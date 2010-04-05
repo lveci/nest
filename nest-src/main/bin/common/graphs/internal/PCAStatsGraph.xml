@@ -1,0 +1,30 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="1-Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters>
+      <file></file>
+    </parameters>
+  </node>
+  <node id="2-PCA-Statistic">
+    <operator>PCA-Statistic</operator>
+    <sources>
+      <sourceProduct refid="1-Read"/>
+    </sources>
+    <parameters>
+        <selectEigenvaluesBy>"Eigenvalue Threshold"</selectEigenvaluesBy>
+	  <eigenvalueThreshold>100</eigenvalueThreshold>
+	  <numPCA>1</numPCA>
+    </parameters>
+  </node>
+  <applicationData id="Presentation">
+    <Description/>
+    <node id="1-Read">
+      <displayPosition y="134.0" x="87.0"/>
+    </node>
+    <node id="2-PCA-Statistic">
+      <displayPosition y="134.0" x="185.0"/>
+    </node>
+  </applicationData>
+</graph>

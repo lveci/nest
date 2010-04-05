@@ -1,0 +1,130 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="1-Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement"/>
+  </node>
+  <node id="2-Write">
+    <operator>Write</operator>
+    <sources>
+      <sourceProduct refid="8-SubsetOp"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <formatName>BEAM-DIMAP</formatName>
+      <file>target.dim</file>
+    </parameters>
+  </node>
+  <node id="3-Apply-Orbit-File">
+    <operator>Apply-Orbit-File</operator>
+    <sources>
+      <sourceProduct refid="1-Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <orbitType>DORIS_VOR</orbitType>
+    </parameters>
+  </node>
+  <node id="4-RemoveAntennaPattern">
+    <operator>RemoveAntennaPattern</operator>
+    <sources>
+      <sourceProduct refid="3-Apply-Orbit-File"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+    </parameters>
+  </node>
+  <node id="5-Multilook">
+    <operator>Multilook</operator>
+    <sources>
+      <sourceProduct refid="4-RemoveAntennaPattern"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <nRgLooks>1</nRgLooks>
+      <nAzLooks>1</nAzLooks>
+      <note>Currently, detection for complex data is performed without any resampling</note>
+    </parameters>
+  </node>
+  <node id="6-Terrain-Correction">
+    <operator>Terrain-Correction</operator>
+    <sources>
+      <sourceProduct refid="5-Multilook"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <demName>SRTM 3Sec GeoTiff</demName>
+      <externalDEMFile/>
+      <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
+      <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
+      <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
+      <pixelSpacing>0.0</pixelSpacing>
+      <projectionName>Geographic Lat/Lon</projectionName>
+      <saveDEM>false</saveDEM>
+      <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
+      <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>
+      <saveSelectedSourceBand>false</saveSelectedSourceBand>
+      <applyRadiometricNormalization>true</applyRadiometricNormalization>
+      <saveSigmaNought>true</saveSigmaNought>
+      <saveGammaNought>false</saveGammaNought>
+      <saveBetaNought>false</saveBetaNought>
+      <incidenceAngleForSigma0>Use projected local incidence angle from DEM</incidenceAngleForSigma0>
+      <incidenceAngleForGamma0>Use projected local incidence angle from DEM</incidenceAngleForGamma0>
+    </parameters>
+  </node>
+  <node id="7-Speckle-Filter">
+    <operator>Speckle-Filter</operator>
+    <sources>
+      <sourceProduct refid="6-Terrain-Correction"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <filter>Mean</filter>
+      <filterSizeX>3</filterSizeX>
+      <filterSizeY>3</filterSizeY>
+      <dampingFactor>2</dampingFactor>
+      <edgeThreshold>5000.0</edgeThreshold>
+    </parameters>
+  </node>
+  <node id="8-SubsetOp">
+    <operator>SubsetOp</operator>
+    <sources>
+      <sourceProduct refid="7-Speckle-Filter"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <regionX>1000</regionX>
+      <regionY>1000</regionY>
+      <width>1500</width>
+      <height>1500</height>
+      <subSamplingX>1</subSamplingX>
+      <subSamplingY>1</subSamplingY>
+    </parameters>
+  </node>
+  <applicationData id="Presentation">
+    <Description/>
+    <node id="1-Read">
+      <displayPosition y="49.0" x="28.0"/>
+    </node>
+    <node id="2-Write">
+      <displayPosition y="228.0" x="474.0"/>
+    </node>
+    <node id="3-Apply-Orbit-File">
+      <displayPosition y="49.0" x="116.0"/>
+    </node>
+    <node id="4-RemoveAntennaPattern">
+      <displayPosition y="106.0" x="96.0"/>
+    </node>
+    <node id="5-Multilook">
+      <displayPosition y="169.0" x="131.0"/>
+    </node>
+    <node id="6-Terrain-Correction">
+      <displayPosition y="169.0" x="257.0"/>
+    </node>
+    <node id="7-Speckle-Filter">
+      <displayPosition y="229.0" x="267.0"/>
+    </node>
+    <node id="8-SubsetOp">
+      <displayPosition y="229.0" x="390.0"/>
+    </node>
+  </applicationData>
+</graph>

@@ -1,0 +1,32 @@
+<!-- source distribution -->
+<assembly>
+    <id>src</id>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <excludes>
+				<exclude>**/.svnignore</exclude>
+                <exclude>**/.cvsignore</exclude>
+                <exclude>**/*.ipr</exclude>
+                <exclude>**/*.iml</exclude>
+                <exclude>**/*.iws</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.settings</exclude>
+                <exclude>**/output/**</exclude>
+				<exclude>**/target/**</exclude>
+                <exclude>**/CVS/**</exclude>
+				<exclude>**/.svn/**</exclude>
+				<exclude>**/.git/**</exclude>
+				<exclude>Algorithms/**</exclude>
+                <exclude>beam/modules/**</exclude>
+                <exclude>beam/testdata/**</exclude>
+                <exclude>beam/log/**</exclude>
+                <exclude>beam/beam-integration-tests/**</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>

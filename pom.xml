@@ -15,6 +15,7 @@
         <ceres.version>0.11-SNAPSHOT</ceres.version>
         <geotools.version>2.6.1</geotools.version>
 		<nest.version>4A</nest.version>
+		<outputdir>../output</outputdir>
     </properties>
 	
     <name>NEST Project</name>
@@ -133,6 +134,7 @@
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-orthorectification</module>
 		<module>nest-developer-tools</module>
+		<module>nest-src</module>
 		
 		<module>doris-op-products</module>
   </modules>
@@ -443,7 +445,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>../beam/modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${artifactId}-${version}</outputDirectory>
 		<pluginManagement>
 	        <plugins>
 	            <plugin>
@@ -456,7 +458,7 @@
 						<optimize>true</optimize>
 	                </configuration>
 	            </plugin>
-
+				
 				<plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.2-beta-1</version>
@@ -500,7 +502,7 @@
                     <configuration>
                         <skip>true</skip>
                         <printSummary>true</printSummary>
-						<workingDirectory>../beam</workingDirectory>
+						<workingDirectory>${outputdir}</workingDirectory>
                         <excludes>
                             <exclude>**/TestRaster.java</exclude>
                             <exclude>**/TestHelper$1.java</exclude>
@@ -515,24 +517,6 @@
                     </configuration>
                     
                 </plugin>
-
-                <!--plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <configuration>
-                        <links>
-                            <link>http://java.sun.com/javase/6/docs/api/</link>
-                        </links>
-                        <aggregate>true</aggregate>
-                        <subpackages>
-                            com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
-                        </subpackages>
-                        <excludePackageNames>
-                            *.internal:com.bc.ceres.site:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
-                        </excludePackageNames>
-                        <maxmemory>1024m</maxmemory>
-                        <quiet>false</quiet>
-                    </configuration>
-                </plugin-->
 
                 <plugin>
                     <artifactId>maven-surefire-report-plugin</artifactId>
@@ -554,7 +538,19 @@
 						<useShortDependencyNames>true</useShortDependencyNames>
                     </configuration>
                 </plugin>
-
+				<plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${outputdir}</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             </plugins>
         </pluginManagement>
 
@@ -563,14 +559,14 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
-						<descriptor>src/main/assembly/repository.xml</descriptor>
-						<descriptor>src/main/assembly/bin-windows.xml</descriptor>
-						<descriptor>src/main/assembly/bin-windows64.xml</descriptor>
-						<descriptor>src/main/assembly/bin-linux.xml</descriptor>
-						<descriptor>src/main/assembly/bin-linux64.xml</descriptor>
-						<descriptor>src/main/assembly/bin-mac.xml</descriptor>
-						<descriptor>src/main/assembly/bin.xml</descriptor>
-                        <descriptor>src/main/assembly/src.xml</descriptor>
+						<descriptor>nest-src/main/assembly/repository.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin-windows.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin-windows64.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin-linux.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin-linux64.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin-mac.xml</descriptor>
+						<descriptor>nest-src/main/assembly/bin.xml</descriptor>
+                        <descriptor>nest-src/main/assembly/src.xml</descriptor>
                     </descriptors>
                 </configuration>
             </plugin>

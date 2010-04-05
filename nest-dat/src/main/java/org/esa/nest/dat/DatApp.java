@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-public final class DatApp extends VisatApp {
+public class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {
         super(applicationDescriptor);
 

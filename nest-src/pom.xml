@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>nest</artifactId>
+        <groupId>org.esa.nest</groupId>
+        <version>${nest.version}</version>
+    </parent>
+
+    <packaging>jar</packaging>
+
+    <groupId>org.esa.nest</groupId>
+    <artifactId>src</artifactId>
+    <name>NEST src</name>
+    <description>Adds the resources for the runtime environment.</description>
+    <version>${nest.version}</version>
+
+	<build>
+        <outputDirectory>${outputdir}/modules/${artifactId}-${version}</outputDirectory>
+		<pluginManagement>
+	        <plugins>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.2</version>
+					<executions>
+					  <execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals>
+						  <goal>copy-resources</goal>
+						</goals>
+						<configuration>
+						  <outputDirectory>${outputdir}</outputDirectory>
+						  <resources>          
+							<resource>
+							  <directory>main/bin/common</directory>
+							  <filtering>true</filtering>
+							</resource>
+							<resource>
+							  <directory>main/bin/win/</directory>
+							</resource>
+							<resource>
+							  <directory>main/bin/linux/</directory>
+							</resource>
+						  </resources>              
+						</configuration>            
+					  </execution>
+					  <execution>
+						<id>copy-libs</id>
+						<phase>validate</phase>
+						<goals>
+						  <goal>copy-resources</goal>
+						</goals>
+						<configuration>
+						  <outputDirectory>${outputdir}/lib</outputDirectory>
+						  <resources>          
+							<resource>
+							  <directory>main/bin/win/</directory>
+							  <includes>
+								<include>**/*.dll</include>
+							  </includes>
+							</resource>
+							<resource>
+							  <directory>main/bin/linux/</directory>
+							  <includes>
+								<include>**/*.so</include>
+							  </includes>
+							</resource>
+						  </resources>              
+						</configuration>            
+					  </execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	 </build>      		
+
+</project>

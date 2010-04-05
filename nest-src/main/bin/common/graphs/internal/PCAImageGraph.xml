@@ -1,0 +1,40 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="1-Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters>
+      <file></file>
+    </parameters>
+  </node>
+  <node id="2-PCA-Image">
+    <operator>PCA-Image</operator>
+    <sources>
+      <sourceProduct refid="1-Read"/>
+    </sources>
+    <parameters>
+    </parameters>
+  </node>
+    <node id="3-Write">
+    <operator>Write</operator>
+    <sources>
+      <sourceProduct refid="2-PCA-Image"/>
+    </sources>
+    <parameters>
+      <formatName>BEAM-DIMAP</formatName>
+      <file>pca.dim</file>
+    </parameters>
+  </node>
+  <applicationData id="Presentation">
+    <Description/>
+    <node id="1-Read">
+      <displayPosition y="134.0" x="87.0"/>
+    </node>
+    <node id="2-PCA-Image">
+      <displayPosition y="134.0" x="185.0"/>
+    </node>
+	<node id="3-Write">
+      <displayPosition y="134.0" x="300.0"/>
+    </node>
+  </applicationData>
+</graph>

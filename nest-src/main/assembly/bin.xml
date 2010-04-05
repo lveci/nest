@@ -1,0 +1,151 @@
+<!-- binary distribution -->
+
+<assembly>
+    <id>bin</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <!--format>zip</format-->
+        <format>dir</format>
+    </formats>
+
+    <files>
+        <file>
+            <source>readme.html</source>
+            <lineEnding>unix</lineEnding>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+        </file>
+		<file>
+            <source>VERSION.txt</source>
+        </file>
+    </files>
+
+    <fileSets>
+
+		<fileSet>
+            <directory>nest-src/main/bin/common/auxdata</directory>
+            <outputDirectory>auxdata</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>nest-src/main/bin/common/config</directory>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+		<fileSet>
+            <directory>nest-src/main/bin/common/graphs</directory>
+            <outputDirectory>graphs</outputDirectory>
+        </fileSet>	
+		<fileSet>
+            <directory>nest-src/main/bin/common/images</directory>
+            <outputDirectory>images</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>nest-src/main/bin/common/res</directory>
+            <outputDirectory>res</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>nest-src/main/licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+		
+		<fileSet>
+            <directory>nest-src/main/commandline</directory>
+            <outputDirectory>commandline</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>nest-src/main/bin/win</directory>
+            <outputDirectory></outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+        </fileSet>
+
+		<fileSet>
+            <directory>nest-src/main/bin/win</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>*.exe</include>
+				<include>*.dll</include>
+            </includes>
+        </fileSet>
+		
+        <fileSet>
+            <directory>nest-src/main/bin/linux</directory>
+            <outputDirectory></outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+
+        <fileSet>
+            <directory>nest-src/main/bin/macosx</directory>
+            <outputDirectory></outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+		
+    </fileSets>
+
+    <moduleSets>
+
+        <!-- (1) Artifacts that go into 'bin', 'lib' or 'modules' -->
+        <moduleSet>
+            <excludes>
+				<exclude>org.esa.nest:nest-bootstrap</exclude>
+				
+                <exclude>com.bc.ceres:ceres-launcher</exclude>
+                <exclude>com.bc.ceres:ceres-deploy</exclude>
+                <exclude>com.bc.ceres:ceres-fs</exclude>
+                <exclude>com.bc.ceres:ceres-site</exclude>				
+				<exclude>com.bc.ceres:ceres-binding</exclude>
+				<exclude>com.bc.ceres:ceres-core</exclude>
+				<exclude>com.bc.ceres:ceres-glayer</exclude>
+				<exclude>com.bc.ceres:ceres-ui</exclude>
+				<exclude>com.bc.ceres:ceres-binio</exclude>
+            </excludes>
+
+            <binaries>
+				<outputDirectory>modules</outputDirectory>
+				<unpack>false</unpack>
+                <outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
+                <includeDependencies>false</includeDependencies>
+                <dependencySets>
+                    <dependencySet>
+                        <outputDirectory>bin</outputDirectory>
+                        <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
+                        <includes>
+                            <include>com.bc.ceres:ceres-launcher</include>
+                        </includes>
+                    </dependencySet>
+                    <dependencySet>
+                        <outputDirectory>lib</outputDirectory>
+						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
+                        <excludes>
+							<exclude>ncsa.hdf:lib-hdf</exclude>
+							<exclude>ucar.netcdf:lib-netcdf</exclude>
+							<exclude>org.esa.nest:nest-core</exclude>
+							<exclude>org.esa.nest:nest-graph-builder</exclude>
+							<exclude>org.esa.nest:nest-reader-generic</exclude>
+							<exclude>org.esa.nest:nest-op-calibration</exclude>
+							<exclude>org.esa.nest:nest-op-coregistration</exclude>
+							<exclude>org.esa.nest:nest-reader-dem</exclude>
+							<exclude>org.esa.nest:nest-reader-ers-ceos</exclude>
+							<exclude>org.esa.nest:nest-reader-xml-based</exclude>
+							<exclude>org.esa.nest:nest-writer-netcdf</exclude>
+                            <exclude>org.esa.beam:beam-*</exclude>
+                        </excludes>
+                    </dependencySet>
+                </dependencySets>
+            </binaries>
+
+        </moduleSet>
+
+    </moduleSets>
+
+</assembly>

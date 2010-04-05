@@ -1,0 +1,58 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="1-Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <file/>
+    </parameters>
+  </node>
+  <node id="2-SARSim-Terrain-Correction">
+    <operator>SARSim-Terrain-Correction</operator>
+    <sources>
+      <sourceProduct refid="1-Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <rmsThreshold>1.0</rmsThreshold>
+      <warpPolynomialOrder>1</warpPolynomialOrder>
+      <!--demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod-->
+      <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
+	  <pixelSpacing>0</pixelSpacing>
+	  <projectionName>Geographic Lat/Lon</projectionName>
+      <saveDEM>false</saveDEM>
+      <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
+      <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>
+	  <saveSelectedSourceBand>true</saveSelectedSourceBand>
+	  <applyRadiometricNormalization>false</applyRadiometricNormalization>
+      <saveSigmaNought>false</saveSigmaNought>
+      <saveGammaNought>false</saveGammaNought>
+      <saveBetaNought>false</saveBetaNought>
+      <incidenceAngleForSigma0>Use projected local incidence angle from DEM</incidenceAngleForSigma0>
+      <incidenceAngleForGamma0>Use projected local incidence angle from DEM</incidenceAngleForGamma0>
+      <openShiftsFile>false</openShiftsFile>
+    </parameters>
+  </node>
+  <node id="3-Write">
+    <operator>Write</operator>
+    <sources>
+      <sourceProduct refid="2-SARSim-Terrain-Correction"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <formatName>BEAM-DIMAP</formatName>
+      <file>gcp_selected_TC.dim</file>
+    </parameters>
+  </node>
+  <applicationData id="Presentation">
+    <Description>Terrain Correction</Description>
+    <node id="1-Read">
+      <displayPosition y="126.0" x="15.0"/>
+    </node>
+    <node id="2-SARSim-Terrain-Correction">
+      <displayPosition y="126.0" x="167.0"/>
+    </node>
+    <node id="3-Write">
+      <displayPosition y="126.0" x="409.0"/>
+    </node>
+  </applicationData>
+</graph>
