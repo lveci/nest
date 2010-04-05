@@ -175,6 +175,7 @@
 
         <ceres.version>0.11-SNAPSHOT</ceres.version>
         <geotools.version>2.6.1</geotools.version>
+		<outputdir>../../output</outputdir>
     </properties>
 
     <dependencyManagement>
@@ -462,7 +463,7 @@
 
 
     <build>
-        <outputDirectory>../modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${artifactId}-${version}</outputDirectory>
 
         <!-- Maven plugin configurations common to all BEAM modules -->
         <pluginManagement>
@@ -474,7 +475,7 @@
                         <source>1.6</source>
                         <target>1.6</target>
                         <debug>true</debug>
-			<optimize>true</optimize>
+						<optimize>true</optimize>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
