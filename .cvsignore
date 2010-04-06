@@ -5,6 +5,7 @@
 .classpath
 .settings
 target
+output
 lib
 log
 config
