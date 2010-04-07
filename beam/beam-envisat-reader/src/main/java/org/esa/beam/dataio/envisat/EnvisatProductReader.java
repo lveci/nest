@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.12 2010-03-31 13:59:56 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.13 2010-04-07 17:29:09 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.12 $ $Date: 2010-03-31 13:59:56 $
+ * @version $Revision: 1.13 $ $Date: 2010-04-07 17:29:09 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -383,10 +383,17 @@ public class EnvisatProductReader extends AbstractProductReader {
     }
 
     private void addTiePointGridsToProduct(Product product) throws IOException {
-        BandLineReader[] bandLineReaders = getProductFile().getBandLineReaders();
+        final BandLineReader[] bandLineReaders = getProductFile().getBandLineReaders();
+        BandLineReader samplesReader = null;
         for (BandLineReader bandLineReader : bandLineReaders) {
-            if (bandLineReader.isTiePointBased()) {
-                TiePointGrid tiePointGrid = createTiePointGrid(bandLineReader);
+            if (bandLineReader.isTiePointBased() && bandLineReader.getBandName().equalsIgnoreCase("samples")) {
+                samplesReader = bandLineReader;
+                break;
+            }
+        }
+        for (BandLineReader bandLineReader : bandLineReaders) {
+            if (bandLineReader.isTiePointBased() && bandLineReader != samplesReader) {
+                TiePointGrid tiePointGrid = createTiePointGrid(bandLineReader, samplesReader);
                 product.addTiePointGrid(tiePointGrid);
             }
         }
@@ -499,91 +506,140 @@ public class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
-    private TiePointGrid createTiePointGrid(BandLineReader bandLineReader) throws IOException {
-        BandInfo bandInfo = bandLineReader.getBandInfo();
-        String bandName = bandLineReader.getBandName();
-        int gridWidth = bandLineReader.getRasterWidth();
-        int gridHeight = bandLineReader.getRasterHeight();
-        int pixelDataType = bandLineReader.getPixelDataField().getDataType();
+    private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
+                                            final BandLineReader samplesReader) throws IOException {
+        final BandInfo bandInfo = bandLineReader.getBandInfo();
+        final String bandName = bandLineReader.getBandName();
+        final int gridWidth = bandLineReader.getRasterWidth();
+        final int gridHeight = bandLineReader.getRasterHeight();
+        final int pixelDataType = bandLineReader.getPixelDataField().getDataType();
         int tiePointIndex = 0;
-        float scalingOffset = bandInfo.getScalingOffset();
-        float scalingFactor = bandInfo.getScalingFactor();
-        float[] tiePoints = new float[gridWidth * gridHeight];
+        final float scalingOffset = bandInfo.getScalingOffset();
+        final float scalingFactor = bandInfo.getScalingFactor();
+        final float[] tiePoints = new float[gridWidth * gridHeight];
+        final boolean storesPixelsInChronologicalOrder = getProductFile().storesPixelsInChronologicalOrder();
+
+        final float offsetX = getProductFile().getTiePointGridOffsetX(gridWidth);
+        final float offsetY = getProductFile().getTiePointGridOffsetY(gridWidth);
+        final float subSamplingX = getProductFile().getTiePointSubSamplingX(gridWidth);
+        final float subSamplingY = getProductFile().getTiePointSubSamplingY(gridWidth);
+        int[] sampleData = null;
+
         for (int y = 0; y < gridHeight; y++) {
             bandLineReader.readLineRecord(y);
+
+            if(samplesReader != null) {
+                samplesReader.readLineRecord(y);
+                sampleData = (int[]) samplesReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
+                    ArrayUtils.swapArray(sampleData);
+                }
+            }
+
             if (pixelDataType == ProductData.TYPE_INT8) {
-                byte[] pixelData = (byte[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final byte[] pixelData = (byte[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * pixelData[x];
+                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
+                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
+                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_UINT8) {
-                byte[] pixelData = (byte[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final byte[] pixelData = (byte[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * (pixelData[x] & 0xff);
+                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xff);
+                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xff);
+                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xff);
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_INT16) {
-                short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * pixelData[x];
+                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
+                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
+                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_UINT16) {
-                short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * (pixelData[x] & 0xffff);
+                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xffff);
+                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffff);
+                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffff);
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_INT32) {
-                int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * pixelData[x];
+                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
+                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
+                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_UINT32) {
-                int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * (pixelData[x] & 0xffffffffL);
+                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xffffffffL);
+                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffffffffL);
+                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffffffffL);
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else if (pixelDataType == ProductData.TYPE_FLOAT32) {
-                float[] pixelData = (float[]) bandLineReader.getPixelDataField().getElems();
-                if (getProductFile().storesPixelsInChronologicalOrder()) {
+                final float[] pixelData = (float[]) bandLineReader.getPixelDataField().getElems();
+                if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
                 for (int x = 0; x < gridWidth; x++) {
-                    tiePoints[tiePointIndex] = scalingOffset + scalingFactor * pixelData[x];
+                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
+                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
+                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                                                                   prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
             } else {
                 throw new IllegalFileFormatException("unhandled tie-point data type"); /*I18N*/
             }
         }
-        float offsetX = getProductFile().getTiePointGridOffsetX(gridWidth);
-        float offsetY = getProductFile().getTiePointGridOffsetY(gridWidth);
-        float subSamplingX = getProductFile().getTiePointSubSamplingX(gridWidth);
-        float subSamplingY = getProductFile().getTiePointSubSamplingY(gridWidth);
 
-        TiePointGrid tiePointGrid = createTiePointGrid(bandName,
+        final TiePointGrid tiePointGrid = createTiePointGrid(bandName,
                                                        gridWidth,
                                                        gridHeight,
                                                        offsetX,
@@ -598,6 +654,18 @@ public class EnvisatProductReader extends AbstractProductReader {
             tiePointGrid.setDescription(bandInfo.getDescription());
         }
         return tiePointGrid;
+    }
+
+    private static float interpolateIfNeeded(final int x, final float subSamplingX, final int[] sampleData,
+                                             float prevVal, float curVal, float nextVal) {
+        if(sampleData != null) {
+            final int p1 = (int)(x*subSamplingX) +1;
+            final int p2 = sampleData[x];
+            if(p1 != p2) {
+                return (prevVal+nextVal)/2.0f;
+            }
+        }
+        return curVal;
     }
 
     private MetadataElement createDatasetTable(String name, RecordReader recordReader) throws IOException {
