@@ -1320,7 +1320,7 @@
         <action>
             <id>reprojectionAction</id>
             <class>org.esa.beam.gpf.operators.reproject.ReprojectionAction</class>
-            <parent>tools</parent>
+            <parent>geometry</parent>
             <placeAfter>flipping</placeAfter>
             <placeBefore>orthorectificationAction</placeBefore>
             <text>Reprojection...</text>

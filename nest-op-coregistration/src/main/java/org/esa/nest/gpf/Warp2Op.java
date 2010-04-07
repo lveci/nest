@@ -341,15 +341,20 @@ public class Warp2Op extends Operator {
             // find first real slave band
             for(Band targetBand : keySet) {
                 if(targetBand.getUnit().equals(Unit.REAL)) {
-                    final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
-                    getWarpData();
-                    break;
+                    final Band srcBand = sourceRasterMap.get(targetBand);
+                    if(srcBand != null) {
+                        final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
+                        getWarpData();
+                        break;
+                    }
                 }
             }
 
             for(Band targetBand : keySet) {
 
                 final Band srcBand = sourceRasterMap.get(targetBand);
+                if(srcBand == null)
+                    continue;
                 Band realSrcBand = complexSrcMap.get(srcBand);
                 if(realSrcBand == null)
                     realSrcBand = srcBand;
