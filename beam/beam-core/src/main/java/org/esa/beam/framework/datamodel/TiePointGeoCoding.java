@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.15 2010-03-31 13:56:29 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.16 2010-04-07 21:23:24 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -58,7 +58,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private float[][] _lonTiePoints = null;
     private int _gridWidth;
     private int _gridHeight;
-
+    
     private float _overlapStart;
     private float _overlapEnd;
 
@@ -99,17 +99,19 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
         _gridWidth = _latGrid.getRasterWidth();
         _gridHeight = _latGrid.getRasterHeight();
+        _subSamplingX = _latGrid.getSubSamplingX();
+        _subSamplingY = _latGrid.getSubSamplingY();
         _latTiePoints = new float[_gridHeight][_gridWidth];
         _lonTiePoints = new float[_gridHeight][_gridWidth];
-        _subSamplingX = (float)(sceneRasterWidth - 1) / (float)(_gridWidth - 1);
-        _subSamplingY = (float)(sceneRasterHeight - 1) / (float)(_gridHeight - 1);
-
+        float[] latTiePoints = _latGrid.getTiePoints();
+        float[] lonTiePoints = _lonGrid.getTiePoints();
+        
+        int k = 0;
         for (int j = 0; j < _gridHeight; j++) {
-            float y = j*_subSamplingY;
             for (int i = 0; i < _gridWidth; i++) {
-                float x = i*_subSamplingX;
-                _latTiePoints[j][i] = _latGrid.getPixelFloat(x, y);
-                _lonTiePoints[j][i] = _lonGrid.getPixelFloat(x, y);
+                _latTiePoints[j][i] = latTiePoints[k];
+                _lonTiePoints[j][i] = lonTiePoints[k];
+                k++;
             }
         }
 
