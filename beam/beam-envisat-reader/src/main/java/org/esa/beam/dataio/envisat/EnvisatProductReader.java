@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.13 2010-04-07 17:29:09 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.14 2010-04-07 21:27:02 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.13 $ $Date: 2010-04-07 17:29:09 $
+ * @version $Revision: 1.14 $ $Date: 2010-04-07 21:27:02 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -546,7 +546,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * pixelData[x];
                     final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -560,7 +560,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xff);
                     final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xff);
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -574,7 +574,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * pixelData[x];
                     final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -588,7 +588,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffff);
                     final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffff);
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -602,7 +602,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * pixelData[x];
                     final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -616,7 +616,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffffffffL);
                     final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffffffffL);
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -630,7 +630,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     final float curVal = scalingOffset + scalingFactor * pixelData[x];
                     final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData,
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
                                                                    prevVal, curVal, nextVal);
                     tiePointIndex++;
                 }
@@ -657,12 +657,12 @@ public class EnvisatProductReader extends AbstractProductReader {
     }
 
     private static float interpolateIfNeeded(final int x, final float subSamplingX, final int[] sampleData,
-                                             float prevVal, float curVal, float nextVal) {
+                                             final int gridWidth, float prevVal, float curVal, float nextVal) {
         if(sampleData != null) {
-            final int p1 = (int)(x*subSamplingX) +1;
+            final int p1 = (int)(x*subSamplingX) + 1;
             final int p2 = sampleData[x];
-            if(p1 != p2) {
-                return (prevVal+nextVal)/2.0f;
+            if(p1 != p2 && p1 != 0 && p1 != gridWidth - 1) {
+                return (prevVal + nextVal)/2.0f;
             }
         }
         return curVal;
