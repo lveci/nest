@@ -37,7 +37,7 @@
 						  <resources>          
 							<resource>
 							  <directory>main/bin/common</directory>
-							  <filtering>true</filtering>
+							  <filtering>false</filtering>
 							</resource>
 							<resource>
 							  <directory>main/bin/win/</directory>
