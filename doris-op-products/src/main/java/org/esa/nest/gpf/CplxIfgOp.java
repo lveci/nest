@@ -23,7 +23,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CplxIfg",
         category = "InSAR Products",
-        description = "Compute interferograms from stack of coregistered images", internal= true)
+        description = "Compute interferograms from stack of coregistered images", internal= false)
 public class CplxIfgOp extends Operator {
 
     @SourceProduct

@@ -23,7 +23,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CplxCoh",
         category = "InSAR Products",
-        description = "Estimate coherence from stack of coregistered images", internal = true)
+        description = "Estimate coherence from stack of coregistered images", internal = false)
 public class CplxCohOp extends Operator {
 
     // ----------------------------------------------------
