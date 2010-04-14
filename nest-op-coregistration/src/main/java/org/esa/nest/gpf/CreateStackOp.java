@@ -488,13 +488,16 @@ public class CreateStackOp extends Operator {
 
                     PixelPos mstPixelPos = new PixelPos();
                     getPixelPos((float)c.y, (float)c.x, targGeoCoding, mstPixelPos);
+                    if (mstPixelPos.isValid() && mstPixelPos.x >= 0 && mstPixelPos.x < targImageWidth &&
+                        mstPixelPos.y >= 0 && mstPixelPos.y < targImageHeight) {
 
-                    int[] offset = new int[2];
-                    offset[0] = (int)slvPixelPos.x - (int)mstPixelPos.x;
-                    offset[1] = (int)slvPixelPos.y - (int)mstPixelPos.y;
-                    slaveOffsettMap.put(slvProd, offset);
-                    foundOverlapPoint = true;
-                    break;
+                        int[] offset = new int[2];
+                        offset[0] = (int)slvPixelPos.x - (int)mstPixelPos.x;
+                        offset[1] = (int)slvPixelPos.y - (int)mstPixelPos.y;
+                        slaveOffsettMap.put(slvProd, offset);
+                        foundOverlapPoint = true;
+                        break;
+                    }
                 }
             }
 
@@ -555,7 +558,9 @@ public class CreateStackOp extends Operator {
                 int[] offset = slaveOffsettMap.get(srcProduct);
                 final int sx0 = Math.max(0, tx0 + offset[0]);
                 final int sy0 = Math.max(0, ty0 + offset[1]);
-                final Rectangle srcRectangle = new Rectangle(sx0, sy0, tw, th);
+                final int sw = Math.min(sx0 + tw - 1, srcImageWidth - 1) - sx0 + 1;
+                final int sh = Math.min(sy0 + th - 1, srcImageHeight - 1) - sy0 + 1;
+                final Rectangle srcRectangle = new Rectangle(sx0, sy0, sw, sh);
                 final Tile srcTile = getSourceTile(sourceRaster, srcRectangle, pm);
                 final ProductData srcData = srcTile.getDataBuffer();
 
