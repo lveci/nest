@@ -54,13 +54,13 @@ public class CreateStackOp extends Operator {
     @TargetProduct(description = "The target product which will use the master's grid.")
     private Product targetProduct = null;
 
-    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    @Parameter(valueSet = {"NONE", ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
-               defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+               defaultValue = "NONE",
                description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
-    private String resamplingType = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
-    private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
+    private String resamplingType = "NONE";
+    private Resampling selectedResampling = null;
 
     @Parameter(valueSet = {MASTER_EXTENT, MIN_EXTENT, MAX_EXTENT },
                defaultValue = MASTER_EXTENT,
@@ -73,6 +73,7 @@ public class CreateStackOp extends Operator {
     protected final static String MAX_EXTENT = "Maximum";
 
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Product, int[]> slaveOffsettMap = new HashMap<Product, int[]>(10);
 
     @Override
     public void initialize() throws OperatorException {
@@ -184,7 +185,11 @@ public class CreateStackOp extends Operator {
                 OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
             }
 
-            selectedResampling = ResamplingFactory.createResampling(resamplingType);
+            if (!resamplingType.contains("NONE")) {
+                selectedResampling = ResamplingFactory.createResampling(resamplingType);
+            } else {
+                computeTargetSlaveCoordinateOffsets();
+            }
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -456,24 +461,135 @@ public class CreateStackOp extends Operator {
         OperatorUtils.addGeoCoding(targetProduct, scnProp);
     }
 
+
+    private void computeTargetSlaveCoordinateOffsets() {
+
+        final GeoCoding targGeoCoding = targetProduct.getGeoCoding();
+        final int targImageWidth = targetProduct.getSceneRasterWidth();
+        final int targImageHeight = targetProduct.getSceneRasterHeight();
+
+        Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
+
+        for (final Product slvProd : sourceProduct) {
+            if(slvProd == masterProduct)
+                continue;
+
+            final GeoCoding slvGeoCoding = slvProd.getGeoCoding();
+            final int slvImageWidth = slvProd.getSceneRasterWidth();
+            final int slvImageHeight = slvProd.getSceneRasterHeight();
+
+            PixelPos slvPixelPos = new PixelPos();
+            boolean foundOverlapPoint = false;
+            for(Coordinate c : mstGeometry.getCoordinates()) {
+                getPixelPos((float)c.y, (float)c.x, slvGeoCoding, slvPixelPos);
+
+                if (slvPixelPos.isValid() && slvPixelPos.x >= 0 && slvPixelPos.x < slvImageWidth &&
+                    slvPixelPos.y >= 0 && slvPixelPos.y < slvImageHeight) {
+
+                    PixelPos mstPixelPos = new PixelPos();
+                    getPixelPos((float)c.y, (float)c.x, targGeoCoding, mstPixelPos);
+
+                    int[] offset = new int[2];
+                    offset[0] = (int)slvPixelPos.x - (int)mstPixelPos.x;
+                    offset[1] = (int)slvPixelPos.y - (int)mstPixelPos.y;
+                    slaveOffsettMap.put(slvProd, offset);
+                    foundOverlapPoint = true;
+                    break;
+                }
+            }
+
+            if (foundOverlapPoint) {
+                continue;
+            }
+
+            final GeoPos srcGeoPosFirstNear = slvGeoCoding.getGeoPos(new PixelPos(0, 0), null);
+            PixelPos mstPixelPos = new PixelPos();
+            getPixelPos(srcGeoPosFirstNear.lat, srcGeoPosFirstNear.lon, targGeoCoding, mstPixelPos);
+            if (mstPixelPos.isValid() && mstPixelPos.x >= 0 && mstPixelPos.x < targImageWidth &&
+                mstPixelPos.y >= 0 && mstPixelPos.y < targImageHeight) {
+
+                int[] offset = new int[2];
+                offset[0] = 0 - (int)mstPixelPos.x;
+                offset[1] = 0 - (int)mstPixelPos.y;
+                slaveOffsettMap.put(slvProd, offset);
+            } else {
+                throw new OperatorException("Product " + slvProd.getName() + " has no overlap with master product.");
+            }
+        }
+
+
+    }
+
+    private void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, PixelPos pixelPos) {
+
+        final GeoPos geoPos = new GeoPos(lat, lon);
+        if (srcGeoCoding instanceof TiePointGeoCoding) {
+            TiePointGeoCoding geoCoding = (TiePointGeoCoding)srcGeoCoding;
+            geoCoding.getAccuratePixelPos(geoPos, pixelPos);
+        } else {
+            srcGeoCoding.getPixelPos(geoPos, pixelPos);
+        }
+    }
+
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
             final Band sourceRaster = sourceRasterMap.get(targetBand);
             final Product srcProduct = sourceRaster.getProduct();
+            final int srcImageWidth = srcProduct.getSceneRasterWidth();
+            final int srcImageHeight = srcProduct.getSceneRasterHeight();
 
-            final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
-                    srcProduct.getGeoCoding(),
-                    srcProduct.getSceneRasterWidth(),
-                    srcProduct.getSceneRasterHeight(),
-                    targetProduct.getGeoCoding(),
-                    targetTile.getRectangle());
-            final Rectangle sourceRectangle = getBoundingBox(
-                    sourcePixelPositions,
-                    srcProduct.getSceneRasterWidth(),
-                    srcProduct.getSceneRasterHeight());
+            if (resamplingType.contains("NONE")) { // without resampling
 
-            collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+                final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
+                final Rectangle targetRectangle = targetTile.getRectangle();
+                final ProductData trgData = targetTile.getDataBuffer();
+                final int tx0 = targetRectangle.x;
+                final int ty0 = targetRectangle.y;
+                final int tw = targetRectangle.width;
+                final int th = targetRectangle.height;
+                final int maxX = tx0 + tw;
+                final int maxY = ty0 + th;
+
+                int[] offset = slaveOffsettMap.get(srcProduct);
+                final int sx0 = Math.max(0, tx0 + offset[0]);
+                final int sy0 = Math.max(0, ty0 + offset[1]);
+                final Rectangle srcRectangle = new Rectangle(sx0, sy0, tw, th);
+                final Tile srcTile = getSourceTile(sourceRaster, srcRectangle, pm);
+                final ProductData srcData = srcTile.getDataBuffer();
+
+                for (int ty = ty0; ty < maxY; ++ty) {
+                    for (int tx = tx0; tx < maxX; ++tx) {
+                        final int targIndex = targetTile.getDataBufferIndex(tx, ty);
+                        final int sx = tx + offset[0];
+                        final int sy = ty + offset[1];
+                        if (sx < 0 || sx >= srcImageWidth || sy < 0 || sy >= srcImageHeight) {
+                            trgData.setElemDoubleAt(targIndex, noDataValue);
+                        } else {
+                            final int srcIndex = srcTile.getDataBufferIndex(sx, sy);
+                            trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex));
+                        }
+                    }
+                    pm.worked(1);
+                }
+
+            } else { // with resampling
+
+                final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
+                        srcProduct.getGeoCoding(),
+                        srcProduct.getSceneRasterWidth(),
+                        srcProduct.getSceneRasterHeight(),
+                        targetProduct.getGeoCoding(),
+                        targetTile.getRectangle());
+                
+                final Rectangle sourceRectangle = getBoundingBox(
+                        sourcePixelPositions,
+                        srcProduct.getSceneRasterWidth(),
+                        srcProduct.getSceneRasterHeight());
+
+                collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+            }
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
