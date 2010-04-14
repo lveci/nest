@@ -32,9 +32,10 @@ public final class AbstractMetadata {
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
     public static final String SPH_DESCRIPTOR = "SPH_DESCRIPTOR";
+    public static final String PATH = "PATH";
     public static final String MISSION = "MISSION";
     public static final String PROC_TIME = "PROC_TIME";
-    public static final String ProcessingSystemIdentifier = "Processing system identifier";
+    public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
     public static final String CYCLE = "CYCLE";
     public static final String REL_ORBIT = "REL_ORBIT";
     public static final String ABS_ORBIT = "ABS_ORBIT";
@@ -128,10 +129,15 @@ public final class AbstractMetadata {
      * @return abstracted metadata root
      */
     public static MetadataElement addAbstractedMetadataHeader(MetadataElement root) {
-        MetadataElement absRoot = root.getElement(ABSTRACT_METADATA_ROOT);
-        if(absRoot == null) {
-            absRoot = new MetadataElement(ABSTRACT_METADATA_ROOT);
-            root.addElementAt(absRoot, 0);
+        MetadataElement absRoot;
+        if(root == null) {
+            absRoot = new MetadataElement(ABSTRACT_METADATA_ROOT);    
+        } else {
+            absRoot = root.getElement(ABSTRACT_METADATA_ROOT);
+            if(absRoot == null) {
+                absRoot = new MetadataElement(ABSTRACT_METADATA_ROOT);
+                root.addElementAt(absRoot, 0);
+            }
         }
 
         // MPH
@@ -182,6 +188,8 @@ public final class AbstractMetadata {
 
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
+        MetadataAttribute att = addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "Average scene height ellipsoid");
+        att.getData().setElemInt(0);
         addAbstractedAttribute(absRoot, map_projection, ProductData.TYPE_ASCII, "", "Map projection applied");
 
         // orthorectification
@@ -198,9 +206,7 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
         addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
-        MetadataAttribute att = addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "average scene height");
-        att.getData().setElemInt(0);
-
+        
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
         // Multilook

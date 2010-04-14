@@ -4,7 +4,9 @@ import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.File;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -16,7 +18,7 @@ import org.esa.nest.util.TestUtils;
  */
 public class TestProductDao extends TestCase {
 
-    private ProductDao db;
+    private ProductDB db;
 
     public TestProductDao(String name) {
         super(name);
@@ -25,7 +27,7 @@ public class TestProductDao extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        db = new ProductDao("productDB");
+        db = ProductDB.instance();
         final boolean connected = db.connect();
         if(!connected) {
             throw new IOException("Unable to connect to database\n"+db.getLastSQLException().getMessage());   
@@ -45,7 +47,7 @@ public class TestProductDao extends TestCase {
         recurseProcessFolder(folder1, db);
     }
 
-    public static void recurseProcessFolder(final File folder, final ProductDao db) throws SQLException {
+    public static void recurseProcessFolder(final File folder, final ProductDB db) throws SQLException {
         for(File file : folder.listFiles()) {
 
             if(file.isDirectory()) {
@@ -66,21 +68,53 @@ public class TestProductDao extends TestCase {
                         System.out.println("Unable to read "+file.getAbsolutePath());
                     }
                     if(sourceProduct != null) {
-                        //System.out.println("Adding "+file.getAbsolutePath());
+                        System.out.println("Adding "+file.getAbsolutePath());
 
                         db.saveProduct(sourceProduct);
+                        sourceProduct.dispose();
                     }
                 }
             }
         }
     }
 
-    public void testListAll() throws IOException, SQLException {
+    public void testListAll() throws SQLException {
 
         final ProductEntry[] list = db.getProductEntryList();
         for(ProductEntry entry : list) {
-            System.out.println(entry.getId() + " " + entry.getPath());
+            System.out.println(entry.getId() + " " + entry.getFile());
         }
+    }
+
+    public void testGetAllMissions() throws SQLException {
+        System.out.println("Missions:");
+        final String[] missions = db.getAllMissions();
+        for(String str : missions) {
+            System.out.println(str);
+        }
+    }
+
+    public void testGetENVISATProductTypes() throws SQLException {
+        System.out.println("ENVISAT productTypes:");
+        final String[] productTypes = db.getProductTypes("ENVISAT");
+        for(String str : productTypes) {
+            System.out.println(str);
+        }
+    }
+
+    public void testGetAllProductTypes() throws SQLException {
+        System.out.println("All productTypes:");
+        final String[] productTypes = db.getAllProductTypes();
+        for(String str : productTypes) {
+            System.out.println(str);
+        }
+    }
+
+    public void testSelect() throws SQLException {
+        final String strGetProductsWhere = "SELECT * FROM APP.PRODUCTS WHERE MISSION='ENVISAT'";
+
+        final Statement queryStatement = db.getDBConnection().createStatement();
+        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
     }
 
 }

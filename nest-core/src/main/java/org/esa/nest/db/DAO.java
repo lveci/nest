@@ -34,6 +34,8 @@ public abstract class DAO {
             if(!createDatabase()) {
                 throw new IOException("Unable to create tables\n"+getLastSQLException().getMessage());
             }
+        } else {
+            validateDatabase();
         }
     }
 
@@ -48,14 +50,15 @@ public abstract class DAO {
     }
 
     private void setDBSystemDir() {
-        // decide on the db system directory
-        final File userAppDir = ResourceUtils.getApplicationUserDir(true);
-        final String systemDir = userAppDir.getAbsolutePath() +File.separator+ dbName;
-        System.setProperty("derby.system.home", systemDir);
-
         // create the db system directory
-        final File fileSystemDir = new File(systemDir);
+        final File fileSystemDir = getDBSystemDir();
         fileSystemDir.mkdir();
+        // decide on the db system directory
+        System.setProperty("derby.system.home", fileSystemDir.getAbsolutePath());
+    }
+
+    public File getDBSystemDir() {
+        return new File(ResourceUtils.getApplicationUserDir(true), dbName);
     }
 
     private void loadDatabaseDriver(final String driverName) {
@@ -67,7 +70,8 @@ public abstract class DAO {
         }
     }
 
-    protected abstract boolean createTables(final Connection dbConnection);
+    protected abstract boolean createTables(final Connection dbConnection) throws SQLException;
+    protected abstract void validateTables(final Connection dbConnection) throws SQLException;
 
     protected abstract void prepareStatements() throws SQLException;
 
@@ -86,7 +90,21 @@ public abstract class DAO {
         return bCreated;
     }
 
+    private void validateDatabase() {
+        dbProperties.put("create", "true");
+
+        try {
+            validateTables(dbConnection);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            lastSQLException = ex;
+        }
+        dbProperties.remove("create");
+    }
+
     public boolean connect() {
+        if(isConnected) return isConnected;
+
         final String dbUrl = getDatabaseUrl();
         try {
             dbConnection = DriverManager.getConnection(dbUrl, dbProperties);
@@ -94,6 +112,7 @@ public abstract class DAO {
 
             isConnected = dbConnection != null;
         } catch (SQLException ex) {
+            ex.printStackTrace();
             isConnected = false;
             lastSQLException = ex;
         }

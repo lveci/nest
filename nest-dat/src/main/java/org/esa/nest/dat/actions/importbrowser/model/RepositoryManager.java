@@ -1,22 +1,14 @@
 package org.esa.nest.dat.actions.importbrowser.model;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.util.Debug;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.FileNameProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.SelectionProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.gpf.OperatorUtils;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;

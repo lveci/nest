@@ -51,33 +51,43 @@ public final class AsarAbstractMetadata {
         }
 
         // MPH
-        addAbstractedAttribute(mph, "PRODUCT", absRoot, "Product name");
+        addAbstractedAttribute("PRODUCT", mph.getAttributeString("PRODUCT", ""), absRoot, "Product name");
         addAbstractedAttribute("PRODUCT_TYPE", _productType, absRoot, "Product type");
-        addAbstractedAttribute(sph, "SPH_DESCRIPTOR", absRoot, "Description");
+        addAbstractedAttribute("SPH_DESCRIPTOR",  mph.getAttributeString("SPH_DESCRIPTOR", ""), absRoot, "Description");
         addAbstractedAttribute("MISSION", getMission(_productType, _file), absRoot, "Satellite mission");
         addAbstractedAttribute("PROC_TIME", mph.getAttributeUTC("PROC_TIME", new ProductData.UTC(0)), absRoot,
                                 "Processed time");
-        addAbstractedAttribute("Processing system identifier", mph.getAttributeString("SOFTWARE_VER", ""), absRoot,
+        addAbstractedAttribute("Processing_system_identifier", mph.getAttributeString("SOFTWARE_VER", ""), absRoot,
                                 "Processing system identifier");
         addAbstractedAttribute(mph, "CYCLE", absRoot, "Cycle");
         addAbstractedAttribute(mph, "REL_ORBIT", absRoot, "Track");
         addAbstractedAttribute(mph, "ABS_ORBIT", absRoot, "Orbit");
         addAbstractedAttribute("STATE_VECTOR_TIME", mph.getAttributeUTC("STATE_VECTOR_TIME", new ProductData.UTC(0)), absRoot,
                                 "Time of orbit state vector");
-        addAbstractedAttribute(mph, "VECTOR_SOURCE", absRoot,
+        addAbstractedAttribute("VECTOR_SOURCE", mph.getAttributeString("VECTOR_SOURCE", ""), absRoot,
                                 "State vector source");
 
         // SPH
-        addAbstractedAttribute(sph, "NUM_SLICES", absRoot, "Number of slices");
+        addAbstractedAttribute("NUM_SLICES", mph.getAttributeInt("NUM_SLICES", 0), "", absRoot, "Number of slices");
         if(waveProduct) {
             addAbstractedAttribute("first_line_time", sph.getAttributeUTC("first_cell_time", new ProductData.UTC(0)), absRoot,
                                 "First cell time");
             addAbstractedAttribute("last_line_time", sph.getAttributeUTC("last_cell_time", new ProductData.UTC(0)), absRoot,
                                 "Last cell time");
+            addAbstractedAttribute("first_near_lat", 0, "deg", absRoot, "");
+            addAbstractedAttribute("first_near_long", 0, "deg", absRoot, "");
+            addAbstractedAttribute("first_far_lat", 0, "deg", absRoot, "");
+            addAbstractedAttribute("first_far_long", 0, "deg", absRoot, "");
+            addAbstractedAttribute("last_near_lat", 0, "deg", absRoot, "");
+            addAbstractedAttribute("last_near_long", 0, "deg", absRoot, "");
+            addAbstractedAttribute("last_far_lat", 0, "deg", absRoot, "");
+            addAbstractedAttribute("last_far_long", 0, "deg", absRoot, "");
+
 
             addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH_1", ""), absRoot, "Swath name");
             addAbstractedAttribute(sph, "PASS", absRoot, "ASCENDING or DESCENDING");
-            
+            addAbstractedAttribute("SAMPLE_TYPE", " ", absRoot, "DETECTED or COMPLEX");
+
             String mds1_tx_rx_polar = sph.getAttributeString("tx_rx_polar", "");
             mds1_tx_rx_polar = mds1_tx_rx_polar.replace("/","");
             addAbstractedAttribute("mds1_tx_rx_polar", mds1_tx_rx_polar, absRoot, "Polarization");
@@ -85,10 +95,6 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("mds3_tx_rx_polar", "", absRoot, "Polarization");
             addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
 
-            addAbstractedAttribute("srgr_flag", sph.getAttributeInt("SR_GR", 0), "flag", absRoot, "SRGR applied");
-            addAbstractedAttribute("ant_elev_corr_flag", sph.getAttributeInt("antenna_corr", 0), "flag", absRoot,
-                                "Antenna elevation applied");
-            addAbstractedAttribute("map_projection", "", absRoot, "Map projection applied");
         } else {
             addAbstractedAttribute("first_line_time", sph.getAttributeUTC("first_line_time", new ProductData.UTC(0)), absRoot,
                     "First zero doppler azimuth time");
@@ -105,8 +111,8 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("last_far_lat", sph.getAttributeDouble("last_far_lat", 0) / million, "deg", absRoot, "");
             addAbstractedAttribute("last_far_long", sph.getAttributeDouble("last_far_long", 0) / million, "deg", absRoot, "");
 
-            addAbstractedAttribute(sph, "SWATH", absRoot, "Swath name");
-            addAbstractedAttribute(sph, "PASS", absRoot, "ASCENDING or DESCENDING");
+            addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH", ""), absRoot, "Swath name");
+            addAbstractedAttribute("PASS", sph.getAttributeString("PASS", ""), absRoot, "ASCENDING or DESCENDING");
             addAbstractedAttribute("SAMPLE_TYPE", sph.getAttributeString("SAMPLE_TYPE").trim(), absRoot, "DETECTED or COMPLEX");
 
             String mds1_tx_rx_polar = sph.getAttributeString("mds1_tx_rx_polar", "");
@@ -119,28 +125,31 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
         }
 
-        addAbstractedAttribute(sph, "ALGORITHM", absRoot, "Processing algorithm");
-        addAbstractedAttribute(sph, "azimuth_looks", absRoot, "");
-        addAbstractedAttribute(sph, "range_looks", absRoot, "");
-        addAbstractedAttribute(sph, "range_spacing", absRoot, "Range sample spacing");
-        addAbstractedAttribute(sph, "azimuth_spacing", absRoot, "Azimuth sample spacing");
+        addAbstractedAttribute("ALGORITHM", sph.getAttributeString("ALGORITHM", ""), absRoot, "Processing algorithm");
+        addAbstractedAttribute("azimuth_looks", sph.getAttributeDouble("azimuth_looks", 0), "", absRoot, "");
+        addAbstractedAttribute("range_looks", sph.getAttributeDouble("range_looks", 0), "", absRoot, "");
+        addAbstractedAttribute("range_spacing", sph.getAttributeDouble("range_spacing", 0), "m", absRoot, "Range sample spacing");
+        addAbstractedAttribute("azimuth_spacing", sph.getAttributeDouble("azimuth_spacing", 0), "m", absRoot, "Azimuth sample spacing");
 
         if(mppAds != null) {
             addAbstractedAttribute("pulse_repetition_frequency", getPulseRepetitionFreq(mppAds), "Hz", absRoot, "PRF");
             addAbstractedAttribute("radar_frequency",
                 mppAds.getAttributeDouble("radar_freq", 0) / 1000000.0, "MHz", absRoot, "Radar frequency");
+        } else {
+            addAbstractedAttribute("pulse_repetition_frequency", 0, "Hz", absRoot, "PRF");
+            addAbstractedAttribute("radar_frequency", 0, "MHz", absRoot, "Radar frequency");
         }
-        addAbstractedAttribute(sph, "line_time_interval", absRoot, "");
+        addAbstractedAttribute("line_time_interval", sph.getAttributeDouble("line_time_interval", 0), "", absRoot, "");
         addAbstractedAttribute("total_size", (int)(product.getRawStorageSize() / (1024.0f * 1024.0f)), "Mb", absRoot,
                             "Total product size");
-        
+
         //MPP
         if(mppAds != null) {
             addAbstractedAttribute("num_output_lines", product.getSceneRasterHeight(), "", absRoot, "");
             addAbstractedAttribute("num_samples_per_line", product.getSceneRasterWidth(), "", absRoot, "");
             addAbstractedAttribute(mppAds, "srgr_flag", absRoot, "SRGR applied");
             addAbstractedAttribute("avg_scene_height", mppAds.getAttributeDouble("avg_scene_height_ellpsoid", 0),
-                    "m", absRoot, "Average ccene height ellipsoid");
+                    "m", absRoot, "Average scene height ellipsoid");
 
             String mapProjection = "";
             String geoRefSystem = "";
@@ -158,15 +167,16 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
 
             final MetadataElement gg = root.getElement("GEOLOCATION_GRID_ADS");
+            double slantRangeDist = 0;
             if(gg != null) {
                 final MetadataElement gg1 = gg.getElement("GEOLOCATION_GRID_ADS.1");
                 if(gg1 != null) {
                     final double slantRangeTime = gg1.getAttributeDouble("ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.slant_range_times");
                     final double halfLightSpeed = 299792458.0 / 2.0;
-                    final double slantRangeDist = slantRangeTime * halfLightSpeed / 1000000000.0; // slantRangeTime ns to s
-                    addAbstractedAttribute("slant_range_to_first_pixel", slantRangeDist, "m", absRoot, "Slant range to 1st data sample");
+                    slantRangeDist = slantRangeTime * halfLightSpeed / 1000000000.0; // slantRangeTime ns to s
                 }
             }
+            addAbstractedAttribute("slant_range_to_first_pixel", slantRangeDist, "m", absRoot, "Slant range to 1st data sample");
 
             addAbstractedAttribute(mppAds, "ant_elev_corr_flag", absRoot, "Antenna elevation applied");
             addAbstractedAttribute(mppAds, "range_spread_comp_flag", absRoot, "range spread compensation applied");
@@ -181,14 +191,37 @@ public final class AsarAbstractMetadata {
                 mppAds.getAttributeDouble("range_samp_rate", 0) / 1000000.0, "MHz", absRoot, "Range Sampling Rate");
             addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag",
                     "Product multilooked", absRoot);
+        } else {
+            addAbstractedAttribute("num_output_lines", 0, "", absRoot, "");
+            addAbstractedAttribute("num_samples_per_line", 0, "", absRoot, "");
+            if(waveProduct)
+                addAbstractedAttribute("srgr_flag", sph.getAttributeInt("SR_GR", 0), "flag", absRoot, "SRGR applied");
+            else
+                addAbstractedAttribute("srgr_flag", 0, "", absRoot, "SRGR applied");
 
-            addOrbitStateVectors(root, absRoot);
-        }
+            addAbstractedAttribute("avg_scene_height", 0, "m", absRoot, "Average scene height ellipsoid");
+            addAbstractedAttribute("map_projection", " ", absRoot, "Map projection applied");
 
-        // add SRGR coefficients if found
-        final MetadataElement srgrADS = root.getElement("SR_GR_ADS");
-        if(srgrADS != null) {
-            addSRGRCoefficients(srgrADS, absRoot);
+            addAbstractedAttribute("is_terrain_corrected", 0, "flag", absRoot, "orthorectification applied");
+            addAbstractedAttribute("dem", "", absRoot, "Digital Elevation Model used");
+            addAbstractedAttribute("geo_ref_system", "", absRoot, "geographic reference system");
+            addAbstractedAttribute("lat_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
+            addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
+            addAbstractedAttribute("slant_range_to_first_pixel", 0, "m", absRoot, "Slant range to 1st data sample");
+
+            if(waveProduct) {
+                addAbstractedAttribute("ant_elev_corr_flag", sph.getAttributeInt("antenna_corr", 0), "flag", absRoot,
+                        "Antenna elevation applied");
+            } else {
+                addAbstractedAttribute("ant_elev_corr_flag", 0, "", absRoot, "Antenna elevation applied");
+            }
+            addAbstractedAttribute("range_spread_comp_flag", 0, "", absRoot, "range spread compensation applied");
+            addAbstractedAttribute("replica_power_corr_flag", ProductData.TYPE_UINT8, "flag",
+                    "Replica pulse power correction applied", absRoot);
+            addAbstractedAttribute("abs_calibration_flag", ProductData.TYPE_UINT8, "flag","Product calibrated", absRoot);
+            addAbstractedAttribute("calibration_factor", 0, "", absRoot, "Calibration constant");
+            addAbstractedAttribute("range_sampling_rate",  0, "MHz", absRoot, "Range Sampling Rate");
+            addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag", "Product multilooked", absRoot);
         }
 
         final MetadataElement dsd = root.getElement("DSD");
@@ -205,6 +238,13 @@ public final class AsarAbstractMetadata {
             }
         }
 
+        addOrbitStateVectors(root, absRoot);
+
+        // add SRGR coefficients if found
+        final MetadataElement srgrADS = root.getElement("SR_GR_ADS");
+        if(srgrADS != null) {
+            addSRGRCoefficients(srgrADS, absRoot);
+        }
     }
     
     public static String getMission(final String productType, final File file) {

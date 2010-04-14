@@ -200,6 +200,19 @@
       </action>
 
       <action>
+            <id>productLibraryUI</id>
+            <parent>file</parent>
+            <placeAfter>openRaster</placeAfter>
+            <class>org.esa.nest.dat.actions.productLibrary.ProductLibraryAction</class>
+            <text>Product Library</text>
+            <shortDescr>Opens the Product Library.</shortDescr>
+            <longDescr>Opens the Product Library dialog to preview and open products.</longDescr>
+            <smallIcon>icons/import_browser16.png</smallIcon>
+            <largeIcon>icons/import_browser.png</largeIcon>
+            <helpID>productGrabber</helpID>
+      </action>
+
+      <action>
             <parent>file</parent>
             <id>createSubset</id>
             <class>org.esa.beam.visat.actions.NewAction</class>
