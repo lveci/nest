@@ -43,7 +43,7 @@ import java.util.Map;
                   version="1.2",
                   authors = "Marco Zuehlke, Norman Fomferra",
                   copyright = "(c) 2010 by Brockmann Consult",
-                  description = "Writes a product to the hard disc.")
+                  description = "Writes a product to a file.")
 public class WriteOp extends Operator {
 
     @TargetProduct
@@ -72,8 +72,8 @@ public class WriteOp extends Operator {
     private Dimension tileSize;
     private int tileCountX;
 
-
     public WriteOp() {
+        setRequiresAllBands(true);
     }
 
     public WriteOp(Product sourceProduct, File file, String formatName) {
@@ -81,6 +81,7 @@ public class WriteOp extends Operator {
     }
 
     public WriteOp(Product sourceProduct, File file, String formatName, boolean deleteOutputOnFailure) {
+        this();
         this.sourceProduct = sourceProduct;
         this.file = file;
         this.formatName = formatName;
@@ -123,17 +124,16 @@ public class WriteOp extends Operator {
                 }
             }
             final Rectangle rect = targetTile.getRectangle();
-            final Tile sourceTile = getSourceTile(targetBand, rect, pm);
             if (writeEntireTileRows) {
                 int tileX = MathUtils.floorInt(targetTile.getMinX() / (double) tileSize.width);
                 int tileY = MathUtils.floorInt(targetTile.getMinY() / (double) tileSize.height);
                 Row row = new Row(targetBand, tileY);
-                Tile[] tileRow = updateTileRow(row, tileX, sourceTile);
+                Tile[] tileRow = updateTileRow(row, tileX, targetTile);
                 if (tileRow != null) {
                     writeTileRow(targetBand, tileRow);
                 }
             } else {
-                final ProductData rawSamples = sourceTile.getRawSamples();
+                final ProductData rawSamples = targetTile.getRawSamples();
                 synchronized (productWriter) {
                     productWriter.writeBandRasterData(targetBand, rect.x, rect.y, rect.width, rect.height, rawSamples, pm);
                 }
@@ -351,4 +351,3 @@ public class WriteOp extends Operator {
 
     }
 }
-    

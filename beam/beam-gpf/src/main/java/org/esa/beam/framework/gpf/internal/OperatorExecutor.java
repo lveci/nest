@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorExecutor.java,v 1.10 2010-03-31 13:59:22 lveci Exp $
+ * $Id: OperatorExecutor.java,v 1.11 2010-04-14 17:26:42 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -115,7 +115,7 @@ public class OperatorExecutor {
                 // executeRowBandColumn(pm); 
                 scheduleRowBandColumn(semaphore, listeners, pm);
             } else if (executionOrder == ExecutionOrder.ROW_COLUMN_BAND) {
-                ScheduleRowColumnBand(semaphore, listeners, pm);
+                scheduleRowColumnBand(semaphore, listeners, pm);
             } else if (executionOrder == ExecutionOrder.BAND_ROW_COLUMN) {
                 scheduleBandRowColumn(semaphore, listeners, pm);
             } else {
@@ -152,7 +152,7 @@ public class OperatorExecutor {
         }
     }
 
-    private void ScheduleRowColumnBand(Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
+    private void scheduleRowColumnBand(Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (int tileX = 0; tileX < tileCountX; tileX++) {
                 for (final PlanarImage image : images) {

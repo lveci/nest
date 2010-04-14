@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorContext.java,v 1.14 2010-04-01 19:42:54 lveci Exp $
+ * $Id: OperatorContext.java,v 1.15 2010-04-14 17:26:42 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,6 +50,7 @@ import org.esa.beam.framework.gpf.graph.GraphOp;
 import org.esa.beam.framework.gpf.internal.OperatorConfiguration.Reference;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.gpf.operators.standard.ReadOp;
 
 import javax.media.jai.JAI;
 import java.awt.Dimension;
@@ -1013,7 +1014,7 @@ public class OperatorContext {
         if (band.isSourceImageSet()) {
             RenderedImage sourceImage = band.getSourceImage().getImage(0);
             OperatorImage targetImage = getTargetImage(band);
-            return targetImage == sourceImage;
+            return targetImage == sourceImage || (operator instanceof ReadOp && targetImage == null);
         } else {
             return false;
         }
