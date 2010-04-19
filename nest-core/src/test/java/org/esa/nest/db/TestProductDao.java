@@ -4,9 +4,7 @@ import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -38,6 +36,7 @@ public class TestProductDao extends TestCase {
         super.tearDown();
 
         db.disconnect();
+        ProductDB.deleteInstance();
     }
 
     public void testAddAll() throws IOException, SQLException {
@@ -96,7 +95,7 @@ public class TestProductDao extends TestCase {
 
     public void testGetENVISATProductTypes() throws SQLException {
         System.out.println("ENVISAT productTypes:");
-        final String[] productTypes = db.getProductTypes("ENVISAT");
+        final String[] productTypes = db.getProductTypes(new String[] { "ENVISAT" });
         for(String str : productTypes) {
             System.out.println(str);
         }
@@ -113,8 +112,8 @@ public class TestProductDao extends TestCase {
     public void testSelect() throws SQLException {
         final String strGetProductsWhere = "SELECT * FROM APP.PRODUCTS WHERE MISSION='ENVISAT'";
 
-        final Statement queryStatement = db.getDBConnection().createStatement();
-        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
+        //final Statement queryStatement = db.getDBConnection().createStatement();
+        //final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
     }
 
 }

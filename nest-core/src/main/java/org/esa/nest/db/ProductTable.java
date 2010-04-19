@@ -1,19 +1,18 @@
 package org.esa.nest.db;
 
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.SQLUtils;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.io.File;
+import java.sql.*;
+import java.util.ArrayList;
 
 /**
  *
  */
 public class ProductTable implements TableInterface {
+
+    private final Connection dbConnection;
 
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtUpdateExistingRecord;
@@ -22,7 +21,6 @@ public class ProductTable implements TableInterface {
     private PreparedStatement stmtDeleteAddress;
     private PreparedStatement stmtAllMissions;
     private PreparedStatement stmtAllProductTypes;
-    private PreparedStatement stmtMissionProductTypes;
 
     private static final String strCreateProductTable =
             "create table APP.PRODUCTS (" +
@@ -88,19 +86,21 @@ public class ProductTable implements TableInterface {
 
     private static final String strAllMissions = "SELECT DISTINCT "+AbstractMetadata.MISSION+" FROM APP.PRODUCTS";
     private static final String strAllProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM APP.PRODUCTS";
-    private static final String strMissionProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM APP.PRODUCTS" +
-                                                     " WHERE "+AbstractMetadata.MISSION+" = ?";
 
-    public void createTable(final Connection dbConnection) throws SQLException {
+    public ProductTable(final Connection dbConnection) {
+        this.dbConnection = dbConnection;
+    }
+
+    public void createTable() throws SQLException {
         final Statement statement = dbConnection.createStatement();
         statement.execute(strCreateProductTable);
     }
 
-    public void validateTable(final Connection dbConnection) throws SQLException {
+    public void validateTable() throws SQLException {
         // alter table if columns are missing    
     }
 
-    public void prepareStatements(final Connection dbConnection) throws SQLException {
+    public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(strSaveProduct, Statement.RETURN_GENERATED_KEYS);
         stmtUpdateExistingRecord = dbConnection.prepareStatement(strUpdateProduct);
         stmtGetAddress = dbConnection.prepareStatement(strGetProduct);
@@ -109,7 +109,6 @@ public class ProductTable implements TableInterface {
 
         stmtAllMissions = dbConnection.prepareStatement(strAllMissions);
         stmtAllProductTypes = dbConnection.prepareStatement(strAllProductTypes);
-        stmtMissionProductTypes = dbConnection.prepareStatement(strMissionProductTypes);
     }
 
     public ResultSet addRecord(final ProductEntry record) throws SQLException {
@@ -142,7 +141,7 @@ public class ProductTable implements TableInterface {
         return results.next();
     }
 
-    public ProductEntry[] getProductEntryList(final Connection dbConnection) throws SQLException {
+    public ProductEntry[] getProductEntryList() throws SQLException {
         final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
 
         final Statement queryStatement = dbConnection.createStatement();
@@ -153,7 +152,7 @@ public class ProductTable implements TableInterface {
         return listEntries.toArray(new ProductEntry[listEntries.size()]);
     }
 
-    public ProductEntry[] query(final Connection dbConnection, final String queryStr) throws SQLException {
+    public ProductEntry[] query(final String queryStr) throws SQLException {
         final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
 
         final Statement queryStatement = dbConnection.createStatement();
@@ -189,15 +188,17 @@ public class ProductTable implements TableInterface {
 
     /**
      * Get All product types for specified mission
-     * @param mission the mission
+     * @param missions the selected missions
      * @return list of product types
      * @throws SQLException .
      */
-    public String[] getProductTypes(final String mission) throws SQLException {
+    public String[] getProductTypes(final String[] missions) throws SQLException {
+        String strMissionProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM APP.PRODUCTS WHERE ";
+        strMissionProductTypes += SQLUtils.getOrList(AbstractMetadata.MISSION, missions);
+
         final ArrayList<String> listEntries = new ArrayList<String>();
-        stmtMissionProductTypes.clearParameters();
-        stmtMissionProductTypes.setString(1, mission);
-        final ResultSet results = stmtMissionProductTypes.executeQuery();
+        final Statement queryStatement = dbConnection.createStatement();
+        final ResultSet results = queryStatement.executeQuery(strMissionProductTypes);
         while(results.next()) {
             listEntries.add(results.getString(1));
         }

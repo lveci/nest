@@ -4,9 +4,9 @@ import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Connection;
 import java.util.Properties;
 
 /**
@@ -14,7 +14,6 @@ import java.util.Properties;
  */
 public abstract class DAO {
 
-    private Connection dbConnection;
     private boolean isConnected;
     private final Properties dbProperties;
     private final String dbName;
@@ -34,8 +33,6 @@ public abstract class DAO {
             if(!createDatabase()) {
                 throw new IOException("Unable to create tables\n"+getLastSQLException().getMessage());
             }
-        } else {
-            validateDatabase();
         }
     }
 
@@ -90,7 +87,7 @@ public abstract class DAO {
         return bCreated;
     }
 
-    private void validateDatabase() {
+    private void validateDatabase(final Connection dbConnection) {
         dbProperties.put("create", "true");
 
         try {
@@ -105,9 +102,10 @@ public abstract class DAO {
     public boolean connect() {
         if(isConnected) return isConnected;
 
-        final String dbUrl = getDatabaseUrl();
         try {
-            dbConnection = DriverManager.getConnection(dbUrl, dbProperties);
+            final Connection dbConnection = DriverManager.getConnection(getDatabaseUrl(), dbProperties);
+
+            validateDatabase(dbConnection);
             prepareStatements();
 
             isConnected = dbConnection != null;
@@ -128,15 +126,12 @@ public abstract class DAO {
                 lastSQLException = ex;
             }
             isConnected = false;
+            dbProperties.remove("shutdown");
         }
     }
 
     public SQLException getLastSQLException() {
         return lastSQLException;
-    }
-
-    public Connection getDBConnection() {
-        return dbConnection;
     }
 
     public String getDatabaseLocation() {

@@ -1,7 +1,7 @@
 package org.esa.nest.db;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -11,6 +11,8 @@ import java.sql.*;
  *
  */
 public class MetadataTable implements TableInterface {
+
+    private final Connection dbConnection;
 
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtUpdateExistingRecord;
@@ -32,13 +34,16 @@ public class MetadataTable implements TableInterface {
     private static final String strSaveProduct =
             "INSERT INTO APP.METADATA ";
 
+    public MetadataTable(final Connection dbConnection) {
+        this.dbConnection = dbConnection;
+    }
 
-    public void createTable(final Connection dbConnection) throws SQLException {
+    public void createTable() throws SQLException {
         final Statement statement = dbConnection.createStatement();
         statement.execute(createTableStr);
     }
 
-    public void validateTable(final Connection dbConnection) throws SQLException {
+    public void validateTable() throws SQLException {
 
     }
 
@@ -73,7 +78,7 @@ public class MetadataTable implements TableInterface {
         return "VARCHAR(555)";
     }
 
-    public void prepareStatements(final Connection dbConnection) throws SQLException {
+    public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(saveProductStr, Statement.RETURN_GENERATED_KEYS);
 
     }

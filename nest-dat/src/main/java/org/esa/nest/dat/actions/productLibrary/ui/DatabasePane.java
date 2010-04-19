@@ -1,12 +1,16 @@
 package org.esa.nest.dat.actions.productLibrary.ui;
 
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductDB;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.SQLUtils;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -19,14 +23,9 @@ import java.util.List;
  */
 public class DatabasePane extends JPanel {
 
-    private final JComboBox missionCombo = new JComboBox();
-    private final JComboBox productTypeCombo = new JComboBox();
+    private final JList missionJList = new JList();
+    private final JList productTypeJList = new JList();
     private final JComboBox passCombo = new JComboBox(new String[] {ALL_PASSES, ASCENDING_PASS, DESCENDING_PASS });
-
-    private final JLabel missionLabel = new JLabel("Mission:");
-    private final JLabel productTypeLabel = new JLabel("Product Type:");
-    private final JLabel passLabel = new JLabel("Pass:");
-
 
     private static final String ALL_MISSIONS = "All Missions";
     private static final String ALL_PRODUCT_TYPES = "All Types";
@@ -42,12 +41,13 @@ public class DatabasePane extends JPanel {
 
     public DatabasePane() {
         try {
+            missionJList.setFixedCellWidth(200);
             createPanel();
             connectToDatabase();
 
-            missionCombo.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
+            missionJList.addListSelectionListener(new ListSelectionListener() {
+                public void valueChanged(ListSelectionEvent event) {
+                    if(modifyingCombos || event.getValueIsAdjusting()) return;
                     try {
                         updateProductTypeCombo();
                         queryDatabase();
@@ -56,9 +56,10 @@ public class DatabasePane extends JPanel {
                     }
                 }
             });
-            productTypeCombo.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
+            productTypeJList.setFixedCellWidth(200);
+            productTypeJList.addListSelectionListener(new ListSelectionListener() {
+                public void valueChanged(ListSelectionEvent event) {
+                    if(modifyingCombos || event.getValueIsAdjusting()) return;
                     try {
                         queryDatabase();
                     } catch(Throwable t) {
@@ -118,9 +119,9 @@ public class DatabasePane extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        DialogUtils.addComponent(this, gbc, "Mission:", missionCombo);
+        DialogUtils.addComponent(this, gbc, "Mission:", new JScrollPane(missionJList));
         gbc.gridy++;
-        DialogUtils.addComponent(this, gbc, "Product Type:", productTypeCombo);
+        DialogUtils.addComponent(this, gbc, "Product Type:", new JScrollPane(productTypeJList));
         gbc.gridy++;
         DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
 
@@ -156,52 +157,59 @@ public class DatabasePane extends JPanel {
 
     private void updateMissionCombo() throws SQLException {
         boolean origState = lockCombos(true);
-        missionCombo.removeAllItems();
-
-        missionCombo.addItem(ALL_MISSIONS);
-        final String[] missionList = db.getAllMissions();
-        for(String mission : missionList) {
-            missionCombo.addItem(mission);
+        try {
+            missionJList.removeAll();
+            missionJList.setListData(SQLUtils.prependString(ALL_MISSIONS, db.getAllMissions()));
+        } finally {
+            lockCombos(origState);
         }
-        lockCombos(origState);
     }
 
     private void updateProductTypeCombo() throws SQLException {
         boolean origState = lockCombos(true);
-        productTypeCombo.removeAllItems();
+        try {
+            productTypeJList.removeAll();
 
-        productTypeCombo.addItem(ALL_PRODUCT_TYPES);
-        String selectedMission = (String)missionCombo.getSelectedItem();
-        String[] missionList;
-        if(selectedMission.equals(ALL_MISSIONS))
-            missionList = db.getAllProductTypes();
-        else
-            missionList = db.getProductTypes(selectedMission);
-        for(String mission : missionList) {
-            productTypeCombo.addItem(mission);
+            final String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
+            String[] productTypeList;
+            if(StringUtils.contains(selectedMissions, ALL_MISSIONS))
+                productTypeList = db.getAllProductTypes();
+            else
+                productTypeList = db.getProductTypes(selectedMissions);
+
+            productTypeJList.setListData(SQLUtils.prependString(ALL_PRODUCT_TYPES, productTypeList));
+        } finally {
+            lockCombos(origState);
         }
-        lockCombos(origState);
+    }
+
+    private String[] toStringArray(Object[] objects) {
+        final String strArray[] = new String[objects.length];
+        for(int i=0; i<objects.length; ++i) {
+            strArray[i] = (String)objects[i];
+        }
+        return strArray;
     }
 
     private void queryDatabase() throws SQLException {
-        String selectedMission = (String)missionCombo.getSelectedItem();
-        String selectedProductType = (String)productTypeCombo.getSelectedItem();
+        String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
+        String selectedProductTypes[] = toStringArray(productTypeJList.getSelectedValues());
         String selectedPass = (String)passCombo.getSelectedItem();
-        if(selectedMission.equals(ALL_MISSIONS))
-            selectedMission = "";
-        if(selectedProductType.equals(ALL_PRODUCT_TYPES))
-            selectedProductType = "";
+        if(StringUtils.contains(selectedMissions, ALL_MISSIONS))
+            selectedMissions = new String[] {};
+        if(StringUtils.contains(selectedProductTypes, ALL_PRODUCT_TYPES))
+            selectedProductTypes = new String[] {};
         if(selectedPass.equals(ALL_PASSES))
             selectedPass = "";
 
         String queryStr = "";
-        if(!selectedMission.isEmpty()) {
-            queryStr += AbstractMetadata.MISSION+"='"+selectedMission+"'";
+        if(selectedMissions.length > 0) {
+            queryStr += SQLUtils.getOrList(AbstractMetadata.MISSION, selectedMissions);
         }
-        if(!selectedProductType.isEmpty()) {
+        if(selectedProductTypes.length > 0) {
             if(!queryStr.isEmpty())
                 queryStr += " AND ";
-            queryStr += AbstractMetadata.PRODUCT_TYPE+"='"+selectedProductType+"'";
+            queryStr += SQLUtils.getOrList(AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
         }
         if(!selectedPass.isEmpty()) {
             if(!queryStr.isEmpty())

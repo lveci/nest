@@ -2,11 +2,11 @@ package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.Product;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Connection;
 
 /**
  *
@@ -24,33 +24,37 @@ public class ProductDB extends DAO {
         return _instance;
     }
 
+    public static void deleteInstance() {
+        _instance = null;
+    }
+
     private ProductDB() throws IOException {
         super("productDB");
     }
 
     @Override
     protected boolean createTables(final Connection dbConnection) throws SQLException {
-        productTable = new ProductTable();
-        productTable.createTable(dbConnection);
-        metadataTable = new MetadataTable();
-        metadataTable.createTable(dbConnection);
+        productTable = new ProductTable(dbConnection);
+        productTable.createTable();
+        metadataTable = new MetadataTable(dbConnection);
+        metadataTable.createTable();
         return true;
     }
 
     @Override
     protected void validateTables(final Connection dbConnection) throws SQLException {
         if(productTable == null)
-            productTable = new ProductTable();
+            productTable = new ProductTable(dbConnection);
         if(metadataTable == null)
-            metadataTable = new MetadataTable();
-        productTable.validateTable(dbConnection);
-        metadataTable.validateTable(dbConnection);
+            metadataTable = new MetadataTable(dbConnection);
+        productTable.validateTable();
+        metadataTable.validateTable();
     }
 
     protected void prepareStatements() throws SQLException {
-        final Connection connection = getDBConnection();
-        productTable.prepareStatements(connection);
-        metadataTable.prepareStatements(connection);
+        //final Connection connection = getDBConnection();
+        productTable.prepareStatements();
+        metadataTable.prepareStatements();
     }
 
     public boolean pathExistsInDB(final File path) throws SQLException {
@@ -98,11 +102,11 @@ public class ProductDB extends DAO {
     }     */
     
     public ProductEntry[] getProductEntryList() throws SQLException {
-        return productTable.getProductEntryList(getDBConnection());
+        return productTable.getProductEntryList();
     }
 
     public ProductEntry[] queryProduct(final String queryStr) throws SQLException {
-        return productTable.query(getDBConnection(), queryStr);
+        return productTable.query(queryStr);
     }
     
   /*  public ProductEntry getProductEntry(final int index) {
@@ -128,7 +132,7 @@ public class ProductDB extends DAO {
         return productTable.getAllProductTypes();
     }
 
-    public String[] getProductTypes(final String mission) throws SQLException {
-        return productTable.getProductTypes(mission);
+    public String[] getProductTypes(final String[] missions) throws SQLException {
+        return productTable.getProductTypes(missions);
     }
 }
