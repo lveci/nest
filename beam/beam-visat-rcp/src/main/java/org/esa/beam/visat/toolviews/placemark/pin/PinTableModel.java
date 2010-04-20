@@ -1,5 +1,5 @@
 /*
- * $Id: PinTableModel.java,v 1.3 2010-03-31 13:59:58 lveci Exp $
+ * $Id: PinTableModel.java,v 1.4 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,6 +37,11 @@ public class PinTableModel extends AbstractPlacemarkTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
+        if (getProduct().getGeoCoding() == null &&
+            (columnIndex == 2 || columnIndex == 3)) {
+            return false;
+        }
+        
         return columnIndex < getStandardColumnNames().length;
     }
 

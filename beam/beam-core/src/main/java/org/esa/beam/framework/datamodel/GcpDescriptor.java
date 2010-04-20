@@ -7,7 +7,7 @@ import java.awt.Point;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.4 $ $Date: 2010-04-20 17:31:23 $
  */
 public class GcpDescriptor implements PlacemarkDescriptor {
 
@@ -53,10 +53,7 @@ public class GcpDescriptor implements PlacemarkDescriptor {
 
     @Override
     public PixelPos updatePixelPos(GeoCoding geoCoding, GeoPos geoPos, PixelPos pixelPos) {
-        if (geoCoding == null || !geoCoding.canGetPixelPos()) {
-            return pixelPos;
-        }
-        return geoCoding.getPixelPos(geoPos, pixelPos);
+        return pixelPos;
     }
 
     @Override

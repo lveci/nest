@@ -21,12 +21,15 @@ import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.GcpDescriptor;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.ImageGeometry;
 import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.PinDescriptor;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Placemark;
-import org.esa.beam.framework.datamodel.PlacemarkSymbol;
+import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -76,7 +79,7 @@ import java.text.MessageFormat;
  *
  * @author Marco Zuehlke
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2010-03-31 13:59:24 $
+ * @version $Revision: 1.2 $ $Date: 2010-04-20 17:31:23 $
  * @since BEAM 4.7
  */
 @OperatorMetadata(alias = "Reproject",
@@ -211,9 +214,9 @@ public class ReprojectionOp extends Operator {
         * Placemarks & masks
         */
         copyPlacemarks(sourceProduct.getPinGroup(), targetProduct.getPinGroup(),
-                       PlacemarkSymbol.createDefaultPinSymbol());
+                       PinDescriptor.INSTANCE);
         copyPlacemarks(sourceProduct.getGcpGroup(), targetProduct.getGcpGroup(),
-                       PlacemarkSymbol.createDefaultGcpSymbol());
+                       GcpDescriptor.INSTANCE);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);
@@ -447,12 +450,22 @@ public class ReprojectionOp extends Operator {
     }
 
     private static void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
-                                       ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkSymbol symbol) {
+                                       ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkDescriptor descriptor) {
         final Placemark[] placemarks = sourcePlacemarkGroup.toArray(new Placemark[0]);
         for (Placemark placemark : placemarks) {
+            PixelPos targetPixelPos = null;
+            if (descriptor instanceof GcpDescriptor) { // reproject GCP position
+                final PixelPos srcPixelPos = placemark.getPixelPos();
+                final GeoPos srcGeoPos = new GeoPos();
+                sourcePlacemarkGroup.getProduct().getGeoCoding().getGeoPos(srcPixelPos, srcGeoPos);
+
+                targetPixelPos = new PixelPos(srcPixelPos.x, srcPixelPos.y);
+                targetPlacemarkGroup.getProduct().getGeoCoding().getPixelPos(srcGeoPos, targetPixelPos);
+            }
+
             final Placemark placemark1 = new Placemark(placemark.getName(), placemark.getLabel(),
-                                                       placemark.getDescription(), null, placemark.getGeoPos(),
-                                                       symbol, targetPlacemarkGroup.getProduct().getGeoCoding());
+                                                       placemark.getDescription(), targetPixelPos, placemark.getGeoPos(),
+                                                       descriptor, targetPlacemarkGroup.getProduct().getGeoCoding());
             targetPlacemarkGroup.add(placemark1);
         }
     }

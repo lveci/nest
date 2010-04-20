@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.9 2010-03-31 13:59:58 lveci Exp $
+ * $Id: MaskToolView.java,v 1.10 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,15 +16,10 @@
  */
 package org.esa.beam.visat.toolviews.mask;
 
-import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProductNodeEvent;
-import org.esa.beam.framework.datamodel.ProductNodeListener;
-import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
@@ -34,77 +29,26 @@ import org.esa.beam.visat.VisatApp;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Container;
 
 // todo - a stripped version of this class may serve as base class for all VISAT tool views (nf)
 
 public abstract class MaskToolView extends AbstractToolView {
 
-    private final ProductNodeListener titleUpdater;
-    private ProductSceneView sceneView;
     private MaskForm maskForm;
     private String prefixTitle;
 
-    public MaskToolView() {
-        this.titleUpdater = createTitleUpdater();
-    }
-
-    private void setSceneView(final ProductSceneView sceneView) {
-        if (this.sceneView != sceneView) {
-            if (this.sceneView != null) {
-                this.sceneView.getProduct().removeProductNodeListener(titleUpdater);
-            }
-            this.sceneView = sceneView;
-            if (this.sceneView != null) {
-                this.sceneView.getProduct().addProductNodeListener(titleUpdater);
-            }
-
-            if (this.sceneView != null) {
-                maskForm.reconfigureMaskTable(this.sceneView.getProduct(), this.sceneView.getRaster());
-            } else {
-                maskForm.clearMaskTable();
-            }
-        }
-        updateTitle();
-    }
-
     private void updateTitle() {
-        final String titleAddtion;
-        if (sceneView != null) {
-            if (sceneView.isRGB()) {
-                titleAddtion = " - " + sceneView.getProduct().getProductRefString() + " RGB";
-            } else {
-                titleAddtion = " - " + sceneView.getRaster().getDisplayName();
-            }
+        final String suffix;
+        if (maskForm.getRaster() != null) {
+            suffix = " - " + maskForm.getRaster().getDisplayName();
+        } else if (maskForm.getProduct() != null) {
+            suffix = " - " + maskForm.getProduct().getDisplayName();
         } else {
-            if (maskForm.getRaster() != null) {
-                titleAddtion = " - " + maskForm.getRaster().getDisplayName();
-            } else if (maskForm.getProduct() != null) {
-                titleAddtion = " - " + maskForm.getProduct().getDisplayName();
-            } else {
-                titleAddtion = "";
-            }
+            suffix = "";
         }
-        getDescriptor().setTitle(prefixTitle + titleAddtion);
-    }
-
-    private ProductNodeListener createTitleUpdater() {
-        return new ProductNodeListenerAdapter() {
-            @Override
-            public void nodeChanged(final ProductNodeEvent event) {
-                if (event.getPropertyName().equalsIgnoreCase(ProductNode.PROPERTY_NAME_NAME)) {
-                    final ProductNode sourceNode = event.getSourceNode();
-                    if ((sceneView.isRGB() && sourceNode == sceneView.getProduct())
-                            || sourceNode == sceneView.getRaster()) {
-                        updateTitle();
-                    }
-                }
-            }
-        };
+        getDescriptor().setTitle(prefixTitle + suffix);
     }
 
     @Override
@@ -113,12 +57,12 @@ public abstract class MaskToolView extends AbstractToolView {
         maskForm = createMaskForm(this, new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                final ProductSceneView sceneView = VisatApp.getApp().getSelectedProductSceneView();
                 if (sceneView != null) {
                     Mask selectedMask = maskForm.getSelectedMask();
                     if (selectedMask != null) {
                         VectorDataNode vectorDataNode = Mask.VectorDataType.getVectorData(selectedMask);
                         if (vectorDataNode != null) {
-                            VisatApp.getApp().setSelectedProductNode(vectorDataNode);
                             sceneView.selectVectorDataLayer(vectorDataNode);
                         }
                     }
@@ -135,25 +79,11 @@ public abstract class MaskToolView extends AbstractToolView {
             }
         }
 
-        ProductSceneView selectedProductSceneView = VisatApp.getApp().getSelectedProductSceneView();
-        if (selectedProductSceneView != null) {
-            setSceneView(selectedProductSceneView);
-        } else {
-            ProductNode selectedProductNode = VisatApp.getApp().getSelectedProductNode();
-            if (selectedProductNode instanceof Product) {
-                Product product = (Product) selectedProductNode;
-                maskForm.reconfigureMaskTable(product, null);
-            } else if (selectedProductNode instanceof RasterDataNode) {
-                RasterDataNode rdn = (RasterDataNode) selectedProductNode;
-                maskForm.reconfigureMaskTable(rdn.getProduct(), rdn);
-            }
-        }
-        updateTitle();
+        updateMaskForm();
 
         // Add an internal frame listsner to VISAT so that we can update our
         // mask manager with the information of the currently activated
         // product scene view.
-        VisatApp.getApp().addInternalFrameListener(new MaskIFL());
         VisatApp.getApp().addProductTreeListener(new MaskPTL());
 
         maskForm.updateState();
@@ -161,49 +91,36 @@ public abstract class MaskToolView extends AbstractToolView {
         return maskForm.createContentPanel();
     }
 
-    protected abstract MaskForm createMaskForm(AbstractToolView maskToolView, ListSelectionListener selectionListener);
-
-    private class MaskIFL extends InternalFrameAdapter {
-
-        @Override
-        public void internalFrameActivated(InternalFrameEvent e) {
-            setSceneView(getSceneView(e));
+    private void updateMaskForm() {
+        ProductNode selectedProductNode = VisatApp.getApp().getSelectedProductNode();
+        if (selectedProductNode instanceof RasterDataNode) {
+            RasterDataNode rdn = (RasterDataNode) selectedProductNode;
+            maskForm.reconfigureMaskTable(rdn.getProduct(), rdn);
+        } else if (selectedProductNode instanceof Product) {
+            Product product = (Product) selectedProductNode;
+            maskForm.reconfigureMaskTable(product, null);
+        } else if (selectedProductNode != null && selectedProductNode.getProduct() != null) {
+            maskForm.reconfigureMaskTable(selectedProductNode.getProduct(), null);
+        } else {
+            maskForm.clearMaskTable();
         }
-
-        @Override
-        public void internalFrameDeactivated(InternalFrameEvent e) {
-            ProductSceneView sceneView = getSceneView(e);
-            if (sceneView != null) {
-                setSceneView(null);
-            }
-        }
-
-        private ProductSceneView getSceneView(InternalFrameEvent e) {
-            Container contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                return (ProductSceneView) contentPane;
-            }
-            return null;
-        }
+        updateTitle();
     }
 
+    protected abstract MaskForm createMaskForm(AbstractToolView maskToolView, ListSelectionListener selectionListener);
+
     private class MaskPTL extends ProductTreeListenerAdapter {
+
         @Override
-        public void productSelected(Product product, int clickCount) {
-            maskForm.reconfigureMaskTable(product, null);
-            setSceneView(null);
+        public void productNodeSelected(ProductNode productNode, int clickCount) {
+            updateMaskForm();
         }
 
         @Override
-        public void bandSelected(Band band, int clickCount) {
-            maskForm.reconfigureMaskTable(band.getProduct(), band);
-            setSceneView(null);
-        }
-        
-        @Override
-        public void tiePointGridSelected(TiePointGrid tiePointGrid, int clickCount) {
-            maskForm.reconfigureMaskTable(tiePointGrid.getProduct(), tiePointGrid);
-            setSceneView(null);
+        public void productRemoved(Product product) {
+            if (maskForm.getProduct() == product) {
+                updateMaskForm();
+            }
         }
     }
 }

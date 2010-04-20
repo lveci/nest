@@ -1,5 +1,5 @@
 /*
-    $Id: LookupTableTest.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
+    $Id: LookupTableTest.java,v 1.3 2010-04-20 17:31:23 lveci Exp $
 
     Copyright (c) 2006 Brockmann Consult. All rights reserved. Use is
     subject to license terms.
@@ -28,7 +28,7 @@ import java.util.Random;
  * Test methods for class {@link LookupTable}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
+ * @version $Revision: 1.3 $ $Date: 2010-04-20 17:31:23 $
  */
 public class LookupTableTest extends TestCase {
 
@@ -88,6 +88,7 @@ public class LookupTableTest extends TestCase {
         final FracIndex[] fi = FracIndex.createArray(3);
         final Random rng = new Random(27182);
 
+        final double[] v = new double[1 << 3];
         for (int i = 0; i < 10; ++i) {
             // Compute random coordinates and fractional indices
             for (int j = 0; j < 3; ++j) {
@@ -110,7 +111,7 @@ public class LookupTableTest extends TestCase {
 
             final double expected = r[2] + 5.0 * (r[1] + 5.0 * r[0]);
             final double a = lut.getValue(x);
-            final double b = lut.getValue(fi);
+            final double b = lut.getValue(fi, v);
 
             assertEquals(expected, a, 1.0E-10);
             assertEquals(expected, b, 1.0E-10);

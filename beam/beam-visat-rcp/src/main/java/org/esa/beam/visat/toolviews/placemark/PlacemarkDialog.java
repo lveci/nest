@@ -1,5 +1,5 @@
 /*
- * $Id: PlacemarkDialog.java,v 1.4 2010-02-10 16:20:37 lveci Exp $
+ * $Id: PlacemarkDialog.java,v 1.5 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,9 +18,9 @@ package org.esa.beam.visat.toolviews.placemark;
 
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
 import org.esa.beam.framework.datamodel.PlacemarkSymbol;
 import org.esa.beam.framework.datamodel.Product;
@@ -92,11 +92,6 @@ public class PlacemarkDialog extends ModalDialog {
 
     @Override
     protected void onOK() {
-        if (!product.containsPixel(getPixelX(), getPixelY())) {
-            showInformationDialog("The " + placemarkDescriptor.getRoleLabel() + " cannot be set because\n" +
-                    "its pixel coordinate is out of bounds."); /*I18N*/
-            return;
-        }
         if (ProductNode.isValidNodeName(getName())) {
             if (symbolChanged) {
                 // Create new symbol instance so an event is fired by placemark when new symbol is set.
@@ -498,8 +493,11 @@ public class PlacemarkDialog extends ModalDialog {
         dialog.setName(placemark.getName());
         dialog.setLabel(placemark.getLabel());
         dialog.setDescription(placemark.getDescription() != null ? placemark.getDescription() : "");
+        // prevent that geoPos change updates pixelPos and vice versa during dialog creation
+        dialog.adjusting = true;
         dialog.setPixelPos(placemark.getPixelPos());
         dialog.setGeoPos(placemark.getGeoPos());
+        dialog.adjusting = false;
         dialog.setPlacemarkSymbol(placemark.getSymbol());
         boolean ok = (dialog.show() == ID_OK);
         if (ok) {

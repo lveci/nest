@@ -14,14 +14,13 @@
  */
 package org.esa.beam.visat.toolviews.layermanager;
 
+import com.bc.ceres.glayer.Layer;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import java.util.WeakHashMap;
 import java.awt.BorderLayout;
-
-import com.bc.ceres.glayer.Layer;
+import java.util.WeakHashMap;
 
 /**
  * Layer manager tool view.
@@ -29,7 +28,7 @@ import com.bc.ceres.glayer.Layer;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-06-01 19:52:04 $
+ * @version $Revision: 1.4 $ $Date: 2010-04-20 17:31:23 $
  * @since BEAM 4.6
  */
 public class LayerManagerToolView extends AbstractLayerToolView {

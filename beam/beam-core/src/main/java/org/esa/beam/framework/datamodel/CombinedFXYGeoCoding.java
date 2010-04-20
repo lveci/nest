@@ -1,5 +1,5 @@
 /*
- * $Id: CombinedFXYGeoCoding.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: CombinedFXYGeoCoding.java,v 1.2 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -222,7 +222,6 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         private Rectangle _region;
         private Point _location;
         private Dimension _dimension;
-        private final PixelPos _pixelPos;
 
         public CodingWrapper(final FXYGeoCoding geoCoding, final int x, final int y, final int width,
                              final int height) {
@@ -230,7 +229,6 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
             _location = new Point(x, y);
             _dimension = new Dimension(width, height);
             _region = new Rectangle(_location, _dimension);
-            _pixelPos = new PixelPos();
         }
 
         public FXYGeoCoding getGeoGoding() {
@@ -269,9 +267,10 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         }
 
         private GeoPos getGeoPos(final PixelPos pixelPos, final GeoPos geoPos) {
-            _pixelPos.setLocation(pixelPos.getX() - _location.x,
-                                  pixelPos.getY() - _location.y);
-            return _geoGoding.getGeoPos(_pixelPos, geoPos);
+            final PixelPos localPixelPos = new PixelPos();
+            localPixelPos.setLocation(pixelPos.getX() - _location.x,
+                                      pixelPos.getY() - _location.y);
+            return _geoGoding.getGeoPos(localPixelPos, geoPos);
         }
 
         public boolean intersects(final Rectangle rectangle) {

@@ -1,5 +1,5 @@
 /*
- * $Id: BandLineReader.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: BandLineReader.java,v 1.2 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,7 +36,7 @@ import java.io.IOException;
  * a certain geophysical parameter.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-04-20 17:31:23 $
  * @see org.esa.beam.dataio.envisat.ProductFile#getBandLineReader
  * @see org.esa.beam.dataio.envisat.RecordReader
  */
@@ -285,17 +285,16 @@ public class BandLineReader {
                 sMaxX = _bandInfo.getWidth() - 1 - sourceMinX;
             }
 
-//            readLineRecord(sourceY);
             readDataFieldSegment(sourceY, sMinX, sMaxX);
 
             ensureBandLineDecoder().computeLine(
-                        getPixelDataField().getElems(),
-                        sMinX,
-                        sMaxX,
-                        sourceStepX,
-                        destRaster.getElems(),
-                        destPos,
-                        destRasterIncr);
+                    getPixelDataField().getElems(),
+                    sMinX,
+                    sMaxX,
+                    sourceStepX,
+                    destRaster.getElems(),
+                    destPos,
+                    destRasterIncr);
         } else {
             int inkrement = destRasterPos;
             final double missingValue = productFile.getMissingMDSRPixelValue();
@@ -314,10 +313,10 @@ public class BandLineReader {
      */
     public synchronized void readLineRecord(int sourceY) throws IOException {
         getPixelDataReader().readRecord(sourceY,
-                getPixelDataRecord());
+                                        getPixelDataRecord());
     }
 
-    
+
     private void readDataFieldSegment(int sourceY, int minX, int maxX) throws IOException {
         getPixelDataReader().readFieldSegment(sourceY, fieldOffset, dataFieldSampleSize, minX, maxX, getPixelDataField());
     }
@@ -335,11 +334,11 @@ public class BandLineReader {
         }
         return offset;
     }
-    
+
     private int getDataFieldSampleSize(BandInfo bandInfo) {
         final int sampleModel = bandInfo.getSampleModel();
         if (sampleModel == BandInfo.SMODEL_1OF1) {
-            return 1; 
+            return 1;
         } else if (sampleModel == BandInfo.SMODEL_1OF2
                 || sampleModel == BandInfo.SMODEL_2OF2
                 || sampleModel == BandInfo.SMODEL_2UB_TO_S) {

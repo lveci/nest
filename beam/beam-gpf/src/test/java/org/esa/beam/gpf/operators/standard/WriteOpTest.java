@@ -1,5 +1,5 @@
 /*
- * $Id: WriteOpTest.java,v 1.2 2010-04-14 17:26:42 lveci Exp $
+ * $Id: WriteOpTest.java,v 1.3 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,6 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Placemark;
-import org.esa.beam.framework.datamodel.PlacemarkSymbol;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -53,7 +52,7 @@ import java.io.StringReader;
  * Created by marcoz.
  *
  * @author marcoz
- * @version $Revision: 1.2 $ $Date: 2010-04-14 17:26:42 $
+ * @version $Revision: 1.3 $ $Date: 2010-04-20 17:31:23 $
  */
 public class WriteOpTest extends TestCase {
 
@@ -90,9 +89,6 @@ public class WriteOpTest extends TestCase {
     public void testWrite() throws Exception {
         String graphOpXml = "<graph id=\"myOneNodeGraph\">\n"
                 + "  <version>1.0</version>\n"
-                + "  <header>\n"
-                + "    <target refid=\"node2\" />\n"
-                + "  </header>\n"
                 + "  <node id=\"node1\">\n"
                 + "    <operator>Algo</operator>\n"
                 + "  </node>\n"
@@ -170,11 +166,10 @@ public class WriteOpTest extends TestCase {
             //
             final int minX = targetTile.getMinX();
             final int minY = targetTile.getMinY();
-            final PlacemarkSymbol symbol = PinDescriptor.INSTANCE.createDefaultSymbol();
             Placemark placemark = new Placemark(band.getName() + minX + "," + minY,
-                                                "label", "descr",
-                                                new PixelPos(minX, minY), null,
-                                                symbol, targetProduct.getGeoCoding());
+                                                        "label", "descr",
+                                                        new PixelPos(minX, minY), null,
+                                                        PinDescriptor.INSTANCE, targetProduct.getGeoCoding());
 
             targetProduct.getPinGroup().add(placemark);
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductProjectionBuilderTest.java,v 1.4 2010-03-31 13:59:55 lveci Exp $
+ * $Id: ProductProjectionBuilderTest.java,v 1.5 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,9 +17,9 @@
 package org.esa.beam.framework.dataio;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.datamodel.Placemark;
+import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.PlacemarkSymbol;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
@@ -66,9 +66,10 @@ public class ProductProjectionBuilderTest extends TestCase {
     }
 
     public void testCopyPlacemarkGroups() throws IOException {
-        final PlacemarkSymbol defaultPinSymbol = PlacemarkSymbol.createDefaultPinSymbol();
-        final Placemark pin = new Placemark("P1", "", "", new PixelPos(1.5f, 1.5f), null, defaultPinSymbol, product.getGeoCoding());
-        final Placemark gcp = new Placemark("G1", "", "", new PixelPos(2.5f, 2.5f), null, defaultPinSymbol, product.getGeoCoding());
+        final Placemark pin = new Placemark("P1", "", "", new PixelPos(1.5f, 1.5f), null,
+                                            PinDescriptor.INSTANCE, product.getGeoCoding());
+        final Placemark gcp = new Placemark("G1", "", "", new PixelPos(2.5f, 2.5f), null,
+                                            PinDescriptor.INSTANCE, product.getGeoCoding());
 
         product.getPinGroup().add(pin);
         product.getGcpGroup().add(gcp);
@@ -83,9 +84,13 @@ public class ProductProjectionBuilderTest extends TestCase {
         assertEquals("P1", pin2.getName());
         assertEquals("G1", gcp2.getName());
 
-        assertEquals(pin.getGeoPos(), pin2.getGeoPos());
-        assertEquals(gcp.getGeoPos(), gcp2.getGeoPos());
-        assertNull(pin2.getPixelPos());
-        assertNull(gcp2.getPixelPos());
+        assertEquals(pin.getGeoPos().lat, pin2.getGeoPos().lat, 1.0e-4f);
+        assertEquals(pin.getGeoPos().lon, pin2.getGeoPos().lon, 1.0e-4f);
+        assertEquals(gcp.getGeoPos().lat, gcp2.getGeoPos().lat, 1.0e-4f);
+        assertEquals(gcp.getGeoPos().lon, gcp2.getGeoPos().lon, 1.0e-4f);
+        assertEquals(54.7000, pin2.getPixelPos().x, 1.0e-4f);
+        assertEquals(-86.3562, pin2.getPixelPos().y, 1.0e-4f);
+        assertEquals(54.7428, gcp2.getPixelPos().x, 1.0e-4f);
+        assertEquals(-86.3812, gcp2.getPixelPos().y, 1.0e-4f);
     }
 }

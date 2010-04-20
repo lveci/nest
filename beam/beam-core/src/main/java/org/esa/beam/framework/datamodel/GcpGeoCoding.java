@@ -12,7 +12,7 @@ import static java.lang.Math.*;
  * Ground control point (GCP) geo-coding.
  *
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2010-02-10 16:20:36 $
+ * @version $Revision: 1.4 $ $Date: 2010-04-20 17:31:23 $
  */
 public class GcpGeoCoding extends AbstractGeoCoding {
 
@@ -311,6 +311,13 @@ public class GcpGeoCoding extends AbstractGeoCoding {
     }
 
     private void initCoordinates(Placemark[] gcps) {
+        for (final Placemark gcp : gcps) {
+            final PixelPos pixelPos = gcp.getPixelPos();
+            final GeoPos geoPos = gcp.getGeoPos();
+            if (pixelPos == null || !pixelPos.isValid() || geoPos == null || !geoPos.isValid()) {
+                throw new IllegalArgumentException("Invalid ground control point.");
+            }
+        }
         x = new double[gcps.length];
         y = new double[gcps.length];
 
@@ -360,7 +367,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-     * @version $Revision: 1.3 $ $Date: 2010-02-10 16:20:36 $
+     * @version $Revision: 1.4 $ $Date: 2010-04-20 17:31:23 $
      */
     public enum Method {
 

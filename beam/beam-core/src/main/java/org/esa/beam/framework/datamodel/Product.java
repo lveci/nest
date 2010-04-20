@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.21 2010-03-31 13:56:29 lveci Exp $
+ * $Id: Product.java,v 1.22 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -67,12 +67,15 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.21 $ $Date: 2010-03-31 13:56:29 $
+ * @version $Revision: 1.22 $ $Date: 2010-04-20 17:31:23 $
  */
 public class Product extends ProductNode {
 
     public static final String METADATA_ROOT_NAME = "metadata";
     public static final String HISTORY_ROOT_NAME = "history";
+
+    public static final String PIN_MASK_NAME = "pins";
+    public static final String GCP_MASK_NAME = "ground_control_points";
 
     public static final String PROPERTY_NAME_FILE_LOCATION = "fileLocation";
     public static final String PROPERTY_NAME_GEOCODING = "geoCoding";
@@ -270,9 +273,9 @@ public class Product extends ProductNode {
         this.indexCodingGroup = new ProductNodeGroup<IndexCoding>(this, "indexCodingGroup", true);
         this.flagCodingGroup = new ProductNodeGroup<FlagCoding>(this, "flagCodingGroup", true);
         this.maskGroup = new ProductNodeGroup<Mask>(this, "maskGroup", true);
-        final VectorDataNode pinVectorDataNode = new VectorDataNode("pins", Placemark.getFeatureType());
+        final VectorDataNode pinVectorDataNode = new VectorDataNode(PIN_MASK_NAME, Placemark.getFeatureType());
         this.vectorDataGroup.add(pinVectorDataNode);
-        final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points", Placemark.getFeatureType());
+        final VectorDataNode gcpVectorDataNode = new VectorDataNode(GCP_MASK_NAME, Placemark.getFeatureType());
         this.vectorDataGroup.add(gcpVectorDataNode);
         this.pinGroup = new PlacemarkGroup(this, "pinGroup", pinVectorDataNode);
         this.gcpGroup = new PlacemarkGroup(this, "gcpGroup", gcpVectorDataNode);
@@ -295,11 +298,11 @@ public class Product extends ProductNode {
         final ProductNodeGroup<Placemark> pinGroup = getPinGroup();
         for (int i = 0; i < pinGroup.getNodeCount(); i++) {
             final Placemark pin = pinGroup.get(i);
-            final PinDescriptor pinDescriptor = PinDescriptor.INSTANCE;
-            final GeoPos geoPos = pin.getGeoPos();
+            final PlacemarkDescriptor pinDescriptor = pin.getPlacemarkDescriptor();
             final PixelPos pixelPos = pin.getPixelPos();
+            GeoPos geoPos = pin.getGeoPos();
             if (pixelPos != null) {
-                pinDescriptor.updateGeoPos(getGeoCoding(), pixelPos, geoPos);
+                geoPos = pinDescriptor.updateGeoPos(getGeoCoding(), pixelPos, geoPos);
             }
             pin.setGeoPos(geoPos);
         }

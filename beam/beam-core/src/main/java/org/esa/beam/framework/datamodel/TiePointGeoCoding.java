@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.16 2010-04-07 21:23:24 junlu Exp $
+ * $Id: TiePointGeoCoding.java,v 1.17 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -244,12 +244,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         if (_approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
-            if (pixelPos == null) {
-                pixelPos = new PixelPos();
-            }
             // ensure that pixel is out of image (= no source position)
-            pixelPos.x = -1;
-            pixelPos.y = -1;
+            if (pixelPos == null) {
+                pixelPos = new PixelPos(-1.0f, -1.0f);
+            } else {
+                pixelPos.x = -1;
+                pixelPos.y = -1;
+            }
+
             if (lat != Float.NaN && lon != Float.NaN) { //(!Float.isNaN(lat) && !Float.isNaN(lon)) {
                 Approximation approximation = getBestApproximation(_approximations, lat, lon);
                 if (approximation == null) {

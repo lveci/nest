@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.21 2010-02-10 16:20:36 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.22 2010-04-20 17:31:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -449,15 +449,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
     }
 
     private void addPlacemarks(Product product) {
-        final PlacemarkSymbol pinSymbol = PlacemarkSymbol.createDefaultPinSymbol();
-        final PlacemarkSymbol gcpSymbol = PlacemarkSymbol.createDefaultGcpSymbol();
-
-        copyPlacemarks(getSourceProduct().getPinGroup(), product.getPinGroup(), pinSymbol, false);
-        copyPlacemarks(getSourceProduct().getGcpGroup(), product.getGcpGroup(), gcpSymbol, true);
+        copyPlacemarks(getSourceProduct().getPinGroup(), product.getPinGroup(), PinDescriptor.INSTANCE, false);
+        copyPlacemarks(getSourceProduct().getGcpGroup(), product.getGcpGroup(), GcpDescriptor.INSTANCE, true);
     }
 
     private void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
-                                ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkSymbol symbol,
+                                ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkDescriptor descriptor,
                                 boolean copyAll) {
         final Placemark[] placemarks = new Placemark[sourcePlacemarkGroup.getNodeCount()];
         sourcePlacemarkGroup.toArray(placemarks);
@@ -492,7 +489,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                                  placemark.getDescription(),
                                                  new PixelPos(x, y),
                                                  placemark.getGeoPos(),
-                                                 symbol,
+                                                 descriptor,
                                                  targetPlacemarkGroup.getProduct().getGeoCoding()));
             }
         }
