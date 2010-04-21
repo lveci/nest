@@ -30,7 +30,6 @@ import java.util.Vector;
 
 public class ProductLibraryUI {
 
-    private static final int quickLookWidth = 500;
     private static final String stopCommand = "stop";
     private static final String updateCommand = "update";
     private static final ImageIcon updateIcon = UIUtils.loadImageIcon("icons/Update24.gif");
@@ -52,6 +51,7 @@ public class ProductLibraryUI {
     private JButton removeButton;
     private JButton updateButton;
 
+    private ProgressBarProgressMonitor progMon;
     private JProgressBar progressBar;
     private JPanel headerPanel;
     private File currentDirectory;
@@ -92,7 +92,8 @@ public class ProductLibraryUI {
 
                 @Override
                 public void componentHidden(final ComponentEvent e) {
-                    //repositoryManager.stopUpdateRepository();
+                    if(progMon != null)
+                        progMon.setCanceled(true);
                 }
             });
             mainFrame.add(mainPanel);
@@ -120,95 +121,33 @@ public class ProductLibraryUI {
         for(File f : baseDirList) {
             repositoryListCombo.insertItemAt(f, repositoryListCombo.getItemCount());
         }
+        if(baseDirList.length > 0)
+            repositoryListCombo.setSelectedIndex(0);
     }
 
     private void performSelectAction() {
-      /*  final Repository repository = repositoryManager.getRepositoryShown();
-        if (repository == null) {
-            return;
-        }
-        final int[] selectedRows = getSelectedRows();
-        if(repository.getEntryCount() > selectedRows[0]) {
-            final RepositoryEntry entry = repository.getEntry(selectedRows[0]);
-            if(entry.getProduct() == null) {
-                entry.openProduct();
-            }
+        updateStatusLabel();
+        /*
             worldMapDataModel.setSelectedProduct(entry.getProduct());
-        }        */
+                */
     }
 
     private void performOpenAction() {
-     /*   if (openHandler != null) {
-            final Repository repository = repositoryManager.getRepositoryShown();
-            if (repository == null) {
-                return;
-            }
-            final int[] selectedRows = getSelectedRows();
-            final File[] productFilesToOpen = new File[selectedRows.length];
-            for (int i = 0; i < selectedRows.length; i++) {
-                if(repository.getEntryCount() > selectedRows[i]) {
-                    final RepositoryEntry entry = repository.getEntry(selectedRows[i]);
-                    productFilesToOpen[i] = entry.getProductFile();
-                }
-            }
-            openHandler.openProducts(productFilesToOpen);
-        }       */
-    }
-
-    private Vector<File> getSelectedFiles() {
-        final Vector<File> fileList = new Vector<File>(10);
-      /*
-        final Repository[] repoList = repositoryManager.getRepositories();
-        for(Repository repo : repoList) {
-            final int numEntries = repo.getEntryCount();
-            for(int i=0; i < numEntries; ++i) {
-                final RepositoryEntry entry = repo.getEntry(i);
-                if(entry.isSelected()) {
-                    // add to list to open
-                    fileList.add(entry.getProductFile());
-                }
-            }
-        }        */
-
-        return fileList;
-    }
-
-    private void unselectAll() {
-      /*  final Repository[] repoList = repositoryManager.getRepositories();
-        for(Repository repo : repoList) {
-            final int numEntries = repo.getEntryCount();
-            for(int i=0; i < numEntries; ++i) {
-                repo.getEntry(i).setSelected(false);
-            }
-        }    */
-    }
-
-    private void performOpenAllSelectedAction() {
-        final Vector<File> fileList = getSelectedFiles();
-
-        if(!fileList.isEmpty()) {
-            final File[] productFilesToOpen = new File[fileList.size()];
-            fileList.toArray(productFilesToOpen);
-
-            openHandler.openProducts(productFilesToOpen);
-            unselectAll();
+        if (openHandler != null) {
+            openHandler.openProducts(getSelectedFiles());
         }
     }
 
-    private void performBatchProcessSelectedAction() {
-        batchProcess(getSelectedFiles(), null);
-    }
-
-    private void performAddToProjectAction() {
-        final Vector<File> fileList = getSelectedFiles();
-
-        if(!fileList.isEmpty()) {
-            final File[] productFilesToOpen = new File[fileList.size()];
-            fileList.toArray(productFilesToOpen);
-
-            Project.instance().ImportFileList(productFilesToOpen);
-            unselectAll();
+    private File[] getSelectedFiles() {
+        final int[] selectedRows = productEntryTable.getSelectedRows();
+        final File[] selectedFiles = new File[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            final Object entry = productEntryTable.getValueAt(selectedRows[i], 0);
+            if(entry instanceof ProductEntry) {
+                selectedFiles[i] = ((ProductEntry)entry).getFile();
+            }
         }
+        return selectedFiles;
     }
 
     private JPopupMenu createPopup() {
@@ -245,32 +184,14 @@ public class ProductLibraryUI {
         }
     }
 
-    private static void batchProcess(final Vector<File> fileList, final File graphFile) {
-        if(!fileList.isEmpty()) {
-            final File[] productFiles = new File[fileList.size()];
-            fileList.toArray(productFiles);
-
-            final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
-                        "Batch Processing", "batchProcessing");
-            batchDlg.setInputFiles(productFiles);
-            if(graphFile != null) {
-                batchDlg.LoadGraphFile(graphFile);
-            }
-            batchDlg.show();
+    private static void batchProcess(final File[] fileList, final File graphFile) {
+        final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
+                "Batch Processing", "batchProcessing");
+        batchDlg.setInputFiles(fileList);
+        if(graphFile != null) {
+            batchDlg.LoadGraphFile(graphFile);
         }
-    }
-
-    private int[] getSelectedRows() {
-        final int[] selectedRows = productEntryTable.getSelectedRows();
-        final int[] sortedRows = new int[selectedRows.length];
-        if (sortedModel != null) {
-            for (int i = 0; i < selectedRows.length; i++) {
-                sortedRows[i] = sortedModel.getSortedIndex(selectedRows[i]);
-            }
-            return sortedRows;
-        } else {
-            return selectedRows;
-        }
+        batchDlg.show();
     }
 
     private void addRepository() {
@@ -289,12 +210,18 @@ public class ProductLibraryUI {
         }
 
         libConfig.addBaseDir(baseDir);
-        repositoryListCombo.insertItemAt(baseDir, repositoryListCombo.getItemCount());
+        final int index = repositoryListCombo.getItemCount();
+        repositoryListCombo.insertItemAt(baseDir, index);
+        repositoryListCombo.setSelectedIndex(index);
         setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
-        
-        final SwingWorker repositoryCollector = new RepositoryCollector(baseDir, doRecursive,
-                                                                        new ProgressBarProgressMonitor(progressBar,
-                                                                                                       statusLabel));
+
+        updateRepostitory(baseDir, doRecursive);
+    }
+
+    private void updateRepostitory(final File baseDir, final boolean doRecursive) {
+        if(baseDir == null) return;
+        progMon = new ProgressBarProgressMonitor(progressBar, statusLabel);
+        final SwingWorker repositoryCollector = new RepositoryCollector(baseDir, doRecursive, progMon);
         repositoryCollector.execute();
     }
 
@@ -396,9 +323,8 @@ public class ProductLibraryUI {
         setComponentName(addToProjectButton, "addToProject");
         addToProjectButton.setText("Import to Project");
         addToProjectButton.addActionListener(new ActionListener() {
-
             public void actionPerformed(final ActionEvent e) {
-                performAddToProjectAction();
+                Project.instance().ImportFileList(getSelectedFiles());
             }
         });
 
@@ -406,9 +332,8 @@ public class ProductLibraryUI {
         setComponentName(openAllSelectedButton, "openAllSelectedButton");
         openAllSelectedButton.setText("Open Selected");
         openAllSelectedButton.addActionListener(new ActionListener() {
-
             public void actionPerformed(final ActionEvent e) {
-                performOpenAllSelectedAction();
+                performOpenAction();
             }
         });
 
@@ -417,9 +342,8 @@ public class ProductLibraryUI {
         batchProcessButton.setText("Batch Process");
         batchProcessButton.setComponentPopupMenu(createPopup());
         batchProcessButton.addActionListener(new ActionListener() {
-
             public void actionPerformed(final ActionEvent e) {
-                performBatchProcessSelectedAction();
+                batchProcess(getSelectedFiles(), null);
             }
         });
 
@@ -529,15 +453,13 @@ public class ProductLibraryUI {
         updateButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-              /*  if (e.getActionCommand().equals("stop")) {
+                if (e.getActionCommand().equals("stop")) {
                     updateButton.setEnabled(false);
                     mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    repositoryManager.stopUpdateRepository();
+                    progMon.setCanceled(true);
                 } else {
-                    repositoryManager.startUpdateRepository((Repository) repositoryListCombo.getSelectedItem(),
-                                                            new ProgressBarProgressMonitor(progressBar, statusLabel),
-                                                            uiCallBack);
-                }     */
+                    updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
+                }
             }
         });
         headerBar.add(updateButton, gbc);
@@ -578,12 +500,20 @@ public class ProductLibraryUI {
         return button;
     }
 
+    private void updateStatusLabel() {
+        String selectedText = "";
+        final int selecteRows = productEntryTable.getSelectedRowCount();
+        if(selecteRows > 0)
+            selectedText = ", "+selecteRows+" Selected";
+        statusLabel.setText(productEntryTable.getRowCount() + " Products"+ selectedText);
+    }
+
     public void ShowRepository(final ProductEntry[] productEntryList) {
         final ProductEntryTableModel tableModel = new ProductEntryTableModel(productEntryList);
         sortedModel = new SortingDecorator(tableModel, productEntryTable.getTableHeader());
         productEntryTable.setModel(sortedModel);
         productEntryTable.setColumnModel(tableModel.getColumnModel());
-
+        updateStatusLabel();
         worldMapUI.setProductEntryList(productEntryList);
     }
 
@@ -840,10 +770,14 @@ public class ProductLibraryUI {
                 fileList.addAll(Arrays.asList(file.listFiles()));
             }
 
-            pm.beginTask("Scanning Files...", fileList.size());
+            final int total = fileList.size();
+            pm.beginTask("Scanning Files...", total);
+            int i=1;
             try {
                 for(File file : fileList) {
                     if(!file.isDirectory()) {
+                        if(pm.isCanceled())
+                            break;
                         if(TestUtils.isNotProduct(file))
                             continue;
 
@@ -866,7 +800,9 @@ public class ProductLibraryUI {
                             }
                         }
                     }
+                    pm.setTaskName("Scanning Files... "+i+" of "+total);
                     pm.worked(1);
+                    ++i;
                 }
             } finally {
                 pm.done();

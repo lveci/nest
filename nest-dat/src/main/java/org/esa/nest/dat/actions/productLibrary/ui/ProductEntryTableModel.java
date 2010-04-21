@@ -21,9 +21,7 @@ public class ProductEntryTableModel extends AbstractTableModel {
 
     public ProductEntryTableModel(final ProductEntry[] productList) {
         this.productEntryList = productList;
-        //dataProviders.add(new SelectionProvider());
         dataProviders.add(new IDProvider());
-        //dataProviders.add(new FileNameProvider());
         dataProviders.add(new PropertiesProvider());
         try {
             dataProviders.add(new QuicklookProvider());
