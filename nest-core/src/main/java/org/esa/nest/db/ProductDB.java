@@ -18,6 +18,8 @@ public class ProductDB extends DAO {
 
     private static ProductDB _instance = null;
 
+    public static final String DEFAULT_PRODUCT_DATABASE_NAME = "productDB";
+
     public static ProductDB instance() throws IOException {
         if(_instance == null)
             _instance = new ProductDB();
@@ -29,7 +31,7 @@ public class ProductDB extends DAO {
     }
 
     private ProductDB() throws IOException {
-        super("productDB");
+        super(DEFAULT_PRODUCT_DATABASE_NAME);
     }
 
     @Override
@@ -68,6 +70,7 @@ public class ProductDB extends DAO {
             // update
         } else {
             addRecord(newEntry);
+            newEntry.createQuickLook(product);
         }
         newEntry.dispose();
     }

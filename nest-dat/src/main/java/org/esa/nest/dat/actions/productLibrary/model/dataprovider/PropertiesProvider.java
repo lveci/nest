@@ -1,7 +1,6 @@
 package org.esa.nest.dat.actions.productLibrary.model.dataprovider;
 
 import org.esa.beam.framework.datamodel.ProductData.UTC;
-import org.esa.beam.util.PropertyMap;
 import org.esa.nest.db.ProductEntry;
 
 import javax.swing.*;
@@ -11,7 +10,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Comparator;
 
 /**
@@ -22,7 +20,6 @@ public class PropertiesProvider implements DataProvider {
 
     private final String[] propertyLables = new String[]{
             "Name:",
-            "Path:",
             "Type:",
             "Pass:",
             "File Size:",
@@ -37,17 +34,6 @@ public class PropertiesProvider implements DataProvider {
     private final Comparator productPropertiesComparator = new ProductPropertiesComparator();
 
     private TableColumn propertiesColumn;
-
-    public boolean mustCreateData(final ProductEntry entry) {
-        return false;
-    }
-
-    public void createData(final ProductEntry entry) throws IOException {
-    }
-
-    public Object getData(final ProductEntry entry) throws IOException {
-        return null;
-    }
 
     public Comparator getComparator() {
         return productPropertiesComparator;
@@ -107,6 +93,7 @@ public class PropertiesProvider implements DataProvider {
                                                        final boolean hasFocus,
                                                        final int row, final int column) {
             String[] values = null;
+            String toolTip = "";
             if (value instanceof ProductEntry) {
                 final ProductEntry entry = (ProductEntry) value;
 
@@ -116,7 +103,6 @@ public class PropertiesProvider implements DataProvider {
 
                 values = new String[]{
                         entry.getName(),
-                        file.getParent(),
                         entry.getProductType(),
                         entry.getPass(),
                         fileSize,
@@ -126,6 +112,7 @@ public class PropertiesProvider implements DataProvider {
                 for (int i = 0; i < values.length; i++) {
                     setValueAt(values[i], i, 1);
                 }
+                toolTip = file.getAbsolutePath();
             } else if (value == null) {
                 for (int i = 0; i < propertyLables.length; i++) {
                     setValueAt(null, i, 1);
@@ -148,6 +135,7 @@ public class PropertiesProvider implements DataProvider {
             centeringPanel.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));
             centeringPanel.add(this, BorderLayout.CENTER);
 
+            centeringPanel.setToolTipText(toolTip);
             adjustCellSize(table, row, column, values);
             return centeringPanel;
         }
@@ -229,7 +217,10 @@ public class PropertiesProvider implements DataProvider {
                 return 1;
             }
 
-            return 0;
+            final ProductEntry s1 = (ProductEntry) o1;
+            final ProductEntry s2 = (ProductEntry) o2;
+
+            return s1.getName().compareTo(s2.getName());
         }
     }
 }

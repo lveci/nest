@@ -1,7 +1,10 @@
 package org.esa.nest.dat.actions.productLibrary.ui;
 
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.*;
+import org.esa.nest.dat.actions.productLibrary.model.dataprovider.DataProvider;
+import org.esa.nest.dat.actions.productLibrary.model.dataprovider.IDProvider;
+import org.esa.nest.dat.actions.productLibrary.model.dataprovider.PropertiesProvider;
+import org.esa.nest.dat.actions.productLibrary.model.dataprovider.QuicklookProvider;
 import org.esa.nest.db.ProductEntry;
 
 import javax.swing.table.AbstractTableModel;
@@ -18,12 +21,12 @@ public class ProductEntryTableModel extends AbstractTableModel {
 
     public ProductEntryTableModel(final ProductEntry[] productList) {
         this.productEntryList = productList;
-        dataProviders.add(new SelectionProvider());
+        //dataProviders.add(new SelectionProvider());
         dataProviders.add(new IDProvider());
         //dataProviders.add(new FileNameProvider());
         dataProviders.add(new PropertiesProvider());
         try {
-            dataProviders.add(new QuicklookProvider(500));
+            dataProviders.add(new QuicklookProvider());
         } catch(Exception e) {
             e.printStackTrace();
             if(VisatApp.getApp() != null) {
@@ -35,6 +38,13 @@ public class ProductEntryTableModel extends AbstractTableModel {
             tableColumn.setModelIndex(getColumnCount());
             columnList.add(tableColumn);
         }
+    }
+
+    public DataProvider getDataProvider(final int columnIndex) {
+        if(columnIndex >= 0 && columnIndex < dataProviders.size()) {
+            return dataProviders.get(columnIndex);
+        }
+        return null;
     }
 
     public TableColumnModel getColumnModel() {

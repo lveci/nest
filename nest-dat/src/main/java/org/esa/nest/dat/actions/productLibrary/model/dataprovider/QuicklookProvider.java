@@ -1,164 +1,24 @@
 
 package org.esa.nest.dat.actions.productLibrary.model.dataprovider;
 
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.util.ProductUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.db.ProductDB;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.util.ResourceUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.SubsampleAverageDescriptor;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.image.*;
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Comparator;
 
 public class QuicklookProvider implements DataProvider {
 
     private final static Comparator quickLookComparator = new QuickLookComparator();
-    private final int maxWidth;
     private TableColumn quickLookColumn;
-    private final File dbSystemFolder;
+    private static final int preferredWidth = 100;
 
-    private static final String QUICKLOOK_PREFIX = "QL_";
-    private static final String QUICKLOOK_EXT = ".jpg";
-
-    public QuicklookProvider(final int maxWidth) throws IOException {
-        this.maxWidth = maxWidth;
-        this.dbSystemFolder = ProductDB.instance().getDBSystemDir();
-    }
-
-    public boolean mustCreateData(final ProductEntry entry) {
-        final File quickLookFile = getQuickLookFile(dbSystemFolder, entry.getId());
-        return !quickLookFile.exists() || quickLookFile.length() == 0;
-    }
-
-    public void createData(final ProductEntry entry) throws IOException {
-      /*  try {
-            final Product product = entry.getProduct();
-            final File storageDir = repository.getStorageDir();
-            final File quickLookFile = getQuickLookFile(storageDir, entry.getProductFile().getName());
-            quickLookFile.createNewFile();
-            final BufferedImage bufferedImage = createQuickLook(product);
-
-            if(isComplex(product)) {
-                ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
-            } else {   // detected
-                ImageIO.write(bufferedImage, "JPG", quickLookFile);
-            }
-            //ImageIO.write(downSampleImage(bufferedImage), "JPG", quickLookFile);
-        } catch(Exception e) {
-            System.out.println("Quicklook create data failed :"+e.getMessage());
-            throw new IOException(e);
-        }     */
-    }
-
-    private static boolean isComplex(Product product) {
-        final MetadataElement root = product.getMetadataRoot();
-        if(root != null) {
-            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-            if(absRoot != null && absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").equals("COMPLEX"))
-                return true;
-        }
-        return false;
-    }
-
-    static BufferedImage averageWithJAI(BufferedImage image) {
-        final int width = 8;
-        final int height = 8;
-        final RenderedOp rendered = JAI.create("boxfilter", image,
-                                 width, height,
-                                 width/2, height/2);
-
-        return rendered.getAsBufferedImage();
-    }
-
-    static RenderedImage downSampleImage(RenderedImage image) {
-
-        final int size = 4;
-        final double scaleX = 1.0 / size;
-        final double scaleY = 1.0 / size;
-        return SubsampleAverageDescriptor.create(image, scaleX, scaleY, null);
-    }
-
-    private static BufferedImage average(BufferedImage image) {
-
-        final int rangeFactor = 4;
-        final int azimuthFactor = 4;
-        final int rangeAzimuth = rangeFactor * azimuthFactor;
-        final Raster raster = image.getData();
-
-        final int w = image.getWidth() / rangeFactor;
-        final int h = image.getHeight() / azimuthFactor;
-        int index = 0;
-        final byte[] data = new byte[w*h];
-
-        for (int ty = 0; ty < h; ++ty) {
-            final int yStart = ty * azimuthFactor;
-            final int yEnd = yStart + azimuthFactor;
-
-            for (int tx = 0; tx < w; ++tx) {
-                final int xStart = tx * rangeFactor;
-                final int xEnd = xStart + rangeFactor;
-
-                double meanValue = 0.0;
-                for (int y = yStart; y < yEnd; ++y) {
-                    for (int x = xStart; x < xEnd; ++x) {
-
-                        meanValue += raster.getSample(x, y, 0);
-                    }
-                }
-                meanValue /= rangeAzimuth;
-
-                data[index++] = (byte)meanValue;
-            }
-        }
-
-        return createRenderedImage(data, w, h, raster);
-    }
-    
-    private static BufferedImage createRenderedImage(byte[] array, int w, int h, Raster raster) {
-
-        // create rendered image with demension being width by height
-        final SampleModel sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_BYTE, w, h, 1);
-        final ColorModel cm = PlanarImage.createColorModel(sm);
-        final DataBufferByte dataBuffer = new DataBufferByte(array, array.length);
-        final WritableRaster writeraster = RasterFactory.createWritableRaster(sm, dataBuffer, new Point(0,0));
-
-        return new BufferedImage(cm, writeraster, cm.isAlphaPremultiplied(), null);
-    }
-
-    public Object getData(final ProductEntry entry) throws IOException {
-     /*   final File storageDir = repository.getStorageDir();
-        final File quickLookFile = getQuickLookFile(storageDir, entry.getProductFile().getName());
-        BufferedImage bufferedImage = null;
-        if (quickLookFile.canRead()) {
-            final FileInputStream fis = new FileInputStream(quickLookFile);
-            try {
-                bufferedImage = ImageIO.read(fis);
-            } finally {
-                fis.close();
-            }
-        }
-        final DataObject data = new DataObject();
-        data.quickLook = bufferedImage;
-        return data;        */
-        return null;
+    public QuicklookProvider() throws IOException {
     }
 
     /**
@@ -178,48 +38,16 @@ public class QuicklookProvider implements DataProvider {
         }   */
     }
 
-    private BufferedImage createQuickLook(final Product product) throws IOException {
-        final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-        int scaleFactor = Math.max(product.getSceneRasterWidth(), product.getSceneRasterHeight()) / maxWidth;
-        if (scaleFactor < 1) {
-            scaleFactor = 1;
-        }
-        productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
-
-        final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
-        final String expression = quicklookBandName + "==0 ? 0 : 10 * log10(abs("+quicklookBandName+"))";
-        final VirtualBand virtBand = new VirtualBand("QuickLook",
-                ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
-                expression);
-        virtBand.setSynthetic(true);
-        product.addBand(virtBand);
-        
-        final Product productSubset = product.createSubset(productSubsetDef, null, null);
-
-        return ProductUtils.createColorIndexedImage(productSubset.getBand(virtBand.getName()), ProgressMonitor.NULL);
-    }
-
     public TableColumn getTableColumn() {
         if (quickLookColumn == null) {
             quickLookColumn = new TableColumn();
             quickLookColumn.setHeaderValue("Quick Look");        /*I18N*/
-            quickLookColumn.setPreferredWidth(200);
+            quickLookColumn.setPreferredWidth(preferredWidth);
             quickLookColumn.setResizable(true);
-            quickLookColumn.setCellRenderer(new QuickLookRenderer(200));
+            quickLookColumn.setCellRenderer(new QuickLookRenderer(preferredWidth));
             quickLookColumn.setCellEditor(new QuickLookEditor());
         }
         return quickLookColumn;
-    }
-
-    private static File getQuickLookFile(final File storageDir, final int id) {
-        return new File(storageDir, QUICKLOOK_PREFIX + id + QUICKLOOK_EXT);
-    }
-
-    private static class DataObject {
-
-        public BufferedImage quickLook = null;
     }
 
     private static class QuickLookRenderer extends DefaultTableCellRenderer {
@@ -248,7 +76,6 @@ public class QuicklookProvider implements DataProvider {
                 tableComponent.setText("");
                 tableComponent.setVerticalAlignment(SwingConstants.CENTER);
                 tableComponent.setHorizontalAlignment(SwingConstants.CENTER);
-
             }
 
             setBackground(table, isSelected);
@@ -258,26 +85,25 @@ public class QuicklookProvider implements DataProvider {
                 tableComponent.setText("");
                 return tableComponent;
             }
-            final DataObject data;
-            if (value instanceof DataObject) {
-                data = (DataObject) value;
-            } else {
-                data = new DataObject();
-            }
 
-            if (data.quickLook != null) {
-                final BufferedImage image = data.quickLook;
-                final TableColumn tableColumn = table.getColumnModel().getColumn(column);
-                int cellWidth = tableColumn.getWidth();
-                int cellHeight = tableColumn.getWidth();
-                if(image.getHeight() > image.getWidth())
-                    cellWidth = -1;
-                else
-                    cellHeight = -1;
-                tableComponent.setIcon(
-                        new ImageIcon(image.getScaledInstance(cellWidth, cellHeight, BufferedImage.SCALE_FAST)));
-                tableComponent.setText("");
-                setTableRowHeight(table, row);
+            if (value instanceof ProductEntry) {
+                final BufferedImage image = ((ProductEntry)value).getQuickLook();
+                if(image == null) {
+                    tableComponent.setIcon(null);
+                    tableComponent.setText("Not available!");
+                } else {
+                    final TableColumn tableColumn = table.getColumnModel().getColumn(column);
+                    int cellWidth = tableColumn.getWidth();
+                    int cellHeight = tableColumn.getWidth();
+                    if(image.getHeight() > image.getWidth())
+                        cellWidth = -1;
+                    else
+                        cellHeight = -1;
+                    tableComponent.setIcon(
+                            new ImageIcon(image.getScaledInstance(cellWidth, cellHeight, BufferedImage.SCALE_FAST)));
+                    tableComponent.setText("");
+                    setTableRowHeight(table, row);
+                }
             } else {
                 tableComponent.setIcon(null);
                 tableComponent.setText("Not available!");
@@ -318,10 +144,10 @@ public class QuicklookProvider implements DataProvider {
                                                      final boolean isSelected,
                                                      final int row,
                                                      final int column) {
-            if (!(value instanceof DataObject)) {
+            if (!(value instanceof ProductEntry)) {
                 return null;
             }
-            final BufferedImage image = ((DataObject) value).quickLook;
+            final BufferedImage image = ((ProductEntry) value).getQuickLook();
             if (image == null) {
                 return null;
             }
@@ -352,8 +178,8 @@ public class QuicklookProvider implements DataProvider {
                 return 1;
             }
 
-            final BufferedImage image1 = ((DataObject) o1).quickLook;
-            final BufferedImage image2 = ((DataObject) o2).quickLook;
+            final BufferedImage image1 = ((ProductEntry) o1).getQuickLook();
+            final BufferedImage image2 = ((ProductEntry) o2).getQuickLook();
 
             if (image1 == null) {
                 return -1;

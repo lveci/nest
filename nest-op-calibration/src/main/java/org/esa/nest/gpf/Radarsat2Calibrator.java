@@ -59,7 +59,6 @@ public class Radarsat2Calibrator implements Calibrator {
     /**
      * Set flag indicating if target image is output in dB scale.
      */
-    @Override
     public void setOutputImageIndB(boolean flag) {
         outputImageScaleInDb = flag;
     }
@@ -67,7 +66,6 @@ public class Radarsat2Calibrator implements Calibrator {
     /**
      * Set external auxiliary file.
      */
-    @Override
     public void setExternalAuxFile(File file) throws OperatorException {
         if (file != null) {
             throw new OperatorException("No external auxiliary file should be selected for Radarsat2 product");
@@ -77,7 +75,6 @@ public class Radarsat2Calibrator implements Calibrator {
     /**
 
      */
-    @Override
     public void initialize(Product srcProduct, Product tgtProduct,
                            boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
             throws OperatorException {
@@ -164,7 +161,6 @@ public class Radarsat2Calibrator implements Calibrator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
-    @Override
     public void computeTile(Band targetBand, Tile targetTile,
                             HashMap<String, String[]> targetBandNameToSourceBandName,
                             ProgressMonitor pm) throws OperatorException {

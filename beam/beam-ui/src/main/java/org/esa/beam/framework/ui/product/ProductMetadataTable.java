@@ -1,5 +1,5 @@
 /*
- * $Id: ProductMetadataTable.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
+ * $Id: ProductMetadataTable.java,v 1.4 2010-04-21 18:13:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,26 +32,29 @@ import java.util.List;
 
 public class ProductMetadataTable extends TreeTable {
 
-    public static final int NAME_COL_INDEX = 0;
-    public static final int VALUE_COL_INDEX = 1;
-    public static final int TYPE_COL_INDEX = 2;
-    public static final int UNIT_COL_INDEX = 3;
-    public static final int DESCR_COL_INDEX = 4;
+    public static final int ID_COL_INDEX = 0;
+    public static final int NAME_COL_INDEX = 1;
+    public static final int VALUE_COL_INDEX = 2;
+    public static final int TYPE_COL_INDEX = 3;
+    public static final int UNIT_COL_INDEX = 4;
+    public static final int DESCR_COL_INDEX = 5;
 
     private static final String[] COLUMN_NAMES = {
-            "Name", // 0
-            "Value", // 1
-            "Type", // 2
-            "Unit", // 3
-            "Description" // 4
+            "#",   // 0
+            "Name", // 1
+            "Value",// 2
+            "Type", // 3
+            "Unit", // 4
+            "Description" // 5
     };
 
     private static final int[] COLUMN_WIDTHS = {
-            130, // 0
-            280, // 1
-            30, // 2
-            30, // 3
-            180 // 4
+            50, // 0
+            130,// 1
+            280,// 2
+            50, // 3
+            50, // 4
+            180 // 5
     };
 
     private static final int _DEFAULT_FONT_SIZE = 11;
@@ -69,6 +72,8 @@ public class ProductMetadataTable extends TreeTable {
         initFonts();
         setModel(new MDTableModel(rootElement));
         getTableHeader().setReorderingAllowed(false);
+        this.setShowGrid(true);
+        this.setShowHorizontalLines(true);
 
         //ElementRefCellRenderer renderer = new ElementRefCellRenderer();
         //renderer.setBorder(new EmptyBorder(2, 3, 2, 3));
@@ -76,6 +81,10 @@ public class ProductMetadataTable extends TreeTable {
         for (int i = 0; i < COLUMN_WIDTHS.length; i++) {
             TableColumn column = getColumnModel().getColumn(i);
             column.setPreferredWidth(COLUMN_WIDTHS[i]);
+            if(i==ID_COL_INDEX || i==TYPE_COL_INDEX || i==UNIT_COL_INDEX) {
+                column.setMaxWidth(COLUMN_WIDTHS[i]);
+                column.setMinWidth(COLUMN_WIDTHS[i]);
+            }
         }
     }
 
@@ -159,10 +168,10 @@ public class ProductMetadataTable extends TreeTable {
             for (int i = 0; i < rootElement.getNumAttributes(); i++) {
                 MetadataAttribute attribute = rootElement.getAttributeAt(i);
                 if (!isNumericAttribute(attribute) || attribute.getData().isScalar()) {
-                    rowList.add(new MDAttributeRow(attribute, -1));
+                    rowList.add(new MDAttributeRow(attribute, -1, i));
                 } else {
                     for (int j = 0; j < attribute.getNumDataElems(); j++) {
-                        rowList.add(new MDAttributeRow(attribute, j));
+                        rowList.add(new MDAttributeRow(attribute, j, i));
                     }
                 }
             }
@@ -231,12 +240,14 @@ public class ProductMetadataTable extends TreeTable {
     }
 
     static class MDAttributeRow extends AbstractRow {
-        MetadataAttribute attribute;
-        int index;
+        final MetadataAttribute attribute;
+        final int index;
+        final int id;
 
-        MDAttributeRow(MetadataAttribute attribute, int index) {
+        MDAttributeRow(MetadataAttribute attribute, int index, int id) {
             this.attribute = attribute;
             this.index = index;
+            this.id = id;
         }
 
         public int getIndex() {
@@ -271,7 +282,9 @@ public class ProductMetadataTable extends TreeTable {
         }
 
         public Object getValueAt(int column) {
-            if (column == NAME_COL_INDEX) {
+            if(column == ID_COL_INDEX) {
+                return id;   
+            } else if (column == NAME_COL_INDEX) {
                 if (index == -1) {
                     return attribute.getName();
                 } else {

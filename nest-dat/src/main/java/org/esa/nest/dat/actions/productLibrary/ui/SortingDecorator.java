@@ -1,13 +1,15 @@
 package org.esa.nest.dat.actions.productLibrary.ui;
 
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
-import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
+import org.esa.nest.dat.actions.productLibrary.model.dataprovider.DataProvider;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,14 +24,14 @@ class SortingDecorator extends AbstractTableModel {
 
     private static final Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
 
-    private final TableModel _tableModel;
+    private final ProductEntryTableModel _tableModel;
     private final JTableHeader _tableHeader;
 
     private final List<Directive> sortingColumns = new ArrayList<Directive>();
     private final Map columnComparators = new HashMap();
     private Row[] viewToModel = null;
 
-    public SortingDecorator(final TableModel tableModel, final JTableHeader tableHeader) {
+    public SortingDecorator(final ProductEntryTableModel tableModel, final JTableHeader tableHeader) {
         Guardian.assertNotNull("tableModel", tableModel);
         Guardian.assertNotNull("tableHeader", tableHeader);
 
@@ -323,7 +325,7 @@ class SortingDecorator extends AbstractTableModel {
     };
 
     private Comparator getComparator(final int column) {
-        final DataProvider dataProvider = ImportBrowserAction.getInstance().getRepositoryManager().getDataProvider(column);
+        final DataProvider dataProvider = _tableModel.getDataProvider(column);
 
         final Class columnType = _tableModel.getColumnClass(column);
         Comparator comparator = dataProvider.getComparator();

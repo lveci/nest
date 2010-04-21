@@ -6,24 +6,12 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.io.IOException;
 import java.util.Comparator;
 
 public class IDProvider implements DataProvider {
 
     private final Comparator comparator = new IntComparator();
     private TableColumn column;
-
-    public boolean mustCreateData(final ProductEntry entry) {
-        return false;
-    }
-
-    public void createData(final ProductEntry entry) throws IOException {
-    }
-
-    public Object getData(final ProductEntry entry) throws IOException {
-        return entry.getId();
-    }
 
     public Comparator getComparator() {
         return comparator;
@@ -78,10 +66,10 @@ public class IDProvider implements DataProvider {
                 return 1;
             }
 
-            final int s1 = (Integer) o1;
-            final int s2 = (Integer) o2;
+            final ProductEntry s1 = (ProductEntry) o1;
+            final ProductEntry s2 = (ProductEntry) o2;
 
-            if(s1 < s2)
+            if(s1.getId() < s2.getId())
                 return -1;
             return 1;
         }

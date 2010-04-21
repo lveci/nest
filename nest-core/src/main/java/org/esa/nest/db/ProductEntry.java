@@ -6,6 +6,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.awt.image.BufferedImage;
 
 /**
 
@@ -21,6 +22,7 @@ public class ProductEntry {
     private String pass;
     private double range_spacing;
     private double azimuth_spacing;
+    private int sampleType;
     
     private MetadataElement absRoot;
     private boolean isSelected = false;
@@ -30,6 +32,8 @@ public class ProductEntry {
     private final GeoPos firstFar = new GeoPos();
     private final GeoPos lastNear = new GeoPos();
     private final GeoPos lastFar = new GeoPos();
+
+    private BufferedImage quickLookImage = null;
 
     public ProductEntry(final int id, final File file) {
         this.id = id;
@@ -159,6 +163,23 @@ public class ProductEntry {
 
     public boolean isSelected() {
         return isSelected;
+    }
+
+    public BufferedImage getQuickLook() {
+        if(quickLookImage == null) {
+            quickLookImage = QuickLookGenerator.loadQuickLook(this);
+        }
+        return quickLookImage;
+    }
+
+    public void setQuickLook(final BufferedImage img) {
+        quickLookImage = img;
+    }
+
+    public void createQuickLook(final Product product) {
+        if(quickLookImage == null) {
+            QuickLookGenerator.createQuickLook(this, product);
+        }
     }
 
     public boolean equals(Object other) {
