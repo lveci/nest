@@ -100,6 +100,8 @@ public class ASARCalibrator implements Calibrator {
     private static final double underFlowFloat = 1.0e-30;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
+    private String incidenceAngleSelection = null;
+
     public ASARCalibrator() {
     }
 
@@ -119,6 +121,10 @@ public class ASARCalibrator implements Calibrator {
         externalAuxFile = file;
     }
 
+    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
+        incidenceAngleSelection = incidenceAngleForSigma0;
+    }
+    
     /**
      *
      * @param srcProduct The source product.

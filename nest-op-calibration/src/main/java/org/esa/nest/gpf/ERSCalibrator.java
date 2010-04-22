@@ -156,6 +156,8 @@ public final class ERSCalibrator implements Calibrator {
     private static final String ESRIN = "ES";
     private static final String VMP = "VMP";
 
+    private String incidenceAngleSelection = null;
+
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
@@ -179,6 +181,10 @@ public final class ERSCalibrator implements Calibrator {
         if (file != null) {
             throw new OperatorException("No external auxiliary file should be selected for ERS product");
         }
+    }
+
+    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
+        incidenceAngleSelection = incidenceAngleForSigma0;
     }
     
     /**

@@ -36,6 +36,8 @@ public interface Calibrator {
 
     public void setOutputImageIndB(boolean flag);
 
+    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0);
+
     public void setExternalAuxFile(File file);
 
     public double applyRetroCalibration(int x, int y, double v, String bandPolar,
