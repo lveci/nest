@@ -4,23 +4,58 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.dat.toolviews.worldmap.NestWorldMapPane;
+
+import javax.swing.event.MouseInputAdapter;
+
+import java.awt.event.MouseEvent;
+import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Apr 13, 2010
- * Time: 1:48:38 PM
- * To change this template use File | Settings | File Templates.
+
  */
 public class WorldMapUI {
 
     private final WorldMapPaneDataModel worldMapDataModel;
-    private final WorldMapPane worlMapPane;
+    private final NestWorldMapPane worlMapPane;
+
+    private final ArrayList<DatabaseQueryListener> listenerList = new ArrayList<DatabaseQueryListener>(1);
 
     public WorldMapUI() {
 
         worldMapDataModel = new WorldMapPaneDataModel();
-        worlMapPane = new WorldMapPane(worldMapDataModel);
+        worlMapPane = new NestWorldMapPane(worldMapDataModel);
+        worlMapPane.getLayerCanvas().addMouseListener(new MouseHandler());
+    }
+
+    /**
+     * Adds a <code>DatabasePaneListener</code>.
+     *
+     * @param listener the <code>DatabasePaneListener</code> to be added.
+     */
+    public void addListener(final DatabaseQueryListener listener) {
+        if (!listenerList.contains(listener)) {
+            listenerList.add(listener);
+        }
+    }
+
+    public GeoPos[] getSelectionBox() {
+        return worldMapDataModel.getSelectionBox();
+    }
+
+    /**
+     * Removes a <code>DatabasePaneListener</code>.
+     *
+     * @param listener the <code>DatabasePaneListener</code> to be removed.
+     */
+    public void removeListener(final DatabaseQueryListener listener) {
+        listenerList.remove(listener);
+    }
+
+    private void notifyQuery() {
+        for (final DatabaseQueryListener listener : listenerList) {
+            listener.notifyNewMapSelectionAvailable();
+        }
     }
 
     public WorldMapPane getWorlMapPane() {
@@ -41,5 +76,15 @@ public class WorldMapUI {
         }
 
         worldMapDataModel.setAdditionalGeoBoundaries(geoBoundaries);
+    }
+
+    private class MouseHandler extends MouseInputAdapter {
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(e.getButton() == MouseEvent.BUTTON1) {
+                notifyQuery();
+            }
+        }
     }
 }

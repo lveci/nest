@@ -3,7 +3,9 @@ package org.esa.nest.dat.actions.productLibrary.ui;
 /**
 
  */
-public interface DatabasePaneListener {
+public interface DatabaseQueryListener {
 
     void notifyNewProductEntryListAvailable();
+
+    void notifyNewMapSelectionAvailable();
 }

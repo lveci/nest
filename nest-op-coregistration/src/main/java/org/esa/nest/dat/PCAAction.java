@@ -7,7 +7,7 @@ public class PCAAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        PCADialog dialog = new PCADialog(getAppContext(), "Principle Component Analysis", "PCAOp");
+        PCADialog dialog = new PCADialog(getAppContext(), "Principal Component Analysis", "PCAOp");
         dialog.setTargetProductNameSuffix("_PCA");
         dialog.show();
     }

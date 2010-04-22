@@ -2,6 +2,7 @@ package org.esa.nest.dat.actions.productLibrary.ui;
 
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductDB;
 import org.esa.nest.db.ProductEntry;
@@ -35,9 +36,10 @@ public class DatabasePane extends JPanel {
 
     private ProductDB db;
     private ProductEntry[] productEntryList = null;
+    private Rectangle.Float selectionRectangle = null;
     boolean modifyingCombos = false;
 
-    private final List<DatabasePaneListener> listenerList = new ArrayList<DatabasePaneListener>(1);
+    private final List<DatabaseQueryListener> listenerList = new ArrayList<DatabaseQueryListener>(1);
 
     public DatabasePane() {
         try {
@@ -89,7 +91,7 @@ public class DatabasePane extends JPanel {
      *
      * @param listener the <code>DatabasePaneListener</code> to be added.
      */
-    public void addListener(final DatabasePaneListener listener) {
+    public void addListener(final DatabaseQueryListener listener) {
         if (!listenerList.contains(listener)) {
             listenerList.add(listener);
         }
@@ -100,8 +102,14 @@ public class DatabasePane extends JPanel {
      *
      * @param listener the <code>DatabasePaneListener</code> to be removed.
      */
-    public void removeListener(final DatabasePaneListener listener) {
+    public void removeListener(final DatabaseQueryListener listener) {
         listenerList.remove(listener);
+    }
+
+    private void notifyQuery() {
+        for (final DatabaseQueryListener listener : listenerList) {
+            listener.notifyNewProductEntryListAvailable();
+        }
     }
 
     private static void handleException(Throwable t) {
@@ -191,6 +199,15 @@ public class DatabasePane extends JPanel {
         return strArray;
     }
 
+    public void setSelectionRect(final Rectangle.Float selRect) {
+        try {
+            selectionRectangle = selRect;
+            queryDatabase();
+        } catch(Throwable t) {
+            handleException(t);
+        }
+    }
+
     private void queryDatabase() throws SQLException {
         String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
         String selectedProductTypes[] = toStringArray(productTypeJList.getSelectedValues());
@@ -222,14 +239,30 @@ public class DatabasePane extends JPanel {
         }
 
         if(queryStr.isEmpty()) {
-            productEntryList = db.getProductEntryList();     
+            productEntryList = instersectMapSelection(db.getProductEntryList());
         } else {
-            productEntryList = db.queryProduct(queryStr);
+            productEntryList = instersectMapSelection(db.queryProduct(queryStr));
         }
 
-        for (final DatabasePaneListener listener : listenerList) {
-            listener.notifyNewProductEntryListAvailable();
+        notifyQuery();
+    }
+
+    private ProductEntry[] instersectMapSelection(final ProductEntry[] resultsList) {
+        if(selectionRectangle != null && selectionRectangle.getWidth() != 0 && selectionRectangle.getHeight() != 0) {
+            final ArrayList<ProductEntry> intersectList = new ArrayList<ProductEntry>();
+            for(ProductEntry entry : resultsList) {
+                final GeoPos start = entry.getFirstNearGeoPos();
+                final GeoPos end = entry.getLastFarGeoPos();
+                final float w = Math.abs(end.getLon()-start.getLon());
+                final float h = Math.abs(end.getLat()-start.getLat());
+                final Rectangle.Float entryRect = new Rectangle.Float(start.getLon(), start.getLat(), w, h);
+                if(selectionRectangle.intersects(entryRect)) {
+                    intersectList.add(entry);    
+                }
+            }
+            return intersectList.toArray(new ProductEntry[intersectList.size()]);
         }
+        return resultsList;
     }
 
     public ProductEntry[] getProductEntryList() {

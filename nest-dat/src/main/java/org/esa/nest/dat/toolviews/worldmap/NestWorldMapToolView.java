@@ -28,7 +28,7 @@ public class NestWorldMapToolView extends WorldMapToolView {
         mainPane.setPreferredSize(new Dimension(320, 160));
 
         worldMapDataModel = new WorldMapPaneDataModel();
-        final WorldMapPane worldMapPane = new WorldMapPane(worldMapDataModel);
+        final NestWorldMapPane worldMapPane = new NestWorldMapPane(worldMapDataModel);
         worldMapPane.setNavControlVisible(true);
         mainPane.add(worldMapPane, BorderLayout.CENTER);
 

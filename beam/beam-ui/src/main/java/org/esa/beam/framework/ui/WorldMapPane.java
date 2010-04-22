@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.6 2009-12-08 20:08:42 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.7 2010-04-22 17:19:54 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -55,7 +55,7 @@ import java.util.List;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2009-12-08 20:08:42 $
+ * @version $Revision: 1.7 $ $Date: 2010-04-22 17:19:54 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -69,7 +69,7 @@ public class WorldMapPane extends JPanel {
         this.dataModel = dataModel;
         layerCanvas = new LayerCanvas();
         layerCanvas.getModel().getViewport().setModelYAxisDown(false);
-        installLayerCanvasNavigation(layerCanvas);
+        installLayerCanvasNavigation(layerCanvas, dataModel);
         layerCanvas.addOverlay(new BoundaryOverlay());
         final Layer rootLayer = layerCanvas.getLayer();
 
@@ -89,6 +89,10 @@ public class WorldMapPane extends JPanel {
         layerCanvas.getViewport().zoom(worldMapLayer.getModelBounds());
         setNavControlVisible(true);
 
+    }
+
+    public LayerCanvas getLayerCanvas() {
+        return layerCanvas;
     }
 
     @Override
@@ -241,8 +245,8 @@ public class WorldMapPane extends JPanel {
         return centerPos;
     }
 
-    private static void installLayerCanvasNavigation(LayerCanvas layerCanvas) {
-        final MouseHandler mouseHandler = new MouseHandler(layerCanvas);
+    private static void installLayerCanvasNavigation(final LayerCanvas layerCanvas, final WorldMapPaneDataModel dataModel) {
+        MouseHandler mouseHandler = new MouseHandler(layerCanvas, dataModel);
         layerCanvas.addMouseListener(mouseHandler);
         layerCanvas.addMouseMotionListener(mouseHandler);
         layerCanvas.addMouseWheelListener(mouseHandler);
@@ -348,25 +352,53 @@ public class WorldMapPane extends JPanel {
 
     public static class MouseHandler extends MouseInputAdapter {
 
-        private LayerCanvas layerCanvas;
+        private final LayerCanvas layerCanvas;
+        private final WorldMapPaneDataModel dataModel;
         private Point p0;
+        private Point.Float selectionStart = new Point.Float();
+        private Point.Float selectionEnd = new Point.Float();
+        private boolean leftButtonDown = false;
 
-        private MouseHandler(LayerCanvas layerCanvas) {
+        private MouseHandler(final LayerCanvas layerCanvas, final WorldMapPaneDataModel dataModel) {
             this.layerCanvas = layerCanvas;
+            this.dataModel = dataModel;
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
-            p0 = e.getPoint();
+            if(e.getButton() == MouseEvent.BUTTON1) {
+                leftButtonDown = true;
+                final AffineTransform viewToModelTransform = layerCanvas.getViewport().getViewToModelTransform();
+                viewToModelTransform.transform(e.getPoint(), selectionStart);
+                dataModel.setSelectionBoxStart(selectionStart.y, selectionStart.x);
+                dataModel.setSelectionBoxEnd(selectionStart.y, selectionStart.x);
+                layerCanvas.updateUI();
+            } else {
+                p0 = e.getPoint();
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(e.getButton() == MouseEvent.BUTTON1) {
+                leftButtonDown = false;
+            }
         }
 
         @Override
         public void mouseDragged(MouseEvent e) {
             final Point p = e.getPoint();
-            final double dx = p.x - p0.x;
-            final double dy = p.y - p0.y;
-            layerCanvas.getViewport().moveViewDelta(dx, dy);
-            p0 = p;
+            if(leftButtonDown) {
+                final AffineTransform viewToModelTransform = layerCanvas.getViewport().getViewToModelTransform();
+                viewToModelTransform.transform(e.getPoint(), selectionEnd);
+                dataModel.setSelectionBoxEnd(selectionEnd.y, selectionEnd.x);
+                layerCanvas.updateUI();
+            } else if(p0 != null){
+                final double dx = p.x - p0.x;
+                final double dy = p.y - p0.y;
+                layerCanvas.getViewport().moveViewDelta(dx, dy);
+                p0 = p;
+            }
         }
 
         @Override
@@ -417,6 +449,8 @@ public class WorldMapPane extends JPanel {
                 drawProduct(rendering.getGraphics(), selectedProduct, true);
             }
 
+            final GeoPos[] selectionBox = dataModel.getSelectionBox();
+            drawGeoBoundary(rendering.getGraphics(), selectionBox, false, null, null);
         }
 
         private void drawProduct(final Graphics2D g2d, final Product product, final boolean isCurrent) {
@@ -455,7 +489,7 @@ public class WorldMapPane extends JPanel {
             if (isCurrent) {
                 g2d.setColor(new Color(255, 200, 200, 70));
             } else {
-                g2d.setColor(new Color(255, 255, 255, 70));
+                g2d.setColor(new Color(255, 255, 255, 20));
             }
             g2d.fill(gp);
             if (isCurrent) {

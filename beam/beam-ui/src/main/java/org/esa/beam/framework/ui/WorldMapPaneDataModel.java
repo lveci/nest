@@ -34,6 +34,9 @@ public class WorldMapPaneDataModel {
     private ArrayList<Product> productList;
     private ArrayList<GeoPos[]> additionalGeoBoundaryList;
 
+    private final GeoPos selectionBoxStart = new GeoPos();
+    private final GeoPos selectionBoxEnd = new GeoPos();
+
     public WorldMapPaneDataModel() {
         productList = new ArrayList<Product>();
         additionalGeoBoundaryList = new ArrayList<GeoPos[]>();
@@ -57,6 +60,23 @@ public class WorldMapPaneDataModel {
             selectedProduct = product;
             firePropertyChange(PROPERTY_SELECTED_PRODUCT, oldSelectedProduct, selectedProduct);
         }
+    }
+
+    public void setSelectionBoxStart(final float lat, final float lon) {
+        selectionBoxStart.setLocation(lat, lon);
+    }
+
+    public void setSelectionBoxEnd(final float lat, final float lon) {
+        selectionBoxEnd.setLocation(lat, lon);
+    }
+
+    public GeoPos[] getSelectionBox() {
+        final GeoPos[] selectionBox = new GeoPos[4];
+        selectionBox[0] = selectionBoxStart;
+        selectionBox[1] = new GeoPos(selectionBoxStart.getLat(), selectionBoxEnd.getLon());
+        selectionBox[2] = selectionBoxEnd;
+        selectionBox[3] = new GeoPos(selectionBoxEnd.getLat(), selectionBoxStart.getLon());
+        return selectionBox;
     }
 
     public Product[] getProducts() {

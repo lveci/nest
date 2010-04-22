@@ -6,10 +6,12 @@ import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryScanner;
 import org.esa.nest.dat.actions.productLibrary.model.ProductLibraryConfig;
@@ -22,11 +24,11 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Vector;
 
 public class ProductLibraryUI {
 
@@ -387,13 +389,15 @@ public class ProductLibraryUI {
     private JPanel createCentrePanel() {
         final JideSplitPane splitPane1H = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
 
+        final MyDatabaseQueryListener dbQueryListener = new MyDatabaseQueryListener();
         final JideSplitPane splitPane11 = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
         dbPane = new DatabasePane();
-        dbPane.addListener(new MyDatabasePaneListener());
+        dbPane.addListener(dbQueryListener);
         splitPane11.add(dbPane);
 
         //splitPane11.add(createRepositoryTreeControl());
         worldMapUI = new WorldMapUI();
+        worldMapUI.addListener(dbQueryListener);
         splitPane11.add(worldMapUI.getWorlMapPane());
 
         splitPane1H.add(splitPane11);
@@ -515,24 +519,6 @@ public class ProductLibraryUI {
         productEntryTable.setColumnModel(tableModel.getColumnModel());
         updateStatusLabel();
         worldMapUI.setProductEntryList(productEntryList);
-    }
-
-    private void updateWorldMap(final ProductEntry[] productEntryList) {
-      /*  final Repository repository = repositoryManager.getRepositoryShown();
-        if(repository != null && worldMapDataModel != null) {
-
-            final ArrayList<Product> productList = new ArrayList<Product>(repository.getEntryCount());
-            for(int i=0; i < repository.getEntryCount(); ++i) {
-                final RepositoryEntry entry = repository.getEntry(i);
-                final Product prod = entry.getProduct();
-                if(prod != null) {
-                    productList.add(prod);
-                }
-            }
-            if(!productList.isEmpty()) {
-                worldMapDataModel.setProducts(productList.toArray(new Product[productList.size()]));
-            }
-        }         */
     }
 
     /**
@@ -722,10 +708,17 @@ public class ProductLibraryUI {
         }
     }
 
-    private class MyDatabasePaneListener implements DatabasePaneListener {
+    private class MyDatabaseQueryListener implements DatabaseQueryListener {
 
         public void notifyNewProductEntryListAvailable() {
             ShowRepository(dbPane.getProductEntryList());
+        }
+
+        public void notifyNewMapSelectionAvailable() {
+            final GeoPos[] selectionBox = worldMapUI.getSelectionBox();
+            dbPane.setSelectionRect(new Rectangle.Float(selectionBox[0].getLon(), selectionBox[0].getLat(),
+                            Math.abs(selectionBox[2].getLon()-selectionBox[0].getLon()),
+                            Math.abs(selectionBox[2].getLat()-selectionBox[0].getLat())));
         }
     }
 
