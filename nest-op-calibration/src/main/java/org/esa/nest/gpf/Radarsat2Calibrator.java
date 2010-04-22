@@ -40,11 +40,13 @@ public class Radarsat2Calibrator implements Calibrator {
     private boolean outputImageScaleInDb = false;
     private boolean isComplex = false;
     private TiePointGrid incidenceAngle = null;
+    private String incidenceAngleSelection = null;
 
     private static final double underFlowFloat = 1.0e-30;
     private static final String lutsigma = "lutsigma";
     private static final String lutgamma = "lutgamma";
     private static final String lutbeta = "lutbeta";
+    private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
 
     private double offset = 0.0;
     private double[] gains = null;
@@ -70,6 +72,10 @@ public class Radarsat2Calibrator implements Calibrator {
         if (file != null) {
             throw new OperatorException("No external auxiliary file should be selected for Radarsat2 product");
         }
+    }
+
+    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
+        incidenceAngleSelection = incidenceAngleForSigma0;
     }
 
     /**
@@ -275,11 +281,19 @@ public class Radarsat2Calibrator implements Calibrator {
             }
         }
 
-        return sigma*Math.sin(localIncidenceAngle * MathUtils.DTOR);
+        if (incidenceAngleSelection.contains(USE_INCIDENCE_ANGLE_FROM_DEM)) {
+            return sigma*Math.sin(localIncidenceAngle * MathUtils.DTOR);
+        } else { // USE_INCIDENCE_ANGLE_FROM_ELLIPSOID
+            return sigma;
+        }
     }
 
     public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
+        if (incidenceAngleSelection.contains(USE_INCIDENCE_ANGLE_FROM_DEM)) {
+            return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
+        } else { // USE_INCIDENCE_ANGLE_FROM_ELLIPSOID
+            return v;
+        }
     }
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {

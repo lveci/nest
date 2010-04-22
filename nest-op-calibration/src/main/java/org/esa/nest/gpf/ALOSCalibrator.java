@@ -42,8 +42,10 @@ public class ALOSCalibrator implements Calibrator {
     private String sampleType = null;
     private double calibrationFactor = 0;
     private TiePointGrid incidenceAngle = null;
+    private String incidenceAngleSelection = null;
 
     private static final double underFlowFloat = 1.0e-30;
+    private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
 
     /**
      * Default constructor. The graph processing framework
@@ -68,6 +70,10 @@ public class ALOSCalibrator implements Calibrator {
         }
     }
 
+    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
+        incidenceAngleSelection = incidenceAngleForSigma0;
+    }
+    
     /**
 
      */
@@ -245,11 +251,19 @@ public class ALOSCalibrator implements Calibrator {
             throw new OperatorException("Unknown band unit");
         }
 
-        return sigma*calibrationFactor*Math.sin(localIncidenceAngle * MathUtils.DTOR);
+        if (incidenceAngleSelection.contains(USE_INCIDENCE_ANGLE_FROM_DEM)) {
+            return sigma*calibrationFactor*Math.sin(localIncidenceAngle * MathUtils.DTOR);
+        } else { // USE_INCIDENCE_ANGLE_FROM_ELLIPSOID
+            return sigma*calibrationFactor;
+        }
     }
 
     public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
+        if (incidenceAngleSelection.contains(USE_INCIDENCE_ANGLE_FROM_DEM)) {
+            return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
+        } else { // USE_INCIDENCE_ANGLE_FROM_ELLIPSOID
+            return v;
+        }
     }
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
