@@ -6,12 +6,10 @@ import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryScanner;
 import org.esa.nest.dat.actions.productLibrary.model.ProductLibraryConfig;
@@ -24,7 +22,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -715,10 +712,7 @@ public class ProductLibraryUI {
         }
 
         public void notifyNewMapSelectionAvailable() {
-            final GeoPos[] selectionBox = worldMapUI.getSelectionBox();
-            dbPane.setSelectionRect(new Rectangle.Float(selectionBox[0].getLon(), selectionBox[0].getLat(),
-                            Math.abs(selectionBox[2].getLon()-selectionBox[0].getLon()),
-                            Math.abs(selectionBox[2].getLat()-selectionBox[0].getLat())));
+            dbPane.setSelectionRect(worldMapUI.getSelectionBox());
         }
     }
 
@@ -777,13 +771,14 @@ public class ProductLibraryUI {
                         if(dbPane.getDB().pathExistsInDB(file))
                             continue;
 
+                        try {
                         final ProductReader reader = ProductIO.getProductReaderForFile(file);
                         if(reader != null) {
                             Product sourceProduct = null;
                             try {
                                 sourceProduct = reader.readProductNodes(file, null);
                             } catch(Exception e) {
-                                System.out.println("Unable to read "+file.getAbsolutePath());
+                                System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                             }
                             if(sourceProduct != null) {
                                 //System.out.println("Adding "+file.getAbsolutePath());
@@ -792,11 +787,16 @@ public class ProductLibraryUI {
                                 sourceProduct.dispose();
                             }
                         }
+                        } catch(Exception e) {
+                            System.out.println("Unable to scan "+file.getAbsolutePath()+"\n"+e.getMessage());
+                        }
                     }
                     pm.setTaskName("Scanning Files... "+i+" of "+total);
                     pm.worked(1);
                     ++i;
                 }
+            } catch(Exception e) {
+                System.out.println("Scanning Exception\n"+e.getMessage());
             } finally {
                 pm.done();
             }

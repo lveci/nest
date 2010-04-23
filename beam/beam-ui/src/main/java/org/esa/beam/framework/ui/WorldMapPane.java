@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.7 2010-04-22 17:19:54 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.8 2010-04-22 20:58:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,12 +50,13 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.7 $ $Date: 2010-04-22 17:19:54 $
+ * @version $Revision: 1.8 $ $Date: 2010-04-22 20:58:44 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -72,7 +73,7 @@ public class WorldMapPane extends JPanel {
         installLayerCanvasNavigation(layerCanvas, dataModel);
         layerCanvas.addOverlay(new BoundaryOverlay());
         final Layer rootLayer = layerCanvas.getLayer();
-
+             
         final Dimension dimension = new Dimension(400, 200);
         final Viewport viewport = layerCanvas.getViewport();
         viewport.setViewBounds(new Rectangle(dimension));
@@ -434,26 +435,36 @@ public class WorldMapPane extends JPanel {
 
         @Override
         public void paintOverlay(LayerCanvas canvas, Rendering rendering) {
+            final Color transWhiteColor = new Color(255, 255, 255, 20);
+
+            final Color selectionFillColor = new Color(255, 255, 0, 70);
+            final Color selectionBorderColor = new Color(255, 255, 0, 255);
+
             for (final GeoPos[] extraGeoBoundary : dataModel.getAdditionalGeoBoundaries()) {
-                drawGeoBoundary(rendering.getGraphics(), extraGeoBoundary, false, null, null);
+                drawGeoBoundary(rendering.getGraphics(), extraGeoBoundary, null, null,
+                                transWhiteColor, Color.WHITE);
             }
 
             final Product selectedProduct = dataModel.getSelectedProduct();
             for (final Product product : dataModel.getProducts()) {
                 if (product != null && selectedProduct != product) {
-                    drawProduct(rendering.getGraphics(), product, false);
+                    drawProduct(rendering.getGraphics(), product,
+                            transWhiteColor, Color.WHITE);
                 }
             }
 
             if (selectedProduct != null) {
-                drawProduct(rendering.getGraphics(), selectedProduct, true);
+                drawProduct(rendering.getGraphics(), selectedProduct,
+                            transWhiteColor, Color.RED);
             }
 
             final GeoPos[] selectionBox = dataModel.getSelectionBox();
-            drawGeoBoundary(rendering.getGraphics(), selectionBox, false, null, null);
+            drawGeoBoundary(rendering.getGraphics(), selectionBox, null, null,
+                            selectionFillColor, selectionBorderColor);
         }
 
-        private void drawProduct(final Graphics2D g2d, final Product product, final boolean isCurrent) {
+        private void drawProduct(final Graphics2D g2d, final Product product,
+                                 final Color fillColor, final Color borderColor) {
             final GeoCoding geoCoding = product.getGeoCoding();
             if (geoCoding == null) {
                 return;
@@ -462,41 +473,41 @@ public class WorldMapPane extends JPanel {
             GeneralPath[] boundaryPaths = getGeoBoundaryPaths(product);
             final String text = String.valueOf(product.getRefNo());
             final PixelPos textCenter = getProductCenter(product);
-            drawGeoBoundary(g2d, boundaryPaths, isCurrent, text, textCenter);
+            drawGeoBoundary(g2d, boundaryPaths, text, textCenter, fillColor, borderColor);
         }
 
-        private void drawGeoBoundary(final Graphics2D g2d, final GeneralPath[] boundaryPaths, final boolean isCurrent,
-                                     final String text, final PixelPos textCenter) {
+        private void drawGeoBoundary(final Graphics2D g2d, final GeneralPath[] boundaryPaths,
+                                     final String text, final PixelPos textCenter,
+                                     final Color fillColor, final Color borderColor) {
             final AffineTransform transform = layerCanvas.getViewport().getModelToViewTransform();
             for (GeneralPath boundaryPath : boundaryPaths) {
                 boundaryPath.transform(transform);
-                drawPath(isCurrent, g2d, boundaryPath, 0.0f);
+                drawPath(g2d, boundaryPath, 0.0f, fillColor, borderColor);
             }
 
             drawText(g2d, text, textCenter, 0.0f);
 
         }
 
-        private void drawGeoBoundary(final Graphics2D g2d, final GeoPos[] geoBoundary, final boolean isCurrent,
-                                     final String text, final PixelPos textCenter) {
-            final GeneralPath gp = convertToPixelPath(geoBoundary);
-            drawPath(isCurrent, g2d, gp, 0.0f);
+        private void drawGeoBoundary(final Graphics2D g2d, final GeoPos[] geoBoundary,
+                                     final String text, final PixelPos textCenter,
+                                     final Color fillColor, final Color borderColor) {
+            ProductUtils.normalizeGeoPolygon(geoBoundary);
+            final ArrayList<GeneralPath> boundaryPaths = ProductUtils.assemblePathList(geoBoundary);
+            final AffineTransform transform = layerCanvas.getViewport().getModelToViewTransform();
+            for (GeneralPath boundaryPath : boundaryPaths) {
+                boundaryPath.transform(transform);
+                drawPath(g2d, boundaryPath, 0.0f, fillColor, borderColor);
+            }
             drawText(g2d, text, textCenter, 0.0f);
         }
 
-        private void drawPath(final boolean isCurrent, Graphics2D g2d, final GeneralPath gp, final float offsetX) {
+        private void drawPath(Graphics2D g2d, final GeneralPath gp, final float offsetX,
+                              final Color fillColor, final Color borderColor) {
             g2d = prepareGraphics2D(offsetX, g2d);
-            if (isCurrent) {
-                g2d.setColor(new Color(255, 200, 200, 70));
-            } else {
-                g2d.setColor(new Color(255, 255, 255, 20));
-            }
+            g2d.setColor(fillColor);
             g2d.fill(gp);
-            if (isCurrent) {
-                g2d.setColor(new Color(255, 0, 0));
-            } else {
-                g2d.setColor(Color.WHITE);
-            }
+            g2d.setColor(borderColor);
             g2d.draw(gp);
         }
 

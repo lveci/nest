@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.19 2010-03-31 13:56:29 lveci Exp $
+ * $Id: ProductUtils.java,v 1.20 2010-04-22 20:58:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -2493,7 +2493,7 @@ public class ProductUtils {
         }
     }
 
-    static ArrayList<GeneralPath> assemblePathList(GeoPos[] geoPoints) {
+    public static ArrayList<GeneralPath> assemblePathList(GeoPos[] geoPoints) {
         final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
         final ArrayList<GeneralPath> pathList = new ArrayList<GeneralPath>(16);
 

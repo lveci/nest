@@ -199,15 +199,6 @@ public class DatabasePane extends JPanel {
         return strArray;
     }
 
-    public void setSelectionRect(final Rectangle.Float selRect) {
-        try {
-            selectionRectangle = selRect;
-            queryDatabase();
-        } catch(Throwable t) {
-            handleException(t);
-        }
-    }
-
     private void queryDatabase() throws SQLException {
         String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
         String selectedProductTypes[] = toStringArray(productTypeJList.getSelectedValues());
@@ -247,6 +238,15 @@ public class DatabasePane extends JPanel {
         notifyQuery();
     }
 
+    public void setSelectionRect(final GeoPos[] selectionBox) {
+        try {
+            selectionRectangle = getBoundingRect(selectionBox);
+            queryDatabase();
+        } catch(Throwable t) {
+            handleException(t);
+        }
+    }
+
     private ProductEntry[] instersectMapSelection(final ProductEntry[] resultsList) {
         if(selectionRectangle != null && selectionRectangle.getWidth() != 0 && selectionRectangle.getHeight() != 0) {
             final ArrayList<ProductEntry> intersectList = new ArrayList<ProductEntry>();
@@ -263,6 +263,36 @@ public class DatabasePane extends JPanel {
             return intersectList.toArray(new ProductEntry[intersectList.size()]);
         }
         return resultsList;
+    }
+
+    private static Rectangle.Float getBoundingRect(final GeoPos[] geoPositions) {
+        float minX = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+
+        for (final GeoPos pos : geoPositions) {
+            final float x = pos.getLon();
+            final float y = pos.getLat();
+
+            if (x < minX) {
+                minX = x;
+            }
+            if (x > maxX) {
+                maxX = x;
+            }
+            if (y < minY) {
+                minY = y;
+            }
+            if (y > maxY) {
+                maxY = y;
+            }
+        }
+        if (minX >= maxX || minY >= maxY) {
+            return null;
+        }
+
+        return new Rectangle.Float(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
     public ProductEntry[] getProductEntryList() {

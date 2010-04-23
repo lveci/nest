@@ -41,10 +41,7 @@ public class ProductEntry {
     }
 
     public ProductEntry(final Product product) {
-        final File file = product.getFileLocation();
-        if(file != null)
-            this.file = product.getFileLocation();
-
+        this.file = product.getFileLocation();        
         this.name = product.getName();
         this.absRoot = AbstractMetadata.getAbstractedMetadata(product);
         if(absRoot != null) {

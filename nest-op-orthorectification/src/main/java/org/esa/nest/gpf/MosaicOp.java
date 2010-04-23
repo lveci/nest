@@ -254,9 +254,9 @@ public class MosaicOp extends Operator {
                                             final int minOffsetX, final int minOffsetY,
                                             final int maxWidth, final int maxHeight) {
         int minX = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE;
+        int maxX = -Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;
-        int maxY = Integer.MIN_VALUE;
+        int maxY = -Integer.MAX_VALUE;
 
         for (final PixelPos pixelsPos : pixelPositions) {
             if (pixelsPos != null) {

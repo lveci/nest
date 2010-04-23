@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.File;
 import java.sql.*;
+import java.awt.*;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -114,6 +115,16 @@ public class TestProductDao extends TestCase {
 
         //final Statement queryStatement = db.getDBConnection().createStatement();
         //final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
+    }
+
+    public void testRectIntersect() {
+        Rectangle.Float a = new Rectangle.Float(-10, 10, 100, 100);
+        Rectangle.Float b = new Rectangle.Float(-20, 20, 50, 50);
+
+        boolean r1 = a.intersects(b);
+        boolean r2 = b.intersects(a);
+
+        System.out.println();
     }
 
 }

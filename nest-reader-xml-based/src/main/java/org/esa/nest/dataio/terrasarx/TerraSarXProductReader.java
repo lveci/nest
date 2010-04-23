@@ -91,18 +91,17 @@ public class TerraSarXProductReader extends AbstractProductReader {
             _dataDir = new TerraSarXProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
+            if(_dataDir.isComplex()) {
+                product = product.createFlippedProduct(ProductFlipper.FLIP_HORIZONTAL, product.getName(), product.getDescription());
+            }
             product.setFileLocation(fileFromInput);
+            product.setProductReader(this);
+            product.setModified(false);
         } catch (Exception e) {
             Debug.trace(e.toString());
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
             throw ioException;
-        }
-        product.setProductReader(this);
-        product.setModified(false);
-
-        if(_dataDir.isComplex()) {
-            return product.createFlippedProduct(ProductFlipper.FLIP_HORIZONTAL, product.getName(), product.getDescription());
         }
 
         return product;
