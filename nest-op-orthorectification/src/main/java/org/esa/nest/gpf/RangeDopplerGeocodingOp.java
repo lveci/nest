@@ -401,7 +401,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         // temp fix for descending Radarsat2
-        if (mission.contains("RS2")) {
+        if (mission.equals("RS2")) {
             final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
             if (pass.contains("DESCENDING")) {
                 flipIndex = true;
