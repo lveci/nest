@@ -44,6 +44,17 @@ the orbit state vectors in your products are not accurate then this
 would be a problem when orthorectifying. You should be using the
 SARSimulation Terrain Correction to coregister your image with a
 simulated SAR image generated from the DEM and then terrain correcting.</p><h4>What external DEM does NEST support?</h4><p>Currently only WGS84-latlong
-<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488; </span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;DEM&nbsp;in meters is accepted as geographic system. User can specify one tile (i.e. one file) of the DEM.</p><h4></h4><p></p>
+<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488; </span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;DEM&nbsp;in meters is accepted as geographic system. User can specify one tile (i.e. one file) of the DEM.</p><h4>What are the definitions of local incidence angle and projected local incidence angle?</h4><p><span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span> The
+local incidence angle is defined as the angle between the normal vector
+of the backscattering element (i.e. vector perpendicular to the ground
+surface) and the incoming radiation vector (i.e. vector formed by the
+satellite position and the backscattering element position).</p><p>The projected local incidence angle is defined as the angle between the
+incoming radiation vector (as defined above) and the projected surface
+normal vector into range plane. Here range plane is the plane formed by
+the satellite position, backscattering element position and the earth
+center.</p><p>For
+more information on the definitions, derivations and calculations of
+the angles please see section 14.3.4 in "SAR Geocoding: Data and
+Systems" by Gunter Schreier.</p><h4></h4><h4></h4><p></p>
 <hr>
 </body></html>
