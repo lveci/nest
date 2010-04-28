@@ -12,6 +12,7 @@ import org.esa.beam.util.ProductUtils;
 import javax.imageio.ImageIO;
 import javax.media.jai.RasterFactory;
 import javax.media.jai.PlanarImage;
+import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,6 +33,11 @@ public class QuickLookGenerator {
     private static final File dbStorageDir = new File(ResourceUtils.getApplicationUserDir(true),
                                                       ProductDB.DEFAULT_PRODUCT_DATABASE_NAME+
                                                       File.separator + "QuickLooks");
+
+    public static boolean quickLookExists(final ProductEntry entry) {
+        final File quickLookFile = getQuickLookFile(dbStorageDir, entry.getId());
+        return quickLookFile.exists() && quickLookFile.length() > 0;
+    }
 
     public static BufferedImage loadQuickLook(final ProductEntry entry) {
         final File quickLookFile = getQuickLookFile(dbStorageDir, entry.getId());
@@ -145,11 +151,11 @@ public class QuickLookGenerator {
         return new BufferedImage(cm, writeraster, cm.isAlphaPremultiplied(), null);
     }
 
-    public static void createQuickLook(final ProductEntry entry, final Product product) {
+    public static void createQuickLook(final int id, final Product product) {
 
-        BufferedImage bufferedImage = null;
+     /*   BufferedImage bufferedImage = null;
         try {
-            final File quickLookFile = getQuickLookFile(dbStorageDir, entry.getId());
+            final File quickLookFile = getQuickLookFile(dbStorageDir, id);
             if(!dbStorageDir.exists())
                 dbStorageDir.mkdirs();
             quickLookFile.createNewFile();
@@ -162,19 +168,25 @@ public class QuickLookGenerator {
             }
         } catch(Exception e) {
             System.out.println("Quicklook create data failed :"+e.getMessage());
-        }
-        entry.setQuickLook(bufferedImage);
+        }      */
 
-    /*    final SwingWorker worker = new SwingWorker() {
+
+        final File quickLookFile = getQuickLookFile(dbStorageDir, id);
+        if(!dbStorageDir.exists())
+            dbStorageDir.mkdirs();
+        try {
+            quickLookFile.createNewFile();
+        } catch(IOException e) {
+            System.out.println("Unable to create file :"+e.getMessage());
+            return;
+        }
+
+        final SwingWorker worker = new SwingWorker() {
             @Override
             protected Object doInBackground() throws Exception {
 
                 BufferedImage bufferedImage = null;
                 try {
-                    final File quickLookFile = getQuickLookFile(dbStorageDir, entry.getId());
-                    if(!dbStorageDir.exists())
-                        dbStorageDir.mkdirs();
-                    quickLookFile.createNewFile();
                     bufferedImage = createQuickLookImage(product);
 
                     if(isComplex(product)) {
@@ -192,13 +204,13 @@ public class QuickLookGenerator {
             @Override
             public void done() {
                 try {
-                    entry.setQuickLook((BufferedImage)get());
+                    product.dispose();
                 } catch(Exception e) {
                     //
                 }
                 //repoMan.fireUpdateRepositoryUI();
             }
         };
-        worker.execute();   */
+        worker.execute();
     }
 }

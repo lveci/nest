@@ -97,7 +97,7 @@ public class PropertiesProvider implements DataProvider {
             if (value instanceof ProductEntry) {
                 final ProductEntry entry = (ProductEntry) value;
 
-                final String pixelSpacing = entry.getRangeSpacing() +"x"+ entry.getAzimuthSpacing() +" m";
+                final String pixelSpacing = entry.getRangeSpacing() +" x "+ entry.getAzimuthSpacing() +" m";
                 final File file = entry.getFile();
                 final String fileSize = (file.length() / (1024 * 1024)) +" Mb";
 

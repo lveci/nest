@@ -16,6 +16,7 @@ import org.esa.nest.dat.actions.productLibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.db.QuickLookGenerator;
 import org.esa.nest.util.TestUtils;
 
 import javax.swing.*;
@@ -783,8 +784,12 @@ public class ProductLibraryUI {
                             if(sourceProduct != null) {
                                 //System.out.println("Adding "+file.getAbsolutePath());
 
-                                dbPane.getDB().saveProduct(sourceProduct);
-                                sourceProduct.dispose();
+                                final ProductEntry entry = dbPane.getDB().saveProduct(sourceProduct);
+                                if(entry.quickLookExists()) {
+                                    sourceProduct.dispose();
+                                } else {
+                                    QuickLookGenerator.createQuickLook(entry.getId(), sourceProduct);
+                                }
                             }
                         }
                         } catch(Exception e) {

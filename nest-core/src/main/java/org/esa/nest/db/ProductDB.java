@@ -63,16 +63,15 @@ public class ProductDB extends DAO {
         return productTable.pathExists(path);
     }
 
-    public void saveProduct(final Product product) throws SQLException {
+    public ProductEntry saveProduct(final Product product) throws SQLException {
         final ProductEntry newEntry = new ProductEntry(product);
 
         if(productTable.pathExists(newEntry.getFile())) {
             // update
         } else {
             addRecord(newEntry);
-            newEntry.createQuickLook(product);
         }
-        newEntry.dispose();
+        return newEntry;
     }
 
     private void addRecord(final ProductEntry record) throws SQLException {

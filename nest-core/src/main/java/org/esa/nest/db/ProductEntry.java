@@ -162,6 +162,10 @@ public class ProductEntry {
         return isSelected;
     }
 
+    public boolean quickLookExists() {
+        return QuickLookGenerator.quickLookExists(this);
+    }
+
     public BufferedImage getQuickLook() {
         if(quickLookImage == null) {
             quickLookImage = QuickLookGenerator.loadQuickLook(this);
@@ -171,12 +175,6 @@ public class ProductEntry {
 
     public void setQuickLook(final BufferedImage img) {
         quickLookImage = img;
-    }
-
-    public void createQuickLook(final Product product) {
-        if(quickLookImage == null) {
-            QuickLookGenerator.createQuickLook(this, product);
-        }
     }
 
     public boolean equals(Object other) {
