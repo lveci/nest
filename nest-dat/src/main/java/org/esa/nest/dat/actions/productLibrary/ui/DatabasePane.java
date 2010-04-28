@@ -18,6 +18,7 @@ import java.awt.event.ItemListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 /**
 
@@ -37,6 +38,7 @@ public class DatabasePane extends JPanel {
     private ProductDB db;
     private ProductEntry[] productEntryList = null;
     private Rectangle.Float selectionRectangle = null;
+    private File baseDir = null;
     boolean modifyingCombos = false;
 
     private final List<DatabaseQueryListener> listenerList = new ArrayList<DatabaseQueryListener>(1);
@@ -199,6 +201,18 @@ public class DatabasePane extends JPanel {
         return strArray;
     }
 
+    public void setBaseDir(final File dir) {
+        baseDir = dir;
+    }
+
+    public void removeProducts(final File baseDir) {
+        try {
+            db.removeProducts(baseDir);
+        } catch(Throwable t) {
+            handleException(t);
+        }
+    }
+
     private void queryDatabase() throws SQLException {
         String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
         String selectedProductTypes[] = toStringArray(productTypeJList.getSelectedValues());
@@ -223,6 +237,12 @@ public class DatabasePane extends JPanel {
             if(!queryStr.isEmpty())
                 queryStr += " AND ";
             queryStr += AbstractMetadata.PASS+"='"+selectedPass+"'";
+        }
+
+        if(baseDir != null) {
+            if(!queryStr.isEmpty())
+                queryStr += " AND ";
+            queryStr += AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
         }
 
         if(productEntryList != null) {

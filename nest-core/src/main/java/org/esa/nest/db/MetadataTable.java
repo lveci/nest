@@ -88,7 +88,7 @@ public class MetadataTable implements TableInterface {
         //System.out.println(record.getFile());
 
         final MetadataElement absRoot = record.getMetadata();
-        final MetadataAttribute[] attribList = record.getMetadata().getAttributes();
+        final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
         int i=1;
         for(MetadataAttribute attrib : attribList) {
             final String name = attrib.getName();

@@ -101,13 +101,17 @@ public class QuickLookGenerator {
 
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
-        return ProductUtils.createColorIndexedImage(productSubset.getBand(virtBand.getName()), ProgressMonitor.NULL);
+        final BufferedImage image = ProductUtils.createColorIndexedImage(productSubset.getBand(virtBand.getName()),
+                                                                         ProgressMonitor.NULL);
+        productSubset.dispose();
+       
+        return image;
     }
 
     private static BufferedImage average(BufferedImage image) {
 
-        final int rangeFactor = 4;
-        final int azimuthFactor = 4;
+        final int rangeFactor = 2;
+        final int azimuthFactor = 2;
         final int rangeAzimuth = rangeFactor * azimuthFactor;
         final Raster raster = image.getData();
 
@@ -153,13 +157,12 @@ public class QuickLookGenerator {
 
     public static void createQuickLook(final int id, final Product product) {
 
-     /*   BufferedImage bufferedImage = null;
+        final File quickLookFile = getQuickLookFile(dbStorageDir, id);
         try {
-            final File quickLookFile = getQuickLookFile(dbStorageDir, id);
             if(!dbStorageDir.exists())
                 dbStorageDir.mkdirs();
             quickLookFile.createNewFile();
-            bufferedImage = createQuickLookImage(product);
+            final BufferedImage bufferedImage = createQuickLookImage(product);
 
             if(isComplex(product)) {
                 ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
@@ -167,10 +170,11 @@ public class QuickLookGenerator {
                 ImageIO.write(bufferedImage, "JPG", quickLookFile);
             }
         } catch(Exception e) {
-            System.out.println("Quicklook create data failed :"+e.getMessage());
-        }      */
+            System.out.println("Quicklook create data failed :"+product.getFileLocation()+"\n"+e.getMessage());
+            quickLookFile.delete();
+        }
 
-
+       /*
         final File quickLookFile = getQuickLookFile(dbStorageDir, id);
         if(!dbStorageDir.exists())
             dbStorageDir.mkdirs();
@@ -185,9 +189,8 @@ public class QuickLookGenerator {
             @Override
             protected Object doInBackground() throws Exception {
 
-                BufferedImage bufferedImage = null;
                 try {
-                    bufferedImage = createQuickLookImage(product);
+                    final BufferedImage bufferedImage = createQuickLookImage(product);
 
                     if(isComplex(product)) {
                         ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
@@ -198,7 +201,7 @@ public class QuickLookGenerator {
                     System.out.println("Quicklook create data failed :"+e.getMessage());
                 }
 
-                return bufferedImage;
+                return null;
             }
 
             @Override
@@ -211,6 +214,6 @@ public class QuickLookGenerator {
                 //repoMan.fireUpdateRepositoryUI();
             }
         };
-        worker.execute();
+        worker.execute();    */
     }
 }

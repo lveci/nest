@@ -48,6 +48,7 @@ public class ProductLibraryUI {
     private JButton addToProjectButton;
     private JButton openAllSelectedButton;
     private JButton batchProcessButton;
+    private JButton addButton;
     private JButton removeButton;
     private JButton updateButton;
 
@@ -225,18 +226,15 @@ public class ProductLibraryUI {
         repositoryCollector.execute();
     }
 
-   /* private void removeRepository(final Repository repository) {
-        if (repository != null) {
-            repositoryManager.removeRepository(repository);
-            final boolean repositoryListIsNotEmpty = repositoryManager.getNumRepositories() > 0;
-            if (repositoryListIsNotEmpty) {
-                final Repository firstElement = repositoryManager.getRepository(0);
-                if(firstElement != null)
-                    repositoryListCombo.setSelectedItem(firstElement);
-            }
-            setUIComponentsEnabled(repositoryListIsNotEmpty);
-        }
-    }       */
+    private void removeRepository(final File baseDir) {
+        libConfig.removeBaseDir(baseDir);
+        final int index = repositoryListCombo.getSelectedIndex();
+        repositoryListCombo.removeItemAt(index);
+        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
+
+        dbPane.removeProducts(baseDir);
+        UpdateUI();
+    }
 
     private void setUIComponentsEnabled(final boolean enable) {
         openButton.setEnabled(enable);
@@ -253,10 +251,14 @@ public class ProductLibraryUI {
             updateButton.setIcon(stopIcon);
             updateButton.setRolloverIcon(stopRolloverIcon);
             updateButton.setActionCommand(stopCommand);
+            addButton.setEnabled(false);
+            removeButton.setEnabled(false);
         } else {
             updateButton.setIcon(updateIcon);
             updateButton.setRolloverIcon(updateRolloverIcon);
             updateButton.setActionCommand(updateCommand);
+            addButton.setEnabled(true);
+            removeButton.setEnabled(true);
         }
     }
 
@@ -418,6 +420,7 @@ public class ProductLibraryUI {
     }*/
 
     public void UpdateUI() {
+        dbPane.refresh();
         productEntryTable.updateUI();
         //updateWorldMap();
     }
@@ -471,20 +474,20 @@ public class ProductLibraryUI {
         headerBar.add(repositoryListCombo, gbc);
         gbc.weightx = 0;
 
-        JButton _addButton = createToolButton(UIUtils.loadImageIcon("icons/Plus24.gif"));
-        _addButton.addActionListener(new ActionListener() {
+        addButton = createToolButton(UIUtils.loadImageIcon("icons/Plus24.gif"));
+        addButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
                 addRepository();
             }
         });
-        headerBar.add(_addButton, gbc);
+        headerBar.add(addButton, gbc);
 
         removeButton = createToolButton(UIUtils.loadImageIcon("icons/Minus24.gif"));
         removeButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                //removeRepository((Repository) repositoryListCombo.getSelectedItem());
+                removeRepository((File)repositoryListCombo.getSelectedItem());
             }
         });
         headerBar.add(removeButton, gbc);
@@ -496,8 +499,7 @@ public class ProductLibraryUI {
     }
 
     private JButton createToolButton(final ImageIcon icon) {
-        final JButton button = (JButton) ToolButtonFactory.createButton(icon,
-                                                                        false);
+        final JButton button = (JButton) ToolButtonFactory.createButton(icon, false);
         button.setBackground(headerPanel.getBackground());
         return button;
     }
@@ -758,11 +760,18 @@ public class ProductLibraryUI {
                 fileList.addAll(Arrays.asList(file.listFiles()));
             }
 
+            final ArrayList<File> qlProductFiles = new ArrayList<File>();
+            final ArrayList<Integer> qlIDs = new ArrayList<Integer>();
+
             final int total = fileList.size();
             pm.beginTask("Scanning Files...", total);
-            int i=1;
+            int i=0;
             try {
                 for(File file : fileList) {
+                    ++i;
+                    pm.setTaskName("Scanning Files... "+i+" of "+total);
+                    pm.worked(1);
+                    
                     if(!file.isDirectory()) {
                         if(pm.isCanceled())
                             break;
@@ -773,33 +782,50 @@ public class ProductLibraryUI {
                             continue;
 
                         try {
-                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                        if(reader != null) {
-                            Product sourceProduct = null;
-                            try {
-                                sourceProduct = reader.readProductNodes(file, null);
-                            } catch(Exception e) {
-                                System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
-                            }
-                            if(sourceProduct != null) {
-                                //System.out.println("Adding "+file.getAbsolutePath());
-
-                                final ProductEntry entry = dbPane.getDB().saveProduct(sourceProduct);
-                                if(entry.quickLookExists()) {
+                            final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                            if(reader != null) {
+                                final Product sourceProduct = reader.readProductNodes(file, null);
+                                if(sourceProduct != null) {
+                                    final ProductEntry entry = dbPane.getDB().saveProduct(sourceProduct);
+                                    if(!entry.quickLookExists()) {
+                                        qlProductFiles.add(file);
+                                        qlIDs.add(entry.getId());
+                                    }
                                     sourceProduct.dispose();
-                                } else {
-                                    QuickLookGenerator.createQuickLook(entry.getId(), sourceProduct);
+                                    entry.dispose();
                                 }
                             }
-                        }
                         } catch(Exception e) {
-                            System.out.println("Unable to scan "+file.getAbsolutePath()+"\n"+e.getMessage());
+                            System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                         }
                     }
-                    pm.setTaskName("Scanning Files... "+i+" of "+total);
-                    pm.worked(1);
-                    ++i;
                 }
+                UpdateUI();
+
+                final int numQL = qlProductFiles.size();
+                pm.beginTask("Generating Quicklooks...", numQL);
+                for(int j=0; j < numQL; ++j) {
+                    pm.setTaskName("Generating Quicklook... "+j+" of "+numQL);
+                    pm.worked(1);
+                    if(pm.isCanceled())
+                        break;
+                    
+                    final File file = qlProductFiles.get(j);
+                    try {
+                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                        if(reader != null) {
+                            final Product sourceProduct = reader.readProductNodes(file, null);
+                            if(sourceProduct != null) {
+                                QuickLookGenerator.createQuickLook(qlIDs.get(j), sourceProduct);
+                                UpdateUI();
+                                sourceProduct.dispose();
+                            }
+                        }
+                    } catch(Exception e) {
+                        System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
+                    }
+                }
+
             } catch(Exception e) {
                 System.out.println("Scanning Exception\n"+e.getMessage());
             } finally {
@@ -810,8 +836,7 @@ public class ProductLibraryUI {
 
         @Override
         public void done() {
-
-            dbPane.refresh();
+            UpdateUI();
         }
 
         private File[] collectAllSubDirs(final File dir) {

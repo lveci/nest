@@ -1,6 +1,7 @@
 package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,25 +85,15 @@ public class ProductDB extends DAO {
             metadataTable.addRecord(record);
         }
     }
-    
-   /* public void editRecord(final ProductEntry record) throws SQLException {
-        stmtUpdateExistingRecord.clearParameters();
 
-        stmtUpdateExistingRecord.setString(1, record.getFile());
-        stmtUpdateExistingRecord.setInt(12, record.getId());
-        stmtUpdateExistingRecord.executeUpdate();
-    } */  
-    
-   /* public void deleteRecord(final int id) throws SQLException {
-        stmtDeleteAddress.clearParameters();
-        stmtDeleteAddress.setInt(1, id);
-        stmtDeleteAddress.executeUpdate();
+    public void removeProducts(final File baseDir) throws SQLException {
+        final String queryStr = AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+        final ProductEntry[] list = queryProduct(queryStr);
+        for(ProductEntry entry : list) {
+            productTable.deleteRecord(entry.getId());
+        }
     }
-    
-    public void deleteRecord(final ProductEntry record) throws SQLException {
-        deleteRecord(record.getId());
-    }     */
-    
+
     public ProductEntry[] getProductEntryList() throws SQLException {
         return productTable.getProductEntryList();
     }

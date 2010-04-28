@@ -134,6 +134,20 @@ public class ProductTable implements TableInterface {
         return stmtSaveNewRecord.getGeneratedKeys();
     }
 
+    /* public void editRecord(final ProductEntry record) throws SQLException {
+        stmtUpdateExistingRecord.clearParameters();
+
+        stmtUpdateExistingRecord.setString(1, record.getFile());
+        stmtUpdateExistingRecord.setInt(12, record.getId());
+        stmtUpdateExistingRecord.executeUpdate();
+    } */
+    
+    public void deleteRecord(final int id) throws SQLException {
+        stmtDeleteAddress.clearParameters();
+        stmtDeleteAddress.setInt(1, id);
+        stmtDeleteAddress.executeUpdate();
+    }
+
     public boolean pathExists(final File path) throws SQLException {
         stmtGetProductWithPath.clearParameters();
         stmtGetProductWithPath.setString(1, path.getAbsolutePath());

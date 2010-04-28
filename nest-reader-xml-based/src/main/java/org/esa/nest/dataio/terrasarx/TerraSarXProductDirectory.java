@@ -144,7 +144,11 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 
-        setFlag(productVariantInfo, "projection", "GROUNDRANGE", absRoot, AbstractMetadata.srgr_flag);
+        int srgr = 1;
+        if(productVariantInfo.getAttributeString("projection", " ").equalsIgnoreCase("SLANTRANGE"))
+            srgr = 0;
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, srgr);
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
 
         final MetadataElement processingFlags = processing.getElement("processingFlags");

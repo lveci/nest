@@ -23,7 +23,7 @@ public class ProductEntry {
     private double range_spacing;
     private double azimuth_spacing;
     private int sampleType;
-    
+
     private MetadataElement absRoot;
     private boolean isSelected = false;
 
@@ -43,7 +43,7 @@ public class ProductEntry {
     public ProductEntry(final Product product) {
         this.file = product.getFileLocation();        
         this.name = product.getName();
-        this.absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        this.absRoot = AbstractMetadata.getAbstractedMetadata(product).createDeepClone();
         if(absRoot != null) {
             this.mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
             this.productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
