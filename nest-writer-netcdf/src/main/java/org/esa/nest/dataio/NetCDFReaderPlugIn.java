@@ -40,10 +40,14 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
         final String fileName = file.getName().toLowerCase();
         for(String ext : FORMAT_FILE_EXTENSIONS) {
             if(!ext.isEmpty() && fileName.endsWith(ext.toLowerCase()))
-                return DecodeQualification.SUITABLE;
+                return isIntended(ext);
         }
 
         return DecodeQualification.UNABLE;
+    }
+
+    protected DecodeQualification isIntended(final String extension) {
+        return DecodeQualification.INTENDED;
     }
 
     /**

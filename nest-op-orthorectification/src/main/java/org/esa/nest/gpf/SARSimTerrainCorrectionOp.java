@@ -371,7 +371,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 //                throw new OperatorException("Selected source band cannot be saved.");
 //            }
         } else {
-            if (applyRadiometricNormalization && mission.contains("ERS")) {
+            if (applyRadiometricNormalization && mission.equals("ERS")) {
                 throw new OperatorException("For radiometric normalization of ERS product, please use one of the following\n" +
                         " user graphs: 'RemoveAntPat_SARSim_GCPSelection' or 'RemoveAntPat_Multilook_SARSim_GCPSelection',\n" +
                         " then apply 'SARSim Terrain Correction' operator to the output in the Graph Builder.");
@@ -379,7 +379,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         // temp fix for descending Radarsat2
-        if (mission.contains("RS2")) {
+        if (mission.equals("RS2")) {
             final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
             if (pass.contains("DESCENDING")) {
                 flipIndex = true;

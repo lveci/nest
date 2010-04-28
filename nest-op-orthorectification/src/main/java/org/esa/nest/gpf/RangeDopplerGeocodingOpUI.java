@@ -149,8 +149,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         if (absRoot != null) {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-                            if (mission.contains("ENVISAT") || mission.contains("ERS") ||
-                                mission.contains("ALOS") || mission.contains("RS2")) {
+                            if (mission.equals("ENVISAT") || mission.equals("ERS") ||
+                                mission.equals("ALOS") || mission.equals("RS2")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
@@ -296,14 +296,14 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-                if ((mission.contains("ENVISAT") || mission.contains("ERS")) &&
+                if ((mission.equals("ENVISAT") || mission.equals("ERS")) &&
                      applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
                     return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
                             " constant and incidence angle corrections will be performed for radiometric normalization");
                 }
 
-                if (!mission.contains("ALOS") && !mission.contains("RS2") && !mission.contains("ENVISAT") &&
-                    !mission.contains("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
+                if (!mission.equals("ALOS") && !mission.equals("RS2") && !mission.equals("ENVISAT") &&
+                    !mission.equals("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
                             " not available for third party products except for ALOS and RadarSAT-2");

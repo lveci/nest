@@ -140,15 +140,15 @@ public final class ApplyOrbitFileOp extends Operator {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-            if(mission.contains("ENVISAT")) {
+            if(mission.equals("ENVISAT")) {
                 if(!orbitType.equals(DELFT_ENVISAT) && !orbitType.equals(DORIS_POR) && !orbitType.equals(DORIS_VOR)) {
                     throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
                 }
-            } else if(mission.contains("ERS1")) {
+            } else if(mission.equals("ERS1")) {
                 if(!orbitType.equals(DELFT_ERS_1) && !orbitType.equals(PRARE_ERS_1)) {
                     throw new OperatorException(orbitType + " is not suitable for an ERS1 product");
                 }
-            } else if(mission.contains("ERS2")) {
+            } else if(mission.equals("ERS2")) {
                 if(!orbitType.equals(DELFT_ERS_2) && !orbitType.equals(PRARE_ERS_2)) {
                     throw new OperatorException(orbitType + " is not suitable for an ERS2 product");
                 }

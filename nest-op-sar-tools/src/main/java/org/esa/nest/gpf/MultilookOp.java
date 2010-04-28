@@ -339,21 +339,21 @@ public final class MultilookOp extends Operator {
 
             String targetUnit = "";
 
-            if (unit.contains("phase")) {
+            if (unit.equals(Unit.PHASE)) {
 
                 continue;
 
-            } else if (unit.contains("imaginary")) {
+            } else if (unit.equals(Unit.IMAGINARY)) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains("real")) {
+            } else if (unit.equals(Unit.REAL)) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                if (nextUnit == null || !nextUnit.equals(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String[] srcBandNames = new String[2];

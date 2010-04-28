@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.gtopo30;
 
 import org.esa.nest.dataio.NetCDFReaderPlugIn;
+import org.esa.beam.framework.dataio.DecodeQualification;
 
 /**
  * The ReaderPlugIn for GTOPO30 tiles.
@@ -17,4 +18,7 @@ public class GTOPO30ReaderPlugIn extends NetCDFReaderPlugIn {
         PLUGIN_DESCRIPTION = GTOPO30_PLUGIN_DESCRIPTION;
     }
 
+    protected DecodeQualification isIntended(final String extension) {
+        return DecodeQualification.SUITABLE;
+    }
 }

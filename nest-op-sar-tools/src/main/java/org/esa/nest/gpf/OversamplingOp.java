@@ -488,7 +488,7 @@ public class OversamplingOp extends Operator {
             for (int i = 0; i < targetBands.length; i++) {
                 checkForCancelation(pm);
 
-                if (targetBands[i].getUnit().contains("real")) {
+                if (targetBands[i].getUnit().equals(Unit.REAL)) {
 
                     if (i+1 >= targetBands.length) {
                         throw new OperatorException("q band is missing from target product");

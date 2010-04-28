@@ -495,7 +495,7 @@ public final class ERSCalibrator implements Calibrator {
     private void getMissionType() {
 
         final String missionType = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        if (!missionType.contains("ERS1") && !missionType.contains("ERS2")) {
+        if (!missionType.equals("ERS1") && !missionType.equals("ERS2")) {
             throw new OperatorException(missionType + " is not a valid mission for ERS Calibration");
         }
 
