@@ -48,6 +48,12 @@ public class QuickLookGenerator {
         return bufferedImage;
     }
 
+    public static void deleteQuickLook(final int id) {
+        final File quickLookFile = getQuickLookFile(dbStorageDir, id);
+        if(quickLookFile.exists())
+            quickLookFile.delete();
+    }
+
     private static File getQuickLookFile(final File storageDir, final int id) {
         return new File(storageDir, QUICKLOOK_PREFIX + id + QUICKLOOK_EXT);
     }

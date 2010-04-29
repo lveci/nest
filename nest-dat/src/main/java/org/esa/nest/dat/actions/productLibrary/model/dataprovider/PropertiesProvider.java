@@ -11,6 +11,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
 import java.util.Comparator;
+import java.text.DecimalFormat;
 
 /**
  * Description of ProductPropertiesProvider
@@ -18,7 +19,9 @@ import java.util.Comparator;
  */
 public class PropertiesProvider implements DataProvider {
 
-    private final String[] propertyLables = new String[]{
+    private static final DecimalFormat df = new DecimalFormat("#.##");
+
+    private static final String[] propertyLables = new String[]{
             "Name:",
             "Type:",
             "Pass:",
@@ -97,7 +100,8 @@ public class PropertiesProvider implements DataProvider {
             if (value instanceof ProductEntry) {
                 final ProductEntry entry = (ProductEntry) value;
 
-                final String pixelSpacing = entry.getRangeSpacing() +" x "+ entry.getAzimuthSpacing() +" m";
+                final String pixelSpacing = df.format(entry.getRangeSpacing()) +" x "+
+                                            df.format(entry.getAzimuthSpacing()) +" m";
                 final File file = entry.getFile();
                 final String fileSize = (file.length() / (1024 * 1024)) +" Mb";
 

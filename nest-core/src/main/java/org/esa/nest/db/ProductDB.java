@@ -91,6 +91,7 @@ public class ProductDB extends DAO {
         final ProductEntry[] list = queryProduct(queryStr);
         for(ProductEntry entry : list) {
             productTable.deleteRecord(entry.getId());
+            QuickLookGenerator.deleteQuickLook(entry.getId());
         }
     }
 

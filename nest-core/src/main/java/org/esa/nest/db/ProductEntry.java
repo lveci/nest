@@ -15,6 +15,7 @@ public class ProductEntry {
 
     private int id;
     private File file;
+    private long fileSize;
     private String name;
     private String mission;
     private String productType;
@@ -23,9 +24,10 @@ public class ProductEntry {
     private double range_spacing;
     private double azimuth_spacing;
     private int sampleType;
+    private long lastModified;
+    private String fileFormat;
 
     private MetadataElement absRoot;
-    private boolean isSelected = false;
 
     // corner locations
     private final GeoPos firstNear = new GeoPos();
@@ -41,7 +43,11 @@ public class ProductEntry {
     }
 
     public ProductEntry(final Product product) {
-        this.file = product.getFileLocation();        
+        this.file = product.getFileLocation();
+        this.lastModified = file.lastModified();
+        this.fileSize = product.getRawStorageSize();
+        this.fileFormat = product.getProductReader().getReaderPlugIn().getFormatNames()[0];
+
         this.name = product.getName();
         this.absRoot = AbstractMetadata.getAbstractedMetadata(product).createDeepClone();
         if(absRoot != null) {
@@ -152,14 +158,6 @@ public class ProductEntry {
 
     public MetadataElement getMetadata() {
         return absRoot;
-    }
-
-    public void setSelected(boolean flag) {
-        isSelected = flag;
-    }
-
-    public boolean isSelected() {
-        return isSelected;
     }
 
     public boolean quickLookExists() {

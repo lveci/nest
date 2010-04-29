@@ -53,7 +53,7 @@ public final class AsarAbstractMetadata {
         // MPH
         addAbstractedAttribute("PRODUCT", mph.getAttributeString("PRODUCT", ""), absRoot, "Product name");
         addAbstractedAttribute("PRODUCT_TYPE", _productType, absRoot, "Product type");
-        addAbstractedAttribute("SPH_DESCRIPTOR",  mph.getAttributeString("SPH_DESCRIPTOR", ""), absRoot, "Description");
+        addAbstractedAttribute("SPH_DESCRIPTOR",  sph.getAttributeString("SPH_DESCRIPTOR", ""), absRoot, "Description");
         addAbstractedAttribute("MISSION", getMission(_productType, _file), absRoot, "Satellite mission");
         addAbstractedAttribute("PROC_TIME", mph.getAttributeUTC("PROC_TIME", new ProductData.UTC(0)), absRoot,
                                 "Processed time");

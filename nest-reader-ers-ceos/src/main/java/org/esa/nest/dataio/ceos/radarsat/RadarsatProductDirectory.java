@@ -70,6 +70,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     @Override
     public Product createProduct() throws IOException, IllegalBinaryFormatException {
         assert(productType != null);
+        productType = extractProductType(productType);
+
         final Product product = new Product(getProductName(), productType, _sceneWidth, _sceneHeight);
 
         if(_imageFiles.length > 1) {
@@ -154,6 +156,23 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
 
         return product;
+    }
+
+    private static String extractProductType(final String productType) {
+
+        if(productType.contains("SLC"))
+            return "SLC";
+        else if(productType.contains("SGF"))
+            return "SGF";
+        else if(productType.contains("SGX"))
+            return "SGX";
+        else if(productType.contains("SSG"))
+            return "SSG";
+        else if(productType.contains("SCN"))
+            return "SCN";
+        else if(productType.contains("SCW"))
+            return "SCW";
+        return productType;
     }
 
     public boolean isRadarsat() throws IOException, IllegalBinaryFormatException {
