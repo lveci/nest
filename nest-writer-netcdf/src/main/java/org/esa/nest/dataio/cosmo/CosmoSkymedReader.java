@@ -116,6 +116,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
         addSlantRangeToFirstPixel();
+        addSRGRCoefficients();
 
         product.setModified(false);
 
@@ -283,7 +284,6 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
 
         addOrbitStateVectors(absRoot, globalElem);
-        addSRGRCoefficients(absRoot, globalElem);
     }
 
     private void addSlantRangeToFirstPixel() {
@@ -334,16 +334,22 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
     }
 
-    private void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement globalElem) {
+    private void addSRGRCoefficients() {
 
         // For detail of ground range to slant range conversion, please see P80 in COSMO-SkyMed SAR Products Handbook.
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
+
         final MetadataAttribute attribute = globalElem.getAttribute("Ground Projection Polynomial Reference Range");
         if (attribute == null) {
             return;
         }
 
         final double referenceRange = attribute.getData().getElemDouble();
-        final double rangeSpacing = globalElem.getAttributeDouble("Ground Range Geometric Resolution");
+
+        final MetadataElement bandElem = getBandElement(product.getBandAt(0));
+        final double rangeSpacing = bandElem.getAttributeDouble("Column Spacing", AbstractMetadata.NO_METADATA);
 
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
