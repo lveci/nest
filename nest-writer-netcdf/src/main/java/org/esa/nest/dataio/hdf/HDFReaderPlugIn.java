@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.hdf;
 
 import org.esa.nest.dataio.NetCDFReaderPlugIn;
+import org.esa.beam.framework.dataio.DecodeQualification;
 
 /**
  * The ReaderPlugIn for HDF products.
@@ -18,4 +19,7 @@ public class HDFReaderPlugIn extends NetCDFReaderPlugIn {
         PLUGIN_DESCRIPTION = HDF_PLUGIN_DESCRIPTION;   
     }
 
+    protected DecodeQualification isIntended(final String extension) {
+        return DecodeQualification.SUITABLE;
+    }
 }
