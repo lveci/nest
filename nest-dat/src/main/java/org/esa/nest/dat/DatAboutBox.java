@@ -3,6 +3,7 @@ package org.esa.nest.dat;
 
 import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
+import java.io.File;
 
 /**
  * This class pertains to the "about" dialog box for the VISAT application.
@@ -44,9 +46,8 @@ class DatAboutBox extends ModalDialog {
             }
         });
 
-        final URL resource = getClass().getResource("/about_nest.jpg");
-        Assert.notNull(resource);
-        final Icon icon = new ImageIcon(resource);
+        final File imgFile = ResourceUtils.findInHomeFolder(File.separator+"res"+File.separator+"NEST_Splash.png");
+        final Icon icon = new ImageIcon(imgFile.getAbsolutePath());
 
         final JLabel imageLabel = new JLabel(icon);
         final JPanel dialogContent = new JPanel(new BorderLayout());

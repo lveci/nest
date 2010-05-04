@@ -695,17 +695,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final Band srcBand = sourceBands[i];
             final String unit = srcBand.getUnit();
-            if(unit == null) {
-                throw new OperatorException("band " + srcBand.getName() + " requires a unit");
-            }
 
-            if (unit.contains(Unit.PHASE)) {
+            if (unit != null && unit.contains(Unit.PHASE)) {
                 continue;
 
-            } else if (unit.contains(Unit.IMAGINARY)) {
+            } else if (unit != null && unit.contains(Unit.IMAGINARY)) {
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains(Unit.REAL)) {
+            } else if (unit != null && unit.contains(Unit.REAL)) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
