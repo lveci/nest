@@ -116,6 +116,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
         addSlantRangeToFirstPixel();
+        addFirstLastLineTimes();
         addSRGRCoefficients();
 
         product.setModified(false);
@@ -230,14 +231,14 @@ public class CosmoSkymedReader extends AbstractProductReader {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, globalElem.getAttributeInt("Orbit Number", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, globalElem.getAttributeString("Orbit Direction", defStr));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType(globalElem));
-
+        /*
         final ProductData.UTC startTime = ReaderUtils.getTime(globalElem, "Scene Sensing Start UTC", timeFormat);
         final ProductData.UTC stopTime = ReaderUtils.getTime(globalElem, "Scene Sensing Stop UTC", timeFormat);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
         product.setStartTime(startTime);
         product.setEndTime(stopTime);
-
+        */
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -246,8 +247,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                 globalElem.getAttributeDouble("Radar Frequency", defInt) / Constants.oneMillion);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
+//        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+//                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 globalElem.getAttributeString("Focusing Algorithm ID", defStr));
@@ -332,6 +333,26 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
             orbitVectorListElem.addElement(orbitVectorElem);
         }
+    }
+
+    private void addFirstLastLineTimes() {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
+        final MetadataElement bandElem = getBandElement(product.getBandAt(0));
+
+        final double referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat).getMJD(); // in days
+        final double firstLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth First Time") / (24*3600); // in days
+        final double lastLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth Last Time") / (24*3600); // in days
+        final double lineTimeInterval = bandElem.getAttributeDouble("Line Time Interval"); // in s
+        final ProductData.UTC startTime = new ProductData.UTC(referenceUTC + firstLineTime);
+        final ProductData.UTC stopTime = new ProductData.UTC(referenceUTC + lastLineTime);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
+        product.setStartTime(startTime);
+        product.setEndTime(stopTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval, lineTimeInterval);
     }
 
     private void addSRGRCoefficients() {
