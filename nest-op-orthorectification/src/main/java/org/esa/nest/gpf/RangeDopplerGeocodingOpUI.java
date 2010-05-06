@@ -150,7 +150,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
                             if (mission.equals("ENVISAT") || mission.equals("ERS") ||
-                                mission.equals("ALOS") || mission.equals("RS2")) {
+                                mission.equals("RS2") || mission.equals("TSX1")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
@@ -295,18 +295,18 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-
+                
                 if ((mission.equals("ENVISAT") || mission.equals("ERS")) &&
                      applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
                     return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
                             " constant and incidence angle corrections will be performed for radiometric normalization");
                 }
 
-                if (!mission.equals("ALOS") && !mission.equals("RS2") && !mission.equals("ENVISAT") &&
+                if (!mission.equals("RS2") && !mission.equals("TSX1") && !mission.equals("ENVISAT") &&
                     !mission.equals("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
-                            " not available for third party products except for ALOS and RadarSAT-2");
+                            " not available for third party products except RadarSAT-2 and TerraSAR-X (SSC)");
                 }
             }
         }
