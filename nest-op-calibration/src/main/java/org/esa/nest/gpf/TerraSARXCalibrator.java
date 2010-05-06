@@ -106,14 +106,14 @@ public class TerraSARXCalibrator implements Calibrator {
             getSampleType();
 
             getCalibrationFactor();
+
+            getTiePointGridData();
             /*
             getFirstLineTime();
 
             getLineTimeInterval();
 
             getSourceImageDimension();
-
-            getTiePointGridData();
 
             getNoiseRecords();
 
