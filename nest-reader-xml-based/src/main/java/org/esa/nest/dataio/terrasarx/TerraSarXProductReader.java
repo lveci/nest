@@ -91,11 +91,11 @@ public class TerraSarXProductReader extends AbstractProductReader {
             _dataDir = new TerraSarXProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
+            product.setFileLocation(fileFromInput);
+            product.setProductReader(this);
             if(_dataDir.isComplex()) {
                 product = product.createFlippedProduct(ProductFlipper.FLIP_HORIZONTAL, product.getName(), product.getDescription());
             }
-            product.setFileLocation(fileFromInput);
-            product.setProductReader(this);
             product.setModified(false);
         } catch (Exception e) {
             Debug.trace(e.toString());
@@ -126,11 +126,12 @@ public class TerraSarXProductReader extends AbstractProductReader {
                 if(destBand.getUnit().equals(Unit.IMAGINARY))
                     oneOfTwo = false;
 
+                final ImageInputStream iiStream = _dataDir.getCosarImageInputStream(destBand);
                 readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
                                                  sourceWidth, sourceHeight,
                                                  sourceStepX, sourceStepY,
                                                  destWidth, destBuffer,
-                                                 oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
+                                                 oneOfTwo, iiStream, pm);
             }
         } catch(Exception e) {
             //

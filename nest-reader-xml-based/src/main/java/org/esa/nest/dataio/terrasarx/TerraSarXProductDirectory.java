@@ -34,7 +34,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     private final float[] incidenceCorners = new float[4];
 
     private final ArrayList<File> cosarFileList = new ArrayList<File>(1);
-    private final Map<Band, ImageInputStream> cosarBandMap = new HashMap<Band, ImageInputStream>(1);
+    private final Map<String, ImageInputStream> cosarBandMap = new HashMap<String, ImageInputStream>(1);
 
     private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -370,8 +370,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+pol);
 
                 try {
-                    cosarBandMap.put(realBand, FileImageInputStreamExtImpl.createInputStream(file));
-                    cosarBandMap.put(imaginaryBand, FileImageInputStreamExtImpl.createInputStream(file));
+                    cosarBandMap.put(realBand.getName(), FileImageInputStreamExtImpl.createInputStream(file));
+                    cosarBandMap.put(imaginaryBand.getName(), FileImageInputStreamExtImpl.createInputStream(file));
                 } catch(Exception e) {
                     //
                 }
@@ -451,7 +451,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     }
 
     ImageInputStream getCosarImageInputStream(final Band band) {
-        return cosarBandMap.get(band);
+        return cosarBandMap.get(band.getName());
     }
 
     @Override
