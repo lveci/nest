@@ -3,10 +3,7 @@ package org.esa.nest.datamodel;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.nest.gpf.ALOSCalibrator;
-import org.esa.nest.gpf.ASARCalibrator;
-import org.esa.nest.gpf.ERSCalibrator;
-import org.esa.nest.gpf.Radarsat2Calibrator;
+import org.esa.nest.gpf.*;
 
 /**
 * The abstract base class for all calibration operators intended to be extended by clients.
@@ -32,7 +29,7 @@ public class CalibrationFactory {
         } else if(mission.equals("RS2")) {
             return new Radarsat2Calibrator();
         } else if(mission.equals("TSX1")) {
-            throw new OperatorException("Mission TerraSAR-X is currently not supported for calibration.");
+            return new TerraSARXCalibrator();
         } else {
             throw new OperatorException("Mission " + mission + " is currently not supported for calibration.");
         }
