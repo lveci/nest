@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Settings>	
-	<defaultJAITileSize value="256"/>
 	<dataPath value="c:\NestData"/>
 	<demPath value="${dataPath}\DEMs"/>
 	

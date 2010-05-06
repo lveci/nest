@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.7 2010-05-06 19:08:53 lveci Exp $
+ * $Id: ProductData.java,v 1.8 2010-05-06 19:13:15 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2010-05-06 19:08:53 $
+ * @version $Revision: 1.8 $ $Date: 2010-05-06 19:13:15 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -1432,7 +1432,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemDoubleAt(int index, double value) {
-            _array[index] = (short)value;// Math.round(value);
+            _array[index] = (short) Math.round(value);
         }
 
         /**
@@ -1770,7 +1770,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemDoubleAt(int index, double value) {
-            _array[index] = (int)value;// Math.round(value);
+            _array[index] = (int) Math.round(value);
         }
 
         /**

@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.27 2010-03-31 16:41:51 lveci Exp $
+ * $Id: VisatApp.java,v 1.28 2010-05-06 19:08:53 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -117,11 +117,7 @@ import javax.swing.SwingWorker;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.filechooser.FileFilter;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dialog;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -147,7 +143,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.27 $ $Date: 2010-03-31 16:41:51 $
+ * @version $Revision: 1.28 $ $Date: 2010-05-06 19:08:53 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -223,6 +219,10 @@ public class VisatApp extends BasicApp implements AppContext {
      * Preferences key for the memory capacity of the JAI tile cache in megabytes
      */
     public static final String PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY = "jai.tileCache.memoryCapacity";
+    /**
+     * Preferences key for the size of the JAI tiles in pixels
+     */
+    public static final String PROPERTY_KEY_JAI_TILE_SIZE = "jai.tileSize";
     /**
      * Preferences key for automatically showing new bands
      */
@@ -1776,6 +1776,8 @@ public class VisatApp extends BasicApp implements AppContext {
     private void configureJaiTileCache() {
         final int tileCacheCapacity = Integer.parseInt(System.getProperty(PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY, "256"));
         JAIUtils.setDefaultTileCacheCapacity(tileCacheCapacity);
+        final int tileSize = Integer.parseInt(System.getProperty(PROPERTY_KEY_JAI_TILE_SIZE, "256"));
+        JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
     }
 
     @Override

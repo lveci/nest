@@ -74,34 +74,6 @@ public class DatApp extends VisatApp {
             HelpSys.showTheme("top");
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
         }
-
-        final int tileSize = Integer.parseInt(Settings.instance().get("defaultJAITileSize"));
-        JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
-
-
-        //prefetchClasses();
-    }
-
-    private static void prefetchClasses() {
-        final SwingWorker worker = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {                
-                try {
-                    final ImportBrowser ib = ImportBrowserAction.getInstance().getImportBrowser();
-                    ib.getFrame().setVisible(false);
-                    final Repository rep = ib.getRepositoryManager().getRepository(0);
-                    if(rep != null) {
-                        //ib.ShowRepository(rep);
-                    }
-
-                } catch(Exception e) {
-                    VisatApp.getApp().showErrorDialog(e.getMessage());
-                }
-                return null;
-            }
-        };
-        worker.execute();
     }
 
     /**
