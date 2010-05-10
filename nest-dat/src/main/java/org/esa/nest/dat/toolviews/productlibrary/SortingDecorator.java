@@ -1,7 +1,7 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.DataProvider;
+import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;

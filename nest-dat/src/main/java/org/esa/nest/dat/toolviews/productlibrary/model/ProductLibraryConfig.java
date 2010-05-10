@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.model;
+package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;

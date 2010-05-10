@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.model.dataprovider;
+package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
 import org.esa.nest.db.ProductEntry;
 

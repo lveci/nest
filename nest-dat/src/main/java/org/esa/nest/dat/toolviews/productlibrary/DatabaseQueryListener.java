@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
 /**
 

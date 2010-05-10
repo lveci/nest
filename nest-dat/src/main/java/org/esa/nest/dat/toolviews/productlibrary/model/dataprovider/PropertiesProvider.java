@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.model.dataprovider;
+package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
 import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.nest.db.ProductEntry;
@@ -49,7 +49,7 @@ public class PropertiesProvider implements DataProvider {
         if (propertiesColumn == null) {
             propertiesColumn = new TableColumn();
             propertiesColumn.setResizable(true);
-            propertiesColumn.setPreferredWidth(150);
+            propertiesColumn.setPreferredWidth(250);
             propertiesColumn.setHeaderValue("Product Properties");
             propertiesColumn.setCellRenderer(new ProductPropertiesRenderer());
         }
@@ -83,6 +83,7 @@ public class PropertiesProvider implements DataProvider {
             setModel(dataModel);
             valueFont = getFont().deriveFont(Font.BOLD);
             getColumnModel().getColumn(1).setCellRenderer(new PropertyValueCellRenderer(valueFont));
+            getColumnModel().getColumn(0).setMaxWidth(80);
 
             //this.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             getTableHeader().setVisible(false);
@@ -153,11 +154,11 @@ public class PropertiesProvider implements DataProvider {
 
             int valuesLength = 50;
             if (values != null) {
-                valuesLength = getMaxStringLength(values, getFontMetrics(valueFont));
+                valuesLength = Math.min(200, getMaxStringLength(values, getFontMetrics(valueFont)));
                 increasePreferredColumnWidth(getColumnModel().getColumn(1), valuesLength);
             }
             int preferredWidth = lablesLength + valuesLength;
-            preferredWidth = (int) (preferredWidth + (preferredWidth * 0.01f));
+            //preferredWidth = (int) (preferredWidth + (preferredWidth * 0.01f));
             final TableColumn valueColumn = table.getColumnModel().getColumn(column);
             final int valueColWidth = Math.max(valueColumn.getWidth(), preferredWidth);
             increasePreferredColumnWidth(valueColumn, valueColWidth);
@@ -203,7 +204,8 @@ public class PropertiesProvider implements DataProvider {
                 final JLabel jLabel = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
                                                                                    row, column);
                 jLabel.setHorizontalAlignment(JLabel.LEFT);
-                jLabel.setFont(_font);
+                if(row == 0)
+                    jLabel.setFont(_font);
                 return jLabel;
             }
         }

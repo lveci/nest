@@ -116,6 +116,21 @@
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
         </toolView>
+
+        <toolView>
+            <id>org.esa.nest.dat.toolviews.productlibrary.ProductLibraryToolView</id>
+            <class>org.esa.nest.dat.toolviews.productlibrary.ProductLibraryToolView</class>
+            <title>Product Library</title>
+            <tabTitle>Product Library</tabTitle>
+            <mnemonic>D</mnemonic>
+            <accelerator>ctrl alt D</accelerator>
+            <smallIcon>icons/import_browser16.png</smallIcon>
+            <largeIcon>icons/import_browser.png</largeIcon>
+            <description>Product Library.</description>
+            <initState>DOCKED</initState>
+            <initSide>EAST</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
     </extension>
 
     <extension point="beam-ui:actions">
@@ -194,19 +209,6 @@
             <accelerator>shift control P</accelerator>
             <shortDescr>Opens the Import Browser.</shortDescr>
             <longDescr>Opens the Import Browser dialog to preview and open products.</longDescr>
-            <smallIcon>icons/import_browser16.png</smallIcon>
-            <largeIcon>icons/import_browser.png</largeIcon>
-            <helpID>productGrabber</helpID>
-      </action>
-
-      <action>
-            <id>productLibraryUI</id>
-            <parent>file</parent>
-            <placeAfter>openRaster</placeAfter>
-            <class>org.esa.nest.dat.actions.productLibrary.ProductLibraryAction</class>
-            <text>Product Library</text>
-            <shortDescr>Opens the Product Library.</shortDescr>
-            <longDescr>Opens the Product Library dialog to preview and open products.</longDescr>
             <smallIcon>icons/import_browser16.png</smallIcon>
             <largeIcon>icons/import_browser.png</largeIcon>
             <helpID>productGrabber</helpID>

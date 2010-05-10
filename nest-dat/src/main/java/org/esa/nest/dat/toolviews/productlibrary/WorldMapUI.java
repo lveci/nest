@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.ui.WorldMapPane;
@@ -76,6 +76,22 @@ public class WorldMapUI {
         }
 
         worldMapDataModel.setAdditionalGeoBoundaries(geoBoundaries);
+    }
+
+    public void setSelectedProductEntryList(final ProductEntry[] selectedProductEntryList) {
+
+        final GeoPos[][] geoBoundaries = new GeoPos[selectedProductEntryList.length][4];
+        int i = 0;
+        for(ProductEntry entry : selectedProductEntryList) {
+            final GeoPos[] geoBound = new GeoPos[4];
+            geoBound[0] = entry.getFirstNearGeoPos();
+            geoBound[1] = entry.getFirstFarGeoPos();
+            geoBound[2] = entry.getLastFarGeoPos();
+            geoBound[3] = entry.getLastNearGeoPos();
+            geoBoundaries[i++] = geoBound;
+        }
+
+        worldMapDataModel.setSelectedGeoBoundaries(geoBoundaries);
     }
 
     private class MouseHandler extends MouseInputAdapter {

@@ -1,10 +1,10 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.DataProvider;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.IDProvider;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.PropertiesProvider;
-import org.esa.nest.dat.actions.productLibrary.model.dataprovider.QuicklookProvider;
+import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;
+import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.IDProvider;
+import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.PropertiesProvider;
+import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.QuicklookProvider;
 import org.esa.nest.db.ProductEntry;
 
 import javax.swing.table.AbstractTableModel;

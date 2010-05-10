@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
@@ -6,13 +6,15 @@ import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.help.HelpSys;
-import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryScanner;
-import org.esa.nest.dat.actions.productLibrary.model.ProductLibraryConfig;
+import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.db.ProductEntry;
@@ -25,10 +27,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ProductLibraryUI {
+public class ProductLibraryToolView extends AbstractToolView {
 
     private static final String stopCommand = "stop";
     private static final String updateCommand = "update";
@@ -57,9 +60,8 @@ public class ProductLibraryUI {
     private JPanel headerPanel;
     private File currentDirectory;
     private ProductOpenHandler openHandler;
-    private final ProductLibraryConfig libConfig;
-    private final String helpId;
-    private JFrame mainFrame;
+    private ProductLibraryConfig libConfig;
+    private final String helpId = "ProductLibrary";
 
     private WorldMapUI worldMapUI = null;
 
@@ -68,9 +70,7 @@ public class ProductLibraryUI {
 
     private DatabasePane dbPane;
 
-    public ProductLibraryUI(final BasicApp basicApp, final String helpId) {
-        libConfig = new ProductLibraryConfig(basicApp.getPreferences());
-        this.helpId = helpId;
+    public ProductLibraryToolView() {
     }
 
     /**
@@ -84,37 +84,36 @@ public class ProductLibraryUI {
         openHandler = handler;
     }
 
-    public synchronized JFrame getFrame() {
-        if (mainFrame == null) {
-            mainFrame = new JFrame("Product Library");
-            mainFrame.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-            initUI();
-            mainFrame.addComponentListener(new ComponentAdapter() {
+    public JComponent createControl() {
 
-                @Override
-                public void componentHidden(final ComponentEvent e) {
-                    if(progMon != null)
-                        progMon.setCanceled(true);
-                }
-            });
-            mainFrame.add(mainPanel);
-            mainFrame.setBounds(libConfig.getWindowBounds());
-            applyConfig(libConfig);
-            mainFrame.addComponentListener(new ComponentAdapter() {
+        libConfig = new ProductLibraryConfig(VisatApp.getApp().getPreferences());
+        setProductOpenHandler(new MyProductOpenHandler(VisatApp.getApp()));
 
-                @Override
-                public void componentMoved(final ComponentEvent e) {
-                    libConfig.setWindowBounds(e.getComponent().getBounds());
-                }
+        initUI();
+        mainPanel.addComponentListener(new ComponentAdapter() {
 
-                @Override
-                public void componentResized(final ComponentEvent e) {
-                    libConfig.setWindowBounds(e.getComponent().getBounds());
-                }
-            });
-            setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
-        }
-        return mainFrame;
+            @Override
+            public void componentHidden(final ComponentEvent e) {
+                if(progMon != null)
+                    progMon.setCanceled(true);
+            }
+        });
+        applyConfig(libConfig);
+        mainPanel.addComponentListener(new ComponentAdapter() {
+
+            @Override
+            public void componentMoved(final ComponentEvent e) {
+                libConfig.setWindowBounds(e.getComponent().getBounds());
+            }
+
+            @Override
+            public void componentResized(final ComponentEvent e) {
+                libConfig.setWindowBounds(e.getComponent().getBounds());
+            }
+        });
+        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
+
+        return mainPanel;
     }
 
     private void applyConfig(final ProductLibraryConfig config) {
@@ -128,15 +127,26 @@ public class ProductLibraryUI {
 
     private void performSelectAction() {
         updateStatusLabel();
-        /*
-            worldMapDataModel.setSelectedProduct(entry.getProduct());
-                */
+
+        worldMapUI.setSelectedProductEntryList(getSelectedProductEntries());
     }
 
     private void performOpenAction() {
         if (openHandler != null) {
             openHandler.openProducts(getSelectedFiles());
         }
+    }
+
+    private ProductEntry[] getSelectedProductEntries() {
+        final int[] selectedRows = productEntryTable.getSelectedRows();
+        final ProductEntry[] selectedEntries = new ProductEntry[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            final Object entry = productEntryTable.getValueAt(selectedRows[i], 0);
+            if(entry instanceof ProductEntry) {
+                selectedEntries[i] = (ProductEntry)entry;
+            }
+        }
+        return selectedEntries;
     }
 
     private File[] getSelectedFiles() {
@@ -393,7 +403,7 @@ public class ProductLibraryUI {
         final JideSplitPane splitPane11 = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
         dbPane = new DatabasePane();
         dbPane.addListener(dbQueryListener);
-        splitPane11.add(dbPane);
+        splitPane11.add(new JScrollPane(dbPane));
 
         //splitPane11.add(createRepositoryTreeControl());
         worldMapUI = new WorldMapUI();
@@ -771,7 +781,7 @@ public class ProductLibraryUI {
                     ++i;
                     pm.setTaskName("Scanning Files... "+i+" of "+total);
                     pm.worked(1);
-                    
+
                     if(!file.isDirectory()) {
                         if(pm.isCanceled())
                             break;
@@ -809,7 +819,7 @@ public class ProductLibraryUI {
                     pm.worked(1);
                     if(pm.isCanceled())
                         break;
-                    
+
                     final File file = qlProductFiles.get(j);
                     try {
                         final ProductReader reader = ProductIO.getProductReaderForFile(file);
@@ -850,6 +860,41 @@ public class ProductLibraryUI {
                 dirList.addAll(Arrays.asList(dirs));
             }
             return dirList.toArray(new File[dirList.size()]);
+        }
+    }
+
+    private static class MyProductOpenHandler implements ProductOpenHandler {
+
+        private final VisatApp visatApp;
+
+        public MyProductOpenHandler(final VisatApp visatApp) {
+            this.visatApp = visatApp;
+        }
+
+        public void openProducts(final File[] productFiles) {
+            for (File productFile : productFiles) {
+                if (isProductOpen(productFile)) {
+                    continue;
+                }
+                try {
+                    final Product product = ProductIO.readProduct(productFile);
+
+                    final ProductManager productManager = visatApp.getProductManager();
+                    productManager.addProduct(product);
+                } catch (IOException e) {
+                    visatApp.showErrorDialog("Not able to open product:\n" +
+                            productFile.getPath());
+                }
+            }
+        }
+
+        private boolean isProductOpen(final File productFile) {
+            final Product openedProduct = visatApp.getOpenProduct(productFile);
+            if (openedProduct != null) {
+                visatApp.showInfoDialog("Product '" + openedProduct.getName() + "' is already opened.", null);
+                return true;
+            }
+            return false;
         }
     }
 }

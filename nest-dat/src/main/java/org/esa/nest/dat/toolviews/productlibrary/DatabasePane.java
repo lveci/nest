@@ -1,5 +1,6 @@
-package org.esa.nest.dat.actions.productLibrary.ui;
+package org.esa.nest.dat.toolviews.productlibrary;
 
+import com.jidesoft.combobox.DateComboBox;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -28,6 +29,8 @@ public class DatabasePane extends JPanel {
     private final JList missionJList = new JList();
     private final JList productTypeJList = new JList();
     private final JComboBox passCombo = new JComboBox(new String[] {ALL_PASSES, ASCENDING_PASS, DESCENDING_PASS });
+    private final DateComboBox startDateBox = new DateComboBox();
+    private final DateComboBox endDateBox = new DateComboBox();
 
     private static final String ALL_MISSIONS = "All Missions";
     private static final String ALL_PRODUCT_TYPES = "All Types";
@@ -45,7 +48,7 @@ public class DatabasePane extends JPanel {
 
     public DatabasePane() {
         try {
-            missionJList.setFixedCellWidth(200);
+            missionJList.setFixedCellWidth(100);
             createPanel();
             connectToDatabase();
 
@@ -60,7 +63,7 @@ public class DatabasePane extends JPanel {
                     }
                 }
             });
-            productTypeJList.setFixedCellWidth(200);
+            productTypeJList.setFixedCellWidth(100);
             productTypeJList.addListSelectionListener(new ListSelectionListener() {
                 public void valueChanged(ListSelectionEvent event) {
                     if(modifyingCombos || event.getValueIsAdjusting()) return;
@@ -135,6 +138,10 @@ public class DatabasePane extends JPanel {
         gbc.gridy++;
         DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
 
+        gbc.gridy++;
+        DialogUtils.addComponent(this, gbc, "Start Date:", startDateBox);
+        gbc.gridy++;
+        DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
     }
 
     private void connectToDatabase() throws Exception {

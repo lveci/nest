@@ -1,4 +1,4 @@
-package org.esa.nest.dat.actions.productLibrary.model.dataprovider;
+package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
 import org.esa.nest.db.ProductEntry;
 
@@ -24,7 +24,7 @@ public class IDProvider implements DataProvider {
         if(column == null) {
             column = new TableColumn();
             column.setHeaderValue("ID");
-            column.setPreferredWidth(35);
+            column.setPreferredWidth(34);
             column.setResizable(false);
             column.setCellRenderer(new IDCellRenderer());
         }
@@ -47,7 +47,7 @@ public class IDProvider implements DataProvider {
                         .getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
 
                 jlabel.setFont(jlabel.getFont().deriveFont(Font.BOLD));
-                jlabel.setToolTipText(text);
+                jlabel.setToolTipText(entry.getFile().getAbsolutePath());
                 return jlabel;
             }
             return null;
