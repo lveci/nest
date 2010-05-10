@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.8 2010-04-22 20:58:44 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.9 2010-05-10 18:23:03 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ import java.util.ArrayList;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.8 $ $Date: 2010-04-22 20:58:44 $
+ * @version $Revision: 1.9 $ $Date: 2010-05-10 18:23:03 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -200,7 +200,8 @@ public class WorldMapPane extends JPanel {
                 repaint();
             }
         }
-        if (WorldMapPaneDataModel.PROPERTY_ADDITIONAL_GEO_BOUNDARIES.equals(evt.getPropertyName())) {
+        if (WorldMapPaneDataModel.PROPERTY_ADDITIONAL_GEO_BOUNDARIES.equals(evt.getPropertyName()) ||
+            WorldMapPaneDataModel.PROPERTY_SELECTED_GEO_BOUNDARIES.equals(evt.getPropertyName())) {
             repaint();
         }
     }
@@ -436,6 +437,7 @@ public class WorldMapPane extends JPanel {
         @Override
         public void paintOverlay(LayerCanvas canvas, Rendering rendering) {
             final Color transWhiteColor = new Color(255, 255, 255, 20);
+            final Color transRedColor = new Color(255, 0, 0, 30);
 
             final Color selectionFillColor = new Color(255, 255, 0, 70);
             final Color selectionBorderColor = new Color(255, 255, 0, 255);
@@ -443,6 +445,11 @@ public class WorldMapPane extends JPanel {
             for (final GeoPos[] extraGeoBoundary : dataModel.getAdditionalGeoBoundaries()) {
                 drawGeoBoundary(rendering.getGraphics(), extraGeoBoundary, null, null,
                                 transWhiteColor, Color.WHITE);
+            }
+
+            for (final GeoPos[] selectGeoBoundary : dataModel.getSelectedGeoBoundaries()) {
+                drawGeoBoundary(rendering.getGraphics(), selectGeoBoundary, null, null,
+                                transRedColor, Color.RED);
             }
 
             final Product selectedProduct = dataModel.getSelectedProduct();

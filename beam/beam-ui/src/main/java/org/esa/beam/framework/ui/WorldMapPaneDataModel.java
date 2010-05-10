@@ -24,6 +24,7 @@ public class WorldMapPaneDataModel {
     public static final String PROPERTY_SELECTED_PRODUCT = "selectedProduct";
     public static final String PROPERTY_PRODUCTS = "products";
     public static final String PROPERTY_ADDITIONAL_GEO_BOUNDARIES = "additionalGeoBoundaries";
+    public static final String PROPERTY_SELECTED_GEO_BOUNDARIES = "selectedGeoBoundaries";
     public static final String PROPERTY_AUTO_ZOOM_ENABLED = "autoZoomEnabled";
 
     private PropertyChangeSupport changeSupport;
@@ -32,7 +33,8 @@ public class WorldMapPaneDataModel {
     private Product selectedProduct;
     private boolean autoZoomEnabled;
     private ArrayList<Product> productList;
-    private ArrayList<GeoPos[]> additionalGeoBoundaryList;
+    private final ArrayList<GeoPos[]> additionalGeoBoundaryList;
+    private final ArrayList<GeoPos[]> selectedGeoBoundaryList;
 
     private final GeoPos selectionBoxStart = new GeoPos();
     private final GeoPos selectionBoxEnd = new GeoPos();
@@ -40,6 +42,7 @@ public class WorldMapPaneDataModel {
     public WorldMapPaneDataModel() {
         productList = new ArrayList<Product>();
         additionalGeoBoundaryList = new ArrayList<GeoPos[]>();
+        selectedGeoBoundaryList = new ArrayList<GeoPos[]>();
         autoZoomEnabled = false;
     }
 
@@ -103,6 +106,19 @@ public class WorldMapPaneDataModel {
             additionalGeoBoundaryList.addAll(Arrays.asList(geoBoundarys));
         }
         firePropertyChange(PROPERTY_ADDITIONAL_GEO_BOUNDARIES, oldGeoBoundarys, additionalGeoBoundaryList);
+    }
+
+    public GeoPos[][] getSelectedGeoBoundaries() {
+        return selectedGeoBoundaryList.toArray(new GeoPos[selectedGeoBoundaryList.size()][]);
+    }
+
+    public void setSelectedGeoBoundaries(GeoPos[][] geoBoundarys) {
+        final GeoPos[][] oldGeoBoundarys = getSelectedGeoBoundaries();
+        selectedGeoBoundaryList.clear();
+        if (geoBoundarys != null) {
+            selectedGeoBoundaryList.addAll(Arrays.asList(geoBoundarys));
+        }
+        firePropertyChange(PROPERTY_SELECTED_GEO_BOUNDARIES, oldGeoBoundarys, selectedGeoBoundaryList);
     }
 
     public void addModelChangeListener(PropertyChangeListener listener) {

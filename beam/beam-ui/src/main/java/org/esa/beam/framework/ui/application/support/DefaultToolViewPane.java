@@ -141,15 +141,16 @@ public class DefaultToolViewPane extends AbstractPageComponentPane {
             JComponent pageComponentControl;
             try {
                 pageComponentControl = getPageComponent().getControl();
+                if(pageComponentControl == null)
+                    throw new Exception("Unable to create control");
             } catch (Throwable e) {
                 e.printStackTrace();
                 // todo - delegate to application exception handler service
-                String message = "An internal error occured.\n " +
-                        "Not able to create user interface control for\n" +
-                        "page component '" + getPageComponent().getDescriptor().getTitle() + "'.";
-                JOptionPane.showMessageDialog(getPageComponent().getContext().getPage().getWindow(),
-                                              message, "Internal Error",
-                                              JOptionPane.ERROR_MESSAGE);
+                String message = "Unable to create UI for\n" +
+                        "'" + getPageComponent().getDescriptor().getTitle() + "'.";
+                //JOptionPane.showMessageDialog(getPageComponent().getContext().getPage().getWindow(),
+                //                              message, "Internal Error",
+                //                              JOptionPane.ERROR_MESSAGE);
                 pageComponentControl = new JLabel(message);
             }
             if (pageComponentControl.getName() == null) {

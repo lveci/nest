@@ -93,7 +93,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
             // Put the pieces together.
             mainPane.add(wwjPanel, BorderLayout.CENTER);
         } catch(Throwable e) {
-            System.out.println("Can't load openGL");
+            System.out.println("Can't load openGL "+e.getMessage());
         }
     }
 
