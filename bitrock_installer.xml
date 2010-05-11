@@ -2,9 +2,8 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>4A</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
-    <splashImage>beam/res/NEST_Splash.png</splashImage>
+    <splashImage>nest-src/main/bin/common/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>

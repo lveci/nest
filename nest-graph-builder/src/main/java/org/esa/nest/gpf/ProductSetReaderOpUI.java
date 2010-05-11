@@ -161,6 +161,9 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
             files = chooser.getSelectedFiles();
+
+            VisatApp.getApp().getPreferences().
+                setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR, chooser.getCurrentDirectory().getAbsolutePath());
         }
         return files;
     }
