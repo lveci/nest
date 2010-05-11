@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.ResourceUtils;
 
@@ -112,6 +113,8 @@ public class Warp2Op extends Operator {
     private final Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
     private final Map<Band, WarpData> warpDataMap = new HashMap<Band, WarpData>(10);
 
+    private String processedSlaveBand;
+
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
@@ -173,6 +176,9 @@ public class Warp2Op extends Operator {
             }
             */
             createTargetProduct();
+
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            processedSlaveBand = absRoot.getAttributeString("processed_slave");
 
             // copy master GCPs
             OperatorUtils.copyGCPsToTarget(masterGCPGroup,
@@ -338,14 +344,16 @@ public class Warp2Op extends Operator {
 
         try {
             final Set<Band> keySet = targetTileMap.keySet();
-            // find first real slave band
-            for(Band targetBand : keySet) {
-                if(targetBand.getUnit().equals(Unit.REAL)) {
-                    final Band srcBand = sourceRasterMap.get(targetBand);
-                    if(srcBand != null) {
-                        final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
-                        getWarpData();
-                        break;
+            if(warpDataMap.isEmpty()) {
+                // find first real slave band
+                for(Band targetBand : keySet) {
+                    if(targetBand.getName().equals(processedSlaveBand)) {
+                        final Band srcBand = sourceRasterMap.get(targetBand);
+                        if(srcBand != null) {
+                            final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
+                            getWarpData();
+                            break;
+                        }
                     }
                 }
             }

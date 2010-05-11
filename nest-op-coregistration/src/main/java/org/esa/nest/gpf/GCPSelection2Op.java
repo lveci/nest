@@ -30,6 +30,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import javax.media.jai.*;
@@ -262,7 +263,7 @@ public class GCPSelection2Op extends Operator {
                                     sourceImageHeight);
 
         final int numSrcBands = sourceProduct.getNumBands();
-        boolean oneSlaveSelected = false;          // all other use setSourceImage
+        boolean oneSlaveProcessed = false;          // all other use setSourceImage
         for(int i = 0; i < numSrcBands; ++i) {
             final Band srcBand = sourceProduct.getBandAt(i);
             final Band targetBand = targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
@@ -270,14 +271,15 @@ public class GCPSelection2Op extends Operator {
             sourceRasterMap.put(targetBand, srcBand);
             gcpsComputedMap.put(srcBand, false);
 
-            if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveSelected) {
+            if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveProcessed) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
                 final String unit = srcBand.getUnit();
-                if(oneSlaveSelected==false && unit != null && !unit.contains(Unit.IMAGINARY)) {
-                    oneSlaveSelected = true;
-                } else {
-                    //targetBand.setSourceImage(srcBand.getSourceImage());
+                if(oneSlaveProcessed==false && unit != null && !unit.contains(Unit.IMAGINARY)) {
+                    oneSlaveProcessed = true;
+                    final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+                    AbstractMetadata.addAbstractedAttribute(absRoot, "processed_slave", ProductData.TYPE_ASCII, "", "");
+                    absRoot.setAttributeString("processed_slave", srcBand.getName());
                 }
             }
 
