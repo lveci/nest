@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.20 2010-04-22 20:58:44 lveci Exp $
+ * $Id: ProductUtils.java,v 1.21 2010-05-11 18:58:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -2265,7 +2265,7 @@ public class ProductUtils {
 
         TiePointGeoCoding slvGeoCoding = null;
         if (sourceGeoCoding instanceof TiePointGeoCoding) {
-            slvGeoCoding = (TiePointGeoCoding)sourceGeoCoding;
+            //slvGeoCoding = (TiePointGeoCoding)sourceGeoCoding;
         }
 
         final int minX = destArea.x;
