@@ -4,7 +4,7 @@
     <version>4A</version>
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
-    <splashImage>beam/res/NEST_Splash.png</splashImage>
+    <splashImage>nest-src/main/bin/common/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
