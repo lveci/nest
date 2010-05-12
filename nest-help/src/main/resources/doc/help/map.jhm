@@ -5,12 +5,12 @@
 
 <map version="2.0">
 
-    <mapID target="top" url="general/NestOverview.html"/>
+    <mapID target="top" url="general/Overview.html"/>
 
     <mapID target="folder" url="images/HelpFolder.jpg"/>
     <mapID target="doc" url="images/HelpDoc.jpg"/>
 
-    <mapID target="NestOverview" url="general/NestOverview.html"/>
+    <mapID target="Overview" url="general/Overview.html"/>
     <mapID target="beamDefinitions" url="general/BeamDefinitions.html"/>
 	<mapID target="SupportedProducts" url="general/SupportedProducts.html"/>
 	<mapID target="AbstractedMetadata" url="general/AbstractedMetadata.html"/>

@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
 
     <symbolicName>nest-help</symbolicName>
-    <name>NEST Help</name>
+    <name>Help</name>
     <version>4A</version>
     <packaging>dir</packaging>
 

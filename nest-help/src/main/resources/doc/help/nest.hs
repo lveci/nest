@@ -4,7 +4,7 @@
         "http://java.sun.com/products/javahelp/helpset_2_0.dtd">
 
 <helpset version="2.0">
-    <title>NEST Help</title>
+    <title>Help</title>
     <maps>
         <homeID>top</homeID>
         <mapref location="map.jhm"/>
@@ -23,7 +23,7 @@
     </view>
 
     <presentation default="true">
-        <name>NEST Help</name>
+        <name>Help</name>
         <size width="800" height="600"/>
         <location x="100" y="100"/>
     </presentation>
