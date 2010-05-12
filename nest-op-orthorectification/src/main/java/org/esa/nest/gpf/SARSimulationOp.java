@@ -122,6 +122,7 @@ public final class SARSimulationOp extends Operator {
     private boolean isElevationModelAvailable = false;
 
     private double rangeSpacing = 0.0;
+    private double azimuthSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
@@ -138,7 +139,7 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
-    private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
+    private static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
     private static String SIMULATED_BAND_NAME = "Simulated_Intensity";
 
     /**
@@ -203,6 +204,7 @@ public final class SARSimulationOp extends Operator {
         wavelength = RangeDopplerGeocodingOp.getRadarFrequency(absRoot);
 
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
@@ -425,8 +427,12 @@ public final class SARSimulationOp extends Operator {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
         }
 
-        final int ymin = Math.max(y0 - h/5, 0);
-        final int nh = h + h/5;
+        double overlapPercentage = 0.2;
+        if (azimuthSpacing <= 1.0) {
+            overlapPercentage = 0.5;
+        }
+        final int ymin = Math.max(y0 - (int)(h*overlapPercentage), 0);
+        final int nh = h + (int)(h*overlapPercentage);
 
         final float[][] localDEM = new float[nh+2][w+2];
         try {
@@ -458,7 +464,7 @@ public final class SARSimulationOp extends Operator {
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
 
                     final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
 

@@ -903,7 +903,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         ProductData layoverShadowingMasksBuffer = null;
         ProductData incidenceAngleFromEllipsoidBuffer = null;
 
-        final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
+        final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
 
         final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
         final Set<Band> keySet = targetTiles.keySet();
@@ -994,7 +994,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
 
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
 

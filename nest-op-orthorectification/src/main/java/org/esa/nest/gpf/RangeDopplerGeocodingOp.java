@@ -195,7 +195,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private TiePointGrid longitude = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
-    private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
+    private static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
@@ -1131,7 +1131,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     double slantRange = computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
 
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
 
