@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.18 2010-05-11 18:58:58 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.19 2010-05-12 20:16:41 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -337,7 +337,15 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final double c2 = a3*b1 - a1*b3;
 
         final double r = Math.sqrt(c1*c1 - 4*c2*c0);
-        double y = (-c1 - r)/(2*c2); // root 2
+        double y;
+        if (c2 == 0.0) {
+            y = - c0/c1;
+        } else {
+            y = (-c1 - r)/(2*c2); // root 2
+        }
+        if (a3*y + a2 == 0.0) {
+            return pixelPos;
+        }
         double x = (-a1*y - a0)/(a3*y + a2);
         int yPos = (int)(y + 0.5);
         int xPos = (int)(x + 0.5);
@@ -347,7 +355,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return pixelPos;
         }
 
-        y = (-c1 + r)/(2*c2); // root 1
+        if (c2 == 0.0) {
+            y = - c0/c1;
+        } else {
+            y = (-c1 + r)/(2*c2); // root 1
+        }
+        if (a3*y + a2 == 0.0) {
+            return pixelPos;
+        }
         x = (-a1*y - a0)/(a3*y + a2);
         yPos = (int)y;
         xPos = (int)x;
