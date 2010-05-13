@@ -217,7 +217,7 @@ public class CplxCohOp extends Operator {
                 for (int y = y0; y < y0 + h; y++) {
                     for (int x = x0; x < x0 + w; x++) {
                         final int index = masterRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
+                        targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), masterData.getElemFloatAt(index));
                     }
                 }
             } else { //coherence bands only one band per slave
