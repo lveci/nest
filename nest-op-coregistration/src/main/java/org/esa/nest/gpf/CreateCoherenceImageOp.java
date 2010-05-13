@@ -233,7 +233,7 @@ public final class CreateCoherenceImageOp extends Operator {
                 for (int y = y0; y < y0 + h; y++) {
                     for (int x = x0; x < x0 + w; x++) {
                         final int index = srcRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(index, srcData.getElemFloatAt(index));
+                        targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), srcData.getElemFloatAt(index));
                     }
                 }
                 /* The following code has problem that is cannot handle the last tile at right and bottom
