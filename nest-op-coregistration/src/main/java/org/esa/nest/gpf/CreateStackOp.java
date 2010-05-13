@@ -524,14 +524,8 @@ public class CreateStackOp extends Operator {
     }
 
     private void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, PixelPos pixelPos) {
-
         final GeoPos geoPos = new GeoPos(lat, lon);
-        if (srcGeoCoding instanceof TiePointGeoCoding) {
-            TiePointGeoCoding geoCoding = (TiePointGeoCoding)srcGeoCoding;
-            geoCoding.getAccuratePixelPos(geoPos, pixelPos);
-        } else {
-            srcGeoCoding.getPixelPos(geoPos, pixelPos);
-        }
+        srcGeoCoding.getPixelPos(geoPos, pixelPos);
     }
 
 
