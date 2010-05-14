@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -45,23 +46,16 @@ public final class CreateCoherenceImageOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Master Band")
-    private String[] masterBandNames = null;
-
-    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Slave Bands")
-    private String[] slaveBandNames = null;
-
-    @Parameter(description = "The coherence window size", interval = "(1, 10]", defaultValue = "3",
+    @Parameter(description = "The coherence window size", interval = "(1, 10]", defaultValue = "5",
                 label="Coherence Window Size")
-    private int coherenceWindowSize = 3;
+    private int coherenceWindowSize = 5;
 
-    private Band masterBand;
-    private Band masterBand2;
+    private Band masterBandI = null;
+    private Band masterBandQ = null;
     private int sourceImageWidth;
     private int sourceImageHeight;
 
+    private boolean complexCoregistration = false;
     private final Map<String, String[]> coherenceSlaveMap = new HashMap<String, String[]>(10);
 
     /**
@@ -91,7 +85,11 @@ public final class CreateCoherenceImageOp extends Operator {
             sourceImageWidth = sourceProduct.getSceneRasterWidth();
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
+            complexCoregistration = AbstractMetadata.getAbstractedMetadata(sourceProduct).
+                    getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX");
+
             createTargetProduct();
+
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -117,76 +115,86 @@ public final class CreateCoherenceImageOp extends Operator {
      */
     private void addSelectedBands() {
 
-        // add master bands
-        if(masterBandNames.length > 2) {
-            throw new OperatorException("Master band should be one real band or a real and imaginary band");
+        final int numSrcBands = sourceProduct.getNumBands();
+        if(numSrcBands < 2) {
+            throw new OperatorException("To create coherence image, more than 2 bands are needed.");
         }
 
-        masterBand = sourceProduct.getBand(masterBandNames[0]);
-        final String masterUnit1 = masterBand.getUnit();
-        if(masterUnit1 == null) {
-            throw new OperatorException("band " + masterBandNames[0] + " requires a unit");
-        } else if (masterUnit1.contains(Unit.PHASE)) {
-            throw new OperatorException("Phase band should not be used for generating coherence image");
-        } else if (masterUnit1.contains(Unit.IMAGINARY)) {
-            throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-        } else if (masterUnit1.contains(Unit.REAL)) {
-            if(masterBandNames.length < 2) {
-                throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+        String[] bandNames = sourceProduct.getBandNames();
+        if (complexCoregistration) {
+            // add master bands
+            masterBandI = sourceProduct.getBand(findBandName(bandNames, 'i', "mst"));
+            masterBandQ = sourceProduct.getBand(findBandName(bandNames, 'q', "mst"));
+            addTargetBand(masterBandI.getName(), masterBandI.getDataType(), masterBandI.getUnit());
+            addTargetBand(masterBandQ.getName(), masterBandQ.getDataType(), masterBandQ.getUnit());
+
+            // add slave and coherence bands
+            for (int i = 1; i <= numSrcBands; i++) {
+
+                final String slaveBandNameI = findBandName(bandNames, 'i', "slv" + i);
+                if (slaveBandNameI == null) {
+                    break;
+                }
+                final String slaveBandNameQ = findBandName(bandNames, 'q', "slv" + i);
+                if (slaveBandNameQ == null) {
+                    break;
+                }
+                final Band slaveBandI = sourceProduct.getBand(slaveBandNameI);
+                final Band slaveBandQ = sourceProduct.getBand(slaveBandNameQ);
+                addTargetBand(slaveBandNameI, slaveBandI.getDataType(), slaveBandI.getUnit());
+                addTargetBand(slaveBandNameQ, slaveBandQ.getDataType(), slaveBandQ.getUnit());
+
+                String[] iqBandNames = new String[2];
+                iqBandNames[0] = slaveBandNameI;
+                iqBandNames[1] = slaveBandNameQ;
+
+                String coherenceBandName = "Coherence_slv" + i;
+                addTargetBand(coherenceBandName, ProductData.TYPE_FLOAT32, "coherence");
+                coherenceSlaveMap.put(coherenceBandName, iqBandNames);
             }
-            masterBand2 = sourceProduct.getBand(masterBandNames[1]);
-            final String masterUnit2 = masterBand2.getUnit();
-            if(!masterUnit2.equals(Unit.IMAGINARY)) {
-                throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-            }
-            addTargetBand(masterBandNames[0], masterBand.getDataType(), masterUnit1);
-            addTargetBand(masterBandNames[1], masterBand2.getDataType(), masterUnit2);
+
         } else {
-            addTargetBand(masterBandNames[0], masterBand.getDataType(), masterUnit1);
-        }
 
-        // add slave bands and coherence image bands
-        int cnt = 1;
-        for(int i = 0; i < slaveBandNames.length; i++) {
-            final String bandName = slaveBandNames[i];
-            /*
-            if(bandName.contains(masterBandNames[0]) ||
-               (masterBandNames.length == 2 && bandName.contains(masterBandNames[1]))) {
-                continue;
-            }
-            */
-            String[] iqBandNames = new String[2];
-            final Band slaveBand = sourceProduct.getBand(bandName);
-            final String slaveUnit1 = slaveBand.getUnit();
-            if(slaveUnit1 == null) {
-                throw new OperatorException("band " + bandName + " requires a unit");
-            } else if (slaveUnit1.contains(Unit.PHASE)) {
-                throw new OperatorException("Phase band should not be used for generating coherence image");
-            } else if (slaveUnit1.contains(Unit.IMAGINARY)) {
-                throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-            } else if (slaveUnit1.contains(Unit.REAL)) {
-                if (slaveBandNames.length < 2) {
-                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                }
-                final Band slaveBand2 = sourceProduct.getBand(slaveBandNames[i+1]);
-                final String slaveUnit2 = slaveBand2.getUnit();
-                if (!slaveUnit2.contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                }
-                addTargetBand(slaveBandNames[i], slaveBand.getDataType(), slaveUnit1);
-                addTargetBand(slaveBandNames[i+1], slaveBand2.getDataType(), slaveUnit2);
-                iqBandNames[0] = slaveBandNames[i];
-                iqBandNames[1] = slaveBandNames[i+1];
-                i++;
-            } else {
-                addTargetBand(slaveBandNames[i], slaveBand.getDataType(), slaveUnit1);
-                iqBandNames[0] = slaveBandNames[i];
-            }
+            masterBandI = sourceProduct.getBand(findBandName(bandNames, ' ', "mst"));
+            addTargetBand(masterBandI.getName(), masterBandI.getDataType(), masterBandI.getUnit());
 
-            String coherenceBandName = "Coherence_slv" + cnt++;
-            addTargetBand(coherenceBandName, ProductData.TYPE_FLOAT32, "coherence");
-            coherenceSlaveMap.put(coherenceBandName, iqBandNames);
+            // add slave and coherence bands
+            for (int i = 1; i <= numSrcBands; i++) {
+
+                final String slaveBandName = findBandName(bandNames, ' ', "slv" + i);
+                if (slaveBandName == null) {
+                    break;
+                }
+                final Band slaveBandI = sourceProduct.getBand(slaveBandName);
+                addTargetBand(slaveBandName, slaveBandI.getDataType(), slaveBandI.getUnit());
+
+                String[] iqBandNames = new String[1];
+                iqBandNames[0] = slaveBandName;
+
+                String coherenceBandName = "Coherence_slv" + i;
+                addTargetBand(coherenceBandName, ProductData.TYPE_FLOAT32, "coherence");
+                coherenceSlaveMap.put(coherenceBandName, iqBandNames);
+            }
         }
+    }
+
+    private String findBandName(String[] bandNames, char firstChar, String namePattern) {
+
+        String bandName = null;
+        for(String name : bandNames) {
+            if (name.contains(namePattern)) {
+                if (firstChar == 'i' || firstChar == 'q') {
+                    if (name.charAt(0) == firstChar) {
+                        bandName = name;
+                        break;
+                    }
+                } else {
+                    bandName = name;
+                    break;
+                }
+            }
+        }
+        return bandName;
     }
 
     private void addTargetBand(String bandName, int dataType, String bandUnit) {
@@ -236,20 +244,12 @@ public final class CreateCoherenceImageOp extends Operator {
                         targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), srcData.getElemFloatAt(index));
                     }
                 }
-                /* The following code has problem that is cannot handle the last tile at right and bottom
-                final Tile srcRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-                final ProductData srcData = srcRaster.getRawSamples();
-                final ProductData targetData = targetTile.getRawSamples();
-                final int n = srcData.getNumElems();
-                for (int i = 0; i < n; ++i) {
-                    targetData.setElemFloatAt(i, srcData.getElemFloatAt(i));
-                }
-                */
+
             } else { // coherence bands
 
                 final String[] iqBandNames = coherenceSlaveMap.get(targetBand.getName());
                 float[] dataArray;
-                if (masterBandNames.length == 1) { // real image
+                if (!complexCoregistration) { // real image
                     final Band slaveBand = sourceProduct.getBand(iqBandNames[0]);
                     dataArray = createCoherenceImage(targetTileRectangle, slaveBand, pm);
                 } else { // complex image
@@ -325,7 +325,7 @@ public final class CreateCoherenceImageOp extends Operator {
         realData.s = new double[w*h];
 
         final Rectangle windowRectangle = new Rectangle(xUL, yUL, w, h);
-        final Tile masterRaster = getSourceTile(masterBand, windowRectangle, pm);
+        final Tile masterRaster = getSourceTile(masterBandI, windowRectangle, pm);
         final Tile slaveRaster = getSourceTile(slaveBand, windowRectangle, pm);
         final ProductData masterData = masterRaster.getDataBuffer();
         final ProductData slaveData = slaveRaster.getDataBuffer();
@@ -363,8 +363,8 @@ public final class CreateCoherenceImageOp extends Operator {
         complexData.sQ = new double[w*h];
 
         final Rectangle windowRectangle = new Rectangle(xUL, yUL, w, h);
-        final Tile masterRasterI = getSourceTile(masterBand, windowRectangle, pm);
-        final Tile masterRasterQ = getSourceTile(masterBand2, windowRectangle, pm);
+        final Tile masterRasterI = getSourceTile(masterBandI, windowRectangle, pm);
+        final Tile masterRasterQ = getSourceTile(masterBandQ, windowRectangle, pm);
         final ProductData masterDataI = masterRasterI.getDataBuffer();
         final ProductData masterDataQ = masterRasterQ.getDataBuffer();
         final Tile slaveRasterI = getSourceTile(iSlaveBand, windowRectangle, pm);
