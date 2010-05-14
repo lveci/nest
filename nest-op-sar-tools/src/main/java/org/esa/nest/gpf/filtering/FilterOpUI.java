@@ -114,14 +114,8 @@ public class FilterOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel(new BorderLayout(4, 4));
         contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets.top = 2;
-        gbc.insets.bottom = 2;
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
         contentPane.add(new JLabel("Source Bands:"), gbc);
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 1;

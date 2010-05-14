@@ -85,14 +85,8 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints _gbc = GridBagUtils.createDefaultConstraints();
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
-        _gbc.anchor = GridBagConstraints.NORTHWEST;
-        _gbc.insets.top = 2;
-        _gbc.insets.bottom = 2;
-
-        _gbc.gridx = 0;
-        _gbc.gridy = 0;
+        GridBagConstraints _gbc = DialogUtils.createGridBagConstraints();
+        
         contentPane.add(new JLabel("Source Bands:"), _gbc);
         _gbc.fill = GridBagConstraints.BOTH;
         _gbc.gridx = 1;
