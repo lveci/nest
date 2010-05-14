@@ -127,7 +127,7 @@
             <smallIcon>icons/import_browser16.png</smallIcon>
             <largeIcon>icons/import_browser.png</largeIcon>
             <description>Product Library.</description>
-            <initState>DOCKED</initState>
+            <initState>ICONIFIED</initState>
             <initSide>EAST</initSide>
             <initIndex>0</initIndex>
         </toolView>

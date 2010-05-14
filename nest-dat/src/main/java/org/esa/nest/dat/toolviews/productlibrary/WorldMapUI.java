@@ -3,6 +3,7 @@ package org.esa.nest.dat.toolviews.productlibrary;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.WorldMapPaneDataModel;
+import org.esa.nest.db.AOI;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.dat.toolviews.worldmap.NestWorldMapPane;
 
@@ -60,6 +61,14 @@ public class WorldMapUI {
 
     public WorldMapPane getWorlMapPane() {
         return worlMapPane;
+    }
+
+    public void setAOIList(final AOI[] aoiList) {
+
+    }
+
+    public void setSelectedAOIList(final AOI[] selectedAOIList) {
+
     }
 
     public void setProductEntryList(final ProductEntry[] productEntryList) {

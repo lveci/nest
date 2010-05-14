@@ -1,4 +1,4 @@
-package org.esa.nest.dat.toolviews.productlibrary;
+package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;

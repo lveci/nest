@@ -1,6 +1,7 @@
-package org.esa.nest.dat.toolviews.productlibrary;
+package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.util.Guardian;
+import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
-class SortingDecorator extends AbstractTableModel {
+public class SortingDecorator extends AbstractTableModel {
 
 
     private static final int DESCENDING = -1;

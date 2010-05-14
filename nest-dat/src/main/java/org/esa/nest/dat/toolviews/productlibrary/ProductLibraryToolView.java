@@ -14,9 +14,11 @@ import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryScanner;
+import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
+import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.db.QuickLookGenerator;
 import org.esa.nest.util.TestUtils;
@@ -57,7 +59,6 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private ProgressBarProgressMonitor progMon;
     private JProgressBar progressBar;
-    private JPanel headerPanel;
     private File currentDirectory;
     private ProductOpenHandler openHandler;
     private ProductLibraryConfig libConfig;
@@ -310,26 +311,8 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private void initUI() {
-        mainPanel = new JPanel(new BorderLayout(4, 4));
-        final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
-
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
-        repositoryListCombo = new JComboBox();
-        setComponentName(repositoryListCombo, "repositoryListCombo");
-        productEntryTable = new JTable();
-        statusLabel = new JLabel("");
-        progressPanel = new JPanel();
-        openButton = new JButton();
-        setComponentName(openButton, "openButton");
-        removeButton = new JButton();
-        setComponentName(removeButton, "removeButton");
-        updateButton = new JButton();
-        setComponentName(updateButton, "updateButton");
-        progressBar = new JProgressBar();
-        setComponentName(progressBar, "progressBar");
-        headerPanel = new JPanel();
-
-        final JPanel openPanel = new JPanel(new BorderLayout(4, 4));
+        northPanel.add(createHeaderPanel(), BorderLayout.CENTER);
 
         addToProjectButton = new JButton();
         setComponentName(addToProjectButton, "addToProject");
@@ -359,26 +342,40 @@ public class ProductLibraryToolView extends AbstractToolView {
             }
         });
 
+        final JPanel openPanel = new JPanel(new BorderLayout(4, 4));
         openPanel.add(addToProjectButton, BorderLayout.WEST);
         openPanel.add(openAllSelectedButton, BorderLayout.CENTER);
         openPanel.add(batchProcessButton, BorderLayout.EAST);
 
-        northPanel.add(headerPanel, BorderLayout.CENTER);
+        final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
+        statusLabel = new JLabel("");
         southPanel.add(statusLabel, BorderLayout.CENTER);
         southPanel.add(openPanel, BorderLayout.WEST);
+
+        progressBar = new JProgressBar();
+        setComponentName(progressBar, "progressBar");
+        progressBar.setStringPainted(true);
+        progressPanel = new JPanel();
+        progressPanel.setLayout(new BorderLayout());
+        progressPanel.add(progressBar);
+        progressPanel.setVisible(false);
         southPanel.add(progressPanel, BorderLayout.EAST);
 
+        mainPanel = new JPanel(new BorderLayout(4, 4));
         mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(createCentrePanel(), BorderLayout.CENTER);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+    }
 
-        progressBar = new JProgressBar();
-        progressBar.setStringPainted(true);
-        progressPanel.setLayout(new BorderLayout());
-        progressPanel.add(progressBar);
-        progressPanel.setVisible(false);
+    private JPanel createCentrePanel() {
+        final JideSplitPane splitPane1H = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+        final MyDatabaseQueryListener dbQueryListener = new MyDatabaseQueryListener();
+        dbPane = new DatabasePane();
+        dbPane.addListener(dbQueryListener);
+        splitPane1H.add(new JScrollPane(dbPane));
 
+        productEntryTable = new JTable();
         productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         productEntryTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         productEntryTable.addMouseListener(new MouseAdapter() {
@@ -393,27 +390,16 @@ public class ProductLibraryToolView extends AbstractToolView {
                 }
             }
         });
-        initHeaderPanel(headerPanel);
-    }
-
-    private JPanel createCentrePanel() {
-        final JideSplitPane splitPane1H = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-
-        final MyDatabaseQueryListener dbQueryListener = new MyDatabaseQueryListener();
-        final JideSplitPane splitPane11 = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
-        dbPane = new DatabasePane();
-        dbPane.addListener(dbQueryListener);
-        splitPane11.add(new JScrollPane(dbPane));
-
-        //splitPane11.add(createRepositoryTreeControl());
-        worldMapUI = new WorldMapUI();
-        worldMapUI.addListener(dbQueryListener);
-        splitPane11.add(worldMapUI.getWorlMapPane());
-
-        splitPane1H.add(splitPane11);
         splitPane1H.add(new JScrollPane(productEntryTable));
 
-        return splitPane1H;
+        final JideSplitPane splitPane1V = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+        splitPane1V.add(splitPane1H);
+
+        worldMapUI = new WorldMapUI();
+        worldMapUI.addListener(dbQueryListener);
+        splitPane1V.add(worldMapUI.getWorlMapPane());
+
+        return splitPane1V;
     }
 
     private void setComponentName(JComponent button, String name) {
@@ -448,13 +434,14 @@ public class ProductLibraryToolView extends AbstractToolView {
         return repositoryTree;
     }    */
 
-    private void initHeaderPanel(final JPanel headerBar) {
+    private JPanel createHeaderPanel() {
+        final JPanel headerBar = new JPanel();
         headerBar.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
 
-        openButton = createToolButton(UIUtils.loadImageIcon("icons/Open24.gif"));
+        openButton = createToolButton("openButton", UIUtils.loadImageIcon("icons/Open24.gif"));
         openButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -463,7 +450,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         headerBar.add(openButton, gbc);
 
-        updateButton = createToolButton(updateIcon);
+        updateButton = createToolButton("updateButton", updateIcon);
         updateButton.setActionCommand(updateCommand);
         updateButton.addActionListener(new ActionListener() {
 
@@ -481,10 +468,12 @@ public class ProductLibraryToolView extends AbstractToolView {
 
         headerBar.add(new JLabel("Repository:")); /* I18N */
         gbc.weightx = 99;
+        repositoryListCombo = new JComboBox();
+        setComponentName(repositoryListCombo, "repositoryListCombo");
         headerBar.add(repositoryListCombo, gbc);
         gbc.weightx = 0;
 
-        addButton = createToolButton(UIUtils.loadImageIcon("icons/Plus24.gif"));
+        addButton = createToolButton("addButton", UIUtils.loadImageIcon("icons/Plus24.gif"));
         addButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -493,7 +482,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         headerBar.add(addButton, gbc);
 
-        removeButton = createToolButton(UIUtils.loadImageIcon("icons/Minus24.gif"));
+        removeButton = createToolButton("removeButton", UIUtils.loadImageIcon("icons/Minus24.gif"));
         removeButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -502,15 +491,17 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         headerBar.add(removeButton, gbc);
 
-        JButton helpButton = createToolButton(UIUtils.loadImageIcon("icons/Help24.gif"));
-        setComponentName(helpButton, "helpButton");
+        final JButton helpButton = createToolButton("helpButton", UIUtils.loadImageIcon("icons/Help24.gif"));
         HelpSys.enableHelpOnButton(helpButton, helpId);
         headerBar.add(helpButton, gbc);
+
+        return headerBar;
     }
 
-    private JButton createToolButton(final ImageIcon icon) {
+    private JButton createToolButton(final String name, final ImageIcon icon) {
         final JButton button = (JButton) ToolButtonFactory.createButton(icon, false);
-        button.setBackground(headerPanel.getBackground());
+        setComponentName(button, name);
+        //button.setBackground(mainPanel.getBackground());
         return button;
     }
 
