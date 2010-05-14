@@ -127,7 +127,7 @@ public final class ResourceUtils {
         return dir;
     }
 
-    private static String getContextID() {
+    public static String getContextID() {
         if (RuntimeActivator.getInstance() != null
                 && RuntimeActivator.getInstance().getModuleContext() != null) {
             return RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
@@ -147,7 +147,7 @@ public final class ResourceUtils {
     }
 
     public static File getGraphFolder(final String subFolder) {
-        final String homeUrl = System.getProperty("nest.home", ".");
+        final String homeUrl = System.getProperty(getContextID()+".home", ".");
         return new File(homeUrl, File.separator + "graphs" + File.separator + subFolder);
     }
 
