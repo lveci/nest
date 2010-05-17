@@ -933,7 +933,7 @@ public class ASARCalibrator implements Calibrator {
                 }
 
                 if (retroCalibrationFlag) { // remove old antenna pattern gain
-                    sigma *= targetTileOldAntPat[yy][xx] * targetTileOldAntPat[yy][xx];
+                    sigma *= targetTileOldAntPat[yy][xx]; // see Andrea's email dated Nov. 11, 2008
                 }
 
                 // apply calibration constant and incidence angle corrections
@@ -948,7 +948,7 @@ public class ASARCalibrator implements Calibrator {
                 }
 
                 if (applyAntennaPatternCorr) { // apply antenna pattern correction
-                    sigma /= targetTileNewAntPat[yy][xx] * targetTileNewAntPat[yy][xx];
+                    sigma /= targetTileNewAntPat[yy][xx];  // see Andrea's email dated Nov. 11, 2008
                 }
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
@@ -1348,13 +1348,13 @@ public class ASARCalibrator implements Calibrator {
         }
 
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            return v*gain*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower); // amplitude
+            return v*Math.sqrt(gain)*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower); // amplitude
         } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
-            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower));
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*Math.sqrt(gain)*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower));
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-            return v*gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower); // intensity
+            return v*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower); // intensity
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange800km/slantRange, rangeSpreadingCompPower));
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km/slantRange, rangeSpreadingCompPower));
         } else {
             throw new OperatorException("Unknown band unit");
         }
@@ -1445,7 +1445,7 @@ public class ASARCalibrator implements Calibrator {
                     elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
         }
 
-        return sigma / newCalibrationConstant[bandPolarIdx] / (gain*gain) *
+        return sigma / newCalibrationConstant[bandPolarIdx] / gain *
                Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower) *
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
@@ -1517,14 +1517,14 @@ public class ASARCalibrator implements Calibrator {
                 slantRange = targetTileSlantRange[yy][xx];
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                    v *= gain*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
+                    v *= Math.sqrt(gain)*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
                 } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
-                    v = Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
+                    v = Math.pow(10, v/10.0)*Math.sqrt(gain)*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
                     v = 10.0*Math.log10(v);
                 } else if (bandUnit == Unit.UnitType.INTENSITY) {
-                    v *= gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
+                    v *= gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
                 } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-                    v = Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
+                    v = Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
                     v = 10.0*Math.log10(v);
                 } else {
                     throw new OperatorException("Unknown band unit");
