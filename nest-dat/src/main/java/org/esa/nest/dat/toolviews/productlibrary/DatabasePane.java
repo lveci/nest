@@ -1,9 +1,9 @@
 package org.esa.nest.dat.toolviews.productlibrary;
 
 import com.jidesoft.combobox.DateComboBox;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductDB;
 import org.esa.nest.db.ProductEntry;
@@ -16,10 +16,10 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
 
 /**
 

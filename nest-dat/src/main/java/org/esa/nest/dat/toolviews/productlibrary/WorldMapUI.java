@@ -3,14 +3,13 @@ package org.esa.nest.dat.toolviews.productlibrary;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.WorldMapPaneDataModel;
+import org.esa.nest.dat.toolviews.worldmap.NestWorldMapPane;
 import org.esa.nest.db.AOI;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.dat.toolviews.worldmap.NestWorldMapPane;
 
 import javax.swing.event.MouseInputAdapter;
-
 import java.awt.event.MouseEvent;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
 

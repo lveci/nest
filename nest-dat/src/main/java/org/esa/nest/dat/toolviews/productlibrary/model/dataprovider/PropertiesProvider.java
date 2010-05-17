@@ -10,8 +10,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
-import java.util.Comparator;
 import java.text.DecimalFormat;
+import java.util.Comparator;
 
 /**
  * Description of ProductPropertiesProvider

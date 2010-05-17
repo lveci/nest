@@ -13,11 +13,10 @@ import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
-import org.esa.nest.dat.actions.importbrowser.model.RepositoryScanner;
-import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
-import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
+import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
+import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.db.QuickLookGenerator;
@@ -842,7 +841,7 @@ public class ProductLibraryToolView extends AbstractToolView {
 
         private File[] collectAllSubDirs(final File dir) {
             final ArrayList<File> dirList = new ArrayList<File>();
-            final RepositoryScanner.DirectoryFileFilter dirFilter = new RepositoryScanner.DirectoryFileFilter();
+            final DirectoryFileFilter dirFilter = new DirectoryFileFilter();
 
             final File[] subDirs = dir.listFiles(dirFilter);
             for (final File subDir : subDirs) {
@@ -886,6 +885,23 @@ public class ProductLibraryToolView extends AbstractToolView {
                 return true;
             }
             return false;
+        }
+    }
+
+    public static class DirectoryFileFilter implements java.io.FileFilter {
+
+        final static String[] skip = { "annotation", "auxraster", "imagedata", "preview", "support", "schemas" };
+
+        public boolean accept(final File file) {
+            if(!file.isDirectory()) return false;
+            final String name = file.getName().toLowerCase();
+            if(name.endsWith(".data"))
+                return false;
+            for(String ext : skip) {
+                if(name.equalsIgnoreCase(ext))
+                    return false;
+            }
+            return true;
         }
     }
 }

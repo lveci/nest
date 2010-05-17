@@ -1,7 +1,6 @@
 package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;
 
 import javax.swing.*;
