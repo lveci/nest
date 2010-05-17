@@ -1495,7 +1495,7 @@ public final class ERSCalibrator implements Calibrator {
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGain);
 
         for (int x = x0; x < x0 + w; x++) {
-            antennaPatternCorrFactor[x - x0] = 1.0 / (antennaPatternGain[x - x0]*antennaPatternGain[x - x0]);
+            antennaPatternCorrFactor[x - x0] = 1.0 / antennaPatternGain[x - x0]; // see Andrea's email dated Nov. 11, 2008
         }
     }
 
@@ -1847,7 +1847,7 @@ public final class ERSCalibrator implements Calibrator {
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGainArray);
 
         for (int x = x0; x < x0 + w; x++) {
-            antennaPatternGain[x - x0] = antennaPatternGainArray[x - x0]*antennaPatternGainArray[x - x0];
+            antennaPatternGain[x - x0] = antennaPatternGainArray[x - x0];
         }
     }
 
@@ -2526,7 +2526,7 @@ public final class ERSCalibrator implements Calibrator {
         final double gain1 = Math.pow(10.0, (double) antPatForPGS[k] / 10.0); // convert dB to linear scale
         final double gain2 = Math.pow(10.0, (double) antPatForPGS[k + 1] / 10.0);
         final double gain = ((theta2 - theta) * gain1 + (theta - theta1) * gain2) / (theta2 - theta1);
-        return gain * gain;
+        return gain; // see Andrea's email dated Nov. 11, 2008
     }
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm)
