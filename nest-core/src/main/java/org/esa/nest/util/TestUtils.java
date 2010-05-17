@@ -44,7 +44,8 @@ public class TestUtils {
 
     private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
                                                    "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw",
-                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz" };
+                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
+                                                   "sav"};
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString("nest.test.maxProductsPerRootFolder"));

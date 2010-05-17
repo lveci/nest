@@ -81,6 +81,11 @@ public class ProductSetPanel {
         return targetProductSelectorModel.getProductDir();
     }
 
+    public void setTargetFolder(final File path) {
+        final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
+        targetProductSelectorModel.setProductDir(path);
+    }
+
     public File[] getFileList() {
         final ArrayList<File> fileList = fileModel.getFileList();
         return fileList.toArray(new File[fileList.size()]);
