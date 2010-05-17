@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.8 2009-12-07 21:39:44 lveci Exp $
+ * $Id: BasicApp.java,v 1.9 2010-05-17 14:49:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -125,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $  $Date: 2009-12-07 21:39:44 $
+ * @version $Revision: 1.9 $  $Date: 2010-05-17 14:49:44 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -1276,6 +1276,8 @@ public class BasicApp {
         if (fileChooser.getCurrentDirectory() != null) {
             // todo replace getAbsolutPath() by getPath()?
             String lastDirPath = fileChooser.getCurrentDirectory().getAbsolutePath();
+            if(dirsOnly)
+                lastDirPath = fileChooser.getSelectedFile().getAbsolutePath();
             if (lastDirPath != null) {
                 getPreferences().setPropertyString(lastDirPropertyKey, lastDirPath);
             }

@@ -1,15 +1,19 @@
 package org.esa.nest.util;
 
+import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.util.io.BeamFileChooser;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,6 +52,19 @@ public final class ResourceUtils {
             System.out.println("Could not delete "+file.getName());
     }
 
+    public static boolean validateFolder(final File file) {
+        if(!file.exists()) {
+            if(!file.mkdirs()) {
+                if(VisatApp.getApp() != null)
+                    VisatApp.getApp().showErrorDialog("Unable to create folder\n"+file.getAbsolutePath());
+                else
+                    System.out.println("Unable to create folder\n"+file.getAbsolutePath());
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static File GetFilePath(final String title, final String formatName, final String extension,
                                    final String fileName, final String description, final boolean isSave) {
         BeamFileFilter fileFilter = null;
@@ -55,15 +72,51 @@ public final class ResourceUtils {
             fileFilter = new BeamFileFilter(formatName, extension, description);
         }
         File file;
-        if (isSave)
+        if (isSave) {
             file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, fileName);
-        else
-            file = VisatApp.getApp().showFileOpenDialog(title, false, fileFilter);
+        } else {
+            String lastDir = VisatApp.getApp().getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR,
+                                                            SystemUtils.getUserHomeDir().getPath());
+            if(fileName == null)
+                file = showFileOpenDialog(title, false, fileFilter, lastDir, BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR);
+            else
+                file = showFileOpenDialog(title, false, fileFilter, fileName, BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR);
+        }
         if (file == null) {
             return null;
         }
 
         return FileUtils.ensureExtension(file, extension);
+    }
+
+    private static File showFileOpenDialog(String title,
+                                         boolean dirsOnly,
+                                         FileFilter fileFilter,
+                                         String currentDir,
+                                         String lastDirPropertyKey) {
+        final BeamFileChooser fileChooser = new BeamFileChooser();
+        fileChooser.setCurrentDirectory(new File(currentDir));
+        if (fileFilter != null) {
+            fileChooser.setFileFilter(fileFilter);
+        }
+        fileChooser.setDialogTitle(VisatApp.getApp().getAppName() + " - " + title);
+        fileChooser.setFileSelectionMode(dirsOnly ? JFileChooser.DIRECTORIES_ONLY : JFileChooser.FILES_ONLY);
+        int result = fileChooser.showOpenDialog(VisatApp.getApp().getMainFrame());
+        if (fileChooser.getCurrentDirectory() != null) {
+            final String lastDirPath = fileChooser.getCurrentDirectory().getAbsolutePath();
+            if (lastDirPath != null) {
+                VisatApp.getApp().getPreferences().setPropertyString(lastDirPropertyKey, lastDirPath);
+            }
+        }
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (file == null || file.getName().equals("")) {
+                return null;
+            }
+            file = file.getAbsoluteFile();
+            return file;
+        }
+        return null;
     }
 
     public static Properties loadProperties(final String filename) throws IOException {

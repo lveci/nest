@@ -1,8 +1,16 @@
 package org.esa.nest.db;
 
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
 
 /**
 
@@ -10,14 +18,19 @@ import java.io.File;
 public class AOI {
 
     private final File aoiFile;
-    private String name;
-    private File inputFolder;
-    private File outputFolder;
-    private File processingGraph;
+    private String name = "aoi";
+    private String inputFolder = "";
+    private String outputFolder = "";
+    private String processingGraph = "";
 
     public AOI(final File file) {
         this.aoiFile = file;
-        this.name = FileUtils.getFilenameWithoutExtension(file);
+        if(!aoiFile.exists() || !load(aoiFile)) {
+            this.name = FileUtils.getFilenameWithoutExtension(file);
+            this.inputFolder = AOIManager.getLastInputPath();
+            this.outputFolder = AOIManager.getLastOutputPath();
+            this.processingGraph = AOIManager.getLastGraphPath();
+        }
     }
 
     public File getFile() {
@@ -32,27 +45,77 @@ public class AOI {
         name = n;
     }
 
-    public File getInputFolder() {
+    public String getInputFolder() {
         return inputFolder;
     }
 
-    public void setInputFolder(final File file) {
+    public void setInputFolder(final String file) {
         inputFolder = file;
     }
 
-    public File getOutputFolder() {
+    public String getOutputFolder() {
         return outputFolder;
     }
 
-    public void setOutputFolder(final File file) {
+    public void setOutputFolder(final String file) {
         outputFolder = file;
     }
 
-    public File getProcessingGraph() {
+    public String getProcessingGraph() {
         return processingGraph;
     }
 
-    public void setProcessingGraph(final File file) {
+    public void setProcessingGraph(final String file) {
         processingGraph = file;
+    }
+
+    public void save() {
+        final Element root = new Element("AOI");
+        root.setAttribute("name", name);
+        final Document doc = new Document(root);
+
+        final Element elem = new Element("param");
+        elem.setAttribute("inputFolder", inputFolder);
+        elem.setAttribute("outputFolder", outputFolder);
+        elem.setAttribute("graph", processingGraph);
+
+        root.addContent(elem);
+
+        XMLSupport.SaveXML(doc, aoiFile.getAbsolutePath());
+    }
+
+    private boolean load(final File file) {
+        org.jdom.Document doc;
+        try {
+            doc = XMLSupport.LoadXML(file.getAbsolutePath());
+
+            final Element root = doc.getRootElement();
+            final Attribute nameAttrib = root.getAttribute("name");
+            if(nameAttrib != null)
+                this.name = nameAttrib.getValue();
+
+            final List children = root.getContent();
+            for (Object aChild : children) {
+                if (aChild instanceof Element) {
+                    final Element child = (Element) aChild;
+                    if(child.getName().equals("param")) {
+                        inputFolder = getAttrib(child, "inputFolder");
+                        outputFolder = getAttrib(child, "outputFolder");
+                        processingGraph = getAttrib(child, "graph");
+                    }
+                }
+            }
+        } catch(IOException e) {
+            VisatApp.getApp().showErrorDialog(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    private static String getAttrib(final Element elem, final String tag) {
+        final Attribute attrib = elem.getAttribute(tag);
+        if(attrib != null)
+            return attrib.getValue();
+        return "";
     }
 }
