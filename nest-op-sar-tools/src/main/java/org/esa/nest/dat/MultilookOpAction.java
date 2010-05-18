@@ -10,15 +10,12 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  */
 public class MultilookOpAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog = null;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
-            dialog.setTargetProductNameSuffix("_ML");
-        }
+        final NestSingleTargetProductDialog dialog = new NestSingleTargetProductDialog("Multilook", getAppContext(),
+                                                                                       "Multilook", getHelpId());
+        dialog.setTargetProductNameSuffix("_ML");
         dialog.show();
 
     }

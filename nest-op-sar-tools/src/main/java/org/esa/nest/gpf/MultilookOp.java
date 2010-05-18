@@ -466,7 +466,8 @@ public final class MultilookOp extends Operator {
         final int tileMinY = sourceRaster1.getMinY();
 
         double meanValue = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY
+            || bandUnit == Unit.UnitType.UNKNOWN) {
             for (int y = yStart; y < yEnd; y++) {
                 final int stride = ((y - tileMinY) * tileStride) + tileOffset;
                 for (int x = xStart; x < xEnd; x++) {
