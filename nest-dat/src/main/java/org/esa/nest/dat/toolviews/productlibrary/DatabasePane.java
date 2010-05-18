@@ -37,6 +37,7 @@ public class DatabasePane extends JPanel {
     private static final String ALL_PASSES = "All Passes";
     private static final String ASCENDING_PASS = "ASCENDING";
     private static final String DESCENDING_PASS = "DESCENDING";
+    public static final String ALL_FOLDERS = "All Folders";
 
     private ProductDB db;
     private ProductEntry[] productEntryList = null;
@@ -209,7 +210,12 @@ public class DatabasePane extends JPanel {
     }
 
     public void setBaseDir(final File dir) {
-        baseDir = dir;
+        try {
+            baseDir = dir;
+            queryDatabase();
+        } catch(Throwable t) {
+            handleException(t);
+        }
     }
 
     public void removeProducts(final File baseDir) {

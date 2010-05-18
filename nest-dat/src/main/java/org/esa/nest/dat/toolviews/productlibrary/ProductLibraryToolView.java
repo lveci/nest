@@ -1,10 +1,7 @@
 package org.esa.nest.dat.toolviews.productlibrary;
 
-import com.bc.ceres.core.Assert;
-import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.help.HelpSys;
@@ -18,9 +15,8 @@ import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
+import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.db.QuickLookGenerator;
-import org.esa.nest.util.TestUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -29,13 +25,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ProductLibraryToolView extends AbstractToolView {
 
-    private static final String stopCommand = "stop";
-    private static final String updateCommand = "update";
     private static final ImageIcon updateIcon = UIUtils.loadImageIcon("icons/Update24.gif");
     private static final ImageIcon updateRolloverIcon = ToolButtonFactory.createRolloverIcon(updateIcon);
     private static final ImageIcon stopIcon = UIUtils.loadImageIcon("icons/Stop24.gif");
@@ -56,7 +48,7 @@ public class ProductLibraryToolView extends AbstractToolView {
     private JButton removeButton;
     private JButton updateButton;
 
-    private ProgressBarProgressMonitor progMon;
+    private LabelBarProgressMonitor progMon;
     private JProgressBar progressBar;
     private File currentDirectory;
     private ProductOpenHandler openHandler;
@@ -111,13 +103,14 @@ public class ProductLibraryToolView extends AbstractToolView {
                 libConfig.setWindowBounds(e.getComponent().getBounds());
             }
         });
-        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
+        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 1);
 
         return mainPanel;
     }
 
     private void applyConfig(final ProductLibraryConfig config) {
         final File[] baseDirList = config.getBaseDirs();
+        repositoryListCombo.insertItemAt(DatabasePane.ALL_FOLDERS, 0);
         for(File f : baseDirList) {
             repositoryListCombo.insertItemAt(f, repositoryListCombo.getItemCount());
         }
@@ -223,26 +216,47 @@ public class ProductLibraryToolView extends AbstractToolView {
         libConfig.addBaseDir(baseDir);
         final int index = repositoryListCombo.getItemCount();
         repositoryListCombo.insertItemAt(baseDir, index);
-        repositoryListCombo.setSelectedIndex(index);
-        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
+        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 1);
 
         updateRepostitory(baseDir, doRecursive);
     }
 
     private void updateRepostitory(final File baseDir, final boolean doRecursive) {
         if(baseDir == null) return;
-        progMon = new ProgressBarProgressMonitor(progressBar, statusLabel);
-        final SwingWorker repositoryCollector = new RepositoryCollector(baseDir, doRecursive, progMon);
+        progMon = new LabelBarProgressMonitor(progressBar, statusLabel);
+        progMon.addListener(new MyProgressBarListener());
+        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, progMon);
+        repositoryCollector.addListener(new MyDatabaseScannerListener());
         repositoryCollector.execute();
     }
 
-    private void removeRepository(final File baseDir) {
-        libConfig.removeBaseDir(baseDir);
-        final int index = repositoryListCombo.getSelectedIndex();
-        repositoryListCombo.removeItemAt(index);
-        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 0);
+    private void removeRepository() {
 
-        dbPane.removeProducts(baseDir);
+        final Object selectedItem = repositoryListCombo.getSelectedItem();
+        final int index = repositoryListCombo.getSelectedIndex();
+        if(index == 0) {
+            final int status=VisatApp.getApp().showQuestionDialog("This will remove all folders and products from the database.\n" +
+                    "Are you sure you wish to continue?", null);
+            if (status == JOptionPane.NO_OPTION)
+                return;
+            while(repositoryListCombo.getItemCount() > 1) {
+                final File baseDir = (File)repositoryListCombo.getItemAt(1);
+                libConfig.removeBaseDir(baseDir);
+                repositoryListCombo.removeItemAt(index);
+                dbPane.removeProducts(baseDir);
+            }
+        } else if(selectedItem instanceof File) {
+            final File baseDir = (File)selectedItem;
+            final int status=VisatApp.getApp().showQuestionDialog("This will remove all products within" +
+                    baseDir.getAbsolutePath()+" from the database\n" +
+                    "Are you sure you wish to continue?", null);
+            if (status == JOptionPane.NO_OPTION)
+                return;
+            libConfig.removeBaseDir(baseDir);
+            repositoryListCombo.removeItemAt(index);
+            dbPane.removeProducts(baseDir);
+        }
+        setUIComponentsEnabled(repositoryListCombo.getItemCount() > 1);
         UpdateUI();
     }
 
@@ -257,16 +271,16 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private void toggleUpdateButton(final String command) {
-        if (command.equals(stopCommand)) {
+        if (command.equals(LabelBarProgressMonitor.stopCommand)) {
             updateButton.setIcon(stopIcon);
             updateButton.setRolloverIcon(stopRolloverIcon);
-            updateButton.setActionCommand(stopCommand);
+            updateButton.setActionCommand(LabelBarProgressMonitor.stopCommand);
             addButton.setEnabled(false);
             removeButton.setEnabled(false);
         } else {
             updateButton.setIcon(updateIcon);
             updateButton.setRolloverIcon(updateRolloverIcon);
-            updateButton.setActionCommand(updateCommand);
+            updateButton.setActionCommand(LabelBarProgressMonitor.updateCommand);
             addButton.setEnabled(true);
             removeButton.setEnabled(true);
         }
@@ -450,7 +464,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         headerBar.add(openButton, gbc);
 
         updateButton = createToolButton("updateButton", updateIcon);
-        updateButton.setActionCommand(updateCommand);
+        updateButton.setActionCommand(LabelBarProgressMonitor.updateCommand);
         updateButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -459,7 +473,8 @@ public class ProductLibraryToolView extends AbstractToolView {
                     mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     progMon.setCanceled(true);
                 } else {
-                    updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
+                    if(repositoryListCombo.getSelectedIndex() != 0)
+                        updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
                 }
             }
         });
@@ -469,6 +484,18 @@ public class ProductLibraryToolView extends AbstractToolView {
         gbc.weightx = 99;
         repositoryListCombo = new JComboBox();
         setComponentName(repositoryListCombo, "repositoryListCombo");
+        repositoryListCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent event) {
+                if(event.getStateChange() == ItemEvent.SELECTED) {
+                    final Object selectedItem = repositoryListCombo.getSelectedItem();
+                    if(selectedItem instanceof File) {
+                        dbPane.setBaseDir((File)selectedItem);
+                    } else {
+                        dbPane.setBaseDir(null);
+                    }
+                }
+            }
+        });
         headerBar.add(repositoryListCombo, gbc);
         gbc.weightx = 0;
 
@@ -485,7 +512,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         removeButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                removeRepository((File)repositoryListCombo.getSelectedItem());
+                removeRepository();
             }
         });
         headerBar.add(removeButton, gbc);
@@ -521,193 +548,6 @@ public class ProductLibraryToolView extends AbstractToolView {
         worldMapUI.setProductEntryList(productEntryList);
     }
 
-    /**
-     * A {@link com.bc.ceres.core.ProgressMonitor} which uses a
-     * Swing's {@link javax.swing.ProgressMonitor} to display progress.
-     */
-    private class ProgressBarProgressMonitor implements ProgressMonitor {
-
-        private final JProgressBar progressBar;
-        private final JLabel messageLabel;
-
-        private double currentWork;
-        private double totalWork;
-
-        private int totalWorkUI;
-        private int currentWorkUI;
-        private int lastWorkUI;
-        private boolean cancelRequested;
-
-        public ProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
-            this.progressBar = progressBar;
-            this.messageLabel = messageLabel;
-        }
-
-        /**
-         * Notifies that the main task is beginning.  This must only be called once
-         * on a given progress monitor instance.
-         *
-         * @param name      the name (or description) of the main task
-         * @param totalWork the total number of work units into which
-         *                  the main task is been subdivided. If the value is <code>UNKNOWN</code>
-         *                  the implementation is free to indicate progress in a way which
-         *                  doesn't require the total number of work units in advance.
-         */
-        public void beginTask(String name, int totalWork) {
-            Assert.notNull(name, "name");
-            currentWork = 0.0;
-            this.totalWork = totalWork;
-            currentWorkUI = 0;
-            lastWorkUI = 0;
-            totalWorkUI = totalWork;
-            if (messageLabel != null) {
-                messageLabel.setText(name);
-            }
-            cancelRequested = false;
-            setDescription(name);
-            setVisibility(true);
-            progressBar.setMaximum(totalWork);
-            toggleUpdateButton(stopCommand);
-        }
-
-        /**
-         * Notifies that the work is done; that is, either the main task is completed
-         * or the user canceled it. This method may be called more than once
-         * (implementations should be prepared to handle this case).
-         */
-        public void done() {
-            runInUI(new Runnable() {
-                public void run() {
-                    if (progressBar != null) {
-                        progressBar.setValue(progressBar.getMaximum());
-                        setVisibility(false);
-                        toggleUpdateButton(updateCommand);
-                        updateButton.setEnabled(true);
-                        mainPanel.setCursor(Cursor.getDefaultCursor());
-                    }
-                }
-            });
-        }
-
-        /**
-         * Internal method to handle scaling correctly. This method
-         * must not be called by a client. Clients should
-         * always use the method </code>worked(int)</code>.
-         *
-         * @param work the amount of work done
-         */
-        public void internalWorked(double work) {
-            currentWork += work;
-            currentWorkUI = (int) (totalWorkUI * currentWork / totalWork);
-            if (currentWorkUI > lastWorkUI) {
-                runInUI(new Runnable() {
-                    public void run() {
-                        if (progressBar != null) {
-                            int progress = progressBar.getMinimum() + currentWorkUI;
-                            progressBar.setValue(progress);
-                            setVisibility(true);
-                            toggleUpdateButton(stopCommand);
-                        }
-                        lastWorkUI = currentWorkUI;
-                    }
-                });
-            }
-        }
-
-        /**
-         * Returns whether cancelation of current operation has been requested.
-         * Long-running operations should poll to see if cancelation
-         * has been requested.
-         *
-         * @return <code>true</code> if cancellation has been requested,
-         *         and <code>false</code> otherwise
-         *
-         * @see #setCanceled(boolean)
-         */
-        public boolean isCanceled() {
-            return cancelRequested;
-        }
-
-        /**
-         * Sets the cancel state to the given value.
-         *
-         * @param canceled <code>true</code> indicates that cancelation has
-         *                 been requested (but not necessarily acknowledged);
-         *                 <code>false</code> clears this flag
-         *
-         * @see #isCanceled()
-         */
-        public void setCanceled(boolean canceled) {
-            cancelRequested = canceled;
-            if (canceled) {
-                done();
-            }
-        }
-
-        /**
-         * Sets the task name to the given value. This method is used to
-         * restore the task label after a nested operation was executed.
-         * Normally there is no need for clients to call this method.
-         *
-         * @param name the name (or description) of the main task
-         *
-         * @see #beginTask(String, int)
-         */
-        public void setTaskName(final String name) {
-            runInUI(new Runnable() {
-                public void run() {
-                    if (messageLabel != null) {
-                        messageLabel.setText(name);
-                    }
-                }
-            });
-        }
-
-        /**
-         * Notifies that a subtask of the main task is beginning.
-         * Subtasks are optional; the main task might not have subtasks.
-         *
-         * @param name the name (or description) of the subtask
-         */
-        public void setSubTaskName(final String name) {
-            setVisibility(true);
-            messageLabel.setText(name);
-            toggleUpdateButton(stopCommand);
-        }
-
-        /**
-         * Notifies that a given number of work unit of the main task
-         * has been completed. Note that this amount represents an
-         * installment, as opposed to a cumulative amount of work done
-         * to date.
-         *
-         * @param work the number of work units just completed
-         */
-        public void worked(int work) {
-            internalWorked(work);
-        }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Stuff to be performed in Swing's event-dispatching thread
-
-        private void runInUI(Runnable task) {
-            if (SwingUtilities.isEventDispatchThread()) {
-                task.run();
-            } else {
-                SwingUtilities.invokeLater(task);
-            }
-        }
-
-        private void setDescription(final String description) {
-            statusLabel.setText(description);
-        }
-
-        private void setVisibility(final boolean visible) {
-            progressPanel.setVisible(visible);
-            statusLabel.setVisible(visible);
-        }
-    }
-
     private class MyDatabaseQueryListener implements DatabaseQueryListener {
 
         public void notifyNewProductEntryListAvailable() {
@@ -719,6 +559,26 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
     }
 
+    private class MyDatabaseScannerListener implements DBScanner.DBScannerListener {
+
+        public void notifyMSG(MSG msg) {
+            UpdateUI();
+        }
+    }
+
+    private class MyProgressBarListener implements LabelBarProgressMonitor.ProgressBarListener {
+        public void notifyStart() {
+            progressPanel.setVisible(true);
+            toggleUpdateButton(LabelBarProgressMonitor.stopCommand);
+        }
+
+        public void notifyDone() {
+            progressPanel.setVisible(false);
+            toggleUpdateButton(LabelBarProgressMonitor.updateCommand);
+            updateButton.setEnabled(true);
+            mainPanel.setCursor(Cursor.getDefaultCursor());
+        }
+    }
 
     /**
      * Should be implemented for handling opening {@link org.esa.beam.framework.datamodel.Product} files.
@@ -731,126 +591,6 @@ public class ProductLibraryToolView extends AbstractToolView {
          * @param productFiles the files to open.
          */
         public void openProducts(File[] productFiles);
-    }
-
-    private class RepositoryCollector extends SwingWorker {
-
-        private final File baseDir;
-        private final boolean doRecursive;
-        private final ProgressMonitor pm;
-
-
-        public RepositoryCollector(final File baseDir, final boolean doRecursive, final ProgressMonitor pm) {
-            this.pm = pm;
-            this.baseDir = baseDir;
-            this.doRecursive = doRecursive;
-        }
-
-        @Override
-        protected Boolean doInBackground() throws Exception {
-            final ArrayList<File> dirList = new ArrayList<File>();
-            dirList.add(baseDir);
-            if (doRecursive) {
-                final File[] subDirs = collectAllSubDirs(baseDir);
-                dirList.addAll(Arrays.asList(subDirs));
-            }
-
-            final ArrayList<File> fileList = new ArrayList<File>();
-            for(File file : dirList) {
-                fileList.addAll(Arrays.asList(file.listFiles()));
-            }
-
-            final ArrayList<File> qlProductFiles = new ArrayList<File>();
-            final ArrayList<Integer> qlIDs = new ArrayList<Integer>();
-
-            final int total = fileList.size();
-            pm.beginTask("Scanning Files...", total);
-            int i=0;
-            try {
-                for(File file : fileList) {
-                    ++i;
-                    pm.setTaskName("Scanning Files... "+i+" of "+total);
-                    pm.worked(1);
-
-                    if(!file.isDirectory()) {
-                        if(pm.isCanceled())
-                            break;
-                        if(TestUtils.isNotProduct(file))
-                            continue;
-
-                        if(dbPane.getDB().pathExistsInDB(file))
-                            continue;
-
-                        try {
-                            final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                            if(reader != null) {
-                                final Product sourceProduct = reader.readProductNodes(file, null);
-                                if(sourceProduct != null) {
-                                    final ProductEntry entry = dbPane.getDB().saveProduct(sourceProduct);
-                                    if(!entry.quickLookExists()) {
-                                        qlProductFiles.add(file);
-                                        qlIDs.add(entry.getId());
-                                    }
-                                    sourceProduct.dispose();
-                                    entry.dispose();
-                                }
-                            }
-                        } catch(Exception e) {
-                            System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
-                        }
-                    }
-                }
-                UpdateUI();
-
-                final int numQL = qlProductFiles.size();
-                pm.beginTask("Generating Quicklooks...", numQL);
-                for(int j=0; j < numQL; ++j) {
-                    pm.setTaskName("Generating Quicklook... "+j+" of "+numQL);
-                    pm.worked(1);
-                    if(pm.isCanceled())
-                        break;
-
-                    final File file = qlProductFiles.get(j);
-                    try {
-                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                        if(reader != null) {
-                            final Product sourceProduct = reader.readProductNodes(file, null);
-                            if(sourceProduct != null) {
-                                QuickLookGenerator.createQuickLook(qlIDs.get(j), sourceProduct);
-                                UpdateUI();
-                                sourceProduct.dispose();
-                            }
-                        }
-                    } catch(Exception e) {
-                        System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
-                    }
-                }
-
-            } catch(Exception e) {
-                System.out.println("Scanning Exception\n"+e.getMessage());
-            } finally {
-                pm.done();
-            }
-            return true;
-        }
-
-        @Override
-        public void done() {
-            UpdateUI();
-        }
-
-        private File[] collectAllSubDirs(final File dir) {
-            final ArrayList<File> dirList = new ArrayList<File>();
-            final DirectoryFileFilter dirFilter = new DirectoryFileFilter();
-
-            final File[] subDirs = dir.listFiles(dirFilter);
-            for (final File subDir : subDirs) {
-                dirList.add(subDir);
-                final File[] dirs = collectAllSubDirs(subDir);
-                dirList.addAll(Arrays.asList(dirs));
-            }
-            return dirList.toArray(new File[dirList.size()]);
-        }
     }
 
     private static class MyProductOpenHandler implements ProductOpenHandler {
@@ -888,20 +628,4 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
     }
 
-    public static class DirectoryFileFilter implements java.io.FileFilter {
-
-        final static String[] skip = { "annotation", "auxraster", "imagedata", "preview", "support", "schemas" };
-
-        public boolean accept(final File file) {
-            if(!file.isDirectory()) return false;
-            final String name = file.getName().toLowerCase();
-            if(name.endsWith(".data"))
-                return false;
-            for(String ext : skip) {
-                if(name.equalsIgnoreCase(ext))
-                    return false;
-            }
-            return true;
-        }
-    }
 }
