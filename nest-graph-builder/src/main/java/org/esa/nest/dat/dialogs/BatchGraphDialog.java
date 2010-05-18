@@ -113,7 +113,7 @@ public class BatchGraphDialog extends ModelessDialog {
     }
 
     @Override
-    protected void onApply() {
+    public void onApply() {
         if(isProcessing) return;
 
         productSetPanel.onApply();
