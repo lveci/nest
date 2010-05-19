@@ -35,7 +35,6 @@ public class GraphExecuter extends Observable {
 
     private int idCount = 0;
     private final ArrayList<GraphNode> nodeList = new ArrayList<GraphNode>();
-    private final ArrayList<GraphNode> savedProductSetList = new ArrayList<GraphNode>();
 
     public enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
 
@@ -225,13 +224,13 @@ public class GraphExecuter extends Observable {
     public boolean InitGraph() throws GraphException {
         if(IsGraphComplete()) {
             AssignAllParameters();
-            replaceProductSetReaders();
+            final GraphNode[] savedProductSetList = replaceProductSetReaders();
 
             try {
                 recreateGraphContext();
                 updateGraphNodes();
             } finally {
-                restoreProductSetReaders();
+                restoreProductSetReaders(savedProductSetList);
             }
             return true;
         }
@@ -377,10 +376,10 @@ public class GraphExecuter extends Observable {
         return productSetDataList.toArray(new ProductSetData[productSetDataList.size()]);
     }
 
-    private void replaceProductSetReaders() {
+    private GraphNode[] replaceProductSetReaders() {
         final ProductSetData[] productSetDataList =
                 findProductSets(OperatorSpi.getOperatorAlias(ProductSetReaderOp.class));
-        savedProductSetList.clear();
+        final ArrayList<GraphNode> savedProductSetList = new ArrayList<GraphNode>();
 
         int cnt = 0;
         for(ProductSetData psData : productSetDataList) {
@@ -394,9 +393,10 @@ public class GraphExecuter extends Observable {
                 savedProductSetList.add(sourceNode);
             }
         }
+        return savedProductSetList.toArray(new GraphNode[savedProductSetList.size()]);
     }
 
-    private void restoreProductSetReaders() {
+    private void restoreProductSetReaders(GraphNode[] savedProductSetList ) {
         for(GraphNode multiSrcNode : savedProductSetList) {
 
             final ArrayList<GraphNode> nodesToRemove = new ArrayList<GraphNode>();

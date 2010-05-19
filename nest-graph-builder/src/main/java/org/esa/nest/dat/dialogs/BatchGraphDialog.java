@@ -23,9 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 /**
  *  Provides the dialog for excuting a graph on a list of products
@@ -46,6 +44,8 @@ public class BatchGraphDialog extends ModelessDialog {
     private final JPanel progressPanel;
     private final JProgressBar progressBar;
     private ProgressBarProgressMonitor progBarMonitor = null;
+
+    private Map<File, File[]> slaveFileMap = null;
 
     private boolean isProcessing = false;
     private File graphFile;
@@ -101,8 +101,8 @@ public class BatchGraphDialog extends ModelessDialog {
     public int show() {
         productSetPanel.initProducts();
         setContent(mainPanel);
-        initGraphs();
-        addGraphTabs("", true);
+        //initGraphs();
+        //addGraphTabs("", true);
         return super.show();
     }
 
@@ -299,7 +299,8 @@ public class BatchGraphDialog extends ModelessDialog {
         for(GraphNode n : graphEx.GetGraphNodes()) {
             if(n.GetOperatorUI() == null)
                 continue;
-            if(n.getNode().getOperatorName().equals("Read") || n.getNode().getOperatorName().equals("Write")) {
+            if(n.getNode().getOperatorName().equals("Read") || n.getNode().getOperatorName().equals("Write")
+               || n.getNode().getOperatorName().equals("ProductSet-Reader")) {
                 n.setOperatorUI(null);
                 continue;
             }
@@ -315,6 +316,10 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
+    public void setSlaveFileMap(Map<File, File[]> fileMap) {
+        slaveFileMap = fileMap;
+    }
+
     void assignParameters() {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
@@ -325,6 +330,13 @@ public class BatchGraphDialog extends ModelessDialog {
             setIO(graphExecuterList.get(graphIndex),
                 "Read", f,
                 "Write", targetFile, internalFormat);
+            if(slaveFileMap != null) {
+                final File[] slaveFiles = slaveFileMap.get(f);
+                if(slaveFiles != null) {
+                    setSlaveIO(graphExecuterList.get(graphIndex),
+                                "ProductSet-Reader", f, slaveFiles);
+                }
+            }
             ++graphIndex;
         }
     }
@@ -347,6 +359,26 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
+    /**
+     * For coregistration
+     * @param graphEx the graph executer
+     * @param productSetID the product set reader
+     * @param masterFile master file
+     * @param slaveFiles slave file list
+     */
+    private static void setSlaveIO(final GraphExecuter graphEx, final String productSetID,
+                                   final File masterFile, final File[] slaveFiles) {
+        final GraphNode productSetNode = graphEx.findGraphNodeByOperator(productSetID);
+        if(productSetNode != null) {
+            StringBuilder str = new StringBuilder(masterFile.getAbsolutePath());
+            for(File slaveFile : slaveFiles) {
+                str.append(",");
+                str.append(slaveFile.getAbsolutePath());
+            }
+            graphEx.setOperatorParam(productSetNode.getID(), "fileList", str.toString());
+        }
+    }
+
     void cloneGraphs() {
         final GraphExecuter graphEx = graphExecuterList.get(0);
         for(int graphIndex = 1; graphIndex < graphExecuterList.size(); ++graphIndex) {
@@ -356,7 +388,6 @@ public class BatchGraphDialog extends ModelessDialog {
         graphExecuterList.clear();
         graphExecuterList.add(graphEx);
 
-        final ArrayList<GraphNode> graphNodes = graphEx.GetGraphNodes();
         final File[] fileList = productSetPanel.getFileList();
         for(int graphIndex = 1; graphIndex < fileList.length; ++graphIndex) {
 
@@ -365,8 +396,10 @@ public class BatchGraphDialog extends ModelessDialog {
             graphExecuterList.add(cloneGraphEx);
 
             final ArrayList<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
-            for(int i=0; i < graphNodes.size(); ++i) {
-                cloneGraphNodes.get(i).setOperatorUI(graphNodes.get(i).GetOperatorUI());
+            for(GraphNode cloneNode : cloneGraphNodes) {
+                final GraphNode node = graphEx.findGraphNode(cloneNode.getID());
+                if(node != null)
+                    cloneNode.setOperatorUI(node.GetOperatorUI());
             }
         }
     }
