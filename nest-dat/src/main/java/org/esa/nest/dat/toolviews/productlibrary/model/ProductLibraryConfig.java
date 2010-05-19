@@ -2,6 +2,7 @@ package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;
+import org.esa.beam.visat.VisatApp;
 
 import java.awt.*;
 import java.io.File;
@@ -41,6 +42,7 @@ public class ProductLibraryConfig {
      */
     public void addBaseDir(final File baseDir) {
         _properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), baseDir.getAbsolutePath());
+        VisatApp.getApp().savePreferences();
     }
 
     /**
@@ -50,6 +52,7 @@ public class ProductLibraryConfig {
      */
     public void removeBaseDir(final File baseDir) {
         _properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), null);
+        VisatApp.getApp().savePreferences();
     }
 
     /**

@@ -188,4 +188,13 @@ public class ProductEntry {
         }
         return bEqual;
     }
+
+    public static File[] getFileList(final ProductEntry[] productEntryList) {
+        final File[] fileList = new File[productEntryList.length];
+        int i = 0;
+        for(ProductEntry entry : productEntryList) {
+            fileList[i++] = entry.getFile();
+        }
+        return fileList;
+    }
 }

@@ -15,6 +15,7 @@ import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
+import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
 
@@ -110,7 +111,7 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private void applyConfig(final ProductLibraryConfig config) {
         final File[] baseDirList = config.getBaseDirs();
-        repositoryListCombo.insertItemAt(DatabasePane.ALL_FOLDERS, 0);
+        repositoryListCombo.insertItemAt(DBQuery.ALL_FOLDERS, 0);
         for(File f : baseDirList) {
             repositoryListCombo.insertItemAt(f, repositoryListCombo.getItemCount());
         }
