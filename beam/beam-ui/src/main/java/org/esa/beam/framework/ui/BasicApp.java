@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.9 2010-05-17 14:49:44 lveci Exp $
+ * $Id: BasicApp.java,v 1.10 2010-05-18 21:26:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -125,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $  $Date: 2010-05-17 14:49:44 $
+ * @version $Revision: 1.10 $  $Date: 2010-05-18 21:26:12 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -973,7 +973,7 @@ public class BasicApp {
         }
     }
 
-    protected final void savePreferences() {
+    public final void savePreferences() {
 
         if (preferencesFile == null) {
             return;
