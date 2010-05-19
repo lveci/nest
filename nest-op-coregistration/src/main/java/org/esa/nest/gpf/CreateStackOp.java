@@ -90,7 +90,7 @@ public class CreateStackOp extends Operator {
                 }
             }
 
-            if(masterBandNames == null || masterBandNames.length == 0) {
+            if(masterBandNames == null || masterBandNames.length == 0 || getMasterProduct(masterBandNames[0]) == null) {
                 final Product defaultProd = sourceProduct[0];
                 if(defaultProd != null) {
                     final Band defaultBand = defaultProd.getBandAt(0);
