@@ -45,7 +45,7 @@ public class DatApp extends VisatApp {
 
     @Override
     protected String getMainFrameTitle() {
-        final String ver = System.getProperty("nest.version");
+        final String ver = System.getProperty(ResourceUtils.getContextID()+".version");
         //return getAppName() + " " + getAppVersion();
         return getAppName() + " "+ver;
     }
@@ -252,8 +252,7 @@ public class DatApp extends VisatApp {
             return;
         }
 
-        final String homeUrl = System.getProperty("nest.home", ".");
-        final File graphPath = new File(homeUrl, File.separator + "graphs");
+        final File graphPath = ResourceUtils.getGraphFolder("");
         if(!graphPath.exists()) return;
 
         createGraphMenu(menu, graphPath);

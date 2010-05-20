@@ -188,6 +188,10 @@ public final class ResourceUtils {
         return System.getProperty("ceres.context", "nest");
     }
 
+    public static String getHomeUrl() {
+        return System.getProperty(getContextID()+".home", ".");
+    }
+
     /**
      * get the temporary data folder in the user's application data directory
      * @return the temp folder
@@ -200,8 +204,7 @@ public final class ResourceUtils {
     }
 
     public static File getGraphFolder(final String subFolder) {
-        final String homeUrl = System.getProperty(getContextID()+".home", ".");
-        return new File(homeUrl, File.separator + "graphs" + File.separator + subFolder);
+        return new File(getHomeUrl(), File.separator + "graphs" + File.separator + subFolder);
     }
 
     public static File findUserAppFile(String filename)

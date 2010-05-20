@@ -29,11 +29,13 @@ public final class DialogUtils {
         contentPane.add(component, gbc);
     }
 
-    public static void addComponent(JPanel contentPane, GridBagConstraints gbc, String label, JComponent component) {
+    public static JLabel addComponent(JPanel contentPane, GridBagConstraints gbc, String text, JComponent component) {
         gbc.gridx = 0;
-        contentPane.add(new JLabel(label), gbc);
+        final JLabel label = new JLabel(text);
+        contentPane.add(label, gbc);
         gbc.gridx = 1;
         contentPane.add(component, gbc);
+        return label;
     }
 
     public static JFormattedTextField createFormattedTextField(final NumberFormat numFormat, final Object value,

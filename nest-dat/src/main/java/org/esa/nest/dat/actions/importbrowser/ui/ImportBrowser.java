@@ -19,6 +19,7 @@ import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvid
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -231,8 +232,7 @@ public class ImportBrowser {
     }
 
     private JPopupMenu createPopup() {
-        final String homeUrl = System.getProperty("nest.home", ".");
-        final File graphPath = new File(homeUrl, File.separator + "graphs");
+        final File graphPath = ResourceUtils.getGraphFolder("");
 
         final JPopupMenu popup = new JPopupMenu();
         if(graphPath.exists()) {

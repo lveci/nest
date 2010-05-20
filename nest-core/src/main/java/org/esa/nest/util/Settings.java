@@ -136,7 +136,7 @@ public final class Settings {
             }
         }
 
-        if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
+        if(keyWord.equalsIgnoreCase(ResourceUtils.getContextID()+".home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
             final String valStr = value.substring(0, idx1) + value.substring(idx2, value.length());
             final File file = ResourceUtils.findInHomeFolder(valStr);
             if(file != null)

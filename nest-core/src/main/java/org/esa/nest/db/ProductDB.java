@@ -55,7 +55,6 @@ public class ProductDB extends DAO {
     }
 
     protected void prepareStatements() throws SQLException {
-        //final Connection connection = getDBConnection();
         productTable.prepareStatements();
         metadataTable.prepareStatements();
     }
@@ -128,5 +127,9 @@ public class ProductDB extends DAO {
 
     public String[] getProductTypes(final String[] missions) throws SQLException {
         return productTable.getProductTypes(missions);
+    }
+
+    public String[] getMetadataNames() {
+        return metadataTable.getAllMetadataNames();
     }
 }

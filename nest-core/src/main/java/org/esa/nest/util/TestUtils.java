@@ -26,34 +26,35 @@ public class TestUtils {
 
     private static final PropertyMap testPreferences = createTestPreferences();
 
-    public final static String rootPathExpectedProducts = testPreferences.getPropertyString("nest.test.rootPathExpectedProducts");
-    public final static String rootPathTerraSarX = testPreferences.getPropertyString("nest.test.rootPathTerraSarX");
-    public final static String rootPathASAR= testPreferences.getPropertyString("nest.test.rootPathASAR");
-    public final static String rootPathRadarsat2 = testPreferences.getPropertyString("nest.test.rootPathRadarsat2");
-    public final static String rootPathRadarsat1 = testPreferences.getPropertyString("nest.test.rootPathRadarsat1");
-    public final static String rootPathERS = testPreferences.getPropertyString("nest.test.rootPathERS");
-    public final static String rootPathJERS = testPreferences.getPropertyString("nest.test.rootPathJERS");
-    public final static String rootPathALOS = testPreferences.getPropertyString("nest.test.rootPathALOS");
-    public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
-    public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
+    private final static String contextID = ResourceUtils.getContextID();
+    public final static String rootPathExpectedProducts = testPreferences.getPropertyString(contextID+".test.rootPathExpectedProducts");
+    public final static String rootPathTerraSarX = testPreferences.getPropertyString(contextID+".test.rootPathTerraSarX");
+    public final static String rootPathASAR= testPreferences.getPropertyString(contextID+".test.rootPathASAR");
+    public final static String rootPathRadarsat2 = testPreferences.getPropertyString(contextID+".test.rootPathRadarsat2");
+    public final static String rootPathRadarsat1 = testPreferences.getPropertyString(contextID+".test.rootPathRadarsat1");
+    public final static String rootPathERS = testPreferences.getPropertyString(contextID+".test.rootPathERS");
+    public final static String rootPathJERS = testPreferences.getPropertyString(contextID+".test.rootPathJERS");
+    public final static String rootPathALOS = testPreferences.getPropertyString(contextID+".test.rootPathALOS");
+    public final static String rootPathCosmoSkymed = testPreferences.getPropertyString(contextID+".test.rootPathCosmoSkymed");
+    public final static String rootPathMixProducts = testPreferences.getPropertyString(contextID+".test.rootPathMixProducts");
 
-    public final static int subsetX = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetX"));
-    public final static int subsetY = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetY"));
-    public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetWidth"));
-    public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetHeight"));
+    public final static int subsetX = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetX"));
+    public final static int subsetY = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetY"));
+    public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetWidth"));
+    public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
     private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
                                                    "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw",
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
-                                                   "sav"};
+                                                   "sav", "7z", "zip", "rrd"};
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
-    private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString("nest.test.maxProductsPerRootFolder"));
+    private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
 
     private static PropertyMap createTestPreferences() {
         final PropertyMap prefs = new PropertyMap();
         try {
-            prefs.load(ResourceUtils.findConfigFile("nest.config"));
+            prefs.load(ResourceUtils.findConfigFile(ResourceUtils.getContextID()+".config"));
         } catch(IOException e) {
             System.out.println("Unable to load test preferences "+e.getMessage());
         }
@@ -65,12 +66,12 @@ public class TestUtils {
     }
 
     public static boolean canTestReadersOnAllProducts() {
-        final String testAllProducts = testPreferences.getPropertyString("nest.test.ReadersOnAllProducts");
+        final String testAllProducts = testPreferences.getPropertyString(contextID+".test.ReadersOnAllProducts");
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 
     public static boolean canTestProcessingOnAllProducts() {
-        final String testAllProducts = testPreferences.getPropertyString("nest.test.ProcessingOnAllProducts");
+        final String testAllProducts = testPreferences.getPropertyString(contextID+".test.ProcessingOnAllProducts");
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 

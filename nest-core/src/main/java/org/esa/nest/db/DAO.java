@@ -17,6 +17,7 @@ public abstract class DAO {
     private boolean isConnected;
     private final Properties dbProperties;
     private final String dbName;
+    private Connection dbConnect = null;
     protected SQLException lastSQLException = null;
 
     public DAO(final String name) throws IOException {
@@ -77,8 +78,8 @@ public abstract class DAO {
         dbProperties.put("create", "true");
 
         try {
-            final Connection dbConnection = DriverManager.getConnection(getDatabaseUrl(), dbProperties);
-            bCreated = createTables(dbConnection);
+            dbConnect = DriverManager.getConnection(getDatabaseUrl(), dbProperties);
+            bCreated = createTables(dbConnect);
         } catch (SQLException ex) {
             ex.printStackTrace();
             lastSQLException = ex;
@@ -103,12 +104,13 @@ public abstract class DAO {
         if(isConnected) return isConnected;
 
         try {
-            final Connection dbConnection = DriverManager.getConnection(getDatabaseUrl(), dbProperties);
+            if(dbConnect == null)
+                dbConnect = DriverManager.getConnection(getDatabaseUrl(), dbProperties);
 
-            validateDatabase(dbConnection);
+            validateDatabase(dbConnect);
             prepareStatements();
 
-            isConnected = dbConnection != null;
+            isConnected = dbConnect != null;
         } catch (SQLException ex) {
             ex.printStackTrace();
             isConnected = false;
@@ -128,6 +130,10 @@ public abstract class DAO {
             isConnected = false;
             dbProperties.remove("shutdown");
         }
+    }
+
+    public Connection getConnection() {
+        return dbConnect;
     }
 
     public SQLException getLastSQLException() {

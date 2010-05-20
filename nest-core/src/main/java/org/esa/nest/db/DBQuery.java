@@ -9,6 +9,9 @@ import java.awt.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
 
@@ -27,6 +30,7 @@ public class DBQuery {
     private String selectedPass = "";
     private Rectangle.Float selectionRectangle = null;
     private File baseDir = null;
+    private final Map<String, String> metadataQueryMap = new HashMap<String, String>();
 
     public DBQuery() {
     }
@@ -45,6 +49,14 @@ public class DBQuery {
 
     public void setBaseDir(final File dir) {
         baseDir = dir;
+    }
+
+    public void clearMetadataQuery() {
+        metadataQueryMap.clear();
+    }
+
+    public void addMetadataQuery(final String name, final String value) {
+        metadataQueryMap.put(name, value);
     }
 
     public ProductEntry[] queryDatabase(final ProductDB db) throws SQLException {
@@ -69,6 +81,16 @@ public class DBQuery {
             if(!queryStr.isEmpty())
                 queryStr += " AND ";
             queryStr += AbstractMetadata.PASS+"='"+selectedPass+"'";
+        }
+
+        final Set<String> metadataNames = metadataQueryMap.keySet();
+        for(String name : metadataNames) {
+            final String value = metadataQueryMap.get(name);
+            if(value != null && !value.isEmpty()) {
+                if(!queryStr.isEmpty())
+                    queryStr += " AND ";
+                queryStr += name+"='"+value+"'";
+            }
         }
 
         if(baseDir != null) {

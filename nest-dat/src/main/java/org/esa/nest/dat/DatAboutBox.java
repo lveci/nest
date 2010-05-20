@@ -89,7 +89,7 @@ class DatAboutBox extends ModalDialog {
     }
 
     private static String getVersionHtml() {
-        final String ver = System.getProperty("nest.version");
+        final String ver = System.getProperty(ResourceUtils.getContextID()+".version");
         final String pattern =
                 "<html>" +
                 "<b>NEST DAT Version "+ver+"</b>" +

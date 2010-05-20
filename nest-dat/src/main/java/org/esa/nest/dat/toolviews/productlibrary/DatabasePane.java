@@ -32,6 +32,8 @@ public class DatabasePane extends JPanel {
             DBQuery.ALL_PASSES, DBQuery.ASCENDING_PASS, DBQuery.DESCENDING_PASS });
     private final DateComboBox startDateBox = new DateComboBox();
     private final DateComboBox endDateBox = new DateComboBox();
+    private final JComboBox metadataNameCombo = new JComboBox();
+    private final JTextField metdataValueField = new JTextField();
 
     private ProductDB db;
     private final DBQuery dbQuery = new DBQuery();
@@ -79,6 +81,11 @@ public class DatabasePane extends JPanel {
                 }
             });
 
+            final String[] metadataNames = db.getMetadataNames();
+            for(String name : metadataNames) {
+                metadataNameCombo.insertItemAt(name, metadataNameCombo.getItemCount());
+            }
+
             refresh();
         } catch(Throwable t) {
             handleException(t);
@@ -123,19 +130,32 @@ public class DatabasePane extends JPanel {
         setLayout(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
+        JLabel label;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        DialogUtils.addComponent(this, gbc, "Mission:", new JScrollPane(missionJList));
+        label = DialogUtils.addComponent(this, gbc, "Mission:", new JScrollPane(missionJList));
+        label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
-        DialogUtils.addComponent(this, gbc, "Product Type:", new JScrollPane(productTypeJList));
+        label = DialogUtils.addComponent(this, gbc, "Product Type:", new JScrollPane(productTypeJList));
+        label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
-        DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
+        label = DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
+        label.setHorizontalAlignment(JLabel.RIGHT);
 
         gbc.gridy++;
-        DialogUtils.addComponent(this, gbc, "Start Date:", startDateBox);
+        label = DialogUtils.addComponent(this, gbc, "Start Date:", startDateBox);
+        label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
-        DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
+        label = DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        gbc.gridx = 0;
+        this.add(metadataNameCombo, gbc);
+        metadataNameCombo.setPrototypeDisplayValue("1234567890123456789");
+        gbc.gridx = 1;
+        this.add(metdataValueField, gbc);
+
     }
 
     private void connectToDatabase() throws Exception {
@@ -223,6 +243,9 @@ public class DatabasePane extends JPanel {
         dbQuery.setSelectedMissions(toStringArray(missionJList.getSelectedValues()));
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
+
+        dbQuery.clearMetadataQuery();
+        dbQuery.addMetadataQuery((String)metadataNameCombo.getSelectedItem(), metdataValueField.getText());
 
         if(productEntryList != null) {
             ProductEntry.dispose(productEntryList);

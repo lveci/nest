@@ -113,8 +113,8 @@ public class TestProductDao extends TestCase {
     public void testSelect() throws SQLException {
         final String strGetProductsWhere = "SELECT * FROM APP.PRODUCTS WHERE MISSION='ENVISAT'";
 
-        //final Statement queryStatement = db.getDBConnection().createStatement();
-        //final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
+        final Statement queryStatement = db.getConnection().createStatement();
+        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere);
     }
 
     public void testRectIntersect() {

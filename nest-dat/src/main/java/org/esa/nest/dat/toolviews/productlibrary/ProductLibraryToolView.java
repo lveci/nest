@@ -18,6 +18,7 @@ import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
 import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -156,8 +157,7 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private JPopupMenu createPopup() {
-        final String homeUrl = System.getProperty("nest.home", ".");
-        final File graphPath = new File(homeUrl, File.separator + "graphs");
+        final File graphPath = ResourceUtils.getGraphFolder("");
 
         final JPopupMenu popup = new JPopupMenu();
         if(graphPath.exists()) {

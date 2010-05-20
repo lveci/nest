@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  *
@@ -13,12 +14,9 @@ import java.sql.*;
 public class MetadataTable implements TableInterface {
 
     private final Connection dbConnection;
+    private final static ArrayList<String> metadataNamesList = new ArrayList<String>();
 
     private PreparedStatement stmtSaveNewRecord;
-    private PreparedStatement stmtUpdateExistingRecord;
-    private PreparedStatement stmtGetAddress;
-    private PreparedStatement stmtGetProductWithPath;
-    private PreparedStatement stmtDeleteAddress;
 
     private final static MetadataElement emptyMetadata = AbstractMetadata.addAbstractedMetadataHeader(null);
     private static String createTableStr;
@@ -55,6 +53,7 @@ public class MetadataTable implements TableInterface {
         final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
         for(MetadataAttribute attrib : attribList) {
             final String name = attrib.getName();
+            metadataNamesList.add(name);
             createTableStr += ", "+ name +" "+ getDataType(attrib.getDataType());
             namesStr += name +",";
             valueStr += "?,";
@@ -80,7 +79,6 @@ public class MetadataTable implements TableInterface {
 
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(saveProductStr, Statement.RETURN_GENERATED_KEYS);
-
     }
 
     public ResultSet addRecord(final ProductEntry record) throws SQLException {
@@ -109,5 +107,9 @@ public class MetadataTable implements TableInterface {
         }
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();
+    }
+
+    public String[] getAllMetadataNames() {
+        return metadataNamesList.toArray(new String[metadataNamesList.size()]);
     }
 }

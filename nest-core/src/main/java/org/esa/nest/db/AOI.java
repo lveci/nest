@@ -22,6 +22,7 @@ public class AOI {
     private String inputFolder = "";
     private String outputFolder = "";
     private String processingGraph = "";
+    private String lastProcessed = "";
 
     public AOI(final File file) {
         this.aoiFile = file;
@@ -69,6 +70,14 @@ public class AOI {
         processingGraph = file;
     }
 
+    public String getLastProcessed() {
+        return lastProcessed;
+    }
+
+    public void setLastProcessed(final String date) {
+        lastProcessed = date;
+    }
+
     public void save() {
         final Element root = new Element("AOI");
         root.setAttribute("name", name);
@@ -78,6 +87,7 @@ public class AOI {
         elem.setAttribute("inputFolder", inputFolder);
         elem.setAttribute("outputFolder", outputFolder);
         elem.setAttribute("graph", processingGraph);
+        elem.setAttribute("lastProcessed", lastProcessed);
 
         root.addContent(elem);
 
@@ -102,6 +112,7 @@ public class AOI {
                         inputFolder = getAttrib(child, "inputFolder");
                         outputFolder = getAttrib(child, "outputFolder");
                         processingGraph = getAttrib(child, "graph");
+                        lastProcessed = getAttrib(child, "lastProcessed");
                     }
                 }
             }
