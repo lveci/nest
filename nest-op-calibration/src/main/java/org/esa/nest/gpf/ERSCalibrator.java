@@ -24,6 +24,7 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
 
 import javax.media.jai.BorderExtender;
@@ -887,8 +888,8 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     private static File getERSAuxFile(final String fileName) {
-        final String homeUrl = System.getProperty("nest.home", ".");
-        final String path = homeUrl + File.separator + "auxdata" + File.separator + "ers" + File.separator + fileName;
+        final String path = ResourceUtils.getHomeUrl() +
+                File.separator + "auxdata" + File.separator + "ers" + File.separator + fileName;
         return new File(path);
     }
 

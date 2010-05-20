@@ -500,7 +500,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     }
 
     public static File getInternalGraphFolder() {
-        final String homeUrl = System.getProperty("nest.home", ".");
-        return new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
+        return ResourceUtils.getGraphFolder("internal");
     }
 }

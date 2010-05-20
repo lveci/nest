@@ -6,6 +6,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.dat.dialogs.MultiGraphDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 
@@ -14,7 +15,7 @@ import java.io.File;
  */
 class PCADialog extends MultiGraphDialog {
 
-    private final static String homeUrl = System.getProperty("nest.home", ".");
+    private final static String homeUrl = ResourceUtils.getHomeUrl();
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 

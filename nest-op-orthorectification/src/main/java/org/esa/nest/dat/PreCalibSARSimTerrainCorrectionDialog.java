@@ -16,8 +16,7 @@ import java.io.File;
  */
 class PreCalibSARSimTerrainCorrectionDialog extends MultiGraphDialog {
 
-    private final static String homeUrl = System.getProperty("nest.home", ".");
-    private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
+    private final static File graphPath = ResourceUtils.getGraphFolder("internal");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final static File tmpFolder = ResourceUtils.getApplicationUserTempDataDir();
