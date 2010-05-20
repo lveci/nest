@@ -1,5 +1,5 @@
 /*
- * $Id: ShowModuleManagerAction.java,v 1.2 2010-03-18 20:39:31 lveci Exp $
+ * $Id: ShowModuleManagerAction.java,v 1.3 2010-05-20 17:48:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,6 +17,7 @@
 package org.esa.beam.visat.actions;
 
 import com.bc.ceres.core.runtime.ProxyConfig;
+import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import com.bc.ceres.swing.update.ConnectionConfigData;
 import com.bc.ceres.swing.update.DefaultModuleManager;
 import com.bc.ceres.swing.update.ModuleManagerPane;
@@ -24,6 +25,7 @@ import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.PropertyMap;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.JButton;
@@ -34,19 +36,20 @@ import java.net.URL;
  * This action shows the update module manager
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-03-18 20:39:31 $
+ * @version $Revision: 1.3 $ $Date: 2010-05-20 17:48:42 $
  */
 public class ShowModuleManagerAction extends ExecCommand {
 
+    private static final String contextID = SystemUtils.getApplicationContextId();
     // System keys
-    private static final String SYS_KEY_BEAM_REPOSITORY_URL = "nest.repository.url";
+    private static final String SYS_KEY_BEAM_REPOSITORY_URL = contextID+".repository.url";
     // Preferences keys
-    private static final String KEY_BEAM_REPOSITORY_PROXY_USED = "nest.repository.proxyUsed";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_HOST = "nest.repository.proxy.host";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_PORT = "nest.repository.proxy.port";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_AUTH_USED = "nest.repository.proxy.authUsed";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_USERNAME = "nest.repository.proxy.username";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_PASSWORD = "nest.repository.proxy.password";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_USED = contextID+".repository.proxyUsed";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_HOST = contextID+".repository.proxy.host";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_PORT = contextID+".repository.proxy.port";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_AUTH_USED = contextID+".repository.proxy.authUsed";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_USERNAME = contextID+".repository.proxy.username";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_PASSWORD = contextID+".repository.proxy.password";
     private static final String RTSM = "Please check the module repository settings in the preferences dialog.";
 
     @Override

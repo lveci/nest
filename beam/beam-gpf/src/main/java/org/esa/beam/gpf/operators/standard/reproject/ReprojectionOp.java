@@ -79,7 +79,7 @@ import java.text.MessageFormat;
  *
  * @author Marco Zuehlke
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-04-20 17:31:23 $
+ * @version $Revision: 1.3 $ $Date: 2010-05-20 17:48:42 $
  * @since BEAM 4.7
  */
 @OperatorMetadata(alias = "Reproject",
@@ -87,7 +87,7 @@ import java.text.MessageFormat;
                   authors = "Marco Zühlke, Marco Peters, Ralf Quast",
                   copyright = "(c) 2009 by Brockmann Consult",
                   description = "Reprojection of a source product to a target Coordinate Reference System.",
-                  internal = false)
+                  internal = true)
 @SuppressWarnings({"UnusedDeclaration"})
 public class ReprojectionOp extends Operator {
 

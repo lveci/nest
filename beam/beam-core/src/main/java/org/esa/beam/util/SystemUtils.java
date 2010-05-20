@@ -1,5 +1,5 @@
 /*
- * $Id: SystemUtils.java,v 1.5 2010-02-09 14:10:28 lveci Exp $
+ * $Id: SystemUtils.java,v 1.6 2010-05-20 17:48:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -49,7 +49,7 @@ import java.util.StringTokenizer;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2010-02-09 14:10:28 $
+ * @version $Revision: 1.6 $ $Date: 2010-05-20 17:48:42 $
  */
 public class SystemUtils {
 
@@ -138,7 +138,7 @@ public class SystemUtils {
         return dir;
     }
 
-    private static String getApplicationContextId() {
+    public static String getApplicationContextId() {
         String contextId = null;
         if (RuntimeContext.getModuleContext() != null) {
             contextId = RuntimeContext.getModuleContext().getRuntimeConfig().getContextId();
