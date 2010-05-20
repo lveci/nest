@@ -466,15 +466,7 @@ public final class MultilookOp extends Operator {
         final int tileMinY = sourceRaster1.getMinY();
 
         double meanValue = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY
-            || bandUnit == Unit.UnitType.UNKNOWN) {
-            for (int y = yStart; y < yEnd; y++) {
-                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
-                for (int x = xStart; x < xEnd; x++) {
-                    meanValue += srcData1.getElemDoubleAt((x - tileMinX) + stride);
-                }
-            }
-        } else if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+        if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             for (int y = yStart; y < yEnd; y++) {
                 final int stride = ((y - tileMinY) * tileStride) + tileOffset;
                 for (int x = xStart; x < xEnd; x++) {
@@ -484,7 +476,7 @@ public final class MultilookOp extends Operator {
 
             meanValue /= (nRgLooks * nAzLooks);
             return 10.0*Math.log10(meanValue); // linear to dB
-        } else { // COMPLEX
+        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) { // COMPLEX
             double i, q;
             int index;
             for (int y = yStart; y < yEnd; y++) {
@@ -494,6 +486,13 @@ public final class MultilookOp extends Operator {
                     i = srcData1.getElemDoubleAt(index);
                     q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
+                }
+            }
+        } else {
+            for (int y = yStart; y < yEnd; y++) {
+                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
+                for (int x = xStart; x < xEnd; x++) {
+                    meanValue += srcData1.getElemDoubleAt((x - tileMinX) + stride);
                 }
             }
         }
