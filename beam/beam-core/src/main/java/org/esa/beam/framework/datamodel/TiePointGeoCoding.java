@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.19 2010-05-12 20:16:41 junlu Exp $
+ * $Id: TiePointGeoCoding.java,v 1.20 2010-05-19 20:17:46 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,6 +54,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private float _latMax;
     private final float _subSamplingX;
     private final float _subSamplingY;
+    private final float _offsetX;
+    private final float _offsetY;
     private float[][] _latTiePoints = null;
     private float[][] _lonTiePoints = null;
     private int _gridWidth;
@@ -101,6 +103,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         _gridHeight = _latGrid.getRasterHeight();
         _subSamplingX = _latGrid.getSubSamplingX();
         _subSamplingY = _latGrid.getSubSamplingY();
+        _offsetX = _latGrid.getOffsetX();
+        _offsetY = _latGrid.getOffsetY();
         _latTiePoints = new float[_gridHeight][_gridWidth];
         _lonTiePoints = new float[_gridHeight][_gridWidth];
         float[] latTiePoints = _latGrid.getTiePoints();
@@ -285,14 +289,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return pixelPos;
         }
 
-        final int i1 = (int)(approximatedPixelPos.x / _subSamplingX);
+        final int i1 = (int)((approximatedPixelPos.x - _offsetX)/ _subSamplingX);
         final int i2 = i1 + 1;
-        final int j1 = (int)(approximatedPixelPos.y / _subSamplingY);
+        final int j1 = (int)((approximatedPixelPos.y - _offsetY) / _subSamplingY);
         final int j2 = j1 + 1;
 
         if (i1 >= _gridWidth || i2 >= _gridWidth || j1 >= _gridHeight || j2 >= _gridHeight) {
-            pixelPos.x = -1.0f;
-            pixelPos.y = -1.0f;
+            pixelPos.x = approximatedPixelPos.x;
+            pixelPos.y = approximatedPixelPos.y;
             return pixelPos;
         }
 
@@ -300,9 +304,16 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         pixelPos.y = approximatedPixelPos.y;
 
         final float x1 = i1*_subSamplingX;
-        final float x2 = Math.min(x1 + _subSamplingX, sceneRasterWidth - 1);
         final float y1 = j1*_subSamplingY;
-        final float y2 = Math.min(y1 + _subSamplingY, sceneRasterHeight - 1);
+        float x2;
+        float y2;
+        if (_offsetX != 0.0f || _offsetY != 0.0f) {
+            x2 = x1 + _subSamplingX;
+            y2 = y1 + _subSamplingY;
+        } else {
+            x2 = Math.min(x1 + _subSamplingX, sceneRasterWidth - 1);
+            y2 = Math.min(y1 + _subSamplingY, sceneRasterHeight - 1);
+        }
 
         final double lat = (double)geoPos.lat;
         final double lon = (double)geoPos.lon;
@@ -347,8 +358,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return pixelPos;
         }
         double x = (-a1*y - a0)/(a3*y + a2);
-        int yPos = (int)(y + 0.5);
-        int xPos = (int)(x + 0.5);
+        int yPos = (int)(y + _offsetY + 0.5);
+        int xPos = (int)(x + _offsetX + 0.5);
         if (xPos >= 0 && xPos < sceneRasterWidth && yPos >= 0 && yPos < sceneRasterHeight) {
             pixelPos.x = (float)xPos;
             pixelPos.y = (float)yPos;
@@ -364,8 +375,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return pixelPos;
         }
         x = (-a1*y - a0)/(a3*y + a2);
-        yPos = (int)y;
-        xPos = (int)x;
+        yPos = (int)(y + _offsetY + 0.5);
+        xPos = (int)(x + _offsetX + 0.5);
         if (xPos >= 0 && xPos < sceneRasterWidth && yPos >= 0 && yPos < sceneRasterHeight) {
             pixelPos.x = (float)xPos;
             pixelPos.y = (float)yPos;
