@@ -95,12 +95,7 @@ public class WorldMapUI {
         final GeoPos[][] geoBoundaries = new GeoPos[productEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : productEntryList) {
-            final GeoPos[] geoBound = new GeoPos[4];
-            geoBound[0] = entry.getFirstNearGeoPos();
-            geoBound[1] = entry.getFirstFarGeoPos();
-            geoBound[2] = entry.getLastFarGeoPos();
-            geoBound[3] = entry.getLastNearGeoPos();
-            geoBoundaries[i++] = geoBound;
+            geoBoundaries[i++] = entry.getBox();
         }
 
         worldMapDataModel.setAdditionalGeoBoundaries(geoBoundaries);
@@ -111,12 +106,7 @@ public class WorldMapUI {
         final GeoPos[][] geoBoundaries = new GeoPos[selectedProductEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : selectedProductEntryList) {
-            final GeoPos[] geoBound = new GeoPos[4];
-            geoBound[0] = entry.getFirstNearGeoPos();
-            geoBound[1] = entry.getFirstFarGeoPos();
-            geoBound[2] = entry.getLastFarGeoPos();
-            geoBound[3] = entry.getLastNearGeoPos();
-            geoBoundaries[i++] = geoBound;
+            geoBoundaries[i++] = entry.getBox();
         }
 
         worldMapDataModel.setSelectedGeoBoundaries(geoBoundaries);

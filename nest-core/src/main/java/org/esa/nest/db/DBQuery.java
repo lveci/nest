@@ -33,6 +33,7 @@ public class DBQuery {
     private String selectedPass = "";
     private Rectangle.Float selectionRectangle = null;
     private File baseDir = null;
+    private File excludeDir = null;
     private Calendar startDate = null;
     private Calendar endDate = null;
     private String freeQuery = "";
@@ -68,6 +69,10 @@ public class DBQuery {
 
     public void setBaseDir(final File dir) {
         baseDir = dir;
+    }
+
+    public void setExcludeDir(final File dir) {
+        excludeDir = dir;
     }
 
     public void setStartEndDate(final Calendar start, final Calendar end) {
@@ -154,6 +159,10 @@ public class DBQuery {
         if(baseDir != null) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+        }
+        if(excludeDir != null) {
+            queryStr += SQLUtils.addAND(queryStr);
+            queryStr += AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
         }
 
         if(queryStr.isEmpty()) {

@@ -223,4 +223,13 @@ public class ProductEntry {
         }
         return fileList;
     }
+
+    public GeoPos[] getBox() {
+        final GeoPos[] geoBound = new GeoPos[4];
+        geoBound[0] = getFirstNearGeoPos();
+        geoBound[1] = getFirstFarGeoPos();
+        geoBound[2] = getLastFarGeoPos();
+        geoBound[3] = getLastNearGeoPos();
+        return geoBound;
+    }
 }
