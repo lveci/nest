@@ -43,6 +43,14 @@ public class WorldMapUI {
         return worldMapDataModel.getSelectionBox();
     }
 
+    public void setSelectionStart(final float lat, final float lon) {
+        worldMapDataModel.setSelectionBoxStart(lat, lon);
+    }
+
+    public void setSelectionEnd(final float lat, final float lon) {
+        worldMapDataModel.setSelectionBoxEnd(lat, lon);
+    }
+
     /**
      * Removes a <code>DatabasePaneListener</code>.
      *
@@ -63,11 +71,23 @@ public class WorldMapUI {
     }
 
     public void setAOIList(final AOI[] aoiList) {
+        final GeoPos[][] geoBoundaries = new GeoPos[aoiList.length][4];
+        int i = 0;
+        for(AOI aoi : aoiList) {
+            geoBoundaries[i++] = aoi.getAOIPoints();
+        }
 
+        worldMapDataModel.setAdditionalGeoBoundaries(geoBoundaries);
     }
 
     public void setSelectedAOIList(final AOI[] selectedAOIList) {
+        final GeoPos[][] geoBoundaries = new GeoPos[selectedAOIList.length][4];
+        int i = 0;
+        for(AOI aoi : selectedAOIList) {
+            geoBoundaries[i++] = aoi.getAOIPoints();
+        }
 
+        worldMapDataModel.setSelectedGeoBoundaries(geoBoundaries);
     }
 
     public void setProductEntryList(final ProductEntry[] productEntryList) {

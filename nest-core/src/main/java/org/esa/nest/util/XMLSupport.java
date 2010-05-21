@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -145,5 +146,23 @@ public final class XMLSupport {
             attribute.setDescription(descAttrib.getValue());
 
         root.addAttribute(attribute);
+    }
+
+    public static String getAttrib(final Element elem, final String tag) {
+        final Attribute attrib = elem.getAttribute(tag);
+        if(attrib != null)
+            return attrib.getValue();
+        return "";
+    }
+
+    public static String[] getStringList(final Element elem) {
+        final ArrayList<String> array = new ArrayList<String>();
+        final List contentList = elem.getContent();
+        for (Object o : contentList) {
+            if (o instanceof Element) {
+                array.add( ((Element)o).getName() );
+            }
+        }
+        return array.toArray(new String[array.size()]);
     }
 }

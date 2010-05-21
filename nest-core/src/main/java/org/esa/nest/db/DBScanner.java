@@ -18,15 +18,17 @@ public final class DBScanner extends SwingWorker {
 
     private final File baseDir;
     private final boolean doRecursive;
+    private final boolean generateQuicklooks;
     private final com.bc.ceres.core.ProgressMonitor pm;
     private final ArrayList<DBScannerListener> listenerList = new ArrayList<DBScannerListener>(1);
 
     public DBScanner(final ProductDB database, final File baseDir, final boolean doRecursive,
-                             final com.bc.ceres.core.ProgressMonitor pm) {
+                     final boolean doQuicklooks, final com.bc.ceres.core.ProgressMonitor pm) {
         this.db = database;
         this.pm = pm;
         this.baseDir = baseDir;
         this.doRecursive = doRecursive;
+        this.generateQuicklooks = doQuicklooks;
     }
 
     public void addListener(final DBScannerListener listener) {
@@ -101,27 +103,29 @@ public final class DBScanner extends SwingWorker {
             }
             notifyMSG(DBScannerListener.MSG.FOLDERS_SCANNED);
 
-            final int numQL = qlProductFiles.size();
-            pm.beginTask("Generating Quicklooks...", numQL);
-            for(int j=0; j < numQL; ++j) {
-                pm.setTaskName("Generating Quicklook... "+j+" of "+numQL);
-                pm.worked(1);
-                if(pm.isCanceled())
-                    break;
-
-                final File file = qlProductFiles.get(j);
-                try {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if(reader != null) {
-                        final Product sourceProduct = reader.readProductNodes(file, null);
-                        if(sourceProduct != null) {
-                            QuickLookGenerator.createQuickLook(qlIDs.get(j), sourceProduct);
-                            notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
-                            sourceProduct.dispose();
+            if(generateQuicklooks) {
+                final int numQL = qlProductFiles.size();
+                pm.beginTask("Generating Quicklooks...", numQL);
+                for(int j=0; j < numQL; ++j) {
+                    pm.setTaskName("Generating Quicklook... "+j+" of "+numQL);
+                    pm.worked(1);
+                    if(pm.isCanceled())
+                        break;
+    
+                    final File file = qlProductFiles.get(j);
+                    try {
+                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                        if(reader != null) {
+                            final Product sourceProduct = reader.readProductNodes(file, null);
+                            if(sourceProduct != null) {
+                                QuickLookGenerator.createQuickLook(qlIDs.get(j), sourceProduct);
+                                notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
+                                sourceProduct.dispose();
+                            }
                         }
+                    } catch(Exception e) {
+                        System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                     }
-                } catch(Exception e) {
-                    System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                 }
             }
             pm.setTaskName("");

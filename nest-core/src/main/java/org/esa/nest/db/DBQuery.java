@@ -4,11 +4,16 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Element;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 
 /**
 
@@ -21,6 +26,7 @@ public class DBQuery {
     public static final String ASCENDING_PASS = "ASCENDING";
     public static final String DESCENDING_PASS = "DESCENDING";
     public static final String ALL_FOLDERS = "All Folders";
+    public static final String DB_QUERY = "dbQuery";
 
     private String selectedMissions[] = {};
     private String selectedProductTypes[] = {};
@@ -40,12 +46,24 @@ public class DBQuery {
         selectedMissions = missions;
     }
 
+    public String[] getSelectedMissions() {
+        return selectedMissions;
+    }
+
     public void setSelectedProductTypes(final String[] productTypes) {
         selectedProductTypes = productTypes;
     }
 
+    public String[] getSelectedProductTypes() {
+        return selectedProductTypes;
+    }
+
     public void setSelectedPass(final String pass) {
         selectedPass = pass;
+    }
+
+    public String getSelectedPass() {
+        return selectedPass;
     }
 
     public void setBaseDir(final File dir) {
@@ -55,6 +73,14 @@ public class DBQuery {
     public void setStartEndDate(final Calendar start, final Calendar end) {
         startDate = start;
         endDate = end;
+    }
+
+    public Calendar getStartDate() {
+        return startDate;
+    }
+
+    public Calendar getEndDate() {
+        return endDate;
     }
 
     public void clearMetadataQuery() {
@@ -67,6 +93,10 @@ public class DBQuery {
 
     public void setFreeQuery(final String queryStr) {
         freeQuery = queryStr;
+    }
+
+    public String getFreeQuery() {
+        return freeQuery;
     }
 
     public ProductEntry[] queryDatabase(final ProductDB db) throws SQLException {
@@ -185,4 +215,102 @@ public class DBQuery {
 
         return new Rectangle.Float(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
+
+    public Element toXML() {
+        final Element elem = new Element(DB_QUERY);
+        final Element missionsElem = new Element("selectedMissions");
+        elem.addContent(missionsElem);
+        for(String m : selectedMissions) {
+            missionsElem.addContent(new Element(m));
+        }
+        final Element productTypesElem = new Element("selectedProductTypes");
+        elem.addContent(productTypesElem);
+        for(String p : selectedProductTypes) {
+            productTypesElem.addContent(new Element(p));
+        }
+        if(selectionRectangle != null) {
+            final Element rectElem = new Element("selectionRectangle");
+            elem.addContent(rectElem);
+            rectElem.setAttribute("x", String.valueOf(selectionRectangle.getX()));
+            rectElem.setAttribute("y", String.valueOf(selectionRectangle.getY()));
+            rectElem.setAttribute("w", String.valueOf(selectionRectangle.getWidth()));
+            rectElem.setAttribute("h", String.valueOf(selectionRectangle.getHeight()));
+        }
+
+        elem.setAttribute("selectedPass", selectedPass);
+        if(baseDir != null)
+            elem.setAttribute("baseDir", baseDir.getAbsolutePath());
+        if(startDate != null) {
+            final Element startDateElem = new Element("startDate");
+            elem.addContent(startDateElem);
+            startDateElem.setAttribute("year", String.valueOf(startDate.get(Calendar.YEAR)));
+            startDateElem.setAttribute("month", String.valueOf(startDate.get(Calendar.MONTH)));
+            startDateElem.setAttribute("day", String.valueOf(startDate.get(Calendar.DAY_OF_MONTH)));
+        }
+        if(endDate != null) {
+            final Element endDateElem = new Element("endDate");
+            elem.addContent(endDateElem);
+            endDateElem.setAttribute("year", String.valueOf(endDate.get(Calendar.YEAR)));
+            endDateElem.setAttribute("month", String.valueOf(endDate.get(Calendar.MONTH)));
+            endDateElem.setAttribute("day", String.valueOf(endDate.get(Calendar.DAY_OF_MONTH)));
+        }
+        elem.setAttribute("freeQuery", freeQuery);
+        return elem;
+    }
+
+    public void fromXML(final Element dbQueryElem) {
+
+        final Element missionsElem = dbQueryElem.getChild("selectedMissions");
+        if(missionsElem != null) {
+            selectedMissions = XMLSupport.getStringList(missionsElem);
+        }
+        final Element productTypesElem = dbQueryElem.getChild("selectedProductTypes");
+        if(productTypesElem != null) {
+            selectedProductTypes = XMLSupport.getStringList(productTypesElem);
+        }
+        final Element rectElem = dbQueryElem.getChild("selectionRectangle");
+        if(rectElem != null) {
+            final Attribute x = rectElem.getAttribute("x");
+            final Attribute y = rectElem.getAttribute("y");
+            final Attribute w = rectElem.getAttribute("w");
+            final Attribute h = rectElem.getAttribute("h");
+            if(x != null && y != null && w != null && h != null) {
+                selectionRectangle = new Rectangle.Float(
+                        Float.parseFloat(x.getValue()),
+                        Float.parseFloat(y.getValue()),
+                        Float.parseFloat(w.getValue()),
+                        Float.parseFloat(h.getValue()));
+            }
+        }
+
+        selectedPass = XMLSupport.getAttrib(dbQueryElem, "selectedPass");
+        final String baseDirStr = XMLSupport.getAttrib(dbQueryElem, "baseDir");
+        if(!baseDirStr.isEmpty())
+            baseDir = new File(baseDirStr);
+        final Element startDateElem = dbQueryElem.getChild("startDate");
+        if(startDateElem != null) {
+            final Attribute y = startDateElem.getAttribute("year");
+            final Attribute m = startDateElem.getAttribute("month");
+            final Attribute d = startDateElem.getAttribute("day");
+            if(y != null && m != null && d != null) {
+                startDate = new GregorianCalendar(Integer.parseInt(y.getValue()),
+                                                  Integer.parseInt(m.getValue()),
+                                                  Integer.parseInt(d.getValue()));
+            }
+        }
+        final Element endDateElem = dbQueryElem.getChild("endDate");
+        if(endDateElem != null) {
+            final Attribute y = endDateElem.getAttribute("year");
+            final Attribute m = endDateElem.getAttribute("month");
+            final Attribute d = endDateElem.getAttribute("day");
+            if(y != null && m != null && d != null) {
+                endDate = new GregorianCalendar(Integer.parseInt(y.getValue()),
+                                                Integer.parseInt(m.getValue()),
+                                                Integer.parseInt(d.getValue()));
+            }
+        }
+        freeQuery = XMLSupport.getAttrib(dbQueryElem, "freeQuery");
+    }
+
+
 }

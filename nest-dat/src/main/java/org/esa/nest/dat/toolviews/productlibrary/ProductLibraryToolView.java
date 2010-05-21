@@ -225,7 +225,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         if(baseDir == null) return;
         progMon = new LabelBarProgressMonitor(progressBar, statusLabel);
         progMon.addListener(new MyProgressBarListener());
-        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, progMon);
+        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, true, progMon);
         repositoryCollector.addListener(new MyDatabaseScannerListener());
         repositoryCollector.execute();
     }

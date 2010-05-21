@@ -47,7 +47,7 @@ public class DatabasePane extends JPanel {
     private final JButton updateButton = new JButton(UIUtils.loadImageIcon("icons/Update16.gif"));
 
     private ProductDB db;
-    private final DBQuery dbQuery = new DBQuery();
+    private DBQuery dbQuery = new DBQuery();
     private ProductEntry[] productEntryList = null;
     boolean modifyingCombos = false;
 
@@ -81,14 +81,14 @@ public class DatabasePane extends JPanel {
             });
             startDateBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent event) {
-                    if(event.getStateChange() == ItemEvent.SELECTED)
-                        queryDatabase();
+                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
+                    queryDatabase();
                 }
             });
             endDateBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent event) {
-                    if(event.getStateChange() == ItemEvent.SELECTED)
-                        queryDatabase();
+                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
+                    queryDatabase();
                 }
             });
             addMetadataButton.addActionListener(new ActionListener() {
@@ -286,7 +286,7 @@ public class DatabasePane extends JPanel {
         }
     }
 
-    private void queryDatabase() {
+    private void setData() {
         dbQuery.setSelectedMissions(toStringArray(missionJList.getSelectedValues()));
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
@@ -294,6 +294,10 @@ public class DatabasePane extends JPanel {
 
         dbQuery.clearMetadataQuery();
         dbQuery.setFreeQuery(metadataArea.getText());
+    }
+
+    private void queryDatabase() {
+        setData();
 
         if(productEntryList != null) {
             ProductEntry.dispose(productEntryList);
@@ -314,5 +318,44 @@ public class DatabasePane extends JPanel {
 
     public ProductEntry[] getProductEntryList() {
         return productEntryList;
+    }
+
+    public DBQuery getDBQuery() {
+        setData();
+        return dbQuery;
+    }
+
+    public void setDBQuery(final DBQuery query) {
+        if(query == null) return;
+        dbQuery = query;
+        
+        boolean origState = lockCombos(true);
+        try {
+            missionJList.setSelectedIndices(findIndices(missionJList, dbQuery.getSelectedMissions()));
+            updateProductTypeCombo();
+            productTypeJList.setSelectedIndices(findIndices(productTypeJList, dbQuery.getSelectedProductTypes()));
+            passCombo.setSelectedItem(dbQuery.getSelectedPass());
+            startDateBox.setCalendar(dbQuery.getStartDate());
+            endDateBox.setCalendar(dbQuery.getEndDate());
+            metadataArea.setText(dbQuery.getFreeQuery());
+        } finally {
+            lockCombos(origState);
+        }
+    }
+
+    private int[] findIndices(final JList list, final String[] values) {
+        final int size = list.getModel().getSize();
+        final ArrayList<Integer> indices = new ArrayList<Integer>();
+        for(int i=0; i < size; ++i) {
+            final String str = (String)list.getModel().getElementAt(i);
+            if(StringUtils.contains(values, str)) {
+                indices.add(i);
+            }
+        }
+        final int[] intIndices = new int[indices.size()];
+        for(int i=0; i < indices.size(); ++i) {
+            intIndices[i] = indices.get(i);
+        }
+        return intIndices;
     }
 }
