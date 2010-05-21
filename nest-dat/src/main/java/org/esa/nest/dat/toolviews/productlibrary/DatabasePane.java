@@ -2,6 +2,7 @@ package org.esa.nest.dat.toolviews.productlibrary;
 
 import com.jidesoft.combobox.DateComboBox;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.db.DBQuery;
@@ -11,14 +12,21 @@ import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.SQLUtils;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.plaf.metal.MetalBorders;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -34,6 +42,9 @@ public class DatabasePane extends JPanel {
     private final DateComboBox endDateBox = new DateComboBox();
     private final JComboBox metadataNameCombo = new JComboBox();
     private final JTextField metdataValueField = new JTextField();
+    private final JTextArea metadataArea = new JTextArea();
+    private final JButton addMetadataButton = new JButton("+");
+    private final JButton updateButton = new JButton(UIUtils.loadImageIcon("icons/Update16.gif"));
 
     private ProductDB db;
     private final DBQuery dbQuery = new DBQuery();
@@ -51,33 +62,38 @@ public class DatabasePane extends JPanel {
             missionJList.addListSelectionListener(new ListSelectionListener() {
                 public void valueChanged(ListSelectionEvent event) {
                     if(modifyingCombos || event.getValueIsAdjusting()) return;
-                    try {
-                        updateProductTypeCombo();
-                        queryDatabase();
-                    } catch(Throwable t) {
-                        handleException(t);
-                    }
+                    updateProductTypeCombo();
+                    queryDatabase();
                 }
             });
             productTypeJList.setFixedCellWidth(100);
             productTypeJList.addListSelectionListener(new ListSelectionListener() {
                 public void valueChanged(ListSelectionEvent event) {
                     if(modifyingCombos || event.getValueIsAdjusting()) return;
-                    try {
-                        queryDatabase();
-                    } catch(Throwable t) {
-                        handleException(t);
-                    }
+                    queryDatabase();
                 }
             });
             passCombo.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent event) {
                     if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
-                    try {
+                    queryDatabase();
+                }
+            });
+            startDateBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent event) {
+                    if(event.getStateChange() == ItemEvent.SELECTED)
                         queryDatabase();
-                    } catch(Throwable t) {
-                        handleException(t);
-                    }
+                }
+            });
+            endDateBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent event) {
+                    if(event.getStateChange() == ItemEvent.SELECTED)
+                        queryDatabase();
+                }
+            });
+            addMetadataButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    addMetadataText();
                 }
             });
 
@@ -155,7 +171,22 @@ public class DatabasePane extends JPanel {
         metadataNameCombo.setPrototypeDisplayValue("1234567890123456789");
         gbc.gridx = 1;
         this.add(metdataValueField, gbc);
+        gbc.gridx = 2;
+        this.add(addMetadataButton, gbc);
+        addMetadataButton.setMaximumSize(new Dimension(3, 3));
 
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        this.add(metadataArea, gbc);
+        metadataArea.setBorder(new LineBorder(Color.BLACK));
+        metadataArea.setLineWrap(true);
+        metadataArea.setRows(4);
+        metadataArea.setToolTipText("Use AND,OR,NOT and =,<,>,<=,>-");
+        gbc.gridx = 2;
+        gbc.gridwidth = 1;
+        this.add(updateButton, gbc);
+        updateButton.setMaximumSize(new Dimension(3, 3));
     }
 
     private void connectToDatabase() throws Exception {
@@ -196,7 +227,7 @@ public class DatabasePane extends JPanel {
         }
     }
 
-    private void updateProductTypeCombo() throws SQLException {
+    private void updateProductTypeCombo() {
         boolean origState = lockCombos(true);
         try {
             productTypeJList.removeAll();
@@ -209,6 +240,8 @@ public class DatabasePane extends JPanel {
                 productTypeList = db.getProductTypes(selectedMissions);
 
             productTypeJList.setListData(SQLUtils.prependString(DBQuery.ALL_PRODUCT_TYPES, productTypeList));
+        } catch(Throwable t) {
+            handleException(t);
         } finally {
             lockCombos(origState);
         }
@@ -223,12 +256,8 @@ public class DatabasePane extends JPanel {
     }
 
     public void setBaseDir(final File dir) {
-        try {
-            dbQuery.setBaseDir(dir);
-            queryDatabase();
-        } catch(Throwable t) {
-            handleException(t);
-        }
+        dbQuery.setBaseDir(dir);
+        queryDatabase();
     }
 
     public void removeProducts(final File baseDir) {
@@ -239,29 +268,40 @@ public class DatabasePane extends JPanel {
         }
     }
 
-    private void queryDatabase() throws SQLException {
+    private void addMetadataText() {
+        final String name = (String)metadataNameCombo.getSelectedItem();
+        final String value = metdataValueField.getText();
+        if(!name.isEmpty() && !value.isEmpty()) {
+            if(metadataArea.getText().length() > 0)
+                metadataArea.append(" AND ");
+            metadataArea.append(name+"='"+value+"' ");
+        }
+    }
+
+    private void queryDatabase() {
         dbQuery.setSelectedMissions(toStringArray(missionJList.getSelectedValues()));
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
+        dbQuery.setStartEndDate(startDateBox.getCalendar(), endDateBox.getCalendar());
 
         dbQuery.clearMetadataQuery();
-        dbQuery.addMetadataQuery((String)metadataNameCombo.getSelectedItem(), metdataValueField.getText());
+        dbQuery.setFreeQuery(metadataArea.getText());
 
         if(productEntryList != null) {
             ProductEntry.dispose(productEntryList);
         }
-        productEntryList = dbQuery.queryDatabase(db);
+        try {
+            productEntryList = dbQuery.queryDatabase(db);
+        } catch(Throwable t) {
+            handleException(t);
+        }
 
         notifyQuery();
     }
 
     public void setSelectionRect(final GeoPos[] selectionBox) {
-        try {
-            dbQuery.setSelectionRect(selectionBox);
-            queryDatabase();
-        } catch(Throwable t) {
-            handleException(t);
-        }
+        dbQuery.setSelectionRect(selectionBox);
+        queryDatabase();
     }
 
     public ProductEntry[] getProductEntryList() {

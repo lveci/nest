@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.image.BufferedImage;
@@ -13,13 +14,16 @@ import java.awt.image.BufferedImage;
  */
 public class ProductEntry {
 
+    public final static String FILE_SIZE = "file_size";
+    public final static String LAST_MODIFIED = "last_modified";
+
     private int id;
     private File file;
     private long fileSize;
     private String name;
     private String mission;
     private String productType;
-    private ProductData.UTC acquisition;
+    private ProductData.UTC firstLineTime;
     private String pass;
     private double range_spacing;
     private double azimuth_spacing;
@@ -56,6 +60,7 @@ public class ProductEntry {
             this.pass = absRoot.getAttributeString(AbstractMetadata.PASS);
             this.range_spacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
             this.azimuth_spacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
+            this.firstLineTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
         }
         getCornerPoints(product);
 
@@ -71,6 +76,10 @@ public class ProductEntry {
         this.pass = results.getString(AbstractMetadata.PASS);
         this.range_spacing = results.getDouble(AbstractMetadata.range_spacing);
         this.azimuth_spacing =results.getDouble(AbstractMetadata.azimuth_spacing);
+        Date date = results.getDate(AbstractMetadata.first_line_time);
+        this.firstLineTime = AbstractMetadata.parseUTC(date.toString(), "yyy-MM-dd");
+        this.fileSize = (long)results.getDouble(FILE_SIZE);
+        this.lastModified = (long)results.getDouble(LAST_MODIFIED);
 
         this.firstNear.setLocation((float)results.getDouble(AbstractMetadata.first_near_lat),
                                    (float)results.getDouble(AbstractMetadata.first_near_long));
@@ -146,6 +155,18 @@ public class ProductEntry {
     }
     public GeoPos getLastFarGeoPos() {
         return lastFar;
+    }
+
+    public ProductData.UTC getFirstLineTime() {
+        return firstLineTime;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public long getLastModified() {
+        return lastModified;
     }
 
     public void setId(int id) {

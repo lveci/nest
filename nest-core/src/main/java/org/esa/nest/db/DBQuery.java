@@ -8,10 +8,7 @@ import org.esa.nest.util.SQLUtils;
 import java.awt.*;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
 
@@ -30,6 +27,10 @@ public class DBQuery {
     private String selectedPass = "";
     private Rectangle.Float selectionRectangle = null;
     private File baseDir = null;
+    private Calendar startDate = null;
+    private Calendar endDate = null;
+    private String freeQuery = "";
+
     private final Map<String, String> metadataQueryMap = new HashMap<String, String>();
 
     public DBQuery() {
@@ -51,12 +52,21 @@ public class DBQuery {
         baseDir = dir;
     }
 
+    public void setStartEndDate(final Calendar start, final Calendar end) {
+        startDate = start;
+        endDate = end;
+    }
+
     public void clearMetadataQuery() {
         metadataQueryMap.clear();
     }
 
     public void addMetadataQuery(final String name, final String value) {
         metadataQueryMap.put(name, value);
+    }
+
+    public void setFreeQuery(final String queryStr) {
+        freeQuery = queryStr;
     }
 
     public ProductEntry[] queryDatabase(final ProductDB db) throws SQLException {
@@ -73,35 +83,53 @@ public class DBQuery {
             queryStr += SQLUtils.getOrList(AbstractMetadata.MISSION, selectedMissions);
         }
         if(selectedProductTypes.length > 0) {
-            if(!queryStr.isEmpty())
-                queryStr += " AND ";
+            queryStr += SQLUtils.addAND(queryStr);
             queryStr += SQLUtils.getOrList(AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
         }
         if(!selectedPass.isEmpty()) {
-            if(!queryStr.isEmpty())
-                queryStr += " AND ";
+            queryStr += SQLUtils.addAND(queryStr);
             queryStr += AbstractMetadata.PASS+"='"+selectedPass+"'";
+        }
+
+        if(startDate != null) {
+            queryStr += SQLUtils.addAND(queryStr);
+            final Date start = SQLUtils.toSQLDate(startDate);
+            if(endDate != null) {
+                final Date end = SQLUtils.toSQLDate(endDate);
+                queryStr += "( "+AbstractMetadata.first_line_time
+                        +" BETWEEN '"+ start.toString() +"' AND '"+ end.toString() + "' )";
+            } else {
+                queryStr += AbstractMetadata.first_line_time +">='"+ start.toString()+"'";
+            }
+        } else if(endDate != null) {
+            queryStr += SQLUtils.addAND(queryStr);
+            final Date end = SQLUtils.toSQLDate(endDate);
+            queryStr += AbstractMetadata.first_line_time +"<='"+ end.toString()+"'";
         }
 
         final Set<String> metadataNames = metadataQueryMap.keySet();
         for(String name : metadataNames) {
             final String value = metadataQueryMap.get(name);
             if(value != null && !value.isEmpty()) {
-                if(!queryStr.isEmpty())
-                    queryStr += " AND ";
+                queryStr += SQLUtils.addAND(queryStr);
                 queryStr += name+"='"+value+"'";
             }
         }
 
+        if(!freeQuery.isEmpty()) {
+            queryStr += SQLUtils.addAND(queryStr);
+            queryStr += "( "+freeQuery+" )";
+        }
+
         if(baseDir != null) {
-            if(!queryStr.isEmpty())
-                queryStr += " AND ";
+            queryStr += SQLUtils.addAND(queryStr);
             queryStr += AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
         }
 
         if(queryStr.isEmpty()) {
             return instersectMapSelection(db.getProductEntryList());
         } else {
+            System.out.println("Query="+queryStr);
             return instersectMapSelection(db.queryProduct(queryStr));
         }
     }

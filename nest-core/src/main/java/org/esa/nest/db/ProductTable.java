@@ -1,11 +1,13 @@
 package org.esa.nest.db;
 
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
 
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  *
@@ -39,7 +41,10 @@ public class ProductTable implements TableInterface {
             AbstractMetadata.last_far_lat   +" DOUBLE, " +
             AbstractMetadata.last_far_long  +" DOUBLE, " +
             AbstractMetadata.range_spacing  +" DOUBLE, " +
-            AbstractMetadata.azimuth_spacing+" DOUBLE" +
+            AbstractMetadata.azimuth_spacing+" DOUBLE, " +
+            AbstractMetadata.first_line_time+" DATE, " +
+            ProductEntry.FILE_SIZE          +" DOUBLE, " +
+            ProductEntry.LAST_MODIFIED      +" DOUBLE" +
             ")";
 
     private static final String strGetProduct =
@@ -65,8 +70,11 @@ public class ProductTable implements TableInterface {
             AbstractMetadata.last_far_lat   +", "+
             AbstractMetadata.last_far_long  +", "+
             AbstractMetadata.range_spacing  +", "+
-            AbstractMetadata.azimuth_spacing+
-            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            AbstractMetadata.azimuth_spacing+", "+
+            AbstractMetadata.first_line_time+", "+
+            ProductEntry.FILE_SIZE          +", "+
+            ProductEntry.LAST_MODIFIED+
+            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String strGetListEntries =
             "SELECT * FROM APP.PRODUCTS ORDER BY "+AbstractMetadata.MISSION+" ASC";
@@ -129,7 +137,10 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDouble(i++, record.getLastFarGeoPos().getLon());
         stmtSaveNewRecord.setDouble(i++, record.getRangeSpacing());
         stmtSaveNewRecord.setDouble(i++, record.getAzimuthSpacing());
-        
+        stmtSaveNewRecord.setDate(i++, SQLUtils.toSQLDate(record.getFirstLineTime()));
+        stmtSaveNewRecord.setDouble(i++, record.getFileSize());
+        stmtSaveNewRecord.setDouble(i++, record.getLastModified());
+
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();
     }
