@@ -16,6 +16,7 @@ public class ProductEntry {
 
     public final static String FILE_SIZE = "file_size";
     public final static String LAST_MODIFIED = "last_modified";
+    public final static String FILE_FORMAT = "file_format";
 
     private int id;
     private File file;
@@ -27,7 +28,6 @@ public class ProductEntry {
     private String pass;
     private double range_spacing;
     private double azimuth_spacing;
-    private int sampleType;
     private long lastModified;
     private String fileFormat;
 
@@ -80,6 +80,7 @@ public class ProductEntry {
         this.firstLineTime = AbstractMetadata.parseUTC(date.toString(), "yyy-MM-dd");
         this.fileSize = (long)results.getDouble(FILE_SIZE);
         this.lastModified = (long)results.getDouble(LAST_MODIFIED);
+        this.fileFormat = results.getString(FILE_FORMAT);
 
         this.firstNear.setLocation((float)results.getDouble(AbstractMetadata.first_near_lat),
                                    (float)results.getDouble(AbstractMetadata.first_near_long));
@@ -167,6 +168,10 @@ public class ProductEntry {
 
     public long getLastModified() {
         return lastModified;
+    }
+
+    public String getFileFormat() {
+        return fileFormat;
     }
 
     public void setId(int id) {

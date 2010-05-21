@@ -44,7 +44,8 @@ public class ProductTable implements TableInterface {
             AbstractMetadata.azimuth_spacing+" DOUBLE, " +
             AbstractMetadata.first_line_time+" DATE, " +
             ProductEntry.FILE_SIZE          +" DOUBLE, " +
-            ProductEntry.LAST_MODIFIED      +" DOUBLE" +
+            ProductEntry.LAST_MODIFIED      +" DOUBLE, " +
+            ProductEntry.FILE_FORMAT        +" VARCHAR(30)" +
             ")";
 
     private static final String strGetProduct =
@@ -73,8 +74,9 @@ public class ProductTable implements TableInterface {
             AbstractMetadata.azimuth_spacing+", "+
             AbstractMetadata.first_line_time+", "+
             ProductEntry.FILE_SIZE          +", "+
-            ProductEntry.LAST_MODIFIED+
-            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            ProductEntry.LAST_MODIFIED      +", "+
+            ProductEntry.FILE_FORMAT        +
+            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String strGetListEntries =
             "SELECT * FROM APP.PRODUCTS ORDER BY "+AbstractMetadata.MISSION+" ASC";
@@ -140,6 +142,7 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDate(i++, SQLUtils.toSQLDate(record.getFirstLineTime()));
         stmtSaveNewRecord.setDouble(i++, record.getFileSize());
         stmtSaveNewRecord.setDouble(i++, record.getLastModified());
+        stmtSaveNewRecord.setString(i++, record.getFileFormat());
 
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();

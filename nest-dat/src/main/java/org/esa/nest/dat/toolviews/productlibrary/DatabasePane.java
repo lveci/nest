@@ -96,6 +96,11 @@ public class DatabasePane extends JPanel {
                     addMetadataText();
                 }
             });
+            updateButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    queryDatabase();
+                }
+            });
 
             final String[] metadataNames = db.getMetadataNames();
             for(String name : metadataNames) {
@@ -150,11 +155,14 @@ public class DatabasePane extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        label = DialogUtils.addComponent(this, gbc, "Mission:", new JScrollPane(missionJList));
-        label.setHorizontalAlignment(JLabel.RIGHT);
+        this.add(new JLabel("Mission:"), gbc);
+        gbc.gridx = 1;
+        this.add(new JLabel("Product Type:"), gbc);
         gbc.gridy++;
-        label = DialogUtils.addComponent(this, gbc, "Product Type:", new JScrollPane(productTypeJList));
-        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridx = 0;
+        this.add(new JScrollPane(missionJList), gbc);
+        gbc.gridx = 1;
+        this.add(new JScrollPane(productTypeJList), gbc);
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);

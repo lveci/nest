@@ -2,6 +2,7 @@ package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
 import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.util.SQLUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -24,12 +25,9 @@ public class PropertiesProvider implements DataProvider {
     private static final String[] propertyLables = new String[]{
             "Name:",
             "Type:",
-            "Pass:",
-            "File Size:",
-            "Image Size:",
+            "Acquired:",
+            "File Format:",
             "Pixel Size:",
-            "Start time:"
-            //"Last Modified:",
     };
 
     private static final String NOT_AVAILABLE = "not available";
@@ -104,14 +102,13 @@ public class PropertiesProvider implements DataProvider {
                 final String pixelSpacing = df.format(entry.getRangeSpacing()) +" x "+
                                             df.format(entry.getAzimuthSpacing()) +" m";
                 final File file = entry.getFile();
-                final String fileSize = (entry.getFileSize() / (1024 * 1024)) +" Mb";
+                final String fileSize = "("+(entry.getFileSize() / (1024 * 1024)) +" Mb)";
 
                 values = new String[]{
                         entry.getName(),
-                        entry.getProductType(),
-                        entry.getPass(),
-                        fileSize,
-                        "",
+                        entry.getProductType()+"   "+entry.getPass(),
+                        SQLUtils.toSQLDate(entry.getFirstLineTime()).toString(),
+                        entry.getFileFormat()+"   "+fileSize,
                         pixelSpacing
                 };
                 for (int i = 0; i < values.length; i++) {

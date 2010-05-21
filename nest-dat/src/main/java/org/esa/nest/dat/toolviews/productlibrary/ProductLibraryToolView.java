@@ -42,7 +42,6 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private JLabel statusLabel;
     private JPanel progressPanel;
-    private JButton openButton;
     private JButton addToProjectButton;
     private JButton openAllSelectedButton;
     private JButton batchProcessButton;
@@ -262,7 +261,6 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private void setUIComponentsEnabled(final boolean enable) {
-        openButton.setEnabled(enable);
         addToProjectButton.setEnabled(enable);
         openAllSelectedButton.setEnabled(enable);
         batchProcessButton.setEnabled(enable);
@@ -455,15 +453,6 @@ public class ProductLibraryToolView extends AbstractToolView {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
 
-        openButton = createToolButton("openButton", UIUtils.loadImageIcon("icons/Open24.gif"));
-        openButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(final ActionEvent e) {
-                performOpenAction();
-            }
-        });
-        headerBar.add(openButton, gbc);
-
         updateButton = createToolButton("updateButton", updateIcon);
         updateButton.setActionCommand(LabelBarProgressMonitor.updateCommand);
         updateButton.addActionListener(new ActionListener() {
@@ -474,8 +463,14 @@ public class ProductLibraryToolView extends AbstractToolView {
                     mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     progMon.setCanceled(true);
                 } else {
-                    if(repositoryListCombo.getSelectedIndex() != 0)
+                    if(repositoryListCombo.getSelectedIndex() != 0) {
                         updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
+                    } else {
+                        final File[] baseDirList = libConfig.getBaseDirs();
+                        for(File f : baseDirList) {
+                             updateRepostitory(f, true);
+                        }
+                    }
                 }
             }
         });
