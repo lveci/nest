@@ -67,6 +67,11 @@ public final class AsarAbstractMetadata {
         addAbstractedAttribute("VECTOR_SOURCE", mph.getAttributeString("VECTOR_SOURCE", ""), absRoot,
                                 "State vector source");
 
+        if(productType.contains("ASA_WS") || productType.contains("ASA_GM"))
+            addAbstractedAttribute("ACQUISITION_MODE", "ScanSAR", absRoot, "Acquisition Mode");
+        else
+            addAbstractedAttribute("ACQUISITION_MODE", "Stripmap", absRoot, "Acquisition Mode");
+
         // SPH
         addAbstractedAttribute("NUM_SLICES", mph.getAttributeInt("NUM_SLICES", 0), "", absRoot, "Number of slices");
         if(waveProduct) {

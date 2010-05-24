@@ -108,7 +108,12 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement radarParameters = sourceAttributes.getElement("radarParameters");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 radarParameters.getAttributeString("acquisitionType", defStr));
-        
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE,
+                radarParameters.getAttributeString("acquisitionType", defStr));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAM_MODE,
+                radarParameters.getAttributeString("beams", defStr));
+
+
         final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt));

@@ -175,6 +175,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "JERS1");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, "Stripmap");
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
