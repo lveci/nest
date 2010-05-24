@@ -103,6 +103,9 @@ public final class DBScanner extends SwingWorker {
                     }
                 }
             }
+
+            db.cleanUpRemovedProducts();
+
             notifyMSG(DBScannerListener.MSG.FOLDERS_SCANNED);
 
             if(generateQuicklooks) {

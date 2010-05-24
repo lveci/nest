@@ -17,6 +17,7 @@ public class MetadataTable implements TableInterface {
     private final static ArrayList<String> metadataNamesList = new ArrayList<String>();
 
     private PreparedStatement stmtSaveNewRecord;
+    private PreparedStatement stmtDeleteProduct;
 
     private final static MetadataElement emptyMetadata = AbstractMetadata.addAbstractedMetadataHeader(null);
     private static String createTableStr;
@@ -31,6 +32,9 @@ public class MetadataTable implements TableInterface {
 
     private static final String strSaveProduct =
             "INSERT INTO APP.METADATA ";
+
+    private static final String strDeleteProduct =
+            "DELETE FROM APP.METADATA WHERE ID = ?";
 
     public MetadataTable(final Connection dbConnection) {
         this.dbConnection = dbConnection;
@@ -79,6 +83,7 @@ public class MetadataTable implements TableInterface {
 
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(saveProductStr, Statement.RETURN_GENERATED_KEYS);
+        stmtDeleteProduct = dbConnection.prepareStatement(strDeleteProduct);
     }
 
     public ResultSet addRecord(final ProductEntry record) throws SQLException {
@@ -107,6 +112,12 @@ public class MetadataTable implements TableInterface {
         }
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();
+    }
+
+    public void deleteRecord(final int id) throws SQLException {
+        stmtDeleteProduct.clearParameters();
+        stmtDeleteProduct.setInt(1, id);
+        stmtDeleteProduct.executeUpdate();
     }
 
     public String[] getAllMetadataNames() {

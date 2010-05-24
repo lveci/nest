@@ -18,7 +18,7 @@ public class ProductTable implements TableInterface {
     private PreparedStatement stmtUpdateExistingRecord;
     private PreparedStatement stmtGetProduct;
     private PreparedStatement stmtGetProductWithPath;
-    private PreparedStatement stmtDeleteAddress;
+    private PreparedStatement stmtDeleteProduct;
     private PreparedStatement stmtAllMissions;
     private PreparedStatement stmtAllProductTypes;
     private PreparedStatement stmtAllAcquisitionModes;
@@ -114,7 +114,7 @@ public class ProductTable implements TableInterface {
         stmtUpdateExistingRecord = dbConnection.prepareStatement(strUpdateProduct);
         stmtGetProduct = dbConnection.prepareStatement(strGetProduct);
         stmtGetProductWithPath = dbConnection.prepareStatement(strGetProductWithPath);
-        stmtDeleteAddress = dbConnection.prepareStatement(strDeleteProduct);
+        stmtDeleteProduct = dbConnection.prepareStatement(strDeleteProduct);
 
         stmtAllMissions = dbConnection.prepareStatement(strAllMissions);
         stmtAllProductTypes = dbConnection.prepareStatement(strAllProductTypes);
@@ -158,9 +158,9 @@ public class ProductTable implements TableInterface {
     } */
     
     public void deleteRecord(final int id) throws SQLException {
-        stmtDeleteAddress.clearParameters();
-        stmtDeleteAddress.setInt(1, id);
-        stmtDeleteAddress.executeUpdate();
+        stmtDeleteProduct.clearParameters();
+        stmtDeleteProduct.setInt(1, id);
+        stmtDeleteProduct.executeUpdate();
     }
 
     public boolean pathExists(final File path) throws SQLException {

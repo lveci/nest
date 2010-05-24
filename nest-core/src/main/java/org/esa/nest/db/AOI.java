@@ -24,6 +24,7 @@ public class AOI {
     private String outputFolder = "";
     private String processingGraph = "";
     private String lastProcessed = "";
+    private int maxSlaves = 1;
 
     private GeoPos[] aoiPoints = new GeoPos[] {};
     private DBQuery slaveDBQuery = null;
@@ -74,6 +75,14 @@ public class AOI {
         processingGraph = file;
     }
 
+    public void setMaxSlaves(final int max) {
+        maxSlaves = max;
+    }
+
+    public int getMaxSlaves() {
+        return maxSlaves;
+    }
+
     public void setAOIPoints(final GeoPos[] selectionBox) {
         aoiPoints = selectionBox;
     }
@@ -108,6 +117,7 @@ public class AOI {
         elem.setAttribute("outputFolder", outputFolder);
         elem.setAttribute("graph", processingGraph);
         elem.setAttribute("lastProcessed", lastProcessed);
+        elem.setAttribute("maxSlaves", String.valueOf(maxSlaves));
         root.addContent(elem);
 
         final Element pntsElem = new Element("points");
@@ -147,6 +157,9 @@ public class AOI {
                         outputFolder = XMLSupport.getAttrib(child, "outputFolder");
                         processingGraph = XMLSupport.getAttrib(child, "graph");
                         lastProcessed = XMLSupport.getAttrib(child, "lastProcessed");
+                        final Attribute maxSlavesAttrib = child.getAttribute("maxSlaves");
+                        if(maxSlavesAttrib != null)
+                            maxSlaves = Integer.parseInt(maxSlavesAttrib.getValue());
                     } else if(child.getName().equals("points")) {
                         final List pntsList = child.getContent();
                         for (Object o : pntsList) {

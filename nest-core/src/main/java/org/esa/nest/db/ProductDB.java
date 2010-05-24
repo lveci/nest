@@ -94,12 +94,26 @@ public class ProductDB extends DAO {
         }
     }
 
+    public void cleanUpRemovedProducts() throws SQLException {
+        final DBQuery dbQuery = new DBQuery();
+        final ProductEntry[] entries = dbQuery.queryDatabase(this);
+        for(ProductEntry entry : entries) {
+            if(!entry.getFile().exists()) {
+                deleteProductEntry(entry);
+            }
+        }
+    }
+
+    public void deleteProductEntry(final ProductEntry entry) throws SQLException {
+        productTable.deleteRecord(entry.getId());
+        QuickLookGenerator.deleteQuickLook(entry.getId());
+    }
+
     public void removeProducts(final File baseDir) throws SQLException {
         final String queryStr = AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
         final ProductEntry[] list = queryProduct(queryStr);
         for(ProductEntry entry : list) {
-            productTable.deleteRecord(entry.getId());
-            QuickLookGenerator.deleteQuickLook(entry.getId());
+            deleteProductEntry(entry);
         }
     }
 
