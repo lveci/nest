@@ -259,7 +259,15 @@ public class CreateStackOp extends Operator {
                 throw new OperatorException("Real and imaginary master bands should be selected in pairs");
             } else if (unit.contains(Unit.REAL)) {
                 if(masterBandNames.length < 2) {
-                    throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+                    if (!contains(masterBandNames, slaveBandNames[0])) {
+                        throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+                    } else {
+                        final int iBandIdx = masterProduct.getBandIndex(getBandName(masterBandNames[0]));
+                        masterBands[1] = masterProduct.getBandAt(iBandIdx+1);
+                        if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
+                            throw new OperatorException("For complex products select a real and an imaginary band");
+                        bandList.add(masterBands[1]);
+                    }
                 } else {
                     final Product prod = getMasterProduct(masterBandNames[1]);
                     if(prod != masterProduct) {
@@ -274,15 +282,16 @@ public class CreateStackOp extends Operator {
         }
 
         // add slave bands
-        if(slaveBandNames == null || slaveBandNames.length == 0) {
+        if(slaveBandNames == null || slaveBandNames.length == 0 || contains(masterBandNames, slaveBandNames[0])) {
             for(Product slvProduct : sourceProduct) {
-                if(slvProduct == masterProduct) continue;
-
                 for(Band band : slvProduct.getBands()) {
                     if(band.getUnit() != null && band.getUnit().equals(Unit.PHASE))
                         continue;
                     if(band instanceof VirtualBand)
                         continue;
+                    if(slvProduct == masterProduct && (band == masterBands[0] || band == masterBands[1]))
+                        continue;
+
                     bandList.add(band);
                 }
             }
