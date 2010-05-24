@@ -262,6 +262,8 @@ public class GCPSelection2Op extends Operator {
                                     sourceImageWidth,
                                     sourceImageHeight);
 
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+        
         final int numSrcBands = sourceProduct.getNumBands();
         boolean oneSlaveProcessed = false;          // all other use setSourceImage
         for(int i = 0; i < numSrcBands; ++i) {
@@ -290,8 +292,6 @@ public class GCPSelection2Op extends Operator {
                 }
             }
         }
-
-        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
     }
 
     /**

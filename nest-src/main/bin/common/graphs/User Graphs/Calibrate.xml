@@ -1,0 +1,43 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="1-Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement"/>
+  </node>
+  <node id="2-Write">
+    <operator>Write</operator>
+    <sources>
+      <sourceProduct refid="3-Calibration"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <formatName>BEAM-DIMAP</formatName>
+      <file>calibrated.dim</file>
+    </parameters>
+  </node>
+  <node id="3-Calibration">
+    <operator>Calibration</operator>
+    <sources>
+      <sourceProduct refid="1-Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <externalAuxFile/>
+      <outputImageScaleInDb>false</outputImageScaleInDb>
+      <createGammaBand>false</createGammaBand>
+      <createBetaBand>false</createBetaBand>
+    </parameters>
+  </node>
+  <applicationData id="Presentation">
+    <Description/>
+    <node id="1-Read">
+      <displayPosition y="134.0" x="37.0"/>
+    </node>
+    <node id="2-Write">
+      <displayPosition y="135.0" x="455.0"/>
+    </node>
+    <node id="3-Calibration">
+      <displayPosition y="135.0" x="215.0"/>
+    </node>
+  </applicationData>
+</graph>
