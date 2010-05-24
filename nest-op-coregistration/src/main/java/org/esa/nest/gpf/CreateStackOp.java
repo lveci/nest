@@ -559,8 +559,8 @@ public class CreateStackOp extends Operator {
                 final int maxY = ty0 + th;
 
                 int[] offset = slaveOffsettMap.get(srcProduct);
-                final int sx0 = Math.max(0, tx0 + offset[0]);
-                final int sy0 = Math.max(0, ty0 + offset[1]);
+                final int sx0 = Math.min(Math.max(0, tx0 + offset[0]), srcImageWidth - 1);
+                final int sy0 = Math.min(Math.max(0, ty0 + offset[1]), srcImageHeight - 1);
                 final int sw = Math.min(sx0 + tw - 1, srcImageWidth - 1) - sx0 + 1;
                 final int sh = Math.min(sy0 + th - 1, srcImageHeight - 1) - sy0 + 1;
                 final Rectangle srcRectangle = new Rectangle(sx0, sy0, sw, sh);
