@@ -11,6 +11,7 @@ import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -176,7 +177,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         };
 
         private final Class types[] = new Class[]{
-                String.class, String.class, String.class, Number.class, Number.class
+                String.class, String.class, String.class, String.class, String.class
         };
 
         private final int widths[] = new int[]{
@@ -184,9 +185,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         };
 
         private class FileStats {
-            Object data[] = new Object[titles.length];
+            String data[] = new String[titles.length];
             FileStats(File file) {
                 data[0] = file.getName();
+            }
+            FileStats(ProductEntry entry) {
+                data[0] = entry.getName();
+                data[1] = entry.getProductType();
+                data[2] = entry.getFirstLineTime().format();
+                data[3] = "";//entry.track;
+                data[4] = "";//entry.orbit;
             }
         }
 
@@ -210,6 +218,15 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             fireTableDataChanged();
 
             updateProductData(fstat, file);
+        }
+
+        public void addFile(final ProductEntry entry) {
+            fileList.add(entry.getFile());
+            clearBlankFile();
+
+            FileStats fstat = new FileStats(entry);
+            dataList.add(fstat);
+            fireTableDataChanged();
         }
 
         public void removeFile(final int index) {
@@ -282,20 +299,21 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                     try {
                         if(!file.getName().isEmpty()) {
                             try {
-                                final Product product = ProductIO.readProduct(file, null);
+                                final Product product = ProductIO.readProduct(file);
                                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
 
                                 fstat.data[0] = product.getName();
                                 fstat.data[1] = product.getProductType();
                                 fstat.data[2] = OperatorUtils.getAcquisitionDate(absRoot);
-                                fstat.data[3] = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0);
-                                fstat.data[4] = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
+                                fstat.data[3] = String.valueOf(absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0));
+                                fstat.data[4] = String.valueOf(absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0));
+                                product.dispose();
                             } catch(Exception ex) {
                                 fstat.data[0] = file.getName();
                                 fstat.data[1] = "";
                                 fstat.data[2] = "";
-                                fstat.data[3] = 0;
-                                fstat.data[4] = 0;
+                                fstat.data[3] = "";
+                                fstat.data[4] = "";
                             }
                         }
                     } finally {

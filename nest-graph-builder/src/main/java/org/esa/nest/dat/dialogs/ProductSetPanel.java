@@ -5,6 +5,7 @@ import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.SystemUtils;
+import org.esa.nest.db.ProductEntry;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
@@ -43,6 +44,7 @@ public class ProductSetPanel {
         String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
         targetProductSelector.getModel().setProductDir(new File(saveDir));
         targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
+        targetProductSelector.getOpenInAppCheckBox().setVisible(false);
 
         ioParametersPanel.add(targetProductSelector.createPanel());
 
@@ -91,10 +93,14 @@ public class ProductSetPanel {
         return fileList.toArray(new File[fileList.size()]);
     }
 
-    public void setFileList(final File[] files) {
+    public Object getValueAt(final int r, final int c) {
+        return fileModel.getValueAt(r, c);
+    }
+
+    public void setProductEntryList(final ProductEntry[] productEntryList) {
         fileModel.clear();
-        for(File f : files) {
-            fileModel.addFile(f);
+        for(ProductEntry entry : productEntryList) {
+            fileModel.addFile(entry);
         }
     }
 }

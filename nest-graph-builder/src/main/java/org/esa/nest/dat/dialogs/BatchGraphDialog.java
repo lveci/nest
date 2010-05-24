@@ -5,14 +5,17 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dat.actions.BatchProcessingAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
+import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.ResourceUtils;
 
 import javax.media.jai.JAI;
@@ -46,13 +49,18 @@ public class BatchGraphDialog extends ModelessDialog {
     private ProgressBarProgressMonitor progBarMonitor = null;
 
     private Map<File, File[]> slaveFileMap = null;
+    private final Map<File, File> targetFileMap = new HashMap<File, File>();
+    private final ArrayList<BatchProcessListener> listenerList = new ArrayList<BatchProcessListener>(1);
+    private final boolean closeOnDone;
 
     private boolean isProcessing = false;
     private File graphFile;
 
-    public BatchGraphDialog(final AppContext theAppContext, final String title, final String helpID) {
+    public BatchGraphDialog(final AppContext theAppContext, final String title, final String helpID, 
+                            final boolean closeOnDone) {
         super(theAppContext.getApplicationWindow(), title, ID_YES| ID_APPLY_CLOSE_HELP, helpID);
-        appContext = theAppContext;
+        this.appContext = theAppContext;
+        this.closeOnDone = closeOnDone;
 
         mainPanel = new JPanel(new BorderLayout(4, 4));
 
@@ -125,6 +133,22 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
+    public void addListener(final BatchProcessListener listener) {
+        if (!listenerList.contains(listener)) {
+            listenerList.add(listener);
+        }
+    }
+
+    public void removeListener(final BatchProcessListener listener) {
+        listenerList.remove(listener);
+    }
+
+    private void notifyMSG(final BatchProcessListener.MSG msg) {
+        for (final BatchProcessListener listener : listenerList) {
+            listener.notifyMSG(msg, targetFileMap);
+        }
+    }
+
     /**
      * OnLoad
      */
@@ -138,8 +162,8 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    public void setInputFiles(final File[] files) {
-        productSetPanel.setFileList(files);
+    public void setInputFiles(final ProductEntry[] productEntryList) {
+        productSetPanel.setProductEntryList(productEntryList);
     }
 
     public void setTargetFolder(final File path) {
@@ -255,7 +279,7 @@ public class BatchGraphDialog extends ModelessDialog {
             for(File file : fileList) {
                 try {
 
-                    final Product product = ProductIO.readProduct(file, null);
+                    final Product product = ProductIO.readProduct(file);
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
                     }
@@ -323,10 +347,18 @@ public class BatchGraphDialog extends ModelessDialog {
     void assignParameters() {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
+        targetFileMap.clear();
         for(File f : fileList) {
-            final String ext = FileUtils.getExtension(f);
-            final String name = FileUtils.getFilenameWithoutExtension(f);
-            final File targetFile = new File(productSetPanel.getTargetFolder(), name+'_'+graphIndex+ext);
+            String name;
+            final Object o = productSetPanel.getValueAt(graphIndex, 0);
+            if(o instanceof String)
+                name = (String) o;
+            else
+                name = FileUtils.getFilenameWithoutExtension(f);
+
+            final File targetFile = new File(productSetPanel.getTargetFolder(), name);
+            targetFileMap.put(f, targetFile);
+
             setIO(graphExecuterList.get(graphIndex),
                 "Read", f,
                 "Write", targetFile, internalFormat);
@@ -486,8 +518,18 @@ public class BatchGraphDialog extends ModelessDialog {
                 //}
             }
             cleanUpTempFiles();
+            notifyMSG(BatchProcessListener.MSG.DONE);
+            if(closeOnDone)
+                close();
         }
 
+    }
+
+    public interface BatchProcessListener {
+
+        public enum MSG { DONE }
+
+        public void notifyMSG(final MSG msg, final Map<File, File> targetFileMap);
     }
 
 }
