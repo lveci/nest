@@ -1,7 +1,9 @@
 package org.esa.nest.util;
 
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.db.ProductDB;
 
 import java.sql.Date;
 import java.util.Calendar;
@@ -42,5 +44,13 @@ public class SQLUtils {
         if(!str.isEmpty())
             return " AND ";
         return "";
+    }
+
+    public static String insertTableName(final String[] tokens, final String tableName, final String freeQuery) {
+        String query = freeQuery;
+        for(String tok : tokens) {
+            query = query.replaceAll(tok, tableName+'.'+tok);
+        }
+        return query;
     }
 }

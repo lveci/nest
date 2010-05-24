@@ -34,6 +34,8 @@ public final class AbstractMetadata {
     public static final String SPH_DESCRIPTOR = "SPH_DESCRIPTOR";
     public static final String PATH = "PATH";
     public static final String MISSION = "MISSION";
+    public static final String ACQUISITION_MODE = "ACQUISITION_MODE";
+    public static final String BEAM_MODE = "BEAM_MODE";
     public static final String PROC_TIME = "PROC_TIME";
     public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
     public static final String CYCLE = "CYCLE";
@@ -145,6 +147,8 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product type");
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "Satellite mission");
+        addAbstractedAttribute(absRoot, ACQUISITION_MODE, ProductData.TYPE_ASCII, "", "Acquisition Mode");
+        addAbstractedAttribute(absRoot, BEAM_MODE, ProductData.TYPE_ASCII, "", "Beams used");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "Processed time");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "Processing system identifier");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "Cycle");
@@ -410,9 +414,9 @@ public final class AbstractMetadata {
         }
         if(abstractedMetadata == null) {
             abstractedMetadata = addAbstractedMetadataHeader(root);
+        } else {
+            patchMissingMetadata(abstractedMetadata);
         }
-        patchMissingMetadata(abstractedMetadata);
-
         return abstractedMetadata;
     }
 

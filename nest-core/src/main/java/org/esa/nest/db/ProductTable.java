@@ -1,13 +1,11 @@
 package org.esa.nest.db;
 
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
 
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  *
@@ -18,11 +16,12 @@ public class ProductTable implements TableInterface {
 
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtUpdateExistingRecord;
-    private PreparedStatement stmtGetAddress;
+    private PreparedStatement stmtGetProduct;
     private PreparedStatement stmtGetProductWithPath;
     private PreparedStatement stmtDeleteAddress;
     private PreparedStatement stmtAllMissions;
     private PreparedStatement stmtAllProductTypes;
+    private PreparedStatement stmtAllAcquisitionModes;
 
     private static final String strCreateProductTable =
             "create table APP.PRODUCTS (" +
@@ -31,6 +30,7 @@ public class ProductTable implements TableInterface {
             AbstractMetadata.PRODUCT        +" VARCHAR(255), " +
             AbstractMetadata.MISSION        +" VARCHAR(30), " +
             AbstractMetadata.PRODUCT_TYPE   +" VARCHAR(30), " +
+            AbstractMetadata.ACQUISITION_MODE+" VARCHAR(30), " +
             AbstractMetadata.PASS           +" VARCHAR(30), " +
             AbstractMetadata.first_near_lat +" DOUBLE, " +
             AbstractMetadata.first_near_long+" DOUBLE, " +
@@ -52,15 +52,13 @@ public class ProductTable implements TableInterface {
             "SELECT * FROM APP.PRODUCTS " +
             "WHERE ID = ?";
 
-    private static final String strGetProductsWhere =
-            "SELECT * FROM APP.PRODUCTS WHERE ";
-
     private static final String strSaveProduct =
             "INSERT INTO APP.PRODUCTS ( " +
             AbstractMetadata.PATH           +", "+
             AbstractMetadata.PRODUCT        +", "+
             AbstractMetadata.MISSION        +", "+
             AbstractMetadata.PRODUCT_TYPE   +", "+
+            AbstractMetadata.ACQUISITION_MODE+", "+
             AbstractMetadata.PASS           +", "+
             AbstractMetadata.first_near_lat +", "+
             AbstractMetadata.first_near_long+", "+
@@ -76,7 +74,7 @@ public class ProductTable implements TableInterface {
             ProductEntry.FILE_SIZE          +", "+
             ProductEntry.LAST_MODIFIED      +", "+
             ProductEntry.FILE_FORMAT        +
-            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String strGetListEntries =
             "SELECT * FROM APP.PRODUCTS ORDER BY "+AbstractMetadata.MISSION+" ASC";
@@ -96,6 +94,7 @@ public class ProductTable implements TableInterface {
 
     private static final String strAllMissions = "SELECT DISTINCT "+AbstractMetadata.MISSION+" FROM APP.PRODUCTS";
     private static final String strAllProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM APP.PRODUCTS";
+    private static final String strAllAcquisitionModes = "SELECT DISTINCT "+AbstractMetadata.ACQUISITION_MODE+" FROM APP.PRODUCTS";
 
     public ProductTable(final Connection dbConnection) {
         this.dbConnection = dbConnection;
@@ -113,12 +112,13 @@ public class ProductTable implements TableInterface {
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(strSaveProduct, Statement.RETURN_GENERATED_KEYS);
         stmtUpdateExistingRecord = dbConnection.prepareStatement(strUpdateProduct);
-        stmtGetAddress = dbConnection.prepareStatement(strGetProduct);
+        stmtGetProduct = dbConnection.prepareStatement(strGetProduct);
         stmtGetProductWithPath = dbConnection.prepareStatement(strGetProductWithPath);
         stmtDeleteAddress = dbConnection.prepareStatement(strDeleteProduct);
 
         stmtAllMissions = dbConnection.prepareStatement(strAllMissions);
         stmtAllProductTypes = dbConnection.prepareStatement(strAllProductTypes);
+        stmtAllAcquisitionModes = dbConnection.prepareStatement(strAllAcquisitionModes);
     }
 
     public ResultSet addRecord(final ProductEntry record) throws SQLException {
@@ -128,6 +128,7 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setString(i++, record.getName());
         stmtSaveNewRecord.setString(i++, record.getMission());
         stmtSaveNewRecord.setString(i++, record.getProductType());
+        stmtSaveNewRecord.setString(i++, record.getAcquisitionMode());
         stmtSaveNewRecord.setString(i++, record.getPass());
         stmtSaveNewRecord.setDouble(i++, record.getFirstNearGeoPos().getLat());
         stmtSaveNewRecord.setDouble(i++, record.getFirstNearGeoPos().getLon());
@@ -180,17 +181,6 @@ public class ProductTable implements TableInterface {
         return listEntries.toArray(new ProductEntry[listEntries.size()]);
     }
 
-    public ProductEntry[] query(final String queryStr) throws SQLException {
-        final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
-
-        final Statement queryStatement = dbConnection.createStatement();
-        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere + queryStr);
-        while(results.next()) {
-            listEntries.add(new ProductEntry(results));
-        }
-        return listEntries.toArray(new ProductEntry[listEntries.size()]);
-    }
-
     public String[] getAllMissions() throws SQLException {
         final ArrayList<String> listEntries = new ArrayList<String>();
         final ResultSet results = stmtAllMissions.executeQuery();
@@ -221,12 +211,49 @@ public class ProductTable implements TableInterface {
      * @throws SQLException .
      */
     public String[] getProductTypes(final String[] missions) throws SQLException {
+        if(missions == null || missions.length == 0)
+            return new String[] {};
         String strMissionProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM APP.PRODUCTS WHERE ";
         strMissionProductTypes += SQLUtils.getOrList(AbstractMetadata.MISSION, missions);
 
         final ArrayList<String> listEntries = new ArrayList<String>();
         final Statement queryStatement = dbConnection.createStatement();
         final ResultSet results = queryStatement.executeQuery(strMissionProductTypes);
+        while(results.next()) {
+            listEntries.add(results.getString(1));
+        }
+        return listEntries.toArray(new String[listEntries.size()]);
+    }
+
+    /**
+     * Get All acquisition modes
+     * @return list of acquisition modes
+     * @throws SQLException .
+     */
+    public String[] getAllAcquisitionModes() throws SQLException {
+        final ArrayList<String> listEntries = new ArrayList<String>();
+        final ResultSet results = stmtAllAcquisitionModes.executeQuery();
+        while(results.next()) {
+            listEntries.add(results.getString(1));
+        }
+        return listEntries.toArray(new String[listEntries.size()]);
+    }
+
+    /**
+     * Get All acquisition modes for specified mission
+     * @param missions the selected missions
+     * @return list of acquisition modes
+     * @throws SQLException .
+     */
+    public String[] getAcquisitionModes(final String[] missions) throws SQLException {
+        if(missions == null || missions.length == 0)
+            return new String[] {};
+        String strMissionAcquisitionModes = "SELECT DISTINCT "+AbstractMetadata.ACQUISITION_MODE+" FROM APP.PRODUCTS WHERE ";
+        strMissionAcquisitionModes += SQLUtils.getOrList(AbstractMetadata.MISSION, missions);
+
+        final ArrayList<String> listEntries = new ArrayList<String>();
+        final Statement queryStatement = dbConnection.createStatement();
+        final ResultSet results = queryStatement.executeQuery(strMissionAcquisitionModes);
         while(results.next()) {
             listEntries.add(results.getString(1));
         }

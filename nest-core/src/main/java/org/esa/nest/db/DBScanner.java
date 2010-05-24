@@ -95,6 +95,8 @@ public final class DBScanner extends SwingWorker {
                                 sourceProduct.dispose();
                                 entry.dispose();
                             }
+                        } else {
+                            System.out.println("No reader for "+file.getAbsolutePath());
                         }
                     } catch(Exception e) {
                         System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
@@ -107,7 +109,7 @@ public final class DBScanner extends SwingWorker {
                 final int numQL = qlProductFiles.size();
                 pm.beginTask("Generating Quicklooks...", numQL);
                 for(int j=0; j < numQL; ++j) {
-                    pm.setTaskName("Generating Quicklook... "+j+" of "+numQL);
+                    pm.setTaskName("Generating Quicklook... "+(j+1)+" of "+numQL);
                     pm.worked(1);
                     if(pm.isCanceled())
                         break;

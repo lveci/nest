@@ -1,6 +1,7 @@
 package org.esa.nest.db;
 
 import junit.framework.TestCase;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -38,14 +39,17 @@ public class TestDBQuery extends TestCase {
         final DBQuery dbQuery = new DBQuery();
         dbQuery.setSelectedMissions(new String[] { "ENVISAT"});
 
-
-        dbQuery.clearMetadataQuery();
-        //dbQuery.addMetadataQuery((String)metadataNameCombo.getSelectedItem(), metdataValueField.getText());
-
         final ProductEntry[] productEntryList = dbQuery.queryDatabase(db);
         showProductEntries(productEntryList);
     }
 
+    public void testFreeQuery() throws SQLException {
+        final DBQuery dbQuery = new DBQuery();
+        dbQuery.setFreeQuery(AbstractMetadata.PRODUCT+" LIKE 'RS2_SGF%'");
+
+        final ProductEntry[] productEntryList = dbQuery.queryDatabase(db);
+        showProductEntries(productEntryList);
+    }
 
     private void showProductEntries(final ProductEntry[] productEntryList) {
         for(ProductEntry entry : productEntryList) {

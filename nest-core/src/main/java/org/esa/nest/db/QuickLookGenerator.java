@@ -1,25 +1,23 @@
 package org.esa.nest.db;
 
-import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.datamodel.ProductData;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.imageio.ImageIO;
-import javax.media.jai.RasterFactory;
 import javax.media.jai.PlanarImage;
-import javax.swing.*;
+import javax.media.jai.RasterFactory;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.awt.image.*;
-import java.awt.*;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  Generates Quicklooks

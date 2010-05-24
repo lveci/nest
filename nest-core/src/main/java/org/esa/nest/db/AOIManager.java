@@ -1,7 +1,6 @@
 package org.esa.nest.db;
 
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.db.AOI;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;

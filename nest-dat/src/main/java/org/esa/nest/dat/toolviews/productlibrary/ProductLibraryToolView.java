@@ -180,7 +180,7 @@ public class ProductLibraryToolView extends AbstractToolView {
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
-                        batchProcess(getSelectedFiles(), file);
+                        batchProcess(getSelectedProductEntries(), file);
                     }
                 });
                 menu.add(item);
@@ -188,10 +188,10 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
     }
 
-    private static void batchProcess(final File[] fileList, final File graphFile) {
+    private static void batchProcess(final ProductEntry[] productEntryList, final File graphFile) {
         final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
-                "Batch Processing", "batchProcessing");
-        batchDlg.setInputFiles(fileList);
+                "Batch Processing", "batchProcessing", false);
+        batchDlg.setInputFiles(productEntryList);
         if(graphFile != null) {
             batchDlg.LoadGraphFile(graphFile);
         }
@@ -350,7 +350,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         batchProcessButton.setComponentPopupMenu(createPopup());
         batchProcessButton.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
-                batchProcess(getSelectedFiles(), null);
+                batchProcess(getSelectedProductEntries(), null);
             }
         });
 
@@ -514,6 +514,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         headerBar.add(removeButton, gbc);
 
         final JButton helpButton = createToolButton("helpButton", UIUtils.loadImageIcon("icons/Help24.gif"));
+        helpButton.setVisible(false);
         HelpSys.enableHelpOnButton(helpButton, helpId);
         headerBar.add(helpButton, gbc);
 

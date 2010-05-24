@@ -3,11 +3,11 @@ package org.esa.nest.db;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.awt.image.BufferedImage;
 
 /**
 
@@ -24,6 +24,7 @@ public class ProductEntry {
     private String name;
     private String mission;
     private String productType;
+    private String acquisitionMode;
     private ProductData.UTC firstLineTime;
     private String pass;
     private double range_spacing;
@@ -55,8 +56,10 @@ public class ProductEntry {
         this.name = product.getName();
         this.absRoot = AbstractMetadata.getAbstractedMetadata(product).createDeepClone();
         if(absRoot != null) {
+            this.name = absRoot.getAttributeString(AbstractMetadata.PRODUCT);
             this.mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
             this.productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+            this.acquisitionMode = absRoot.getAttributeString(AbstractMetadata.ACQUISITION_MODE);
             this.pass = absRoot.getAttributeString(AbstractMetadata.PASS);
             this.range_spacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
             this.azimuth_spacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
@@ -73,6 +76,7 @@ public class ProductEntry {
         this.name = results.getString(AbstractMetadata.PRODUCT);
         this.mission = results.getString(AbstractMetadata.MISSION);
         this.productType = results.getString(AbstractMetadata.PRODUCT_TYPE);
+        this.acquisitionMode = results.getString(AbstractMetadata.ACQUISITION_MODE);
         this.pass = results.getString(AbstractMetadata.PASS);
         this.range_spacing = results.getDouble(AbstractMetadata.range_spacing);
         this.azimuth_spacing =results.getDouble(AbstractMetadata.azimuth_spacing);
@@ -131,6 +135,10 @@ public class ProductEntry {
 
     public String getProductType() {
         return productType;
+    }
+
+    public String getAcquisitionMode() {
+        return acquisitionMode;
     }
 
     public String getPass() {

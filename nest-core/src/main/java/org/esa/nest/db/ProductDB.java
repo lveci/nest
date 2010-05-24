@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -16,10 +18,15 @@ public class ProductDB extends DAO {
 
     private ProductTable productTable;
     private MetadataTable metadataTable;
+    private Connection dbConnection = null;
 
     private static ProductDB _instance = null;
-
     public static final String DEFAULT_PRODUCT_DATABASE_NAME = "productDB";
+    public static final String PROD_TABLE = "APP.PRODUCTS";
+    public static final String META_TABLE = "APP.METADATA";
+    
+    private static final String strGetProductsWhere =
+            "SELECT * FROM APP.PRODUCTS, APP.METADATA WHERE APP.PRODUCTS.ID = APP.METADATA.ID AND ";
 
     public static ProductDB instance() throws IOException {
         if(_instance == null)
@@ -36,7 +43,8 @@ public class ProductDB extends DAO {
     }
 
     @Override
-    protected boolean createTables(final Connection dbConnection) throws SQLException {
+    protected boolean createTables(final Connection connection) throws SQLException {
+        this.dbConnection = connection;
         productTable = new ProductTable(dbConnection);
         productTable.createTable();
         metadataTable = new MetadataTable(dbConnection);
@@ -45,7 +53,8 @@ public class ProductDB extends DAO {
     }
 
     @Override
-    protected void validateTables(final Connection dbConnection) throws SQLException {
+    protected void validateTables(final Connection connection) throws SQLException {
+        this.dbConnection = connection;
         if(productTable == null)
             productTable = new ProductTable(dbConnection);
         if(metadataTable == null)
@@ -99,7 +108,14 @@ public class ProductDB extends DAO {
     }
 
     public ProductEntry[] queryProduct(final String queryStr) throws SQLException {
-        return productTable.query(queryStr);
+        final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
+
+        final Statement queryStatement = dbConnection.createStatement();
+        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere + queryStr);
+        while(results.next()) {
+            listEntries.add(new ProductEntry(results));
+        }
+        return listEntries.toArray(new ProductEntry[listEntries.size()]);
     }
     
   /*  public ProductEntry getProductEntry(final int index) {
@@ -127,6 +143,14 @@ public class ProductDB extends DAO {
 
     public String[] getProductTypes(final String[] missions) throws SQLException {
         return productTable.getProductTypes(missions);
+    }
+
+    public String[] getAllAcquisitionModes() throws SQLException {
+        return productTable.getAllAcquisitionModes();
+    }
+
+    public String[] getAcquisitionModes(final String[] missions) throws SQLException {
+        return productTable.getAcquisitionModes(missions);
     }
 
     public String[] getMetadataNames() {

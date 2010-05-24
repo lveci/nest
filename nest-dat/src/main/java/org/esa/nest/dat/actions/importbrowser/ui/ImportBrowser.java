@@ -270,8 +270,8 @@ public class ImportBrowser {
             fileList.toArray(productFiles);
 
             final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
-                        "Batch Processing", "batchProcessing");
-            batchDlg.setInputFiles(productFiles);
+                        "Batch Processing", "batchProcessing", false);
+            //batchDlg.setInputFiles(productFiles);
             if(graphFile != null) {
                 batchDlg.LoadGraphFile(graphFile);
             }

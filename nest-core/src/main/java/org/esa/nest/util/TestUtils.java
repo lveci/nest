@@ -43,11 +43,13 @@ public class TestUtils {
     public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetWidth"));
     public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
-    private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
-                                                   "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw",
+    private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
+                                                   "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
-                                                   "sav", "7z", "zip", "rrd"};
-    private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut", "readme" };
+                                                   "sav", "7z", "zip", "rrd", "lbl", "z", "gz", "exe", "bat", "sh", "rtf",
+                                                   "prj", "dbf", "shx", "ace", "ace2"};
+    private static String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut",
+                                                 "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
 

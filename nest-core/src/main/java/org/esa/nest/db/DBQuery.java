@@ -9,11 +9,9 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.List;
 
 /**
 
@@ -23,6 +21,7 @@ public class DBQuery {
     public static final String ALL_MISSIONS = "All Missions";
     public static final String ALL_PRODUCT_TYPES = "All Types";
     public static final String ALL_PASSES = "All Passes";
+    public static final String ALL_MODES = "All Modes";
     public static final String ASCENDING_PASS = "ASCENDING";
     public static final String DESCENDING_PASS = "DESCENDING";
     public static final String ALL_FOLDERS = "All Folders";
@@ -30,6 +29,7 @@ public class DBQuery {
 
     private String selectedMissions[] = {};
     private String selectedProductTypes[] = {};
+    private String selectedAcquisitionMode = "";
     private String selectedPass = "";
     private Rectangle.Float selectionRectangle = null;
     private File baseDir = null;
@@ -59,8 +59,18 @@ public class DBQuery {
         return selectedProductTypes;
     }
 
+    public void setSelectedAcquisitionMode(final String mode) {
+        if(mode != null)
+            selectedAcquisitionMode = mode;
+    }
+
+    public String getSelectedAcquisitionMode() {
+        return selectedAcquisitionMode;
+    }
+
     public void setSelectedPass(final String pass) {
-        selectedPass = pass;
+        if(pass != null)
+            selectedPass = pass;
     }
 
     public String getSelectedPass() {
@@ -110,20 +120,26 @@ public class DBQuery {
             selectedMissions = new String[] {};
         if(StringUtils.contains(selectedProductTypes, ALL_PRODUCT_TYPES))
             selectedProductTypes = new String[] {};
+        if(selectedAcquisitionMode.equals(ALL_MODES))
+            selectedAcquisitionMode = "";
         if(selectedPass.equals(ALL_PASSES))
             selectedPass = "";
 
         String queryStr = "";
         if(selectedMissions.length > 0) {
-            queryStr += SQLUtils.getOrList(AbstractMetadata.MISSION, selectedMissions);
+            queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.MISSION, selectedMissions);
         }
         if(selectedProductTypes.length > 0) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += SQLUtils.getOrList(AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
+            queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
+        }
+        if(!selectedAcquisitionMode.isEmpty()) {
+            queryStr += SQLUtils.addAND(queryStr);
+            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+"'";
         }
         if(!selectedPass.isEmpty()) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += AbstractMetadata.PASS+"='"+selectedPass+"'";
+            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+"'";
         }
 
         if(startDate != null) {
@@ -131,15 +147,15 @@ public class DBQuery {
             final Date start = SQLUtils.toSQLDate(startDate);
             if(endDate != null) {
                 final Date end = SQLUtils.toSQLDate(endDate);
-                queryStr += "( "+AbstractMetadata.first_line_time
+                queryStr += "( "+ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time
                         +" BETWEEN '"+ start.toString() +"' AND '"+ end.toString() + "' )";
             } else {
-                queryStr += AbstractMetadata.first_line_time +">='"+ start.toString()+"'";
+                queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time +">='"+ start.toString()+"'";
             }
         } else if(endDate != null) {
             queryStr += SQLUtils.addAND(queryStr);
             final Date end = SQLUtils.toSQLDate(endDate);
-            queryStr += AbstractMetadata.first_line_time +"<='"+ end.toString()+"'";
+            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time +"<='"+ end.toString()+"'";
         }
 
         final Set<String> metadataNames = metadataQueryMap.keySet();
@@ -147,22 +163,23 @@ public class DBQuery {
             final String value = metadataQueryMap.get(name);
             if(value != null && !value.isEmpty()) {
                 queryStr += SQLUtils.addAND(queryStr);
-                queryStr += name+"='"+value+"'";
+                queryStr += ProductDB.META_TABLE+'.'+name+"='"+value+"'";
             }
         }
 
         if(!freeQuery.isEmpty()) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += "( "+freeQuery+" )";
+            final String metadataFreeQuery = SQLUtils.insertTableName(db.getMetadataNames(), ProductDB.META_TABLE, freeQuery);
+            queryStr += "( "+metadataFreeQuery+" )";
         }
 
         if(baseDir != null) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
         }
         if(excludeDir != null) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
+            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
         }
 
         if(queryStr.isEmpty()) {
@@ -246,6 +263,7 @@ public class DBQuery {
             rectElem.setAttribute("h", String.valueOf(selectionRectangle.getHeight()));
         }
 
+        elem.setAttribute("selectedAcquisitionMode", selectedAcquisitionMode);
         elem.setAttribute("selectedPass", selectedPass);
         if(baseDir != null)
             elem.setAttribute("baseDir", baseDir.getAbsolutePath());
@@ -292,6 +310,7 @@ public class DBQuery {
             }
         }
 
+        selectedAcquisitionMode = XMLSupport.getAttrib(dbQueryElem, "selectedAcquisitionMode");
         selectedPass = XMLSupport.getAttrib(dbQueryElem, "selectedPass");
         final String baseDirStr = XMLSupport.getAttrib(dbQueryElem, "baseDir");
         if(!baseDirStr.isEmpty())

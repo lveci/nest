@@ -36,6 +36,7 @@ public class DatabasePane extends JPanel {
 
     private final JList missionJList = new JList();
     private final JList productTypeJList = new JList();
+    private final JComboBox acquisitionModeCombo = new JComboBox(new String[] { DBQuery.ALL_MODES });
     private final JComboBox passCombo = new JComboBox(new String[] {
             DBQuery.ALL_PASSES, DBQuery.ASCENDING_PASS, DBQuery.DESCENDING_PASS });
     private final DateComboBox startDateBox = new DateComboBox();
@@ -70,6 +71,12 @@ public class DatabasePane extends JPanel {
             productTypeJList.addListSelectionListener(new ListSelectionListener() {
                 public void valueChanged(ListSelectionEvent event) {
                     if(modifyingCombos || event.getValueIsAdjusting()) return;
+                    queryDatabase();
+                }
+            });
+            acquisitionModeCombo.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent event) {
+                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
                     queryDatabase();
                 }
             });
@@ -164,6 +171,9 @@ public class DatabasePane extends JPanel {
         gbc.gridx = 1;
         this.add(new JScrollPane(productTypeJList), gbc);
         gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Acquisition Mode:", acquisitionModeCombo);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);
 
@@ -239,15 +249,24 @@ public class DatabasePane extends JPanel {
         boolean origState = lockCombos(true);
         try {
             productTypeJList.removeAll();
+            acquisitionModeCombo.removeAllItems();
 
             final String selectedMissions[] = toStringArray(missionJList.getSelectedValues());
             String[] productTypeList;
-            if(StringUtils.contains(selectedMissions, DBQuery.ALL_MISSIONS))
+            String[] acquisitionModeList;
+            if(StringUtils.contains(selectedMissions, DBQuery.ALL_MISSIONS)) {
                 productTypeList = db.getAllProductTypes();
-            else
+                acquisitionModeList = db.getAllAcquisitionModes();
+            } else {
                 productTypeList = db.getProductTypes(selectedMissions);
-
+                acquisitionModeList = db.getAcquisitionModes(selectedMissions);
+            }
             productTypeJList.setListData(SQLUtils.prependString(DBQuery.ALL_PRODUCT_TYPES, productTypeList));
+            final String[] modeItems = SQLUtils.prependString(DBQuery.ALL_MODES, acquisitionModeList);
+            for(String item : modeItems) {
+                acquisitionModeCombo.addItem(item);
+            }
+
         } catch(Throwable t) {
             handleException(t);
         } finally {
@@ -289,6 +308,7 @@ public class DatabasePane extends JPanel {
     private void setData() {
         dbQuery.setSelectedMissions(toStringArray(missionJList.getSelectedValues()));
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
+        dbQuery.setSelectedAcquisitionMode((String) acquisitionModeCombo.getSelectedItem());
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
         dbQuery.setStartEndDate(startDateBox.getCalendar(), endDateBox.getCalendar());
 
@@ -334,6 +354,7 @@ public class DatabasePane extends JPanel {
             missionJList.setSelectedIndices(findIndices(missionJList, dbQuery.getSelectedMissions()));
             updateProductTypeCombo();
             productTypeJList.setSelectedIndices(findIndices(productTypeJList, dbQuery.getSelectedProductTypes()));
+            acquisitionModeCombo.setSelectedItem(dbQuery.getSelectedAcquisitionMode());
             passCombo.setSelectedItem(dbQuery.getSelectedPass());
             startDateBox.setCalendar(dbQuery.getStartDate());
             endDateBox.setCalendar(dbQuery.getEndDate());
