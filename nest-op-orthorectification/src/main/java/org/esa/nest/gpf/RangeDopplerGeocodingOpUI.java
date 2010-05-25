@@ -57,6 +57,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
     final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
 
+    final JLabel externalAuxFileLabel = new JLabel("External Aux File:");
+    final JTextField externalAuxFile = new JTextField("");
+    final JButton externalAuxFileBrowseButton = new JButton("...");
+
     private boolean saveDEM = false;
     private boolean saveLocalIncidenceAngle = false;
     private boolean saveProjectedLocalIncidenceAngle = false;
@@ -162,6 +166,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                 saveBetaNoughtCheckBox.setEnabled(true);
                                 saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
                                 saveSelectedSourceBandCheckBox.setSelected(false);
+                                externalAuxFile.setEnabled(true);
+                                externalAuxFileLabel.setEnabled(true);
+                                externalAuxFileBrowseButton.setEnabled(true);
 
                             } else {
 
@@ -172,6 +179,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                 incidenceAngleForSigma0.setEnabled(false);
                                 incidenceAngleForGamma0.setEnabled(false);
                                 saveSelectedSourceBandCheckBox.setSelected(true);
+                                externalAuxFile.setEnabled(false);
+                                externalAuxFileLabel.setEnabled(false);
+                                externalAuxFileBrowseButton.setEnabled(false);
                             }
                         }
 
@@ -184,6 +194,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         incidenceAngleForSigma0.setEnabled(false);
                         incidenceAngleForGamma0.setEnabled(false);
                         saveSelectedSourceBandCheckBox.setSelected(true);
+                        externalAuxFile.setEnabled(false);
+                        externalAuxFileLabel.setEnabled(false);
+                        externalAuxFileBrowseButton.setEnabled(false);
                     }
                 }
         });
@@ -216,6 +229,14 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         }
                     }
                 }
+        });
+
+        externalAuxFile.setColumns(30);
+        externalAuxFileBrowseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                final File file = VisatApp.getApp().showFileOpenDialog("External Aux File", false, null);
+                externalAuxFile.setText(file.getAbsolutePath());
+            }
         });
 
         return new JScrollPane(panel);
@@ -284,6 +305,14 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveSigmaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
         saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
         saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+
+        final File auxFile = (File)paramMap.get("externalAuxFile");
+        if(auxFile != null) {
+            externalAuxFile.setText(auxFile.getAbsolutePath());
+        }
+        externalAuxFile.setEnabled(applyRadiometricNormalization);
+        externalAuxFileLabel.setEnabled(applyRadiometricNormalization);
+        externalAuxFileBrowseButton.setEnabled(applyRadiometricNormalization);
     }
 
     @Override
@@ -344,6 +373,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("saveBetaNought", saveBetaNought);
         paramMap.put("saveGammaNought", saveGammaNought);
         paramMap.put("saveSigmaNought", saveSigmaNought);
+
+        final String auxFileStr = externalAuxFile.getText();
+        if(!auxFileStr.isEmpty()) {
+            paramMap.put("externalAuxFile", new File(auxFileStr));
+        }
     }
 
     JComponent createPanel() {
@@ -404,6 +438,17 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         gbc.insets.left = 20;
         contentPane.add(saveBetaNoughtCheckBox, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.insets.left = 20;
+        contentPane.add(externalAuxFileLabel, gbc);
+        gbc.gridx = 1;
+        gbc.insets.left = 1;
+        contentPane.add(externalAuxFile, gbc);
+        DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, true);
+        gbc.gridx = 2;
+        contentPane.add(externalAuxFileBrowseButton, gbc);
 
         //DialogUtils.fillPanel(contentPane, gbc);
 

@@ -150,6 +150,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             defaultValue = USE_INCIDENCE_ANGLE_FROM_DEM, label="")
     private String incidenceAngleForGamma0 = USE_INCIDENCE_ANGLE_FROM_DEM;
 
+    @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
+    private File externalAuxFile = null;
+
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
@@ -266,6 +269,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
+                calibrator.setExternalAuxFile(externalAuxFile);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
             }
 

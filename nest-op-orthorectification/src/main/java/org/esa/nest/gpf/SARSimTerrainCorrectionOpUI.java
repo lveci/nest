@@ -104,10 +104,22 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         gbc.insets.left = 20;
         contentPane.add(saveBetaNoughtCheckBox, gbc);
+
         gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.insets.left = 20;
+        contentPane.add(externalAuxFileLabel, gbc);
+        gbc.gridx = 1;
+        gbc.insets.left = 1;
+        contentPane.add(externalAuxFile, gbc);
+        DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, true);
+        gbc.gridx = 2;
+        contentPane.add(externalAuxFileBrowseButton, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
         gbc.insets.left = 1;
         contentPane.add(openShiftsFileCheckBox, gbc);
-        
         //DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;

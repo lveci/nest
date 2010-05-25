@@ -140,6 +140,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
             defaultValue = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM, label="")
     private String incidenceAngleForGamma0 = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM;
 
+    @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
+    private File externalAuxFile = null;
+
     @Parameter(description = "Show range and azimuth shifts file in a text viewer", defaultValue = "false", label="Show Range and Azimuth Shifts")
     private boolean openShiftsFile = false;
 
@@ -274,6 +277,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
+                calibrator.setExternalAuxFile(externalAuxFile);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
             }
 
