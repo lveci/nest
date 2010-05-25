@@ -5,13 +5,11 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.dat.actions.BatchProcessingAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
@@ -117,6 +115,9 @@ public class BatchGraphDialog extends ModelessDialog {
     @Override
     public void hide() {
         productSetPanel.releaseProducts();
+        if(progBarMonitor != null)
+            progBarMonitor.setCanceled(true);
+        notifyMSG(BatchProcessListener.BatchMSG.CLOSE);
         super.hide();
     }
 
@@ -143,7 +144,7 @@ public class BatchGraphDialog extends ModelessDialog {
         listenerList.remove(listener);
     }
 
-    private void notifyMSG(final BatchProcessListener.MSG msg) {
+    private void notifyMSG(final BatchProcessListener.BatchMSG msg) {
         for (final BatchProcessListener listener : listenerList) {
             listener.notifyMSG(msg, targetFileMap);
         }
@@ -463,6 +464,8 @@ public class BatchGraphDialog extends ModelessDialog {
                 final File[] fileList = productSetPanel.getFileList();
                 int graphIndex = 0;
                 for(GraphExecuter graphEx : graphExecuterList) {
+                    if(pm.isCanceled()) break;
+
                     try {
                         final String nOfm = String.valueOf(graphIndex+1)+" of "+fileList.length + ' ';
                         statusLabel.setText("Processing "+ nOfm +fileList[graphIndex].getName());
@@ -518,18 +521,20 @@ public class BatchGraphDialog extends ModelessDialog {
                 //}
             }
             cleanUpTempFiles();
-            notifyMSG(BatchProcessListener.MSG.DONE);
+            notifyMSG(BatchProcessListener.BatchMSG.DONE);
             if(closeOnDone)
                 close();
         }
+
+
 
     }
 
     public interface BatchProcessListener {
 
-        public enum MSG { DONE }
+        public enum BatchMSG { DONE, CLOSE }
 
-        public void notifyMSG(final MSG msg, final Map<File, File> targetFileMap);
+        public void notifyMSG(final BatchMSG msg, final Map<File, File> targetFileMap);
     }
 
 }

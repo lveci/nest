@@ -525,7 +525,7 @@ public class CreateStackOp extends Operator {
                 offset[1] = 0 - (int)mstPixelPos.y;
                 slaveOffsettMap.put(slvProd, offset);
             } else {
-                throw new OperatorException("Product " + slvProd.getName() + " has no overlap with master product.");
+               throw new OperatorException("Product " + slvProd.getName() + " has no overlap with master product.");
             }
         }
 

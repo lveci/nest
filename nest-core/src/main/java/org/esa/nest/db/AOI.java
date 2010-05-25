@@ -24,6 +24,7 @@ public class AOI {
     private String outputFolder = "";
     private String processingGraph = "";
     private String lastProcessed = "";
+    private boolean findSlaves = false;
     private int maxSlaves = 1;
 
     private GeoPos[] aoiPoints = new GeoPos[] {};
@@ -75,6 +76,14 @@ public class AOI {
         processingGraph = file;
     }
 
+    public boolean getFindSlaves() {
+        return findSlaves;
+    }
+
+    public void setFindSlaves(final  boolean flag) {
+        findSlaves = flag;
+    }
+
     public void setMaxSlaves(final int max) {
         maxSlaves = max;
     }
@@ -117,6 +126,7 @@ public class AOI {
         elem.setAttribute("outputFolder", outputFolder);
         elem.setAttribute("graph", processingGraph);
         elem.setAttribute("lastProcessed", lastProcessed);
+        elem.setAttribute("findSlaves", String.valueOf(findSlaves));
         elem.setAttribute("maxSlaves", String.valueOf(maxSlaves));
         root.addContent(elem);
 
@@ -157,6 +167,9 @@ public class AOI {
                         outputFolder = XMLSupport.getAttrib(child, "outputFolder");
                         processingGraph = XMLSupport.getAttrib(child, "graph");
                         lastProcessed = XMLSupport.getAttrib(child, "lastProcessed");
+                        final Attribute findSlavesAttrib = child.getAttribute("findSlaves");
+                        if(findSlavesAttrib != null)
+                            findSlaves = Boolean.parseBoolean(findSlavesAttrib.getValue());                              
                         final Attribute maxSlavesAttrib = child.getAttribute("maxSlaves");
                         if(maxSlavesAttrib != null)
                             maxSlaves = Integer.parseInt(maxSlavesAttrib.getValue());
