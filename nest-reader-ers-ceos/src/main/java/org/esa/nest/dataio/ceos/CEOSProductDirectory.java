@@ -311,6 +311,33 @@ public abstract class CEOSProductDirectory {
         AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, rec.getAttributeDouble(tag));
     }
 
+    protected static void addDopplerCentroidCoefficients(final MetadataElement absRoot, final BaseRecord sceneRec) {
+        if(sceneRec == null) return;
+
+        final MetadataElement dopCoefficientsElem = absRoot.getElement(AbstractMetadata.dop_coefficients);
+
+        final MetadataElement dopListElem = new MetadataElement(AbstractMetadata.dop_coef_list);
+        dopCoefficientsElem.addElement(dopListElem);
+
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        dopListElem.setAttributeUTC(AbstractMetadata.dop_coef_time, utcTime);
+        AbstractMetadata.addAbstractedAttribute(dopListElem, AbstractMetadata.slant_range_time,
+                ProductData.TYPE_FLOAT64, "ns", "Slant Range Time");
+        AbstractMetadata.setAttribute(dopListElem, AbstractMetadata.slant_range_time, 0.0);
+
+        addDopCoef(dopListElem, sceneRec, "Cross track Doppler frequency centroid constant term", 1);
+        addDopCoef(dopListElem, sceneRec, "Cross track Doppler frequency centroid linear term", 2);
+        addDopCoef(dopListElem, sceneRec, "Cross track Doppler frequency centroid quadratic term", 3);
+    }
+
+    protected static void addDopCoef(final MetadataElement dopListElem, final BaseRecord rec, final String tag, int cnt) {
+        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
+        dopListElem.addElement(coefElem);
+
+        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.dop_coef, ProductData.TYPE_FLOAT64, "", tag);
+        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.dop_coef, rec.getAttributeDouble(tag));
+    }
+
     protected static ImageInputStream createInputStream(final File file) throws IOException {
         return new FileImageInputStream(file);
     }

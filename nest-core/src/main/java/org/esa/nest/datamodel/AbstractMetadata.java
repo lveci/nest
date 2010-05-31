@@ -117,6 +117,13 @@ public final class AbstractMetadata {
     public static final String coefficient = "coefficient";
     public static final String srgr_coef = "srgr_coef";
 
+    // Doppler Centroid Coefficients
+    public static final String dop_coefficients = "Doppler_Centroid_Coefficients";
+    public static final String dop_coef_list = "dop_coef_list";
+    public static final String dop_coef_time = "zero_doppler_time";
+    public static final String slant_range_time = "slant_range_time";
+    public static final String dop_coef = "dop_coef";
+
     // orthorectification
     public static final String is_terrain_corrected = "is_terrain_corrected";
     public static final String DEM = "DEM";
@@ -221,6 +228,7 @@ public final class AbstractMetadata {
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
+        absRoot.addElement(new MetadataElement(dop_coefficients));
 
         return absRoot;
     }

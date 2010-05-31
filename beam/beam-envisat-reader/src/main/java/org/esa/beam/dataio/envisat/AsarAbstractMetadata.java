@@ -250,6 +250,12 @@ public final class AsarAbstractMetadata {
         if(srgrADS != null) {
             addSRGRCoefficients(srgrADS, absRoot);
         }
+
+        // add Doppler Centroid coefficients
+        final MetadataElement dopplerCentroidCoeffsADS = root.getElement("DOP_CENTROID_COEFFS_ADS");
+        if(dopplerCentroidCoeffsADS != null) {
+            addDopplerCentroidCoefficients(dopplerCentroidCoeffsADS, absRoot);
+        }
     }
     
     public static String getMission(final String productType, final File file) {
@@ -430,16 +436,16 @@ public final class AsarAbstractMetadata {
 
         int listCnt = 1;
         if(srgrAds.getNumElements() == 0) {
-            addCoefficients(srgrAds, srgrListElem, listCnt);
+            addOneSetSRGRCoefficients(srgrAds, srgrListElem, listCnt);
         } else {
             for(MetadataElement srgrSrc : srgrAds.getElements()) {
 
-                addCoefficients(srgrSrc, srgrListElem, listCnt++);
+                addOneSetSRGRCoefficients(srgrSrc, srgrListElem, listCnt++);
             }
         }
     }
 
-    private static void addCoefficients(MetadataElement srgrSrc, MetadataElement srgrListElem, int listCnt) {
+    private static void addOneSetSRGRCoefficients(MetadataElement srgrSrc, MetadataElement srgrListElem, int listCnt) {
         final ArrayList<Double> coefList = new ArrayList<Double>(5);
         ProductData.UTC utcTime;
         double origin;
@@ -470,4 +476,55 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("srgr_coef", value, "", coefElem, "");
         }
     }
+
+
+    private static void addDopplerCentroidCoefficients(MetadataElement dopplerCentroidCoeffsADS, MetadataElement dest) {
+        final MetadataElement dopplerCentroidCoeffsListElem = new MetadataElement("Doppler_Centroid_Coefficients");
+        dest.addElement(dopplerCentroidCoeffsListElem);
+
+        int listCnt = 1;
+        if(dopplerCentroidCoeffsADS.getNumElements() == 0) {
+            addOneSetDopplerCentroidCoefficients(dopplerCentroidCoeffsADS, dopplerCentroidCoeffsListElem, listCnt);
+        } else {
+            for(MetadataElement dopplerCentroidSrc : dopplerCentroidCoeffsADS.getElements()) {
+
+                addOneSetDopplerCentroidCoefficients(dopplerCentroidSrc, dopplerCentroidCoeffsListElem, listCnt++);
+            }
+        }
+    }
+
+    private static void addOneSetDopplerCentroidCoefficients(
+            MetadataElement dopplerCentroidSrc, MetadataElement dopplerCentroidCoeffsListElem, int listCnt) {
+
+        final ArrayList<Double> coefList = new ArrayList<Double>(5);
+        ProductData.UTC utcTime;
+        double origin;
+        try {
+            utcTime = dopplerCentroidSrc.getAttributeUTC("zero_doppler_time");
+            origin = dopplerCentroidSrc.getAttributeDouble("slant_range_time");
+
+            final MetadataAttribute dopCoefAttrib = dopplerCentroidSrc.getAttribute("dop_coef");
+            final ProductData data = dopCoefAttrib.getData();
+            for(int i=0; i < data.getNumElems(); ++i) {
+                coefList.add(data.getElemDoubleAt(i));
+            }
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        final MetadataElement dopElem = new MetadataElement("dop_coef_list."+listCnt);
+        dopplerCentroidCoeffsListElem.addElement(dopElem);
+        addAbstractedAttribute("zero_doppler_time", utcTime, dopElem, "");
+        addAbstractedAttribute("slant_range_time", origin, "ns", dopElem, "");
+
+        int coefCnt = 1;
+        for(Double value : coefList) {
+            final MetadataElement coefElem = new MetadataElement("coefficient."+coefCnt);
+            ++coefCnt;
+            dopElem.addElement(coefElem);
+            addAbstractedAttribute("dop_coef", value, "", coefElem, "");
+        }
+    }
+
 }

@@ -348,6 +348,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
             c3 = c3/Fr*Constants.halfLightSpeed;
             AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c3);
         }
+
+        addDopplerCentroidCoefficients(absRoot, sceneRec);
     }
 
     private String getMapProjection(BaseRecord mapProjRec) {
