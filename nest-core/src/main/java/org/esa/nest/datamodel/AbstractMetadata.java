@@ -516,8 +516,7 @@ public final class AbstractMetadata {
     /**
      * Get SRGR Coefficients.
      * @param absRoot Abstracted metadata root.
-     * @return orbitStateVectors Array of orbit state vectors.
-     * @throws Exception The exceptions.
+     * @return Array of SRGR coefficient data sets.
      */
     public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) {
 
@@ -540,6 +539,34 @@ public final class AbstractMetadata {
             srgrCoefficientList[k++] = srgrList;
         }
         return srgrCoefficientList;
+    }
+
+    /**
+     * Get Doppler Centroid Coefficients.
+     * @param absRoot Abstracted metadata root.
+     * @return Array of Doppler centroid coefficient data sets.
+     */
+    public static DopplerCentroidCoefficientList[] getDopplerCentroidCoefficients(final MetadataElement absRoot) {
+
+        final MetadataElement elemRoot = absRoot.getElement(dop_coefficients);
+        final MetadataElement[] dop_coef_listElem = elemRoot.getElements();
+        final DopplerCentroidCoefficientList[] dopCoefficientList = new DopplerCentroidCoefficientList[dop_coef_listElem.length];
+        int k = 0;
+        for (MetadataElement listElem : dop_coef_listElem) {
+            final DopplerCentroidCoefficientList dopList = new DopplerCentroidCoefficientList();
+            dopList.time  = listElem.getAttributeUTC(srgr_coef_time);
+            dopList.timeMJD = dopList.time.getMJD();
+            dopList.slant_range_time = listElem.getAttributeDouble(slant_range_time);
+
+            final int numSubElems = listElem.getNumElements();
+            dopList.coefficients = new double[numSubElems];
+            for (int i=0; i < numSubElems; ++i) {
+                final MetadataElement coefElem = listElem.getElementAt(i);
+                dopList.coefficients[i] = coefElem.getAttributeDouble(dop_coef, 0.0);
+            }
+            dopCoefficientList[k++] = dopList;
+        }
+        return dopCoefficientList;
     }
 
     public static class OrbitStateVector {
@@ -566,6 +593,13 @@ public final class AbstractMetadata {
         public ProductData.UTC time = null;
         public double timeMJD = 0;
         public double ground_range_origin = 0.0;
+        public double[] coefficients = null;
+    }
+
+    public static class DopplerCentroidCoefficientList {
+        public ProductData.UTC time = null;
+        public double timeMJD = 0;
+        public double slant_range_time = 0.0;
         public double[] coefficients = null;
     }
 }
