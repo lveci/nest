@@ -250,8 +250,6 @@ public class CplxCohOp extends Operator {
                             for (int y = y0; y < y0 + h; y++) {
                                 for (int x = x0; x < x0 + w; x++) {
 
-                                    final int index = slaveRasterQ.getDataBufferIndex(x, y);
-
                                     double sum1 = 0.0;
                                     double sum2 = 0.0;
                                     double sum3 = 0.0;
@@ -291,7 +289,7 @@ public class CplxCohOp extends Operator {
                                     }
 
                                     float cohValue = (float) (Math.sqrt(sum1 * sum1 + sum2 * sum2) / Math.sqrt(sum3 * sum4));
-                                    targetData.setElemFloatAt(index, cohValue);
+                                    targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), cohValue);
                                 }
                             }
                         }
