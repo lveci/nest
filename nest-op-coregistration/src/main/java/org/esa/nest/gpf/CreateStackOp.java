@@ -78,6 +78,12 @@ public class CreateStackOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
+        // Temporary code to disable Max/Min extends in case of NONE resampling. A UI should be created later to
+        // properly disable Max/Min extends in this case.
+        if (resamplingType.contains("NONE")) {
+            extent = MASTER_EXTENT;
+        }
+
         try {
             if(sourceProduct == null)
                 return;
