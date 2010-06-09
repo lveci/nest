@@ -47,6 +47,22 @@ public class MetadataTable implements TableInterface {
 
     public void validateTable() throws SQLException {
 
+        final Statement alterStatement = dbConnection.createStatement();
+
+        // add missing columns to the table
+        final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
+        for(MetadataAttribute attrib : attribList) {
+            final String name = attrib.getName();
+            final String testStr = "SELECT "+name+" FROM APP.METADATA";
+            try {
+                alterStatement.executeQuery(testStr);
+            } catch(SQLException e) {
+                if(e.getSQLState().equals("42X04")) {
+                    final String alterStr = "ALTER TABLE APP.METADATA ADD " + name +" "+ getDataType(attrib.getDataType());
+                    alterStatement.execute(alterStr);
+                }
+            }
+        }
     }
 
     private static void createTableStrings() {
