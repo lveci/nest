@@ -351,7 +351,6 @@ public final class ERSCalibrator implements Calibrator {
             }
 
             for (int y = y0; y < y0 + h; y++) {
-
                 index = sourceRaster1.getDataBufferIndex(x, y);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -1111,15 +1110,8 @@ public final class ERSCalibrator implements Calibrator {
         final double e2 = Math.pow(b/a, 2.0);
         final double rt = a*Math.sqrt((cos2 + e2*e2*sin2)/(cos2 + e2*sin2));
         final double rt2 = rt*rt;
-
-        double groundRangeSpacing;
-        if (isDetectedSampleType) {
-            groundRangeSpacing = rangeSpacing;
-        } else {
-            groundRangeSpacing = rangeSpacing / Math.sin(alpha1);
-        }
-
-        double deltaPsi = groundRangeSpacing/rt; // in radian
+        final double deltaPsi = rangeSpacing/rt; // in radian
+        final double r1 = halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
 
         double psi = 0.0;
         double alpha = 0.0;
@@ -1127,24 +1119,21 @@ public final class ERSCalibrator implements Calibrator {
         if (!pafID.contains(UK_PAF) || processingTime.compareTo(time19930408) >= 0) {
 
             // Method 1 in Appendix B1
-            final double r1 = halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
             final double rtPlusH = Math.sqrt(rt2 + r1*r1 + 2.0*rt*r1*Math.cos(alpha1));
             final double rtPlusH2 = rtPlusH*rtPlusH;
             final double theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
             final double psi1 = alpha1 - theta1;
-            psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
+                if (isDetectedSampleType) {
+                    psi = psi1 + i*deltaPsi;
+                    ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
+                } else { // see Andrea's email dataed June 9, 2010
+                    ri = r1 + i*rangeSpacing;
+                }
                 alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
                 incidenceAngles[i] = alpha;
                 lookAngles[i] = Math.acos((ri + rt*Math.cos(alpha))/rtPlusH);
                 rangeSpreadingLoss[i] = Math.pow(ri/referenceSlantRange, 3.0);
-
-                if (!isDetectedSampleType) {
-                    groundRangeSpacing = rangeSpacing / Math.sin(alpha);
-                    deltaPsi = groundRangeSpacing/rt;
-                }
-                psi = psi + deltaPsi;
             }
 
         } else { // For UK-PAF products processed prior to 8th April 1993
@@ -1163,19 +1152,17 @@ public final class ERSCalibrator implements Calibrator {
             final double rtPlusH2 = rtPlusH*rtPlusH;
             final double theta1 = Math.asin(Math.sin(alpha1)*rt/rtPlusH);
             final double psi1 = alpha1 - theta1;
-            psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
+                if (isDetectedSampleType) {
+                    psi = psi1 + Math.asin(i*deltaPsi);
+                    ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
+                } else { // see Andrea's email dataed June 9, 2010
+                    ri = r1 + i*rangeSpacing;
+                }
                 alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
                 incidenceAngles[i] = alpha;
                 lookAngles[i] = Math.asin(Math.sin(alpha)*rt/rtPlusH);
                 rangeSpreadingLoss[i] = Math.pow(ri/referenceSlantRange, 3.0);
-
-                if (!isDetectedSampleType) {
-                    groundRangeSpacing = rangeSpacing / Math.sin(alpha);
-                    deltaPsi = groundRangeSpacing/rt;
-                }
-                psi = psi + Math.asin(deltaPsi);
             }
         }
         /*
