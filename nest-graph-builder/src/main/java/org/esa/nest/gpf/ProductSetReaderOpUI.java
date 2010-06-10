@@ -307,7 +307,6 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                                 fstat.data[2] = OperatorUtils.getAcquisitionDate(absRoot);
                                 fstat.data[3] = String.valueOf(absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0));
                                 fstat.data[4] = String.valueOf(absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0));
-                                product.dispose();
                             } catch(Exception ex) {
                                 fstat.data[0] = file.getName();
                                 fstat.data[1] = "";

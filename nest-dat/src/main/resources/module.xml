@@ -188,13 +188,13 @@
             <id>openRaster</id>
             <class>org.esa.beam.visat.actions.OpenAction</class>
             <parent>file</parent>
-            <text>Open Raster Dataset</text>
+            <text>Open Raster Product</text>
             <mnemonic>O</mnemonic>
             <accelerator>control O</accelerator>
             <separatorBefore>true</separatorBefore>
             <placeAfter>closeProject</placeAfter>
-            <shortDescr>Open a data product.</shortDescr>
-            <description>Open a data product.</description>
+            <shortDescr>Open a raster data product.</shortDescr>
+            <description>Open a raster data product.</description>
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
             <helpId>open</helpId>
