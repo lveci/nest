@@ -217,7 +217,7 @@ public class ALOSCalibrator implements Calibrator {
                     q = srcData2.getElemDoubleAt(index);
                     sigma = i * i + q * q;
                 } else {
-                    throw new OperatorException("ASAR Calibration: unhandled unit");
+                    throw new OperatorException("ALOS Calibration: unhandled unit");
                 }
 
                 sigma *= calibrationFactor;

@@ -96,13 +96,25 @@ public final class OperatorUtils {
 
     private static String getPolarizationFromBandName(final String bandName) {
 
-        final int idx = bandName.lastIndexOf('_');
-        if (idx != -1) {
-            final String pol = bandName.substring(idx+1).toLowerCase();
-            if (pol.contains("hh") || pol.contains("vv") || pol.contains("hv") || pol.contains("vh")) {
-                return pol;
-            } 
-        }
+    	// Account for possibilities like "x_HH_dB" or "x_HH_times_VV_conj"
+    	// where the last one will return an exception because it appears to contain
+    	// multiple polarizations
+    	String pol = "";
+    	final String bandNameLower = bandName.toLowerCase();
+    	if (bandNameLower.contains("_hh"))
+    		pol += "hh";
+    	if (bandNameLower.contains("_vv"))
+    		pol += "vv";
+    	if (bandNameLower.contains("_hv"))
+    		pol += "hv";
+    	if (bandNameLower.contains("_vh"))
+    		pol += "vh";
+    	
+    	if (pol.length() == 2)
+    		return pol;
+    	else if (pol.length() > 2)
+    		throw new OperatorException("Band name contains multiple polarziations: " + pol);
+    
         return null;
     }
 

@@ -18,7 +18,7 @@ public final class Unit {
     public static final String REAL = "real";
     public static final String IMAGINARY = "imaginary";
 
-    public static final String DB = "dB";
+    public static final String DB = "db";
 
     public static final String AMPLITUDE_DB = AMPLITUDE+'_'+DB;
     public static final String INTENSITY_DB = INTENSITY+'_'+DB;

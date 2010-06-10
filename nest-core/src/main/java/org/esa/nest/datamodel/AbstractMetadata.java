@@ -86,12 +86,17 @@ public final class AbstractMetadata {
     // calibration and flags
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
     public static final String range_spread_comp_flag = "range_spread_comp_flag";
+    public static final String inc_angle_comp_flag = "inc_angle_comp_flag";
     public static final String abs_calibration_flag = "abs_calibration_flag";
     public static final String calibration_factor = "calibration_factor";
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
     public static final String range_sampling_rate = "range_sampling_rate";
     public static final String avg_scene_height = "avg_scene_height";
     public static final String multilook_flag = "multilook_flag";
+    public static final String ref_inc_angle = "ref_inc_angle";
+    public static final String ref_slant_range = "ref_slant_range";
+    public static final String ref_slant_range_exp = "ref_slant_range_exp";
+    public static final String rescaling_factor = "rescaling_factor";
 
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
@@ -217,7 +222,12 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
         addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
-        
+        addAbstractedAttribute(absRoot, inc_angle_comp_flag, ProductData.TYPE_UINT8, "flag", "incidence angle compensation applied");
+        addAbstractedAttribute(absRoot, ref_inc_angle, ProductData.TYPE_FLOAT64, "", "Reference incidence angle");
+        addAbstractedAttribute(absRoot, ref_slant_range, ProductData.TYPE_FLOAT64, "", "Reference slant range");
+        addAbstractedAttribute(absRoot, ref_slant_range_exp, ProductData.TYPE_FLOAT64, "", "Reference slant range exponent");
+        addAbstractedAttribute(absRoot, rescaling_factor, ProductData.TYPE_FLOAT64, "", "Rescaling factor");
+         
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
         // Multilook

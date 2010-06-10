@@ -30,6 +30,8 @@ public class CalibrationFactory {
             return new Radarsat2Calibrator();
         } else if(mission.equals("TSX1")) {
             return new TerraSARXCalibrator();
+        } else if(mission.contains("CSK")) {
+        	return new CosmoSkymedCalibrator();
         } else {
             throw new OperatorException("Mission " + mission + " is currently not supported for calibration.");
         }

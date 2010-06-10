@@ -99,12 +99,12 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final NcAttributeMap globalAttributes = NcAttributeMap.create(this.netcdfFile);
 
         final String productType = NetCDFUtils.getProductType(globalAttributes, readerPlugIn.getFormatNames()[0]);
-        int rasterWidth = rasterDim.getDimX().getLength();
-        int rasterHieght = rasterDim.getDimY().getLength();
+        final int rasterWidth = rasterDim.getDimX().getLength();
+        final int rasterHeight = rasterDim.getDimY().getLength();
 
         product = new Product(inputFile.getName(),
                                productType,
-                               rasterWidth, rasterHieght,
+                               rasterWidth, rasterHeight,
                                this);
         product.setFileLocation(inputFile);
         product.setDescription(NetCDFUtils.getProductDescription(globalAttributes));
@@ -116,7 +116,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
         addSlantRangeToFirstPixel();
-        addFirstLastLineTimes();
+        addFirstLastLineTimes(rasterHeight);
         addSRGRCoefficients();
 
         product.setModified(false);
@@ -265,17 +265,47 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 globalElem.getAttributeString("Projection ID", defStr));
         }
 
+        // Global calibration attributes
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag,
+        		globalElem.getAttributeInt("Calibration Constant Compensation Flag"));
+        
+        final String rngSpreadComp = globalElem.getAttributeString(
+        		"Range Spreading Loss Compensation Geometry", defStr);
+        if (rngSpreadComp.equals("NONE"))
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag, 0);
+        else
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag, 1);
+        
+        final String incAngComp = globalElem.getAttributeString(
+        		"Incidence Angle Compensation Geometry", defStr);
+        if (incAngComp.equals("NONE"))
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.inc_angle_comp_flag, 0);
+        else
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.inc_angle_comp_flag, 1);
+       
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ref_inc_angle,
+                globalElem.getAttributeDouble("Reference Incidence Angle", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ref_slant_range,
+                globalElem.getAttributeDouble("Reference Slant Range", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ref_slant_range_exp,
+                globalElem.getAttributeDouble("Reference Slant Range Exponent", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.rescaling_factor,
+                globalElem.getAttributeDouble("Rescaling Factor", defInt));
+        
         final MetadataElement s01Elem = globalElem.getElement("S01");
         if(s01Elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 s01Elem.getAttributeDouble("PRF", defInt));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 s01Elem.getAttributeString("Polarisation", defStr));
+            
+            // Calibration constant read from Global_Metadata during calibration initialization
         }
         final MetadataElement s02Elem = globalElem.getElement("S02");
         if(s02Elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
                 s02Elem.getAttributeString("Polarisation", defStr));
+            
         }
 
         if(isComplex) {
@@ -335,7 +365,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
     }
 
-    private void addFirstLastLineTimes() {
+    private void addFirstLastLineTimes(final int rasterHeight) {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final MetadataElement root = product.getMetadataRoot();
         final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
@@ -344,7 +374,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final double referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat).getMJD(); // in days
         final double firstLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth First Time") / (24*3600); // in days
         final double lastLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth Last Time") / (24*3600); // in days
-        final double lineTimeInterval = bandElem.getAttributeDouble("Line Time Interval"); // in s
+        double lineTimeInterval = bandElem.getAttributeDouble("Line Time Interval", 0); // in s
         final ProductData.UTC startTime = new ProductData.UTC(referenceUTC + firstLineTime);
         final ProductData.UTC stopTime = new ProductData.UTC(referenceUTC + lastLineTime);
 
@@ -352,6 +382,9 @@ public class CosmoSkymedReader extends AbstractProductReader {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
         product.setStartTime(startTime);
         product.setEndTime(stopTime);
+        if(lineTimeInterval == 0) {
+            lineTimeInterval = ReaderUtils.getLineTimeInterval(startTime, stopTime, rasterHeight);
+        }
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval, lineTimeInterval);
     }
 
