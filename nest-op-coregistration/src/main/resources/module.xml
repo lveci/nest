@@ -44,7 +44,7 @@
             <parent>sartools</parent>
         </action>
 
-        <action>
+        <!--action>
             <id>openCoregistrationDialog</id>
             <class>org.esa.nest.dat.CoregistrationAction</class>
             <parent>Coregistration</parent>
@@ -52,13 +52,13 @@
             <shortDescr>Perform Coregistration</shortDescr>
             <separatorAfter>true</separatorAfter>
             <helpId>Coregistration</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>CoregistrationGraph</id>
             <class>org.esa.nest.dat.CoregistrationGraphAction</class>
-            <text>Full Coregistration (single graph)</text>
-            <shortDescr>Perform Coregistration</shortDescr>
+            <text>Full Coregistration</text>
+            <shortDescr>Perform Coregistration in a single graph</shortDescr>
             <parent>Coregistration</parent>
             <helpId>Coregistration</helpId>
         </action>
