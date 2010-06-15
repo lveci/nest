@@ -136,6 +136,8 @@
 		<module>nest-developer-tools</module>
 		<module>nest-src</module>
 		
+		<module>doris-core-prototypes</module>
+		<module>doris-op-prototypes</module>
 		<module>doris-op-products</module>
   </modules>
 

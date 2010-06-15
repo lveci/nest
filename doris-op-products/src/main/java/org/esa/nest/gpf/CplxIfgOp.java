@@ -23,7 +23,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CplxIfg",
         category = "InSAR Products",
-        description = "Compute interferograms from stack of coregistered images", internal= false)
+        description = "Compute interferograms from stack of coregistered images", internal = false)
 public class CplxIfgOp extends Operator {
 
     @SourceProduct
@@ -108,7 +108,6 @@ public class CplxIfgOp extends Operator {
 
         for (int i = 0; i < numSrcBands; i += inc) {
 
-
             final Band srcBandI = sourceProduct.getBandAt(i);
             final Band srcBandQ = sourceProduct.getBandAt(i + 1);
 
@@ -123,7 +122,7 @@ public class CplxIfgOp extends Operator {
                             srcBandI.getName();
                 }
                 Band targetBandI;
-                if(srcBandI == masterBand0) {
+                if (srcBandI == masterBand0) {
                     targetBandI = ProductUtils.copyBand(srcBandI.getName(), sourceProduct, targetProduct);
                     targetBandI.setSourceImage(srcBandI.getSourceImage());
                 } else {
@@ -141,7 +140,7 @@ public class CplxIfgOp extends Operator {
                 }
 
                 Band targetBandQ;
-                if(srcBandQ == masterBand1) {
+                if (srcBandQ == masterBand1) {
                     targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
                     targetBandQ.setSourceImage(srcBandQ.getSourceImage());
                 } else {
@@ -241,7 +240,7 @@ public class CplxIfgOp extends Operator {
                         // cplx(a).*conj(cplx(b))
                         targetData.setElemFloatAt(index,
                                 (masterDataI.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)) -
-                                        (masterDataQ.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)));
+                                        (masterDataQ.getElemFloatAt(index) * (-1) * slaveDataQ.getElemFloatAt(index)));
 
                     }
                 }
@@ -261,7 +260,7 @@ public class CplxIfgOp extends Operator {
 
                         // cplx(a).*conj(cplx(b))
                         targetData.setElemFloatAt(index,
-                                (masterDataI.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)) +
+                                (masterDataI.getElemFloatAt(index) * (-1) * slaveDataQ.getElemFloatAt(index)) +
                                         (masterDataQ.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)));
 
                     }

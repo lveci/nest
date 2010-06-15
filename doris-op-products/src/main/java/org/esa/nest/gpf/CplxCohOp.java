@@ -1,7 +1,9 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
@@ -13,11 +15,12 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-//import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.Unit;
+// import org.esa.nest.doris.datamodel.AbstractDorisMetadata; // repackage this
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 
@@ -32,6 +35,8 @@ public class CplxCohOp extends Operator {
     // NOTE 2: No reference phase (dem nor flat earth) is removed by default in computation
     // NOTE 3: No multilooking happening in this operator
     // ----------------------------------------------------
+
+    int testCounter = 0;
 
     @SourceProduct
     private Product sourceProduct;
@@ -90,6 +95,19 @@ public class CplxCohOp extends Operator {
             throw new OperatorException(e);
         }
     }
+
+    /**
+     * Thread safe counter
+     */
+    class Counter {
+        private int count = 0;
+        public synchronized void increment() {
+            int n = count;
+            count = n + 1;
+        }
+    }
+
+
 
     /**
      * Create target product.
@@ -163,7 +181,13 @@ public class CplxCohOp extends Operator {
 
 //        coherenceSlaveMap.put(coherenceBandName, iqBandNames);
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-//        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
+        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 200);
+
+        System.out.println("--------------------------------------------------------------------");
+        System.out.println("Product size (width X height):" + sourceProduct.getSceneRasterWidth() + " X " + sourceProduct.getSceneRasterHeight());
+        System.out.println("--------------------------------------------------------------------");
+
+
     }
 
     private void addTargetBand(String bandName, int dataType, String bandUnit) {
@@ -190,13 +214,58 @@ public class CplxCohOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
+       
         try {
 
+//            int n,count;
+
             final Rectangle targetTileRectangle = targetTile.getRectangle();
+
             final int x0 = targetTileRectangle.x;
             final int y0 = targetTileRectangle.y;
             final int w = targetTileRectangle.width;
             final int h = targetTileRectangle.height;
+
+//             synchronized (this) {
+
+// //                count = n + 1;
+// //
+// //                System.out.println("Count: " + count);
+
+//                 final MetadataElement targetRoot = targetProduct.getMetadataRoot();
+//                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                 // DORIS: Abstracted Metadata Root
+//                 // can i put some synchronization here?!
+//                 MetadataElement dorisMetadataRoot = targetRoot.getElement(AbstractDorisMetadata.DORIS_PROCSTEP_METADATA_ROOT);
+//                 if (dorisMetadataRoot == null) {
+//                     System.out.println("tx0 = " + x0 + ", ty0 = " + y0 + ", w = " + w + ", h = " + h);
+//                     System.out.println("Loop counter: " + y0);
+//                     dorisMetadataRoot = new MetadataElement(AbstractDorisMetadata.DORIS_PROCSTEP_METADATA_ROOT);
+//                     targetRoot.addElement(dorisMetadataRoot);
+//                 } else {
+//                     System.out.println("tx0 = " + x0 + ", ty0 = " + y0 + ", w = " + w + ", h = " + h);
+//                     System.out.println("Loop counter: " + y0);
+//                 }
+//             }
+
+//        final Rectangle targetTileRectangleOverlap = targetTileRectangle.clone();
+//        targetTileRectangleOverlap.setSize(targetTileRectangle.width,targetTileRectangle.height+10);
+
+            // try to work out an overlap between tiles?
+            final int x0_overlap = x0;
+            final int y0_overlap = y0;
+            final int w_overlap = w;
+            int h_overlap = h + 10; // fnc of coherence window
+
+            if (y0_overlap + h_overlap > sourceProduct.getSceneRasterHeight()) {
+                h_overlap = h;
+            }
+
+            final Rectangle targetTileRectangleOverlap = new Rectangle(x0_overlap, y0_overlap, w_overlap, h_overlap);
+
+//            System.out.println("---- test --- ");
+//            System.out.println("tileOriginal (x,y,w,h):" + x0 + "," + y0 + "," + w + "," + h);
+//            System.out.println("tileOverlap (x,y,w,h):" + x0_overlap + "," + y0_overlap + "," + w_overlap + "," + h_overlap);
 
 //            // for coherence window
 //            final int winL = coherenceWindowSize;
@@ -214,10 +283,12 @@ public class CplxCohOp extends Operator {
                 final ProductData masterData = masterRaster.getDataBuffer();
                 final ProductData targetData = targetTile.getDataBuffer();
 
+                
                 for (int y = y0; y < y0 + h; y++) {
                     for (int x = x0; x < x0 + w; x++) {
+
                         final int index = masterRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), masterData.getElemFloatAt(index));
+                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
                     }
                 }
             } else { //coherence bands only one band per slave
@@ -229,19 +300,19 @@ public class CplxCohOp extends Operator {
                     int inc = 2;
                     for (int slaveBandNameIndex = 0; slaveBandNameIndex < slaveBandNames.length; slaveBandNameIndex += inc) {
 
-                        if (slaveBandNames[slaveBandNameIndex] != null && slaveBandNames[slaveBandNameIndex + 1] != null ) {
+                        if (slaveBandNames[slaveBandNameIndex] != null && slaveBandNames[slaveBandNameIndex + 1] != null) {
 
-                            final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangle, pm);
+                            final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangleOverlap, pm);
                             final ProductData masterDataI = masterRasterI.getDataBuffer();
 
-                            final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangle, pm);
+                            final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangleOverlap, pm);
                             final ProductData masterDataQ = masterRasterQ.getDataBuffer();
 
 
-                            final Tile slaveRasterI = getSourceTile(sourceProduct.getBand(slaveBandNames[0]), targetTileRectangle, pm);
+                            final Tile slaveRasterI = getSourceTile(sourceProduct.getBand(slaveBandNames[0]), targetTileRectangleOverlap, pm);
                             final ProductData slaveDataI = slaveRasterI.getDataBuffer();
 
-                            final Tile slaveRasterQ = getSourceTile(sourceProduct.getBand(slaveBandNames[1]), targetTileRectangle, pm);
+                            final Tile slaveRasterQ = getSourceTile(sourceProduct.getBand(slaveBandNames[1]), targetTileRectangleOverlap, pm);
                             final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
 
                             final ProductData targetData = targetTile.getDataBuffer();
@@ -250,17 +321,20 @@ public class CplxCohOp extends Operator {
                             for (int y = y0; y < y0 + h; y++) {
                                 for (int x = x0; x < x0 + w; x++) {
 
+                                    final int index = slaveRasterQ.getDataBufferIndex(x, y);
+
                                     double sum1 = 0.0;
                                     double sum2 = 0.0;
                                     double sum3 = 0.0;
                                     double sum4 = 0.0;
 
-                                    // ho overlap between tiles
                                     int coherenceWindowHeight = y + coherenceWindowSize;
-                                    if (coherenceWindowHeight > y0 + h) {
+                                    // check on the last tile!
+                                    if (h == h_overlap && coherenceWindowHeight > y0 + h) {
                                         coherenceWindowHeight = y0 + h; // - (y + coherenceWindowSize);
                                     }
 
+                                    // assume no tiling in range
                                     int coherenceWindowLength = x + coherenceWindowSize;
                                     if (coherenceWindowLength > x0 + w) {
                                         coherenceWindowLength = x0 + w; // - (x + coherenceWindowSize);
@@ -289,7 +363,7 @@ public class CplxCohOp extends Operator {
                                     }
 
                                     float cohValue = (float) (Math.sqrt(sum1 * sum1 + sum2 * sum2) / Math.sqrt(sum3 * sum4));
-                                    targetData.setElemFloatAt(targetTile.getDataBufferIndex(x, y), cohValue);
+                                    targetData.setElemFloatAt(index, cohValue);
                                 }
                             }
                         }
