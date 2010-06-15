@@ -1,0 +1,32 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>doris-core-prototypes</symbolicName>
+    <version>4A</version>
+    <name>NEST-DORIS Core</name>
+
+    <description>
+        NEST-DORIS Core
+    </description>
+
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+
+    <categories>System</categories>
+
+
+</module>

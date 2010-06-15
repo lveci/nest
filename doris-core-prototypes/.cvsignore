@@ -1,0 +1,9 @@
+*.ipr
+*.iml
+*.iws
+.project
+.classpath
+.settings
+target
+modules
+build.properties
