@@ -34,7 +34,7 @@
       <columnInterpFactor>2</columnInterpFactor>
       <maxIteration>2</maxIteration>
       <gcpTolerance>0.5</gcpTolerance>
-      <applyFineRegistration>true</applyFineRegistration>
+      <applyFineRegistration>false</applyFineRegistration>
       <fineRegistrationWindowWidth>64</fineRegistrationWindowWidth>
       <fineRegistrationWindowHeight>64</fineRegistrationWindowHeight>
       <coherenceWindowSize>3</coherenceWindowSize>
@@ -49,7 +49,7 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <rmsThreshold>1.0</rmsThreshold>
-      <warpPolynomialOrder>2</warpPolynomialOrder>
+      <warpPolynomialOrder>1</warpPolynomialOrder>
       <interpolationMethod>Bilinear interpolation</interpolationMethod>
       <openResidualsFile>false</openResidualsFile>
     </parameters>
