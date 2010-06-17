@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.14 2010-04-07 21:27:02 junlu Exp $
+ * $Id: EnvisatProductReader.java,v 1.15 2010-06-17 14:15:27 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.14 $ $Date: 2010-04-07 21:27:02 $
+ * @version $Revision: 1.15 $ $Date: 2010-06-17 14:15:27 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -521,7 +521,10 @@ public class EnvisatProductReader extends AbstractProductReader {
 
         final float offsetX = getProductFile().getTiePointGridOffsetX(gridWidth);
         final float offsetY = getProductFile().getTiePointGridOffsetY(gridWidth);
-        final float subSamplingX = getProductFile().getTiePointSubSamplingX(gridWidth);
+        final int sceneRasterWidth = getProductFile().getSceneRasterWidth();
+        final int sceneRasterHeight = getProductFile().getSceneRasterHeight();
+        final float subSamplingX = (float)sceneRasterWidth/(float)(gridWidth - 1);
+//        final float subSamplingX = getProductFile().getTiePointSubSamplingX(gridWidth);
         final float subSamplingY = getProductFile().getTiePointSubSamplingY(gridWidth);
         int[] sampleData = null;
 
@@ -541,99 +544,114 @@ public class EnvisatProductReader extends AbstractProductReader {
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
-                for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
-                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
-                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                final float[] pixelDataFloat = new float[gridWidth];
+                for (int x = 0; x < gridWidth; x++) {
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * pixelData[x];
+                }
+
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_UINT8) {
                 final byte[] pixelData = (byte[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xff);
-                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xff);
-                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xff);
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * (pixelData[x] & 0xff);
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_INT16) {
                 final short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
-                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
-                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * pixelData[x];
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_UINT16) {
                 final short[] pixelData = (short[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xffff);
-                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffff);
-                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffff);
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * (pixelData[x] & 0xffff);
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_INT32) {
                 final int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
-                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
-                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * pixelData[x];
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_UINT32) {
                 final int[] pixelData = (int[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * (pixelData[Math.max(x-1, 0)] & 0xffffffffL);
-                    final float curVal = scalingOffset + scalingFactor * (pixelData[x] & 0xffffffffL);
-                    final float nextVal = scalingOffset + scalingFactor * (pixelData[Math.min(x+1, gridWidth-1)] & 0xffffffffL);
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * (pixelData[x] & 0xffffffffL);
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else if (pixelDataType == ProductData.TYPE_FLOAT32) {
                 final float[] pixelData = (float[]) bandLineReader.getPixelDataField().getElems();
                 if (storesPixelsInChronologicalOrder) {
                     ArrayUtils.swapArray(pixelData);
                 }
+                final float[] pixelDataFloat = new float[gridWidth];
                 for (int x = 0; x < gridWidth; x++) {
-                    final float prevVal = scalingOffset + scalingFactor * pixelData[Math.max(x-1, 0)];
-                    final float curVal = scalingOffset + scalingFactor * pixelData[x];
-                    final float nextVal = scalingOffset + scalingFactor * pixelData[Math.min(x+1, gridWidth-1)];
+                    pixelDataFloat[x] = scalingOffset + scalingFactor * pixelData[x];
+                }
 
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(x, subSamplingX, sampleData, gridWidth,
-                                                                   prevVal, curVal, nextVal);
+                for (int x = 0; x < gridWidth; x++) {
+                    final float p = x*subSamplingX;
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
+
             } else {
                 throw new IllegalFileFormatException("unhandled tie-point data type"); /*I18N*/
             }
@@ -656,16 +674,44 @@ public class EnvisatProductReader extends AbstractProductReader {
         return tiePointGrid;
     }
 
-    private static float interpolateIfNeeded(final int x, final float subSamplingX, final int[] sampleData,
-                                             final int gridWidth, float prevVal, float curVal, float nextVal) {
-        if(sampleData != null) {
-            final int p1 = (int)(x*subSamplingX) + 1;
-            final int p2 = sampleData[x];
-            if(p1 != p2 && p1 != 0 && p1 != gridWidth - 1) {
-                return (prevVal + nextVal)/2.0f;
+    private static float interpolateIfNeeded(
+            final float p, final float[] pixelDataFloat, final int[] sampleData, final int x, final int gridWidth) {
+
+        if(sampleData != null && x > 0 && x < gridWidth - 1) {
+            int xx = 0;
+            for (int i = 0; i < gridWidth; i++) {
+                if (p > sampleData[i] - 1) {
+                    xx = i;
+                } else {
+                    break;
+                }
             }
+
+            final int xStart = Math.max(0, xx - 1);
+            final int xEnd = Math.min(xx + 2, gridWidth - 1);
+            final double[] pos = new double[xEnd - xStart + 1];
+            final double[] val = new double[xEnd - xStart + 1];
+            for (int i = xStart; i <= xEnd; i++) {
+                pos[i - xStart] = sampleData[i] - 1;
+                val[i - xStart] = pixelDataFloat[i];
+            }
+            return (float)lagrangeInterpolatingPolynomial(pos, val, (double)p);
         }
-        return curVal;
+        return pixelDataFloat[x];
+    }
+    
+    private static double lagrangeInterpolatingPolynomial (final double pos[], final double val[], final double desiredPos)  {
+        double retVal = 0;
+        for (int i = 0; i < pos.length; ++i) {
+            double weight = 1;
+            for (int j = 0; j < pos.length; ++j) {
+                if (j != i) {
+                    weight *= (desiredPos - pos[j]) / (pos[i] - pos[j]);
+                }
+            }
+            retVal += weight * val[i];
+        }
+        return retVal;
     }
 
     private MetadataElement createDatasetTable(String name, RecordReader recordReader) throws IOException {
