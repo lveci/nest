@@ -114,8 +114,8 @@ public class QuickLookGenerator {
 
     private static BufferedImage average(BufferedImage image) {
 
-        final int rangeFactor = 2;
-        final int azimuthFactor = 2;
+        final int rangeFactor = 4;
+        final int azimuthFactor = 4;
         final int rangeAzimuth = rangeFactor * azimuthFactor;
         final Raster raster = image.getData();
 
@@ -145,10 +145,10 @@ public class QuickLookGenerator {
             }
         }
 
-        return createRenderedImage(data, w, h, raster);
+        return createRenderedImage(data, w, h);
     }
 
-    private static BufferedImage createRenderedImage(byte[] array, int w, int h, Raster raster) {
+    private static BufferedImage createRenderedImage(byte[] array, int w, int h) {
 
         // create rendered image with demension being width by height
         final SampleModel sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_BYTE, w, h, 1);
@@ -168,56 +168,14 @@ public class QuickLookGenerator {
             quickLookFile.createNewFile();
             final BufferedImage bufferedImage = createQuickLookImage(product);
 
-            if(isComplex(product)) {
+            //if(isComplex(product)) {
                 ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
-            } else {   // detected
-                ImageIO.write(bufferedImage, "JPG", quickLookFile);
-            }
+            //} else {   // detected
+            //    ImageIO.write(bufferedImage, "JPG", quickLookFile);
+            //}
         } catch(Exception e) {
             System.out.println("Quicklook create data failed :"+product.getFileLocation()+"\n"+e.getMessage());
             quickLookFile.delete();
         }
-
-       /*
-        final File quickLookFile = getQuickLookFile(dbStorageDir, id);
-        if(!dbStorageDir.exists())
-            dbStorageDir.mkdirs();
-        try {
-            quickLookFile.createNewFile();
-        } catch(IOException e) {
-            System.out.println("Unable to create file :"+e.getMessage());
-            return;
-        }
-
-        final SwingWorker worker = new SwingWorker() {
-            @Override
-            protected Object doInBackground() throws Exception {
-
-                try {
-                    final BufferedImage bufferedImage = createQuickLookImage(product);
-
-                    if(isComplex(product)) {
-                        ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
-                    } else {   // detected
-                        ImageIO.write(bufferedImage, "JPG", quickLookFile);
-                    }
-                } catch(Exception e) {
-                    System.out.println("Quicklook create data failed :"+e.getMessage());
-                }
-
-                return null;
-            }
-
-            @Override
-            public void done() {
-                try {
-                    product.dispose();
-                } catch(Exception e) {
-                    //
-                }
-                //repoMan.fireUpdateRepositoryUI();
-            }
-        };
-        worker.execute();    */
     }
 }

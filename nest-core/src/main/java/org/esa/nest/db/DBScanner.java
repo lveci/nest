@@ -79,8 +79,17 @@ public final class DBScanner extends SwingWorker {
                     if(TestUtils.isNotProduct(file))
                         continue;
 
-                    if(db.pathExistsInDB(file))
+                    // check if already exists in db
+                    final ProductEntry existingEntry = db.getProductEntry(file);
+                    if(existingEntry != null) {
+                        // check for missing quicklook
+                        if(!existingEntry.quickLookExists()) {
+                            qlProductFiles.add(file);
+                            qlIDs.add(existingEntry.getId());
+                        }
+                        existingEntry.dispose();
                         continue;
+                    }
 
                     try {
                         final ProductReader reader = ProductIO.getProductReaderForFile(file);

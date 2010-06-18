@@ -80,7 +80,7 @@ public class ProductTable implements TableInterface {
             "SELECT * FROM APP.PRODUCTS ORDER BY "+AbstractMetadata.MISSION+" ASC";
 
     private static final String strGetProductWithPath =
-            "SELECT ID FROM APP.PRODUCTS WHERE "+AbstractMetadata.PATH+" = ?";
+            "SELECT * FROM APP.PRODUCTS WHERE "+AbstractMetadata.PATH+" = ?";
 
     private static final String strUpdateProduct =
             "UPDATE APP.PRODUCTS SET " +
@@ -161,6 +161,16 @@ public class ProductTable implements TableInterface {
         stmtDeleteProduct.clearParameters();
         stmtDeleteProduct.setInt(1, id);
         stmtDeleteProduct.executeUpdate();
+    }
+
+    public ProductEntry getProductEntry(final File path) throws SQLException {
+        stmtGetProductWithPath.clearParameters();
+        stmtGetProductWithPath.setString(1, path.getAbsolutePath());
+        final ResultSet results = stmtGetProductWithPath.executeQuery();
+        if(results.next()) {
+            return new ProductEntry(results);
+        }
+        return null;
     }
 
     public boolean pathExists(final File path) throws SQLException {

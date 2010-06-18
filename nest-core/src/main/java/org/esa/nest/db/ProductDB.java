@@ -72,6 +72,10 @@ public class ProductDB extends DAO {
         return productTable.pathExists(path);
     }
 
+    public ProductEntry getProductEntry(final File path) throws SQLException {
+        return productTable.getProductEntry(path);
+    }
+
     public ProductEntry saveProduct(final Product product) throws SQLException {
         final ProductEntry newEntry = new ProductEntry(product);
 
