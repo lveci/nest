@@ -120,6 +120,7 @@ public final class SARSimulationOp extends Operator {
     private int sourceImageHeight = 0;
     private boolean srgrFlag = false;
     private boolean isElevationModelAvailable = false;
+    private boolean overlapComputed = false;
 
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -135,6 +136,9 @@ public final class SARSimulationOp extends Operator {
     private double[] xPosArray = null;
     private double[] yPosArray = null;
     private double[] zPosArray = null;
+
+    private int tileSize = 100;
+    private float tileOverlapPercentage = 0.0f;
 
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
@@ -330,7 +334,7 @@ public final class SARSimulationOp extends Operator {
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
+        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), tileSize);
     }
 
     private void addSelectedBands() {
@@ -394,6 +398,39 @@ public final class SARSimulationOp extends Operator {
         }
     }
 
+    private synchronized void computeTileOverlapPercentage(final int tileSize) throws Exception {
+
+        if(overlapComputed) return;
+
+        final int x = sourceImageWidth/2;
+        final int y = tileSize - 1;
+        final double[] earthPoint = new double[3];
+        final double[] sensorPos = new double[3];
+        final GeoPos geoPos = new GeoPos(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y));
+        final double alt = dem.getElevation(geoPos);
+
+        GeoUtils.geo2xyz(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
+
+        final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
+                firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
+
+        double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
+        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
+
+        final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
+
+        tileOverlapPercentage = (float)(azimuthIndex - tileSize)/ (float)tileSize;
+        if (tileOverlapPercentage >= 0.0) {
+            tileOverlapPercentage += 0.05;
+        } else {
+            tileOverlapPercentage -= 0.05;
+        }
+        overlapComputed = true;
+    }
+
+
     /**
      * Called by the framework in order to compute the stack of tiles for the given target bands.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
@@ -409,6 +446,9 @@ public final class SARSimulationOp extends Operator {
         try {
             if (!isElevationModelAvailable) {
                 getElevationModel();
+            }
+            if(!overlapComputed) {
+                computeTileOverlapPercentage(tileSize);
             }
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -427,12 +467,18 @@ public final class SARSimulationOp extends Operator {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
         }
 
-        double overlapPercentage = 0.2;
-        if (azimuthSpacing <= 1.0) {
-            overlapPercentage = 0.5;
+        int ymin = 0;
+        int ymax = 0;
+        int nh = 0;
+        if (tileOverlapPercentage >= 0.0f) {
+            ymin = Math.max(y0 - (int)(h*tileOverlapPercentage), 0);
+            nh = h + (int)(h*tileOverlapPercentage);
+            ymax = y0 + h;
+        } else {
+            ymin = y0;
+            nh = h + (int)(h*Math.abs(tileOverlapPercentage));
+            ymax = y0 + nh;
         }
-        final int ymin = Math.max(y0 - (int)(h*overlapPercentage), 0);
-        final int nh = h + (int)(h*overlapPercentage);
 
         final float[][] localDEM = new float[nh+2][w+2];
         try {
@@ -442,7 +488,7 @@ public final class SARSimulationOp extends Operator {
 
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
-            for (int y = ymin; y < y0 + h; y++) {
+            for (int y = ymin; y < ymax; y++) {
 
                 final double[] slrs = new double[w];
                 final double[] elev = new double[w];
