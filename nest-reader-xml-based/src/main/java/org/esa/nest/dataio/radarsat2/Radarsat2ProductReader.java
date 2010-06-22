@@ -22,9 +22,9 @@ public class Radarsat2ProductReader extends AbstractProductReader {
 
     private Radarsat2ProductDirectory _dataDir = null;
 
-    private static final String lutsigma = "lutsigma";
-    private static final String lutgamma = "lutgamma";
-    private static final String lutbeta = "lutbeta";
+    private static final String lutsigma = "lutSigma";
+    private static final String lutgamma = "lutGamma";
+    private static final String lutbeta = "lutBeta";
 
     /**
      * Constructs a new abstract product reader.

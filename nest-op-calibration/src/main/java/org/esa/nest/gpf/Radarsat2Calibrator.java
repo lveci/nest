@@ -43,9 +43,9 @@ public class Radarsat2Calibrator implements Calibrator {
     private String incidenceAngleSelection = null;
 
     private static final double underFlowFloat = 1.0e-30;
-    private static final String lutsigma = "lutsigma";
-    private static final String lutgamma = "lutgamma";
-    private static final String lutbeta = "lutbeta";
+    private static final String lutsigma = "lutSigma";
+    private static final String lutgamma = "lutGamma";
+    private static final String lutbeta = "lutBeta";
     private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
 
     private double offset = 0.0;
@@ -127,6 +127,8 @@ public class Radarsat2Calibrator implements Calibrator {
             if(gainsAttrib !=null) {
                 gains = (double[])gainsAttrib.getData().getElems();
             }
+        } else {
+            throw new OperatorException(lutsigma+" not found. Please ensure the look up table "+lutsigma+".xml is in the same folder as the original product");
         }
     }
 

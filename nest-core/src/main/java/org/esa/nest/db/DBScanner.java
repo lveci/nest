@@ -172,7 +172,7 @@ public final class DBScanner extends SwingWorker {
 
     private static class DirectoryFileFilter implements java.io.FileFilter {
 
-        final static String[] skip = { "annotation", "auxraster", "imagedata", "preview", "support", "schemas" };
+        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
 
         public boolean accept(final File file) {
             if(!file.isDirectory()) return false;

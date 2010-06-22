@@ -29,6 +29,8 @@ public final class Unit {
 
     public static UnitType getUnitType(Band sourceBand) {
 
+        if(sourceBand.getUnit() == null)
+            return UnitType.UNKNOWN;
         final String  unit =  sourceBand.getUnit().toLowerCase();
         if (unit.contains(AMPLITUDE)) {
             if (unit.contains(DB))

@@ -93,9 +93,11 @@ public class TerraSarXProductReader extends AbstractProductReader {
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);
             product.setProductReader(this);
-            if(_dataDir.isComplex()) {
+            /*if(_dataDir.isComplex()) {
                 product = product.createFlippedProduct(ProductFlipper.FLIP_HORIZONTAL, product.getName(), product.getDescription());
-            }
+                product.setFileLocation(fileFromInput);
+                product.setProductReader(this);
+            }    */
             product.setModified(false);
         } catch (Exception e) {
             Debug.trace(e.toString());
