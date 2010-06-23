@@ -184,6 +184,13 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
+    /**
+     * Set auxiliary file flag.
+     */
+    @Override
+    public void setAuxFileFlag(String file) {
+    }
+    
     public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
         incidenceAngleSelection = incidenceAngleForSigma0;
     }

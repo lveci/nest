@@ -52,6 +52,10 @@ public class CalibrationOp extends Operator {
             sourceProductId="source", label="Source Band")
     private String[] sourceBandNames;
 
+    @Parameter(valueSet = {LATEST_AUX, PRODUCT_AUX, EXTERNAL_AUX}, description = "The auxiliary file",
+               defaultValue=LATEST_AUX, label="Auxiliary File")
+    private String auxFile = LATEST_AUX;
+
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
     private File externalAuxFile = null;
 
@@ -67,6 +71,10 @@ public class CalibrationOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(2);
 
     private Calibrator calibrator = null;
+
+    public static final String PRODUCT_AUX = "Product Auxiliary File";
+    public static final String LATEST_AUX = "Latest Auxiliary File";
+    public static final String EXTERNAL_AUX = "External Auxiliary File";
 
     /**
      * Default constructor. The graph processing framework
@@ -94,6 +102,7 @@ public class CalibrationOp extends Operator {
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
+            calibrator.setAuxFileFlag(auxFile);
             calibrator.setExternalAuxFile(externalAuxFile);
             calibrator.setOutputImageIndB(outputImageScaleInDb);
             calibrator.initialize(sourceProduct, targetProduct, false, true);
@@ -379,6 +388,7 @@ public class CalibrationOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(CalibrationOp.class);
+            setOperatorUI(CalibrationOpUI.class);
         }
     }
 }

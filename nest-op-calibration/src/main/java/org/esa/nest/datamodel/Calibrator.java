@@ -40,6 +40,8 @@ public interface Calibrator {
 
     public void setExternalAuxFile(File file);
 
+    public void setAuxFileFlag(String auxFile);
+
     public double applyRetroCalibration(int x, int y, double v, String bandPolar,
                                         final Unit.UnitType bandUnit, int[] subSwathIndex);
 
