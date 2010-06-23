@@ -107,7 +107,7 @@ public final class DBScanner extends SwingWorker {
                         } else {
                             System.out.println("No reader for "+file.getAbsolutePath());
                         }
-                    } catch(Exception e) {
+                    } catch(Throwable e) {
                         System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                     }
                 }
@@ -137,14 +137,14 @@ public final class DBScanner extends SwingWorker {
                                 sourceProduct.dispose();
                             }
                         }
-                    } catch(Exception e) {
+                    } catch(Throwable e) {
                         System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                     }
                 }
             }
             pm.setTaskName("");
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             System.out.println("Scanning Exception\n"+e.getMessage());
         } finally {
             pm.done();
