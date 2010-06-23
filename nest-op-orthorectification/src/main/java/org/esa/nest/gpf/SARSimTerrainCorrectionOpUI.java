@@ -108,6 +108,15 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.insets.left = 20;
+        DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
+        gbc.gridx = 2;
+        contentPane.add(externalAuxFileBrowseButton, gbc);
+        /*
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.insets.left = 20;
         contentPane.add(externalAuxFileLabel, gbc);
         gbc.gridx = 1;
         gbc.insets.left = 1;
@@ -115,7 +124,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, true);
         gbc.gridx = 2;
         contentPane.add(externalAuxFileBrowseButton, gbc);
-
+        */
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.insets.left = 1;

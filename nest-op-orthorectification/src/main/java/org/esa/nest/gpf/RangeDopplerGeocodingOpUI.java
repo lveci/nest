@@ -40,6 +40,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
     final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+    final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.LATEST_AUX,
+                                                          CalibrationOp.PRODUCT_AUX,
+                                                          CalibrationOp.EXTERNAL_AUX});
 
     final JTextField pixelSpacing = new JTextField("");
     private final JTextField externalDEMFile = new JTextField("");
@@ -57,6 +60,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
     final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
 
+    final JLabel auxFileLabel = new JLabel("Auxiliary File:");
     final JLabel externalAuxFileLabel = new JLabel("External Aux File:");
     final JTextField externalAuxFile = new JTextField("");
     final JButton externalAuxFileBrowseButton = new JButton("...");
@@ -110,6 +114,21 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         externalDEMFile.setColumns(30);
         demName.setSelectedItem(parameterMap.get("demName"));
         enableExternalDEM(false);
+
+        auxFile.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent event) {
+                final String item = (String)auxFile.getSelectedItem();
+                if(item.equals(CalibrationOp.EXTERNAL_AUX)) {
+                    enableExternalAuxFile(true);
+                } else {
+                    externalAuxFile.setText("");
+                    enableExternalAuxFile(false);
+                }
+            }
+        });
+        externalAuxFile.setColumns(30);
+        auxFile.setSelectedItem(parameterMap.get("auxFile"));
+        enableExternalAuxFile(false);
 
         externalDEMBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -166,6 +185,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                 saveBetaNoughtCheckBox.setEnabled(true);
                                 saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
                                 saveSelectedSourceBandCheckBox.setSelected(false);
+                                auxFile.setEnabled(true);
+                                auxFileLabel.setEnabled(true);
                                 externalAuxFile.setEnabled(true);
                                 externalAuxFileLabel.setEnabled(true);
                                 externalAuxFileBrowseButton.setEnabled(true);
@@ -179,6 +200,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                 incidenceAngleForSigma0.setEnabled(false);
                                 incidenceAngleForGamma0.setEnabled(false);
                                 saveSelectedSourceBandCheckBox.setSelected(true);
+                                auxFile.setEnabled(false);
+                                auxFileLabel.setEnabled(false);
                                 externalAuxFile.setEnabled(false);
                                 externalAuxFileLabel.setEnabled(false);
                                 externalAuxFileBrowseButton.setEnabled(false);
@@ -194,6 +217,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         incidenceAngleForSigma0.setEnabled(false);
                         incidenceAngleForGamma0.setEnabled(false);
                         saveSelectedSourceBandCheckBox.setSelected(true);
+                        auxFile.setEnabled(false);
+                        auxFileLabel.setEnabled(false);
                         externalAuxFile.setEnabled(false);
                         externalAuxFileLabel.setEnabled(false);
                         externalAuxFileBrowseButton.setEnabled(false);
@@ -231,7 +256,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
         });
 
-        externalAuxFile.setColumns(30);
         externalAuxFileBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 final File file = VisatApp.getApp().showFileOpenDialog("External Aux File", false, null);
@@ -263,9 +287,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             pixelSpacing.setText(String.valueOf(pix));
         }
 
-        final File extFile = (File)paramMap.get("externalDEMFile");
-        if(extFile != null) {
-            externalDEMFile.setText(extFile.getAbsolutePath());
+        final File extDEMFile = (File)paramMap.get("externalDEMFile");
+        if(extDEMFile != null) {
+            externalDEMFile.setText(extDEMFile.getAbsolutePath());
             externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
         } else {
             externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
@@ -306,10 +330,13 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
         saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
 
-        final File auxFile = (File)paramMap.get("externalAuxFile");
-        if(auxFile != null) {
-            externalAuxFile.setText(auxFile.getAbsolutePath());
+        auxFile.setSelectedItem(paramMap.get("auxFile"));
+        final File extAuxFile = (File)paramMap.get("externalAuxFile");
+        if(extAuxFile != null) {
+            externalAuxFile.setText(extAuxFile.getAbsolutePath());
         }
+        auxFile.setEnabled(applyRadiometricNormalization);
+        auxFileLabel.setEnabled(applyRadiometricNormalization);
         externalAuxFile.setEnabled(applyRadiometricNormalization);
         externalAuxFileLabel.setEnabled(applyRadiometricNormalization);
         externalAuxFileBrowseButton.setEnabled(applyRadiometricNormalization);
@@ -325,14 +352,14 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
                 
-                if ((mission.equals("ENVISAT") || mission.equals("ERS")) &&
+                if ((mission.equals("ENVISAT") || mission.contains("ERS")) &&
                      applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
                     return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
                             " constant and incidence angle corrections will be performed for radiometric normalization");
                 }
 
                 if (!mission.equals("RS2") && !mission.equals("TSX1") && !mission.equals("ENVISAT") &&
-                    !mission.equals("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
+                    !mission.contains("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
                             " not available for third party products except RadarSAT-2 and TerraSAR-X (SSC)");
@@ -374,9 +401,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("saveGammaNought", saveGammaNought);
         paramMap.put("saveSigmaNought", saveSigmaNought);
 
-        final String auxFileStr = externalAuxFile.getText();
-        if(!auxFileStr.isEmpty()) {
-            paramMap.put("externalAuxFile", new File(auxFileStr));
+        paramMap.put("auxFile", auxFile.getSelectedItem());
+        final String extAuxFileStr = externalAuxFile.getText();
+        if(!extAuxFileStr.isEmpty()) {
+            paramMap.put("externalAuxFile", new File(extAuxFileStr));
         }
     }
 
@@ -442,15 +470,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.insets.left = 20;
-        contentPane.add(externalAuxFileLabel, gbc);
-        gbc.gridx = 1;
-        gbc.insets.left = 1;
-        contentPane.add(externalAuxFile, gbc);
-        DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, true);
+        DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
         gbc.gridx = 2;
         contentPane.add(externalAuxFileBrowseButton, gbc);
-
-        //DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }
@@ -478,5 +502,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         public void keyTyped(KeyEvent e) {
             changedByUser = true;
         }
+    }
+
+    private void enableExternalAuxFile(boolean flag) {
+        DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, flag);
+        externalAuxFileBrowseButton.setVisible(flag);
     }
 }

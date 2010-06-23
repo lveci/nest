@@ -47,7 +47,7 @@ public class ASARCalibrator implements Calibrator {
     private boolean outputImageScaleInDb = false;
 
     private MetadataElement absRoot = null;
-
+    private String auxFile = null;
     private String productType = null;
     private String oldXCAFileName = null; // the old XCA file
     private String newXCAFileName = null; // XCA file for radiometric calibration
@@ -119,6 +119,14 @@ public class ASARCalibrator implements Calibrator {
     @Override
     public void setExternalAuxFile(File file) {
         externalAuxFile = file;
+    }
+
+    /**
+     * Set auxiliary file flag.
+     */
+    @Override
+    public void setAuxFileFlag(String file) {
+        auxFile = file;
     }
 
     public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
@@ -264,7 +272,7 @@ public class ASARCalibrator implements Calibrator {
     private void setCalibrationFlags() {
 
         if (antElevCorrFlag) {
-            if (multilookFlag) {
+            if (multilookFlag || auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
                 retroCalibrationFlag = false;
                 System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
             } else {
@@ -272,7 +280,11 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
+        if (auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
+            applyAntennaPatternCorr = false;
+        } else {
+            applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
+        }
         applyRangeSpreadingCorr = !rangeSpreadCompFlag;
     }
 
@@ -816,7 +828,9 @@ public class ASARCalibrator implements Calibrator {
         }
 
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
-        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
+        if (auxFile.contains(CalibrationOp.EXTERNAL_AUX) && newXCAFileName != null) {
+            AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
+        }
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
     }
 
@@ -1426,28 +1440,34 @@ public class ASARCalibrator implements Calibrator {
             throw new OperatorException("Unknown band unit");
         }
 
+        sigma *= Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
+                 newCalibrationConstant[bandPolarIdx];
+
         if (multilookFlag && antElevCorrFlag) { // calibration constant and incidence angle corrections only
-            return sigma / newCalibrationConstant[bandPolarIdx] *
-                   Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+            return sigma;
         }
 
-        final double elevationAngle = computeElevationAngle(slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
+        sigma *= Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower);
 
-        double gain;
-        if (wideSwathProductFlag) {
-            if (subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) { // Rem(AP+RSL)/ApplyADC Op is used
-                computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
+        if (applyAntennaPatternCorr) {
+            final double elevationAngle = computeElevationAngle(slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
+
+            double gain;
+            if (wideSwathProductFlag) {
+                if (subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) { // Rem(AP+RSL)/ApplyADC Op is used
+                    computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
+                }
+                gain = getAntennaPatternGain(
+                        elevationAngle, bandPolarIdx, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
+            } else {
+                gain = computeAntPatGain(
+                        elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
             }
-            gain = getAntennaPatternGain(
-                    elevationAngle, bandPolarIdx, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
-        } else {
-            gain = computeAntPatGain(
-                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
-        }
 
-        return sigma / newCalibrationConstant[bandPolarIdx] / gain *
-               Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower) *
-               Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+            sigma /= gain;
+        }
+        
+        return sigma;
     }
 
     private void computeSubSwathIndex(final double rangeIndex, final double azimuthIndex,
