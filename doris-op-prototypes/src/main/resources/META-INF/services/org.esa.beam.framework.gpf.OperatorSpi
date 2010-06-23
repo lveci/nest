@@ -2,6 +2,7 @@ org.esa.nest.doris.gpf.CreateStackDorisOp$Spi
 org.esa.nest.doris.gpf.CoregistrationCorCorrOp$Spi
 org.esa.nest.doris.gpf.CoregistrationCorCorr2Op$Spi
 org.esa.nest.doris.gpf.ComplexIfgOp$Spi
+org.esa.nest.doris.gpf.ComplexIfgSRDOp$Spi
 org.esa.nest.doris.gpf.ComplexSrpIfgOp$Spi
 org.esa.nest.doris.gpf.CoregistrationCorOrbOp$Spi
 org.esa.nest.doris.gpf.CoregistrationCorFineOp$Spi

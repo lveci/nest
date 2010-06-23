@@ -172,6 +172,14 @@
             <parent>insar</parent>
         </action>
 
+        <action>
+            <id>ComplexIfgSRDAction</id>
+            <class>org.esa.nest.doris.dat.ComplexIfgSRDAction</class>
+            <text>SRD Interferogram (jblas)</text>
+            <shortDescr>Subtract DEM phase</shortDescr>
+            <parent>insar</parent>
+        </action>
+
         <!--<action>-->
             <!--<id>ComplexSrpIfgAction</id>-->
             <!--<class>org.esa.nest.doris.dat.ComplexSrpIfgAction</class>-->

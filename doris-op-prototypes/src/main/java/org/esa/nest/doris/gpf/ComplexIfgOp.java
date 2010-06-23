@@ -826,9 +826,6 @@ public class ComplexIfgOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        System.out.println("Number of bands of the source product: " + sourceProduct.getNumBands());
-        System.out.println("Number of bands of the target product: " + targetProduct.getNumBands());
-
 //        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 100);
         targetProduct.setPreferredTileSize(50, 50);
 
@@ -928,6 +925,8 @@ public class ComplexIfgOp extends Operator {
 
             ComplexFloatMatrix cplxMatrixMaster = null;
             ComplexFloatMatrix cplxMatrixSlave = null;
+            RenderedImage srcImage;
+            float[] dataArray;
 
 //            pm.beginTask("Computation of interferogram", targetProduct.getNumBands());
 
@@ -940,8 +939,8 @@ public class ComplexIfgOp extends Operator {
                 } else if (sourceBand == masterBand2) {
 
                     Tile masterRasterI = getSourceTile(masterBand1, targetRectangle, pm);
-                    RenderedImage srcImage = masterRasterI.getRasterDataNode().getSourceImage();
-                    float[] dataArray = srcImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
+                    srcImage = masterRasterI.getRasterDataNode().getSourceImage();
+                    dataArray = srcImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
 
                     FloatMatrix dataRealMatrix = new FloatMatrix(masterRasterI.getHeight(), masterRasterI.getWidth(), dataArray);
 
@@ -960,8 +959,8 @@ public class ComplexIfgOp extends Operator {
                 } else if (sourceBandUnit != null && sourceBandUnit.contains(Unit.REAL)) {
 
                     Tile slaveRasterI = getSourceTile(sourceBand, targetRectangle, pm);
-                    RenderedImage srcImage = slaveRasterI.getRasterDataNode().getSourceImage();
-                    float[] dataArray = srcImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
+                    srcImage = slaveRasterI.getRasterDataNode().getSourceImage();
+                    dataArray = srcImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
 
 //                    FloatMatrix dataRealMatrix = new FloatMatrix(slaveRasterI.getWidth(), slaveRasterI.getHeight(), dataArray);
                     FloatMatrix dataRealMatrix = new FloatMatrix(slaveRasterI.getHeight(), slaveRasterI.getWidth(), dataArray);
@@ -1019,7 +1018,7 @@ public class ComplexIfgOp extends Operator {
                 // all bands except for virtual ones
                 if (targetBandUnit.contains(Unit.REAL)) {
 
-                    final float[] dataArray = cplxIfg.real().toArray();
+                    dataArray = cplxIfg.real().toArray();
 
                     targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
@@ -1027,7 +1026,7 @@ public class ComplexIfgOp extends Operator {
 
                 } else if (targetBandUnit.contains(Unit.IMAGINARY)) {
 
-                    final float[] dataArray = cplxIfg.imag().toArray();
+                    dataArray = cplxIfg.imag().toArray();
                     targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
                 }
