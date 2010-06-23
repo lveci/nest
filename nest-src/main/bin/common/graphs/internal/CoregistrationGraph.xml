@@ -17,7 +17,7 @@
       </masterBands>
       <sourceBands>
       </sourceBands>
-      <resamplingType>NEAREST_NEIGHBOUR</resamplingType>
+      <resamplingType>NONE</resamplingType>
       <extent>Master</extent>
     </parameters>
   </node>
