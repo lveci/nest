@@ -330,6 +330,15 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
         saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
 
+        if(sourceProducts != null) {
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
+            if (absRoot != null) {
+                final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+                if (sampleType.equals("COMPLEX")) {
+                    auxFile.removeItem(CalibrationOp.PRODUCT_AUX);
+                }
+            }
+        }
         auxFile.setSelectedItem(paramMap.get("auxFile"));
         final File extAuxFile = (File)paramMap.get("externalAuxFile");
         if(extAuxFile != null) {
