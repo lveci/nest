@@ -26,8 +26,8 @@ import java.util.Map;
 public class CalibrationOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.PRODUCT_AUX,
-                                                                  CalibrationOp.LATEST_AUX,
+    private final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.LATEST_AUX,
+                                                                  CalibrationOp.PRODUCT_AUX,
                                                                   CalibrationOp.EXTERNAL_AUX});
 
     final JLabel externalAuxFileLabel = new JLabel("External Auxiliary File:");
