@@ -164,21 +164,29 @@
             <!--<parent>insar</parent>-->
         <!--</action>-->
 
-        <action>
-            <id>ComplexIfgAction</id>
-            <class>org.esa.nest.doris.dat.ComplexIfgAction</class>
-            <text>Complex Interferogram (jblas)</text>
-            <shortDescr>Compute complex interferogram and optionally subtract "flat earth" phase</shortDescr>
-            <parent>insar</parent>
-        </action>
+        <!--<action>-->
+            <!--<id>InSARProducts</id>-->
+            <!--<class>org.esa.beam.visat.actions.ActionGroup</class>-->
+            <!--<text>InSAR Products</text>-->
+            <!--<parent>insar</parent>-->
+            <!--&lt;!&ndash;<separatorAfter>true</separatorAfter>&ndash;&gt;-->
+        <!--</action>-->
 
-        <action>
-            <id>ComplexIfgSRDAction</id>
-            <class>org.esa.nest.doris.dat.ComplexIfgSRDAction</class>
-            <text>SRD Interferogram (jblas)</text>
-            <shortDescr>Subtract DEM phase</shortDescr>
-            <parent>insar</parent>
-        </action>
+        <!--<action>-->
+            <!--<id>ComplexIfgAction</id>-->
+            <!--<class>org.esa.nest.doris.dat.ComplexIfgAction</class>-->
+            <!--<text>Complex Interferogram</text>-->
+            <!--<shortDescr>Compute complex interferogram and optionally subtract "flat earth" phase</shortDescr>-->
+            <!--<parent>insar</parent>-->
+        <!--</action>-->
+
+        <!--<action>-->
+            <!--<id>ComplexIfgSRDAction</id>-->
+            <!--<class>org.esa.nest.doris.dat.ComplexIfgSRDAction</class>-->
+            <!--<text>SRD Interferogram (jblas)</text>-->
+            <!--<shortDescr>Subtract DEM phase</shortDescr>-->
+            <!--<parent>insar</parent>-->
+        <!--</action>-->
 
         <!--<action>-->
             <!--<id>ComplexSrpIfgAction</id>-->

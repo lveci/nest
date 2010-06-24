@@ -24,7 +24,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "ComplexSrpIfg",
         category = "InSAR Prototypes",
-        description = "Compute interferograms from stack and subtract flat earth: JBLAS implementation", internal = false)
+        description = "Compute interferograms from stack and subtract flat earth: JBLAS implementation", internal = true)
 public class ComplexSrpIfgOp extends Operator {
 
     @SourceProduct

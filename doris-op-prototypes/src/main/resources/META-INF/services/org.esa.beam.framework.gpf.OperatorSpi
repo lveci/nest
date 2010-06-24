@@ -1,15 +1,4 @@
-org.esa.nest.doris.gpf.CreateStackDorisOp$Spi
-org.esa.nest.doris.gpf.CoregistrationCorCorrOp$Spi
-org.esa.nest.doris.gpf.CoregistrationCorCorr2Op$Spi
 org.esa.nest.doris.gpf.ComplexIfgOp$Spi
+org.esa.nest.doris.gpf.CreateStackDorisOp$Spi
 org.esa.nest.doris.gpf.ComplexIfgSRDOp$Spi
 org.esa.nest.doris.gpf.ComplexSrpIfgOp$Spi
-org.esa.nest.doris.gpf.CoregistrationCorOrbOp$Spi
-org.esa.nest.doris.gpf.CoregistrationCorFineOp$Spi
-org.esa.nest.doris.gpf.CoregistrationCPMOp$Spi
-org.esa.nest.doris.gpf.CoregistrationResampleOp$Spi
-org.esa.nest.doris.gpf.BaselinesOp$Spi
-org.esa.nest.doris.gpf.LAOp$Spi
-org.esa.nest.doris.gpf.ComplexDataOp$Spi
-org.esa.nest.doris.gpf.Experiment_1Op$Spi
-org.esa.nest.doris.gpf.Experiment_2Op$Spi

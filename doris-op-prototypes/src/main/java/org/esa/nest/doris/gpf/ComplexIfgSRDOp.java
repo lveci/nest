@@ -755,7 +755,7 @@ public class ComplexIfgSRDOp extends Operator {
 //        targetGeoCoding = targetProduct.getGeoCoding();
         targetProduct.setPreferredTileSize(500,500);
 //        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
-        
+
         final Dimension tileSize = targetProduct.getPreferredTileSize();
         final int rasterHeight = targetProduct.getSceneRasterHeight();
         final int rasterWidth = targetProduct.getSceneRasterWidth();

@@ -1,9 +1,7 @@
-package org.esa.nest.doris.gpf;
+package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.resamp.Resampling;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -17,13 +15,9 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.gpf.OperatorUtils;
-import org.jblas.*;
-
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
-import org.esa.beam.framework.datamodel.GeoPos;
-
+import org.jblas.*;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -35,7 +29,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "ComplexIfg",
         category = "InSAR Prototypes",
-        description = "Compute interferograms from stack of coregistered images : JBLAS implementation", internal = true)
+        description = "Compute interferograms from stack of coregistered images : JBLAS implementation", internal = false)
 public class ComplexIfgOp extends Operator {
 
     @SourceProduct

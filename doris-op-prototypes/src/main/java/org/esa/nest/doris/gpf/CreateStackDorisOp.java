@@ -248,7 +248,7 @@ public class CreateStackDorisOp extends Operator {
             targetRoot.addElement(dorisMetadataRoot);
         }
 
-        
+
 
         for(Product referenceProduct : sourceProduct) {
             if(referenceProduct != masterProduct) {

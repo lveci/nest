@@ -10,7 +10,7 @@
     <version>${nest.version}</version>
   </parent>
 
-  <name>NEST-DORIS core [Prototypes]</name>
+  <name>NEST-DORIS Core [Prototypes]</name>
   <groupId>org.esa.nest.doris</groupId>
   <artifactId>doris-core-prototypes</artifactId>
   <version>${nest.version}</version>

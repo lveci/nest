@@ -44,14 +44,14 @@
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>InSAR Products</text>
             <parent>insar</parent>
-            <separatorAfter>true</separatorAfter>
+            <!--<separatorAfter>true</separatorAfter>-->
         </action>
 
         <action>
-            <id>CplxIfgAction</id>
-            <class>org.esa.nest.dat.CplxIfgAction</class>
-            <text>Interferogram</text>
-            <shortDescr>Compute interferogram from stack of coregistered images</shortDescr>
+            <id>ComplexgIfgAction</id>
+            <class>org.esa.nest.dat.ComplexIfgAction</class>
+            <text>Interferogram formation</text>
+            <shortDescr>Interferogram from stack with optional subtraction of 'flat earth' phase</shortDescr>
             <parent>InSARProducts</parent>
         </action>
 

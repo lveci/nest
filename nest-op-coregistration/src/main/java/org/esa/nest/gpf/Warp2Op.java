@@ -14,7 +14,6 @@
  */
 package org.esa.nest.gpf;
 
-import Jama.Matrix;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
@@ -31,7 +30,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.ResourceUtils;
 import org.jblas.DoubleMatrix;
-import thredds.wcs.v1_0_0_1.GetCapabilities;
 
 import javax.media.jai.*;
 import java.awt.*;
@@ -121,6 +119,7 @@ public class Warp2Op extends Operator {
     private final Map<Band, WarpData> warpDataMap = new HashMap<Band, WarpData>(10);
 
     private String processedSlaveBand;
+
     // fields fof InSAR interpolation kernels: elements of InterpolationTable of jai
     private int numberOfKernelPoints;
     private int padding;
@@ -395,6 +394,7 @@ public class Warp2Op extends Operator {
 
         try {
             final Set<Band> keySet = targetTileMap.keySet();
+
             if(warpDataMap.isEmpty()) {
                 // find first real slave band
                 for(Band targetBand : keySet) {

@@ -37,12 +37,7 @@
       <artifactId>jtransforms</artifactId>
 	  <version>2.0</version>
     </dependency>
-	<dependency>
-      <groupId>org</groupId>
-      <version>1.0</version>
-      <artifactId>jblas</artifactId>
-    </dependency>
-    <dependency>
+        <dependency>
       <groupId>org.esa.beam</groupId>
       <artifactId>beam-envisat-reader</artifactId>
     </dependency>
@@ -71,6 +66,15 @@
       <artifactId>nest-writer-netcdf</artifactId>
       <version>${nest.version}</version>
     </dependency>
+        <dependency>
+            <groupId>org</groupId>
+            <version>1.0.1</version>
+            <!-- scope>system</scope -->
+            <!-- systemPath>~/.m2/repository/org/jblas/1.0.1/jblas-1.0.1.jar</systemPath -->
+            <artifactId>jblas</artifactId>
+        </dependency>
+
+
   </dependencies>
 
 </project>

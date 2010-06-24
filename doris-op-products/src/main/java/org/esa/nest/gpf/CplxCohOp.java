@@ -14,13 +14,14 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
+//import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
 // import org.esa.nest.doris.datamodel.AbstractDorisMetadata; // repackage this
 
 import java.awt.*;
 import java.util.HashMap;
-import java.util.Iterator;
+//import java.util.Iterator;
+
 import java.util.Map;
 
 
@@ -36,17 +37,23 @@ public class CplxCohOp extends Operator {
     // NOTE 3: No multilooking happening in this operator
     // ----------------------------------------------------
 
-    int testCounter = 0;
-
     @SourceProduct
     private Product sourceProduct;
 
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The coherence window size", interval = "(1, 10]", defaultValue = "5",
-            label = "Coherence Window Size")
-    private int coherenceWindowSize = 5;
+    @Parameter(interval = "(1, 20]",
+            description = "Size of coherence estimation window in Azimuth direction",
+            defaultValue = "10",
+            label = "Coherence Window Size in Azimuth")
+    private int coherenceWindowSizeAzimuth = 10;
+
+    @Parameter(interval = "(1, 20]",
+            description = "Size of coherence estimation window in Range direction",
+            defaultValue = "2",
+            label = "Coherence Window Size in Range")
+    private int coherenceWindowSizeRange = 2;
 
     private Band masterBand0 = null;
     private Band masterBand1 = null;
@@ -145,9 +152,6 @@ public class CplxCohOp extends Operator {
                 if (srcBandI == masterBand0) {
                     iBandName = srcBandI.getName();
                     masterBandNames[0] = iBandName;
-                    final Band targetBandI = targetProduct.addBand(iBandName, ProductData.TYPE_FLOAT32);
-                    ProductUtils.copyRasterDataNodeProperties(srcBandI, targetBandI);
-                    sourceRasterMap.put(targetBandI, srcBandI);
                 } else {
                     slaveBandNames[slaveArrayCounter++] = srcBandI.getName();
                 }
@@ -155,9 +159,6 @@ public class CplxCohOp extends Operator {
                 if (srcBandQ == masterBand1) {
                     qBandName = srcBandQ.getName();
                     masterBandNames[1] = qBandName;
-                    final Band targetBandQ = targetProduct.addBand(qBandName, ProductData.TYPE_FLOAT32);
-                    ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
-                    sourceRasterMap.put(targetBandQ, srcBandQ);
                 } else {
                     slaveBandNames[slaveArrayCounter++] = srcBandQ.getName();
                 }
@@ -172,20 +173,13 @@ public class CplxCohOp extends Operator {
 
                 cnt++;
 
-                //ReaderUtils.createVirtualIntensityBand(targetProduct, targetBandI, targetBandQ, suffix);                
-                // only coherence: REAL VALUES
-                //ReaderUtils.createVirtualPhaseBand(targetProduct, targetBandI, targetBandQ, suffix);
             }
 
         }
 
 //        coherenceSlaveMap.put(coherenceBandName, iqBandNames);
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 200);
-
-        System.out.println("--------------------------------------------------------------------");
-        System.out.println("Product size (width X height):" + sourceProduct.getSceneRasterWidth() + " X " + sourceProduct.getSceneRasterHeight());
-        System.out.println("--------------------------------------------------------------------");
+        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
 
 
     }
@@ -214,10 +208,7 @@ public class CplxCohOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-       
         try {
-
-//            int n,count;
 
             final Rectangle targetTileRectangle = targetTile.getRectangle();
 
@@ -226,145 +217,91 @@ public class CplxCohOp extends Operator {
             final int w = targetTileRectangle.width;
             final int h = targetTileRectangle.height;
 
-//             synchronized (this) {
-
-// //                count = n + 1;
-// //
-// //                System.out.println("Count: " + count);
-
-//                 final MetadataElement targetRoot = targetProduct.getMetadataRoot();
-//                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                 // DORIS: Abstracted Metadata Root
-//                 // can i put some synchronization here?!
-//                 MetadataElement dorisMetadataRoot = targetRoot.getElement(AbstractDorisMetadata.DORIS_PROCSTEP_METADATA_ROOT);
-//                 if (dorisMetadataRoot == null) {
-//                     System.out.println("tx0 = " + x0 + ", ty0 = " + y0 + ", w = " + w + ", h = " + h);
-//                     System.out.println("Loop counter: " + y0);
-//                     dorisMetadataRoot = new MetadataElement(AbstractDorisMetadata.DORIS_PROCSTEP_METADATA_ROOT);
-//                     targetRoot.addElement(dorisMetadataRoot);
-//                 } else {
-//                     System.out.println("tx0 = " + x0 + ", ty0 = " + y0 + ", w = " + w + ", h = " + h);
-//                     System.out.println("Loop counter: " + y0);
-//                 }
-//             }
-
-//        final Rectangle targetTileRectangleOverlap = targetTileRectangle.clone();
-//        targetTileRectangleOverlap.setSize(targetTileRectangle.width,targetTileRectangle.height+10);
-
             // try to work out an overlap between tiles?
-            final int x0_overlap = x0;
             final int y0_overlap = y0;
-            final int w_overlap = w;
-            int h_overlap = h + 10; // fnc of coherence window
-
+//            final int w_overlap = w;
+            int h_overlap = h + coherenceWindowSizeAzimuth; // fnc of coherence window
             if (y0_overlap + h_overlap > sourceProduct.getSceneRasterHeight()) {
                 h_overlap = h;
             }
 
+            final int x0_overlap = x0;
+            int w_overlap = w + coherenceWindowSizeRange; // fnc of coherence window
+            if (x0_overlap + w_overlap > sourceProduct.getSceneRasterWidth()) {
+                w_overlap = w;
+            }
+
             final Rectangle targetTileRectangleOverlap = new Rectangle(x0_overlap, y0_overlap, w_overlap, h_overlap);
 
-//            System.out.println("---- test --- ");
-//            System.out.println("tileOriginal (x,y,w,h):" + x0 + "," + y0 + "," + w + "," + h);
-//            System.out.println("tileOverlap (x,y,w,h):" + x0_overlap + "," + y0_overlap + "," + w_overlap + "," + h_overlap);
+            // loop through pairs of slaveBandNames
+            if (targetBand.getUnit().contains("coherence")) {
 
-//            // for coherence window
-//            final int winL = coherenceWindowSize;
-//            final int winP = coherenceWindowSize;
-//
-//            final int leadingZeros = (winP - 1) / 2; // number of pixels=0 floor...
-//            final int trailingZeros = (winP) / 2;  // floor....
+                int inc = 2;
+                for (int slaveBandNameIndex = 0; slaveBandNameIndex < slaveBandNames.length; slaveBandNameIndex += inc) {
 
-            final Band srcBand = sourceRasterMap.get(targetBand);
-            //final Band srcBand = sourceProduct.getBand(targetBand.getName());
+                    if (slaveBandNames[slaveBandNameIndex] != null && slaveBandNames[slaveBandNameIndex + 1] != null) {
 
-            // dump master into a product
-            if (srcBand == masterBand0 || srcBand == masterBand1) {
-                final Tile masterRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-                final ProductData masterData = masterRaster.getDataBuffer();
-                final ProductData targetData = targetTile.getDataBuffer();
+                        final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangleOverlap, pm);
+                        final ProductData masterDataI = masterRasterI.getDataBuffer();
 
-                
-                for (int y = y0; y < y0 + h; y++) {
-                    for (int x = x0; x < x0 + w; x++) {
+                        final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangleOverlap, pm);
+                        final ProductData masterDataQ = masterRasterQ.getDataBuffer();
 
-                        final int index = masterRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
-                    }
-                }
-            } else { //coherence bands only one band per slave
+                        final Tile slaveRasterI = getSourceTile(sourceProduct.getBand(slaveBandNames[0]), targetTileRectangleOverlap, pm);
+                        final ProductData slaveDataI = slaveRasterI.getDataBuffer();
 
-                // loop through pairs of slaveBandNames
+                        final Tile slaveRasterQ = getSourceTile(sourceProduct.getBand(slaveBandNames[1]), targetTileRectangleOverlap, pm);
+                        final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
 
-                if (targetBand.getUnit().contains("coherence")) {
+                        final ProductData targetData = targetTile.getDataBuffer();
 
-                    int inc = 2;
-                    for (int slaveBandNameIndex = 0; slaveBandNameIndex < slaveBandNames.length; slaveBandNameIndex += inc) {
+                        // separate estimation along the edges
+                        for (int y = y0; y < y0 + h; y++) {
+                            for (int x = x0; x < x0 + w; x++) {
 
-                        if (slaveBandNames[slaveBandNameIndex] != null && slaveBandNames[slaveBandNameIndex + 1] != null) {
+                                final int index = slaveRasterQ.getDataBufferIndex(x, y);
 
-                            final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangleOverlap, pm);
-                            final ProductData masterDataI = masterRasterI.getDataBuffer();
+                                double sum1 = 0.0;
+                                double sum2 = 0.0;
+                                double sum3 = 0.0;
+                                double sum4 = 0.0;
 
-                            final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangleOverlap, pm);
-                            final ProductData masterDataQ = masterRasterQ.getDataBuffer();
-
-
-                            final Tile slaveRasterI = getSourceTile(sourceProduct.getBand(slaveBandNames[0]), targetTileRectangleOverlap, pm);
-                            final ProductData slaveDataI = slaveRasterI.getDataBuffer();
-
-                            final Tile slaveRasterQ = getSourceTile(sourceProduct.getBand(slaveBandNames[1]), targetTileRectangleOverlap, pm);
-                            final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
-
-                            final ProductData targetData = targetTile.getDataBuffer();
-
-                            // separate estimation along the edges
-                            for (int y = y0; y < y0 + h; y++) {
-                                for (int x = x0; x < x0 + w; x++) {
-
-                                    final int index = slaveRasterQ.getDataBufferIndex(x, y);
-
-                                    double sum1 = 0.0;
-                                    double sum2 = 0.0;
-                                    double sum3 = 0.0;
-                                    double sum4 = 0.0;
-
-                                    int coherenceWindowHeight = y + coherenceWindowSize;
-                                    // check on the last tile!
-                                    if (h == h_overlap && coherenceWindowHeight > y0 + h) {
-                                        coherenceWindowHeight = y0 + h; // - (y + coherenceWindowSize);
-                                    }
-
-                                    // assume no tiling in range
-                                    int coherenceWindowLength = x + coherenceWindowSize;
-                                    if (coherenceWindowLength > x0 + w) {
-                                        coherenceWindowLength = x0 + w; // - (x + coherenceWindowSize);
-                                    }
-
-
-                                    int line;
-                                    int pix;
-                                    for (line = y; line < coherenceWindowHeight; line++) {
-                                        for (pix = x; pix < coherenceWindowLength; pix++) {
-
-                                            final int indexCohWind = slaveRasterQ.getDataBufferIndex(pix, line);
-
-                                            final float mr = masterDataI.getElemFloatAt(indexCohWind);
-                                            final float mi = masterDataQ.getElemFloatAt(indexCohWind);
-                                            final float sr = slaveDataI.getElemFloatAt(indexCohWind);
-                                            final float si = slaveDataQ.getElemFloatAt(indexCohWind);
-
-                                            sum1 += mr * sr + mi * si;
-                                            sum2 += mi * sr - mr * si;
-                                            sum3 += mr * mr + mi * mi;
-                                            sum4 += sr * sr + si * si;
-
-                                        }
-
-                                    }
-
-                                    float cohValue = (float) (Math.sqrt(sum1 * sum1 + sum2 * sum2) / Math.sqrt(sum3 * sum4));
-                                    targetData.setElemFloatAt(index, cohValue);
+                                // check only on last row of tiles
+                                int coherenceWindowHeight = y + coherenceWindowSizeAzimuth;
+                                if (h == h_overlap && coherenceWindowHeight > y0 + h) {
+                                    coherenceWindowHeight = y0 + h; // - (y + coherenceWindowSize);
                                 }
+
+                                // check only on last column of tiles
+                                int coherenceWindowLength = x + coherenceWindowSizeRange;
+                                if (w == w_overlap && coherenceWindowLength > x0 + w) {
+                                    coherenceWindowLength = x0 + w; // - (x + coherenceWindowSize);
+                                }
+
+
+                                int line;
+                                int pix;
+                                for (line = y; line < coherenceWindowHeight; line++) {
+                                    for (pix = x; pix < coherenceWindowLength; pix++) {
+
+                                        final int indexCohWind = slaveRasterQ.getDataBufferIndex(pix, line);
+
+                                        final float mr = masterDataI.getElemFloatAt(indexCohWind);
+                                        final float mi = masterDataQ.getElemFloatAt(indexCohWind);
+                                        final float sr = slaveDataI.getElemFloatAt(indexCohWind);
+                                        final float si = slaveDataQ.getElemFloatAt(indexCohWind);
+
+                                        sum1 += mr * sr + mi * si;
+                                        sum2 += mi * sr - mr * si;
+                                        sum3 += mr * mr + mi * mi;
+                                        sum4 += sr * sr + si * si;
+
+                                    }
+
+                                }
+
+                                float cohValue = (float) (Math.sqrt(sum1 * sum1 + sum2 * sum2) / Math.sqrt(sum3 * sum4));
+                                targetData.setElemFloatAt(index, cohValue);
                             }
                         }
                     }
