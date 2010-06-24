@@ -336,6 +336,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
                 if (sampleType.equals("COMPLEX")) {
                     auxFile.removeItem(CalibrationOp.PRODUCT_AUX);
+                } else if (auxFile.getItemCount() == 2) {
+                    auxFile.addItem(CalibrationOp.PRODUCT_AUX);
                 }
             }
         }
