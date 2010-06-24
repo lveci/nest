@@ -37,6 +37,13 @@
       <artifactId>jtransforms</artifactId>
 	  <version>2.0</version>
     </dependency>
+      <dependency>
+          <groupId>org</groupId>
+          <version>1.0.1</version>
+          <!-- scope>system</scope -->
+          <!-- systemPath>~/.m2/repository/org/jblas/1.0.1/jblas-1.0.1.jar</systemPath -->
+          <artifactId>jblas</artifactId>
+      </dependency>
   </dependencies>
 
 </project>
