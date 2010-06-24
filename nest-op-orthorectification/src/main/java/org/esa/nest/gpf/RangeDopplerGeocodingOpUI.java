@@ -172,7 +172,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         if (absRoot != null) {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-                            if (mission.equals("ENVISAT") || mission.equals("ERS") ||
+                            if (mission.equals("ENVISAT") || mission.contains("ERS") ||
                                 mission.equals("RS2") || mission.equals("TSX1")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
