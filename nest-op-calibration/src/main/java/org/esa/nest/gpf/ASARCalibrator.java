@@ -828,7 +828,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
-        if (auxFile.contains(CalibrationOp.EXTERNAL_AUX) && newXCAFileName != null) {
+        if (!auxFile.contains(CalibrationOp.PRODUCT_AUX) && newXCAFileName != null) {
             AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
         }
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
