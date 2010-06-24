@@ -22,7 +22,7 @@
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
-      <file>coherence.dim</file>
+      <file>coherence</file>
     </parameters>
   </node>
   <applicationData id="Presentation">

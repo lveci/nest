@@ -1134,7 +1134,6 @@ public class Warp2Op extends Operator {
             for (int i = 0; i < y.length; i++) {
                 y[i] = sinc(x[i]) * rect(x[i] / N) *
                         Math.cos(vPI * x[i]) / (1.0 - Math.pow(v2 * x[i], 2));
-
             }
             return y;
         } // END rc_kernel
