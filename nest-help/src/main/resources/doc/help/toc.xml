@@ -41,7 +41,8 @@
 	        <tocitem text="Utilities Menu" target="toolsMenu"/>
 			<tocitem text="SAR Tools Menu" target="sarToolsMenu"/>
 			<tocitem text="Geometry Menu" target="geometryMenu"/>
-	        <tocitem text="Window Menu" target="windowMenu"/>
+            <tocitem text="InSAR Tools Menu" target="InSARMenu"/>
+            <tocitem text="Window Menu" target="windowMenu"/>
 	        <tocitem text="Help Menu" target="helpMenu"/>
 		</tocitem>
 		
@@ -174,7 +175,9 @@
 			<tocitem text="Mosaic" target="MosaicOp"/>
 		</tocitem>	
 		<tocitem text="InSAR">
-			<tocitem text="InSAR" target="InSAR"/>
+			<tocitem text="InSAR functionality" target="InSAR"/>
+			<tocitem text="Interferogram formation" target="ComplexIfgOp"/>
+			<tocitem text="Coherence estimation" target="CplxCohOp"/>
 		</tocitem>
 		<tocitem text="Ocean Tools">
 			<tocitem text="Object Detection" target="ObjectDetection"/>

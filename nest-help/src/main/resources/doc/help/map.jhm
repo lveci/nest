@@ -27,6 +27,7 @@
     <mapID target="toolsMenu" url="visat/ToolsMenu.html"/>
 	<mapID target="sarToolsMenu" url="visat/SARToolsMenu.html"/>
 	<mapID target="geometryMenu" url="visat/GeometryMenu.html"/>
+    <mapID target="InSARMenu" url="visat/InSARMenu.html"/>
     <mapID target="windowMenu" url="visat/WindowMenu.html"/>
     <mapID target="helpMenu" url="visat/HelpMenu.html"/>
 	<mapID target="projectView" url="visat/ProjectView.html"/>
@@ -161,7 +162,9 @@
 	
 	<!--InSAR-->
 	<mapID target="InSAR" url="operators/InSAR.html"/>
-	
+    <mapID target="ComplexIfgOp" url="operators/ComplexIfgOp.html"/>
+    <mapID target="CplxCohOp" url="operators/CplxCohOp.html"/>
+
 	<!--Ocean Tools-->
 	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
 	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
