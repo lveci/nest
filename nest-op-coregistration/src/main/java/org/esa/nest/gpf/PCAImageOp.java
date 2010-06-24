@@ -96,7 +96,7 @@ public class PCAImageOp extends Operator {
 
                 addSelectedBands();
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -247,7 +247,7 @@ public class PCAImageOp extends Operator {
                 }
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

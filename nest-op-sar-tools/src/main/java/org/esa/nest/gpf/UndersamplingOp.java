@@ -227,7 +227,7 @@ public class UndersamplingOp extends Operator {
 
             updateTargetProductMetadata(subSamplingX, subSamplingY);
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -671,7 +671,7 @@ public class UndersamplingOp extends Operator {
             } else {
                 throw new OperatorException("Unknown undersampling method: " + method);
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

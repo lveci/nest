@@ -74,7 +74,7 @@ public final class FillHoleOp extends Operator {
 
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -173,7 +173,7 @@ public final class FillHoleOp extends Operator {
                     trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
                 }
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

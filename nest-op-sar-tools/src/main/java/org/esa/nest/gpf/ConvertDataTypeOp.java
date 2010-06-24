@@ -111,7 +111,7 @@ public class ConvertDataTypeOp extends Operator {
             addSelectedBands();
 
             updateMetadata();
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

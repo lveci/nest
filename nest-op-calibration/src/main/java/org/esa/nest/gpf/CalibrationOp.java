@@ -115,7 +115,7 @@ public class CalibrationOp extends Operator {
                 createBetaVirtualBand(targetProduct, outputImageScaleInDb);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -255,7 +255,7 @@ public class CalibrationOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
             calibrator.computeTile(targetBand, targetTile, targetBandNameToSourceBandName, pm);
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

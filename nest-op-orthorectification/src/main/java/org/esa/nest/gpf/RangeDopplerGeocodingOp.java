@@ -282,7 +282,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(externalDEMFile == null) {
                 checkIfDEMInstalled(demName);
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -1214,7 +1214,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
             localDEM = null;
             
-        } catch(Exception e) {
+        } catch(Throwable e) {
             orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
         }

@@ -211,7 +211,7 @@ public class GCPSelection2Op extends Operator {
                 fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
                 fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -340,7 +340,7 @@ public class GCPSelection2Op extends Operator {
                 pm.worked(1);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
@@ -450,7 +450,7 @@ public class GCPSelection2Op extends Operator {
         gcpsComputedMap.put(slaveBand, true);
 
         //System.gc();
-     } catch(Exception e) {
+     } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
          if(visatApp != null)
@@ -520,7 +520,7 @@ public class GCPSelection2Op extends Operator {
             }
 
             return true;
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getCoarseSlaveGCPPosition ", e);
         }
         return false;
@@ -976,7 +976,7 @@ public class GCPSelection2Op extends Operator {
                 //System.out.println("Valid GCP");
                 return true;
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getFineSlaveGCPPosition ", e);
         }
         return false;

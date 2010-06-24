@@ -158,6 +158,11 @@
 			<artifactId>lib-netcdf</artifactId>
 			<version>4.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org</groupId>
+            <version>1.0.1</version>
+            <artifactId>jblas</artifactId>
+        </dependency>
 
         <!--dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>

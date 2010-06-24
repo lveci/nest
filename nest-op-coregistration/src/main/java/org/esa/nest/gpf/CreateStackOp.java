@@ -197,7 +197,7 @@ public class CreateStackOp extends Operator {
                 computeTargetSlaveCoordinateOffsets();
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -604,7 +604,7 @@ public class CreateStackOp extends Operator {
 
                 collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

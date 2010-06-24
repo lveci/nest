@@ -224,7 +224,7 @@ public class Warp2Op extends Operator {
             OperatorUtils.copyGCPsToTarget(masterGCPGroup,
                     targetProduct.getGcpGroup(targetProduct.getBand(masterBand.getName())));
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             openResidualsFile = true;
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
@@ -435,7 +435,7 @@ public class Warp2Op extends Operator {
 
                 sourceRaster.getDataBuffer().dispose();
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

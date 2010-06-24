@@ -124,7 +124,7 @@ public class OversamplingOp extends Operator {
             computeTargetImageSizeAndPixelSpacings();
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -509,7 +509,7 @@ public class OversamplingOp extends Operator {
                 }
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

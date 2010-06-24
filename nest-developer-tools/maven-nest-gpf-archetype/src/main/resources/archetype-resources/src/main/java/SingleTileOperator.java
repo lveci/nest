@@ -91,7 +91,7 @@ public class SingleTileOperator extends Operator {
             // update the metadata with the affect of the processing
             updateTargetProductMetadata();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

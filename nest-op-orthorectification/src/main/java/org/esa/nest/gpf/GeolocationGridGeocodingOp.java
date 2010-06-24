@@ -156,7 +156,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 throw new OperatorException("Unknown interpolation method");
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -441,7 +441,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

@@ -101,7 +101,7 @@ public class PCAMinOp extends Operator {
                 addSelectedBands();
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -296,7 +296,7 @@ public class PCAMinOp extends Operator {
 
             computePCAMin(tileMinPCA);
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

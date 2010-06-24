@@ -90,7 +90,7 @@ public final class CreateCoherenceImageOp extends Operator {
 
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -262,7 +262,7 @@ public final class CreateCoherenceImageOp extends Operator {
                 targetTile.setRawSamples(rawTargetData);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

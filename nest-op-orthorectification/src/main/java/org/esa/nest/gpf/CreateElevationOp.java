@@ -116,7 +116,7 @@ public final class CreateElevationOp extends Operator {
             elevationBand.setUnit(Unit.METERS);
             elevationBand.setDescription(demDescriptor.getName());
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -214,7 +214,7 @@ public final class CreateElevationOp extends Operator {
                     targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle, pm).getRawSamples());
                 }
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

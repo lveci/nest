@@ -114,7 +114,7 @@ public class SubsetOp extends Operator {
                                             rectangle.height,
                                             destBuffer, pm);
             targetTile.setRawSamples(destBuffer);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

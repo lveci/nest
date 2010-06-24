@@ -314,7 +314,7 @@ public final class OperatorUtils {
         return sourceBands;
     }
 
-    public static void catchOperatorException(String opName, Exception e) throws OperatorException {
+    public static void catchOperatorException(String opName, Throwable e) throws OperatorException {
         if(opName.contains("$"))
             opName = opName.substring(0, opName.indexOf('$'));
         String message = opName + ": ";

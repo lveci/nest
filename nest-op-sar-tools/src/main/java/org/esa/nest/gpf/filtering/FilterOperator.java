@@ -158,7 +158,7 @@ public class FilterOperator extends Operator {
             targetProduct.setEndTime(sourceProduct.getEndTime());
 
             targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

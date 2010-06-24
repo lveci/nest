@@ -176,7 +176,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
             updateOrbitStateVectors();
   
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

@@ -1031,7 +1031,7 @@ public class ComplexIfgOp extends Operator {
 
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
             OperatorUtils.catchOperatorException(getId(), e);
 

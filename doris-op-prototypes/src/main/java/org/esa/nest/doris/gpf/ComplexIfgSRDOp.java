@@ -961,7 +961,7 @@ public class ComplexIfgSRDOp extends Operator {
             }
 
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             threadCounter.increment();

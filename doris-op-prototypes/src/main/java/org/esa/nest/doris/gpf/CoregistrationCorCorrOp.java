@@ -216,7 +216,7 @@ public class CoregistrationCorCorrOp extends Operator {
             System.out.println("TotalTileCount: [" + totalTileCount + "]");
 
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -359,7 +359,7 @@ public class CoregistrationCorCorrOp extends Operator {
                 pm.worked(1);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
 
@@ -487,7 +487,7 @@ public class CoregistrationCorCorrOp extends Operator {
         gcpsComputedMap.put(slaveBand, true);
 
         //System.gc();
-     } catch(Exception e) {
+     } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
          if(visatApp != null)
@@ -560,7 +560,7 @@ public class CoregistrationCorCorrOp extends Operator {
             }
 
             return true;
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getCoarseSlaveGCPPosition ", e);
         }
         return false;
@@ -1023,7 +1023,7 @@ public class CoregistrationCorCorrOp extends Operator {
                 //System.out.println("Valid GCP");
                 return true;
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getFineSlaveGCPPosition ", e);
         }
         return false;

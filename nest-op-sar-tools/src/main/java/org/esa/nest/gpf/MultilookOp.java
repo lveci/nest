@@ -115,7 +115,7 @@ public final class MultilookOp extends Operator {
 
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -172,7 +172,7 @@ public final class MultilookOp extends Operator {
             final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
 
             computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnitType);
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

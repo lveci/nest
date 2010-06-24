@@ -131,7 +131,7 @@ public class PCAStatisticsOp extends Operator {
                 // write initial temporary metadata
                 writeStatsToMetadata();
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -299,7 +299,7 @@ public class PCAStatisticsOp extends Operator {
 
             computeImageStatistics(tileSum, tileSumCross, pm);
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

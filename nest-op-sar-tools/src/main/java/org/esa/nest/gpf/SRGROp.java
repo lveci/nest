@@ -143,7 +143,7 @@ public class SRGROp extends Operator {
                 interpMethod = Interpolation.SINC;
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -260,7 +260,7 @@ public class SRGROp extends Operator {
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), Math.max(v, 0.0));
             }
         }
-      } catch(Exception e) {
+      } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

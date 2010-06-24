@@ -148,7 +148,7 @@ public class SpeckleFilterOp extends Operator {
 
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -332,7 +332,7 @@ public class SpeckleFilterOp extends Operator {
                 computeRefinedLee(sourceRaster1, sourceRaster2, bandUnit, targetTile, x0, y0, w, h, pm);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

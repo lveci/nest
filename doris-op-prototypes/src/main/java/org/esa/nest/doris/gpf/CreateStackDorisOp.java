@@ -203,7 +203,7 @@ public class CreateStackDorisOp extends Operator {
 
 
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -650,7 +650,7 @@ public class CreateStackDorisOp extends Operator {
 
                 collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

@@ -446,15 +446,20 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 isProcessing = true;
                 graphEx.executeGraph(pm);
 
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 System.out.print(e.getMessage());
                 if(e.getMessage() != null && !e.getMessage().isEmpty())
                     statusLabel.setText(e.getMessage());
                 else
-                    statusLabel.setText(e.toString());
+                    statusLabel.setText(e.getCause().toString());
                 errorOccured = true;
             } finally {
                 isProcessing = false;
+                graphEx.disposeGraphContext();
+                // free cache
+                JAI.getDefaultInstance().getTileCache().flush();
+                System.gc();
+
                 pm.done();
             }
             return graphEx;
@@ -472,10 +477,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
             }
-            graphEx.disposeGraphContext();
-            // free cache
-            JAI.getDefaultInstance().getTileCache().flush();
-            System.gc();
 
             if(!errorOccured) {
                 openTargetProducts(graphEx.getProductsToOpenInDAT());

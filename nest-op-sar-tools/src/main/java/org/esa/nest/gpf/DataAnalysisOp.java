@@ -112,7 +112,7 @@ public class DataAnalysisOp extends Operator {
 
             createTargetProduct();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

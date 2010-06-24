@@ -134,7 +134,7 @@ public final class DeburstWSSOp extends Operator {
 
             // update the metadata with the affect of the processing
             updateTargetProductMetadata();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -516,7 +516,7 @@ public final class DeburstWSSOp extends Operator {
                     break;
             }          */
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

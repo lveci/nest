@@ -158,7 +158,7 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
 
             halfWindowWidth = windowWidth/2;
             halfWindowHeight = windowHeight/2;
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

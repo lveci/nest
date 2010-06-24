@@ -132,7 +132,7 @@ public class MosaicOp extends Operator {
 
             updateTargetProductMetadata();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -375,7 +375,7 @@ public class MosaicOp extends Operator {
             if(!validSourceData.isEmpty()) {
                 collocateSourceBand(validSourceData, resampling, targetTile, pm);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
@@ -445,7 +445,7 @@ public class MosaicOp extends Operator {
                 pm.worked(1);
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

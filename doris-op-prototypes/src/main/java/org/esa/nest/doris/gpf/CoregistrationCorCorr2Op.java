@@ -214,7 +214,7 @@ public class CoregistrationCorCorr2Op extends Operator {
                 fHalfWindowWidth = fWindowWidth / 2;
                 fHalfWindowHeight = fWindowHeight / 2;
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -339,7 +339,7 @@ public class CoregistrationCorCorr2Op extends Operator {
                 pm.worked(1);
             }
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
 
@@ -411,7 +411,7 @@ public class CoregistrationCorCorr2Op extends Operator {
             }
             pm.worked(1);
         }
-     } catch(Exception e) {
+     } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
         pm.done();
@@ -483,7 +483,7 @@ public class CoregistrationCorCorr2Op extends Operator {
             }
 
             return true;
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getCoarseSlaveGCPPosition ", e);
         }
         return false;
@@ -929,7 +929,7 @@ public class CoregistrationCorCorr2Op extends Operator {
                 //System.out.println("Valid GCP");
                 return true;
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " getFineSlaveGCPPosition ", e);
         }
         return false;

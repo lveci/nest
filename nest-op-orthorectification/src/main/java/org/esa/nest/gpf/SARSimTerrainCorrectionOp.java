@@ -288,7 +288,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             updateTargetProductMetadata();
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -1098,7 +1098,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
         }

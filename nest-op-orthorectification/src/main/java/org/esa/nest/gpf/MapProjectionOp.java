@@ -128,7 +128,7 @@ public final class MapProjectionOp extends Operator {
 
             updateMetadata(targetProduct);
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
@@ -186,7 +186,7 @@ public final class MapProjectionOp extends Operator {
         try {
             final Tile sourceTile = getSourceTile(projectedProduct.getBand(targetBand.getName()), targetTile.getRectangle(), pm);
             targetTile.setRawSamples(sourceTile.getRawSamples());
-        } catch(Exception e) {
+        } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();

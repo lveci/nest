@@ -29,7 +29,7 @@ public class GraphExecuter extends Observable {
     private final GPF gpf;
     private Graph graph;
     private GraphContext graphContext = null;
-    private final GraphProcessor processor;
+    private GraphProcessor processor;
     private String graphDescription = "";
     private File lastLoadedGraphFile = null;
 
@@ -44,7 +44,6 @@ public class GraphExecuter extends Observable {
         gpf.getOperatorSpiRegistry().loadOperatorSpis();
 
         graph = new Graph("Graph");
-        processor = new GraphProcessor();
     }
 
     public ArrayList<GraphNode> GetGraphNodes() {
@@ -241,6 +240,7 @@ public class GraphExecuter extends Observable {
         if(graphContext != null)
             GraphProcessor.disposeGraphContext(graphContext);
 
+        processor = new GraphProcessor();
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
     }
 
