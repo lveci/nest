@@ -38,47 +38,12 @@
     <extension point="beam-ui:actions">
 
         <action>
-            <id>Coregistration</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>Coregistration</text>
-            <parent>sartools</parent>
-        </action>
-
-        <!--action>
-            <id>openCoregistrationDialog</id>
-            <class>org.esa.nest.dat.CoregistrationAction</class>
-            <parent>Coregistration</parent>
-            <text>Full Coregistration</text>
-            <shortDescr>Perform Coregistration</shortDescr>
-            <separatorAfter>true</separatorAfter>
-            <helpId>Coregistration</helpId>
-        </action-->
-
-        <action>
             <id>CoregistrationGraph</id>
             <class>org.esa.nest.dat.CoregistrationGraphAction</class>
-            <text>Full Coregistration</text>
+            <text>Automatic Coregistration</text>
             <shortDescr>Perform Coregistration in a single graph</shortDescr>
-            <parent>Coregistration</parent>
+            <parent>sartools</parent>
             <helpId>Coregistration</helpId>
-        </action>
-
-        <action>
-            <id>GCPSelectionAction</id>
-            <class>org.esa.nest.dat.GCPSelectionAction</class>
-            <parent>Coregistration</parent>
-            <text>GCP Selection</text>
-            <shortDescr>Perform GCP Selection for Coregistration</shortDescr>
-            <helpId>GCPSelection</helpId>
-        </action>
-
-        <action>
-            <id>WarpAction</id>
-            <class>org.esa.nest.dat.WarpAction</class>
-            <parent>Coregistration</parent>
-            <text>Warp</text>
-            <shortDescr>Perform Warp for Coregistration</shortDescr>
-            <helpId>Warp</helpId>
         </action>
         
         <action>
