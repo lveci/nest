@@ -28,6 +28,7 @@
 		<tocitem text="World Map" target="showWorldMapWnd"/>
 		<tocitem text="WorldWind View" target="WorldWind"/>
 		<tocitem text="Import Browser" target="productGrabber"/>
+		<tocitem text="Product Library" target="productLibrary"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
 		<tocitem text="Settings Dialog" target="settings"/>
 		<tocitem text="Wave Mode Polar View" target="polarView"/>

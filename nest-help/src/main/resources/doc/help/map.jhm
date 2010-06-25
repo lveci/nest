@@ -32,6 +32,7 @@
     <mapID target="helpMenu" url="visat/HelpMenu.html"/>
 	<mapID target="projectView" url="visat/ProjectView.html"/>
     <mapID target="productBrowser" url="visat/ProductBrowser.html"/>
+	<mapID target="productLibrary" url="visat/ProductLibrary.html"/>
     <mapID target="pixelInfoView" url="visat/ProductBrowser.html#pixelView"/>
     <mapID target="propertyEditor" url="visat/PropertyEditor.html"/>
     <mapID target="subsetDialog" url="visat/ProductSubsetDialog.html"/>
