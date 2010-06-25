@@ -193,7 +193,7 @@ public class Warp2Op extends Operator {
                     createInSARInterpTable();
 
                 } else {
-                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+                    interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
                 }
             } else { // detected products
 
@@ -201,6 +201,8 @@ public class Warp2Op extends Operator {
                     interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
                 } else if (interpolationMethod.equals(BILINEAR)) {
                     interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+                } else {
+                    interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
                 }
             }
             /*
