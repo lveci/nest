@@ -38,7 +38,7 @@ public class ComplexIfgOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter( valueSet = {"3", "4", "5", "6", "7", "8"},
+    @Parameter( valueSet = {"1","2","3", "4", "5", "6", "7", "8"},
                 description = "Order of 'Flat earth phase' polynomial",
                 defaultValue = "5",
                 label="Degree of \"Flat Earth\" polynomial")
@@ -179,9 +179,9 @@ public class ComplexIfgOp extends Operator {
     private void estimateFlatEarthPolynomial() {
 
         // estimation window : this works only for NEST "crop" logic
-        int minLine = 1;
+        int minLine = 0;
         int maxLine = sourceImageHeight;
-        int minPixel = 1;
+        int minPixel = 0;
         int maxPixel = sourceImageWidth;
 
         Rectangle rectangle = new Rectangle();
@@ -431,13 +431,11 @@ public class ComplexIfgOp extends Operator {
             ellipsoidPosition.y = ellipsoidPosition.y + ellipsoidPositionSolution.get(1);
             ellipsoidPosition.z = ellipsoidPosition.z + ellipsoidPositionSolution.get(2);
 
-            System.out.println("ellipsoidPosition (iteration) :" + iter + " : " + ellipsoidPosition);
-
             // check convergence
             if (Math.abs(ellipsoidPositionSolution.get(0)) < CRITERPOS &&
                     Math.abs(ellipsoidPositionSolution.get(1)) < CRITERPOS &&
                     Math.abs(ellipsoidPositionSolution.get(2)) < CRITERPOS) {
-                System.out.println("INFO: ellipsoidPosition (converged) = " + ellipsoidPosition);
+//                System.out.println("INFO: ellipsoidPosition (converged) = " + ellipsoidPosition);
                 break;
             } else if (iter >= MAXITER) {
                 MAXITER = MAXITER + 1;
@@ -656,15 +654,15 @@ public class ComplexIfgOp extends Operator {
 
         // Check redundancy
         final int numOfUnknowns = polyDegree + 1;
-        System.out.println("Degree of orbit interpolating polynomial: " + polyDegree);
-        System.out.println("Number of unknowns: " + numOfUnknowns);
-        System.out.println("Number of data points (orbit): " + numOfPoints);
+//        System.out.println("Degree of orbit interpolating polynomial: " + polyDegree);
+//        System.out.println("Number of unknowns: " + numOfUnknowns);
+//        System.out.println("Number of data points (orbit): " + numOfPoints);
         if (numOfPoints < numOfUnknowns) {
             throw new OperatorException("Number of points is smaller than parameters solved for.");
         }
 
         // Setup system of equation
-        System.out.println("Setting up linear system of equations");
+//        System.out.println("Setting up linear system of equations");
         DoubleMatrix A = new DoubleMatrix(numOfPoints, numOfUnknowns);// designmatrix
         for (int j = 0; j <= polyDegree; j++) {
             DoubleMatrix normPostingTemp = normPosting.dup();
@@ -672,10 +670,7 @@ public class ComplexIfgOp extends Operator {
             A.putColumn(j, normPostingTemp);
         }
 
-        System.out.println("A = " + A);
-
-
-        System.out.println("Solving lin. system of equations with Cholesky.");
+//        System.out.println("Solving lin. system of equations with Cholesky.");
         // Fit polynomial through computed vector of phases
         DoubleMatrix y = observations.dup();
         DoubleMatrix N = A.transpose().mmul(A);
@@ -700,12 +695,12 @@ public class ComplexIfgOp extends Operator {
 
         DoubleMatrix maxDeviation = N.mmul(Qx_hat).sub(DoubleMatrix.eye(Qx_hat.rows));
 
-        System.out.println("polyFit orbit: max(abs(N*inv(N)-I)) = " + maxDeviation.get(1, 1));
+//        System.out.println("polyFit orbit: max(abs(N*inv(N)-I)) = " + maxDeviation.get(1, 1));
 
-        // ___ report max error... (seems sometimes this can be extremely large) ___
-        if (maxDeviation.get(1, 1) > 1e-6) {
-            System.out.println("polyfit orbit interpolation unstable!");
-        }
+//        // ___ report max error... (seems sometimes this can be extremely large) ___
+//        if (maxDeviation.get(1, 1) > 1e-6) {
+//            System.out.println("polyfit orbit interpolation unstable!");
+//        }
 
         // work out residuals
         DoubleMatrix y_hat = A.mmul(x);
@@ -717,21 +712,22 @@ public class ComplexIfgOp extends Operator {
         // 0.05 is already 1 wavelength! (?)
         if (absMatrix(e_hat_abs).max() > 0.02) {
             System.out.println("WARNING: Max. approximation error at datapoints (x,y,or z?): " + absMatrix(e_hat).max() + "m");
-        } else {
-            System.out.println("Max. approximation error at datapoints (x,y,or z?): " + absMatrix(e_hat).max() + "m");
         }
+//        else {
+//            System.out.println("Max. approximation error at datapoints (x,y,or z?): " + absMatrix(e_hat).max() + "m");
+//        }
 
-        System.out.println("REPORTING POLYFIT LEAST SQUARES ERRORS");
-        System.out.println(" time \t\t\t y \t\t\t yhat  \t\t\t ehat");
-        for (int i = 0; i < numOfPoints; i++) {
-            System.out.println(" " + posting.get(i) + "\t" + y.get(i) + "\t" + y_hat.get(i) + "\t" + e_hat.get(i));
-        }
+//        System.out.println("REPORTING POLYFIT LEAST SQUARES ERRORS");
+//        System.out.println(" time \t\t\t y \t\t\t yhat  \t\t\t ehat");
+//        for (int i = 0; i < numOfPoints; i++) {
+//            System.out.println(" " + posting.get(i) + "\t" + y.get(i) + "\t" + y_hat.get(i) + "\t" + e_hat.get(i));
+//        }
 
         for (int i = 0; i < numOfPoints - 1; i++) {
             // ___ check if dt is constant, not necessary for me, but may ___
             // ___ signal error in header data of SLC image ___
             double dt = posting.get(i + 1) - posting.get(i);
-            System.out.println("Time step between point " + i + 1 + " and " + i + "= " + dt);
+//            System.out.println("Time step between point " + i + 1 + " and " + i + "= " + dt);
 
             if (Math.abs(dt - (posting.get(1) - posting.get(0))) > 0.001)// 1ms of difference we allow...
                 System.out.println("WARNING: Orbit: data does not have equidistant time interval?");
@@ -741,7 +737,6 @@ public class ComplexIfgOp extends Operator {
     } // END polyfit
 
     private DoubleMatrix absMatrix(DoubleMatrix matrix) {
-        System.out.println("matrix = " + matrix);
         for (int i = 0; i < matrix.rows; i++) {
             for (int j = 0; j < matrix.columns; j++) {
                 matrix.put(i, j, Math.abs(matrix.get(i, j)));
@@ -819,17 +814,17 @@ public class ComplexIfgOp extends Operator {
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
 //        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 100);
-        targetProduct.setPreferredTileSize(50, 50);
+        targetProduct.setPreferredTileSize(500, 500); // polyval optimized for the equal size tiles!!!
+
 
         final Dimension tileSize = targetProduct.getPreferredTileSize();
         final int rasterHeight = targetProduct.getSceneRasterHeight();
         final int rasterWidth = targetProduct.getSceneRasterWidth();
 
-        int tileCountX = MathUtils.ceilInt(rasterWidth / (double) tileSize.width);
-        int tileCountY = MathUtils.ceilInt(rasterHeight / (double) tileSize.height);
-        totalTileCount = tileCountX * tileCountY;
-
-        System.out.println("TotalTileCount: [" + totalTileCount + "]");
+//        int tileCountX = MathUtils.ceilInt(rasterWidth / (double) tileSize.width);
+//        int tileCountY = MathUtils.ceilInt(rasterHeight / (double) tileSize.height);
+//        totalTileCount = tileCountX * tileCountY;
+//        System.out.println("TotalTileCount: [" + totalTileCount + "]");
 
 //        // initialization of complex matrices
 //        cplxMatrixMaster = new ComplexFloatMatrix(tileSize.width, tileSize.height);
@@ -875,7 +870,6 @@ public class ComplexIfgOp extends Operator {
                     String suffix = "";
                     if (srcBandI != masterBand1) {
                         suffix = "_ifg" + cnt++;
-                        //System.out.println(suffix);
                     }
 
                     slaveRasterMap.put(srcBandI, srcBandQ);
@@ -884,14 +878,7 @@ public class ComplexIfgOp extends Operator {
 
                 }
             }
-
-
         }
-
-        // virtual bands count like a regular bands!!!
-        System.out.println("Number of bands of the source product: " + sourceProduct.getNumBands());
-        System.out.println("Number of bands of the target product: " + targetProduct.getNumBands());
-
     }
 
     /**
@@ -913,7 +900,7 @@ public class ComplexIfgOp extends Operator {
             int y0 = targetRectangle.y;
             int w = targetRectangle.width;
             int h = targetRectangle.height;
-            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+//            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             ComplexFloatMatrix cplxMatrixMaster = null;
             ComplexFloatMatrix cplxMatrixSlave = null;
@@ -944,9 +931,6 @@ public class ComplexIfgOp extends Operator {
                     FloatMatrix dataImagMatrix = new FloatMatrix(masterRasterQ.getHeight(), masterRasterQ.getWidth(), dataArray);
 
                     cplxMatrixMaster = new ComplexFloatMatrix(dataRealMatrix, dataImagMatrix);
-                    System.out.println("---- Matrix allocation ----- ");
-                    System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-                    System.out.println("master matrix dimensions: " + cplxMatrixMaster.getLength() + "," + cplxMatrixMaster.getRows());
 
                 } else if (sourceBandUnit != null && sourceBandUnit.contains(Unit.REAL)) {
 
@@ -964,42 +948,36 @@ public class ComplexIfgOp extends Operator {
                     FloatMatrix dataImagMatrix = new FloatMatrix(slaveRasterQ.getHeight(), slaveRasterQ.getWidth(), dataArray);
 
                     cplxMatrixSlave = new ComplexFloatMatrix(dataRealMatrix, dataImagMatrix);
-//                    System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-//                    System.out.println("---- Matrix allocation ----- ");
-//                    System.out.println("slave matrix dimensions: " + cplxMatrixSlave.getLength() + "," + cplxMatrixSlave.getRows());
+
                 }
             }
 
-//            System.out.println("---- Matrix multiplication ----- ");
-//            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-//            System.out.println("master matrix dimensions: " + cplxMatrixMaster.getLength() + "," + cplxMatrixMaster.getRows());
-//            System.out.println("slave matrix dimensions: " + cplxMatrixSlave.getLength() + "," + cplxMatrixSlave.getRows());
-
             // TODO: integrate subtraction of Reference Phase
             ComplexFloatMatrix cplxIfg = cplxMatrixMaster.muli(cplxMatrixSlave.conji());
-
 
             // if flat earth phase flag is on
             // ------------------------------------------------
 
             // normalize pixel :: range_axis
             DoubleMatrix rangeAxisNormalized;
-            rangeAxisNormalized = DoubleMatrix.linspace(x0, x0 + w, cplxIfg.columns);
-            rangeAxisNormalized.subi(0.5 * (1 + (1 + sourceImageWidth)));
-            rangeAxisNormalized.divi(0.25 * ((1 + sourceImageWidth)-1));
+            rangeAxisNormalized = DoubleMatrix.linspace(x0, x0 + w - 1, cplxIfg.columns);
+            rangeAxisNormalized.subi(0.5 * (1 + sourceImageWidth));
+            rangeAxisNormalized.divi(0.25 * (sourceImageWidth-1));
 
             DoubleMatrix azimuthAxisNormalized;
-            azimuthAxisNormalized = DoubleMatrix.linspace(y0, y0 + h, cplxIfg.rows);
-            azimuthAxisNormalized.subi(0.5 * (1 + (1 + sourceImageHeight)));
-            azimuthAxisNormalized.divi(0.25 * ((1 + sourceImageHeight) - 1));
+            azimuthAxisNormalized = DoubleMatrix.linspace(y0, y0 + h - 1, cplxIfg.rows);
+            azimuthAxisNormalized.subi(0.5 * (1 + sourceImageHeight));
+            azimuthAxisNormalized.divi(0.25 * (sourceImageHeight - 1));
 
-            DoubleMatrix realReferencePhase = polyValOnGrid(azimuthAxisNormalized, rangeAxisNormalized, flatEarthPolyCoefs, degreeFromCoefficients(flatEarthPolyCoefs.length));
+            DoubleMatrix realReferencePhase = polyValOnGrid(azimuthAxisNormalized, rangeAxisNormalized,
+                    flatEarthPolyCoefs, degreeFromCoefficients(flatEarthPolyCoefs.length));
 
             ComplexFloatMatrix cplxReferencePhase;
-            cplxReferencePhase = new ComplexFloatMatrix(MatrixFunctions.cos(realReferencePhase.toFloatMatrix()), MatrixFunctions.sin(realReferencePhase.toFloatMatrix()));
+            cplxReferencePhase = new ComplexFloatMatrix(MatrixFunctions.cos(realReferencePhase.toFloatMatrix()),
+                    MatrixFunctions.sin(realReferencePhase.toFloatMatrix()));
 
-//            cplxIfg.copy(cplxReferencePhase);
-            cplxIfg.muli(cplxReferencePhase.conji());
+//            cplxIfg = cplxIfg.muli(cplxReferencePhase.transpose().conji());
+            cplxIfg.muli(cplxReferencePhase.transpose().conji());
 
             for (Band targetBand : targetProduct.getBands()) {
 
@@ -1011,10 +989,7 @@ public class ComplexIfgOp extends Operator {
                 if (targetBandUnit.contains(Unit.REAL)) {
 
                     dataArray = cplxIfg.real().toArray();
-
                     targetTile.setRawSamples(ProductData.createInstance(dataArray));
-
-                    System.out.println("Dumping a tile");
 
                 } else if (targetBandUnit.contains(Unit.IMAGINARY)) {
 
@@ -1028,24 +1003,6 @@ public class ComplexIfgOp extends Operator {
         } catch (Throwable e) {
 
             OperatorUtils.catchOperatorException(getId(), e);
-
-        } finally {
-
-//            pm.done();
-
-            // can i update of metadata here!?
-            // this is not very thread safe?! :: tile scheduling is performed in ROW_BAND_COLUMN order, see OperatorExecutor
-            // perhaps it would make sense to change the dispatching order to ROW_COLUMN_BAND?
-
-            threadCounter.increment();
-//            System.out.println("Thread nr: " + threadCounter.increment() + " out of " + totalTileCount);
-//            if (totalTileCount == threadCounter.getValue()) {
-//                System.out.println("-----------------------------------");
-//                System.out.println("Finished for this thread");
-//                System.out.println("-----------------------------------");
-//            }
-
-            // check out dispose(): see email of Luis, 31.05.2010
 
         }
     }
@@ -1068,9 +1025,9 @@ public class ComplexIfgOp extends Operator {
             System.out.println("WARNING: polyal degree < -1 ????");
         }
 
-        if (x.length > y.length) {
-            System.out.println("WARNING: polyal function, x larger tan y, while optimized for y larger x");
-        }
+//        if (x.length > y.length) {
+//            System.out.println("WARNING: polyal function, x larger than y, while optimized for y larger x");
+//        }
 
         if (degreee == -1) {
             degreee = degreeFromCoefficients(coeff.length);
@@ -1403,29 +1360,24 @@ public class ComplexIfgOp extends Operator {
 
             // meters
             radar_wavelength = (Constants.lightSpeed / Math.pow(10,6)) / element.getAttributeDouble(AbstractMetadata.radar_frequency);
-
-            System.out.println("radar_wavelength = " + radar_wavelength);
+//            System.out.println("radar_wavelength = " + radar_wavelength);
 
             //
             PRF = element.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
             ProductData.UTC t_azi1_UTC = element.getAttributeUTC(AbstractMetadata.first_line_time);
-
-            System.out.println("t_azi1_UTC = " + t_azi1_UTC);
+//            System.out.println("t_azi1_UTC = " + t_azi1_UTC);
 
             // work with seconds of the day!
             t_azi1 = (t_azi1_UTC.getMJD() - (int)t_azi1_UTC.getMJD())*24*3600;
-
-            System.out.println("t_azi1 = " + t_azi1);
+//            System.out.println("t_azi1 = " + t_azi1);
 
             // 2 times range sampling rate [HZ]
             rsr2x = element.getAttributeDouble(AbstractMetadata.range_sampling_rate) * Math.pow(10,6) * 2;
-
-            System.out.println("rsr2x = " + rsr2x);
+//            System.out.println("rsr2x = " + rsr2x);
 
             // one way time to first range pixels [sec]
             t_range1 = element.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel)/Constants.lightSpeed;
-
-            System.out.println("t_range1 = " + t_range1);
+//            System.out.println("t_range1 = " + t_range1);
 
             approxRadarCentreOriginal = new Point2d();
 
@@ -1434,8 +1386,8 @@ public class ComplexIfgOp extends Operator {
 
             approxGeoCentreOriginal = new GeoPos();
 
-            System.out.println("approxGeoCentreOriginal = " + approxGeoCentreOriginal);
-            System.out.println("element.getAttributeDouble(AbstractMetadata.first_near_lat = " + element.getAttributeDouble(AbstractMetadata.first_near_lat));
+//            System.out.println("approxGeoCentreOriginal = " + approxGeoCentreOriginal);
+//            System.out.println("element.getAttributeDouble(AbstractMetadata.first_near_lat = " + element.getAttributeDouble(AbstractMetadata.first_near_lat));
 
             // TODO: replace computation of the centre using getGeoPos()
             // simple averaging of the corners
