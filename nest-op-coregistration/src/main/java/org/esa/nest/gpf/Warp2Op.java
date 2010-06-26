@@ -84,10 +84,6 @@ public class Warp2Op extends Operator {
             label = "Warp Polynomial Order")
     private int warpPolynomialOrder = 2;
 
-//    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR,
-//                label="Interpolation Method")
-//    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR}, defaultValue = BILINEAR,
-//            label = "Interpolation Method")
     @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, TRI, CC4P, CC6P, TS6P, TS8P, TS16P}, defaultValue = BILINEAR,
             label = "Interpolation Method")
     private String interpolationMethod = BILINEAR;
@@ -102,17 +98,17 @@ public class Warp2Op extends Operator {
     private Band masterBand2 = null;
     private boolean complexCoregistration = false;
 
-    private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
-    private static final String BILINEAR = "Bilinear interpolation";
-    private static final String BICUBIC = "Bicubic interpolation";
-    private static final String BICUBIC2 = "Bicubic2 interpolation";
-    private static final String RECT = "Step function (nearest-neighbor)";
-    private static final String TRI = "Linear interpolation";
-    private static final String CC4P = "Cubic convolution (4 points)";
-    private static final String CC6P = "Cubic convolution (6 points)";
-    private static final String TS6P = "Truncated sinc (6 points)";
-    private static final String TS8P = "Truncated sinc (8 points)";
-    private static final String TS16P = "Truncated sinc (16 points)";
+    public static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
+    public static final String BILINEAR = "Bilinear interpolation";
+    public static final String BICUBIC = "Bicubic interpolation";
+    public static final String BICUBIC2 = "Bicubic2 interpolation";
+    public static final String RECT = "Step function (nearest-neighbor)";
+    public static final String TRI = "Linear interpolation";
+    public static final String CC4P = "Cubic convolution (4 points)";
+    public static final String CC6P = "Cubic convolution (6 points)";
+    public static final String TS6P = "Truncated sinc (6 points)";
+    public static final String TS8P = "Truncated sinc (8 points)";
+    public static final String TS16P = "Truncated sinc (16 points)";
 
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
     private final Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
@@ -162,13 +158,6 @@ public class Warp2Op extends Operator {
                 masterBand2 = sourceProduct.getBandAt(1);
             }
 
-//            private static final String TRI = "Linear interpolation";
-//            private static final String CC4P = "Cubic convolution (4 points)";
-//            private static final String CC6P = "Cubic convolution (6 points)";
-//            private static final String TS6P = "Truncated sinc (6 points)";
-//            private static final String TS8P = "Truncated sinc (8 points)";
-//            private static final String TS16P = "Truncated sinc (16 points)";
-
             // The following code is temporary
             if (complexCoregistration) {
 
@@ -205,18 +194,7 @@ public class Warp2Op extends Operator {
                     interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
                 }
             }
-            /*
-            // determine interpolation method for warp function
-            if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
-                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-            } else if (interpolationMethod.equals(BILINEAR)) {
-                interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-            } else if (interpolationMethod.equals(BICUBIC)) {
-                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
-            } else if (interpolationMethod.equals(BICUBIC2)) {
-                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
-            }
-            */
+
             createTargetProduct();
 
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
@@ -862,6 +840,7 @@ public class Warp2Op extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(Warp2Op.class);
+            super.setOperatorUI(WarpOpUI.class);
         }
     }
 

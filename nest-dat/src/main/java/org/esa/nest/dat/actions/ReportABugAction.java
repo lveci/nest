@@ -30,7 +30,7 @@ public class ReportABugAction extends ExecCommand {
         final String mail = PR_EMAIL + "?subject=NEST-Problem-Report&body=Description:%0A%0A%0A%0A";
         final String sysInfo = getSystemInfo();
 
-        final String longmail = mail + "SysInfo:%0A" + sysInfo;
+        final String longmail = mail + "SysInfo:%0A" + sysInfo.substring(0, Math.min(1800, sysInfo.length()));
 
         try {
             desktop.mail(URI.create(longmail));

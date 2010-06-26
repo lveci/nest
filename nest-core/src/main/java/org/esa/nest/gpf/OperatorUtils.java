@@ -431,6 +431,16 @@ public final class OperatorUtils {
         targetProduct.setGeoCoding(tpGeoCoding);
     }
 
+    public static boolean isComplex(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
+            if(sampleType.equalsIgnoreCase("complex"))
+                return true;
+        }
+        return false;
+    }
+
     public static class SceneProperties {
         public int sceneWidth, sceneHeight;
         public double latMin, lonMin, latMax, lonMax;
@@ -438,4 +448,5 @@ public final class OperatorUtils {
         public final Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
         public final Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
     }
+
 }

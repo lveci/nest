@@ -76,7 +76,9 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         maxIteration.setText(String.valueOf(paramMap.get("maxIteration")));
         gcpTolerance.setText(String.valueOf(paramMap.get("gcpTolerance")));
 
-        checkIfComplex();
+        if(sourceProducts != null && sourceProducts.length > 0) {
+            isComplex = OperatorUtils.isComplex(sourceProducts[0]);
+        }
 
         if(isComplex) {
             applyFineRegistration = (Boolean)paramMap.get("applyFineRegistration");
@@ -89,19 +91,6 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
             coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
         }
         enableComplexFields();
-    }
-
-    private void checkIfComplex() {
-        if(sourceProducts != null && sourceProducts.length > 0) {
-            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
-            if(absRoot != null) {
-                final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
-                if(sampleType.equalsIgnoreCase("complex"))
-                    isComplex = true;
-                else
-                    isComplex = false;
-            }
-        }
     }
 
     @Override
