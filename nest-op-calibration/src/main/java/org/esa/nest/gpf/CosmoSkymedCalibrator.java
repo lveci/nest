@@ -197,7 +197,7 @@ public class CosmoSkymedCalibrator implements Calibrator {
         referenceSlantRangeExp = absRoot.getAttributeDouble(
         		AbstractMetadata.ref_slant_range_exp);
         referenceIncidenceAngle = absRoot.getAttributeDouble(
-        		AbstractMetadata.ref_inc_angle);
+        		AbstractMetadata.ref_inc_angle)*Math.PI/180.0;
         rescalingFactor = absRoot.getAttributeDouble(
         		AbstractMetadata.rescaling_factor);
         
@@ -319,6 +319,9 @@ public class CosmoSkymedCalibrator implements Calibrator {
 
         double sigma, dn, i, q;
         int index;
+        final double powFactor = Math.pow(referenceSlantRange, 2*referenceSlantRangeExp);
+        final double sinRefIncidenceAngle = Math.sin(referenceIncidenceAngle);
+        final double rescaleCalFactor = rescalingFactor*rescalingFactor*Ks;
 
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
@@ -341,12 +344,12 @@ public class CosmoSkymedCalibrator implements Calibrator {
                 }
 
                 if (applyRangeSpreadingLossCorrection)
-                	sigma *= Math.pow(referenceSlantRange, 2*referenceSlantRangeExp);
+                    sigma *= powFactor;
                 
                 if (applyIncidenceAngleCorrection)
-                	sigma *= Math.sin(referenceIncidenceAngle);
+                    sigma *= sinRefIncidenceAngle;
 
-                sigma /= (rescalingFactor*rescalingFactor*Ks);
+                sigma /= rescaleCalFactor;
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
                     if (sigma < underFlowFloat) {
