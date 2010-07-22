@@ -272,7 +272,7 @@ public class ASARCalibrator implements Calibrator {
     private void setCalibrationFlags() {
 
         if (antElevCorrFlag) {
-            if (multilookFlag || auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
+            if (multilookFlag || auxFile != null && auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
                 retroCalibrationFlag = false;
                 System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
             } else {
@@ -280,7 +280,7 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        if (auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
+        if (auxFile != null && auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
             applyAntennaPatternCorr = false;
         } else {
             applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
