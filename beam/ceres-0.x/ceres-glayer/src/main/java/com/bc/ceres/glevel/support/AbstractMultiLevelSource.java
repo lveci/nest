@@ -1,10 +1,30 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package com.bc.ceres.glevel.support;
 
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
+import javax.media.jai.operator.ScaleDescriptor;
+import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.image.RenderedImage;
 
 /**
@@ -57,6 +77,10 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
      * Called by {@link #getImage(int)} if a level image is requested for the first time.
      * Note that images created via this method will be {@link PlanarImage#dispose disposed}
      * when {@link #reset} is called on this multi-level image source. See {@link #getImage(int)}.
+     * <p/>
+     * The dimension of the level image created must be the same as that obtained from
+     * {@link #getImageDimension(int, int, double)} for the scale associated with the
+     * given resolution level.
      *
      * @param level The resolution level.
      *
@@ -94,5 +118,23 @@ public abstract class AbstractMultiLevelSource implements MultiLevelSource {
         if (level < 0 || level >= getModel().getLevelCount()) {
             throw new IllegalArgumentException("level=" + level);
         }
+    }
+
+    /**
+     * Computes the dimension of an image at a certain level. The image dimension computed is the
+     * same as that obtained from {@code javax.media.jai.operatorScaleDescriptor.create(...)}.
+     *
+     * @param width  The width of the image in pixels at level zero.
+     * @param height The height of the image in pixels at level zero.
+     * @param scale  The scale at the level of interest.
+     *
+     * @return the dimension of the image at the level of interest.
+     */
+    public static Dimension getImageDimension(int width, int height, double scale) {
+        final float scaleFactor = (float) (1.0 / scale);
+
+        final RenderedOp c = ConstantDescriptor.create((float) width, (float) height, new Float[]{0.0f}, null);
+        final RenderedOp s = ScaleDescriptor.create(c, scaleFactor, scaleFactor, 0.0f, 0.0f, null, null);
+        return new Dimension(s.getWidth(), s.getHeight());
     }
 }

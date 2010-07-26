@@ -1,4 +1,20 @@
 /*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
+/*
  * HtmlModuleGenerator.java
  *
  * Created on 19. April 2007, 10:08
@@ -6,106 +22,111 @@
 
 package com.bc.ceres.site;
 
+import com.bc.ceres.core.runtime.Dependency;
 import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.site.util.ExclusionListBuilder;
+import com.bc.ceres.site.util.ModuleUtils;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.ResourceBundle;
 
 /**
  * Generate a HTML view of a module repository. This is only a fragment, not a
  * complete page.
+ *
  * @see PageDecoratorGenerator for information on how to create a complete HTML page
  */
 public class HtmlModuleGenerator implements HtmlGenerator {
 
-    private final ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/bc/ceres/site/LocalStrings");
-
-    /** Creates a new instance of HtmlModuleGenerator */
+    /**
+     * Creates a new instance of HtmlModuleGenerator
+     */
     public HtmlModuleGenerator() {
     }
 
-    public void generate(PrintWriter out, Module[] modules) throws IOException {
-        out.println("<table class=\"modules\">");
+    public void generate(PrintWriter out, Module[] allModules, String repositoryUrl) throws IOException {
+        File exclusionList = retrieveExclusionList(repositoryUrl);
+        Module[] modules = ModuleUtils.cleanModules(allModules, exclusionList);
         for (Module module : modules) {
-            out.println("  <tr class=\"head\">");
-            out.print("    <td class=\"name\"><a name=\"" + sanitize(module.getName().replace(' ', '_'))+"\"></a>");
-            out.print(getDisplayText("name"));
-            out.println("</td><td class=\"value\"><a href=\"" +  sanitize(module.getLocation().toExternalForm()) + "\">"+sanitize(module.getName())+"</a></td></tr>");
-//            output(out, "name", module.getName(), module.getLocation().toExternalForm());
-            output(out, "symbolicName", module.getSymbolicName(), null);
-            output(out, "aboutUrl", module.getAboutUrl()!=null?"<span class=\"aboutLink\">about</span>":"", module.getAboutUrl());
-            output(out, "activatorClassName", module.getActivatorClassName(), null);
-            output(out, "vendor", module.getVendor(), null);
-            output(out, "contactAddress", module.getContactAddress(), null);
-            output(out, "url", module.getUrl(), module.getUrl());
-            output(out, "copyright", module.getCopyright(), null);
-            output(out, "description", module.getDescription(), null);
-            output(out, "licenseUrl", module.getLicenseUrl(), module.getLicenseUrl());
-            output(out, "manifestVersion", module.getManifestVersion(), null);
-            output(out, "packaging", module.getPackaging(), null);
-            output(out, "version", module.getVersion().toString(), null);
-            output(out, "contentLength", getSizeText(module.getContentLength()), null);
-            output(out, "lastModified", getDateText(module.getLastModified()), null);
+            writerHeader(out, module);
 
-            out.println("  <tr class=\"totop\"><td></td><td><a href=\"#top\">top</a></td></tr>");
+            // description
+            final Dependency[] dependencies = module.getDeclaredDependencies();
+            out.println("<div class=\"description\">");
+            out.println(module.getDescription());
+            out.println("</div>");
+            out.println("<p>");
+
+            out.print("<div class=\"dependencies\">");
+            out.println("Depends on:");
+            out.println("<ul>");
+            for (Dependency dependency : dependencies) {
+                out.print("  <li>");
+                final String symbolicName = dependency.getModuleSymbolicName();
+                final String readableName = ModuleUtils.symbolicToReadableName(symbolicName, allModules);
+                final boolean dependencyIncl = !ModuleUtils.isExcluded(symbolicName, exclusionList);
+                if (dependencyIncl) {
+                    out.print("<a href=\"#" + readableName.replaceAll(" ", "") + "\">");
+                }
+                final String depVersion = dependency.getVersion();
+                String version = (depVersion != null) ? depVersion : "";
+                out.print(readableName + " " + version);
+                if (dependencyIncl) {
+                    out.print("</a>");
+                }
+                out.println("</li>");
+            }
+            out.println("</ul>");
+            out.println("</div>");
+
+            writeFooter(out, module);
         }
-        out.println("</table>");
     }
 
-    private void output(PrintWriter out, String clazz) {
-        output(out, clazz, "", null);
-    }
+    private void writerHeader(PrintWriter out, Module module) {
+        final String size = ModuleUtils.retrieveSize(module);
+        final String moduleName = module.getName();
 
-    private void output(PrintWriter out, String clazz, String value, String link) {
-        clazz = sanitize(clazz);
-        value = sanitize(value);
-        link = sanitize(link);
-        out.print("<tr class=\""+clazz+"\"><td class=\"key\">");
-        out.print(getDisplayText(clazz));
-        out.print("</td><td class=\"value\">");
-        if(link != null) {
-            out.print("<a href=\"" + link + "\">") ;
+        out.print("<h2 class=\"heading\">" + moduleName + " ");
+        out.println("<a name= " + moduleName.replaceAll(" ", "") + ">");
+        out.print("<a href=\"" + module.getLocation().toExternalForm() + "\">");
+        out.print(module.getVersion());
+        if (size != null) {
+            out.println("&nbsp;(" + size + ")");
         }
-        if(value != null) {
-            out.print(value.trim());
+        out.print("</a>");
+        out.println("</h2>");
+    }
+
+    private void writeFooter(PrintWriter out, Module module) {
+        final String year = ModuleUtils.retrieveYear(module);
+        out.print("<div class=\"footer\">");
+        final String contactUrl = module.getUrl();
+        if (contactUrl != null) {
+            out.print("<a href=\"" + contactUrl + "\">");
         }
-        if(link != null) out.print("</a>") ;
-        out.println("</td>\n</tr>");
-    }
-
-    private String getDisplayText(String key) {
-        String bundleKey = "module." + key;
-        if(bundle.containsKey(bundleKey)) {
-            return bundle.getString(bundleKey).trim();
+        out.print(module.getVendor());
+        if (contactUrl != null) {
+            out.print("</a>");
         }
-        return key.trim();
+        out.print(!year.equals("-1") ? ", " + year : "");
+        final String licenceUrl = module.getLicenseUrl();
+        if (licenceUrl != null) {
+            out.print("&nbsp;&#8226;&nbsp;<a href=\"" + licenceUrl + "\">Licence</a>");
+        }
+        out.print("&nbsp;&#8226;&nbsp;<a href=\"#top\">top</a>");
+        out.println("</div>");
+
+        out.println("<br/>");
     }
 
-    // siehe ModuleTextFactory in ceres-ui... Dieser Code wurde in der Eile
-    // kopiert und modifiziert!
-
-    private static final String NOT_SPECIFIED = "(not specified)";
-
-    static String getText(String s) {
-        return s == null ? NOT_SPECIFIED : s;
+    private static File retrieveExclusionList(String repositoryUrl) {
+        String sep = "";
+        if (!repositoryUrl.endsWith("/")) {
+            sep = "/";
+        }
+        return new File(repositoryUrl + sep + ExclusionListBuilder.EXCLUSION_LIST_FILENAME);
     }
 
-    static String getDateText(long timestamp) {
-        DateFormat dateInstance = SimpleDateFormat.getDateInstance();
-        return dateInstance.format(new Date(timestamp));
-    }
-
-    static String getSizeText(long bytes) {
-        long kilos = Math.round(bytes / 1024.0);
-        long megas = Math.round(bytes / (1024.0 * 1024.0));
-        return getText(megas > 0 ? (megas + " M") : kilos > 0 ? (kilos + " K") : (bytes + " B"));
-    }
-
-    private String sanitize(String link) {
-        // todo: escape HTML special characters.
-        return link;
-    }
 }

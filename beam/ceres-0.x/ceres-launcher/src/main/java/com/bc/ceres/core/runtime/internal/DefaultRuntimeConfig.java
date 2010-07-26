@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.runtime.RuntimeConfig;
@@ -17,6 +33,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
     public static final String CONFIG_KEY_CERES_CONTEXT = "ceres.context";
     public static final String CONFIG_KEY_DEBUG = "debug";
     public static final String CONFIG_KEY_MAIN_CLASS = "mainClass";
+    public static final String CONFIG_KEY_CLASSPATH = "classpath";
     public static final String CONFIG_KEY_HOME = "home";
     public static final String CONFIG_KEY_CONFIG_FILE_NAME = "config";
     public static final String CONFIG_KEY_MODULES = "modules";
@@ -45,6 +62,9 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
 
     private String mainClassKey;
     private String mainClassName;
+
+    private String classpathKey;
+    private String mainClassPath;
 
     private String applicationIdKey;
     private String applicationId;
@@ -95,6 +115,11 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         return mainClassName;
     }
 
+    @Override
+    public String getMainClassPath() {
+        return mainClassPath;
+    }
+
     public String getHomeDirPath() {
         return homeDirPath;
     }
@@ -133,6 +158,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         initHomeDirAndConfiguration();
         initDebug(); // yes, again
         initMainClassName();
+        initClasspathPaths();
         initModulesDir();
         initLibDirs();
         if (isUsingModuleRuntime()) {
@@ -156,6 +182,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         modulesDirKey = String.format("%s.%s", contextId, CONFIG_KEY_MODULES);
         libDirsKey = String.format("%s.%s", contextId, CONFIG_KEY_LIB_DIRS);
         mainClassKey = String.format("%s.%s", contextId, CONFIG_KEY_MAIN_CLASS);
+        classpathKey = String.format("%s.%s", contextId, CONFIG_KEY_CLASSPATH);
         applicationIdKey = String.format("%s.%s", contextId, CONFIG_KEY_APP);
         logLevelKey = String.format("%s.%s", contextId, CONFIG_KEY_LOG_LEVEL);
         consoleLogKey = String.format("%s.%s", contextId, CONFIG_KEY_CONSOLE_LOG);
@@ -390,6 +417,10 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         if (isNullOrEmptyString(mainClassName)) {
             throw createMissingPropertyKeyException(mainClassKey);
         }
+    }
+
+    private void initClasspathPaths() throws RuntimeConfigException {
+        mainClassPath = getProperty(classpathKey, null);
     }
 
     private void initModulesDir() throws RuntimeConfigException {

@@ -1,18 +1,17 @@
 /*
- * $Id: FileEditor.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
- *
- * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package com.bc.ceres.swing.binding.internal;
 
@@ -22,50 +21,54 @@ import com.bc.ceres.swing.binding.BindingContext;
 import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  * An editor for file names using a file chooser dialog.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
+ * @version $Revision: 1.2 $ $Date: 2010-07-26 19:14:09 $
  * @since BEAM 4.6
  */
 public class FileEditor extends PropertyEditor {
 
     @Override
     public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-        return File.class.isAssignableFrom(propertyDescriptor.getType());
+        return File.class.isAssignableFrom(propertyDescriptor.getType())
+               && !Boolean.TRUE.equals(propertyDescriptor.getAttribute("directory"));
     }
-    
+
     @Override
     public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
-        JTextField textField = new JTextField();
-        ComponentAdapter adapter = new TextComponentAdapter(textField);
+        final JTextField textField = new JTextField();
+        final ComponentAdapter adapter = new TextComponentAdapter(textField);
         final Binding binding = bindingContext.bind(propertyDescriptor.getName(), adapter);
-        final JPanel subPanel = new JPanel(new BorderLayout(2, 2));
-        subPanel.add(textField, BorderLayout.CENTER);
-        JButton etcButton = new JButton("...");
+        final JPanel editorPanel = new JPanel(new BorderLayout(2, 2));
+        editorPanel.add(textField, BorderLayout.CENTER);
+        final JButton etcButton = new JButton("...");
+        final Dimension size = new Dimension(26, 16);
+        etcButton.setPreferredSize(size);
+        etcButton.setMinimumSize(size);
         etcButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                int i = fileChooser.showDialog(subPanel, "Select");
+                final JFileChooser fileChooser = new JFileChooser();
+                int i = fileChooser.showDialog(editorPanel, "Select");
                 if (i == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null) {
                     binding.setPropertyValue(fileChooser.getSelectedFile());
                 }
             }
         });
-        subPanel.add(etcButton, BorderLayout.EAST);
-        return subPanel;
+        editorPanel.add(etcButton, BorderLayout.EAST);
+        return editorPanel;
     }
 }

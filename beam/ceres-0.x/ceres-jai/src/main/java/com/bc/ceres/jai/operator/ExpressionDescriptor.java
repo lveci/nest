@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package com.bc.ceres.jai.operator;
 
 import com.bc.ceres.jai.ExpressionCompilerConfig;
@@ -6,6 +22,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.OperationDescriptorImpl;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.RenderedOp;
+import javax.media.jai.registry.RenderableRegistryMode;
 import javax.media.jai.registry.RenderedRegistryMode;
 import java.awt.RenderingHints;
 import java.awt.image.DataBuffer;
@@ -155,7 +172,9 @@ public class ExpressionDescriptor extends OperationDescriptorImpl {
      * @param compilerConfig The configuration for the Java expression compiler.
      * @param hints          The <code>RenderingHints</code> to use.
      *                       May be <code>null</code>.
+     *
      * @return The <code>RenderedOp</code> destination.
+     *
      * @throws IllegalArgumentException if <code>expression</code> is <code>invalid</code>.
      */
     public static RenderedOp create(Map<String, RenderedImage> sources,

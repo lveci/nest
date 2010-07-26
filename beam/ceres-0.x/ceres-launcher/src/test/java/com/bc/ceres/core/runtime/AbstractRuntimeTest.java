@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package com.bc.ceres.core.runtime;
 
 import junit.framework.TestCase;
@@ -45,6 +61,7 @@ public abstract class AbstractRuntimeTest extends TestCase {
         System.clearProperty(contextId+".home");
         System.clearProperty(contextId+".app");
         System.clearProperty(contextId+".mainClass");
+        System.clearProperty(contextId+".classpath");
         System.clearProperty(contextId+".modules");
         System.clearProperty(contextId+".config");
         System.clearProperty(contextId+".libDirs");
@@ -121,8 +138,17 @@ public abstract class AbstractRuntimeTest extends TestCase {
         touch0(new File(baseDirPath, filePath), data);
     }
 
-    protected URL toURL(String filePath) throws IOException {
-        return new File(getBaseDirPath() + "/" + filePath).toURI().toURL();
+    protected URL toMainURL(String filePath) throws IOException {
+        return new File(filePath).toURI().toURL();
+    }
+
+    protected URL toDefaultURL(String filePath) throws IOException {
+        final File file = new File(filePath);
+        if (file.isAbsolute()) {
+            return file.toURI().toURL();
+        } else {
+            return new File(getBaseDirPath(), file.getPath()).toURI().toURL();
+        }
     }
 
     private void mkdir0(File dir) throws IOException {

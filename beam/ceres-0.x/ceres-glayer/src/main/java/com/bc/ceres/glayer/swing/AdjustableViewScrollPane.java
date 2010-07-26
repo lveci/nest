@@ -1,18 +1,17 @@
 /*
- * $Id: AdjustableViewScrollPane.java,v 1.5 2010-03-31 13:59:58 lveci Exp $
- *
- * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package com.bc.ceres.glayer.swing;
 
@@ -44,7 +43,7 @@ import java.awt.geom.Rectangle2D;
  * the view component must implement the {@link AdjustableView} interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2010-03-31 13:59:58 $
+ * @version $Revision: 1.6 $ $Date: 2010-07-26 19:14:05 $
  */
 public class AdjustableViewScrollPane extends JPanel {
     private static final long serialVersionUID = -2634482999458990218L;

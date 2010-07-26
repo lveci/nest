@@ -1,8 +1,31 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.runtime.*;
+import com.bc.ceres.core.runtime.Activator;
+import com.bc.ceres.core.runtime.Dependency;
+import com.bc.ceres.core.runtime.Extension;
+import com.bc.ceres.core.runtime.ExtensionPoint;
+import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.core.runtime.ModuleContext;
+import com.bc.ceres.core.runtime.ModuleState;
+import com.bc.ceres.core.runtime.Version;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +90,7 @@ public class ModuleImpl implements Module {
     private transient ModuleContext context;  // initialised by ModuleStarter
 
     // avoid direct instantiation, modules can only be instantiated by the ModuleManfestParser
+
     private ModuleImpl() {
     }
 
@@ -276,6 +300,7 @@ public class ModuleImpl implements Module {
     }
 
     /*internal*/
+
     public void setVersion(Version version) {
         this.version = version;
     }
@@ -386,6 +411,7 @@ public class ModuleImpl implements Module {
     }
 
     /*internal*/
+
     public void setState(ModuleState state) {
         this.state = state;
     }
@@ -484,7 +510,8 @@ public class ModuleImpl implements Module {
         return resolveExceptionList.toArray(new ResolveException[0]);
     }
 
-    private List<ResolveException> addResolveException(ResolveException resolveException, List<ResolveException> resolveExceptionList) {
+    private List<ResolveException> addResolveException(ResolveException resolveException,
+                                                       List<ResolveException> resolveExceptionList) {
         if (resolveExceptionList == null) {
             resolveExceptionList = new ArrayList<ResolveException>(3);
         }
@@ -498,5 +525,10 @@ public class ModuleImpl implements Module {
         }
         resolveExceptionList.add(resolveException);
         return resolveExceptionList;
+    }
+
+    @Override
+    public int compareTo(Module o) {
+        return this.getName().compareTo(o.getName());
     }
 }

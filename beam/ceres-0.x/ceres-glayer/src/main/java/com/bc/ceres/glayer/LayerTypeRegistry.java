@@ -1,18 +1,17 @@
 /*
- * $Id: LayerTypeRegistry.java,v 1.3 2010-02-09 14:10:28 lveci Exp $
- * 
- * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation. This program is distributed in the hope it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package com.bc.ceres.glayer;
 
@@ -45,6 +44,7 @@ public class LayerTypeRegistry {
      * Return the instance for the given layerType class name.
      *
      * @param name The name of the layer type.
+     *
      * @return the instance
      */
     public static LayerType getLayerType(String name) {
@@ -64,10 +64,20 @@ public class LayerTypeRegistry {
      * Return the instance for the given layerType class.
      *
      * @param layerTypeClass The class of the layer type.
+     *
      * @return the instance
      */
     public static <T extends LayerType> T getLayerType(Class<T> layerTypeClass) {
         return (T) getRegistry().getService(layerTypeClass.getName());
+    }
+
+    /**
+     * Returns a set of all available layerTypes.
+     *
+     * @return the set
+     */
+    public static Set<LayerType> getLayerTypes() {
+        return getRegistry().getServices();
     }
 
     private static ServiceRegistry<LayerType> getRegistry() {
@@ -97,7 +107,7 @@ public class LayerTypeRegistry {
             }
         }
     }
-    
+
     private void registerAliases(LayerType layerType) {
         String layerTypeClassName = layerType.getClass().getName();
         aliases.put(layerType.getName(), layerTypeClassName);
@@ -124,7 +134,9 @@ public class LayerTypeRegistry {
 
     // Initialization on demand holder idiom, see
     // http://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
+
     private static class Holder {
+
         private static final LayerTypeRegistry instance = new LayerTypeRegistry();
     }
 }
