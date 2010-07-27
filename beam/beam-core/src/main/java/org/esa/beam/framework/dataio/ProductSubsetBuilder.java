@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.22 2010-04-20 17:31:23 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.23 2010-07-26 20:09:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
