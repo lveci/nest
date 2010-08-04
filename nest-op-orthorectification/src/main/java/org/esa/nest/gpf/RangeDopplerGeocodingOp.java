@@ -1270,7 +1270,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The elevation in meter.
      * @throws Exception from DEM
      */
-    private synchronized float getLocalElevation(final GeoPos geoPos) throws Exception {
+    private float getLocalElevation(final GeoPos geoPos) throws Exception {
 
         if(externalDEMFile == null) {
             return dem.getElevation(geoPos);
