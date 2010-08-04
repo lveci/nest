@@ -68,8 +68,7 @@ class FileElevationModel implements Resampling.Raster {
         return _resampling;
     }
 
-    public float getElevation(GeoPos geoPos) throws Exception {
-
+    public synchronized float getElevation(GeoPos geoPos) throws Exception {
         tileGeocoding.getPixelPos(geoPos, pix);
         if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x > RASTER_WIDTH || pix.y > RASTER_HEIGHT)
             return noDataValue;
