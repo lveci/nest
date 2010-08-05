@@ -99,6 +99,11 @@ public class CalibrationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
+            MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.coregistered_stack)) {
+                throw new OperatorException("Cannot apply calibration to coregistered product.");
+            }
+            
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
