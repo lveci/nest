@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.jai;
 
 import junit.framework.TestCase;
@@ -8,6 +24,7 @@ import org.esa.beam.framework.datamodel.ROIDefinition;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 
 import javax.media.jai.PlanarImage;
+import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
@@ -78,6 +95,33 @@ public class ImageManagerTest extends TestCase {
         assertEquals(0, dataBuffer.getElem(1));
         assertEquals(255, dataBuffer.getElem(2));
         assertEquals(0, dataBuffer.getElem(3));
+    }
+
+    /**
+     * size of source image is calculated in
+     * {@code com.bc.ceres.glevel.support.DefaultMultiLevelSource#createImage(int)}
+     * <p/>
+     * size of mask image is calculated in
+     * {@code org.esa.beam.jai.ImageManager#createSingleBandedImageLayout(org.esa.beam.framework.datamodel.RasterDataNode)}
+     * <p/>
+     * they shall not produce different results.
+     */
+    public void testImageAndMaskSize() {
+        Product p = new Product("n", "t", 8501, 7651);
+        Band b = p.addBand("b", ProductData.TYPE_FLOAT32);
+        b.setNoDataValue(13);
+        b.setNoDataValueUsed(true);
+        b.setSourceImage(ConstantDescriptor.create((float) p.getSceneRasterWidth(),
+                                                   (float) p.getSceneRasterHeight(),
+                                                   new Float[]{42f}, null));
+        ImageManager imageManager = ImageManager.getInstance();
+        int levelCount = b.getSourceImage().getModel().getLevelCount();
+
+        PlanarImage sourceImage = imageManager.getSourceImage(b, levelCount - 1);
+        PlanarImage maskImage = imageManager.getValidMaskImage(b, levelCount - 1);
+
+        assertEquals(sourceImage.getWidth(), maskImage.getWidth());
+        assertEquals(sourceImage.getHeight(), maskImage.getHeight());
     }
 
     private Band createBand(double factor, double offset, boolean log10Scaled) {

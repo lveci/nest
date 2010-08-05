@@ -96,19 +96,19 @@
     </pluginRepositories>
 
     <distributionManagement>
-       <repository>
-           <id>bc-mvn-repo-public</id>
-           <name>Public Maven Repository at Brockmann Consult</name>
-           <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
-           <uniqueVersion>false</uniqueVersion>
-       </repository>
-       <snapshotRepository>
-           <id>bc-mvn-repo-public</id>
-           <name>Public Maven Snapshot Repository at Brockmann Consult</name>
-           <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
-           <uniqueVersion>false</uniqueVersion>
-       </snapshotRepository>
-   </distributionManagement>
+        <repository>
+            <id>bc-mvn-repo-public</id>
+            <name>Public Maven Repository at Brockmann Consult</name>
+            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>bc-mvn-repo-public</id>
+            <name>Public Maven Snapshot Repository at Brockmann Consult</name>
+            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
 
 
     <modules>
@@ -164,7 +164,8 @@
         <module>lib-hdf</module>
         <module>lib-netcdf</module>
         <module>blue-marble-worldmap</module>
-		<module>beam-envi-reader</module>
+        <module>globcover-worldmap</module>
+	<module>beam-envi-reader</module>
 
     </modules>
 
@@ -271,16 +272,22 @@
             </dependency>
 
             <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-netcdf</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
                 <groupId>ncsa.hdf</groupId>
                 <artifactId>lib-hdf</artifactId>
                 <version>2.3</version>
             </dependency>
 
-            <!--dependency>
+            <dependency>
                 <groupId>ucar.netcdf</groupId>
                 <artifactId>lib-netcdf</artifactId>
                 <version>4.0</version>
-            </dependency-->
+            </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
 
@@ -479,7 +486,7 @@
                         <source>1.6</source>
                         <target>1.6</target>
                         <debug>true</debug>
-						<optimize>true</optimize>
+			<optimize>true</optimize>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

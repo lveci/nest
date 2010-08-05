@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.gpf.internal;
 
 import com.bc.ceres.core.Assert;
@@ -30,7 +46,8 @@ public class TileImpl implements Tile {
     private final int width;
     private final int height;
     private final boolean target;
-    private final boolean raw;
+    private final boolean scaled;
+    private final boolean signedByte;
     private final int scanlineOffset;
     private final int scanlineStride;
     private final byte[] dataBufferByte;
@@ -75,8 +92,9 @@ public class TileImpl implements Tile {
         this.width = rectangle.width;
         this.height = rectangle.height;
         this.target = target;
-        // todo - optimize getSample()/setSample() methods by using a Closure that either honours calibration or not. (nf 04.2010)
-        this.raw = rasterDataNode.isScalingApplied();
+        // todo - optimize getSample()/setSample() methods by using a Closure that either honours scaling / signedByte. (nf 04.2010)
+        this.scaled = rasterDataNode.isScalingApplied();
+        this.signedByte = rasterDataNode.getDataType() == ProductData.TYPE_INT8;
 
         int smX0 = rectangle.x - raster.getSampleModelTranslateX();
         int smY0 = rectangle.y - raster.getSampleModelTranslateY();
@@ -244,49 +262,113 @@ public class TileImpl implements Tile {
     }
 
     @Override
-    public float[] getSamplesFloat() {
-        final ProductData data = getRawSamples();
-        if (raw) {
-            final int size = data.getNumElems();
-            float[] samples = new float[size];
-            for (int i = 0; i < size; i++) {
-                samples[i] = toGeoPhysical(data.getElemFloatAt(i));
+    public int[] getSamplesInt() {
+        // todo - urgently need benchmarks. performance may be poor (nf 04.2010)
+        // todo - directly read this data from RasterDataNode.geophysicalImage once it masks out NaN correctly  (nf 04.2010)
+        if (getRasterDataNode().isValidMaskUsed()) {
+            final int size = width * height;
+            final int[] samples = new int[size];
+            int i = 0;
+            for (int y = minY; y <= maxY; y++) {
+                for (int x = minX; x <= maxX; x++) {
+                    samples[i++] = isSampleValid(x, y) ? getSampleInt(x, y) : 0;
+                }
             }
             return samples;
         } else {
-            if (data.getType() == ProductData.TYPE_FLOAT32) {
-                return (float[]) data.getElems();
+            final ProductData data = getRawSamples();
+            if (!scaled && data.getType() == ProductData.TYPE_INT32) {
+                return (int[]) data.getElems();
+            }
+            final int size = data.getNumElems();
+            final int[] samples = new int[size];
+            if (scaled) {
+                for (int i = 0; i < size; i++) {
+                    samples[i] = (int) toGeoPhysical(data.getElemIntAt(i));
+                }
             } else {
-                final int size = data.getNumElems();
-                float[] samples = new float[size];
+                for (int i = 0; i < size; i++) {
+                    samples[i] = data.getElemIntAt(i);
+                }
+            }
+            return samples;
+        }
+    }
+
+    @Override
+    public float[] getSamplesFloat() {
+        // todo - urgently need benchmarks. performance may be poor (nf 04.2010)
+        // todo - directly read this data from RasterDataNode.geophysicalImage once it masks out NaN correctly  (nf 04.2010)
+        if (getRasterDataNode().isValidMaskUsed()) {
+            final int size = width * height;
+            final float[] samples = new float[size];
+            int i = 0;
+            for (int y = minY; y <= maxY; y++) {
+                for (int x = minX; x <= maxX; x++) {
+                    samples[i++] = isSampleValid(x, y) ? getSampleFloat(x, y) : Float.NaN;
+                }
+            }
+            return samples;
+        } else {
+            final ProductData data = getRawSamples();
+            if (!scaled && data.getType() == ProductData.TYPE_FLOAT32) {
+                return (float[]) data.getElems();
+            }
+            final int size = data.getNumElems();
+            final float[] samples = new float[size];
+            if (scaled) {
+                for (int i = 0; i < size; i++) {
+                    samples[i] = toGeoPhysical(data.getElemFloatAt(i));
+                }
+            } else {
                 for (int i = 0; i < size; i++) {
                     samples[i] = data.getElemFloatAt(i);
                 }
-                return samples;
             }
+            return samples;
         }
     }
 
     @Override
     public double[] getSamplesDouble() {
-        final ProductData data = getRawSamples();
-        if (raw) {
-            final int size = data.getNumElems();
-            double[] samples = new double[size];
-            for (int i = 0; i < size; i++) {
-                samples[i] = toGeoPhysical(data.getElemDoubleAt(i));
+        // todo - urgently need benchmarks. performance may be poor (nf 04.2010)
+        // todo - directly read this data from RasterDataNode.geophysicalImage once it masks out NaN correctly  (nf 04.2010)
+        if (getRasterDataNode().isValidMaskUsed()) {
+            final int size = width * height;
+            final double[] samples = new double[size];
+            int i = 0;
+            for (int y = minY; y <= maxY; y++) {
+                for (int x = minX; x <= maxX; x++) {
+                    samples[i++] = isSampleValid(x, y) ? getSampleDouble(x, y) : Double.NaN;
+                }
             }
             return samples;
         } else {
-            if (data.getType() == ProductData.TYPE_FLOAT64) {
+            final ProductData data = getRawSamples();
+            if (!scaled && data.getType() == ProductData.TYPE_FLOAT32) {
                 return (double[]) data.getElems();
+            }
+            final int size = data.getNumElems();
+            final double[] samples = new double[size];
+            if (scaled) {
+                for (int i = 0; i < size; i++) {
+                    samples[i] = toGeoPhysical(data.getElemDoubleAt(i));
+                }
             } else {
-                final int size = data.getNumElems();
-                double[] samples = new double[size];
                 for (int i = 0; i < size; i++) {
                     samples[i] = data.getElemDoubleAt(i);
                 }
-                return samples;
+            }
+            return samples;
+        }
+    }
+
+    @Override
+    public void setSamples(int[] samples) {
+        int i = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                setSample(x, y, samples[i++]);
             }
         }
     }
@@ -324,8 +406,12 @@ public class TileImpl implements Tile {
     @Override
     public int getSampleInt(int x, int y) {
         int sample = raster.getSample(x, y, 0);
-        // todo - handle unsigned data types here!!!
-        if (raw) {
+        // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
+        if (signedByte) {
+            //noinspection SillyAssignment
+            sample = (byte) sample;
+        }
+        if (scaled) {
             sample = (int) Math.floor(toGeoPhysical(sample) + 0.5);
         }
         return sample;
@@ -333,8 +419,7 @@ public class TileImpl implements Tile {
 
     @Override
     public void setSample(int x, int y, int sample) {
-        // todo - handle unsigned data types here!!!
-        if (raw) {
+        if (scaled) {
             sample = (int) Math.floor(toRaw((double) sample) + 0.5);
         }
         writableRaster.setSample(x, y, 0, sample);
@@ -343,7 +428,12 @@ public class TileImpl implements Tile {
     @Override
     public float getSampleFloat(int x, int y) {
         float sample = raster.getSampleFloat(x, y, 0);
-        if (raw) {
+        // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
+        if (signedByte) {
+            //noinspection SillyAssignment
+            sample = (byte) sample;
+        }
+        if (scaled) {
             sample = toGeoPhysical(sample);
         }
         return sample;
@@ -351,7 +441,7 @@ public class TileImpl implements Tile {
 
     @Override
     public void setSample(int x, int y, float sample) {
-        if (raw) {
+        if (scaled) {
             sample = toRaw(sample);
         }
         writableRaster.setSample(x, y, 0, sample);
@@ -361,7 +451,12 @@ public class TileImpl implements Tile {
     @Override
     public double getSampleDouble(int x, int y) {
         double sample = raster.getSampleDouble(x, y, 0);
-        if (raw) {
+        // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
+        if (signedByte) {
+            //noinspection SillyAssignment
+            sample = (byte) sample;
+        }
+        if (scaled) {
             sample = toGeoPhysical(sample);
         }
         return sample;
@@ -369,7 +464,7 @@ public class TileImpl implements Tile {
 
     @Override
     public void setSample(int x, int y, double sample) {
-        if (raw) {
+        if (scaled) {
             sample = toRaw(sample);
         }
         writableRaster.setSample(x, y, 0, sample);
@@ -380,7 +475,7 @@ public class TileImpl implements Tile {
         long sample = raster.getSample(x, y, 0);
         return BitSetter.isFlagSet(sample, bitIndex);
     }
-    
+
     @Override
     public void setSample(int x, int y, int bitIndex, boolean sample) {
         long longSample = raster.getSample(x, y, 0);

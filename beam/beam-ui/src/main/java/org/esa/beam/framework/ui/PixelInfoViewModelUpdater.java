@@ -1,18 +1,17 @@
 /*
- * $Id: PixelInfoViewModelUpdater.java,v 1.2 2009-07-10 18:36:55 lveci Exp $
- *
- * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.ui;
 
@@ -35,6 +34,7 @@ import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 
 import javax.media.jai.PlanarImage;
@@ -47,7 +47,7 @@ import java.util.Vector;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2009-07-10 18:36:55 $
+ * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:54 $
  * @since BEAM 4.5.2
  */
 class PixelInfoViewModelUpdater {
@@ -392,9 +392,9 @@ class PixelInfoViewModelUpdater {
         }
         if (isPixelValid(band, _pixelX, _pixelY, _level)) {
             if (band.isFloatingPointType()) {
-                return String.valueOf(getSampleFloat(band, _pixelX, _pixelY, _level));
+                return String.valueOf(ProductUtils.getGeophysicalSampleDouble(band, _pixelX, _pixelY, _level));
             } else {
-                return String.valueOf(getSampleInt(band, _pixelX, _pixelY, _level));
+                return String.valueOf(ProductUtils.getGeophysicalSampleLong(band, _pixelX, _pixelY, _level));
             }
         } else {
             return RasterDataNode.NO_DATA_TEXT;
@@ -409,26 +409,6 @@ class PixelInfoViewModelUpdater {
         } else {
             return true;
         }
-    }
-
-    private float getSampleFloat(Band band, int pixelX, int pixelY, int level) {
-        PlanarImage image = ImageManager.getInstance().getSourceImage(band, level);
-        Raster data = getRasterTile(image, pixelX, pixelY);
-        float sampleFloat = data.getSampleFloat(pixelX, pixelY, 0);
-        if (band.isScalingApplied()) {
-            sampleFloat = (float) band.scale(sampleFloat);
-        }
-        return sampleFloat;
-    }
-
-    private int getSampleInt(Band band, int pixelX, int pixelY, int level) {
-        PlanarImage image = ImageManager.getInstance().getSourceImage(band, level);
-        Raster data = getRasterTile(image, pixelX, pixelY);
-        int sampleInt = data.getSample(pixelX, pixelY, 0);
-        if (band.isScalingApplied()) {
-            sampleInt = (int) band.scale(sampleInt);
-        }
-        return sampleInt;
     }
 
     private Raster getRasterTile(PlanarImage image, int pixelX, int pixelY) {
@@ -455,7 +435,7 @@ class PixelInfoViewModelUpdater {
         }
         int rowIndex = 0;
         for (Band band : currentFlagBands) {
-            int pixelValue = available ? getSampleInt(band, _pixelX, _pixelY, _level) : 0;
+            long pixelValue = available ? ProductUtils.getGeophysicalSampleLong(band, _pixelX, _pixelY, _level) : 0;
 
             for (int j = 0; j < band.getFlagCoding().getNumAttributes(); j++) {
                 if (available) {

@@ -1,18 +1,17 @@
 /*
- * $Id: XmlWriter.java,v 1.2 2009-07-09 17:59:52 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.util;
 
@@ -164,7 +163,7 @@ public class XmlWriter {
     public void printLine(String[] tags, String text) {
         if (text != null && text.trim().length() > 0) {
             _pWriter.print(tags[0]);
-            _pWriter.print(_xmlOutputter.outputString(new Text(text.trim())));
+            _pWriter.print(encode(text));
             _pWriter.println(tags[1].trim());
         } else {
             _pWriter.println(tags[0].substring(0, tags[0].length() - 1).concat(" />"));

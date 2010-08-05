@@ -1,21 +1,20 @@
-package org.esa.beam.dataio.ceos.prism.records;
-
 /*
- * $Id: PrismAncillary1RecordTest.java,v 1.2 2010-03-31 13:59:55 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
+
+package org.esa.beam.dataio.ceos.prism.records;
 
 import org.esa.beam.dataio.ceos.CeosFileReader;
 import org.esa.beam.dataio.ceos.IllegalCeosFormatException;
@@ -25,12 +24,6 @@ import org.esa.beam.dataio.ceos.records.Ancillary1RecordTest;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 
-/**
- * Created by marco.
- *
- * @author marco
- * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:55 $
- */
 public class PrismAncillary1RecordTest extends Ancillary1RecordTest {
 
 

@@ -1,27 +1,29 @@
 /*
- * $Id: FileArrayEditor.java,v 1.4 2009-12-02 16:52:12 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.ui.io;
 
+import org.esa.beam.framework.dataio.ProductIOPlugIn;
+import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileChooser;
+import org.esa.beam.util.io.BeamFileFilter;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -30,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileFilter;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -38,10 +41,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * An UI-Component which represents a file list with the ability to add and remove files.
+ * An UI-Component which represents a product file list with the ability to add and remove files.
  */
 public class FileArrayEditor {
 
@@ -74,6 +78,7 @@ public class FileArrayEditor {
     protected final EditorParent getParent() {
         return _parent;
     }
+
     /**
      * Retrieves the editor UI.
      *
@@ -212,6 +217,7 @@ public class FileArrayEditor {
     /*
      * Callback invoked by the add button
      */
+
     private void onAddButton() {
         _fileDialog = getFileDialogSafe();
         final File userInputDir = _parent.getUserInputDir();
@@ -234,6 +240,7 @@ public class FileArrayEditor {
     /*
      * Callback invoked by the remove button
      */
+
     private void onRemoveButton() {
         final Object[] toRemove = _listComponent.getSelectedValues();
         for (Object o : toRemove) {
@@ -246,6 +253,7 @@ public class FileArrayEditor {
     /*
      * Retrieves the file chooser object. If none is present, an object is constructed
      */
+
     private JFileChooser getFileDialogSafe() {
         if (_fileDialog == null) {
             _fileDialog = createFileChooserDialog();
@@ -256,15 +264,24 @@ public class FileArrayEditor {
 
     protected JFileChooser createFileChooserDialog() {
         final JFileChooser chooser = new BeamFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setCurrentDirectory(SystemUtils.getUserHomeDir());
+        chooser.setAcceptAllFileFilterUsed(true);
         chooser.setMultiSelectionEnabled(true);
+
+        final Iterator<ProductReaderPlugIn> iterator = ProductIOPlugInManager.getInstance().getAllReaderPlugIns();
+        while (iterator.hasNext()) {
+            final ProductReaderPlugIn readerPlugIn = iterator.next();
+            final BeamFileFilter productFileFilter = readerPlugIn.getProductFileFilter();
+            chooser.addChoosableFileFilter(productFileFilter);
+        }
+        chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+
         return chooser;
     }
 
     /*
      * Calls the listener about changes - if necessary
      */
+
     private void notifyListener() {
         if ((_listener != null)) {
             _listener.updatedList(_fileList.toArray(new File[_fileList.size()]));

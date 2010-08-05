@@ -283,7 +283,7 @@ public class PCAMinOp extends Operator {
             Arrays.fill(tileMinPCA, Double.MAX_VALUE);
 
             for (int i = 0; i < numPCA; i++) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
                 for (int k = 0; k < n; k++) {
                     double vPCA = 0.0;
                     for (int j = 0; j < numOfSourceBands; j++) {

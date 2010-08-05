@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.gpf.operators.mosaic;
 
 import com.bc.ceres.binding.Property;
@@ -7,6 +23,7 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.annotations.Parameter;
@@ -14,7 +31,7 @@ import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.gpf.operators.standard.MosaicOp;
 import org.esa.beam.util.math.MathUtils;
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.geometry.Envelope;
@@ -22,8 +39,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -49,7 +64,7 @@ class MosaicFormModel {
     public static final String PROPERTY_UPDATE_PRODUCT = "updateProduct";
     public static final String PROPERTY_UPDATE_MODE = "updateMode";
     public static final String PROPERTY_SHOW_SOURCE_PRODUCTS = "showSourceProducts";
-    
+
     public static final String PROPERTY_WEST_BOUND = "westBound";
     public static final String PROPERTY_NORTH_BOUND = "northBound";
     public static final String PROPERTY_EAST_BOUND = "eastBound";
@@ -199,22 +214,23 @@ class MosaicFormModel {
     public Product getBoundaryProduct() throws FactoryException, TransformException {
         final CoordinateReferenceSystem mapCRS = getTargetCRS();
         if (mapCRS != null) {
+            final ReferencedEnvelope envelope = getTargetEnvelope();
+            final Envelope mapEnvelope = envelope.transform(mapCRS, true);
+
             final double pixelSizeX = (Double) getPropertyValue("pixelSizeX");
             final double pixelSizeY = (Double) getPropertyValue("pixelSizeY");
-            final Envelope envelope = getTargetEnvelope();
+            final int w = MathUtils.floorInt(mapEnvelope.getSpan(0) / pixelSizeX);
+            final int h = MathUtils.floorInt(mapEnvelope.getSpan(1) / pixelSizeY);
 
-            final Envelope targetEnvelope = CRS.transform(envelope, mapCRS);
-            final int sceneRasterWidth = MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
-            final int sceneRasterHeight = MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
-            final Product outputProduct = new Product("mosaic", "MosaicBounds",
-                                                      sceneRasterWidth, sceneRasterHeight);
-            final Rectangle imageRect = new Rectangle(0, 0, sceneRasterWidth, sceneRasterHeight);
-            final AffineTransform i2mTransform = new AffineTransform();
-            i2mTransform.translate(targetEnvelope.getMinimum(0), targetEnvelope.getMinimum(1));
-            i2mTransform.scale(pixelSizeX, pixelSizeY);
-            i2mTransform.translate(-0.5, -0.5);
-            outputProduct.setGeoCoding(new CrsGeoCoding(mapCRS, imageRect, i2mTransform));
-            return outputProduct;
+            final Product product = new Product("mosaic", "MosaicBounds", w, h);
+            final GeoCoding geoCoding = new CrsGeoCoding(mapCRS,
+                                                         w, h,
+                                                         mapEnvelope.getMinimum(0),
+                                                         mapEnvelope.getMaximum(1),
+                                                         pixelSizeX, pixelSizeY);
+            product.setGeoCoding(geoCoding);
+
+            return product;
         }
         return null;
     }
@@ -235,7 +251,7 @@ class MosaicFormModel {
         }
     }
 
-    GeneralEnvelope getTargetEnvelope() {
+    ReferencedEnvelope getTargetEnvelope() {
         final double west = (Double) getPropertyValue(PROPERTY_WEST_BOUND);
         final double north = (Double) getPropertyValue(PROPERTY_NORTH_BOUND);
         final double east = (Double) getPropertyValue(PROPERTY_EAST_BOUND);
@@ -244,10 +260,7 @@ class MosaicFormModel {
         final Rectangle2D bounds = new Rectangle2D.Double();
         bounds.setFrameFromDiagonal(west, north, east, south);
 
-        final GeneralEnvelope envelope = new GeneralEnvelope(bounds);
-        envelope.setCoordinateReferenceSystem(DefaultGeographicCRS.WGS84);
-
-        return envelope;
+        return new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
     }
 
     public WorldMapPaneDataModel getWorldMapModel() {

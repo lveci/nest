@@ -1,15 +1,24 @@
 /*
- * $Id: ExtMath.java,v 1.2 2009-05-22 15:31:30 lveci Exp $
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
- * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
- * http://www.brockmann-consult.de
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package com.bc.jexp.impl;
 
 /**
  * An extension the the {@link java.lang.Math class}.
  */
-public final class ExtMath {
+public class ExtMath {
 
     private static final double INV_LN_10 = 1.0 / Math.log(10.0);
 
@@ -39,8 +48,10 @@ public final class ExtMath {
      * @return true, if x1 and x2 are equal
      */
     public static boolean feq(final double x1, final double x2, final double eps) {
-        // allows to compare Double.NEGATIVE_INFINITY and Double.POSITIVE_INFINITY
-        return x1 == x2 || Math.abs(x1 - x2) <= eps;
+        if (x1 == x2) { // allows to compare Double.NEGATIVE_INFINITY and Double.POSITIVE_INFINITY
+            return true;
+        }
+        return Math.abs(x1 - x2) <= eps;
     }
 
     /**

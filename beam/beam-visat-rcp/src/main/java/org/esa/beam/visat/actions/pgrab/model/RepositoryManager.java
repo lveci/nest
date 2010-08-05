@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.actions.pgrab.model;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -16,13 +32,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by IntelliJ IDEA.
- * User: marco
- * Date: 05.09.2005
- * Time: 10:48:14
- */
 
 /**
  * The class RepositoryManager handels a list of repositories and a list of data provider.

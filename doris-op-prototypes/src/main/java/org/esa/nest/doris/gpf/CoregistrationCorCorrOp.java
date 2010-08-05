@@ -406,7 +406,7 @@ public class CoregistrationCorCorrOp extends Operator {
         System.out.println("------------------------------------------------------------");
 
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
-            checkForCancelation(pm);
+            checkForCancellation(pm);
             final Placemark mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 

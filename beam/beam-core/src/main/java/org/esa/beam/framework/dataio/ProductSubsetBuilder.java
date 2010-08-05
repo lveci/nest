@@ -1,18 +1,17 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.23 2010-07-26 20:09:13 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.dataio;
 
@@ -26,11 +25,13 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
+ * @version $Revision: 1.24 $ $Date: 2010-08-05 17:00:50 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -290,9 +291,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                   destBuffer, pm);
     }
 
-    /**
-     * Reads a subsampled bandraster.
-     */
     private void readBandRasterDataSubSampling(Band sourceBand,
                                                int sourceOffsetX, int sourceOffsetY,
                                                int sourceWidth, int sourceHeight,
@@ -485,12 +483,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             if (x >= 0 && x < getSceneRasterWidth() && y >= 0 && y < getSceneRasterHeight() || copyAll) {
                 targetPlacemarkGroup.add(new Placemark(placemark.getName(),
-                                                 placemark.getLabel(),
-                                                 placemark.getDescription(),
-                                                 new PixelPos(x, y),
-                                                 placemark.getGeoPos(),
-                                                 descriptor,
-                                                 targetPlacemarkGroup.getProduct().getGeoCoding()));
+                                                       placemark.getLabel(),
+                                                       placemark.getDescription(),
+                                                       new PixelPos(x, y),
+                                                       placemark.getGeoPos(),
+                                                       descriptor,
+                                                       targetPlacemarkGroup.getProduct().getGeoCoding()));
             }
         }
     }
@@ -514,7 +512,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             product.setEndTime(new ProductData.UTC(newStop));
         } else {
             product.setStartTime(startTime);
-            product.setEndTime(stopTime);    
+            product.setEndTime(stopTime);
         }
     }
 
@@ -545,6 +543,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
     }
 
     // @todo 1 nf/nf - duplicated code in ProductProjectionBuilder, ProductFlipper and ProductSubsetBulider
+
     protected void addBandsToProduct(Product product) {
         Debug.assertNotNull(getSourceProduct());
         Debug.assertNotNull(product);
@@ -609,12 +608,14 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                     destBand.setSampleCoding(null);
                 }
                 if (isFullScene(getSubsetDef()) && sourceBand.isStxSet()) {
-                    createImageInfo(sourceBand, destBand);
+                    copyStx(sourceBand, destBand);
                 }
-
                 product.addBand(destBand);
                 bandMap.put(destBand, sourceBand);
             }
+        }
+        for (final Map.Entry<Band, RasterDataNode> entry : bandMap.entrySet()) {
+            copyImageInfo(entry.getValue(), entry.getKey());
         }
     }
 
@@ -640,30 +641,30 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if (isNodeAccepted(gridName) || (gridName.equals(latGridName) || gridName.equals(lonGridName))) {
                 final TiePointGrid tiePointGrid = TiePointGrid.createSubset(sourceTiePointGrid, getSubsetDef());
                 if (isFullScene(getSubsetDef()) && sourceTiePointGrid.isStxSet()) {
-                    createImageInfo(sourceTiePointGrid, tiePointGrid);
+                    copyStx(sourceTiePointGrid, tiePointGrid);
                 }
                 product.addTiePointGrid(tiePointGrid);
+                copyImageInfo(sourceTiePointGrid, tiePointGrid);
             }
         }
     }
 
-    private void createImageInfo(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
+    private void copyStx(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
         final Stx sourceStx = sourceRaster.getStx();
         final Stx targetStx = new Stx(sourceStx.getMin(), sourceStx.getMax(),
                                       sourceStx.getMean(), sourceStx.getStandardDeviation(),
-                                      sourceStx.getCoefficientOfVariation(),
-                                      sourceStx.getEquivalentNumberOfLooks(),
                                       ProductData.isIntType(sourceRaster.getDataType()),
                                       Arrays.copyOf(sourceStx.getHistogramBins(), sourceStx.getHistogramBins().length),
                                       sourceStx.getResolutionLevel());
         targetRaster.setStx(targetStx);
+    }
+
+    private void copyImageInfo(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
         final ImageInfo imageInfo;
         if (sourceRaster.getImageInfo() != null) {
             imageInfo = sourceRaster.getImageInfo().createDeepCopy();
-        } else {
-            imageInfo = targetRaster.createDefaultImageInfo(null, ProgressMonitor.NULL);
+            targetRaster.setImageInfo(imageInfo);
         }
-        targetRaster.setImageInfo(imageInfo);
     }
 
     private boolean isFullScene(ProductSubsetDef subsetDef) {
@@ -671,12 +672,10 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             return true;
         }
         final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
-        if (subsetDef.getRegion() == null || subsetDef.getRegion().equals(sourceRegion) &&
-                                             subsetDef.getSubSamplingX() == 1 &&
-                                             subsetDef.getSubSamplingY() == 1) {
-            return true;
-        }
-        return false;
+        return subsetDef.getRegion() == null
+               || subsetDef.getRegion().equals(sourceRegion)
+                  && subsetDef.getSubSamplingX() == 1
+                  && subsetDef.getSubSamplingY() == 1;
     }
 
     protected void addGeoCodingToProduct(final Product product) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.toolviews.spectrum;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -7,13 +23,12 @@ import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.ui.diagram.AbstractDiagramGraph;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.IndexValidator;
 import org.esa.beam.util.math.Range;
 
-import javax.media.jai.PlanarImage;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.image.Raster;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -22,12 +37,12 @@ class SpectrumGraph extends AbstractDiagramGraph {
 
     private Placemark placemark;
     private Band[] bands;
-    private float[] energies;
-    private float[] wavelengths;
+    private double[] energies;
+    private double[] wavelengths;
     private final Range energyRange;
     private final Range wavelengthRange;
 
-    public SpectrumGraph(Placemark placemark, Band[] bands) {
+    SpectrumGraph(Placemark placemark, Band[] bands) {
         Debug.assertNotNull(bands);
         this.placemark = placemark;
         this.bands = bands;
@@ -100,17 +115,17 @@ class SpectrumGraph extends AbstractDiagramGraph {
             }
         });
         if (wavelengths == null || wavelengths.length != this.bands.length) {
-            wavelengths = new float[this.bands.length];
+            wavelengths = new double[this.bands.length];
         }
         if (energies == null || energies.length != this.bands.length) {
-            energies = new float[this.bands.length];
+            energies = new double[this.bands.length];
         }
         for (int i = 0; i < wavelengths.length; i++) {
             wavelengths[i] = this.bands[i].getSpectralWavelength();
             energies[i] = 0.0f;
         }
-        Range.computeRangeFloat(wavelengths, IndexValidator.TRUE, wavelengthRange, ProgressMonitor.NULL);
-        Range.computeRangeFloat(energies, IndexValidator.TRUE, energyRange, ProgressMonitor.NULL);
+        Range.computeRangeDouble(wavelengths, IndexValidator.TRUE, wavelengthRange, ProgressMonitor.NULL);
+        Range.computeRangeDouble(energies, IndexValidator.TRUE, energyRange, ProgressMonitor.NULL);
     }
 
     public void readValues(int pixelX, int pixelY, int level) {
@@ -130,20 +145,12 @@ class SpectrumGraph extends AbstractDiagramGraph {
             }
             energies[i] = getSample(band, pixelX, pixelY, level);
         }
-        Range.computeRangeFloat(energies, IndexValidator.TRUE, energyRange, ProgressMonitor.NULL);
+        Range.computeRangeDouble(energies, IndexValidator.TRUE, energyRange, ProgressMonitor.NULL);
         // no invalidate() call here, SpectrumDiagram does this
     }
 
-    private float getSample(Band band, int pixelX, int pixelY, int level) {
-        PlanarImage image = ImageManager.getInstance().getSourceImage(band, level);
-        final int tileX = image.XToTileX(pixelX);
-        final int tileY = image.YToTileY(pixelY);
-        Raster data = image.getTile(tileX, tileY);
-        float sampleFloat = data.getSampleFloat(pixelX, pixelY, 0);
-        if (band.isScalingApplied()) {
-            sampleFloat = (float) band.scale(sampleFloat);
-        }
-        return sampleFloat;
+    private double getSample(Band band, int pixelX, int pixelY, int level) {
+        return ProductUtils.getGeophysicalSampleDouble(band, pixelX, pixelY, level);
     }
 
     @Override

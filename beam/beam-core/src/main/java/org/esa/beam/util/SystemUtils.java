@@ -1,18 +1,17 @@
 /*
- * $Id: SystemUtils.java,v 1.6 2010-05-20 17:48:42 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.util;
 
@@ -21,6 +20,7 @@ import org.esa.beam.util.logging.BeamLogManager;
 import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
 
 import javax.media.jai.JAI;
+import javax.media.jai.OperationRegistry;
 import javax.swing.UIManager;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -31,6 +31,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,6 +42,7 @@ import java.text.MessageFormat;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 /**
  * A collection of (BEAM-) system level functions.
@@ -49,7 +51,7 @@ import java.util.StringTokenizer;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.6 $ $Date: 2010-05-20 17:48:42 $
+ * @version $Revision: 1.7 $ $Date: 2010-08-05 17:00:50 $
  */
 public class SystemUtils {
 
@@ -89,9 +91,11 @@ public class SystemUtils {
 
     private static final String _H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
     private static final String _H4_CLASS_NAME = "ncsa.hdf.hdflib.HDFLibrary";
-    private static final String FILE_PROTOCOLL_PREFIX = "file:";
+    private static final String FILE_PROTOCOL_PREFIX = "file:";
     private static final String JAR_PROTOCOL_PREFIX = "jar:";
     private static final String EPSG_DATABASE_DIR_NAME = "epsg-database";
+
+    private static final String JAI_REGISTRY_PATH = "/META-INF/javax.media.jai.registryFile.jai";
 
     /**
      * Gets the current user's name, or the string <code>"unknown"</code> if the the user's name cannot be determined.
@@ -262,8 +266,8 @@ public class SystemUtils {
 
     private static String stripUrlProtocolPrefixes(String path) {
         while (true) {
-            if (path.startsWith(FILE_PROTOCOLL_PREFIX)) {
-                path = path.substring(FILE_PROTOCOLL_PREFIX.length());
+            if (path.startsWith(FILE_PROTOCOL_PREFIX)) {
+                path = path.substring(FILE_PROTOCOL_PREFIX.length());
             } else if (path.startsWith(JAR_PROTOCOL_PREFIX)) {
                 path = path.substring(JAR_PROTOCOL_PREFIX.length());
             } else {
@@ -523,12 +527,37 @@ public class SystemUtils {
     }
     
     /**
-     * Initialize third party libraries of BEAM
+     * Initialize third party libraries of BEAM.
+     * @param cl The most useful class loader.
+     * @since BEAM 4.8
       */
-    public static void initThirdPartyLibraries() {
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+    public static void init3rdPartyLibs(ClassLoader cl) {
+        initJAI(cl);
+        initGeoTools();
+    }
+
+    private static void initGeoTools() {
+        // Must store EPSG database in BEAM home, otherwise it will be deleted from default temp location (Unix!, Windows?)
         File epsgDir = new File(SystemUtils.getApplicationDataDir(true), EPSG_DATABASE_DIR_NAME);
         System.setProperty(HsqlEpsgDatabase.DIRECTORY_KEY, epsgDir.getAbsolutePath());
+    }
+
+    private static void initJAI(ClassLoader cl) {
+        // Must use a new operation registry in order to register JAI operators defined in Ceres and BEAM
+        OperationRegistry operationRegistry = OperationRegistry.getThreadSafeOperationRegistry();
+        InputStream is = SystemUtils.class.getResourceAsStream(JAI_REGISTRY_PATH);
+        if (is != null) {
+            try {
+                operationRegistry.updateFromStream(is);
+                operationRegistry.registerServices(cl);
+                JAI.getDefaultInstance().setOperationRegistry(operationRegistry);
+            } catch (IOException e) {
+                BeamLogManager.getSystemLogger().log(Level.SEVERE, MessageFormat.format("Error loading {0}: {1}", JAI_REGISTRY_PATH, e.getMessage()), e);
+            }
+        } else {
+            BeamLogManager.getSystemLogger().warning(MessageFormat.format("{0} not found", JAI_REGISTRY_PATH));
+        }
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
     }
 
     /**

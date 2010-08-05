@@ -1,18 +1,17 @@
 /*
- * $Id: ParserImpl.java,v 1.2 2010-03-02 16:00:14 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package com.bc.jexp.impl;
 
@@ -28,7 +27,7 @@ import com.bc.jexp.Term;
  * A default implementation for the {@link <code>com.bc.jexp.Parser</code>} interface.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-03-02 16:00:14 $
+ * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:49 $
  */
 public final class ParserImpl implements Parser {
 
@@ -137,7 +136,7 @@ public final class ParserImpl implements Parser {
         if (namespace != null && namespace != defaultNamespace) {
             _defaultNamespace = new NamespaceImpl(namespace);
         }
-        _tokenizer = new Tokenizer(code.replace("IF",""));
+        _tokenizer = new Tokenizer(code);
         Term term = parseImpl();
         _tokenizer = null;
         _defaultNamespace = defaultNamespace;
@@ -202,10 +201,10 @@ public final class ParserImpl implements Parser {
     private Term parseConditional(final boolean required) throws ParseException {
         Term t1 = parseLogicalOr(required);
         int tt = _tokenizer.next();
-        if (tt == '?' || _tokenizer.getToken().equalsIgnoreCase("THEN")) {
+        if (tt == '?') {
             Term t2 = parseTerm(true);
             tt = _tokenizer.next();
-            if (tt == ':' || _tokenizer.getToken().equalsIgnoreCase("ELSE")) {
+            if (tt == ':') {
                 if (isTypeChecking() && !t1.isB()) {
                     reportError("Boolean operand expected before '?' in conditional '?:' term.");
                 }

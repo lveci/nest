@@ -1,18 +1,17 @@
 /*
- * $Id: ProductTreeModel.java,v 1.1 2010-03-31 13:59:59 lveci Exp $
- *
- * Copyright (C) 2010 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.ui.product.tree;
 
@@ -36,14 +35,14 @@ import java.util.List;
 
 public class ProductTreeModel implements TreeModel {
 
-    private final ProductManagerNode rootNode;
+    private final ProductManagerTN rootTN;
     private ProductNodeListener productNodeListener;
     private ProductManager productManager;
     private final EventListenerList treeModelListeners;
 
     public ProductTreeModel(final ProductManager manager) {
         this.productManager = manager;
-        rootNode = new ProductManagerNode(productManager);
+        rootTN = new ProductManagerTN(productManager);
         productNodeListener = new ProductListener();
         productManager.addListener(new ProductManagerListener());
         treeModelListeners = new EventListenerList();
@@ -54,19 +53,19 @@ public class ProductTreeModel implements TreeModel {
     }
 
     @Override
-    public ProductTreeNode getChild(Object parent, int index) {
-        return ((ProductTreeNode) parent).getChildAt(index);
+    public AbstractTN getChild(Object parent, int index) {
+        return ((AbstractTN) parent).getChildAt(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return ((ProductTreeNode) parent).getChildCount();
+        return ((AbstractTN) parent).getChildCount();
     }
 
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return ((ProductTreeNode) parent).getIndex((ProductTreeNode) child);
+        return ((AbstractTN) parent).getIndex((AbstractTN) child);
     }
 
     @Override
@@ -80,13 +79,13 @@ public class ProductTreeModel implements TreeModel {
     }
 
     @Override
-    public ProductTreeNode getRoot() {
-        return rootNode;
+    public AbstractTN getRoot() {
+        return rootTN;
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        return ((ProductTreeNode) node).getChildCount() == 0;
+        return ((AbstractTN) node).getChildCount() == 0;
     }
 
     @Override
@@ -122,10 +121,10 @@ public class ProductTreeModel implements TreeModel {
     public TreePath getTreePath(Object nodeContent) {
         Enumeration enumeration = new TreeNodeEnumeration.Postorder(getRoot());
         while (enumeration.hasMoreElements()) {
-            ProductTreeNode childNode = (ProductTreeNode) enumeration.nextElement();
+            AbstractTN childNode = (AbstractTN) enumeration.nextElement();
             if (childNode.getContent() == nodeContent) {
-                ProductTreeNode actualNode = childNode;
-                List<ProductTreeNode> pathList = new ArrayList<ProductTreeNode>();
+                AbstractTN actualNode = childNode;
+                List<AbstractTN> pathList = new ArrayList<AbstractTN>();
                 while (actualNode != null) {
                     pathList.add(actualNode);
                     actualNode = actualNode.getParent();
@@ -165,6 +164,12 @@ public class ProductTreeModel implements TreeModel {
                     if (path != null) {
                         fireTreeNodeChanged(path);
                     }
+                }
+            } else if (event.getSourceNode() instanceof Product) {
+                Product product = (Product) event.getSourceNode();
+                TreePath path = getTreePath(product);
+                if (path != null) {
+                    fireTreeNodeChanged(path);
                 }
             }
         }

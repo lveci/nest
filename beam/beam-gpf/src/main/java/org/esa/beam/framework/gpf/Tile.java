@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.gpf;
 
 import org.esa.beam.framework.datamodel.ProductData;
@@ -53,7 +69,7 @@ import java.util.Iterator;
  * sample values.
  * Use the {@link #toGeoPhysical(float)} and {@link #toRaw(float)} to convert between physical and raw
  * sample values.</p>
-
+ * <p/>
  * <p/>
  * <p>(3) The the fastest way to read from or write to sample data is to directly access the sample data
  * via their primitive data buffers:</p>
@@ -352,15 +368,31 @@ public interface Tile extends Iterable<Tile.Pos> {
     void setRawSamples(ProductData rawSamples);
 
     /**
+     * Gets the scaled, (geo-)physical array of {@code int} samples, copied from or directly returning the underlying
+     * data buffer. In contradiction to the {@link #getDataBuffer()} method, the returned samples
+     * will cover exactly the region {@link #getRectangle()} rectangle} of this tile. Thus, the number
+     * of returned samples will always equal {@link #getWidth() width} {@code *} {@link #getHeight() height}.
+     * <p/>
+     * <p>Sample values that are masked out (see {@link #isSampleValid(int, int)}) are returned as array elements
+     * having the value {@link Float#NaN}.</p>
+     *
+     * @return The (geo-)physical samples computed from the underlying raw data buffer.
+     * @see #setSamples(int[])
+     * @since BEAM 4.8
+     */
+    int[] getSamplesInt();
+
+    /**
      * Gets the scaled, (geo-)physical array of {@code double} samples, copied from or directly returning the underlying
      * data buffer. In contradiction to the {@link #getDataBuffer()} method, the returned samples
      * will cover exactly the region {@link #getRectangle()} rectangle} of this tile. Thus, the number
      * of returned samples will always equal {@link #getWidth() width} {@code *} {@link #getHeight() height}.
-     * <p>In order to apply changes of the samples values to this tile, it is mandatory to call
-     * {@link #setRawSamples(org.esa.beam.framework.datamodel.ProductData)} with the modified
-     * {@code ProductData} instance.</p>
+     * <p/>
+     * <p>Sample values that are masked out (see {@link #isSampleValid(int, int)}) are returned as array elements
+     * having the value {@link Float#NaN}.</p>
      *
-     * @return The raw samples copied from or directly returning the underlying data buffer.
+     * @return The (geo-)physical samples computed from the underlying raw data buffer.
+     * @see #setSamples(float[])
      */
     float[] getSamplesFloat();
 
@@ -369,11 +401,12 @@ public interface Tile extends Iterable<Tile.Pos> {
      * data buffer. In contradiction to the {@link #getDataBuffer()} method, the returned samples
      * will cover exactly the region {@link #getRectangle()} rectangle} of this tile. Thus, the number
      * of returned samples will always equal {@link #getWidth() width} {@code *} {@link #getHeight() height}.
-     * <p>In order to apply changes of the samples values to this tile, it is mandatory to call
-     * {@link #setRawSamples(org.esa.beam.framework.datamodel.ProductData)} with the modified
-     * {@code ProductData} instance.</p>
+     * <p/>
+     * <p>Sample values that are masked out (see {@link #isSampleValid(int, int)}) are returned as array elements
+     * having the value {@link Float#NaN}.</p>
      *
-     * @return The raw samples copied from or directly returning the underlying data buffer.
+     * @return The (geo-)physical samples computed from the underlying raw data buffer.
+     * @see #setSamples(double[])
      */
     double[] getSamplesDouble();
 
@@ -381,10 +414,20 @@ public interface Tile extends Iterable<Tile.Pos> {
      * Sets this tile's scaled, (geo-)physical samples as array of {@code floats}s.
      * The number of given samples must be equal {@link #getWidth() width} {@code *} {@link #getHeight() height}
      * of this tile.
-     * <p>This method must be used
-     * in order to apply changes made to the samples returned by the {@link #getRawSamples()} method.</p>
      *
-     * @param samples The raw samples to be set.
+     * @param samples The (geo-)physical samples to be set.
+     * @see #getSamplesInt()
+     * @since BEAM 4.8
+     */
+    void setSamples(int[] samples);
+
+    /**
+     * Sets this tile's scaled, (geo-)physical samples as array of {@code floats}s.
+     * The number of given samples must be equal {@link #getWidth() width} {@code *} {@link #getHeight() height}
+     * of this tile.
+     *
+     * @param samples The (geo-)physical samples to be set.
+     * @see #getSamplesFloat()
      */
     void setSamples(float[] samples);
 
@@ -395,7 +438,8 @@ public interface Tile extends Iterable<Tile.Pos> {
      * <p>This method must be used
      * in order to apply changes made to the samples returned by the {@link #getRawSamples()} method.</p>
      *
-     * @param samples The raw samples to be set.
+     * @param samples The (geo-)physical samples to be set.
+     * @see #getSamplesDouble()
      */
     void setSamples(double[] samples);
 

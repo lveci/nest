@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.ui.product.tree;
 
 import javax.swing.tree.TreeNode;
@@ -5,12 +21,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 
-public abstract class ProductTreeNode implements TreeNode {
+public abstract class AbstractTN implements TreeNode {
     private String name;
     private Object content;
-    private ProductTreeNode parent;
+    private AbstractTN parent;
 
-    protected ProductTreeNode(String name, Object content, ProductTreeNode parent) {
+    protected AbstractTN(String name, Object content, AbstractTN parent) {
         this.name = name;
         this.content = content;
         this.parent = parent;
@@ -24,12 +40,8 @@ public abstract class ProductTreeNode implements TreeNode {
         return content;
     }
 
-    public void setContent(Object content) {
-        this.content = content;
-    }
-
     @Override
-    public ProductTreeNode getParent() {
+    public AbstractTN getParent() {
         return parent;
     }
 
@@ -45,7 +57,7 @@ public abstract class ProductTreeNode implements TreeNode {
 
     @Override
     public Enumeration children() {
-        ProductTreeNode[] nodes = new ProductTreeNode[getChildCount()];
+        AbstractTN[] nodes = new AbstractTN[getChildCount()];
         for (int i = 0; i < getChildCount(); i++) {
             nodes[i] = getChildAt(i);
         }
@@ -54,7 +66,7 @@ public abstract class ProductTreeNode implements TreeNode {
 
     @Override
     public int getIndex(TreeNode node) {
-        return getIndex((ProductTreeNode) node);
+        return getIndex((AbstractTN) node);
     }
 
     @Override
@@ -63,12 +75,12 @@ public abstract class ProductTreeNode implements TreeNode {
     }
 
     @Override
-    public abstract ProductTreeNode getChildAt(int index);
+    public abstract AbstractTN getChildAt(int index);
 
     @Override
     public abstract int getChildCount();
 
-    protected abstract int getIndex(ProductTreeNode node);
+    protected abstract int getIndex(AbstractTN node);
 
     @Override
     public boolean equals(Object o) {
@@ -79,7 +91,7 @@ public abstract class ProductTreeNode implements TreeNode {
             return false;
         }
 
-        ProductTreeNode node = (ProductTreeNode) o;
+        AbstractTN node = (AbstractTN) o;
 
         if (content != null ? !content.equals(node.content) : node.content != null) {
             return false;

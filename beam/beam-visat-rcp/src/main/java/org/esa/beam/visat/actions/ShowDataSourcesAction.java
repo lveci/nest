@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
@@ -19,13 +35,18 @@ import com.bc.ceres.core.runtime.Module;
  * web page.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
  */
 public class ShowDataSourcesAction extends ExecCommand {
     // todo - convert to properties for NEST (nf - 11.07.2008)
     private static final String BEAM_HELP_MODULE_NAME = "beam-help";
     private static final String DATASOURCES_RESOURCE_PATH = "doc/help/general/BeamDataSources.html";
     private static final String DATASOURCES_PROPERTY_NAME = "beam.datasources.url";
+
+    @Override
+    public void updateState(final CommandEvent event) {
+        setEnabled(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE));
+    }
 
     /**
      * Opens the default browser to display the BEAM data sources web page.
@@ -43,6 +64,8 @@ public class ShowDataSourcesAction extends ExecCommand {
             VisatApp.getApp().showErrorDialog("Illegal resource URI:\n" + e.getMessage());
         } catch (IOException e) {
             VisatApp.getApp().showErrorDialog("An I/O error occured:\n" + e.getMessage());
+        } catch (UnsupportedOperationException e) {
+            VisatApp.getApp().showErrorDialog("The desktop command 'browse' is not supported.:\n" + e.getMessage());
         }
     }
 

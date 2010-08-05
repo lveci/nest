@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.toolviews.layermanager.layersrc.product;
 
 
@@ -33,7 +49,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.geom.AffineTransform;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,8 +109,6 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
         LayerType type = LayerTypeRegistry.getLayerType(RasterImageLayerType.class.getName());
         PropertySet configuration = type.createLayerConfig(getContext().getLayerContext());
         configuration.setValue(RasterImageLayerType.PROPERTY_NAME_RASTER, rasterDataNode);
-        final GeoCoding geoCoding = rasterDataNode.getGeoCoding();
-        AffineTransform i2mTransform = ImageManager.getImageToModelTransform(geoCoding);
         configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, false);
         configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
         configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);

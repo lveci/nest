@@ -404,7 +404,7 @@ public class MosaicOp extends Operator {
             }
 
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                     final int trgIndex = targetTile.getDataBufferIndex(x, y);
 

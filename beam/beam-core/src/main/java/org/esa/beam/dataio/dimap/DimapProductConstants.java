@@ -1,18 +1,17 @@
 /*
- * $Id: DimapProductConstants.java,v 1.6 2009-12-14 21:03:50 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.dimap;
 
@@ -21,7 +20,7 @@ package org.esa.beam.dataio.dimap;
  *
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.7 $ $Date: 2010-08-05 17:00:49 $
  */
 public final class DimapProductConstants {
 
@@ -361,13 +360,26 @@ public final class DimapProductConstants {
      *        &lt;IMAGE_TO_MODEL_TRANSFORM&gt;matrix values&lt;/IMAGE_TO_MODEL_TRANSFORM&gt;
      *    &lt;/Geoposition&gt;
      * </pre>
-     * In addition, the persistence of {@code BitmaskDef}s is obsolte, because {@code BitmaskDef}s
+     * In addition, the persistence of {@code BitmaskDef}s is obsolete, because {@code BitmaskDef}s
      * have been marked as deprecated and replaced with {@code Mask}s.  
+     * </td>
+     * </tr>
+     * <tr>
+     * <td valign="top">2.9.0</td>
+     * <td> For 4.8, the element BAND_GROUPING has been introduced.
+     * <pre>
+     *    &lt;Image_Interpretation&gt;
+     *        &lt;BAND_GROUPING&gt;pattern-1:pattern-2:pattern-3&lt;/BAND_GROUPING&gt;
+     *        ...
+     *    &lt;/Image_Interpretation&gt;
+     * </pre>
+     * In addition, the persistence of {@code BitmaskDef}s is obsolete, because {@code BitmaskDef}s
+     * have been marked as deprecated and replaced with {@code Mask}s.
      * </td>
      * </tr>
      * </table>
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.8.0";
+    public static final String DIMAP_CURRENT_VERSION = "2.9.0";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";
@@ -485,6 +497,7 @@ public final class DimapProductConstants {
     public static final String TAG_DATASET_SERIES = "DATASET_SERIES";
     public static final String TAG_DATASET_NAME = "DATASET_NAME";
     public static final String TAG_DATASET_DESCRIPTION = "DATASET_DESCRIPTION";
+    public static final String TAG_DATASET_AUTO_GROUPING = "DATASET_AUTO_GROUPING";
     public static final String TAG_COPYRIGHT = "COPYRIGHT";
     public static final String TAG_COUNTRY_NAME = "COUNTRY_NAME";
     public static final String TAG_COUNTRY_CODE = "COUNTRY_CODE";

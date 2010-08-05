@@ -48,7 +48,7 @@ public class TestEnvisatReader extends TestCase {
         final File folder = new File(TestUtils.rootPathASAR);
         if(!folder.exists()) return;
 
-        if(TestUtils.canTestReadersOnAllProducts())
-            TestUtils.recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, null);
+        //if(TestUtils.canTestReadersOnAllProducts())
+        //    TestUtils.recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, null);
     }
 }

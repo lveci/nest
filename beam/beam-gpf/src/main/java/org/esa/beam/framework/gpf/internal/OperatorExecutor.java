@@ -1,18 +1,17 @@
 /*
- * $Id: OperatorExecutor.java,v 1.11 2010-04-14 17:26:42 lveci Exp $
- *
- * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.gpf.internal;
 
@@ -164,7 +163,7 @@ public class OperatorExecutor {
 
     private void scheduleTile(final PlanarImage image, int tileX, int tileY, Semaphore semaphore,
                               TileComputationListener[] listeners, ProgressMonitor pm) {
-        checkForCancelation(pm);
+        checkForCancellation(pm);
         acquirePermits(semaphore, 1);
         if (error != null) {
             semaphore.release(parallelism);
@@ -208,7 +207,7 @@ public class OperatorExecutor {
         return images.toArray(new PlanarImage[images.size()]);
     }
 
-    private static void checkForCancelation(ProgressMonitor pm) {
+    private static void checkForCancellation(ProgressMonitor pm) {
         if (pm.isCanceled()) {
             throw new OperatorException("Operation canceled.");
         }
@@ -220,7 +219,7 @@ public class OperatorExecutor {
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (final PlanarImage image : images) {
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    checkForCancelation(pm);
+                    checkForCancellation(pm);
                     image.getTile(tileX, tileY);
                     pm.worked(1);
                 }

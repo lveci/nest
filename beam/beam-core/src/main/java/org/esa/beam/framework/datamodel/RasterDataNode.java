@@ -1,26 +1,30 @@
 /*
- * $Id: RasterDataNode.java,v 1.17 2010-04-20 17:31:23 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import com.bc.ceres.glevel.support.GenericMultiLevelSource;
+import com.bc.ceres.jai.operator.InterpretationType;
+import com.bc.ceres.jai.operator.ReinterpretDescriptor;
+import com.bc.ceres.jai.operator.ScalingType;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.BitRaster;
@@ -28,6 +32,7 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.ObjectUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.jai.SingleBandedSampleModel;
 import org.esa.beam.util.math.DoubleList;
 import org.esa.beam.util.math.Histogram;
 import org.esa.beam.util.math.IndexValidator;
@@ -36,13 +41,17 @@ import org.esa.beam.util.math.Quantizer;
 import org.esa.beam.util.math.Range;
 import org.esa.beam.util.math.Statistics;
 
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.ROI;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -78,7 +87,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     public static final String PROPERTY_NAME_GEOCODING = Product.PROPERTY_NAME_GEOCODING;
     public static final String PROPERTY_NAME_STX = "stx";
     public static final String PROPERTY_NAME_AREA_OF_DATA = "areaOfData";
-    
+
     /**
      * Text returned by the <code>{@link #getPixelString}</code> method if no data is available at the given pixel
      * position.
@@ -144,13 +153,13 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
 
     private MultiLevelImage sourceImage;
     private MultiLevelImage geophysicalImage;
-    
+
     // todo - use instead of validMaskImage, deprecate validMaskImage
     // private Mask validMask;
     private MultiLevelImage validMaskImage;
 
     private ROI validMaskROI;
-    
+
     /**
      * Constructs an object of type <code>RasterDataNode</code>.
      *
@@ -331,7 +340,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     }
 
     /**
-     * Returns the geophysical data type of this <code>RasterDataNode</code>. The value retuned is always one of the
+     * Returns the geophysical data type of this <code>RasterDataNode</code>. The value returned is always one of the
      * <code>ProductData.TYPE_XXX</code> constants.
      *
      * @return the geophysical data type
@@ -340,14 +349,12 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @see #isScalingApplied()
      */
     public int getGeophysicalDataType() {
-        if (isScalingApplied()) {
-            if (ProductData.getElemSize(getDataType()) > 2) {
-                return ProductData.TYPE_FLOAT64;
-            } else {
-                return ProductData.TYPE_FLOAT32;
-            }
-        }
-        return getDataType();
+        return ImageManager.getProductDataType(
+                ReinterpretDescriptor.getTargetDataType(ImageManager.getDataBufferType(getDataType()),
+                                                        getScalingFactor(),
+                                                        getScalingOffset(),
+                                                        getScalingType(),
+                                                        getInterpretationType()));
     }
 
     /**
@@ -721,7 +728,14 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         } else if (Double.isInfinite(noDataValue)) {
             return "!inf(" + ref + ")";
         } else {
-            return "fneq(" + ref + "," + noDataValue + ")";
+            if (ProductData.isIntType(getDataType())) {
+                double rawNoDataValue = getNoDataValue();
+                String rawSymbol = getName() + ".raw";
+                String extName = BandArithmetic.createExternalName(rawSymbol);
+                return extName + " != " + rawNoDataValue;
+            } else {
+                return "fneq(" + ref + "," + noDataValue + ")";
+            }
         }
     }
 
@@ -2007,7 +2021,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         if (geophysicalImage == null) {
             synchronized (this) {
                 if (geophysicalImage == null) {
-                    if (isScalingApplied()) {
+                    if (isScalingApplied()
+                        || getDataType() == ProductData.TYPE_INT8
+                        || getDataType() == ProductData.TYPE_UINT32) {
                         this.geophysicalImage = createGeophysicalImage();
                     } else {
                         this.geophysicalImage = getSourceImage();
@@ -2023,13 +2039,40 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
 
             @Override
             protected RenderedImage createImage(RenderedImage[] sourceImages, int level) {
-                return ImageManager.createRescaleOp(sourceImages[0],
-                                                    ImageManager.getDataBufferType(getGeophysicalDataType()),
-                                                    getScalingFactor(),
-                                                    getScalingOffset(),
-                                                    isLog10Scaled());
+                final RenderedImage source = sourceImages[0];
+                final double factor = getScalingFactor();
+                final double offset = getScalingOffset();
+                final ScalingType scalingType = getScalingType();
+                final InterpretationType interpretationType = getInterpretationType();
+                final int sourceDataType = source.getSampleModel().getDataType();
+                final int targetDataType = ReinterpretDescriptor.getTargetDataType(sourceDataType,
+                                                                                   factor,
+                                                                                   offset,
+                                                                                   scalingType,
+                                                                                   interpretationType);
+                final SampleModel sampleModel = new SingleBandedSampleModel(targetDataType,
+                                                                            source.getWidth(),
+                                                                            source.getHeight());
+                final ImageLayout imageLayout = ReinterpretDescriptor.createTargetImageLayout(source, sampleModel);
+                return ReinterpretDescriptor.create(source, factor, offset, scalingType, interpretationType,
+                                                    new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout));
             }
         });
+    }
+
+    private ScalingType getScalingType() {
+        return isLog10Scaled() ? ReinterpretDescriptor.EXPONENTIAL : ReinterpretDescriptor.LINEAR;
+    }
+
+    private InterpretationType getInterpretationType() {
+        switch (getDataType()) {
+            case ProductData.TYPE_INT8:
+                return ReinterpretDescriptor.INTERPRET_BYTE_SIGNED;
+            case ProductData.TYPE_UINT32:
+                return ReinterpretDescriptor.INTERPRET_INT_UNSIGNED;
+            default:
+                return ReinterpretDescriptor.AWT;
+        }
     }
 
     private void resetGeophysicalImage() {
@@ -2183,13 +2226,17 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         return validMaskImage != null ? validMaskImage.getImageShape(0) : null;
     }
 
-    private static MultiLevelImage toMultiLevelImage(RenderedImage sourceImage) {
+    private MultiLevelImage toMultiLevelImage(RenderedImage sourceImage) {
+        MultiLevelImage mli;
         if (sourceImage instanceof MultiLevelImage) {
-            return (MultiLevelImage) sourceImage;
+            mli = (MultiLevelImage) sourceImage;
         } else {
-            return new DefaultMultiLevelImage(ImageManager.getMultiLevelSource(sourceImage));
+            MultiLevelModel model = ImageManager.getMultiLevelModel(this);
+            mli = new DefaultMultiLevelImage(new DefaultMultiLevelSource(sourceImage, model));
         }
+        return mli;
     }
+
 
     static final class DelegatingValidator implements IndexValidator {
 

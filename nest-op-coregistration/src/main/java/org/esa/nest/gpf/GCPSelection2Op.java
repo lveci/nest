@@ -370,7 +370,7 @@ public class GCPSelection2Op extends Operator {
         int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
-            checkForCancelation(pm);
+            checkForCancellation(pm);
             final Placemark mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 

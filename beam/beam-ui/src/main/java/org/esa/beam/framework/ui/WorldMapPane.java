@@ -1,18 +1,17 @@
 /*
- * $Id: WorldMapPane.java,v 1.9 2010-05-10 18:23:03 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.ui;
 
@@ -56,7 +55,7 @@ import java.util.ArrayList;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.9 $ $Date: 2010-05-10 18:23:03 $
+ * @version $Revision: 1.10 $ $Date: 2010-08-05 17:00:54 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -73,7 +72,7 @@ public class WorldMapPane extends JPanel {
         installLayerCanvasNavigation(layerCanvas, dataModel);
         layerCanvas.addOverlay(new BoundaryOverlay());
         final Layer rootLayer = layerCanvas.getLayer();
-             
+
         final Dimension dimension = new Dimension(400, 200);
         final Viewport viewport = layerCanvas.getViewport();
         viewport.setViewBounds(new Rectangle(dimension));
@@ -493,7 +492,6 @@ public class WorldMapPane extends JPanel {
             }
 
             drawText(g2d, text, textCenter, 0.0f);
-
         }
 
         private void drawGeoBoundary(final Graphics2D g2d, final GeoPos[] geoBoundary,

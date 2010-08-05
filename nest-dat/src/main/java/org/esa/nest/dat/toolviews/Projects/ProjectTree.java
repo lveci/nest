@@ -4,7 +4,6 @@ import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -105,8 +104,6 @@ class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
                 createMenuItem(popup, "Save Project As...");
                 createMenuItem(popup, "Close Project");
                 createMenuItem(popup, "Refresh Project");
-                addSeparator(popup);
-                createMenuItem(popup, "Import Datasets");
             } else {
                 addSeparator(popup);
                 createMenuItem(popup, "Create Folder");
@@ -128,10 +125,7 @@ class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
             } else if(folder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
                 addSeparator(popup);
                 createMenuItem(popup, "New Graph...");
-            } else if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
-                addSeparator(popup);
-                createMenuItem(popup, "Import Datasets");
-            }
+            } 
         } else if (context instanceof ProjectFile) {
             createMenuItem(popup, "Open");
 
@@ -218,8 +212,6 @@ class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             final ProjectFile file = (ProjectFile) menuContext;
             project.importSubset(parentFolder, file.getFile());
-        } else if(actionCmd.equals("Import Datasets")) {
-            ImportBrowserAction.getInstance().ShowImportBrowser();
         } else if(actionCmd.equals("Clear")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.clearFolder(subFolder);

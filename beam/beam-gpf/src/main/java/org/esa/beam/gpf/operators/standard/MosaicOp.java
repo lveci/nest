@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.gpf.operators.standard;
 
 import com.bc.ceres.binding.Converter;
@@ -24,11 +40,11 @@ import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.jai.JAIUtils;
+import org.esa.beam.util.math.MathUtils;
 import org.geotools.factory.Hints;
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.geometry.Envelope;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -40,8 +56,6 @@ import javax.media.jai.operator.AddDescriptor;
 import javax.media.jai.operator.FormatDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
@@ -352,7 +366,6 @@ public class MosaicOp extends Operator {
     }
 
     private Product createTargetProduct() {
-        Product product;
         try {
             CoordinateReferenceSystem targetCRS;
             try {
@@ -360,31 +373,29 @@ public class MosaicOp extends Operator {
             } catch (FactoryException e) {
                 targetCRS = CRS.decode(crs, true);
             }
-            Rectangle2D.Double rect = new Rectangle2D.Double();
-            rect.setFrameFromDiagonal(westBound, northBound, eastBound, southBound);
-            GeneralEnvelope generalEnvelope = new GeneralEnvelope(rect);
-            generalEnvelope.setCoordinateReferenceSystem(DefaultGeographicCRS.WGS84);
-            Envelope envelope = CRS.transform(generalEnvelope, targetCRS);
-            int width = (int) (envelope.getSpan(0) / pixelSizeX);
-            int height = (int) (envelope.getSpan(1) / pixelSizeY);
-            final AffineTransform mapTransform = new AffineTransform();
-            double easting = envelope.getMinimum(0);
-            double northing = envelope.getMaximum(1);
-            mapTransform.translate(easting, northing);
-            mapTransform.scale(pixelSizeX, -pixelSizeY);
-            mapTransform.translate(-0.5, -0.5);
-            CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS, new Rectangle(0, 0, width, height),
-                                                      mapTransform);
-            product = new Product("mosaic", "BEAM_MOSAIC", width, height);
+            final Rectangle2D bounds = new Rectangle2D.Double();
+            bounds.setFrameFromDiagonal(westBound, northBound, eastBound, southBound);
+            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+            final int width = MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
+            final int height = MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                                                            width,
+                                                            height,
+                                                            targetEnvelope.getMinimum(0),
+                                                            targetEnvelope.getMaximum(1),
+                                                            pixelSizeX, pixelSizeY);
+
+            final Product product = new Product("mosaic", "BEAM_MOSAIC", width, height);
             product.setGeoCoding(geoCoding);
-            Dimension tileSize = JAIUtils.computePreferredTileSize(width, height, 1);
+            final Dimension tileSize = JAIUtils.computePreferredTileSize(width, height, 1);
             product.setPreferredTileSize(tileSize);
             addTargetBands(product);
+
+            return product;
         } catch (Exception e) {
             throw new OperatorException(e);
         }
-
-        return product;
     }
 
     private void addTargetBands(Product product) {

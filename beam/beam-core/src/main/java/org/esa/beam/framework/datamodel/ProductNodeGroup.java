@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.Assert;
@@ -10,7 +26,7 @@ import java.util.Collection;
  * A type-safe container for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
  */
 public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
@@ -18,11 +34,21 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
     private final boolean takingOverNodeOwnership;
 
     /**
-     * Constructs a node group.
+     * Constructs a node group with no owner and which will not take ownership of added children.
+     *
+     * @param name The group name.
+     * @since BEAM 4.8
+     */
+    public ProductNodeGroup(String name) {
+        this(null, name, false);
+    }
+
+    /**
+     * Constructs a node group for the given owner.
      *
      * @param owner                   The owner of the group.
      * @param name                    The group name.
-     * @param takingOverNodeOwnership If {@code true}, nodes will have this group as owner after adding.
+     * @param takingOverNodeOwnership If {@code true}, child nodes will have this group as owner after adding.
      */
     public ProductNodeGroup(ProductNode owner, String name, boolean takingOverNodeOwnership) {
         super(name, "");
@@ -32,22 +58,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
     }
 
     /**
-     * Constructs a node group.
-     *
-     * @param owner       The owner of the group.
-     * @param name        The group name.
-     * @param description A descriptive text.
-     *
-     * @deprecated since BEAM 4.7
-     */
-    @Deprecated
-    public ProductNodeGroup(ProductNode owner, String name, String description) {
-        this(owner, name, true);
-        setDescription(description);
-    }
-
-    /**
-     * @return {@code true}, if nodes will have this group as owner after adding.
+     * @return {@code true}, if child nodes will have this group as owner after adding.
      */
     public boolean isTakingOverNodeOwnership() {
         return takingOverNodeOwnership;
@@ -62,7 +73,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
     /**
      * @param index The node index.
-     *
      * @return The product node at the given index.
      */
     public T get(int index) {
@@ -73,7 +83,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * Returns the display names of all products currently managed.
      *
      * @return an array containing the display names, never <code>null</code>, but the array can have zero length
-     *
      * @see ProductNode#getDisplayName()
      */
     public String[] getNodeDisplayNames() {
@@ -101,7 +110,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
     /**
      * @param array the array into which the elements of the list are to be stored, if it is big enough; otherwise, a
      *              new array of the same runtime type is allocated for this purpose.
-     *
      * @return an array containing the product nodes, never <code>null</code>, but the array can have zero length
      */
     public T[] toArray(T[] array) {
@@ -118,7 +126,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
     /**
      * @param displayName the display name
-     *
      * @return the product node with the given display name.
      */
     public T getByDisplayName(final String displayName) {
@@ -127,7 +134,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
     /**
      * @param name the name
-     *
      * @return the product node with the given name.
      */
     public T get(String name) {
@@ -138,7 +144,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * Tests whether a node with the given name is contained in this group.
      *
      * @param name the name
-     *
      * @return true, if so
      */
     public boolean contains(String name) {
@@ -149,7 +154,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * Tests whether the given product is contained in this list.
      *
      * @param node the node
-     *
      * @return true, if so
      */
     public boolean contains(final T node) {
@@ -160,7 +164,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * Adds the given node to this group.
      *
      * @param node the node to be added, ignored if <code>null</code>
-     *
      * @return true, if the node has been added
      */
     public boolean add(T node) {
@@ -188,7 +191,6 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * Removes the given node from this group.
      *
      * @param node the node to be removed
-     *
      * @return true, if the node was removed
      */
     public boolean remove(T node) {

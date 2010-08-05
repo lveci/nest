@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2002-2008 by Brockmann Consult
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.cluster;
 
@@ -36,7 +37,7 @@ import java.util.Map;
  * Operator for cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:49 $
  */
 @OperatorMetadata(alias = "EMClusterAnalysis",
                   version = "1.0",
@@ -206,7 +207,7 @@ public class EMClusterOp extends Operator {
             final double[] posteriors = new double[clusterCount];
 
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
 
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     if (roi == null || roi.contains(x, y)) {
@@ -263,7 +264,7 @@ public class EMClusterOp extends Operator {
             final EMClusterer clusterer = createClusterer(SubProgressMonitor.create(pm, 100));
 
             for (int i = 0; i < iterationCount; ++i) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
                 clusterer.iterate();
                 pm.worked(1);
             }
@@ -330,7 +331,7 @@ public class EMClusterOp extends Operator {
             for (int i = 0; i < sourceBands.length; i++) {
                 int index = 0;
                 for (int y = 0; y < sceneHeight; y++) {
-                    checkForCancelation(pm);
+                    checkForCancellation(pm);
 
                     final Tile sourceTile =
                             getSourceTile(sourceBands[i], new Rectangle(0, y, sceneWidth, 1), ProgressMonitor.NULL);

@@ -486,7 +486,7 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
 
                 if (targetBands[i].getUnit().equals(Unit.REAL)) {
 

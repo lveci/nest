@@ -1,18 +1,17 @@
 /*
- * $Id: PropertyEditor.java,v 1.4 2009-05-27 21:09:23 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.visat.dialogs;
 
@@ -23,7 +22,6 @@ import com.bc.jexp.Term;
 import com.bc.jexp.WritableNamespace;
 import com.bc.jexp.impl.ParserImpl;
 import com.bc.jexp.impl.SymbolFactory;
-
 import org.esa.beam.framework.datamodel.AbstractBand;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
@@ -52,6 +50,11 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 
+import javax.swing.JComponent;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -62,12 +65,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.JComponent;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 
 public class PropertyEditor {
 
@@ -152,6 +149,7 @@ public class PropertyEditor {
         public Parameter _paramSunSpectralFlux;
 
         public Parameter _paramProductType;
+        public Parameter _paramBandSubGroupPaths;
         public Parameter _paramNoDataValueUsed;
         public Parameter _paramNoDataValue;
         public Parameter _paramGeophysUnit;
@@ -196,6 +194,7 @@ public class PropertyEditor {
                 public void visit(final Product product) {
                     _product = product;
                     initProductTypeParam();
+                    initProductBandGroupingParam();
                 }
 
                 @Override
@@ -288,7 +287,7 @@ public class PropertyEditor {
             }
             return true;
         }
-        
+
         private Product[] getCompatibleProducts(RasterDataNode rasterDataNode) {
             List<Product> compatibleProducts = new ArrayList<Product>(12);
             Product vbProduct = rasterDataNode.getProduct();
@@ -304,10 +303,10 @@ public class PropertyEditor {
             }
             return compatibleProducts.toArray(new Product[compatibleProducts.size()]);
         }
-        
+
         private float getGeolocationEps() {
             return (float) VisatApp.getApp().getPreferences().getPropertyDouble(VisatApp.PROPERTY_KEY_GEOLOCATION_EPS,
-                                                                       VisatApp.PROPERTY_DEFAULT_GEOLOCATION_EPS);
+                                                                                VisatApp.PROPERTY_DEFAULT_GEOLOCATION_EPS);
         }
 
         public void changeProperties() {
@@ -322,6 +321,7 @@ public class PropertyEditor {
                 _node.setDescription(_paramDescription.getValueAsText());
                 if (_product != null) {
                     _product.setProductType(_paramProductType.getValueAsText());
+                    _product.setAutoGrouping(_paramBandSubGroupPaths.getValueAsText());
                 }
                 if (_rasterDataNode != null) {
                     final boolean noDataValueUsed = ((Boolean) _paramNoDataValueUsed.getValue()).booleanValue();
@@ -345,6 +345,15 @@ public class PropertyEditor {
 
             if (_rasterDataNode != null && (_virtualBandPropertyChanged || _validMaskPropertyChanged)) {
                 updateImages();
+            }
+        }
+
+        private String formatBandSubGroupPaths() {
+            final Product.AutoGrouping autoGrouping = _product.getAutoGrouping();
+            if (autoGrouping != null) {
+                return autoGrouping.toString();
+            } else {
+                return "";
             }
         }
 
@@ -441,6 +450,17 @@ public class PropertyEditor {
             properties.setEmptyValuesNotAllowed(true);
             properties.setLabel("Product type"); /*I18N*/
             _paramProductType = new Parameter("productType", _product.getProductType(), properties);
+        }
+
+        private void initProductBandGroupingParam() {
+            final ParamProperties properties = new ParamProperties(String.class);
+            properties.setNullValueAllowed(true);
+            properties.setEmptyValuesNotAllowed(false);
+            properties.setLabel("Band grouping"); /*I18N*/
+            properties.setDescription("Colon-separated (':') list of band name parts which are used to auto-create band groups."); /*I18N*/
+            properties.setNumRows(2);
+            properties.setPropertyValue(ParamProperties.WORD_WRAP_KEY, true);
+            _paramBandSubGroupPaths = new Parameter("bandGrouping", formatBandSubGroupPaths(), properties);
         }
 
         private void initVirtualBandExpressionParam() {
@@ -604,10 +624,18 @@ public class PropertyEditor {
             add(_paramProductType.getEditor().getComponent(), _gbc);
             _gbc.fill = GridBagConstraints.HORIZONTAL;
             _gbc.weighty = 1;
+
+            _gbc.gridy++;
+            _gbc.weightx = 0;
+            add(_paramBandSubGroupPaths.getEditor().getLabelComponent(), _gbc);
+            _gbc.weightx = 1;
+            add(_paramBandSubGroupPaths.getEditor().getComponent(), _gbc);
+            _gbc.fill = GridBagConstraints.HORIZONTAL;
+            _gbc.weighty = 1;
         }
 
         private void initBandUI() {
-       /*     _gbc.insets.top += GROUP_GAP;
+            _gbc.insets.top += GROUP_GAP;
             _gbc.fill = GridBagConstraints.HORIZONTAL;
 
             _gbc.gridy++;
@@ -625,7 +653,7 @@ public class PropertyEditor {
             add(createValueUnitPair(_paramSpectralBandwidth.getEditor().getComponent(),
                                     _paramSpectralBandwidth.getEditor().getPhysUnitLabelComponent()), _gbc);
 
-            _gbc.insets.top -= GROUP_GAP;     */
+            _gbc.insets.top -= GROUP_GAP;
         }
 
         private JPanel createValueUnitPair(JComponent c1, JComponent c2) {
@@ -695,7 +723,7 @@ public class PropertyEditor {
         }
 
         @Override
-            protected boolean verifyUserInput() {
+        protected boolean verifyUserInput() {
             return editorContent.validateProperties();
         }
     }

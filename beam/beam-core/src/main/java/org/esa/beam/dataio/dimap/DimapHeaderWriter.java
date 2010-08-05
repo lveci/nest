@@ -1,18 +1,17 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.13 2010-03-31 13:56:29 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.dimap;
 
@@ -94,7 +93,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] tags = createTags(indent, DimapProductConstants.TAG_ROOT, attributes);
         println(tags[0]);
         indent++;
-        writeMatadataId(indent);
+        writeMetadataId(indent);
         writeDatasetId(indent);
         writeDatasetUse(indent);
         writeProductionElements(indent);
@@ -226,7 +225,8 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     protected void writeImageInterpretationElements(int indent) {
         final Band[] bands = product.getBands();
-        if (bands != null && bands.length > 0) {
+        final boolean hasBands = bands != null && bands.length > 0;
+        if (hasBands) {
             final String[] iiTags = createTags(indent, DimapProductConstants.TAG_IMAGE_INTERPRETATION);
             println(iiTags[0]);
             for (int i = 0; i < bands.length; i++) {
@@ -987,7 +987,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(productionTags[1]);
     }
 
-    protected void writeMatadataId(int indent) {
+    protected void writeMetadataId(int indent) {
         final String[] idTags = createTags(indent, DimapProductConstants.TAG_METADATA_ID);
         println(idTags[0]);
         final String[][] attributes = new String[1][];
@@ -1014,6 +1014,10 @@ public final class DimapHeaderWriter extends XmlWriter {
             final String[] idTags = createTags(indent, DimapProductConstants.TAG_DATASET_USE);
             println(idTags[0]);
             printLine(indent + 1, DimapProductConstants.TAG_DATASET_COMMENTS, description);
+            final Product.AutoGrouping autoGrouping = product.getAutoGrouping();
+            if (autoGrouping != null) {
+                printLine(indent + 1, DimapProductConstants.TAG_DATASET_AUTO_GROUPING, autoGrouping.toString());
+            }
             println(idTags[1]);
         }
     }

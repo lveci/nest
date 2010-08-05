@@ -1,18 +1,17 @@
 /*
- * $Id: DimapProductReader.java,v 1.13 2010-03-31 13:56:29 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.dimap;
 
@@ -53,6 +52,7 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * The <code>DimapProductReader</code> class is an implementation of the <code>ProductReader</code> interface
@@ -60,7 +60,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2010-03-31 13:56:29 $
+ * @version $Revision: 1.14 $ $Date: 2010-08-05 17:00:49 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -212,7 +212,8 @@ public class DimapProductReader extends AbstractProductReader {
                     tiePointGrid.setDiscontinuity(TiePointGrid.getDiscontinuity(floats));
                 }
             } catch (IOException e) {
-                throw new IOException(MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tiePointGridName), e);
+                throw new IOException(
+                        MessageFormat.format("I/O error while reading tie-point grid ''{0}''.", tiePointGridName), e);
             } finally {
                 if (inputStream != null) {
                     inputStream.close();
@@ -278,6 +279,7 @@ public class DimapProductReader extends AbstractProductReader {
      * @param destWidth     the width of region to be read given in the band's raster co-ordinates
      * @param destHeight    the height of region to be read given in the band's raster co-ordinates
      * @param pm            a monitor to inform the user about progress
+     *
      * @throws java.io.IOException if  an I/O error occurs
      * @see #getSubsetDef
      */
@@ -297,6 +299,9 @@ public class DimapProductReader extends AbstractProductReader {
 
         final File dataFile = bandDataFiles.get(destBand);
         final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
+        if (inputStream == null) {
+            return;
+        }
 
         int destPos = 0;
 
@@ -353,7 +358,16 @@ public class DimapProductReader extends AbstractProductReader {
     private ImageInputStream getOrCreateImageInputStream(Band band, File file) throws IOException {
         ImageInputStream inputStream = getImageInputStream(band);
         if (inputStream == null) {
-            inputStream = new FileImageInputStreamExtImpl(file);
+            try {
+                inputStream = new FileImageInputStreamExtImpl(file);
+            } catch (IOException e) {
+                BeamLogManager.getSystemLogger().log(Level.WARNING,
+                                                     "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",
+                                                     e);
+            }
+            if (inputStream == null) {
+                return null;
+            }
             if (bandInputStreams == null) {
                 bandInputStreams = new Hashtable<Band, ImageInputStream>();
             }
@@ -370,7 +384,8 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private void readVectorData() {
-        File dataDir = new File(inputDir, FileUtils.getFilenameWithoutExtension(inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
+        File dataDir = new File(inputDir, FileUtils.getFilenameWithoutExtension(
+                inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
         File vectorDataDir = new File(dataDir, "vector_data");
         if (vectorDataDir.exists()) {
             File[] vectorFiles = vectorDataDir.listFiles(new FilenameFilter() {

@@ -1,18 +1,17 @@
 /*
- * $Id: AbstractExportImageAction.java,v 1.3 2009-05-14 16:31:18 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.visat.actions;
 
@@ -47,21 +46,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-/**
- * Created by Marco Peters.
- *
- * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-05-14 16:31:18 $
- */
 public abstract class AbstractExportImageAction extends ExecCommand {
 
     public static final String EXPORT_IMAGE_CMD_ID = "exportImageFile";
     public static final String EXPORT_ROI_IMAGE_CMD_ID = "exportROIImageFile";
     public static final String EXPORT_LEGEND_IMAGE_CMD_ID = "exportLegendImageFile";
 
-    private static final String[] BMP_FORMAT_DESCRIPTION = {"BMP", "bmp", "BMP - Microsoft Windows Bitmap"};
-    private static final String[] PNG_FORMAT_DESCRIPTION = {"PNG", "png", "PNG - Portable Network Graphics"};
-    private static final String[] JPEG_FORMAT_DESCRIPTION = {
+    protected static final String[] BMP_FORMAT_DESCRIPTION = {"BMP", "bmp", "BMP - Microsoft Windows Bitmap"};
+    protected static final String[] PNG_FORMAT_DESCRIPTION = {"PNG", "png", "PNG - Portable Network Graphics"};
+    protected static final String[] JPEG_FORMAT_DESCRIPTION = {
             "JPEG", "jpg,jpeg", "JPEG - Joint Photographic Experts Group"
     };
 
@@ -70,8 +63,8 @@ public abstract class AbstractExportImageAction extends ExecCommand {
 //            "JPEG2000", "jpg,jpeg", "JPEG 2000 - Joint Photographic Experts Group"
 //    };
 
-    private static final String[] TIFF_FORMAT_DESCRIPTION = {"TIFF", "tif,tiff", "TIFF - Tagged Image File Format"};
-    private static final String[] GEOTIFF_FORMAT_DESCRIPTION = {
+    protected static final String[] TIFF_FORMAT_DESCRIPTION = {"TIFF", "tif,tiff", "TIFF - Tagged Image File Format"};
+    protected static final String[] GEOTIFF_FORMAT_DESCRIPTION = {
             "GeoTIFF", "tif,tiff", "GeoTIFF - TIFF with geo-location"
     };
 
@@ -80,15 +73,15 @@ public abstract class AbstractExportImageAction extends ExecCommand {
             BMP_FORMAT_DESCRIPTION,
             PNG_FORMAT_DESCRIPTION,
             JPEG_FORMAT_DESCRIPTION,
-            //TIFF_FORMAT_DESCRIPTION,
+            TIFF_FORMAT_DESCRIPTION,
     };
 
     private final static String[][] SCENE_IMAGE_FORMAT_DESCRIPTIONS = {
             BMP_FORMAT_DESCRIPTION,
             PNG_FORMAT_DESCRIPTION,
             JPEG_FORMAT_DESCRIPTION,
-            //TIFF_FORMAT_DESCRIPTION,
-            //GEOTIFF_FORMAT_DESCRIPTION,
+            TIFF_FORMAT_DESCRIPTION,
+            GEOTIFF_FORMAT_DESCRIPTION,
     };
     private static final String[] TRANSPARENCY_IMAGE_FORMATS = new String[]{"TIFF", "PNG"};
 
@@ -167,7 +160,7 @@ public abstract class AbstractExportImageAction extends ExecCommand {
 
         final BeamFileFilter fileFilter = fileChooser.getBeamFileFilter();
         String imageFormat = fileFilter != null ? fileFilter.getFormatName() : "TIFF";
-        if (imageFormat.equals("GeoTIFF") && !entireImageSelected) {
+        if (imageFormat.equals(GEOTIFF_FORMAT_DESCRIPTION[0]) && !entireImageSelected) {
             final int status = visatApp.showQuestionDialog("GeoTIFF is not applicable to image clippings.\n" +
                                                            "Shall TIFF format be used instead?", null);
             if (status == JOptionPane.YES_OPTION) {

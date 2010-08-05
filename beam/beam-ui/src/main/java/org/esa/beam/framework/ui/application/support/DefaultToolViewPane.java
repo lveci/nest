@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.ui.application.support;
 
 import com.jidesoft.docking.DockContext;
@@ -141,16 +157,15 @@ public class DefaultToolViewPane extends AbstractPageComponentPane {
             JComponent pageComponentControl;
             try {
                 pageComponentControl = getPageComponent().getControl();
-                if(pageComponentControl == null)
-                    throw new Exception("Unable to create control");
             } catch (Throwable e) {
                 e.printStackTrace();
                 // todo - delegate to application exception handler service
-                String message = "Unable to create UI for\n" +
-                        "'" + getPageComponent().getDescriptor().getTitle() + "'.";
-                //JOptionPane.showMessageDialog(getPageComponent().getContext().getPage().getWindow(),
-                //                              message, "Internal Error",
-                //                              JOptionPane.ERROR_MESSAGE);
+                String message = "An internal error occured.\n " +
+                        "Not able to create user interface control for\n" +
+                        "page component '" + getPageComponent().getDescriptor().getTitle() + "'.";
+                JOptionPane.showMessageDialog(getPageComponent().getContext().getPage().getWindow(),
+                                              message, "Internal Error",
+                                              JOptionPane.ERROR_MESSAGE);
                 pageComponentControl = new JLabel(message);
             }
             if (pageComponentControl.getName() == null) {

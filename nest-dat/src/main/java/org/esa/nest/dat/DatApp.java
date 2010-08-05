@@ -207,7 +207,6 @@ public class DatApp extends VisatApp {
         addCommandsToToolBar(toolBar, new String[]{
                 "newProject",
                 "loadProject",
-                "importBrowser",
                 null,
                 "openRaster",
                 //"openVector",

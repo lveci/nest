@@ -1,18 +1,17 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.16 2010-04-20 17:31:23 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.dimap;
 
@@ -101,7 +100,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.16 $ $Date: 2010-04-20 17:31:23 $
+ * @version $Revision: 1.17 $ $Date: 2010-08-05 17:00:49 $
  */
 public class DimapProductHelpers {
 
@@ -1442,6 +1441,15 @@ public class DimapProductHelpers {
             }
         }
 
+        private static void setAutoGrouping(final Element element, Product product) {
+            final String text = element.getChildTextTrim(DimapProductConstants.TAG_DATASET_AUTO_GROUPING);
+            if (StringUtils.isNotNullAndNotEmpty(text)) {
+                product.setAutoGrouping(text);
+            } else {
+                product.setAutoGrouping("");
+            }
+        }
+
         private static void addSpectralBands(final Element parent, Product product) {
             final List children = parent.getChildren(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
             final List<Element> filterBandElementList = new ArrayList<Element>();
@@ -1676,6 +1684,7 @@ public class DimapProductHelpers {
             Element child = getRootElement().getChild(DimapProductConstants.TAG_DATASET_USE);
             if (child != null) {
                 description = child.getChildTextTrim(DimapProductConstants.TAG_DATASET_COMMENTS);
+                setAutoGrouping(child, product);
             }
             if (description == null || description.length() == 0) {
                 child = getRootElement().getChild(DimapProductConstants.TAG_DATASET_ID);

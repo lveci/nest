@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.worldmap;
 
 import com.bc.ceres.binding.Property;
@@ -6,6 +22,7 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
+import org.esa.beam.glayer.WorldMapLayerType;
 import org.esa.beam.glevel.TiledFileMultiLevelSource;
 import org.geotools.referencing.AbstractIdentifiedObject;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -17,13 +34,14 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.7 $ $Date: 2010-02-09 14:10:28 $
+ * @version $Revision: 1.8 $ $Date: 2010-08-05 17:00:56 $
  * @since BEAM 4.6
  */
-public class BlueMarbleLayerType extends ImageLayer.Type {
+public class BlueMarbleLayerType extends WorldMapLayerType {
 
     private static final String WORLD_IMAGE_DIR_PROPERTY_NAME = "org.esa.beam.worldImageDir";
     private static final String WORLD_MAP_LAYER_NAME = "World Map (NASA Blue Marble)";
+    private static final String WORLD_MAP_LABEL = "NASA Blue Marble";
     private static final String TYPE_NAME = "BlueMarbleLayerType";
     private static final String[] ALIASES = {"org.esa.beam.worldmap.BlueMarbleLayerType"};
 
@@ -33,7 +51,12 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
     public String getName() {
         return TYPE_NAME;
     }
-    
+
+    @Override
+    public String getLabel() {
+        return WORLD_MAP_LABEL;
+    }
+
     @Override
     public String[] getAliases() {
         return ALIASES;

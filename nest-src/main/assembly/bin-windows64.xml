@@ -16,35 +16,13 @@
             <lineEnding>unix</lineEnding>
             <filtered>true</filtered>
         </file>
-        <file>
-            <source>LICENSE.txt</source>
-        </file>
-		<file>
-            <source>VERSION.txt</source>
-        </file>
     </files>
 
     <fileSets>
 
 		<fileSet>
-            <directory>nest-src/main/bin/common/auxdata</directory>
-            <outputDirectory>auxdata</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>nest-src/main/bin/common/config</directory>
-            <outputDirectory>config</outputDirectory>
-        </fileSet>
-		<fileSet>
-            <directory>nest-src/main/bin/common/graphs</directory>
-            <outputDirectory>graphs</outputDirectory>
-        </fileSet>	
-		<fileSet>
-            <directory>nest-src/main/bin/common/images</directory>
-            <outputDirectory>images</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>nest-src/main/bin/common/res</directory>
-            <outputDirectory>res</outputDirectory>
+            <directory>nest-src/main/bin/common/</directory>
+            <outputDirectory></outputDirectory>
         </fileSet>
         <fileSet>
             <directory>nest-src/main/licenses</directory>

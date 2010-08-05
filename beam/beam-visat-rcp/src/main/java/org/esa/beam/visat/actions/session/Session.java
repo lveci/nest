@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.actions.session;
 
 import com.bc.ceres.binding.ConversionException;
@@ -56,7 +72,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.15 $ $Date: 2010-02-10 16:20:37 $
+ * @version $Revision: 1.16 $ $Date: 2010-08-05 17:00:55 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -134,13 +150,14 @@ public class Session {
                 MetadataElement metadataElement = metadataView.getMetadataElement();
                 StringBuilder sb = new StringBuilder(metadataElement.getName());
                 MetadataElement parent = metadataElement.getParentElement();
-                while (parent != metadataRoot) {
+                while (parent != null && parent != metadataRoot) {
                     sb.append('|');
                     sb.append(parent.getName());
                     parent = parent.getParentElement();
                 }
                 productNodeName = sb.toString();
                 productRefNo = view.getVisibleProductNode().getProduct().getRefNo();
+                // todo - flag and index coding views (rq-20100618)
             }
             viewRefs[i] = new ViewRef(i,
                                       view.getClass().getName(),
@@ -308,6 +325,7 @@ public class Session {
                         collectSceneView(viewRef, productManager, applicationPreferences, pm, problems, views);
                     } else if (ProductMetadataView.class.getName().equals(viewRef.type)) {
                         collectMetadataView(viewRef, productManager, views);
+                        // todo - flag and index coding views (rq-20100618)
                     } else {
                         throw new Exception("Unknown view type: " + viewRef.type);
                     }

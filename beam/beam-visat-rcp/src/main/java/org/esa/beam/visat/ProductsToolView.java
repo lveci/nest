@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat;
 
 import com.bc.ceres.glayer.Layer;
@@ -21,7 +37,7 @@ import org.esa.beam.framework.ui.product.ProductTree;
 import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
 import org.esa.beam.framework.ui.product.VectorDataLayer;
 import org.esa.beam.framework.ui.product.tree.ProductTreeModel;
-import org.esa.beam.framework.ui.product.tree.ProductTreeNode;
+import org.esa.beam.framework.ui.product.tree.AbstractTN;
 import org.esa.beam.util.Debug;
 import org.esa.beam.visat.actions.ShowMetadataViewAction;
 import org.esa.beam.visat.internal.RasterDataNodeDeleter;
@@ -31,7 +47,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -272,7 +287,7 @@ public class ProductsToolView extends AbstractToolView {
         
         private Object getSelectedObject() {
             TreePath treePath = (TreePath) getSelection().getSelectedValue();
-            return ((ProductTreeNode) treePath.getLastPathComponent()).getContent();
+            return ((AbstractTN) treePath.getLastPathComponent()).getContent();
         }
     }
 

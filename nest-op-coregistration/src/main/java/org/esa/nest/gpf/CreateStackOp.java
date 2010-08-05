@@ -638,7 +638,7 @@ public class CreateStackOp extends Operator {
                 final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
 
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    checkForCancelation(pm);
+                    checkForCancellation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         final PixelPos sourcePixelPos = sourcePixelPositions[index];
 
@@ -664,7 +664,7 @@ public class CreateStackOp extends Operator {
                 sourceTile.getDataBuffer().dispose();
             } else {
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    checkForCancelation(pm);
+                    checkForCancellation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
                     }

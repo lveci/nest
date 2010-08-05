@@ -1,18 +1,17 @@
 /*
- * $Id: BandMathsOp.java,v 1.1 2010-03-31 13:59:24 lveci Exp $
- *
- * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.gpf.operators.standard;
 
@@ -48,13 +47,35 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "BandMath", version = "1.0", category = "Utilities",
-                  description = "Create a product with one or more bands using mathematical expressions.\n" +
-                                "This operator can only be invoked with a Graph XML file.", internal=true)
+/**
+ * <p>
+ * This band maths operator can be used to create a product with multiple bands based on mathematical expression.<br/>
+ * All products specified as source must have the same width and height, otherwise the operator will fail.
+ * The geo-coding information and metadata for the target product is taken from the first source product.
+ * </p>
+ * <p>
+ * To reference a band of one of the source products within an expression use the following syntax:<br/>
+ * <br/>
+ * <code>sourceProducts<b>#</b>.bandName</code><br/>
+ * <br/>
+ * Where <b>#</b> means the index of the source product. The index is zero based.<br/>
+ * The bands of the first source product (<code>sourceProducts<b>0</b></code>) can be referenced without this
+ * product identifier.
+ * </p>
+ * <p>
+ * When using this operator from the command-line Graph XML file must be provided in order to
+ * specify all parameters.
+ * </p>
+ */
+@OperatorMetadata(alias = "BandMaths",
+                  version = "1.0",
+                  copyright = "(c) 2010 by Brockmann Consult",
+		  category = "Utilities",
+                  description = "Create a product with one or more bands using mathematical expressions.")
 public class BandMathsOp extends Operator {
 
     public static class BandDescriptor {
-
+        
         public String name;
         public String expression;
         public String description;
@@ -76,7 +97,7 @@ public class BandMathsOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @SourceProducts
+    @SourceProducts(description = "Any number of source products.")
     private Product[] sourceProducts;
 
     @Parameter(alias = "targetBands", itemAlias = "targetBand",
@@ -95,10 +116,10 @@ public class BandMathsOp extends Operator {
         bandDescriptors[0].expression = expression;
         bandDescriptors[0].type = ProductData.TYPESTRING_INT8;
 
-        BandMathsOp bandMathOp = new BandMathsOp();
-        bandMathOp.targetBandDescriptors = bandDescriptors;
-        bandMathOp.sourceProducts = new Product[]{sourceProduct};
-        return bandMathOp;
+        BandMathsOp bandMathsOp = new BandMathsOp();
+        bandMathsOp.targetBandDescriptors = bandDescriptors;
+        bandMathsOp.sourceProducts = new Product[]{sourceProduct};
+        return bandMathsOp;
     }
 
     @Override

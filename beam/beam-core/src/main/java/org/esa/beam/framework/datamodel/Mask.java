@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.binding.Property;
@@ -33,7 +49,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2010-04-01 19:39:12 $
+ * @version $Revision: 1.14 $ $Date: 2010-08-05 17:00:50 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -52,7 +68,7 @@ public class Mask extends Band {
      * @param imageType The new mask's image type.
      */
     public Mask(String name, int width, int height, ImageType imageType) {
-        super(name, ProductData.TYPE_INT8, width, height);
+        super(name, ProductData.TYPE_UINT8, width, height);
         Assert.notNull(imageType, "imageType");
         this.imageType = imageType;
         this.imageConfigListener = new PropertyChangeListener() {

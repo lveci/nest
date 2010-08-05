@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat;
 
 import com.bc.ceres.swing.selection.SelectionContext;
@@ -17,6 +33,7 @@ import org.esa.beam.framework.ui.application.ToolViewDescriptor.State;
 import org.esa.beam.framework.ui.application.support.AbstractApplicationPage;
 import org.esa.beam.framework.ui.application.support.DefaultToolViewPane;
 import org.esa.beam.framework.ui.command.CommandManager;
+import org.esa.beam.util.Debug;
 
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
@@ -129,7 +146,7 @@ public class VisatApplicationPage extends AbstractApplicationPage {
     @Override
     protected void setActiveComponent() {
         String activeFrameKey = dockingManager.getActiveFrameKey();
-        //System.out.println("setActiveComponent: " + activeFrameKey);
+        Debug.trace("setActiveComponent: " + activeFrameKey);
 
         ToolView toolView = null;
         if (activeFrameKey != null) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.Assert;
@@ -10,7 +26,8 @@ import javax.media.jai.Histogram;
 import javax.media.jai.PixelAccessor;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.MinDescriptor;
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -93,7 +110,7 @@ public class Stx {
         return createImpl(raster, 0, roiImage, null, binCount, min, max, pm);
     }
 
-	public static Stx create(RasterDataNode raster, Mask roiMask, int binCount, double min, double max,
+    public static Stx create(RasterDataNode raster, Mask roiMask, int binCount, double min, double max,
                              ProgressMonitor pm) {
         Shape maskShape = null;
         RenderedImage maskImage = null;
@@ -103,6 +120,7 @@ public class Stx {
         }
         return createImpl(raster, 0, maskImage, maskShape, binCount, min, max, pm);
     }
+
 
     /**
      * Creates a {@code Stx} object with the given Parameter.
@@ -275,19 +293,19 @@ public class Stx {
     }
 
 
-    private static Stx createImpl(RasterDataNode raster, int level, RenderedImage maskImage, Shape maskShape, int binCount,
-                              ProgressMonitor pm) {
+    private static Stx createImpl(RasterDataNode raster, int level, RenderedImage maskImage, Shape maskShape,
+                                  int binCount, ProgressMonitor pm) {
         try {
             pm.beginTask("Computing statistics", 3);
-            final ExtremaStxOp extremaOp = new ExtremaStxOp();
-            accumulate(raster, level, maskImage, maskShape, extremaOp, SubProgressMonitor.create(pm, 1));
+            final SummaryStxOp summaryOp = new SummaryStxOp();
+            accumulate(raster, level, maskImage, maskShape, summaryOp, SubProgressMonitor.create(pm, 1));
 
-            double min = extremaOp.getLowValue();
-            double max = extremaOp.getHighValue();
-            double mean = extremaOp.getMean();
-            long numValues = extremaOp.getNumValues();
-            double coeffOfVariation = extremaOp.getCoefficientOfVariation();
-            double enl = extremaOp.getEquivalentNumberOfLooks();
+            double min = summaryOp.getMinimum();
+            double max = summaryOp.getMaximum();
+            double mean = summaryOp.getMean();
+            double stdDev = summaryOp.getStdDev();
+	        double coeffOfVariation = summaryOp.getCoefficientOfVariation();
+            double enl = summaryOp.getEquivalentNumberOfLooks();
 
             if (min == Double.MAX_VALUE && max == -Double.MAX_VALUE) {
                 final Histogram histogram = createHistogram(1, 0, 1);
@@ -305,27 +323,7 @@ public class Stx {
 
 
             return createImpl(raster, level, maskImage, maskShape, histogram,
-                          min, max, mean, numValues, coeffOfVariation, enl,
-                          SubProgressMonitor.create(pm, 1));
-        } finally {
-            pm.done();
-        }
-    }
-
-    private static Stx createImpl(RasterDataNode raster, int level, RenderedImage maskImage, Shape maskShape, int binCount, double min,
-                              double max, ProgressMonitor pm) {
-        try {
-            pm.beginTask("Computing statistics", 3);
-
-            double off = getHighValueOffset(raster);
-            final HistogramStxOp histogramOp = new HistogramStxOp(binCount, min, max + off);
-            accumulate(raster, level, maskImage, maskShape, histogramOp, SubProgressMonitor.create(pm, 1));
-
-            // Create JAI histo, but use our "BEAM" bins
-            final Histogram histogram = createHistogram(binCount, min, max + off);
-            System.arraycopy(histogramOp.getBins(), 0, histogram.getBins(0), 0, binCount);
-
-            return createImpl(raster, level, maskImage, maskShape, histogram, min, max, Double.NaN, -1L, Double.NaN, Double.NaN,
+                          min, max, mean, stdDev, coeffOfVariation, enl,
                           SubProgressMonitor.create(pm, 1));
         } finally {
             pm.done();
@@ -333,27 +331,38 @@ public class Stx {
     }
 
     private static Stx createImpl(RasterDataNode raster, int level, RenderedImage maskImage, Shape maskShape,
-                              Histogram histogram, double min, double max, double mean, long numSamples,
-                              double coeffOfVariation, double enl,
-                              ProgressMonitor pm) {
+                                  int binCount, double min, double max, ProgressMonitor pm) {
         try {
-            pm.beginTask("Computing statistics", 1);
-            if (numSamples < 0) {
-                numSamples = computeSum(histogram.getBins(0));
-            }
-            if (Double.isNaN(mean)) {
-                final MeanStxOp meanOp = new MeanStxOp(numSamples);
-                accumulate(raster, level, maskImage, maskShape, meanOp, SubProgressMonitor.create(pm, 1));
-                mean = meanOp.getMean();
-            }
-            final StdDevStxOp stdDevOp = new StdDevStxOp(numSamples, mean);
-            accumulate(raster, level, maskImage, maskShape, stdDevOp, SubProgressMonitor.create(pm, 1));
-            double stdDev = stdDevOp.getStdDev();
+            pm.beginTask("Computing statistics", 3);
 
-            return new Stx(min, max, mean, stdDev, coeffOfVariation, enl, histogram, level);
+            double off = getHighValueOffset(raster);
+            final HistogramStxOp histogramOp = new HistogramStxOp(binCount, min, max + off);
+            accumulate(raster, level, maskImage, maskShape, histogramOp, SubProgressMonitor.create(pm, 1));
+
+            // Create JAI histogram, but use our "BEAM" bins
+            final Histogram histogram = createHistogram(binCount, min, max + off);
+            System.arraycopy(histogramOp.getBins(), 0, histogram.getBins(0), 0, binCount);
+
+            return createImpl(raster, level, maskImage, maskShape, histogram, min, max, Double.NaN, Double.NaN,
+                              Double.NaN, Double.NaN,
+                              SubProgressMonitor.create(pm, 1));
         } finally {
             pm.done();
         }
+    }
+
+    private static Stx createImpl(RasterDataNode raster, int level, RenderedImage maskImage, Shape maskShape,
+                                  Histogram histogram, double min, double max, double mean, double stdDev,
+                                  double coeffOfVariation, double enl,
+				                  ProgressMonitor pm) {
+        if (Double.isNaN(mean) || Double.isNaN(stdDev)) {
+            final SummaryStxOp meanOp = new SummaryStxOp();
+            accumulate(raster, level, maskImage, maskShape, meanOp, pm);
+            mean = meanOp.getMean();
+            stdDev = meanOp.getStdDev();
+        }
+
+        return new Stx(min, max, mean, stdDev, coeffOfVariation, enl, histogram, level);
     }
 
     private static double getHighValueOffset(RasterDataNode raster) {
@@ -411,7 +420,18 @@ public class Stx {
                 throw new IllegalStateException("maskSampleModel.dataType != TYPE_BYTE");
             }
             maskAccessor = new PixelAccessor(maskSampleModel, null);
-            // todo - assert dataImage x0,y0,w,h properties equal those of maskImage (nf)
+            if (maskImage.getMinX() != dataImage.getMinX()) {
+                throw new IllegalStateException("maskImage.getMinX() != dataImage.getMinX()");
+            }
+            if (maskImage.getMinY() != dataImage.getMinY()) {
+                throw new IllegalStateException("maskImage.getMinY() != dataImage.getMinY()");
+            }
+            if (maskImage.getWidth() != dataImage.getWidth()) {
+                throw new IllegalStateException("maskImage.getWidth() != dataImage.getWidth()");
+            }
+            if (maskImage.getHeight() != dataImage.getHeight()) {
+                throw new IllegalStateException("maskImage.getWidth() != dataImage.getWidth()");
+            }
         } else {
             maskAccessor = null;
         }
@@ -425,7 +445,20 @@ public class Stx {
         final int tileX2 = tileX1 + numXTiles - 1;
         final int tileY2 = tileY1 + numYTiles - 1;
 
-        // todo - assert dataImage tile properties equal those of maskImage (nf)
+        if (maskImage != null) {
+            if (maskImage.getTileGridXOffset() != tileX1) {
+                throw new IllegalStateException("maskImage.getTileGridXOffset() != dataImage.getTileGridXOffset()");
+            }
+            if (maskImage.getTileGridXOffset() != tileY1) {
+                throw new IllegalStateException("maskImage.getTileGridYOffset() != dataImage.getTileGridYOffset()");
+            }
+            if (maskImage.getNumXTiles() != numXTiles) {
+                throw new IllegalStateException("maskImage.getNumXTiles() != dataImage.getNumXTiles()");
+            }
+            if (maskImage.getNumYTiles() != numYTiles) {
+                throw new IllegalStateException("maskImage.getNumYTiles() != dataImage.getNumYTiles()");
+            }
+        }
 
         try {
             pm.beginTask("Computing " + op.getName(), numXTiles * numYTiles);
@@ -448,25 +481,31 @@ public class Stx {
                             // --> we can not use the tile index of the one for the other, so we use the bounds
                             final Raster maskTile = maskImage != null ? maskImage.getData(dataTile.getBounds()) : null;
                             final Rectangle r = new Rectangle(dataImage.getMinX(), dataImage.getMinY(),
-                                                              dataImage.getWidth(), dataImage.getHeight()).intersection(dataTile.getBounds());
-                            switch (dataAccessor.sampleType) {
-                                case PixelAccessor.TYPE_BIT:
-                                case DataBuffer.TYPE_BYTE:
+                                                              dataImage.getWidth(), dataImage.getHeight()).intersection(
+                                    dataTile.getBounds());
+                            switch (raster.getDataType()) {
+                                case ProductData.TYPE_UINT8:
                                     op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
-                                case DataBuffer.TYPE_USHORT:
+                                case ProductData.TYPE_INT8:
+                                    op.accumulateDataByte(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
+                                    break;
+                                case ProductData.TYPE_UINT16:
                                     op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
-                                case DataBuffer.TYPE_SHORT:
+                                case ProductData.TYPE_INT16:
                                     op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
-                                case DataBuffer.TYPE_INT:
+                                case ProductData.TYPE_UINT32:
+                                    op.accumulateDataUInt(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
+                                    break;
+                                case ProductData.TYPE_INT32:
                                     op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
-                                case DataBuffer.TYPE_FLOAT:
+                                case ProductData.TYPE_FLOAT32:
                                     op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
-                                case DataBuffer.TYPE_DOUBLE:
+                                case ProductData.TYPE_FLOAT64:
                                     op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                             }
@@ -479,5 +518,4 @@ public class Stx {
             pm.done();
         }
     }
-
 }

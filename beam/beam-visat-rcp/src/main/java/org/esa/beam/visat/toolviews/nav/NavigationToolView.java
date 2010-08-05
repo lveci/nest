@@ -1,18 +1,17 @@
 /*
- * $Id: NavigationToolView.java,v 1.5 2010-04-01 19:39:12 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.visat.toolviews.nav;
 
@@ -240,7 +239,7 @@ public class NavigationToolView extends AbstractToolView {
         final JSpinner.NumberEditor editor = (JSpinner.NumberEditor) rotationAngleSpinner.getEditor();
         rotationAngleField = editor.getTextField();
         final DecimalFormat rotationFormat;
-        rotationFormat = new DecimalFormat("#####.##", decimalFormatSymbols);
+        rotationFormat = new DecimalFormat("#####.##°", decimalFormatSymbols);
         rotationFormat.setGroupingUsed(false);
         rotationFormat.setDecimalSeparatorAlwaysShown(false);
         rotationAngleField.setFormatterFactory(new JFormattedTextField.AbstractFormatterFactory() {
@@ -689,7 +688,7 @@ public class NavigationToolView extends AbstractToolView {
                 final boolean showWindow = preferences.getPropertyBool(VisatApp.PROPERTY_KEY_AUTO_SHOW_NAVIGATION,
                                                                        true);
                 if (showWindow) {
-                    ApplicationPage page = VisatApp.getApp().getPage();
+                    ApplicationPage page = VisatApp.getApp().getApplicationPage();
                     ToolView toolView = page.getToolView(NavigationToolView.ID);
                     if (toolView != null) {
                         page.showToolView(NavigationToolView.ID);

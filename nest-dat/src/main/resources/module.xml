@@ -41,7 +41,7 @@
                 <frameIcon>/org/esa/nest/dat/icons/dat.png</frameIcon>
                 <image>/org/esa/nest/dat/icons/nest_splash.png</image>
                 <excludedActions>
-                    <id>orthorectification</id>
+                    <id>orthorectificationAction</id>
                     <id>showDataSources</id>
                     <id>new</id>
                     <id>open</id>
@@ -200,7 +200,7 @@
             <helpId>open</helpId>
       </action>
 
-      <action>
+      <!--action>
             <id>importBrowser</id>
             <parent>file</parent>
             <placeAfter>openRaster</placeAfter>
@@ -212,7 +212,7 @@
             <smallIcon>icons/import_browser16.png</smallIcon>
             <largeIcon>icons/import_browser.png</largeIcon>
             <helpID>productGrabber</helpID>
-      </action>
+      </action-->
 
       <action>
             <parent>file</parent>
@@ -249,7 +249,7 @@
             <parent>file</parent>
             <text>Reopen</text>
             <mnemonic>R</mnemonic>
-            <placeAfter>importBrowser</placeAfter>
+            <placeAfter>openRaster</placeAfter>
             <shortDescr>Re-open a BEAM-DIMAP data product.</shortDescr>
             <longDescr>Re-open a BEAM-DIMAP data product.</longDescr>
             <smallIcon>icons/History16.gif</smallIcon>

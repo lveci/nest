@@ -1,18 +1,17 @@
 /*
- * $Id: ProductImportAction.java,v 1.5 2010-01-08 18:37:25 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.visat.actions;
 
@@ -25,6 +24,7 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.dataio.ProfileReaderPlugIn;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeList;
 import org.esa.beam.framework.help.HelpSys;
@@ -61,7 +61,7 @@ import java.util.Iterator;
  * This action imports a product of the associated format.
  *
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2010-01-08 18:37:25 $
+ * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:55 $
  */
 public class ProductImportAction extends ExecCommand {
 
@@ -100,10 +100,13 @@ public class ProductImportAction extends ExecCommand {
 
         readerPlugInClassName = getConfigString(config, "readerPlugin");
         if (readerPlugInClassName != null) {
-            ServiceRegistry<ProductReaderPlugIn> serviceRegistry = ServiceRegistryManager.getInstance().getServiceRegistry(ProductReaderPlugIn.class);
+            ServiceRegistry<ProductReaderPlugIn> serviceRegistry = ServiceRegistryManager.getInstance().getServiceRegistry(
+                    ProductReaderPlugIn.class);
             readerPlugIn = serviceRegistry.getService(readerPlugInClassName);
             if (readerPlugIn == null) {
-                throw new CoreException(getMessage(MessageFormat.format("Configuration error: Product reader ''{0}'' is not a known service.", readerPlugInClassName)));
+                throw new CoreException(getMessage(
+                        MessageFormat.format("Configuration error: Product reader ''{0}'' is not a known service.",
+                                             readerPlugInClassName)));
             }
         }
 
@@ -112,7 +115,8 @@ public class ProductImportAction extends ExecCommand {
             if (readerPlugIn != null) {
                 formatName = readerPlugIn.getFormatNames()[0];
             } else {
-                throw new CoreException(getMessage("Configuration error: Neither 'readerPlugin' nor 'formatName' is specified."));
+                throw new CoreException(
+                        getMessage("Configuration error: Neither 'readerPlugin' nor 'formatName' is specified."));
             }
         }
         if (readerPlugIn == null) {
@@ -122,11 +126,18 @@ public class ProductImportAction extends ExecCommand {
                 readerPlugIn = (ProductReaderPlugIn) iter.next();
             }
             if (readerPlugIn == null) {
-                throw new CoreException(getMessage(MessageFormat.format("Configuration error: No product reader found for format ''{0}''.", formatName)));
+                throw new CoreException(getMessage(
+                        MessageFormat.format("Configuration error: No product reader found for format ''{0}''.",
+                                             formatName)));
             }
         }
+        String profileClassName = getConfigString(config, "profileClassName");
+        if (profileClassName != null && readerPlugIn instanceof ProfileReaderPlugIn) {
+            ProfileReaderPlugIn profileReaderPlugIn = (ProfileReaderPlugIn) readerPlugIn;
+            readerPlugIn = profileReaderPlugIn.createProfileReaderPlugin(profileClassName);
+        }
 
-        final Boolean useAllFileFilterObj = getConfigBoolean(config, "useAllFileFilter");
+        Boolean useAllFileFilterObj = getConfigBoolean(config, "useAllFileFilter");
         useAllFileFilter = useAllFileFilterObj != null ? useAllFileFilterObj : false;
 
         final Boolean useFilesAndFoldersObj = getConfigBoolean(config, "useFilesAndFolders");
@@ -190,7 +201,7 @@ public class ProductImportAction extends ExecCommand {
             product = visatApp.getOpenProduct(selectedFile);
             if (product != null) {
                 visatApp.showErrorDialog("The product is already open.\n"
-                        + "A product can only be opened once.");
+                                         + "A product can only be opened once.");
                 visatApp.setSelectedProductNode(product);
                 return;
             }
@@ -260,12 +271,12 @@ public class ProductImportAction extends ExecCommand {
                             visatApp.showErrorDialog("File is empty:\n" + file.getPath());
                             file = null;
                         } else if (isFileOfFormat(file, DimapProductConstants.DIMAP_FORMAT_NAME)
-                                && !getFormatName().equals(DimapProductConstants.DIMAP_FORMAT_NAME)) {
+                                   && !getFormatName().equals(DimapProductConstants.DIMAP_FORMAT_NAME)) {
                             visatApp.showInfoDialog(
                                     "The selected file\n"
-                                            + "'" + file.getPath() + "'\n"
-                                            + "appears to be a BEAM-DIMAP product.\n\n"
-                                            + "Please use 'Open' in the file menu to open such product types.\n"
+                                    + "'" + file.getPath() + "'\n"
+                                    + "appears to be a BEAM-DIMAP product.\n\n"
+                                    + "Please use 'Open' in the file menu to open such product types.\n"
                                     , null);
                             file = null;
                         }
@@ -292,7 +303,7 @@ public class ProductImportAction extends ExecCommand {
                 product = reader.readProductNodes(file, null);
             } else {
                 visatApp.showWarningDialog("Cannot decode the selected product file\n" +
-                        "'" + file.getPath() + "'");
+                                           "'" + file.getPath() + "'");
             }
             visatApp.getMainFrame().setCursor(Cursor.getDefaultCursor());
             visatApp.clearStatusBarMessage();
@@ -313,159 +324,162 @@ public class ProductImportAction extends ExecCommand {
         return false;
     }
 
-protected class ProductFileChooser extends BeamFileChooser {
+    protected class ProductFileChooser extends BeamFileChooser {
 
-    private static final long serialVersionUID = -8122437634943074658L;
+        private static final long serialVersionUID = -8122437634943074658L;
 
-    private JButton _subsetButton;
-    private Product _subsetProduct;
+        private JButton _subsetButton;
+        private Product _subsetProduct;
 
-    private JLabel _sizeLabel;
+        private JLabel _sizeLabel;
 
-    public ProductFileChooser() {
-        createUI();
-    }
+        public ProductFileChooser() {
+            createUI();
+        }
 
-    /**
-     * File chooser only returns a product, if a product subset was created.
-     *
-     * @return the product subset or null
-     */
-    public Product getSubsetProduct() {
-        return _subsetProduct;
-    }
+        /**
+         * File chooser only returns a product, if a product subset was created.
+         *
+         * @return the product subset or null
+         */
+        public Product getSubsetProduct() {
+            return _subsetProduct;
+        }
 
-    @Override
-    public int showDialog(Component parent, String approveButtonText) {
-        clearCurrentProduct();
-        return super.showDialog(parent, approveButtonText);
-    }
+        @Override
+        public int showDialog(Component parent, String approveButtonText) {
+            clearCurrentProduct();
+            return super.showDialog(parent, approveButtonText);
+        }
 
-    protected void createUI() {
+        protected void createUI() {
 
-        setDialogType(OPEN_DIALOG);
-        setDialogTitle(VisatApp.getApp().getAppName() + " - Import " + formatName + " Product"); /*I18N*/
+            setDialogType(OPEN_DIALOG);
+            setDialogTitle(VisatApp.getApp().getAppName() + " - Import " + formatName + " Product"); /*I18N*/
 
-        _subsetButton = new JButton("Subset...");  /*I18N*/
-        _subsetButton.setMnemonic('S'); /*I18N*/
-        _subsetButton.addActionListener(new ActionListener() {
+            _subsetButton = new JButton("Subset...");  /*I18N*/
+            _subsetButton.setMnemonic('S'); /*I18N*/
+            _subsetButton.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent e) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
 
-                openProductSubsetDialog();
-            }
-        });
-        _subsetButton.setEnabled(false);
-
-        JButton _historyButton = new JButton("History...");
-        _historyButton.setMnemonic('H');
-        _historyButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                // @todo 2 nf/nf - Implement!
-            }
-        });
-        _historyButton.setEnabled(false);
-
-        _sizeLabel = new JLabel("0 M");
-        _sizeLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JPanel panel = GridBagUtils.createPanel();
-        GridBagConstraints gbc = GridBagUtils.createConstraints(
-                "fill=HORIZONTAL,weightx=1,anchor=NORTHWEST,insets.left=7,insets.right=7,insets.bottom=4");
-        GridBagUtils.addToPanel(panel, _subsetButton, gbc, "gridy=0");
-        //GridBagUtils.addToPanel(panel, _historyButton, gbc, "gridy=1");
-        GridBagUtils.addToPanel(panel, _sizeLabel, gbc, "gridy=1");
-        GridBagUtils.addVerticalFiller(panel, gbc);
-
-        setAccessory(panel);
-
-        addPropertyChangeListener(new PropertyChangeListener() {
-
-            public void propertyChange(PropertyChangeEvent e) {
-                String prop = e.getPropertyName();
-                if (prop.equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
-                    clearCurrentProduct();
-                    _subsetButton.setEnabled(true);
-                } else if (prop.equals(JFileChooser.DIRECTORY_CHANGED_PROPERTY)) {
-                    clearCurrentProduct();
-                    _subsetButton.setEnabled(false);
+                    openProductSubsetDialog();
                 }
-                updateState();
-            }
-        });
+            });
+            _subsetButton.setEnabled(false);
 
-        ProductFileChooser.this.setPreferredSize(new Dimension(640, 400));
-        clearCurrentProduct();
-        updateState();
-    }
+            JButton _historyButton = new JButton("History...");
+            _historyButton.setMnemonic('H');
+            _historyButton.addActionListener(new ActionListener() {
 
-    private void updateState() {
-        setApproveButtonText("Import Product");/*I18N*/
-        setApproveButtonMnemonic('I');/*I18N*/
-        setApproveButtonToolTipText("Imports the entire product.");/*I18N*/
-        File file = getSelectedFile();
-        if (file != null && file.isFile()) {
-            long fileSize = Math.round(file.length() / (1024.0 * 1024.0));
-            if (fileSize >= 1) {
-                _sizeLabel.setText("File size: " + fileSize + " M");
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // @todo 2 nf/nf - Implement!
+                }
+            });
+            _historyButton.setEnabled(false);
+
+            _sizeLabel = new JLabel("0 M");
+            _sizeLabel.setHorizontalAlignment(JLabel.RIGHT);
+            JPanel panel = GridBagUtils.createPanel();
+            GridBagConstraints gbc = GridBagUtils.createConstraints(
+                    "fill=HORIZONTAL,weightx=1,anchor=NORTHWEST,insets.left=7,insets.right=7,insets.bottom=4");
+            GridBagUtils.addToPanel(panel, _subsetButton, gbc, "gridy=0");
+            //GridBagUtils.addToPanel(panel, _historyButton, gbc, "gridy=1");
+            GridBagUtils.addToPanel(panel, _sizeLabel, gbc, "gridy=1");
+            GridBagUtils.addVerticalFiller(panel, gbc);
+
+            setAccessory(panel);
+
+            addPropertyChangeListener(new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(PropertyChangeEvent e) {
+                    String prop = e.getPropertyName();
+                    if (prop.equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
+                        clearCurrentProduct();
+                        _subsetButton.setEnabled(true);
+                    } else if (prop.equals(JFileChooser.DIRECTORY_CHANGED_PROPERTY)) {
+                        clearCurrentProduct();
+                        _subsetButton.setEnabled(false);
+                    }
+                    updateState();
+                }
+            });
+
+            ProductFileChooser.this.setPreferredSize(new Dimension(640, 400));
+            clearCurrentProduct();
+            updateState();
+        }
+
+        private void updateState() {
+            setApproveButtonText("Import Product");/*I18N*/
+            setApproveButtonMnemonic('I');/*I18N*/
+            setApproveButtonToolTipText("Imports the entire product.");/*I18N*/
+            File file = getSelectedFile();
+            if (file != null && file.isFile()) {
+                long fileSize = Math.round(file.length() / (1024.0 * 1024.0));
+                if (fileSize >= 1) {
+                    _sizeLabel.setText("File size: " + fileSize + " M");
+                } else {
+                    _sizeLabel.setText("File size: < 1 M");
+                }
             } else {
-                _sizeLabel.setText("File size: < 1 M");
+                _sizeLabel.setText("");
             }
-        } else {
-            _sizeLabel.setText("");
-        }
-    }
-
-    private void clearCurrentProduct() {
-        _subsetProduct = null;
-    }
-
-    private void openProductSubsetDialog() {
-
-        File file = getSelectedFile();
-        if (file == null) {
-            // Should not come here...
-            return;
         }
 
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        Product product = readProductNodes(file);
-        setCursor(Cursor.getDefaultCursor());
-
-        boolean approve = openProductSubsetDialog(product);
-        if (approve) {
-            approveSelection();
+        private void clearCurrentProduct() {
+            _subsetProduct = null;
         }
 
-        updateState();
-    }
+        private void openProductSubsetDialog() {
 
-    private boolean openProductSubsetDialog(Product product) {
-        _subsetProduct = null;
-        boolean approve = false;
-        if (product != null) {
-            VisatApp visatApp = VisatApp.getApp();
-            JFrame mainFrame = visatApp.getMainFrame();
-            ProductSubsetDialog productSubsetDialog = new ProductSubsetDialog(mainFrame, product);
-            if (productSubsetDialog.show() == ProductSubsetDialog.ID_OK) {
-                ProductNodeList<Product> products = new ProductNodeList<Product>();
-                products.add(product);
-                NewProductDialog newProductDialog = new NewProductDialog(visatApp.getMainFrame(), products, 0,
-                                                                         true);
-                newProductDialog.setSubsetDef(productSubsetDialog.getProductSubsetDef());
-                if (newProductDialog.show() == NewProductDialog.ID_OK) {
-                    _subsetProduct = newProductDialog.getResultProduct();
-                    approve = _subsetProduct != null;
-                    if (!approve && newProductDialog.getException() != null) {
-                        visatApp.showErrorDialog("The product subset could not be created:\n" +
-                                newProductDialog.getException().getMessage());
+            File file = getSelectedFile();
+            if (file == null) {
+                // Should not come here...
+                return;
+            }
+
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            Product product = readProductNodes(file);
+            setCursor(Cursor.getDefaultCursor());
+
+            boolean approve = openProductSubsetDialog(product);
+            if (approve) {
+                approveSelection();
+            }
+
+            updateState();
+        }
+
+        private boolean openProductSubsetDialog(Product product) {
+            _subsetProduct = null;
+            boolean approve = false;
+            if (product != null) {
+                VisatApp visatApp = VisatApp.getApp();
+                JFrame mainFrame = visatApp.getMainFrame();
+                ProductSubsetDialog productSubsetDialog = new ProductSubsetDialog(mainFrame, product);
+                if (productSubsetDialog.show() == ProductSubsetDialog.ID_OK) {
+                    ProductNodeList<Product> products = new ProductNodeList<Product>();
+                    products.add(product);
+                    NewProductDialog newProductDialog = new NewProductDialog(visatApp.getMainFrame(), products, 0,
+                                                                             true);
+                    newProductDialog.setSubsetDef(productSubsetDialog.getProductSubsetDef());
+                    if (newProductDialog.show() == NewProductDialog.ID_OK) {
+                        _subsetProduct = newProductDialog.getResultProduct();
+                        approve = _subsetProduct != null;
+                        if (!approve && newProductDialog.getException() != null) {
+                            visatApp.showErrorDialog("The product subset could not be created:\n" +
+                                                     newProductDialog.getException().getMessage());
+                        }
                     }
                 }
             }
+            return approve;
         }
-        return approve;
     }
-}
 
 
 }

@@ -1,22 +1,23 @@
 /*
- * $Id: VisatPreferencesDialog.java,v 1.4 2010-02-11 21:17:51 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 
 package org.esa.beam.visat;
 
+import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.swing.TableLayout;
 import com.bc.ceres.swing.update.ConnectionConfigData;
@@ -27,6 +28,7 @@ import org.esa.beam.framework.param.ParamChangeListener;
 import org.esa.beam.framework.param.ParamExceptionHandler;
 import org.esa.beam.framework.param.ParamGroup;
 import org.esa.beam.framework.param.ParamProperties;
+import org.esa.beam.framework.param.ParamValidateException;
 import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.PixelInfoView;
@@ -38,18 +40,24 @@ import org.esa.beam.framework.ui.config.DefaultConfigPage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.glayer.GraticuleLayerType;
 import org.esa.beam.glayer.NoDataLayerType;
+import org.esa.beam.glayer.WorldMapLayerType;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.visat.actions.ShowModuleManagerAction;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -59,6 +67,9 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.esa.beam.visat.VisatApp.*;
 
@@ -81,6 +92,7 @@ public class VisatPreferencesDialog extends ConfigDialog {
         layerPropertiesPage.addSubPage(new NoDataOverlayPage());
         layerPropertiesPage.addSubPage(new MaskOverlayPage());
         layerPropertiesPage.addSubPage(new GraticuleOverlayPage());
+        layerPropertiesPage.addSubPage(new WorldMapLayerPage());
         addRootPage(layerPropertiesPage);
         addRootPage(new RGBImageProfilePage());
         addRootPage(new LoggingPage());
@@ -1372,6 +1384,95 @@ public class VisatPreferencesDialog extends ConfigDialog {
             gbc.gridy++;
 
             return createPageUIContentPane(pageUI);
+        }
+    }
+
+    private class WorldMapLayerPage extends DefaultConfigPage {
+
+        private static final String PARAMETER_NAME_WORLDMAP_TYPE = "worldmap.type";
+
+        private JComboBox box;
+        private List<WorldMapLayerType> worldMapLayerTypes;
+
+        public WorldMapLayerPage() {
+            setTitle("World Map Layer");
+        }
+
+        @Override
+        protected void initConfigParams(ParamGroup configParams) {
+            Parameter param = new Parameter(PARAMETER_NAME_WORLDMAP_TYPE, "GlobCoverLayerType");
+            worldMapLayerTypes = new ArrayList<WorldMapLayerType>();
+            Set<LayerType> allLayerTypes = LayerTypeRegistry.getLayerTypes();
+            for (LayerType layerType : allLayerTypes) {
+                if (layerType instanceof WorldMapLayerType) {
+                    WorldMapLayerType worldMapLayerType = (WorldMapLayerType) layerType;
+                    worldMapLayerTypes.add(worldMapLayerType);
+                }
+            }
+            configParams.addParameter(param);
+        }
+
+        @Override
+        protected void initPageUI() {
+            JPanel pageUI = createPageUI();
+            setPageUI(pageUI);
+            updatePageUI();
+        }
+
+        private JPanel createPageUI() {
+            JPanel pageUI = GridBagUtils.createPanel();
+
+            box = new JComboBox();
+            box.setRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+                                                              boolean cellHasFocus) {
+                    Component rendererComponent = super.getListCellRendererComponent(list, value, index, isSelected,
+                                                                                     cellHasFocus);
+                    if (value instanceof WorldMapLayerType && rendererComponent instanceof JLabel) {
+                        WorldMapLayerType worldMapLayerType = (WorldMapLayerType) value;
+                        JLabel label = (JLabel) rendererComponent;
+                        label.setText(worldMapLayerType.getLabel());
+                    }
+                    return rendererComponent;
+                }
+            });
+            GridBagConstraints gbc = GridBagUtils.createConstraints("fill=HORIZONTAL,anchor=WEST");
+            gbc.gridy = 0;
+            gbc.weightx = 0;
+
+            pageUI.add(new JLabel("World Map Layer: "), gbc);
+            gbc.weightx = 1;
+
+            pageUI.add(box, gbc);
+            gbc.insets.top = _LINE_INSET_TOP;
+            return createPageUIContentPane(pageUI);
+        }
+
+        @Override
+        public void updatePageUI() {
+            DefaultComboBoxModel aModel = new DefaultComboBoxModel(worldMapLayerTypes.toArray());
+            final Parameter param = getConfigParam(PARAMETER_NAME_WORLDMAP_TYPE);
+            String valueAsText = param.getValueAsText();
+            WorldMapLayerType selected = null;
+            for (WorldMapLayerType worldMapLayerType : worldMapLayerTypes) {
+                if (worldMapLayerType.getName().equals(valueAsText)) {
+                    selected = worldMapLayerType;
+                    break;
+                }
+            }
+            aModel.setSelectedItem(selected);
+            box.setModel(aModel);
+        }
+
+        @Override
+        public void onOK() {
+            WorldMapLayerType selected = (WorldMapLayerType) box.getModel().getSelectedItem();
+            final Parameter param = getConfigParam(PARAMETER_NAME_WORLDMAP_TYPE);
+            try {
+                param.setValue(selected.getName());
+            } catch (ParamValidateException ignore) {
+            }
         }
     }
 

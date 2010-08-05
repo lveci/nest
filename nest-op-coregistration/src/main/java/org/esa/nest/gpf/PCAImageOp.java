@@ -232,7 +232,7 @@ public class PCAImageOp extends Operator {
             final int n = bandsRawSamples[0].getNumElems();
 
             for (int i = 0; i < numPCA; i++) {
-                checkForCancelation(pm);
+                checkForCancellation(pm);
 
                 final Band targetBand = targetProduct.getBand("PC" + i);
                 final Tile targetTile = targetTileMap.get(targetBand);

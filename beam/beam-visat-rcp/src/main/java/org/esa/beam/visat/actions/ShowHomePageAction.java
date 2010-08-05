@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
@@ -12,11 +28,15 @@ import java.io.IOException;
  * web page.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
  */
 public class ShowHomePageAction extends ExecCommand {
-    private static final String HOME_PAGE_URL_DEFAULT =
-            "http://www.brockmann-consult.de/beam/";
+    private static final String HOME_PAGE_URL_DEFAULT = "http://www.brockmann-consult.de/beam/";
+
+    @Override
+    public void updateState(final CommandEvent event) {
+        setEnabled(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE));
+    }
 
     /**
      * Launches the default browser to display the BEAM Wiki.
@@ -27,9 +47,9 @@ public class ShowHomePageAction extends ExecCommand {
     @Override
     public void actionPerformed(CommandEvent event) {
         final String homePageUrl = System.getProperty("beam.homePageUrl", HOME_PAGE_URL_DEFAULT);
-        final Desktop desktop = Desktop.getDesktop();
 
         try {
+            final Desktop desktop = Desktop.getDesktop();
             desktop.browse(URI.create(homePageUrl));
         } catch (IOException e) {
             // TODO - handle

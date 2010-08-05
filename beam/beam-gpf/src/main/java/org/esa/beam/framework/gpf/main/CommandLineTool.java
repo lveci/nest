@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.gpf.main;
 
 import com.bc.ceres.binding.ConversionException;
@@ -27,6 +43,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * The common command-line tool for the GPF.
@@ -89,7 +107,6 @@ class CommandLineTool {
     private void run(CommandLineArgs lineArgs) throws ValidationException, ConversionException, IOException, GraphException {
         TileCache tileCache = JAI.getDefaultInstance().getTileCache();
         tileCache.setMemoryCapacity(lineArgs.getTileCacheCapacity());
-        SystemUtils.initThirdPartyLibraries();
 
         if (lineArgs.getOperatorName() != null) {
             Map<String, Object> parameters = getParameterMap(lineArgs);
@@ -110,7 +127,7 @@ class CommandLineTool {
             Node lastNode = graph.getNode(graph.getNodeCount() - 1);
             SortedMap<String, String> sourceFilepathsMap = lineArgs.getSourceFilepathMap();
             String readOperatorAlias = OperatorSpi.getOperatorAlias(ReadOp.class);
-            for (Map.Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
+            for (Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
                 String sourceId = entry.getKey();
                 String sourceFilepath = entry.getValue();
                 String sourceNodeId = sourceNodeIdMap.get(sourceId);
@@ -133,7 +150,7 @@ class CommandLineTool {
                 parameters.createChild("formatName").setValue(lineArgs.getTargetFormatName());
 
                 Node targetNode = new Node("WriteProduct$" + lastNode.getId(), writeOperatorAlias);
-                targetNode.addSource(new NodeSource("input", lastNode.getId()));
+                targetNode.addSource(new NodeSource("source", lastNode.getId()));
                 targetNode.setConfiguration(parameters);
 
                 graph.addNode(targetNode);
@@ -280,7 +297,7 @@ class CommandLineTool {
             String s = sourceFile.getPath();
             product = readProduct(s);
             if (product == null) {
-                throw new IOException("No approriate product reader found for " + sourceFile);
+                throw new IOException("No appropriate product reader found for " + sourceFile);
             }
             fileToProductMap.put(sourceFile, product);
         }

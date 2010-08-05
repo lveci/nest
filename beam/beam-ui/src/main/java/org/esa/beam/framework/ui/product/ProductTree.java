@@ -1,17 +1,17 @@
 /*
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.framework.ui.product;
 
@@ -33,15 +33,15 @@ import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandManager;
 import org.esa.beam.framework.ui.command.CommandUIFactory;
+import org.esa.beam.framework.ui.product.tree.AbstractTN;
 import org.esa.beam.framework.ui.product.tree.ProductTreeModel;
-import org.esa.beam.framework.ui.product.tree.ProductTreeNode;
 import org.esa.beam.dataio.dimap.DimapProductReader;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeModelEvent;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -49,8 +49,8 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -67,6 +67,7 @@ import java.util.Set;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
+ * @version $Revision: 1.20 $ $Date: 2010-08-05 17:00:55 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -262,7 +263,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         TreePath selPath = getPathForLocation(event.getX(), event.getY());
         if (selPath != null) {
             setSelectionPath(selPath);
-            ProductTreeNode node = (ProductTreeNode) getLastSelectedPathComponent();
+            AbstractTN node = (AbstractTN) getLastSelectedPathComponent();
             if (node != null) {
                 Object context = node.getContent();
                 if (context != null) {
@@ -338,7 +339,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             if (selRow >= 0) {
                 int clickCount = event.getClickCount();
                 TreePath selPath = getPathForLocation(event.getX(), event.getY());
-                ProductTreeNode node = (ProductTreeNode) selPath.getLastPathComponent();
+                AbstractTN node = (AbstractTN) selPath.getLastPathComponent();
                 fireNodeSelected(node.getContent(), clickCount);
             }
         }
@@ -348,7 +349,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
         @Override
         public void valueChanged(TreeSelectionEvent event) {
-            ProductTreeNode node = (ProductTreeNode) getLastSelectedPathComponent();
+            AbstractTN node = (AbstractTN) getLastSelectedPathComponent();
             if (node != null) {
                 fireNodeSelected(node.getContent(), 1);
             }
@@ -419,7 +420,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 boldFont = getFont().deriveFont(Font.BOLD);
             }
 
-            ProductTreeNode treeNode = (ProductTreeNode) value;
+            AbstractTN treeNode = (AbstractTN) value;
             value = treeNode.getContent();
 
             setFont(normalFont);
@@ -739,7 +740,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             final JTree tree = (JTree)c;
             final TreePath path = tree.getSelectionPath();
 
-            final ProductTreeNode node = (ProductTreeNode) path.getLastPathComponent();
+            final AbstractTN node = (AbstractTN) path.getLastPathComponent();
             final Object context = node.getContent();
             if (context != null) {
                 if(context instanceof Product) {

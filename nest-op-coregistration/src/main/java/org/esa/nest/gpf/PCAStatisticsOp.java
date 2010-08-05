@@ -325,7 +325,7 @@ public class PCAStatisticsOp extends Operator {
         double vi, vj;
         for (int i = 0; i < numOfSourceBands; i++) {
 
-            checkForCancelation(pm);
+            checkForCancellation(pm);
             Arrays.fill(tileSumCross[i], 0.0);
 
             for (int j = 0; j <= i; j++) {
@@ -370,7 +370,7 @@ public class PCAStatisticsOp extends Operator {
         double vi, vj, vm;
         for (int i = 0; i < numOfSourceBands; i++) {
 
-            checkForCancelation(pm);
+            checkForCancellation(pm);
             Arrays.fill(tileSumCross[i], 0.0);
 
             for (int j = 0; j <= i; j++) {
@@ -408,7 +408,7 @@ public class PCAStatisticsOp extends Operator {
     private synchronized void computeImageStatistics (double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) {
 
         for (int i = 0; i < numOfSourceBands; i++) {
-            checkForCancelation(pm);
+            checkForCancellation(pm);
             for (int j = 0; j <= i; j++) {
                 if (j < i) {
                     sumCross[i][j] += tileSumCross[i][j];

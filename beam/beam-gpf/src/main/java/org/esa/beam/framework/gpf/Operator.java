@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.framework.gpf;
 
 import com.bc.ceres.core.Assert;
@@ -355,16 +371,17 @@ public abstract class Operator {
     }
 
     /**
-     * Checks for cancelation of the current processing request. Throws an exception, if the
-     * request has been canceled (e.g. by the user).
+     * Checks for cancellation of the current processing request. Throws an exception, if the
+     * request has been canceled (e.g. by the user). The given progress monitor is usually the one passed into the
+     * {@link #computeTile} or {@link #computeTileStack} methods.
      *
      * @param pm The progress monitor passed into the
      *           the {@link #computeTile(org.esa.beam.framework.datamodel.Band, Tile,com.bc.ceres.core.ProgressMonitor) computeTile} method or
      *           the {@link #computeTileStack(java.util.Map, java.awt.Rectangle, com.bc.ceres.core.ProgressMonitor) computeTileStack}  method.
      * @throws OperatorException if the current processing request has been canceled (e.g. by the user).
      */
-    protected static void checkForCancelation(ProgressMonitor pm) throws OperatorException {
-        OperatorContext.checkForCancelation(pm);
+    protected final void checkForCancellation(ProgressMonitor pm) throws OperatorException {
+        context.checkForCancellation(pm);
     }
 
     /**

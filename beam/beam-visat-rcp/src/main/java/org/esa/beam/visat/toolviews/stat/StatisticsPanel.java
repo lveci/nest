@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.visat.toolviews.stat;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -252,13 +268,16 @@ class StatisticsPanel extends TextPagePanel implements MultipleRoiComputePanel.C
     }
 
     /*
-     * Use error-propagation to compute stddev for log10-scaled bands. (Ask Ralf for maths details.)
+     * Use error-propagation to compute stddev for log10-scaled bands.
      */
     private double getStandardDeviation(Stx stat) {
-        if (getRaster().isLog10Scaled()) {
-            return getRaster().getScalingFactor() * Math.log(10.0) * getMean(stat) * stat.getStandardDeviation();
+        final RasterDataNode raster = getRaster();
+        final double alpha = raster.getScalingFactor();
+        final double delta = stat.getStandardDeviation();
+        if (raster.isLog10Scaled()) {
+            return Math.abs(raster.scale(stat.getMean()) * Math.log(10.0) * alpha * delta);
         } else {
-            return getRaster().scale(stat.getStandardDeviation());
+            return Math.abs(alpha * delta);
         }
     }
 }

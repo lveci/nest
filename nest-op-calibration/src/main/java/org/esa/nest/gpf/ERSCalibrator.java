@@ -350,7 +350,7 @@ public final class ERSCalibrator implements Calibrator {
         int index;
         int adcJ=0;
         for (int x = x0; x < x0 + w; x++) {
-            OperatorContext.checkForCancelation(pm);
+            OperatorContext.checkForCancellation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
             if (applyADCSaturationCorrectionToCurrentTile) {
@@ -2577,7 +2577,7 @@ public final class ERSCalibrator implements Calibrator {
         double sigma = 0.0;
         int adcJ = 0;
         for (int x = tx0; x < tx0 + tw; x++) {
-            OperatorContext.checkForCancelation(pm);
+            OperatorContext.checkForCancellation(pm);
 
             double antennaPatternByRangeSpreadingLoss = 0.0;
             if (isDetectedSampleType) {

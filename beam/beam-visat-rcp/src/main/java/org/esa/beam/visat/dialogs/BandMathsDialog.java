@@ -1,18 +1,17 @@
 /*
- * $Id: BandMathsDialog.java,v 1.1 2010-03-31 14:00:01 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.visat.dialogs;
 
@@ -79,6 +78,7 @@ public class BandMathsDialog extends ModalDialog {
     private static final String PROPERTY_NAME_BAND_NAME = "bandName";
     private static final String PROPERTY_NAME_BAND_DESC = "bandDescription";
     private static final String PROPERTY_NAME_BAND_UNIT = "bandUnit";
+    private static final String PROPERTY_NAME_BAND_WAVELENGTH = "bandWavelength";
 
     private final VisatApp visatApp;
     private final ProductNodeList<Product> productsList;
@@ -93,6 +93,7 @@ public class BandMathsDialog extends ModalDialog {
     private String bandName;
     private String bandDescription = "";
     private String bandUnit = "";
+    private float bandWavelength = 0;
 
     private static int numNewBands = 0;
 
@@ -215,6 +216,13 @@ public class BandMathsDialog extends ModalDialog {
                                 "weightx=1, insets.top=3, gridwidth=2, fill=HORIZONTAL, anchor=WEST");
 
         gbc.gridy = ++line;
+        components = createComponents(PROPERTY_NAME_BAND_WAVELENGTH, TextFieldEditor.class);
+        GridBagUtils.addToPanel(panel, components[1], gbc,
+                                "weightx=0, insets.top=3, gridwidth=1, fill=HORIZONTAL, anchor=WEST");
+        GridBagUtils.addToPanel(panel, components[0], gbc,
+                                "weightx=1, insets.top=3, gridwidth=2, fill=HORIZONTAL, anchor=WEST");
+
+        gbc.gridy = ++line;
         components = createComponents(PROPERTY_NAME_SAVE_EXPRESSION_ONLY, CheckBoxEditor.class);
         GridBagUtils.addToPanel(panel, components[0], gbc, "insets.top=3, gridwidth=3, fill=HORIZONTAL, anchor=EAST");
 
@@ -229,7 +237,7 @@ public class BandMathsDialog extends ModalDialog {
 
         gbc.gridy = ++line;
 
-        JLabel expressionLabel = new JLabel("Expression:");
+        JLabel expressionLabel = new JLabel("Band maths expression:");
         JTextArea expressionArea = new JTextArea();
         expressionArea.setRows(3);
         TextComponentAdapter textComponentAdapter = new TextComponentAdapter(expressionArea);
@@ -289,8 +297,12 @@ public class BandMathsDialog extends ModalDialog {
         descriptor.setDisplayName("Unit");
         descriptor.setDescription("The physical unit for the new band.");
 
+        descriptor = container.getDescriptor(PROPERTY_NAME_BAND_WAVELENGTH);
+        descriptor.setDisplayName("Spectral wavelength");
+        descriptor.setDescription("The physical unit for the new band.");
+
         descriptor = container.getDescriptor(PROPERTY_NAME_EXPRESSION);
-        descriptor.setDisplayName("Expression");
+        descriptor.setDisplayName("Band maths expression");
         descriptor.setDescription("Band maths expression");
         descriptor.setNotEmpty(true);
 
