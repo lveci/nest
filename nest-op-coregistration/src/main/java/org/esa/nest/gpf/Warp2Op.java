@@ -300,6 +300,15 @@ public class Warp2Op extends Operator {
 
         // coregistrated image should have the same geo-coding as the master image
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+        updateTargetProductMetadata();
+    }
+
+    /**
+     * Update metadata in the target product.
+     */
+    private void updateTargetProductMetadata() {
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.coregistered_stack, 1);
     }
 
     private synchronized void getWarpData() throws OperatorException {
