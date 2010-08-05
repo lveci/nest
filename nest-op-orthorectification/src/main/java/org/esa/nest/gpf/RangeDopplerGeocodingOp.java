@@ -111,8 +111,11 @@ public class RangeDopplerGeocodingOp extends Operator {
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
     private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
-    @Parameter(description = "The pixel spacing", defaultValue = "0", label="Pixel Spacing (m)")
-    private double pixelSpacing = 0;
+    @Parameter(description = "The pixel spacing in meters", defaultValue = "0", label="Pixel Spacing (m)")
+    private double pixelSpacingInMeter = 0;
+
+    @Parameter(description = "The pixel spacing in degrees", defaultValue = "0", label="Pixel Spacing (deg)")
+    private double pixelSpacingInDegree = 0;
 
     @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
     private String projectionName = IdentityTransformDescriptor.NAME;
@@ -533,8 +536,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         /*
         double spacing = 0.0;
-        if (pixelSpacing > 0.0) {
-            spacing = pixelSpacing;
+        if (pixelSpacingInMeter > 0.0) {
+            spacing = pixelSpacingInMeter;
         } else {
             if (srgrFlag) {
                 spacing = Math.min(rangeSpacing, azimuthSpacing);
@@ -543,7 +546,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
         */
-        double spacing = pixelSpacing;
+        double spacing = pixelSpacingInMeter;
         double minAbsLat;
         if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
             minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
@@ -658,15 +661,24 @@ public class RangeDopplerGeocodingOp extends Operator {
                                                 0.0,
                                                 sourceProduct.getBandAt(0).getNoDataValue());
 
-        if (Double.compare(pixelSpacing, 0.0) != 0 &&
-            Double.compare(pixelSpacing, getPixelSpacing(sourceProduct)) != 0) {
+        if (pixelSpacingInMeter > 0.0) {
             computeImageGeoBoundary(sourceProduct, projectionName, imageGeoBoundary);
-            computeDEMTraversalSampleInterval();
-            mapInfo.setPixelSizeX((float)delLat);
-            mapInfo.setPixelSizeY((float)delLon);
+            delLat = pixelSpacingInDegree;
+            delLon = pixelSpacingInDegree;
+            double pixelSizeX;
+            double pixelSizeY;
+            if (projectionName.equals("Geographic Lat/Lon")) {
+                pixelSizeX = pixelSpacingInDegree;
+                pixelSizeY = pixelSpacingInDegree;
+            } else {
+                pixelSizeX = pixelSpacingInMeter;
+                pixelSizeY = pixelSpacingInMeter;
+            }
+            mapInfo.setPixelSizeX((float)pixelSizeX);
+            mapInfo.setPixelSizeY((float)pixelSizeY);
 
             final Dimension outputRasterSize = ProductUtils.getOutputRasterSize(
-                    sourceProduct, null, mapInfo.getMapProjection().getMapTransform(), (float)delLat, (float)delLon);
+                    sourceProduct, null, mapInfo.getMapProjection().getMapTransform(), pixelSizeX, pixelSizeY);
             mapInfo.setSceneWidth(outputRasterSize.width);
             mapInfo.setSceneHeight(outputRasterSize.height);
             mapInfo.setPixelX(0.5f*outputRasterSize.width);
@@ -930,10 +942,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
 
-        if (Double.compare(pixelSpacing, 0.0) != 0 &&
-            Double.compare(pixelSpacing, getPixelSpacing(sourceProduct)) != 0) {
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, pixelSpacing);
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, pixelSpacing);
+        if (pixelSpacingInMeter > 0.0 &&
+            Double.compare(pixelSpacingInMeter, getPixelSpacing(sourceProduct)) != 0) {
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, pixelSpacingInMeter);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, pixelSpacingInMeter);
         }        
     }
 
@@ -1975,6 +1987,24 @@ public class RangeDopplerGeocodingOp extends Operator {
         } else {
             return Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(srcProduct)), azimuthSpacing);
         }
+    }
+
+    /**
+     * Compute pixel spacing in degrees.
+     * @param pixelSpacingInMeter Pixel spacing in meters.
+     * @return The pixel spacing in degrees.
+     */
+    public static double getPixelSpacingInDegree(double pixelSpacingInMeter) {
+        return pixelSpacingInMeter / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+    }
+
+    /**
+     * Compute pixel spacing in meters.
+     * @param pixelSpacingInDegree Pixel spacing in degrees.
+     * @return The pixel spacing in meters.
+     */
+    public static double getPixelSpacingInMeter(double pixelSpacingInDegree) {
+        return pixelSpacingInDegree * Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.DTOR;
     }
 
     /**

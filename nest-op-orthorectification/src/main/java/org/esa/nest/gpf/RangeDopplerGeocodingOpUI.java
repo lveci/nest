@@ -44,7 +44,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                                           CalibrationOp.PRODUCT_AUX,
                                                           CalibrationOp.EXTERNAL_AUX});
 
-    final JTextField pixelSpacing = new JTextField("");
+    final JTextField pixelSpacingInMeter = new JTextField("");
+    final JTextField pixelSpacingInDegree = new JTextField("");
     private final JTextField externalDEMFile = new JTextField("");
     private final JTextField externalDEMNoDataValue = new JTextField("");
     private final JButton externalDEMBrowseButton = new JButton("...");
@@ -73,8 +74,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private boolean saveBetaNought = false;
     private boolean saveGammaNought = false;
     private boolean saveSigmaNought = false;
-    private boolean changedByUser = false;
     private double extNoDataValue = 0;
+
+    String savedProductName = null;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -138,8 +140,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
             }
         });
-
-        pixelSpacing.addKeyListener(new TextAreaKeyListener());
 
         saveDEMCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -277,14 +277,23 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
 
-        if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
-            Double pix;
+        String productName = null;
+        if (sourceProducts != null) {
+            productName = sourceProducts[0].getName();
+        }
+
+        if(sourceProducts != null && (pixelSpacingInMeter.getText().isEmpty() || !productName.equals(savedProductName))) {
+            Double pixM, pixD;
             try {
-                pix = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                pixM = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                savedProductName = productName;
             } catch (Exception e) {
-                pix = 0.0;
+                pixM = 0.0;
+                pixD = 0.0;
             }
-            pixelSpacing.setText(String.valueOf(pix));
+            pixelSpacingInMeter.setText(String.valueOf(pixM));
+            pixelSpacingInDegree.setText(String.valueOf(pixD));
         }
 
         final File extDEMFile = (File)paramMap.get("externalDEMFile");
@@ -391,10 +400,16 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("incidenceAngleForGamma0", incidenceAngleForGamma0.getSelectedItem());
         paramMap.put("incidenceAngleForSigma0", incidenceAngleForSigma0.getSelectedItem());
-        if(pixelSpacing.getText().isEmpty()) {
-            paramMap.put("pixelSpacing", 0.0);    
+        if(pixelSpacingInMeter.getText().isEmpty()) {
+            paramMap.put("pixelSpacingInMeter", 0.0);
         } else {
-            paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
+            paramMap.put("pixelSpacingInMeter", Double.parseDouble(pixelSpacingInMeter.getText()));
+        }
+
+        if(pixelSpacingInDegree.getText().isEmpty()) {
+            paramMap.put("pixelSpacingInDegree", 0.0);
+        } else {
+            paramMap.put("pixelSpacingInDegree", Double.parseDouble(pixelSpacingInDegree.getText()));
         }
 
         final String extFileStr = externalDEMFile.getText();
@@ -445,7 +460,42 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacing);
+        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacingInMeter);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (deg):", pixelSpacingInDegree);
+
+        pixelSpacingInMeter.addFocusListener(new FocusListener() {
+
+            public void focusGained(final FocusEvent e) {
+            }
+            public void focusLost(final FocusEvent e) {
+                Double pixM, pixD;
+                try {
+                    pixM = Double.parseDouble(pixelSpacingInMeter.getText());
+                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                } catch (Exception ec) {
+                    pixD = 0.0;
+                }
+                pixelSpacingInDegree.setText(String.valueOf(pixD));
+            }
+        });
+
+        pixelSpacingInDegree.addFocusListener(new FocusListener() {
+
+            public void focusGained(final FocusEvent e) {
+            }
+            public void focusLost(final FocusEvent e) {
+                Double pixM, pixD;
+                try {
+                    pixD = Double.parseDouble(pixelSpacingInDegree.getText());
+                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+                } catch (Exception ec) {
+                    pixM = 0.0;
+                }
+                pixelSpacingInMeter.setText(String.valueOf(pixM));
+            }
+        });
+
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
         
@@ -503,16 +553,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             projectionsValueSet[i] = projections[i].getName();
         }
         return projectionsValueSet;
-    }
-
-    private class TextAreaKeyListener implements KeyListener {
-        public void keyPressed(KeyEvent e) {
-        }
-        public void keyReleased(KeyEvent e) {
-        }
-        public void keyTyped(KeyEvent e) {
-            changedByUser = true;
-        }
     }
 
     private void enableExternalAuxFile(boolean flag) {

@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 import java.util.Map;
 
 /**
@@ -72,7 +74,42 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacing);
+        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacingInMeter);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (deg):", pixelSpacingInDegree);
+
+        pixelSpacingInMeter.addFocusListener(new FocusListener() {
+
+            public void focusGained(final FocusEvent e) {
+            }
+            public void focusLost(final FocusEvent e) {
+                Double pixM, pixD;
+                try {
+                    pixM = Double.parseDouble(pixelSpacingInMeter.getText());
+                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                } catch (Exception ec) {
+                    pixD = 0.0;
+                }
+                pixelSpacingInDegree.setText(String.valueOf(pixD));
+            }
+        });
+
+        pixelSpacingInDegree.addFocusListener(new FocusListener() {
+
+            public void focusGained(final FocusEvent e) {
+            }
+            public void focusLost(final FocusEvent e) {
+                Double pixM, pixD;
+                try {
+                    pixD = Double.parseDouble(pixelSpacingInDegree.getText());
+                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+                } catch (Exception ec) {
+                    pixM = 0.0;
+                }
+                pixelSpacingInMeter.setText(String.valueOf(pixM));
+            }
+        });
+        
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
 
