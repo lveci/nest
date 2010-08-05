@@ -366,6 +366,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     facilityRec.getAttributeInt("Range spreading loss compensation flag"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                     facilityRec.getAttributeDouble("Absolute calibration constant K"));
         }

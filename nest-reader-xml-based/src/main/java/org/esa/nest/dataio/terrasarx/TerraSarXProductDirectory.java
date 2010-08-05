@@ -150,6 +150,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, srgr);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
 
         final MetadataElement processingFlags = processing.getElement("processingFlags");
         setFlag(processingFlags, "rangeSpreadingLossCorrectedFlag", "true", absRoot, AbstractMetadata.range_spread_comp_flag);

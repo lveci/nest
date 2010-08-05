@@ -97,6 +97,7 @@ public final class AbstractMetadata {
     public static final String ref_slant_range = "ref_slant_range";
     public static final String ref_slant_range_exp = "ref_slant_range_exp";
     public static final String rescaling_factor = "rescaling_factor";
+    public static final String coregistered_stack = "coregistered_stack";
 
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
@@ -232,6 +233,9 @@ public final class AbstractMetadata {
 
         // Multilook
         addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");
+
+        // coregistration
+        addAbstractedAttribute(absRoot, coregistered_stack, ProductData.TYPE_UINT8, "flag", "Coregistration applied");
 
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file used");

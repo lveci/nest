@@ -314,6 +314,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                     facilityRec.getAttributeDouble("Absolute calibration constant K"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
         }
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());

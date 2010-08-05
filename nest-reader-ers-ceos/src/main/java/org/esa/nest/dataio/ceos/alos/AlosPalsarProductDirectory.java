@@ -417,6 +417,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag, 1);        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
         if(radiometricRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 radiometricRec.getAttributeDouble("Calibration factor"));

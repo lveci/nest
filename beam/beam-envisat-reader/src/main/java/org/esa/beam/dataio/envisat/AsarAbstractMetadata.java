@@ -187,8 +187,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute(mppAds, "range_spread_comp_flag", absRoot, "range spread compensation applied");
             addAbstractedAttribute("replica_power_corr_flag", ProductData.TYPE_UINT8, "flag",
                     "Replica pulse power correction applied", absRoot);
-            addAbstractedAttribute("abs_calibration_flag", ProductData.TYPE_UINT8, "flag",
-                    "Product calibrated", absRoot);
+            addAbstractedAttribute("abs_calibration_flag", ProductData.TYPE_UINT8, "flag","Product calibrated", absRoot);
             addAbstractedAttribute("calibration_factor",
                 mppAds.getAttributeDouble("ASAR_Main_ADSR.sd/calibration_factors.1.ext_cal_fact", 0), "", absRoot,
                     "Calibration constant");
@@ -196,6 +195,7 @@ public final class AsarAbstractMetadata {
                 mppAds.getAttributeDouble("range_samp_rate", 0) / 1000000.0, "MHz", absRoot, "Range Sampling Rate");
             addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag",
                     "Product multilooked", absRoot);
+            addAbstractedAttribute("coregistered_stack", ProductData.TYPE_UINT8, "flag","Coregistration applied", absRoot);
         } else {
             addAbstractedAttribute("num_output_lines", 0, "", absRoot, "");
             addAbstractedAttribute("num_samples_per_line", 0, "", absRoot, "");
@@ -227,6 +227,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("calibration_factor", 0, "", absRoot, "Calibration constant");
             addAbstractedAttribute("range_sampling_rate",  0, "MHz", absRoot, "Range Sampling Rate");
             addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag", "Product multilooked", absRoot);
+            addAbstractedAttribute("coregistered_stack", ProductData.TYPE_UINT8, "flag","Coregistration applied", absRoot);
         }
 
         final MetadataElement dsd = root.getElement("DSD");

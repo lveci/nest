@@ -268,7 +268,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
         // Global calibration attributes
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag,
         		globalElem.getAttributeInt("Calibration Constant Compensation Flag"));
-        
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
+
         final String rngSpreadComp = globalElem.getAttributeString(
         		"Range Spreading Loss Compensation Geometry", defStr);
         if (rngSpreadComp.equals("NONE"))
@@ -370,8 +371,13 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final MetadataElement root = product.getMetadataRoot();
         final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
         final MetadataElement bandElem = getBandElement(product.getBandAt(0));
-
+        
         final double referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat).getMJD(); // in days
+        /*
+        final double firstLineTime = globalElem.getElement("S01").getElement("B001").getAttributeDouble("Azimuth First Time") / (24*3600); // in days
+        final double lastLineTime = globalElem.getElement("S01").getElement("B001").getAttributeDouble("Azimuth Last Time") / (24*3600); // in days
+        double lineTimeInterval = (24*3600)*(lastLineTime - firstLineTime) / (product.getSceneRasterHeight() - 1);
+        */
         final double firstLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth First Time") / (24*3600); // in days
         final double lastLineTime = bandElem.getAttributeDouble("Zero Doppler Azimuth Last Time") / (24*3600); // in days
         double lineTimeInterval = bandElem.getAttributeDouble("Line Time Interval", 0); // in s
