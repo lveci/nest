@@ -200,20 +200,6 @@
             <helpId>open</helpId>
       </action>
 
-      <!--action>
-            <id>importBrowser</id>
-            <parent>file</parent>
-            <placeAfter>openRaster</placeAfter>
-            <class>org.esa.nest.dat.actions.importbrowser.ImportBrowserAction</class>
-            <text>Import Browser</text>
-            <accelerator>shift control P</accelerator>
-            <shortDescr>Opens the Import Browser.</shortDescr>
-            <longDescr>Opens the Import Browser dialog to preview and open products.</longDescr>
-            <smallIcon>icons/import_browser16.png</smallIcon>
-            <largeIcon>icons/import_browser.png</largeIcon>
-            <helpID>productGrabber</helpID>
-      </action-->
-
       <action>
             <parent>file</parent>
             <id>createSubset</id>
