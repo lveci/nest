@@ -487,6 +487,7 @@ class ColorManipulationForm {
         if (productSceneView != null) {
             setImageInfoCopy(createDefaultImageInfo());
             childForm.resetFormModel(getProductSceneView());
+            childForm.getMoreOptionsForm().updateForm();
             applyButton.setEnabled(true);
         }
     }
