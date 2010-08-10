@@ -38,9 +38,8 @@
             <directory>nest-src/main/bin/linux64</directory>
             <outputDirectory></outputDirectory>
 			<includes>
-				<include>**/*.sh</include>
+				<include>**/*.so</include>
 			</includes>
-            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
@@ -49,12 +48,12 @@
             <directory>nest-src/main/bin/linux64</directory>
             <outputDirectory></outputDirectory>
 			<includes>
-				<include>**/*.so</include>
+				<include>**/*.sh</include>
 			</includes>
+            <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
-		
     </fileSets>
 
     <moduleSets>

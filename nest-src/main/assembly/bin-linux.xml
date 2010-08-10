@@ -34,17 +34,6 @@
             <outputDirectory>commandline</outputDirectory>
         </fileSet>
 		
-        <fileSet>
-            <directory>nest-src/main/bin/linux</directory>
-            <outputDirectory></outputDirectory>
-			<includes>
-				<include>**/*.sh</include>
-			</includes>
-            <lineEnding>unix</lineEnding>
-            <fileMode>0755</fileMode>
-            <directoryMode>0755</directoryMode>
-        </fileSet>
-		
 		<fileSet>
             <directory>nest-src/main/bin/linux</directory>
             <outputDirectory></outputDirectory>
@@ -55,6 +44,16 @@
             <directoryMode>0755</directoryMode>
         </fileSet>
 		
+		<fileSet>
+            <directory>nest-src/main/bin/linux</directory>
+            <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
     </fileSets>
 
     <moduleSets>
