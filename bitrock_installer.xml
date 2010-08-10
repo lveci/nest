@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>4A</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -107,9 +108,6 @@
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-4A-bin.dir/VERSION.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-4A-bin.dir/LICENSE.txt</origin>
                         </distributionFile>
                         <distributionDirectory>
                             <origin>target/nest-4A-bin.dir/auxdata</origin>
