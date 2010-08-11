@@ -88,6 +88,7 @@ public class VersionChecker {
     }
 
     private String getVersion(final URL url) throws IOException {
+        try {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
         final String line;
         try {
@@ -99,5 +100,9 @@ public class VersionChecker {
             throw new IOException("unexpected version file format");
         }
         return line;
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+        return "";
     }
 }

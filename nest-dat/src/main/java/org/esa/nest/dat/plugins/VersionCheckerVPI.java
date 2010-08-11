@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerVPI.java,v 1.6 2010-01-14 17:16:13 lveci Exp $
+ * $Id: VersionCheckerVPI.java,v 1.7 2010-08-11 19:51:42 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -33,7 +33,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
     private static final String MESSAGE_BOX_TITLE = "Software Version Check";  /*I18N*/
     private static final int DELAY_MILLIS = 5 * 1000;  // 5 seconds delay
 
-    private static final String remoteVersionUrl = "http://www.array.ca/nest/version.txt";
+    private static final String remoteVersionUrl = "http://www.array.ca/nest-web/VERSION.txt";
     private static final String NEST_WEBSITE = "http://www.array.ca/nest";
 
     private static final String DISABLE_HINT = "Please note that you can disable the on-line version check\n" +
