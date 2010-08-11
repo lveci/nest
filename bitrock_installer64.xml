@@ -64,9 +64,6 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4A-bin.dir/LICENSE.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-4A-bin.dir/readme.html</origin>
                         </distributionFile>
                         <distributionFile>
