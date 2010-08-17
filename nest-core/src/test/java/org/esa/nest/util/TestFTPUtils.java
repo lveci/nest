@@ -17,11 +17,9 @@ package org.esa.nest.util;
 
 import junit.framework.TestCase;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
-
-import org.apache.commons.net.ftp.FTPFile;
 
 
 /**

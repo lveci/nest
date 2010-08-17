@@ -21,17 +21,17 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.esa.beam.visat.VisatApp;
-import org.jdom.Element;
-import org.jdom.Document;
 import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public final class ftpUtils {

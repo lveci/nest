@@ -16,7 +16,6 @@
 package org.esa.nest.dat.toolviews.worldmap;
 
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.VisatApp;

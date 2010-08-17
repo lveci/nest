@@ -23,19 +23,16 @@ import org.esa.beam.framework.ui.product.ProductMetadataTable;
 import org.esa.beam.framework.ui.product.ProductMetadataView;
 import org.esa.beam.framework.ui.product.ProductNodeView;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.dialogs.ProductSelectorDialog;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 
 /**
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.2 $ $Date: 2010-08-17 16:05:27 $
+ * @version $Revision: 1.3 $ $Date: 2010-08-17 16:53:41 $
  */
 public class ExportMetadataXMLAction extends ExecCommand {
 

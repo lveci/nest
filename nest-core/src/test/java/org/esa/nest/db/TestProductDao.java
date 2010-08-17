@@ -16,16 +16,17 @@
 package org.esa.nest.db;
 
 import junit.framework.TestCase;
-
-import java.io.IOException;
-import java.io.File;
-import java.sql.*;
-import java.awt.*;
-
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.util.TestUtils;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
 

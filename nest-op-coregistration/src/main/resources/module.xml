@@ -64,16 +64,6 @@
             <helpId>CreateStackOp</helpId>
         </action>
 
-        <!--action>
-            <id>CreateCoherenceImageOp</id>
-            <class>org.esa.nest.dat.CreateCoherenceImageOpAction</class>
-            <text>Generate Coherence Image</text>
-            <shortDescr>Create coherence images</shortDescr>
-            <helpId>CreateCoherenceImageOp</helpId>
-            <parent>Insar</parent>
-            <placeAfter>openCoregistrationDialog</placeAfter>
-        </action-->
-
     </extension>
 
 </module>

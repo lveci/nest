@@ -15,7 +15,6 @@
  */
 package org.esa.nest.dat;
 
-import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.nest.util.ResourceUtils;
 
@@ -23,11 +22,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
-import java.text.MessageFormat;
+import java.io.File;
 import java.util.*;
 import java.util.List;
-import java.io.File;
 
 /**
  * This class pertains to the "about" dialog box for the VISAT application.

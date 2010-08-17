@@ -1,10 +1,10 @@
 package org.esa.nest.dat.views.polarview;
 
 import java.awt.*;
-import java.io.PrintStream;
-import java.io.FileOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 class ReadoutCanvas {
 

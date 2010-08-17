@@ -17,19 +17,19 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
-import org.esa.nest.dataio.ReaderUtils;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Helper methods for working with Operators

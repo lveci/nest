@@ -14,20 +14,19 @@
  */
 package org.esa.nest.gpf;
 
-import java.awt.*;
-import java.io.File;
-import java.util.HashMap;
-
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.Unit.UnitType;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 
-import com.bc.ceres.core.ProgressMonitor;
+import java.awt.*;
+import java.io.File;
+import java.util.HashMap;
 
 /**
  * Calibration for Cosmo-Skymed data products.

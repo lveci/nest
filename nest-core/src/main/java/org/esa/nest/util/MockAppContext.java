@@ -15,11 +15,11 @@
  */
 package org.esa.nest.util;
 
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.application.ApplicationPage;
-import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductManager;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.application.ApplicationPage;
+import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.PropertyMap;
 
 import javax.swing.*;

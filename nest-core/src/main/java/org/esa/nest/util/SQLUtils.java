@@ -16,9 +16,6 @@
 package org.esa.nest.util;
 
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.util.StringUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.db.ProductDB;
 
 import java.sql.Date;
 import java.util.Calendar;
