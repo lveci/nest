@@ -438,15 +438,6 @@
             <separatorBefore>true</separatorBefore>
         </action>
 
-        <!--action>
-            <id>nestProjection</id>
-            <class>org.esa.nest.dat.actions.ProjectionAction</class>
-            <parent>geometry</parent>
-            <text>Map Projection...</text>
-            <shortDescr>Apply Map Projection</shortDescr>
-            <helpId>projectionDialog</helpId>
-        </action-->
-
         <action>
             <id>attachNestPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
@@ -550,18 +541,6 @@
             <description>Toggle visibility of the layers tool bar.</description>
             <helpId>showLayersToolBar</helpId>
         </action>
-
-        <!--action>
-            <id>crossHairTool</id>
-            <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.nest.dat.tool.CrossHairTool</tool>
-            <parent>tools</parent>
-            <text>Select</text>
-            <shortDescr>Selection Tool</shortDescr>
-            <largeIcon>icons/CrossHairTool.gif</largeIcon>
-            <selected>true</selected>
-            <helpId>selectTool</helpId>
-        </action-->
 
         <action>
             <id>showPolarWaveView</id>
