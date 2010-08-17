@@ -28,8 +28,8 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Constants;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;

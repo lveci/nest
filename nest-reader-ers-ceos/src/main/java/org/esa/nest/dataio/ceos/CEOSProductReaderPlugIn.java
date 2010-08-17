@@ -24,7 +24,6 @@ import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.ers.ERSProductReader;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
 
 /**
