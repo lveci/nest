@@ -211,19 +211,7 @@ public class Warp2Op extends Operator {
         } catch (Throwable e) {
             openResidualsFile = true;
             OperatorUtils.catchOperatorException(getId(), e);
-        } finally {
-            if (openResidualsFile) {
-                final File residualsFile = getResidualsFile(sourceProduct);
-                if (Desktop.isDesktopSupported() && residualsFile.exists()) {
-                    try {
-                        Desktop.getDesktop().open(residualsFile);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        // do nothing
-                    }
-                }
-            }
-        }
+        } 
     }
 
     private void createInSARInterpTable() {
@@ -397,6 +385,18 @@ public class Warp2Op extends Operator {
                             final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
                             getWarpData();
                             break;
+                        }
+                    }
+                }
+
+                if (openResidualsFile) {
+                    final File residualsFile = getResidualsFile(sourceProduct);
+                    if (Desktop.isDesktopSupported() && residualsFile.exists()) {
+                        try {
+                            Desktop.getDesktop().open(residualsFile);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            // do nothing
                         }
                     }
                 }
