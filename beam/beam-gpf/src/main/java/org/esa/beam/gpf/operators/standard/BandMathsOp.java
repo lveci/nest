@@ -107,6 +107,11 @@ public class BandMathsOp extends Operator {
                description = "List of variables which can be used within the expressions.")
     private Variable[] variables;
 
+    @Parameter
+    private String bandName;
+    @Parameter
+    private String bandExpression = null;
+
     private Map<Band, BandDescriptor> descriptorMap;
 
     public static BandMathsOp createBooleanExpressionBand(String expression, Product sourceProduct) {
@@ -125,7 +130,15 @@ public class BandMathsOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         if (targetBandDescriptors == null || targetBandDescriptors.length == 0) {
-            throw new OperatorException("No target bands specified.");
+        //    throw new OperatorException("No target bands specified.");
+            if(bandExpression != null) {
+                targetBandDescriptors = new BandMathsOp.BandDescriptor[1];
+                final BandMathsOp.BandDescriptor bandDesc = new BandMathsOp.BandDescriptor();
+                bandDesc.name =  bandName;
+                bandDesc.type =  ProductData.TYPESTRING_FLOAT32;
+                bandDesc.expression = bandExpression;
+                targetBandDescriptors[0] = bandDesc;
+            }
         }
 
         int width = sourceProducts[0].getSceneRasterWidth();
@@ -138,11 +151,13 @@ public class BandMathsOp extends Operator {
         }
         targetProduct = new Product(sourceProducts[0].getName() + "BandMath", "BandMath", width, height);
 
-        descriptorMap = new HashMap<Band, BandDescriptor>(targetBandDescriptors.length);
-        Namespace namespace = createNamespace();
-        Parser verificationParser = new ParserImpl(namespace, true);
-        for (BandDescriptor bandDescriptor : targetBandDescriptors) {
-            createBand(bandDescriptor, verificationParser);
+        if (targetBandDescriptors != null && targetBandDescriptors.length > 0) {
+            descriptorMap = new HashMap<Band, BandDescriptor>(targetBandDescriptors.length);
+            Namespace namespace = createNamespace();
+            Parser verificationParser = new ParserImpl(namespace, true);
+            for (BandDescriptor bandDescriptor : targetBandDescriptors) {
+                createBand(bandDescriptor, verificationParser);
+            }
         }
 
         ProductUtils.copyMetadata(sourceProducts[0], targetProduct);

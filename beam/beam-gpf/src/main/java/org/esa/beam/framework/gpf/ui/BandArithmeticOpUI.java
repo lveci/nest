@@ -106,6 +106,8 @@ public class BandArithmeticOpUI extends BaseOperatorUI {
         final BandMathsOp.BandDescriptor[] bandDescriptors = new BandMathsOp.BandDescriptor[1];
         bandDescriptors[0] = bandDesc;
         paramMap.put("targetBandDescriptors", bandDescriptors);
+        paramMap.put("bandName", bandDesc.name);
+        paramMap.put("bandExpression", bandDesc.expression);
     }
 
     private void initVariables() {

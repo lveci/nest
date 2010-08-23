@@ -94,9 +94,9 @@ public abstract class BaseOperatorUI implements OperatorUI {
                 if (descriptor.getType().isArray() && itemAlias != null && !itemAlias.isEmpty()) {
                     final DomElement childElement = descriptor.getItemsInlined() ? parentElement : parentElement.createChild(getElementName(p));
                     final Object array = p.getValue();
-                    if (array != null) {
+                    final Converter itemConverter = getItemConverter(descriptor);
+                    if (array != null && itemConverter != null) {
                         final int arrayLength = Array.getLength(array);
-                        final Converter itemConverter = getItemConverter(descriptor);
                         for (int i = 0; i < arrayLength; i++) {
                             final Object component = Array.get(array, i);
                             final DomElement itemElement = childElement.createChild(itemAlias);
@@ -106,7 +106,7 @@ public abstract class BaseOperatorUI implements OperatorUI {
                                 itemElement.setValue(text);
                             }
                         }
-                    }
+                    } 
                 } else {
                     final DomElement childElement = parentElement.createChild(getElementName(p));
                     final Object childValue = p.getValue();
