@@ -298,7 +298,14 @@ public class CosmoSkymedReader extends AbstractProductReader {
         	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.inc_angle_comp_flag, 0);
         else
         	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.inc_angle_comp_flag, 1);
-       
+
+        final String antElevComp = globalElem.getAttributeString(
+        		"Range Antenna Pattern Compensation Geometry", defStr);
+        if (antElevComp.equals("NONE"))
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag, 0);
+        else
+        	AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag, 1);
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ref_inc_angle,
                 globalElem.getAttributeDouble("Reference Incidence Angle", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ref_slant_range,
