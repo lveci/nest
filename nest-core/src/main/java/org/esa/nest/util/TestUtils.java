@@ -27,6 +27,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.db.DBScanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -268,7 +269,8 @@ public class TestUtils {
     public static int recurseProcessFolder(final OperatorSpi spi, final File folder, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
-        for(File file : folder.listFiles()) {
+        final DBScanner.DirectoryFileFilter dirFilter = new DBScanner.DirectoryFileFilter();
+        for(File file : folder.listFiles(dirFilter)) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
 

@@ -185,7 +185,7 @@ public final class DBScanner extends SwingWorker {
         return dirList.toArray(new File[dirList.size()]);
     }
 
-    private static class DirectoryFileFilter implements java.io.FileFilter {
+    public static class DirectoryFileFilter implements java.io.FileFilter {
 
         final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
 
