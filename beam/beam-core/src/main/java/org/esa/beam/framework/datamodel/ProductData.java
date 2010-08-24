@@ -56,7 +56,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2010-08-05 17:00:50 $
+ * @version $Revision: 1.10 $ $Date: 2010-08-24 17:36:35 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -2566,9 +2566,9 @@ public abstract class ProductData implements Cloneable {
         public UTC(double mjd) {
             super(3);
 
-            double microSeconds = (mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND;
-            double seconds = (mjd * SECONDS_PER_DAY - microSeconds * MICROS_TO_SECONDS) % SECONDS_PER_DAY;
             final double days = (int) mjd;
+            double seconds = (int)((mjd - days) * SECONDS_PER_DAY);
+            double microSeconds = (int)(((mjd - days)*SECONDS_PER_DAY - seconds) * MICROS_PER_SECOND);
 
             if (microSeconds < 0) {
                 microSeconds += MICROS_PER_SECOND;
