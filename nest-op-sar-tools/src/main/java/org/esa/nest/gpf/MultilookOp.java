@@ -381,6 +381,10 @@ public final class MultilookOp extends Operator {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
+                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
+                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().endsWith(pol)) {
+                    targetBandName += "_" + pol.toUpperCase();
+                }
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                     targetUnit = unit;
