@@ -31,14 +31,6 @@
 
     <extension point="beam-ui:actions">
 
-        <!--action>
-            <id>insarComingSoonAction</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>NEST-DORIS InSAR (Coming soon)</text>
-            <shortDescr>Complete port of DORIS plus more</shortDescr>
-            <parent>insar</parent>
-        </action-->
-
 		<action>
             <id>InSARProducts</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>

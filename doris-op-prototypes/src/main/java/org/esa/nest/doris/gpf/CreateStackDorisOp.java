@@ -45,7 +45,8 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "CreateStackDoris",
                   category = "InSAR Prototypes",
-                  description = "Collocates two or more products based on their geo-codings.")
+                  description = "Collocates two or more products based on their geo-codings.",
+                  internal = true)
 public class CreateStackDorisOp extends Operator {
 
     @SourceProducts
