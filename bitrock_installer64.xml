@@ -64,9 +64,6 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4A-bin.dir/readme.html</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-4A-bin.dir/VERSION.txt</origin>
                         </distributionFile>
                         <distributionDirectory>
@@ -99,6 +96,9 @@
                         <distributionDirectory>
                             <origin>target/nest-4A-bin.dir/config</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin.dir/readme.txt</origin>
+                        </distributionFile>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>

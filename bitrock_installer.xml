@@ -104,9 +104,6 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4A-bin.dir/readme.html</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-4A-bin.dir/VERSION.txt</origin>
                         </distributionFile>
                         <distributionDirectory>
@@ -139,6 +136,9 @@
                         <distributionDirectory>
                             <origin>target/nest-4A-bin.dir/config</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin.dir/readme.txt</origin>
+                        </distributionFile>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>
@@ -184,7 +184,7 @@
                             <origin>target/nest-4A-bin-linux.dir/libmlib_jai.so</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>../dist/jdk7/linux/jre</origin>
+                            <origin>../dist/jdk6/linux32/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
@@ -268,6 +268,24 @@
                         <distributionDirectory>
                             <origin>../dist/jdk7/linux64/jre</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libmlib_jai.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libclib_jiio.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libgluegen-rt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libjogl.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libjogl_awt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4A-bin-linux64.dir/libjogl_cg.so</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
                 <folder>
