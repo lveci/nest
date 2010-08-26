@@ -273,7 +273,7 @@ public class ASARCalibrator implements Calibrator {
     private void setCalibrationFlags() {
 
         if (antElevCorrFlag) {
-            if (multilookFlag) {
+            if (multilookFlag || auxFile != null && auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
                 retroCalibrationFlag = false;
                 System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
             } else {
@@ -281,7 +281,11 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
+        if (auxFile != null && auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
+            applyAntennaPatternCorr = false;
+        } else {
+            applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
+        }
         applyRangeSpreadingCorr = !rangeSpreadCompFlag;
     }
 
@@ -424,18 +428,15 @@ public class ASARCalibrator implements Calibrator {
 
     private void getNewXCAFile() throws Exception {
 
-        if (auxFile != null && auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
-            newXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
-            newXCAFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + newXCAFileName;
-
-        } else if(auxFile != null && auxFile.contains(CalibrationOp.EXTERNAL_AUX)) {
-
+        if(auxFile != null && auxFile.contains(CalibrationOp.EXTERNAL_AUX)) {
             if (externalAuxFile != null && externalAuxFile.exists()) {
+
                 if (!externalAuxFile.getName().contains("ASA_XCA")) {
                     throw new OperatorException("Invalid XCA file for ASAR product");
                 }
                 newXCAFileName = externalAuxFile.getName();
                 newXCAFilePath = externalAuxFile.getAbsolutePath();
+
             } else {
                 throw new OperatorException("No external auxiliary file is specified.");
             }
@@ -1452,23 +1453,27 @@ public class ASARCalibrator implements Calibrator {
             return sigma;
         }
 
-        sigma *= Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower);
-
-        final double elevationAngle = computeElevationAngle(slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
-
-        double gain;
-        if (wideSwathProductFlag) {
-            if (subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) { // Rem(AP+RSL)/ApplyADC Op is used
-                computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
-            }
-            gain = getAntennaPatternGain(
-                    elevationAngle, bandPolarIdx, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
-        } else {
-            gain = computeAntPatGain(
-                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
+        if (auxFile == null || !auxFile.contains(CalibrationOp.PRODUCT_AUX)) {
+            sigma *= Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower);
         }
 
-        sigma /= gain;
+        if (applyAntennaPatternCorr) {
+            final double elevationAngle = computeElevationAngle(slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
+
+            double gain;
+            if (wideSwathProductFlag) {
+                if (subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) { // Rem(AP+RSL)/ApplyADC Op is used
+                    computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
+                }
+                gain = getAntennaPatternGain(
+                        elevationAngle, bandPolarIdx, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
+            } else {
+                gain = computeAntPatGain(
+                        elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
+            }
+
+            sigma /= gain;
+        }
         
         return sigma;
     }
