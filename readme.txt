@@ -1,4 +1,4 @@
-About NEST Version 3C
+About NEST Version 4A
 
 The Next ESA SAR Toolbox (NEST) will be used for reading, post-processing, analyzing and visualizing the large archive of data from present and planned ESA SAR missions including Sentinel-1, as well as third party SAR-data from JERS SAR, ALOS PALSAR, TerraSAR-X and Radarsat-2. NEST will help the remote sensing community by handling ESA SAR products and complimenting existing commercial packages.
 
@@ -27,15 +27,14 @@ Building NEST from the source
 2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin to your PATH.
 
 3. Download the NEST source code and unpack into $MY_PROJECTS/nest.
-4. Copy 3rd-party folder found in nest-developer-tools\maven-dependencies into your Maven repository, which is by default ~/.m2/repository.
-5. Cd into $MY_PROJECTS/nest
-6. Build NEST from source: Type mvn compile or mvn package
-7. Open project in the your IDE. IntelliJ IDEA users:
+4. Cd into $MY_PROJECTS/nest
+5. Build NEST from source: Type mvn compile or mvn package
+6. Open project in the your IDE. IntelliJ IDEA users:
 
     * To build IDEA project files for NEST: Type mvn idea:idea
     * In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the created project file $MY_PROJECTS/nest/nest.ipr
 
-8. Open project in the your IDE. Eclipse users:
+7. Open project in the your IDE. Eclipse users:
 
     * To build Eclipse project files for NEST: Type mvn eclipse:eclipse
     * Make sure that M2_REPO classpath variable is set:
@@ -56,7 +55,7 @@ Building NEST from the source
     * Main class: com.bc.ceres.launcher.Launcher
     * VM parameters: -Xmx1024M -Dceres.context=nest
     * Program parameters: none
-    * Working directory: $MY_PROJECTS/nest/beam
+    * Working directory: $MY_PROJECTS/nest/output
     * Use classpath of module (project in Eclipse): nest-bootstrap
 
 
