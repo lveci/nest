@@ -12,8 +12,7 @@
 
     <files>
         <file>
-            <source>readme.html</source>
-            <lineEnding>unix</lineEnding>
+            <source>readme.txt</source>
             <filtered>true</filtered>
         </file>
     </files>
