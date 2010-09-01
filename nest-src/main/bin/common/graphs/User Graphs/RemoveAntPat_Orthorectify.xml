@@ -28,7 +28,8 @@
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
       <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
-      <pixelSpacing>12.5</pixelSpacing>
+      <pixelSpacingInMeter>0.0</pixelSpacingInMeter>
+      <pixelSpacingInDegree>0.0</pixelSpacingInDegree>
 	  <projectionName>Geographic Lat/Lon</projectionName>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
