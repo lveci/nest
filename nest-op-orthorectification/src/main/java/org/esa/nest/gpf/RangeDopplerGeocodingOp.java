@@ -1996,7 +1996,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The pixel spacing in degrees.
      */
     public static double getPixelSpacingInDegree(double pixelSpacingInMeter) {
-        return pixelSpacingInMeter / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        return pixelSpacingInMeter / Constants.semiMajorAxis * org.esa.beam.util.math.MathUtils.RTOD;
+//        return pixelSpacingInMeter / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
     }
 
     /**
@@ -2005,7 +2006,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The pixel spacing in meters.
      */
     public static double getPixelSpacingInMeter(double pixelSpacingInDegree) {
-        return pixelSpacingInDegree * Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.DTOR;
+        return pixelSpacingInDegree * Constants.semiMinorAxis * org.esa.beam.util.math.MathUtils.DTOR;
+//        return pixelSpacingInDegree * Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.DTOR;
     }
 
     /**
