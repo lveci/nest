@@ -18,7 +18,6 @@ package org.esa.beam.framework.gpf.main;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.sun.media.jai.util.SunTileScheduler;
-
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -27,13 +26,12 @@ import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.GraphIO;
 import org.esa.beam.framework.gpf.graph.Node;
 
+import javax.media.jai.JAI;
+import javax.media.jai.TileScheduler;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.media.jai.JAI;
-import javax.media.jai.TileScheduler;
 
 public class CommandLineToolGraphTest extends TestCase {
     private GraphCommandLineContext context;
@@ -242,17 +240,20 @@ public class CommandLineToolGraphTest extends TestCase {
             logString = "";
         }
 
+        @Override
         public Product readProduct(String productFilepath) throws IOException {
             logString += "s" + readProductCounter + "=" + productFilepath + ";";
             readProductCounter++;
             return new Product("P", "T", 10, 10);
         }
 
+        @Override
         public void writeProduct(Product targetProduct, String filePath, String formatName) throws IOException {
             logString += "t" + writeProductCounter + "=" + filePath + ";";
             writeProductCounter++;
         }
 
+        @Override
         public Graph readGraph(String filepath, Map<String, String> parameterMap) throws IOException, GraphException {
 
             logString += "g=" + filepath + ";";
@@ -291,17 +292,20 @@ public class CommandLineToolGraphTest extends TestCase {
             return GraphIO.read(new StringReader(xml), parameterMap);
         }
 
+        @Override
         public void executeGraph(Graph graph) throws GraphException {
             logString += "e=" + graph.getId() + ";";
             executedGraph = graph;
         }
 
 
+        @Override
         public Product createOpProduct(String opName, Map<String, Object> parameters, Map<String, Product> sourceProducts) throws OperatorException {
             fail("did not expect to come here");
             return null;
         }
 
+        @Override
         public Map<String, String> readParameterFile(String propertiesFilepath) throws IOException {
             HashMap<String, String> hashMap = new HashMap<String, String>();
             hashMap.put("expression", "sqrt(x*x + y*y)");
@@ -309,6 +313,7 @@ public class CommandLineToolGraphTest extends TestCase {
             return hashMap;
         }
 
+        @Override
         public void print(String m) {
             this.m += m;
         }

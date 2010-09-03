@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.23 $ $Date: 2010-08-05 17:00:50 $
+ * @version $Revision: 1.24 $ $Date: 2010-09-02 20:24:09 $
  */
 public class Product extends ProductNode {
 
@@ -3047,6 +3047,9 @@ public class Product extends ProductNode {
                 return true;
             } else if (o instanceof AutoGrouping) {
                 AutoGrouping other = (AutoGrouping) o;
+                if (other.size() != size()) {
+                    return false;
+                }
                 for (int i = 0; i < paths.length; i++) {
                     String[] path = paths[i];
                     if (!ObjectUtils.equalObjects(path, other.get(i))) {

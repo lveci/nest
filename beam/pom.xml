@@ -8,7 +8,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.8-SNAPSHOT</version>
+    <version>4.9-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -142,12 +142,12 @@
         <!--module>beam-unmix</module-->
         <module>beam-cluster-analysis</module>
         <!--module>beam-collocation</module-->
+	<!--module>beam-pixel-extraction</module-->
 
         <!--module>beam-avhrr-reader</module-->
         <!--module>beam-atsr-reader</module-->
         <module>beam-alos-reader</module>
-        <!--module>beam-netcdf-reader</module-->
-        <!--module>beam-netcdf4-reader</module-->
+        <!--module>beam-netcdf</module-->
         <!--module>beam-merisl3-reader</module-->
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
@@ -177,10 +177,11 @@
            -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <beam.version>4.8-SNAPSHOT</beam.version>
-        <ceres.version>0.11-SNAPSHOT</ceres.version>
-        <geotools.version>2.6.1</geotools.version>
-		<outputdir>../../output</outputdir>
+        <beam.version>4.9-SNAPSHOT</beam.version>
+        <ceres.version>0.12-SNAPSHOT</ceres.version>
+        <geotools.version>2.6.5</geotools.version>
+        <jide.version>2.9.5</jide.version>
+	<outputdir>../../output</outputdir>
     </properties>
 
     <dependencyManagement>
@@ -268,13 +269,13 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-envisat-reader</artifactId>
-                <version>1.3.200-SNAPSHOT</version>
+                <version>1.3.200</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.101-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -286,7 +287,7 @@
             <dependency>
                 <groupId>ucar.netcdf</groupId>
                 <artifactId>lib-netcdf</artifactId>
-                <version>4.0</version>
+                <version>4.1-SNAPSHOT</version>
             </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
@@ -379,9 +380,9 @@
             <!-- BC Neural Network Library ############################################# -->
 
             <dependency>
-                <groupId>com.bc</groupId>
-                <artifactId>bc-jnn</artifactId>
-                <version>1.5</version>
+                <groupId>com.bc.jnn</groupId>
+                <artifactId>jnn</artifactId>
+                <version>1.6</version>
             </dependency>
 
             <!-- Jama Matrix Algebra Library ############################################# -->
@@ -414,27 +415,27 @@
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-dock</artifactId>
-                <version>2.7.7</version>
+                <version>${jide.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-action</artifactId>
-                <version>2.7.7</version>
+                <version>${jide.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-grids</artifactId>
-                <version>2.7.7</version>
+                <version>${jide.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-components</artifactId>
-                <version>2.7.7</version>
+                <version>${jide.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-common</artifactId>
-                <version>2.7.7</version>
+                <version>${jide.version}</version>
             </dependency>
 
             <!-- XStream Libraries ############################################# -->
@@ -695,6 +696,15 @@
             <id>tom</id>
             <name>Thomas Block</name>
             <email>thomas.block@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>thomas</id>
+            <name>Thomas Storm</name>
+            <email>thomas.storm@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>

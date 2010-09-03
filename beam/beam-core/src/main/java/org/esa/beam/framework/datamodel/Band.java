@@ -58,7 +58,7 @@ import java.util.Random;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+ * @version $Revision: 1.7 $ $Date: 2010-09-02 20:24:09 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -255,7 +255,7 @@ public class Band extends AbstractBand {
     }
 
     /**
-     * Gets the solar flux in in <code>mW/(m^2 sr nm)</code> (milli-watts per square metre per ste-radian per nanometer)
+     * Gets the solar flux in <code>mW/(m^2 sr nm)</code> (milli-watts per square metre per ste-radian per nanometer)
      * units for the wavelength of this band.
      *
      * @return the solar flux for the wavelength of this band, or zero if this is not a spectral band or the solar flux

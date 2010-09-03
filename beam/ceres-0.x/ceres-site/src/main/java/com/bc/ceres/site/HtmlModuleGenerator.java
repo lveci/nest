@@ -24,10 +24,8 @@ package com.bc.ceres.site;
 
 import com.bc.ceres.core.runtime.Dependency;
 import com.bc.ceres.core.runtime.Module;
-import com.bc.ceres.site.util.ExclusionListBuilder;
 import com.bc.ceres.site.util.ModuleUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -45,50 +43,65 @@ public class HtmlModuleGenerator implements HtmlGenerator {
     public HtmlModuleGenerator() {
     }
 
-    public void generate(PrintWriter out, Module[] allModules, String repositoryUrl) throws IOException {
-        File exclusionList = retrieveExclusionList(repositoryUrl);
-        Module[] modules = ModuleUtils.cleanModules(allModules, exclusionList);
-        for (Module module : modules) {
-            writerHeader(out, module);
+    @Override
+    public void generate(PrintWriter out, Module[] modules, String version) throws IOException {
+        if (modules == null) {
+            return;
+        }
+        for (int i = 0, modulesLength = modules.length; i < modulesLength; i++) {
+            Module module = modules[i];
+            writeHeader(out, module);
 
             // description
-            final Dependency[] dependencies = module.getDeclaredDependencies();
             out.println("<div class=\"description\">");
             out.println(module.getDescription());
             out.println("</div>");
-            out.println("<p>");
 
-            out.print("<div class=\"dependencies\">");
-            out.println("Depends on:");
-            out.println("<ul>");
-            for (Dependency dependency : dependencies) {
-                out.print("  <li>");
-                final String symbolicName = dependency.getModuleSymbolicName();
-                final String readableName = ModuleUtils.symbolicToReadableName(symbolicName, allModules);
-                final boolean dependencyIncl = !ModuleUtils.isExcluded(symbolicName, exclusionList);
-                if (dependencyIncl) {
-                    out.print("<a href=\"#" + readableName.replaceAll(" ", "") + "\">");
+            // dependencies
+            final Dependency[] dependencies = module.getDeclaredDependencies();
+            if (dependencies != null && dependencies.length > 0) {
+
+                out.println("<p>");
+                out.println(
+                        "<a href=\"JavaScript:doMenu('main" + i + "');\" id=\"xmain" + i + "\">[+]</a> Depends on:<br>");
+                out.print("<div id=\"main" + i + "\" style=\"display:none\">");
+//                out.println("Depends on:");
+                out.println("<ul>");
+
+                for (Dependency dependency : dependencies) {
+                    writeDependency(out, modules, dependency);
                 }
-                final String depVersion = dependency.getVersion();
-                String version = (depVersion != null) ? depVersion : "";
-                out.print(readableName + " " + version);
-                if (dependencyIncl) {
-                    out.print("</a>");
-                }
-                out.println("</li>");
+                out.println("</ul>");
+                out.println("</div>");
+
+                out.println("</p>");
             }
-            out.println("</ul>");
-            out.println("</div>");
-
             writeFooter(out, module);
         }
     }
 
-    private void writerHeader(PrintWriter out, Module module) {
+    private void writeDependency(PrintWriter out, Module[] modules, Dependency dependency) {
+        out.print("  <li>");
+        final String symbolicName = dependency.getModuleSymbolicName();
+        final String readableName = ModuleUtils.symbolicToReadableName(symbolicName, modules);
+//                final boolean dependencyIncl = !ModuleUtils.isExcluded(symbolicName, exclusionList);
+//                if (dependencyIncl) {
+//                    out.print("<a href=\"#" + readableName.replaceAll(" ", "") + "\">");
+//                }
+        String depVersion = dependency.getVersion();
+        depVersion = (depVersion != null) ? depVersion : "";
+        out.print(readableName + " " + depVersion);
+//                if (dependencyIncl) {
+//                    out.print("</a>");
+//                }
+        out.println("</li>");
+    }
+
+    private void writeHeader(PrintWriter out, Module module) {
         final String size = ModuleUtils.retrieveSize(module);
         final String moduleName = module.getName();
 
-        out.print("<h2 class=\"heading\">" + moduleName + " ");
+        out.print("<h3 class=\"heading\">" + moduleName + " ");
         out.println("<a name= " + moduleName.replaceAll(" ", "") + ">");
         out.print("<a href=\"" + module.getLocation().toExternalForm() + "\">");
         out.print(module.getVersion());
@@ -96,7 +109,7 @@ public class HtmlModuleGenerator implements HtmlGenerator {
             out.println("&nbsp;(" + size + ")");
         }
         out.print("</a>");
-        out.println("</h2>");
+        out.println("</h3>");
     }
 
     private void writeFooter(PrintWriter out, Module module) {
@@ -115,18 +128,8 @@ public class HtmlModuleGenerator implements HtmlGenerator {
         if (licenceUrl != null) {
             out.print("&nbsp;&#8226;&nbsp;<a href=\"" + licenceUrl + "\">Licence</a>");
         }
-        out.print("&nbsp;&#8226;&nbsp;<a href=\"#top\">top</a>");
         out.println("</div>");
 
         out.println("<br/>");
     }
-
-    private static File retrieveExclusionList(String repositoryUrl) {
-        String sep = "";
-        if (!repositoryUrl.endsWith("/")) {
-            sep = "/";
-        }
-        return new File(repositoryUrl + sep + ExclusionListBuilder.EXCLUSION_LIST_FILENAME);
-    }
-
 }

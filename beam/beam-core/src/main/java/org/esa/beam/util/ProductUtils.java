@@ -25,7 +25,6 @@ import com.bc.jexp.ParseException;
 import com.bc.jexp.Parser;
 import com.bc.jexp.Term;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.TopologyException;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
@@ -1389,7 +1388,7 @@ public class ProductUtils {
 
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<VectorDataNode> vectorDataGroup = sourceProduct.getVectorDataGroup();
-        if (sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null) {
+        if (sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null || vectorDataGroup.getNodeCount() == 0) {
             return;
         }
         if (sourceProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
@@ -1406,12 +1405,12 @@ public class ProductUtils {
                 }
             }
         } else {
-            Geometry sourceGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(sourceProduct);
-            Geometry targetGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(targetProduct);
             Geometry clipGeometry;
             try {
+                Geometry sourceGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(sourceProduct);
+                Geometry targetGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(targetProduct);
                 clipGeometry = sourceGeometryWGS84.intersection(targetGeometryWGS84);
-            } catch (TopologyException e) {
+            } catch (Exception e) {
                 return;
             }
         
