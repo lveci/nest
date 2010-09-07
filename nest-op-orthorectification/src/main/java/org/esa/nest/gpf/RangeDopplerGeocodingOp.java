@@ -312,7 +312,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private void checkUserInput() {
 
         if (!saveSelectedSourceBand && !applyRadiometricNormalization) {
-            throw new OperatorException("Please selecte output band for terrain corrected image");
+            throw new OperatorException("Please select output band for terrain corrected image");
         }
 
         if (!applyRadiometricNormalization) {
