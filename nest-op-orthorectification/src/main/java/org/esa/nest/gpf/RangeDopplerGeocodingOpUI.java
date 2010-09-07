@@ -188,7 +188,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
                             if (mission.equals("ENVISAT") || mission.contains("ERS") ||
-                                mission.equals("RS2") || mission.equals("TSX1")) {
+                                mission.equals("RS2") || mission.equals("TSX1") || mission.contains("CSKS")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
@@ -415,10 +415,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
 
                 if (!mission.equals("RS2") && !mission.equals("TSX1") && !mission.equals("ENVISAT") &&
-                    !mission.contains("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
+                    !mission.contains("ERS") && !mission.contains("CSKS") && !mission.equals(" ") &&
+                        applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
-                            " not available for third party products except RadarSAT-2 and TerraSAR-X (SSC)");
+                            " not available for third party products except RadarSAT-2, TerraSAR-X (SSC) and COSMO SkyMED");
                 }
             }
         }
