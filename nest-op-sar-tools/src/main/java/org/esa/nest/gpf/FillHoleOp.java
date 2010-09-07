@@ -37,7 +37,7 @@ import java.util.ArrayList;
  * Fill hole pixels in source product with linear interpolations in both x and y directions.
  */
 
-@OperatorMetadata(alias="Fill-Hole", category = "SAR Tools", description="Fill holes in given product")
+@OperatorMetadata(alias="Fill-Hole", category = "Utilities", description="Fill holes in given product")
 public final class FillHoleOp extends Operator {
 
     @SourceProduct(alias="source")

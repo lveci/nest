@@ -201,6 +201,18 @@
       </action>
 
       <action>
+            <id>showProductLibrary</id>
+            <class>org.esa.nest.dat.actions.ShowProductLibraryAction</class>
+            <parent>file</parent>
+            <text>Product Library</text>
+            <placeAfter>openRaster</placeAfter>
+            <shortDescr>Show Product Library Metadata Database</shortDescr>
+            <description>Show Product Library Metadata Database</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/product_library16.png</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/product_library24.png</largeIcon>
+      </action>
+
+      <action>
             <parent>file</parent>
             <id>createSubset</id>
             <class>org.esa.beam.visat.actions.NewAction</class>
@@ -211,7 +223,7 @@
             <largeIcon>icons/New24.gif</largeIcon>
             <helpId>new</helpId>
             <context>product</context>
-            <placeAfter>openRaster</placeAfter>
+            <placeAfter>showProductLibrary</placeAfter>
       </action>
 
       <!--action>
@@ -235,7 +247,7 @@
             <parent>file</parent>
             <text>Reopen</text>
             <mnemonic>R</mnemonic>
-            <placeAfter>openRaster</placeAfter>
+            <placeAfter>createSubset</placeAfter>
             <shortDescr>Re-open a BEAM-DIMAP data product.</shortDescr>
             <longDescr>Re-open a BEAM-DIMAP data product.</longDescr>
             <smallIcon>icons/History16.gif</smallIcon>

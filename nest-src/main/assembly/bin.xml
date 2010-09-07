@@ -86,6 +86,9 @@
 				<exclude>com.bc.ceres:ceres-glayer</exclude>
 				<exclude>com.bc.ceres:ceres-ui</exclude>
 				<exclude>com.bc.ceres:ceres-binio</exclude>
+				<exclude>com.bc.ceres:ceres-jai</exclude>
+				<exclude>org.esa.nest.doris:doris-core-prototypes</exclude>
+				<exclude>org.esa.nest:doris-op-prototypes</exclude>
             </excludes>
 
             <binaries>
@@ -118,6 +121,7 @@
 							<exclude>org.esa.nest:nest-writer-netcdf</exclude>
 							<exclude>org.esa.nest:nest-dat</exclude>
 							<exclude>org.esa.nest.doris:doris-core-prototypes</exclude>
+							<exclude>org.esa.nest:doris-op-prototypes</exclude>
                             <exclude>org.esa.beam:beam-*</exclude>
                         </excludes>
                     </dependencySet>

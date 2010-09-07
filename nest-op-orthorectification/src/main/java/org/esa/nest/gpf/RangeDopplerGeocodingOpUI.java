@@ -81,15 +81,15 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     final JTextField externalAuxFile = new JTextField("");
     final JButton externalAuxFileBrowseButton = new JButton("...");
 
-    private boolean saveDEM = false;
-    private boolean saveLocalIncidenceAngle = false;
-    private boolean saveProjectedLocalIncidenceAngle = false;
-    private boolean saveSelectedSourceBand = false;
-    private boolean applyRadiometricNormalization = false;
-    private boolean saveBetaNought = false;
-    private boolean saveGammaNought = false;
-    private boolean saveSigmaNought = false;
-    private double extNoDataValue = 0;
+    private Boolean saveDEM = false;
+    private Boolean saveLocalIncidenceAngle = false;
+    private Boolean saveProjectedLocalIncidenceAngle = false;
+    private Boolean saveSelectedSourceBand = false;
+    private Boolean applyRadiometricNormalization = false;
+    private Boolean saveBetaNought = false;
+    private Boolean saveGammaNought = false;
+    private Boolean saveSigmaNought = false;
+    private Double extNoDataValue = 0.0;
 
     String savedProductName = null;
 
@@ -320,39 +320,55 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         }
 
         saveDEM = (Boolean)paramMap.get("saveDEM");
-        saveDEMCheckBox.getModel().setPressed(saveDEM);
+        if(saveDEM != null) {
+            saveDEMCheckBox.getModel().setPressed(saveDEM);
+        }
 
         saveLocalIncidenceAngle = (Boolean)paramMap.get("saveLocalIncidenceAngle");
-        saveLocalIncidenceAngleCheckBox.getModel().setPressed(saveLocalIncidenceAngle);
+        if(saveLocalIncidenceAngle != null) {
+            saveLocalIncidenceAngleCheckBox.getModel().setPressed(saveLocalIncidenceAngle);
+        }
 
         saveProjectedLocalIncidenceAngle = (Boolean)paramMap.get("saveProjectedLocalIncidenceAngle");
-        saveProjectedLocalIncidenceAngleCheckBox.getModel().setPressed(saveProjectedLocalIncidenceAngle);
+        if(saveProjectedLocalIncidenceAngle != null) {
+            saveProjectedLocalIncidenceAngleCheckBox.getModel().setPressed(saveProjectedLocalIncidenceAngle);
+        }
 
         saveSelectedSourceBand = (Boolean)paramMap.get("saveSelectedSourceBand");
-        saveSelectedSourceBandCheckBox.getModel().setPressed(saveSelectedSourceBand);
-        saveSelectedSourceBandCheckBox.setSelected(saveSelectedSourceBand);
+        if(saveSelectedSourceBand != null) {
+            saveSelectedSourceBandCheckBox.getModel().setPressed(saveSelectedSourceBand);
+            saveSelectedSourceBandCheckBox.setSelected(saveSelectedSourceBand);
+        }
 
         applyRadiometricNormalization = (Boolean)paramMap.get("applyRadiometricNormalization");
-        applyRadiometricNormalizationCheckBox.getModel().setPressed(applyRadiometricNormalization);
-        applyRadiometricNormalizationCheckBox.setSelected(applyRadiometricNormalization);
+        if(applyRadiometricNormalization != null) {
+            applyRadiometricNormalizationCheckBox.getModel().setPressed(applyRadiometricNormalization);
+            applyRadiometricNormalizationCheckBox.setSelected(applyRadiometricNormalization);
+
+            incidenceAngleForGamma0.setEnabled(applyRadiometricNormalization);
+            incidenceAngleForSigma0.setEnabled(applyRadiometricNormalization);
+            saveSigmaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+            saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+            saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+        }
 
         saveBetaNought = (Boolean)paramMap.get("saveBetaNought");
-        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
-        saveBetaNoughtCheckBox.setSelected(false);
+        if(saveBetaNought != null) {
+            saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+            saveBetaNoughtCheckBox.setSelected(false);
+        }
 
         saveGammaNought = (Boolean)paramMap.get("saveGammaNought");
-        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
-        saveGammaNoughtCheckBox.setSelected(false);
+        if(saveGammaNought != null) {
+            saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+            saveGammaNoughtCheckBox.setSelected(false);
+        }
 
         saveSigmaNought = (Boolean)paramMap.get("saveSigmaNought");
-        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
-        saveSigmaNoughtCheckBox.setSelected(saveSigmaNought);
-
-        incidenceAngleForGamma0.setEnabled(applyRadiometricNormalization);
-        incidenceAngleForSigma0.setEnabled(applyRadiometricNormalization);
-        saveSigmaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
-        saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
-        saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+        if(saveSigmaNought != null) {
+            saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+            saveSigmaNoughtCheckBox.setSelected(saveSigmaNought);
+        }
 
         if(sourceProducts != null) {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
@@ -365,16 +381,21 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
             }
         }
-        auxFile.setSelectedItem(paramMap.get("auxFile"));
+        final String auxFileStr = (String)paramMap.get("auxFile");
+        if(auxFileStr != null) {
+            auxFile.setSelectedItem(auxFileStr);
+        }
         final File extAuxFile = (File)paramMap.get("externalAuxFile");
         if(extAuxFile != null) {
             externalAuxFile.setText(extAuxFile.getAbsolutePath());
         }
-        auxFile.setEnabled(applyRadiometricNormalization);
-        auxFileLabel.setEnabled(applyRadiometricNormalization);
-        externalAuxFile.setEnabled(applyRadiometricNormalization);
-        externalAuxFileLabel.setEnabled(applyRadiometricNormalization);
-        externalAuxFileBrowseButton.setEnabled(applyRadiometricNormalization);
+        if(applyRadiometricNormalization != null) {
+            auxFile.setEnabled(applyRadiometricNormalization);
+            auxFileLabel.setEnabled(applyRadiometricNormalization);
+            externalAuxFile.setEnabled(applyRadiometricNormalization);
+            externalAuxFileLabel.setEnabled(applyRadiometricNormalization);
+            externalAuxFileBrowseButton.setEnabled(applyRadiometricNormalization);
+        }
     }
 
     @Override

@@ -129,9 +129,9 @@ public class Property {
             try {
                 value = converter.parse(text);
             } catch (ConversionException e) {
-                throw new ValidationException(MessageFormat.format("Value for ''{0}'' is invalid.\n''{1}''",
+                throw new ValidationException(MessageFormat.format("Value for ''{0}'' is invalid.''{1}''",
                                                                    getDescriptor().getDisplayName(),
-                                                                   e.getMessage()),
+                                                                   e.getMessage()+" "+text),
                                               e);
             }
             setValue(value);

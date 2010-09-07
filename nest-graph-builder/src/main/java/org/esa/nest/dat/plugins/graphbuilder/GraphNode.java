@@ -94,9 +94,10 @@ public class GraphNode {
             try {
                 if(child.getChildCount() == 0) {
                     final Converter converter = getConverter(valueContainer, name);
-                    if(converter == null)
+                    if(converter == null) {
                         throw new IllegalArgumentException("Graph parameter "+name+
                                 " not found for Operator "+operatorSpi.getOperatorAlias());
+                    }
                     parameterMap.put(name, converter.parse(value));
                 } else {
                     final Converter converter = getConverter(valueContainer, name);
