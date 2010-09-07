@@ -57,7 +57,7 @@ public class GraphNode {
 
     private Xpp3Dom displayParameters;
 
-    GraphNode(final Node n) {
+    GraphNode(final Node n) throws IllegalArgumentException {
         node = n;
         displayParameters = new Xpp3Dom("node");
         displayParameters.setAttribute("id", node.getId());
@@ -73,7 +73,7 @@ public class GraphNode {
         return operatorUI;
     }
 
-    private void initParameters() {
+    private void initParameters() throws IllegalArgumentException {
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
         if(operatorSpi == null) return;
@@ -94,6 +94,9 @@ public class GraphNode {
             try {
                 if(child.getChildCount() == 0) {
                     final Converter converter = getConverter(valueContainer, name);
+                    if(converter == null)
+                        throw new IllegalArgumentException("Graph parameter "+name+
+                                " not found for Operator "+operatorSpi.getOperatorAlias());
                     parameterMap.put(name, converter.parse(value));
                 } else {
                     final Converter converter = getConverter(valueContainer, name);

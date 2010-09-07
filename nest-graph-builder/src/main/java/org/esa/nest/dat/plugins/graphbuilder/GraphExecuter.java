@@ -348,8 +348,8 @@ public class GraphExecuter extends Observable {
                 }
                 idCount = nodes.length;
             }
-        } catch(IOException e) {
-            throw new GraphException("Unable to load graph " + filePath);
+        } catch(Throwable e) {
+            throw new GraphException("Unable to load graph " + filePath +"\n"+e.getMessage());
         }
     }
 
