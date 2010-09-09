@@ -38,7 +38,7 @@
     </scm>
 
     <repositories>
-        <repository>
+        <!--repository>
             <id>bc-mvn</id>
             <name>Public Maven Repository at Brockmann Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -50,7 +50,7 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
-        </repository>
+        </repository-->
         <repository>
             <id>maven2-repository.dev.java.net</id>
             <name>Java.net repository</name>

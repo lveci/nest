@@ -50,7 +50,7 @@
     </scm>
 
 	<repositories>
-        <repository>
+        <!--repository>
             <id>bc-mvn-repo</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -60,7 +60,7 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
+        </repository-->
 		<repository>
             <id>array-mvn-repo</id>
             <name>Public Maven Repository at Array Systems Computing Inc</name>

@@ -44,7 +44,7 @@
     </scm>
 
     <repositories>
-        <repository>
+        <!--repository>
               <id>bc-mvn-repo-http</id>
               <name>Public Maven Repository at Brockmann Consult</name>
               <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -56,7 +56,7 @@
                   <enabled>true</enabled>
                   <checksumPolicy>warn</checksumPolicy>
               </snapshots>
-          </repository>        
+          </repository-->        
     </repositories>
 
     <distributionManagement>
