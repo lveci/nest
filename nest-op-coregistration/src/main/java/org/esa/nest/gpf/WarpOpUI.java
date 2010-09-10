@@ -64,11 +64,10 @@ public class WarpOpUI extends BaseOperatorUI {
         warpPolynomialOrder.setSelectedItem(paramMap.get("warpPolynomialOrder"));
 
         if(sourceProducts != null && sourceProducts.length > 0) {
-            final String os = System.getProperty("sun.desktop");
             final String arch = System.getProperty("sun.arch.data.model");
 
             final boolean isComplex = OperatorUtils.isComplex(sourceProducts[0]);
-            if(!isComplex || (os.equals("windows") && arch.equals("32"))) {
+            if(!isComplex || arch.equals("32")) {
                 interpolationMethod.removeAllItems();
                 interpolationMethod.addItem(Warp2Op.NEAREST_NEIGHBOR);
                 interpolationMethod.addItem(Warp2Op.BILINEAR);

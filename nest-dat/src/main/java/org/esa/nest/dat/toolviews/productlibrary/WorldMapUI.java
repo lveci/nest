@@ -118,6 +118,10 @@ public class WorldMapUI {
 
     public void setSelectedProductEntryList(final ProductEntry[] selectedProductEntryList) {
 
+        if(selectedProductEntryList == null) {
+            worldMapDataModel.setSelectedGeoBoundaries(null);
+            return;
+        }
         final GeoPos[][] geoBoundaries = new GeoPos[selectedProductEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : selectedProductEntryList) {

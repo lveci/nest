@@ -558,6 +558,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         productEntryTable.setColumnModel(tableModel.getColumnModel());
         updateStatusLabel();
         worldMapUI.setProductEntryList(productEntryList);
+        worldMapUI.setSelectedProductEntryList(null);
     }
 
     private class MyDatabaseQueryListener implements DatabaseQueryListener {
