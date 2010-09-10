@@ -171,7 +171,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         setFlag(processingFlags, "elevationPatternCorrectedFlag", "true", absRoot, AbstractMetadata.ant_elev_corr_flag);
 
          AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                (slantRangeCorners[0] / 1000000000.0) * Constants.halfLightSpeed);
+                (Math.min(slantRangeCorners[0], slantRangeCorners[2]) / 1000000000.0) * Constants.halfLightSpeed);
+        // Note: Here we use the minimum of the slant range times of two corners because the original way cause
+        //       problem for stripmap product when the two slant range times are different.
 
         final MetadataElement calibration = level1Elem.getElement("calibration");
         if(calibration != null) {
