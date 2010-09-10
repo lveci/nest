@@ -91,7 +91,7 @@ public class PolsarProProductReader extends NestEnviProductReader {
         final Product product = new Product(productName, mainHeader.getSensorType(),
                 mainHeader.getNumSamples(), mainHeader.getNumLines());
         product.setProductReader(this);
-        product.setFileLocation(mainHeaderFile);
+        product.setFileLocation(inputFile);
         product.setDescription(mainHeader.getDescription());
 
         initGeocoding(product, mainHeader);
