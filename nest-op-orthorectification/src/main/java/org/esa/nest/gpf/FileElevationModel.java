@@ -83,20 +83,24 @@ class FileElevationModel implements Resampling.Raster {
     }
 
     public synchronized float getElevation(GeoPos geoPos) throws Exception {
-        tileGeocoding.getPixelPos(geoPos, pix);
-        if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x > RASTER_WIDTH || pix.y > RASTER_HEIGHT)
-            return noDataValue;
-        
-        _resampling.computeIndex(pix.x, pix.y,
-                                 RASTER_WIDTH,
-                                 RASTER_HEIGHT,
-                                 _resamplingIndex);
+        try {
+            tileGeocoding.getPixelPos(geoPos, pix);
+            if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x >= RASTER_WIDTH || pix.y >= RASTER_HEIGHT)
+               return noDataValue;
 
-        final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
-        if (Float.isNaN(elevation)) {
-            return noDataValue;
+            _resampling.computeIndex(pix.x, pix.y,
+                                     RASTER_WIDTH,
+                                     RASTER_HEIGHT,
+                                    _resamplingIndex);
+
+            final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
+            if (Float.isNaN(elevation)) {
+                return noDataValue;
+            }
+            return elevation;
+        } catch(Exception e) {
+            throw new Exception("Problem reading DEM: "+e.getMessage());
         }
-        return elevation;
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
