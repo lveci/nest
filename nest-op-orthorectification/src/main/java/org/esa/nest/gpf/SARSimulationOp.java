@@ -407,7 +407,12 @@ public final class SARSimulationOp extends Operator {
         final double[] earthPoint = new double[3];
         final double[] sensorPos = new double[3];
         final GeoPos geoPos = new GeoPos(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y));
-        final double alt = dem.getElevation(geoPos);
+        double alt = 0.0;
+        if(externalDEMFile == null) {
+            alt = dem.getElevation(geoPos);
+        } else {
+            alt = fileElevationModel.getElevation(geoPos);
+        }
 
         GeoUtils.geo2xyz(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
