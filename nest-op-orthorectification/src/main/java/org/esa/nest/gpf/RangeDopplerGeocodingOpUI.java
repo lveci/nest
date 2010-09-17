@@ -144,7 +144,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
         externalAuxFile.setColumns(30);
-        auxFile.setSelectedItem(parameterMap.get("auxFile"));
+        final String auxFileParam = (String)parameterMap.get("auxFile");
+        if(auxFileParam != null) {
+            auxFile.setSelectedItem(auxFileParam);
+        }
         enableExternalAuxFile(false);
 
         externalDEMBrowseButton.addActionListener(new ActionListener() {
