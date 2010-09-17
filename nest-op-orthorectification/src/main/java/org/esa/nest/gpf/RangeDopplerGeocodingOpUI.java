@@ -303,7 +303,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         if(sourceProducts != null && (pixelSpacingInMeter.getText().isEmpty() || !productName.equals(savedProductName))) {
             Double pixM, pixD;
             try {
-                pixM = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                pixM = (Double)paramMap.get("pixelSpacingInMeter");
+                if(pixM == null || pixM == 0) {
+                    pixM = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                } 
                 pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
                 savedProductName = productName;
             } catch (Exception e) {
