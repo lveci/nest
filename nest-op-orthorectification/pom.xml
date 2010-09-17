@@ -9,7 +9,7 @@
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-op-orthorectification</artifactId>
   <name>NEST Orthorectification</name>
-  <version>${nest.version}</version>
+  <version>${nest.version}-1.6</version>
   <description>Provides for orthorectifying SAR data</description>
   
   <dependencies>
