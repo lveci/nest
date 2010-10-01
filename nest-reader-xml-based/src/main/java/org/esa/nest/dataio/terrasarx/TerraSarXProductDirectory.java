@@ -142,10 +142,21 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 imageRaster.getAttributeInt("numberOfRows", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                complexImageInfo.getAttributeDouble("projectedSpacingAzimuth", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                complexImageInfo.getElement("projectedSpacingRange").getAttributeDouble("slantRange", defInt));
+        // See Andrea's email dated Sept. 30, 2010
+        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+        if(sampleType.contains("COMPLEX")) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                    complexImageInfo.getAttributeDouble("projectedSpacingAzimuth", defInt));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                    complexImageInfo.getElement("projectedSpacingRange").getAttributeDouble("slantRange", defInt));
+        } else {
+            final MetadataElement rowSpacing = imageDataInfo.getElement("imageRaster").getElement("rowSpacing");
+            final MetadataElement colSpacing = imageDataInfo.getElement("imageRaster").getElement("columnSpacing");
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                    rowSpacing.getAttributeDouble("rowSpacing", defInt));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                    colSpacing.getAttributeDouble("columnSpacing", defInt));
+        }
 
         final MetadataElement settings = instrument.getElement("settings");
         final MetadataElement settingRecord = settings.getElement("settingRecord");
