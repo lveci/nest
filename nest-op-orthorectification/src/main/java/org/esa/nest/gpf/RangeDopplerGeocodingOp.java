@@ -799,7 +799,11 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    targetBandName = srcBand.getName();
+                    if (pol != null && !pol.isEmpty()) {
+                        targetBandName = srcBand.getName() + "_" + pol.toUpperCase();
+                    } else {
+                        targetBandName = srcBand.getName();
+                    }
                     if (addTargetBand(targetBandName, unit, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
