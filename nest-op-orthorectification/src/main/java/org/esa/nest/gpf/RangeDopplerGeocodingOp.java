@@ -1634,7 +1634,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
-            if (vi == tileData.noDataValue || vq == tileData.noDataValue) {
+            if (tileData.noDataValue != 0 && (vi == tileData.noDataValue || vq == tileData.noDataValue)) {
                 return tileData.noDataValue;
             }
             v = vi*vi + vq*vq;
@@ -1642,7 +1642,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         } else {
 
             v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            if (v == tileData.noDataValue) {
+            if (tileData.noDataValue != 0 && (v == tileData.noDataValue)) {
                 return tileData.noDataValue;
             }
         }
@@ -1696,10 +1696,11 @@ public class RangeDopplerGeocodingOp extends Operator {
             final double vq10 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y1));
             final double vq11 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y1));
 
-            if (vi00 == tileData.noDataValue || vi01 == tileData.noDataValue ||
+            if (tileData.noDataValue != 0 &&
+               (vi00 == tileData.noDataValue || vi01 == tileData.noDataValue ||
                 vi10 == tileData.noDataValue || vi11 == tileData.noDataValue ||
                 vq00 == tileData.noDataValue || vq01 == tileData.noDataValue ||
-                vq10 == tileData.noDataValue || vq11 == tileData.noDataValue) {
+                vq10 == tileData.noDataValue || vq11 == tileData.noDataValue)) {
                 return tileData.noDataValue;
             }
 
@@ -1715,8 +1716,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
             v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
 
-            if (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
-                v10 == tileData.noDataValue || v11 == tileData.noDataValue) {
+            if (tileData.noDataValue != 0 &&
+               (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
+                v10 == tileData.noDataValue || v11 == tileData.noDataValue)) {
                 return tileData.noDataValue;
             }
         }
@@ -1798,7 +1800,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 for (int j = 0; j < x.length; j++) {
                     final double vi = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
                     final double vq = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x[j], y[i]));
-                    if (vi == tileData.noDataValue || vq == tileData.noDataValue) {
+                    if (tileData.noDataValue != 0 && (vi == tileData.noDataValue || vq == tileData.noDataValue)) {
                         return tileData.noDataValue;
                     }
                     v[i][j] = vi*vi + vq*vq;
@@ -1810,7 +1812,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
-                    if (v[i][j] == tileData.noDataValue) {
+                    if (tileData.noDataValue != 0 && (v[i][j] == tileData.noDataValue)) {
                         return tileData.noDataValue;
                     }
                 }
