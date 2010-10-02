@@ -45,7 +45,7 @@
     <dependency>
       <groupId>org.esa.nest</groupId>
       <artifactId>nest-reader-xml-based</artifactId>
-      <version>${nest.version}</version>
+      <version>${nest.version}-1.7</version>
     </dependency>
     <dependency>
       <groupId>org.esa.nest</groupId>

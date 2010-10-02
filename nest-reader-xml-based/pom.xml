@@ -12,7 +12,7 @@
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-reader-xml-based</artifactId>
     <name>NEST TerraSAR-X and Radarsat-2 Product Reader</name>
-    <version>${nest.version}</version>
+    <version>${nest.version}-1.7</version>
 
     <packaging>jar</packaging>
 
