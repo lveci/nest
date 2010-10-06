@@ -282,9 +282,7 @@ public class Warp2Op extends Operator {
                 sourceRasterMap.put(targetBandQ, srcBandQ);
 
                 complexSrcMap.put(srcBandQ, srcBand);
-                String suffix = "_mst";
-                if (srcBand != masterBand)
-                    suffix = "_slv" + cnt++;
+                final String suffix = "_"+OperatorUtils.getSuffixFromBandName(srcBand.getName());
                 ReaderUtils.createVirtualIntensityBand(targetProduct, targetBand, targetBandQ, suffix);
                 ReaderUtils.createVirtualPhaseBand(targetProduct, targetBand, targetBandQ, suffix);
             }

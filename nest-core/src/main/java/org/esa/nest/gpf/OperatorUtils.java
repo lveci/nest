@@ -153,19 +153,31 @@ public final class OperatorUtils {
 
     public static String getSuffixFromBandName(final String bandName) {
 
-        final int idx1 = bandName.lastIndexOf('_');
+        final int idx1 = bandName.indexOf('_');
         if (idx1 != -1) {
-            return bandName.substring(idx1+1).toLowerCase();
+            return bandName.substring(idx1+1);
         }
-        final int idx2 = bandName.lastIndexOf('-');
+        final int idx2 = bandName.indexOf('-');
         if (idx2 != -1) {
-            return bandName.substring(idx2+1).toLowerCase();
+            return bandName.substring(idx2+1);
         }
-        final int idx3 = bandName.lastIndexOf('.');
+        final int idx3 = bandName.indexOf('.');
         if (idx3 != -1) {
-            return bandName.substring(idx3+1).toLowerCase();
+            return bandName.substring(idx3+1);
         }
         return null;
+    }
+
+    public static String getBandTimeStamp(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            //final String mission = "_"+absRoot.getAttributeString(AbstractMetadata.MISSION, "");
+            String dateString = OperatorUtils.getAcquisitionDate(absRoot);
+            if(!dateString.isEmpty())
+                dateString = '_' + dateString;
+            return StringUtils.createValidName(dateString, new char[]{'_', '.'}, '_');
+        }
+        return "";
     }
 
     public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {

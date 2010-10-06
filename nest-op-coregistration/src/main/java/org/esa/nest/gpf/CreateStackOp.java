@@ -159,7 +159,7 @@ public class CreateStackOp extends Operator {
             // add master bands first
             for (final Band srcBand : slaveBandList) {
                 if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                    suffix = "_mst" + getBandTimeStamp(srcBand.getProduct());
+                    suffix = "_mst" + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
 
                     final Band targetBand = new Band(srcBand.getName() + suffix,
                             srcBand.getDataType(),
@@ -179,7 +179,7 @@ public class CreateStackOp extends Operator {
                 if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
                     if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                     } else {
-                        suffix = "_slv" + cnt++ + getBandTimeStamp(srcBand.getProduct());
+                        suffix = "_slv" + cnt++ + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
                     }
 
                     final Product srcProduct = srcBand.getProduct();
@@ -217,18 +217,6 @@ public class CreateStackOp extends Operator {
         }
     }
 
-    private static String getBandTimeStamp(final Product product) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        if(absRoot != null) {
-            final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION, "");
-            String dateString = OperatorUtils.getAcquisitionDate(absRoot);
-            if(!dateString.isEmpty())
-                dateString = '_' + dateString;
-            return StringUtils.createValidName("_"+mission + dateString, new char[]{'_', '.'}, '_');
-        }
-        return "";        
-    }
-
     private void copySlaveMetadata() {
         final MetadataElement targetRoot = targetProduct.getMetadataRoot();
         MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
@@ -240,7 +228,7 @@ public class CreateStackOp extends Operator {
             if(prod != masterProduct) {
                 final MetadataElement slvAbsMetadata = AbstractMetadata.getAbstractedMetadata(prod);
                 if(slvAbsMetadata != null) {
-                    final String timeStamp = getBandTimeStamp(prod);
+                    final String timeStamp = OperatorUtils.getBandTimeStamp(prod);
                     final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName()+timeStamp);
                     targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
                     ProductUtils.copyMetadata(slvAbsMetadata, targetSlaveMetadata);

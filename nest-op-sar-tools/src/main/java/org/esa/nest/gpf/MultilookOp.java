@@ -314,7 +314,8 @@ public final class MultilookOp extends Operator {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
-                bandNameList.add(band.getName());
+                if(!(band instanceof VirtualBand))
+                    bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
@@ -356,29 +357,27 @@ public final class MultilookOp extends Operator {
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
+                targetBandName = "Intensity";
+                final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);
+                if (suff != null) {
+                    targetBandName += "_" + suff;
+                }
                 final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty()) {
-                    targetBandName = "Intensity_" + pol.toUpperCase();
-                } else {
-                    final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);
-                    if (suff != null) {
-                        targetBandName = "Intensity_" + suff;
-                    } else {
-                        targetBandName = "Intensity";
-                    }
+                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
+                    targetBandName += "_" + pol.toUpperCase();
                 }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = "intensity";
+                    targetUnit = Unit.INTENSITY;
                 }
 
             } else {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
-                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().endsWith(pol)) {
+                final String pol = OperatorUtils.getBandPolarization(targetBandName, absRoot);
+                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
                     targetBandName += "_" + pol.toUpperCase();
                 }
                 if(targetProduct.getBand(targetBandName) == null) {
