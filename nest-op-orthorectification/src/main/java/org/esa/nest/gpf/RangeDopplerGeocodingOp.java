@@ -782,10 +782,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final Band[] srcBands = {srcBand};
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
                 if (saveSigmaNought) {
+                    targetBandName = "Sigma0";
                     if (pol != null && !pol.isEmpty()) {
-                        targetBandName = "Sigma0_" + pol.toUpperCase();
-                    } else {
-                        targetBandName = "Sigma0";
+                        targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
@@ -799,10 +798,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    if (pol != null && !pol.isEmpty()) {
-                        targetBandName = srcBand.getName() + "_" + pol.toUpperCase();
-                    } else {
-                        targetBandName = srcBand.getName();
+                    targetBandName = srcBand.getName();
+                    if (pol != null && !pol.isEmpty() && !srcBand.getName().toLowerCase().contains(pol)) {
+                        targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, unit, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
