@@ -17,6 +17,7 @@
         <band>Sigma0</band>
       </sourceBands>
       <landMask>true</landMask>
+	  <useSRTM>true</useSRTM>
 	  <geometry></geometry>
 	  <invertGeometry>false</invertGeometry>
 	  <byPass>false</byPass>
