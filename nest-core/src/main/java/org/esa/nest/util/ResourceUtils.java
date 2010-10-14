@@ -322,7 +322,7 @@ public final class ResourceUtils {
      * @throws java.io.IOException if an I/O error occured
      */
     public static InputStream getInflaterInputStream(File file) throws IOException {
-        if (file.getName().endsWith(".gz")) {
+        if (file.getName().toLowerCase().endsWith(".gz")) {
             try {
                 return createGZIPInputStream(file);
             } catch (IOException e) {

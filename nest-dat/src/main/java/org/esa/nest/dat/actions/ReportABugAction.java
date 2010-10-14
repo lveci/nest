@@ -18,6 +18,7 @@ package org.esa.nest.dat.actions;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.StringUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -41,8 +42,14 @@ public class ReportABugAction extends ExecCommand {
     @Override
     public void actionPerformed(CommandEvent event) {
 
+        final String contextID = ResourceUtils.getContextID();
+        final String ver = System.getProperty(contextID+".version");
+        String email = System.getProperty(contextID+".contact_email");
+        if(email == null || email.isEmpty())
+            email = PR_EMAIL;
+
         final Desktop desktop = Desktop.getDesktop();
-        final String mail = PR_EMAIL + "?subject=NEST-Problem-Report&body=Description:%0A%0A%0A%0A";
+        final String mail = email + "?subject="+contextID+ver+"-Problem-Report&body=Description:%0A%0A%0A%0A";
         final String sysInfo = getSystemInfo();
 
         final String longmail = mail + "SysInfo:%0A" + sysInfo.substring(0, Math.min(1800, sysInfo.length()));

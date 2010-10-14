@@ -29,15 +29,13 @@ import java.util.Set;
  */
 public class ProductLibraryConfig {
 
-    private static final String REPOSITORIES_KEY = "productGrabber.repository.%1$d.dirPath";
-    private static final String CURRENT_REPSOITORY_KEY = "productGrabber.repository.selected.dirPath";
     private static final String WINDOW_LOCATION_X_KEY = "productLibrary.window.locationX";
     private static final String WINDOW_LOCATION_Y_KEY = "productLibrary.window.locationY";
     private static final String WINDOW_WIDTH_KEY = "productLibrary.window.width";
     private static final String WINDOW_HEIGHT_KEY = "productLibrary.window.height";
     private static final String BASE_DIR = "BaseDir_";
 
-    private final PropertyMap _properties;
+    private final PropertyMap properties;
 
     /**
      * Creates a new instance with the given {@link org.esa.beam.util.PropertyMap}.
@@ -47,7 +45,7 @@ public class ProductLibraryConfig {
      */
     public ProductLibraryConfig(final PropertyMap configuration) {
         Guardian.assertNotNull("configuration", configuration);
-        _properties = configuration;
+        properties = configuration;
     }
 
     /**
@@ -56,7 +54,7 @@ public class ProductLibraryConfig {
      * @param baseDir the repository base directory.
      */
     public void addBaseDir(final File baseDir) {
-        _properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), baseDir.getAbsolutePath());
+        properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), baseDir.getAbsolutePath());
         VisatApp.getApp().savePreferences();
     }
 
@@ -66,7 +64,7 @@ public class ProductLibraryConfig {
      * @param baseDir the repository base directory.
      */
     public void removeBaseDir(final File baseDir) {
-        _properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), null);
+        properties.setPropertyString(BASE_DIR+baseDir.getAbsolutePath(), null);
         VisatApp.getApp().savePreferences();
     }
 
@@ -77,12 +75,12 @@ public class ProductLibraryConfig {
      */
     public File[] getBaseDirs() {
         final ArrayList<File> dirList = new ArrayList<File>();
-        final Set keys = _properties.getProperties().keySet();
+        final Set keys = properties.getProperties().keySet();
         for(Object o : keys) {
             if( o instanceof String) {
                 final String key = (String)o;
                 if(key.startsWith(BASE_DIR)) {
-                    final String path = _properties.getPropertyString(key);
+                    final String path = properties.getPropertyString(key);
                     if(path != null) {
                         final File file = new File(path);
                         if(file.exists()) {
@@ -101,10 +99,10 @@ public class ProductLibraryConfig {
      * @param windowBounds the window bounds.
      */
     public void setWindowBounds(final Rectangle windowBounds) {
-        _properties.setPropertyInt(WINDOW_LOCATION_X_KEY, windowBounds.x);
-        _properties.setPropertyInt(WINDOW_LOCATION_Y_KEY, windowBounds.y);
-        _properties.setPropertyInt(WINDOW_WIDTH_KEY, windowBounds.width);
-        _properties.setPropertyInt(WINDOW_HEIGHT_KEY, windowBounds.height);
+        properties.setPropertyInt(WINDOW_LOCATION_X_KEY, windowBounds.x);
+        properties.setPropertyInt(WINDOW_LOCATION_Y_KEY, windowBounds.y);
+        properties.setPropertyInt(WINDOW_WIDTH_KEY, windowBounds.width);
+        properties.setPropertyInt(WINDOW_HEIGHT_KEY, windowBounds.height);
     }
 
     /**
@@ -113,10 +111,10 @@ public class ProductLibraryConfig {
      * @return the window bounds.
      */
     public Rectangle getWindowBounds() {
-        final int x = _properties.getPropertyInt(WINDOW_LOCATION_X_KEY, 50);
-        final int y = _properties.getPropertyInt(WINDOW_LOCATION_Y_KEY, 50);
-        final int width = _properties.getPropertyInt(WINDOW_WIDTH_KEY, 700);
-        final int height = _properties.getPropertyInt(WINDOW_HEIGHT_KEY, 450);
+        final int x = properties.getPropertyInt(WINDOW_LOCATION_X_KEY, 50);
+        final int y = properties.getPropertyInt(WINDOW_LOCATION_Y_KEY, 50);
+        final int width = properties.getPropertyInt(WINDOW_WIDTH_KEY, 700);
+        final int height = properties.getPropertyInt(WINDOW_HEIGHT_KEY, 450);
 
         return new Rectangle(x, y, width, height);
     }

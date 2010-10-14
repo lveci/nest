@@ -339,9 +339,20 @@ public class EnviProductReader extends AbstractProductReader {
                     product.getSceneRasterWidth(),
                     product.getSceneRasterHeight());
             band.setDescription(description);
+
+            final String name = validBandName.toLowerCase();
+            if(name.contains("real")) {
+                band.setUnit("real");
+            } else if(name.contains("imag") && !name.contains("image") && !name.contains("imagary")) {
+                band.setUnit("imaginary");
+            } else if(name.contains("phase")) {
+                band.setUnit("phase");
+            } else {
+                band.setUnit("amplitude");
+            }
             product.addBand(band);
 
-            long bandStartPosition = headerOffset + bandSizeInBytes * i;
+            final long bandStartPosition = headerOffset + bandSizeInBytes * i;
             bandStreamPositionMap.put(band, bandStartPosition);
             imageInputStreamMap.put(band, initializeInputStreamForBandData(headerFile, header));
         }
