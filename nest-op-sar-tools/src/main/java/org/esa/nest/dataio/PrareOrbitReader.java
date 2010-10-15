@@ -16,11 +16,13 @@
 package org.esa.nest.dataio;
 
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -386,26 +388,26 @@ public final class PrareOrbitReader {
      * @throws IOException The exception.
      */
     double TDT2UTC(double tdt) throws IOException {
-        double tai = tdt - 32.184/secondToDay;
+        double tai = tdt - 32.184*secondToDay;
 
-        if (tai >= 54832.0) {                 /* 2009 Jan 1 */
-            return tai - 33.0/secondToDay;
-        } else if (tai >= 53736.0) {          /* 2006 Jan 1 */
-            return tai - 33.0/secondToDay;
-        } else if (tai >= 51179.0) {          /* 1999 Jan 1 */
-            return tai - 32.0/secondToDay;
-        } else if (tai >= 50630.0) {          /* 1997 Jul 1 */
-            return tai - 31.0/secondToDay;
-        } else if (tai >= 50083.0) {          /* 1996 Jan 1 */
-            return tai - 30.0/secondToDay;
-        } else if (tai >= 49534.0) {          /* 1994 July 1 */
-            return tai - 29.0/secondToDay;
-        } else if (tai >= 49169.0) {          /* 1993 July 1 */
-            return tai - 28.0/secondToDay;
-        } else if (tai >= 48804.0) {          /* 1992 July 1 */
-            return tai - 27.0/secondToDay;
-        } else if (tai >= 48257.0) {          /* 1991 Jan 1 */
-            return tai - 26.0;
+        if (tai >= ProductData.UTC.create(new Date(109,1,1), 0).getMJD()) {                 /* 2009 Jan 1 */
+            return tai - 34.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(106,1,1), 0).getMJD()) {          /* 2006 Jan 1 */
+            return tai - 33.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(99,1,1), 0).getMJD()) {          /* 1999 Jan 1 */
+            return tai - 32.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(97,7,1), 0).getMJD()) {          /* 1997 Jul 1 */
+            return tai - 31.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(96,1,1), 0).getMJD()) {          /* 1996 Jan 1 */
+            return tai - 30.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(94,7,1), 0).getMJD()) {          /* 1994 July 1 */
+            return tai - 29.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(93,7,1), 0).getMJD()) {          /* 1993 July 1 */
+            return tai - 28.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(92,7,1), 0).getMJD()) {          /* 1992 July 1 */
+            return tai - 27.0*secondToDay;
+        } else if (tai >= ProductData.UTC.create(new Date(91,1,1), 0).getMJD()) {          /* 1991 Jan 1 */
+            return tai - 26.0*secondToDay;
         } else {
             throw new IOException("Incorrect UTC time");
         }
