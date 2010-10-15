@@ -42,7 +42,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
     private static final String MESSAGE_BOX_TITLE = "Software Version Check";  /*I18N*/
     private static final int DELAY_MILLIS = 5 * 1000;  // 5 seconds delay
 
-    private static final String remoteVersionUrl = "http://www.array.ca/nest-web/VERSION.txt";
+    private static String remoteVersionUrl = "http://www.array.ca/nest-web/";
     private static final String NEST_WEBSITE = "http://www.array.ca/nest";
 
     private static final String DISABLE_HINT = "Please note that you can disable the on-line version check\n" +
@@ -54,6 +54,10 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
      * @param visatApp a reference to the VISAT application instance.
      */
     public void start(VisatApp visatApp) {
+        final String contextID = ResourceUtils.getContextID();
+
+        remoteVersionUrl += contextID + "_getversion.php?u="+System.getProperty("user.name")+"&r="+System.getProperty("user.country");
+
         if (!isVersionCheckQuestionSuppressed() || isVersionCheckEnabled()) {
             final Timer timer = new Timer(DELAY_MILLIS, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -157,9 +161,9 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
         }
         Object[] message = new Object[]{
                 "A new software version is available.\n" +
-                        "Please visit the NEST homepage at\n", /*I18N*/
+                        "Please visit the homepage at\n", /*I18N*/
                 beamHomeLabel,
-                "to update your NEST software with the latest features and bug fixes.\n" + /*I18N*/
+                "to update your software with the latest features and bug fixes.\n" + /*I18N*/
                         (auto ? "\n" + DISABLE_HINT : "")
         };
         JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
