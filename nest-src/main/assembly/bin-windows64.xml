@@ -39,6 +39,7 @@
             <lineEnding>dos</lineEnding>
             <includes>
                 <include>*.bat</include>
+				<include>*.ini</include>
             </includes>
         </fileSet>
 
