@@ -738,6 +738,10 @@ public final class ApplyOrbitFileOp extends Operator {
         // loop through all orbit files in the given folder
         for(File f : list) {
 
+            if (f.isDirectory()) {
+                continue;
+            }
+            
             // read header record of each orbit file
             prareReader.readOrbitHeader(f);
 
