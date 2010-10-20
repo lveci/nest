@@ -17,6 +17,7 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -25,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * Replaces the Metadata with that of another product
@@ -73,7 +75,7 @@ public class ReplaceMetadataOp extends Operator {
 
             // create target product
             targetProduct = new Product(masterProduct.getName(),
-                                        masterProduct.getProductType(),
+                                        slaveProduct.getProductType(),
                                         masterProduct.getSceneRasterWidth(),
                                         masterProduct.getSceneRasterHeight());
 
@@ -87,16 +89,30 @@ public class ReplaceMetadataOp extends Operator {
 
             // copy or create product nodes for metadata, tiepoint grids, geocoding, start/end times, etc.
             ProductUtils.copyMetadata(slaveProduct, targetProduct);
-            ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
-            ProductUtils.copyFlagCodings(masterProduct, targetProduct);
-            ProductUtils.copyGeoCoding(masterProduct, targetProduct);
-            targetProduct.setStartTime(masterProduct.getStartTime());
-            targetProduct.setEndTime(masterProduct.getEndTime());
-            targetProduct.setDescription(masterProduct.getDescription());
+            ProductUtils.copyTiePointGrids(slaveProduct, targetProduct);
+            ProductUtils.copyFlagCodings(slaveProduct, targetProduct);
+            ProductUtils.copyGeoCoding(slaveProduct, targetProduct);
+            targetProduct.setStartTime(slaveProduct.getStartTime());
+            targetProduct.setEndTime(slaveProduct.getEndTime());
+            targetProduct.setDescription(slaveProduct.getDescription());
+
+            final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(masterProduct);
+            final int isPolsarPro = absRootMst.getAttributeInt(AbstractMetadata.polsarProData, 0);
+            if(isPolsarPro > 0) {
+                resetPolarizations(AbstractMetadata.getAbstractedMetadata(targetProduct));
+            }
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
+
+    private static void resetPolarizations(final MetadataElement absRoot) {
+        absRoot.setAttributeString(AbstractMetadata.mds1_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
+        absRoot.setAttributeInt(AbstractMetadata.polsarProData, 1);
     }
 
     /**

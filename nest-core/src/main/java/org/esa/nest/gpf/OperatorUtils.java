@@ -151,6 +151,23 @@ public final class OperatorUtils {
         return mdsPolar;
     }
 
+    public static String getprefixFromBandName(final String bandName) {
+
+        final int idx1 = bandName.indexOf('_');
+        if (idx1 != -1) {
+            return bandName.substring(0, idx1);
+        }
+        final int idx2 = bandName.indexOf('-');
+        if (idx2 != -1) {
+            return bandName.substring(0, idx2);
+        }
+        final int idx3 = bandName.indexOf('.');
+        if (idx3 != -1) {
+            return bandName.substring(0, idx3);
+        }
+        return null;
+    }
+
     public static String getSuffixFromBandName(final String bandName) {
 
         final int idx1 = bandName.indexOf('_');

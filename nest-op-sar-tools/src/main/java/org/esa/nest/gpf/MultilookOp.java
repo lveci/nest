@@ -330,6 +330,9 @@ public final class MultilookOp extends Operator {
             sourceBands[i] = sourceBand;
         }
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        final boolean isPolsarPro = absRoot.getAttributeInt(AbstractMetadata.polsarProData, 0) == 1;
+
         String targetBandName;
         for (int i = 0; i < sourceBands.length; i++) {
 
@@ -341,17 +344,14 @@ public final class MultilookOp extends Operator {
 
             String targetUnit = "";
 
-            if (unit.equals(Unit.IMAGINARY)) {
-
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit.equals(Unit.REAL)) {
+            if (unit.equals(Unit.REAL) || unit.equals(Unit.IMAGINARY)) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.equals(Unit.IMAGINARY)) {
+                if (nextUnit == null || !((unit.equals(Unit.REAL) && nextUnit.equals(Unit.IMAGINARY)) ||
+                                          (unit.equals(Unit.IMAGINARY) && nextUnit.equals(Unit.REAL)))) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String[] srcBandNames = new String[2];
@@ -365,6 +365,10 @@ public final class MultilookOp extends Operator {
                 final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
                 if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
                     targetBandName += "_" + pol.toUpperCase();
+                }
+                if(isPolsarPro) {
+                    final String pre = OperatorUtils.getprefixFromBandName(srcBandNames[0]);
+                    targetBandName = "Intensity_" + pre;
                 }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {

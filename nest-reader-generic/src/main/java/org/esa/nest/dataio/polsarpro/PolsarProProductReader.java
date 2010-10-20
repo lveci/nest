@@ -18,8 +18,12 @@ package org.esa.nest.dataio.polsarpro;
 import org.esa.beam.dataio.envi.Header;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.envi.NestEnviProductReader;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,6 +50,8 @@ public class PolsarProProductReader extends NestEnviProductReader {
         final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
         Header mainHeader = null;
         File mainHeaderFile = null;
+
+        ResourceUtils.sortFileList(fileList);
 
         for(File file : fileList) {
             if(file.isDirectory())
@@ -104,7 +110,9 @@ public class PolsarProProductReader extends NestEnviProductReader {
 
         initMetadata(product, mainHeaderFile);
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        absRoot.setAttributeInt(AbstractMetadata.polsarProData, 1);
+
         return product;
     }
-
 }

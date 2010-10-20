@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Comparator;
+import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -348,4 +350,27 @@ public final class ResourceUtils {
     private static InputStream createGZIPInputStream(File file) throws IOException {
         return new GZIPInputStream(new FileInputStream(file));
     }
+
+    public static void sortFileList(final File[] filelist) {
+        Comparator<File> byDirThenAlpha = new DirAlphaComparator();
+
+        Arrays.sort(filelist, byDirThenAlpha);
+        
+    }
+
+    private static class DirAlphaComparator implements Comparator<File> {
+
+        // Comparator interface requires defining compare method.
+        public int compare(File filea, File fileb) {
+            //... Sort directories before files, otherwise alphabetical ignoring case.
+            if (filea.isDirectory() && !fileb.isDirectory()) {
+                return -1;
+            } else if (!filea.isDirectory() && fileb.isDirectory()) {
+                return 1;
+            } else {
+                return filea.getName().compareToIgnoreCase(fileb.getName());
+            }
+        }
+    }
+
 }

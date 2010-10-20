@@ -215,6 +215,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private Calibrator calibrator = null;
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
+    private boolean isPolsarPro = false;
 
     private boolean flipIndex = false; // temp fix for descending Radarsat2
 
@@ -420,6 +421,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 flipIndex = true;
             }
         }
+
+        isPolsarPro = absRoot.getAttributeInt(AbstractMetadata.polsarProData, 0) == 1;
     }
 
     /**
@@ -728,17 +731,15 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             if (unit != null && unit.contains(Unit.PHASE)) {
                 continue;
-
-            } else if (unit != null && unit.contains(Unit.IMAGINARY)) {
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit != null && unit.contains(Unit.REAL)) {
+            } else if (unit != null && !isPolsarPro &&
+                    (unit.equals(Unit.REAL)||unit.equals(Unit.IMAGINARY))) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
+                if (nextUnit == null || !((unit.equals(Unit.REAL) && nextUnit.equals(Unit.IMAGINARY)) ||
+                                          (unit.equals(Unit.IMAGINARY) && nextUnit.equals(Unit.REAL)))) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final Band[] srcBands = new Band[2];
@@ -1162,7 +1163,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     slantRange = computeSlantRange(
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    /*final*/ double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                    double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     // temp fix for descending Radarsat2
@@ -1628,7 +1629,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
@@ -1680,7 +1681,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
@@ -1791,7 +1792,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {

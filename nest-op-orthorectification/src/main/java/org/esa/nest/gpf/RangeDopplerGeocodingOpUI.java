@@ -413,6 +413,13 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+                final int isPolsarpro = absRoot.getAttributeInt(AbstractMetadata.polsarProData, 0);
+
+                if(isPolsarpro > 0 && applyRadiometricNormalization) {
+                    applyRadiometricNormalization = false;
+                    return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization is" +
+                            " not available for products imported from PolSARPro");
+                }
                 
                 if ((mission.equals("ENVISAT") || mission.contains("ERS")) &&
                      applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
@@ -425,7 +432,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
-                            " not available for third party products except RadarSAT-2, TerraSAR-X (SSC) and COSMO SkyMED");
+                            " not available for "+mission+" products");
                 }
             }
         }
