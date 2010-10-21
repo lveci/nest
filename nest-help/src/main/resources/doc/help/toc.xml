@@ -96,6 +96,7 @@
 
         <tocitem text="Analysis Tools">
 			<tocitem text="Geometry Management" target="geometryManagement"/>
+			<tocitem text="Mask and ROI Management" target="MaskROIManagement"/>
             <tocitem text="Product GCP Manager" target="showGcpManagerWnd"/>
             <tocitem text="Product Pin Manager" target="showPinManagerWnd"/>
             <tocitem text="Band ROI Definition" target="showROIDefWnd"/>
