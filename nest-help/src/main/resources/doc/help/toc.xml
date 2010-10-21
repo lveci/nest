@@ -99,7 +99,6 @@
 			<tocitem text="Mask and ROI Management" target="MaskROIManagement"/>
             <tocitem text="Product GCP Manager" target="showGcpManagerWnd"/>
             <tocitem text="Product Pin Manager" target="showPinManagerWnd"/>
-            <tocitem text="Band ROI Definition" target="showROIDefWnd"/>
             <tocitem text="Product/Band Information" target="informationDialog"/>
             <tocitem text="Product/Band Geo-Coding Information" target="geoCodingInfoDialog"/>
             <tocitem text="Band Statistics" target="statisticsDialog"/>
