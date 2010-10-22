@@ -1,11 +1,11 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-reader-ers-ceos</symbolicName>
-    <version>4A</version>
-    <name>NEST ERS 1 and 2 CEOS Product Reader</name>
+    <version>4B</version>
+    <name>NEST CEOS Product Reader</name>
 
     <description>
-        Enables reading of ERS data products in CEOS format.
+        Enables reading of ERS, ALOS, JERS, RSAT1 data products in CEOS format.
     </description>
 
     <vendor>Array Systems Computing Inc</vendor>

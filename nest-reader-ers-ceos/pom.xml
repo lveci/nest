@@ -11,7 +11,7 @@
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-reader-ers-ceos</artifactId>
-    <name>NEST ERS 1 and 2 CEOS Product Reader</name>
+    <name>NEST CEOS Product Reader</name>
     <version>${nest.version}</version>
 
     <packaging>jar</packaging>

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>doris-core-prototypes</symbolicName>
-    <version>4A</version>
+    <version>4B</version>
     <name>NEST-DORIS Core</name>
 
     <description>

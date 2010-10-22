@@ -2,7 +2,7 @@
 
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>doris-op-prototypes</symbolicName>
-    <version>4A</version>
+    <version>4B</version>
     <name>NEST-DORIS Prototypes</name>
     <description>NEST-DORIS InSAR prototypes</description>
 
