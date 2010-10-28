@@ -288,6 +288,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 calibrator.setAuxFileFlag(auxFile);
                 calibrator.setExternalAuxFile(externalAuxFile);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
+                calibrator.setIncidenceAngleForSigma0(incidenceAngleForSigma0);
             }
 
             updateTargetProductMetadata();
