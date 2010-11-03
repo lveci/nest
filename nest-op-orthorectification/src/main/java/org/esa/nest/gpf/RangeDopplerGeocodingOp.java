@@ -932,7 +932,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, geoPosLastNear.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, projectionName);
         if (!useAvgSceneHeight) {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
             if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
