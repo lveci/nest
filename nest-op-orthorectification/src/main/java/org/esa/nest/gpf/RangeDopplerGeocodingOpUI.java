@@ -191,7 +191,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
                             if (mission.equals("ENVISAT") || mission.contains("ERS") ||
-                                mission.equals("RS2") || mission.equals("TSX1") || mission.contains("CSKS")) {
+                                mission.equals("RS2") || mission.equals("TSX1") || mission.equals("TDX1") || mission.contains("CSKS")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
@@ -427,7 +427,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             " constant and incidence angle corrections will be performed for radiometric normalization");
                 }
 
-                if (!mission.equals("RS2") && !mission.equals("TSX1") && !mission.equals("ENVISAT") &&
+                if (!mission.equals("RS2") && !mission.equals("TSX1") && !mission.equals("TDX1") && !mission.equals("ENVISAT") &&
                     !mission.contains("ERS") && !mission.contains("CSKS") && !mission.equals(" ") &&
                         applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;

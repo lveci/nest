@@ -141,7 +141,7 @@ public class TerraSARXCalibrator implements Calibrator {
      */
     private void getMission() {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        if(!mission.equals("TSX1"))
+        if(!(mission.equals("TSX1") || mission.equals("TDX1")))
             throw new OperatorException("TerraSARXCalibrator: " + mission +
                     " is not a valid mission for TerraSAT-X Calibration");
     }

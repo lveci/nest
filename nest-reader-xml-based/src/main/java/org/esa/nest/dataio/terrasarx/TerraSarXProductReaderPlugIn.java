@@ -44,7 +44,7 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
         final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-        if (filename.startsWith(TerraSarXConstants.PRODUCT_HEADER_PREFIX) &&
+        if ((filename.startsWith(TerraSarXConstants.TSX1_HEADER_PREFIX) || filename.startsWith(TerraSarXConstants.TDX1_HEADER_PREFIX)) &&
                 file.toString().toUpperCase().endsWith(TerraSarXConstants.getIndicationKey())) {
             return DecodeQualification.INTENDED;
         }
@@ -131,7 +131,9 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
          */
         public boolean accept(final File file) {
             if (super.accept(file)) {
-                if (file.isDirectory() || file.getName().toUpperCase().startsWith(TerraSarXConstants.PRODUCT_HEADER_PREFIX)) {
+                final String name = file.getName().toUpperCase();
+                if (file.isDirectory() || name.startsWith(TerraSarXConstants.TSX1_HEADER_PREFIX)
+                        || name.startsWith(TerraSarXConstants.TDX1_HEADER_PREFIX)) {
                     return true;
                 }
             }
