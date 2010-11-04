@@ -23,6 +23,7 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
@@ -36,6 +37,7 @@ import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.util.VersionChecker;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
@@ -81,6 +83,8 @@ class CommandLineTool {
         try {
             lineArgs.parseArguments();
 
+            getVersion();
+
             if (lineArgs.isHelpRequested()) {
                 if (lineArgs.getOperatorName() != null) {
                     commandLineContext.print(CommandLineUsage.getUsageTextForOperator(lineArgs.getOperatorName()));
@@ -99,6 +103,28 @@ class CommandLineTool {
                 e.printStackTrace(System.err);
             }
             throw e;
+        }
+    }
+
+    public static String getContextID() {
+        if (RuntimeActivator.getInstance() != null
+                && RuntimeActivator.getInstance().getModuleContext() != null) {
+            return RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
+        }
+        return System.getProperty("ceres.context", "nest");
+    }
+
+    private void getVersion() {
+        try {
+            // check version
+            String remoteVersionUrl = "http://www.array.ca/nest-web/";
+            remoteVersionUrl += getContextID() + "_getversion.php?u="+System.getProperty("user.name")+"&r=GPT";  
+
+            final VersionChecker versionChecker = new VersionChecker();
+            versionChecker.setRemoteVersionUrlString(remoteVersionUrl);
+            versionChecker.getRemoteVersion();
+        } catch(IOException e) {
+            //
         }
     }
 

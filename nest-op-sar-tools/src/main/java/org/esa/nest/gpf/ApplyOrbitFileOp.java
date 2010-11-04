@@ -79,8 +79,9 @@ public final class ApplyOrbitFileOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {DORIS_POR, DORIS_VOR, DELFT_ENVISAT, DELFT_ERS_1, DELFT_ERS_2, PRARE_ERS_1, PRARE_ERS_2},
-            defaultValue = DORIS_VOR, label="Orbit Type")
+    @Parameter(valueSet = {DORIS_POR+" (ENVISAT)", DORIS_VOR+" (ENVISAT)",
+            DELFT_PRECISE+" (ENVISAT, ERS1&2)", PRARE_PRECISE+" (ERS1&2)" },
+            defaultValue = DORIS_VOR+" (ENVISAT)", label="Orbit Type")
     private String orbitType = DORIS_VOR;
 
     private MetadataElement absRoot = null;
@@ -102,13 +103,12 @@ public final class ApplyOrbitFileOp extends Operator {
     private TiePointGrid latitude = null;
     private TiePointGrid longitude = null;
 
-    private static final String DORIS_POR = "DORIS_POR";
-    private static final String DORIS_VOR = "DORIS_VOR";
-    private static final String DELFT_ENVISAT = "DELFT_PRECISE_ENVISAT";
-    private static final String DELFT_ERS_1 = "DELFT_PRECISE_ERS_1";
-    private static final String DELFT_ERS_2 = "DELFT_PRECISE_ERS_2";
-    private static final String PRARE_ERS_1 = "PRARE_PRECISE_ERS_1";
-    private static final String PRARE_ERS_2 = "PRARE_PRECISE_ERS_2";
+    private String mission;
+
+    private static final String DORIS_POR = "DORIS Precise";
+    private static final String DORIS_VOR = "DORIS Verified";
+    private static final String DELFT_PRECISE = "DELFT Precise";
+    private static final String PRARE_PRECISE = "PRARE Precise";
 
     private ftpUtils ftp = null;
     private Map<String, Long> fileSizeMap = null;
@@ -139,17 +139,17 @@ public final class ApplyOrbitFileOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
             if(mission.equals("ENVISAT")) {
-                if(!orbitType.equals(DELFT_ENVISAT) && !orbitType.equals(DORIS_POR) && !orbitType.equals(DORIS_VOR)) {
+                if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(DORIS_POR) && !orbitType.startsWith(DORIS_VOR)) {
                     throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
                 }
             } else if(mission.equals("ERS1")) {
-                if(!orbitType.equals(DELFT_ERS_1) && !orbitType.equals(PRARE_ERS_1)) {
+                if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(PRARE_PRECISE)) {
                     throw new OperatorException(orbitType + " is not suitable for an ERS1 product");
                 }
             } else if(mission.equals("ERS2")) {
-                if(!orbitType.equals(DELFT_ERS_2) && !orbitType.equals(PRARE_ERS_2)) {
+                if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(PRARE_PRECISE)) {
                     throw new OperatorException(orbitType + " is not suitable for an ERS2 product");
                 }
             } else {
@@ -492,7 +492,8 @@ public final class ApplyOrbitFileOp extends Operator {
         AbstractMetadata.setOrbitStateVectors(tgtAbsRoot, orbitStateVectors);
 
         // save orbit file name
-        tgtAbsRoot.setAttributeString(AbstractMetadata.orbit_state_vector_file, orbitFile.getName());
+        final String prefix = orbitType.substring(0, orbitType.indexOf("("));
+        tgtAbsRoot.setAttributeString(AbstractMetadata.orbit_state_vector_file, prefix+" "+orbitFile.getName());
     }
     
     // ====================================== DORIS ORBIT FILE ===============================================
@@ -612,13 +613,13 @@ public final class ApplyOrbitFileOp extends Operator {
         // construct path to the orbit file folder
         String orbitPathStr = "";
         String delftFTPPath = "";
-        if(orbitType.contains(DELFT_ENVISAT)) {
+        if(mission.equals("ENVISAT")) {
             orbitPathStr = Settings.instance().get("OrbitFiles/delftEnvisatOrbitPath");
             delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ENVISAT_precise_remotePath");
-        } else if(orbitType.contains(DELFT_ERS_1)) {
+        } else if(mission.equals("ERS1")) {
             orbitPathStr = Settings.instance().get("OrbitFiles/delftERS1OrbitPath");
             delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS1_precise_remotePath");
-        } else if(orbitType.contains(DELFT_ERS_2)) {
+        } else if(mission.equals("ERS2")) {
             orbitPathStr = Settings.instance().get("OrbitFiles/delftERS2OrbitPath");
             delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS2_precise_remotePath");
         }
@@ -700,9 +701,9 @@ public final class ApplyOrbitFileOp extends Operator {
         prareReader = PrareOrbitReader.getInstance();
         // construct path to the orbit file folder
         String orbitPath = "";
-        if(orbitType.contains(PRARE_ERS_1)) {
+        if(mission.equals("ERS1")) {
             orbitPath = Settings.instance().get("OrbitFiles/prareERS1OrbitPath");
-        } else if(orbitType.contains(PRARE_ERS_2)) {
+        } else if(mission.equals("ERS2")) {
             orbitPath = Settings.instance().get("OrbitFiles/prareERS2OrbitPath");
         }
 

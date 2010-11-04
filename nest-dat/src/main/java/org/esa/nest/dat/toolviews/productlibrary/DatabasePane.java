@@ -52,6 +52,13 @@ public class DatabasePane extends JPanel {
             DBQuery.ALL_PASSES, DBQuery.ASCENDING_PASS, DBQuery.DESCENDING_PASS });
     private final DateComboBox startDateBox = new DateComboBox();
     private final DateComboBox endDateBox = new DateComboBox();
+    private final JComboBox polarizationCombo = new JComboBox(new String[] {
+            DBQuery.ANY, "HH", "VV", "HV", "VH" });
+    private final JComboBox calibrationCombo = new JComboBox(new String[] {
+            DBQuery.ANY, DBQuery.CALIBRATED, DBQuery.NOT_CALIBRATED });
+    private final JComboBox orbitCorrectionCombo = new JComboBox(new String[] {
+            DBQuery.ANY, DBQuery.ORBIT_PRELIMINARY, DBQuery.ORBIT_PRECISE, DBQuery.ORBIT_VERIFIED });
+
     private final JComboBox metadataNameCombo = new JComboBox();
     private final JTextField metdataValueField = new JTextField();
     private final JTextArea metadataArea = new JTextArea();
@@ -85,18 +92,12 @@ public class DatabasePane extends JPanel {
                     queryDatabase();
                 }
             });
-            acquisitionModeCombo.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
-                    queryDatabase();
-                }
-            });
-            passCombo.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
-                    queryDatabase();
-                }
-            });
+            addComboListener(acquisitionModeCombo);
+            addComboListener(passCombo);
+            addComboListener(polarizationCombo);
+            addComboListener(calibrationCombo);
+            addComboListener(orbitCorrectionCombo);
+
             startDateBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent event) {
                     if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
@@ -129,6 +130,15 @@ public class DatabasePane extends JPanel {
         } catch(Throwable t) {
             handleException(t);
         }
+    }
+
+    private void addComboListener(final JComboBox combo) {
+        combo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent event) {
+                if(modifyingCombos || event.getStateChange() == ItemEvent.DESELECTED) return;
+                queryDatabase();
+            }
+        });
     }
 
     /**
@@ -193,6 +203,15 @@ public class DatabasePane extends JPanel {
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Polarization Contains:", polarizationCombo);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Calibration:", calibrationCombo);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Orbit Correction:", orbitCorrectionCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
         gbc.gridx = 0;
@@ -323,6 +342,10 @@ public class DatabasePane extends JPanel {
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
         dbQuery.setStartEndDate(startDateBox.getCalendar(), endDateBox.getCalendar());
 
+        dbQuery.setSelectedPolarization((String)polarizationCombo.getSelectedItem());
+        dbQuery.setSelectedCalibration((String)calibrationCombo.getSelectedItem());
+        dbQuery.setSelectedOrbitCorrection((String)orbitCorrectionCombo.getSelectedItem());
+
         dbQuery.clearMetadataQuery();
         dbQuery.setFreeQuery(metadataArea.getText());
     }
@@ -369,6 +392,11 @@ public class DatabasePane extends JPanel {
             passCombo.setSelectedItem(dbQuery.getSelectedPass());
             startDateBox.setCalendar(dbQuery.getStartDate());
             endDateBox.setCalendar(dbQuery.getEndDate());
+
+            polarizationCombo.setSelectedItem(dbQuery.getSelectedPolarization());
+            calibrationCombo.setSelectedItem(dbQuery.getSelectedCalibration());
+            orbitCorrectionCombo.setSelectedItem(dbQuery.getSelectedOrbitCorrection());
+
             metadataArea.setText(dbQuery.getFreeQuery());
         } finally {
             lockCombos(origState);

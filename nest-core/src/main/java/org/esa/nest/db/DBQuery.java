@@ -40,12 +40,21 @@ public class DBQuery {
     public static final String ASCENDING_PASS = "ASCENDING";
     public static final String DESCENDING_PASS = "DESCENDING";
     public static final String ALL_FOLDERS = "All Folders";
+    public static final String ANY = "Any";
+    public static final String CALIBRATED = "Calibrated";
+    public static final String NOT_CALIBRATED = "Not Calibrated";
+    public static final String ORBIT_PRELIMINARY = "Preliminary";
+    public static final String ORBIT_PRECISE = "Precise";
+    public static final String ORBIT_VERIFIED = "Verified";
     public static final String DB_QUERY = "dbQuery";
 
     private String selectedMissions[] = {};
     private String selectedProductTypes[] = {};
     private String selectedAcquisitionMode = "";
     private String selectedPass = "";
+    private String selectedPolarization = ANY;
+    private String selectedCalibration = ANY;
+    private String selectedOrbitCorrection = ANY;
     private Rectangle.Float selectionRectangle = null;
     private File baseDir = null;
     private File excludeDir = null;
@@ -92,6 +101,33 @@ public class DBQuery {
         return selectedPass;
     }
 
+    public void setSelectedPolarization(final String pol) {
+        if(pol != null)
+            selectedPolarization = pol;
+    }
+
+    public String getSelectedPolarization() {
+        return selectedPolarization;
+    }
+
+    public void setSelectedCalibration(final String calib) {
+        if(calib != null)
+            selectedCalibration = calib;
+    }
+
+    public String getSelectedCalibration() {
+        return selectedCalibration;
+    }
+
+    public void setSelectedOrbitCorrection(final String orbitCor) {
+        if(orbitCor != null)
+            selectedOrbitCorrection = orbitCor;
+    }
+
+    public String getSelectedOrbitCorrection() {
+        return selectedOrbitCorrection;
+    }
+
     public void setBaseDir(final File dir) {
         baseDir = dir;
     }
@@ -135,10 +171,6 @@ public class DBQuery {
             selectedMissions = new String[] {};
         if(StringUtils.contains(selectedProductTypes, ALL_PRODUCT_TYPES))
             selectedProductTypes = new String[] {};
-        if(selectedAcquisitionMode.equals(ALL_MODES))
-            selectedAcquisitionMode = "";
-        if(selectedPass.equals(ALL_PASSES))
-            selectedPass = "";
 
         String queryStr = "";
         if(selectedMissions.length > 0) {
@@ -148,13 +180,31 @@ public class DBQuery {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
         }
-        if(!selectedAcquisitionMode.isEmpty()) {
+        if(!selectedAcquisitionMode.equals(ALL_MODES)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+"'";
         }
-        if(!selectedPass.isEmpty()) {
+        if(!selectedPass.equals(ALL_PASSES)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+"'";
+        }
+        if(!selectedPolarization.equals(ANY)) {
+            queryStr += SQLUtils.addAND(queryStr);
+            queryStr += "( "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+"'"+ " )";                              
+        }
+        if(!selectedCalibration.equals(ANY)) {
+            queryStr += SQLUtils.addAND(queryStr);
+            if(selectedCalibration.equals(CALIBRATED))
+                queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1";
+            else if(selectedCalibration.equals(NOT_CALIBRATED))
+                queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0";
+        }
+        if(!selectedOrbitCorrection.equals(ANY)) {
+            queryStr = formOrbitCorrectionQuery(queryStr);
         }
 
         if(startDate != null) {
@@ -203,6 +253,24 @@ public class DBQuery {
             System.out.println("Query="+queryStr);
             return instersectMapSelection(db.queryProduct(queryStr));
         }
+    }
+
+    private String formOrbitCorrectionQuery(String queryStr) {
+        queryStr += SQLUtils.addAND(queryStr);
+        if(selectedOrbitCorrection.equals(ORBIT_VERIFIED)) {
+            queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Verified%'";
+        } else if(selectedOrbitCorrection.equals(ORBIT_PRECISE)) {
+            queryStr += "( "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Precise%' OR "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DELFT Precise%' OR "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'PRARE Precise%'"+ " )";
+        } else if(selectedOrbitCorrection.equals(ORBIT_PRELIMINARY)) {
+            queryStr += "( "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DORIS%' AND "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DELFT%' AND "+
+                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'PRARE%'"+ " )";
+        }
+        return queryStr;
     }
 
     public void setSelectionRect(final GeoPos[] selectionBox) {
