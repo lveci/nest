@@ -27,7 +27,7 @@
         <action>
             <id>importOptical</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>Optical</text>
+            <text>Multispectral</text>
             <parent>import</parent>
         </action>
 
