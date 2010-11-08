@@ -90,7 +90,7 @@
     </repositories>
 
     <pluginRepositories>
-        <pluginRepository>
+        <!--pluginRepository>
             <id>bc-mvn-repo</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -101,6 +101,17 @@
             <snapshots>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </pluginRepository-->
+		<pluginRepository>
+            <id>array-mvn-repo</id>
+            <name>Public Maven Repository at Array Systems Computing Inc</name>
+            <url>http://www.array.ca/nest-web/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
         <pluginRepository>
