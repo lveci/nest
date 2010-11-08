@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * Saves a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 public class SaveSessionAction extends ExecCommand {

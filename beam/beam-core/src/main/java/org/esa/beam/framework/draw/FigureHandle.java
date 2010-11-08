@@ -23,7 +23,7 @@ import java.awt.geom.Rectangle2D;
  * A handle of a figure. Handles are used to move, rescale or rotate figures in a drawing.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-08-05 17:00:50 $
+
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

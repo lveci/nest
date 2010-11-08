@@ -19,7 +19,7 @@ package org.esa.beam.util;
  * The <code>AssertionFailure</code> class is an error caused by a failed program assertion.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  * @see Debug
  * @see Debug#assertTrue(boolean)
  * @see Debug#assertTrue(boolean, String)

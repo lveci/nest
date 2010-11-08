@@ -33,7 +33,7 @@ import java.util.Map;
  * <p>A default implementation for the Figure interface are provided by the <code>AbstractFigure</code> class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-08-05 17:00:50 $
+
  * @see FigureHandle
  * @see AbstractFigure
  * @deprecated since BEAM 4.7, no replacement

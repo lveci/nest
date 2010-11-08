@@ -53,7 +53,7 @@ import java.util.Vector;
  * <p> All functions have been implemented with extreme caution in order to provide a maximum performance.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ImageUtils {
 

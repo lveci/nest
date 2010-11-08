@@ -20,7 +20,7 @@ package org.esa.beam.framework.gpf.internal;
  * A simple tile cache metric which holds the average time required to process a pixel of an image.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:51 $
+
  * @since BEAM 4.6
  */
 public class PerformanceMetric {

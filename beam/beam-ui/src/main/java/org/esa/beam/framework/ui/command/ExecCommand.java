@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
  * The <code>ExecCommand</code> is an ...
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2010-08-05 17:00:54 $
+
  */
 public class ExecCommand extends SelectableCommand implements ConfigurableExtension {
 

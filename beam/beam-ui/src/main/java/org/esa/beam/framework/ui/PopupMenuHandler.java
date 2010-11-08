@@ -39,7 +39,7 @@ import java.util.Comparator;
  * popup-menu is created by the <code>PopupMenuFactory</code> instance passed to the constructor of this class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-08-05 17:00:54 $
+
  * @see PopupMenuFactory
  */
 public class PopupMenuHandler implements MouseListener, KeyListener {

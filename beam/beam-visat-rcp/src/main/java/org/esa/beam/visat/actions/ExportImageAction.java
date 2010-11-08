@@ -56,7 +56,7 @@ import java.awt.image.RenderedImage;
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.10 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class ExportImageAction extends AbstractExportImageAction {
 

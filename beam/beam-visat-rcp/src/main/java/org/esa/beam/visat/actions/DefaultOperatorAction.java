@@ -36,7 +36,7 @@ import org.esa.beam.framework.ui.command.CommandEvent;
  *
  * @author Norman Fomferra
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class DefaultOperatorAction extends AbstractVisatAction {
 

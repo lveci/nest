@@ -1,18 +1,26 @@
 /*
- * $Id: ModisProductReaderPlugIn.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
- *
- * Copyright (C) 2002,2003  by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.modis;
 
+import ncsa.hdf.hdflib.HDFConstants;
+import ncsa.hdf.hdflib.HDFException;
+import org.esa.beam.dataio.modis.hdf.HdfAttributes;
+import org.esa.beam.dataio.modis.hdf.HdfUtils;
 import org.esa.beam.dataio.modis.hdf.lib.HDF;
+import org.esa.beam.dataio.modis.productdb.ModisProductDb;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
@@ -49,28 +57,49 @@ public class ModisProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
 
-        DecodeQualification bRet = DecodeQualification.UNABLE;
         File file = null;
-
         if (input instanceof String) {
             file = new File((String) input);
         } else if (input instanceof File) {
             file = (File) input;
         }
 
-        if ((file != null) && (file.exists()) && (file.isFile())) {
-            if (file.getPath().toLowerCase().endsWith(ModisConstants.DEFAULT_FILE_EXTENSION)) {
-                try {
-                    if (HDF.getWrap().Hishdf(file.getPath())) {
-                        bRet = DecodeQualification.SUITABLE;
+        if (file != null && file.exists() &&  file.isFile() && file.getPath().toLowerCase().endsWith(ModisConstants.DEFAULT_FILE_EXTENSION)) {
+            try {
+                String path = file.getPath();
+                if (HDF.getWrap().Hishdf(path)) {
+                    int fileId = HDFConstants.FAIL;
+                    int sdStart = HDFConstants.FAIL;
+                    try {
+                        fileId = HDF.getWrap().Hopen(path, HDFConstants.DFACC_RDONLY);
+                        sdStart = HDF.getWrap().SDstart(path, HDFConstants.DFACC_RDONLY);
+                        HdfAttributes globalAttrs = HdfUtils.readAttributes(sdStart);
+
+                        // check wheter daac or imapp
+                        ModisGlobalAttributes modisAttributes;
+                        if (globalAttrs.getStringAttributeValue(ModisConstants.STRUCT_META_KEY) == null) {
+                            modisAttributes = new ModisImappAttributes(file, sdStart, globalAttrs);
+                        } else {
+                            modisAttributes = new ModisDaacAttributes(globalAttrs);
+                        }
+                        final String productType = modisAttributes.getProductType();
+                        if (ModisProductDb.getInstance().isSupportedProduct(productType)) {
+                            return DecodeQualification.INTENDED;
+                        }
+                    } catch (HDFException ignore) {
+                    } finally {
+                        if (sdStart != HDFConstants.FAIL) {
+                            HDF.getWrap().Hclose(sdStart);
+                        }
+                        if (fileId != HDFConstants.FAIL) {
+                            HDF.getWrap().Hclose(fileId);
+                        }
                     }
-                } catch (Exception e) {
-                    // nothing to do, return value is already false
                 }
+            } catch (Exception ignore) {
             }
         }
-
-        return bRet;
+        return DecodeQualification.UNABLE;
     }
 
     /**

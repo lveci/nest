@@ -30,7 +30,7 @@ import javax.swing.SwingConstants;
  * An editor for numeric values with an unlimited range.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2010-07-26 19:14:09 $
+ * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:25 $
  * @since BEAM 4.6
  */
 public class NumericEditor extends PropertyEditor {

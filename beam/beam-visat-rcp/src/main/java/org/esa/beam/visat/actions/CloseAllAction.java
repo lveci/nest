@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This action closes all opened products.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class CloseAllAction extends ExecCommand {
 

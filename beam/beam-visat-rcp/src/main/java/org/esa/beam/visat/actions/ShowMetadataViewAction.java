@@ -34,7 +34,7 @@ import java.awt.Cursor;
  * This action opens an Metadata View of the currently selected Metadata Node
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 public class ShowMetadataViewAction extends ExecCommand {

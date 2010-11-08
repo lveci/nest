@@ -28,7 +28,7 @@ import java.util.Set;
  * elevation models as described by their {@link ElevationModelDescriptor}s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $
+
  */
 public class ElevationModelRegistry {
 

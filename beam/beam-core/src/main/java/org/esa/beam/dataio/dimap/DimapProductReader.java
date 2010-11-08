@@ -60,7 +60,7 @@ import java.util.logging.Level;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.14 $ $Date: 2010-08-05 17:00:49 $
+
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -143,9 +143,9 @@ public class DimapProductReader extends AbstractProductReader {
 
         bindBandsToFiles(dom);
         if (product == null) {
+            DimapProductHelpers.addGcps(dom, this.product);
             initGeoCodings(dom);
             DimapProductHelpers.addPins(dom, this.product);
-            DimapProductHelpers.addGcps(dom, this.product);
             readVectorData();
             DimapProductHelpers.addMaskUsages(dom, this.product);
         }
@@ -184,7 +184,6 @@ public class DimapProductReader extends AbstractProductReader {
             }
             final File dataFile = bandDataFiles.get(band);
             if (dataFile == null || !dataFile.canRead()) {
-                product.removeBand(band);
                 BeamLogManager.getSystemLogger().warning(
                         "DimapProductReader: Unable to read file '" + dataFile + "' referenced by '" + band.getName() + "'.");
                 BeamLogManager.getSystemLogger().warning(
@@ -199,9 +198,9 @@ public class DimapProductReader extends AbstractProductReader {
             final TiePointGrid tiePointGrid = product.getTiePointGrid(tiePointGridName);
             String dataFile = DimapProductHelpers.getTiePointDataFile(jDomDocument, tiePointGrid.getName());
             dataFile = FileUtils.exchangeExtension(dataFile, DimapProductConstants.IMAGE_FILE_EXTENSION);
-            FileImageInputStreamExtImpl inputStream = null;
+            FileImageInputStream inputStream = null;
             try {
-                inputStream = new FileImageInputStreamExtImpl(new File(inputDir, dataFile));
+                inputStream = new FileImageInputStream(new File(inputDir, dataFile));
                 final float[] floats = ((float[]) tiePointGrid.getData().getElems());
                 inputStream.seek(0);
                 inputStream.readFully(floats, 0, floats.length);
@@ -359,7 +358,7 @@ public class DimapProductReader extends AbstractProductReader {
         ImageInputStream inputStream = getImageInputStream(band);
         if (inputStream == null) {
             try {
-                inputStream = new FileImageInputStreamExtImpl(file);
+                inputStream = new FileImageInputStream(file);
             } catch (IOException e) {
                 BeamLogManager.getSystemLogger().log(Level.WARNING,
                                                      "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",

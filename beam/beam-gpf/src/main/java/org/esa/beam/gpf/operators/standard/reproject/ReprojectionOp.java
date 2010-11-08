@@ -80,7 +80,7 @@ import java.text.MessageFormat;
  *
  * @author Marco Zuehlke
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:53 $
+
  * @since BEAM 4.7
  */
 @OperatorMetadata(alias = "Reproject",
@@ -182,9 +182,10 @@ public class ReprojectionOp extends Operator {
         */
         Rectangle targetRect = targetImageGeometry.getImageRect();
         targetProduct = new Product("projected_" + sourceProduct.getName(),
-                                    "projection of: " + sourceProduct.getDescription(),
+                                    sourceProduct.getProductType(),
                                     targetRect.width,
                                     targetRect.height);
+        targetProduct.setDescription(sourceProduct.getDescription());
         Dimension tileSize = ImageManager.getPreferredTileSize(targetProduct);
         targetProduct.setPreferredTileSize(tileSize);
         /*
@@ -230,6 +231,7 @@ public class ReprojectionOp extends Operator {
         if (elevationModel != null) {
             elevationModel.dispose();
         }
+        super.dispose();
     }
 
     private ElevationModel createElevationModel() throws OperatorException {

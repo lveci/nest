@@ -23,7 +23,7 @@ import org.esa.beam.framework.ui.layer.LayerSource;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  * 
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 public class CollectionLayerSource implements LayerSource {

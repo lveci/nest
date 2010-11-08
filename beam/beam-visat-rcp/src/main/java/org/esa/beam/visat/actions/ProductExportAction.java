@@ -42,7 +42,7 @@ import java.util.Iterator;
  * This action exports a product of the associated format.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class ProductExportAction extends ExecCommand {
 

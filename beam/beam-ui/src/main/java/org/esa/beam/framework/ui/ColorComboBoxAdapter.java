@@ -31,7 +31,7 @@ import javax.swing.JComponent;
  * A binding for the JIDE {@link ColorComboBox}.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.2
  */
 public class ColorComboBoxAdapter extends ComponentAdapter implements PropertyChangeListener {

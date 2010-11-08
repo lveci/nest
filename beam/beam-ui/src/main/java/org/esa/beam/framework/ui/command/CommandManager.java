@@ -23,7 +23,7 @@ import com.bc.ceres.swing.figure.Interactor;
  * which are applied to all commands in the list.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $  $Date: 2010-08-05 17:00:54 $
+
  */
 public interface CommandManager {
 

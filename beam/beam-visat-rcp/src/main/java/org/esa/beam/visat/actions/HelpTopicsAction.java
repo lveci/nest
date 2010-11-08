@@ -23,7 +23,7 @@ import org.esa.beam.framework.help.HelpSys;
  * This action shows the VISAT help.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class HelpTopicsAction extends ExecCommand {
 

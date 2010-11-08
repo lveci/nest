@@ -662,14 +662,6 @@ public class MapProjectionDialog extends ModalDialog {
         }
     }
 
-    public String getProjectionName() {
-        return _outputMapInfo.getMapProjection().getName();
-    }
-
-    public String getDatumName() {
-        return _outputMapInfo.getDatum().getName();
-    }
-
 }
 
 

@@ -16,7 +16,6 @@
 package org.esa.beam.visat.actions;
 
 import com.bc.ceres.core.runtime.ProxyConfig;
-import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import com.bc.ceres.swing.update.ConnectionConfigData;
 import com.bc.ceres.swing.update.DefaultModuleManager;
 import com.bc.ceres.swing.update.ModuleManagerPane;
@@ -35,7 +34,7 @@ import java.net.URL;
  * This action shows the update module manager
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class ShowModuleManagerAction extends ExecCommand {
 

@@ -21,7 +21,7 @@ import java.util.EventListener;
  * This type of listener is informed if some property within the property map changes its value.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public interface PropertyMapChangeListener extends EventListener {
 

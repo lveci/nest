@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-envisat-reader</symbolicName>
-    <version>1.3.200</version>
+    <version>1.4</version>
     <name>Envisat Product Reader</name>
 
     <description>Enables BEAM to read ENVISAT data products.</description>
@@ -13,6 +13,10 @@
 
 
     <changelog><![CDATA[
+       <p>Changes from version 1.3.101 to 1.3.200:<br/>
+       [BEAM-1160] Auto-grouping of bands shall be controlled by data model<br/>
+       [BEAM-1162] The Envisat reader should support reformatted / line-interleaved products<br/>
+       </p>
        <p>Changes from version 1.3 to 1.3.101:<br/>
        [BEAM-1034] Envisat reader should create PixelGeoCoding for FSG/FRG products automatically<br/>
        [BEAM-1032] Orthorectification not applicable for MER_FRS_2P<br/>
@@ -56,33 +60,23 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ENVISAT</formatName>
             <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>E</mnemonic>
             <accelerator>control E</accelerator>
-            <text>Import ENVISAT (ASAR,MERIS,AATSR) Product...</text>
-            <shortDescr>Import an ENVISAT (ASAR, MERIS,AATSR) data product or subset.</shortDescr>
-            <description>Import an ENVISAT ASAR, MERIS or AATSR data product or subset.</description>
+            <text>Import ENVISAT (MERIS,AATSR,ASAR) Product...</text>
+            <shortDescr>Import an ENVISAT (MERIS,AATSR,ASAR) data product or product subset.</shortDescr>
+            <description>Import an ENVISAT MERIS, AATSR or ASAR data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-        </action>
-		<action>
-            <id>importMERISProduct</id>
-            <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>ENVISAT</formatName>
-            <useAllFileFilter>true</useAllFileFilter>
-            <text>Import ENVISAT MERIS Product...</text>
-            <shortDescr>Import an ENVISAT (ASAR, MERIS,AATSR) data product or subset.</shortDescr>
-            <description>Import an ENVISAT ASAR, MERIS or AATSR data product or subset.</description>
-            <largeIcon>icons/Import24.gif</largeIcon>
-			<parent>importOptical</parent>
         </action>
         <action>
             <id>importErsProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ERS1/2</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <text>Import ERS (.e1, .e2) Product...</text>
-            <shortDescr>Open ERS 1/2 (SAR, ATSR) data product in PGS-Envisat format or subset.</shortDescr>
-            <description>Open ERS 1/2 (SAR, ATSR) data product in PGS-Envisat format or subset.</description>
+            <mnemonic>E</mnemonic>
+            <text>Import ERS1/2 (ATSR,SAR) Product...</text>
+            <shortDescr>Import an ERS1/2 (ATSR,SAR) data product or product subset.</shortDescr>
+            <description>Import an ERS1/2 ATSR or SAR data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-            <placeAfter>importEnvisatProduct</placeAfter>
         </action>
     </extension>
 

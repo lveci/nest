@@ -26,7 +26,7 @@ import org.esa.beam.framework.datamodel.VectorDataNode;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:55 $
+
  * @see ProductTree
  * @since BEAM 4.7
  */

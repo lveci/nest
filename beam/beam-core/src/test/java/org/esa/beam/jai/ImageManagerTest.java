@@ -31,7 +31,7 @@ import java.awt.image.RenderedImage;
 
 /**
  * @author Norman Fomferra
- * @version $revision$ $date$
+
  */
 public class ImageManagerTest extends TestCase {
 

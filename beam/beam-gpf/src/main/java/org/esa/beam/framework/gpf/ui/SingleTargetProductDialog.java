@@ -45,13 +45,13 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.8 $ $Date: 2010-08-05 17:00:51 $
+
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
     private TargetProductSelector targetProductSelector;
     private AppContext appContext;
-    private JLabel statusLabel;
+    private JLabel statusLabel;  // NESTMOD
 
     public SingleTargetProductDialog(AppContext appContext, String title, String helpID) {
         this(appContext, title, ID_APPLY_CLOSE_HELP, helpID);
@@ -80,6 +80,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         button.setMnemonic('R');
         updateRunButton();
 
+	// NESTMOD
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));
         this.getJDialog().getContentPane().add(statusLabel, BorderLayout.NORTH);
@@ -294,15 +295,17 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
             saveTime = 0L;
             Product product = null;
             try {
-                // free cache
+                // free cache	// NESTMOD
                 JAI.getDefaultInstance().getTileCache().flush();
                 System.gc();
 
                 executeStartTime = Calendar.getInstance().getTime();
                 long t0 = System.currentTimeMillis();
-                WriteOp.writeProduct(targetProduct,
-                                     model.getProductFile(),
-                                     model.getFormatName(), SubProgressMonitor.create(pm, 95));
+                WriteOp writeOp = new WriteOp(targetProduct, model.getProductFile(), model.getFormatName());
+                writeOp.setDeleteOutputOnFailure(true);
+                writeOp.setWriteEntireTileRows(true);
+                writeOp.setClearCacheAfterRowWrite(false);
+                writeOp.writeProduct(SubProgressMonitor.create(pm, 95));
                 saveTime = System.currentTimeMillis() - t0;
                 if (model.isOpenInAppSelected()) {
                     product = ProductIO.readProduct(model.getProductFile());

@@ -89,6 +89,7 @@ public class GPF {
     public static final Map<String, Product> NO_SOURCES = Collections.unmodifiableMap(new TreeMap<String, Product>());
 
     private static GPF defaultInstance = new GPF();
+
     private OperatorSpiRegistry spiRegistry;
 
     protected GPF() {
@@ -102,7 +103,9 @@ public class GPF {
      *
      * @param operatorName the name of the operator to use.
      * @param parameters   the named parameters needed by the operator.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(String operatorName,
@@ -118,7 +121,9 @@ public class GPF {
      * @param operatorName   the name of the operator to use.
      * @param parameters     the named parameters needed by the operator.
      * @param renderingHints the rendering hints may be {@code null}.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(String operatorName,
@@ -135,7 +140,9 @@ public class GPF {
      * @param operatorName  the name of the operator to use.
      * @param parameters    the named parameters needed by the operator.
      * @param sourceProduct a source product.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(final String operatorName,
@@ -153,7 +160,9 @@ public class GPF {
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProduct  the source product.
      * @param renderingHints the rendering hints may be {@code null}.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(final String operatorName,
@@ -171,7 +180,9 @@ public class GPF {
      * @param operatorName   the name of the operator to use.
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts the source products.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(final String operatorName,
@@ -189,7 +200,9 @@ public class GPF {
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts the source products.
      * @param renderingHints the rendering hints may be {@code null}.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(String operatorName,
@@ -200,8 +213,10 @@ public class GPF {
         if (sourceProducts.length > 0) {
             sourceProductMap = new HashMap<String, Product>(sourceProducts.length);
             OperatorSpi operatorSpi = GPF.getDefaultInstance().spiRegistry.getOperatorSpi(operatorName);
-            if(operatorSpi == null) {
-                throw new OperatorException(String.format("Operator for '%s' not found. Maybe OperatorSpi is not loaded.", operatorName));
+            if (operatorSpi == null) {
+                throw new OperatorException(
+                        String.format("Unknown operator '%s'. Note that operator aliases are case sensitive.",
+                                      operatorName));
             }
             Field[] declaredFields = operatorSpi.getOperatorClass().getDeclaredFields();
             for (Field declaredField : declaredFields) {
@@ -213,7 +228,10 @@ public class GPF {
                 if (sourceProductsAnnotation != null) {
                     for (int i = 0; i < sourceProducts.length; i++) {
                         Product sourceProduct = sourceProducts[i];
-                        sourceProductMap.put(SOURCE_PRODUCT_FIELD_NAME + "." + (i), sourceProduct);
+                        sourceProductMap.put(SOURCE_PRODUCT_FIELD_NAME + "." + (i + 1), sourceProduct);
+                        // kept for backward compatibility
+                        // since BEAM 4.9 the pattern above is preferred
+                        sourceProductMap.put(SOURCE_PRODUCT_FIELD_NAME + (i + 1), sourceProduct);
                     }
                 }
             }
@@ -230,7 +248,9 @@ public class GPF {
      * @param operatorName   the name of the operator to use.
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts the map of named source products.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(String operatorName,
@@ -248,7 +268,9 @@ public class GPF {
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts the map of named source products.
      * @param renderingHints the rendering hints, may be {@code null}.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public static Product createProduct(String operatorName,
@@ -265,7 +287,9 @@ public class GPF {
      * @param operatorName   the name of the operator to use.
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts a map of named source products.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     @Deprecated
@@ -287,7 +311,9 @@ public class GPF {
      * @param parameters     the named parameters needed by the operator.
      * @param sourceProducts the map of named source products.
      * @param renderingHints the rendering hints, may be {@code null}.
+     *
      * @return the product created by the operator.
+     *
      * @throws OperatorException if the product could not be created.
      */
     public Product createProductNS(String operatorName,
@@ -340,6 +366,7 @@ public class GPF {
     }
 
     static class RenderingKey<T> extends RenderingHints.Key {
+
         private final Class<T> objectClass;
         private final Validator<T> validator;
 
@@ -365,6 +392,7 @@ public class GPF {
         }
 
         interface Validator<T> {
+
             boolean isValid(T val);
         }
     }

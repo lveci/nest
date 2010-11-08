@@ -35,7 +35,7 @@ import com.bc.ceres.core.runtime.Module;
  * web page.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class ShowDataSourcesAction extends ExecCommand {
     // todo - convert to properties for NEST (nf - 11.07.2008)

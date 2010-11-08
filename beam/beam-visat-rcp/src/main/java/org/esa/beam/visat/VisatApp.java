@@ -145,7 +145,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.29 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class VisatApp extends BasicApp implements AppContext {
 

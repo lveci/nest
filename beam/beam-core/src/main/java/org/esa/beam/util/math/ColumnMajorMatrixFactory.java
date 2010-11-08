@@ -19,7 +19,7 @@ package org.esa.beam.util.math;
  * Matrix factory implementation.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:51 $
+
  */
 public class ColumnMajorMatrixFactory implements MatrixFactory {
     /**

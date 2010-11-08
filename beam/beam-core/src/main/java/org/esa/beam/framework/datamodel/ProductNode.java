@@ -26,7 +26,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public abstract class ProductNode {
 

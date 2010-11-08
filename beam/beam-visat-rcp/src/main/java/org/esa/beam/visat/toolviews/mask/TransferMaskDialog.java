@@ -43,7 +43,7 @@ import java.util.Map;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:56 $
+
  * @since BEAM 4.7
  */
 class TransferMaskDialog extends ModalDialog {

@@ -30,7 +30,7 @@ import java.security.CodeSource;
  * Installls resources from a given source to a given target.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ResourceInstaller {
 

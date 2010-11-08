@@ -21,7 +21,7 @@ import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.jidesoft.grid.SortableTable;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.dataio.placemark.PlacemarkIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -37,6 +37,8 @@ import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.help.HelpSys;
+import org.esa.beam.framework.ui.DecimalTableCellRenderer;
+import org.esa.beam.framework.ui.FloatCellEditor;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.command.CommandManager;
@@ -49,19 +51,13 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.SystemUtils;
-import org.esa.beam.util.XmlWriter;
 import org.esa.beam.util.io.BeamFileChooser;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.DOMBuilder;
-import org.xml.sax.SAXException;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -73,11 +69,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -88,10 +81,6 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -105,19 +94,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -128,23 +114,6 @@ import java.util.List;
 public class PlacemarkManagerToolView extends AbstractToolView {
 
     public static final String PROPERTY_KEY_IO_DIR = "pin.io.dir";
-    public static final String NAME_COL_NAME = "Name";
-    public static final String LABEL_COL_NAME = "Label";
-    public static final String DESC_COL_NAME = "Desc";
-    public static final String LON_COL_NAME = "Lon";
-    public static final String LAT_COL_NAME = "Lat";
-
-    private static final String FILE_EXTENSION_FLAT_OLD = ".pnf";
-    private static final String FILE_EXTENSION_XML_OLD = ".pnx";
-
-    private static final String FILE_EXTENSION_FLAT_TEXT = ".txt";
-    private static final String FILE_EXTENSION_PLACEMARK = ".placemark";
-
-    private static final int INDEX_FOR_NAME = 0;
-    private static final int INDEX_FOR_LON = 1;
-    private static final int INDEX_FOR_LAT = 2;
-    private static final int INDEX_FOR_DESC = 3;
-    private static final int INDEX_FOR_LABEL = 4;
 
     private final PlacemarkDescriptor placemarkDescriptor;
 
@@ -156,8 +125,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     private Product product;
     private SortableTable placemarkTable;
     private PlacemarkListener placemarkListener;
-    private BeamFileFilter pinPlacemarkFileFilter;
-    private BeamFileFilter pinTextFileFilter;
     private Band[] selectedBands;
     private TiePointGrid[] selectedGrids;
     private boolean synchronizingPlacemarkSelectedState;
@@ -194,7 +161,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         placemarkTable.addMouseListener(toolTipSetter);
         placemarkTable.addMouseListener(new PopupListener());
         placemarkTable.setModel(placemarkTableModel);
-        placemarkTable.setDefaultRenderer(Float.class, new FloatTableCellRenderer(new DecimalFormat("0.000")));
+        placemarkTable.setDefaultCellRenderer(new RightAlignmentTableCellRenderer());
+        placemarkTable.setDefaultRenderer(Float.class, new DecimalTableCellRenderer(new DecimalFormat("0.000")));
         placemarkTable.getSelectionModel().addListSelectionListener(new PlacemarkTableSelectionHandler());
         updateTableModel();
 
@@ -325,18 +293,18 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     }
 
     protected void addCellRenderer(TableColumnModel columnModel) {
-        columnModel.getColumn(0).setCellRenderer(new FloatTableCellRenderer(new DecimalFormat("0.000")));
-        columnModel.getColumn(1).setCellRenderer(new FloatTableCellRenderer(new DecimalFormat("0.000")));
-        columnModel.getColumn(2).setCellRenderer(new FloatTableCellRenderer(new DecimalFormat("0.000000")));
-        columnModel.getColumn(3).setCellRenderer(new FloatTableCellRenderer(new DecimalFormat("0.000000")));
+        columnModel.getColumn(0).setCellRenderer(new DecimalTableCellRenderer(new DecimalFormat("0.000")));
+        columnModel.getColumn(1).setCellRenderer(new DecimalTableCellRenderer(new DecimalFormat("0.000")));
+        columnModel.getColumn(2).setCellRenderer(new DecimalTableCellRenderer(new DecimalFormat("0.000000")));
+        columnModel.getColumn(3).setCellRenderer(new DecimalTableCellRenderer(new DecimalFormat("0.000000")));
     }
 
     protected void addCellEditor(TableColumnModel columnModel) {
-        final PinCellEditor pixelCellEditor = new PinCellEditor();
+        final FloatCellEditor pixelCellEditor = new FloatCellEditor();
         columnModel.getColumn(0).setCellEditor(pixelCellEditor);
         columnModel.getColumn(1).setCellEditor(pixelCellEditor);
-        columnModel.getColumn(2).setCellEditor(new PinLonCellEditor());
-        columnModel.getColumn(3).setCellEditor(new PinLatCellEditor());
+        columnModel.getColumn(2).setCellEditor(new FloatCellEditor(-180, 180));
+        columnModel.getColumn(3).setCellEditor(new FloatCellEditor(-90, 90));
     }
 
     private ProductSceneView getSceneView() {
@@ -438,7 +406,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     void copyActivePlacemark() {
         Guardian.assertNotNull("product", product);
-        Placemark activePlacemark = getSelectedPlacemarkFromTable();
+        Placemark activePlacemark = getSelectedPlacemark();
         Guardian.assertNotNull("activePlacemark", activePlacemark);
         Placemark newPlacemark = new Placemark("copy_of_" + activePlacemark.getName(),
                                                activePlacemark.getLabel(),
@@ -487,7 +455,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     void editActivePin() {
         Guardian.assertNotNull("product", product);
-        Placemark activePlacemark = getSelectedPlacemarkFromTable();
+        Placemark activePlacemark = getSelectedPlacemark();
         Guardian.assertNotNull("activePlacemark", activePlacemark);
         if (PlacemarkDialog.showEditPlacemarkDialog(getPaneWindow(), product, activePlacemark,
                                                     placemarkDescriptor)) {
@@ -497,11 +465,11 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     }
 
     void removeSelectedPins() {
-        final Placemark[] placemarks = getSelectedNodesFromTable();
+        final List<Placemark> placemarks = getSelectedPlacemarks();
         int i = JOptionPane.showConfirmDialog(getPaneWindow(),
                                               MessageFormat.format(
                                                       "Do you really want to remove {0} selected{1}(s)?\nThis action can not be undone.",
-                                                      placemarks.length, placemarkDescriptor.getRoleLabel()),
+                                                      placemarks.size(), placemarkDescriptor.getRoleLabel()),
                                               MessageFormat.format("{0} - Remove {1}s", getDescriptor().getTitle(),
                                                                    placemarkDescriptor.getRoleLabel()),
                                               JOptionPane.OK_CANCEL_OPTION);
@@ -520,12 +488,12 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         }
     }
 
-    private int getNumSelectedNodesFromTable() {
+    private int getNumSelectedPlacemarks() {
         int[] rowIndexes = placemarkTable.getSelectedRows();
         return rowIndexes != null ? rowIndexes.length : 0;
     }
 
-    private Placemark getSelectedPlacemarkFromTable() {
+    private Placemark getSelectedPlacemark() {
         int rowIndex = placemarkTable.getSelectedRow();
         if (rowIndex >= 0) {
             return placemarkTableModel.getPlacemarkAt(placemarkTable.getActualRowAt(rowIndex));
@@ -533,23 +501,21 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         return null;
     }
 
-    private Placemark[] getSelectedNodesFromTable() {
-        int[] rowIndexes = placemarkTable.getSelectedRows();
-        if (rowIndexes != null) {
-            Placemark[] pins = new Placemark[rowIndexes.length];
-            for (int i = 0; i < rowIndexes.length; i++) {
-                int rowIndex = placemarkTable.getActualRowAt(rowIndexes[i]);
-                pins[i] = placemarkTableModel.getPlacemarkAt(rowIndex);
+    private List<Placemark> getSelectedPlacemarks() {
+        List<Placemark> placemarkList = new ArrayList<Placemark>();
+        int[] sortedRowIndexes = placemarkTable.getSelectedRows();
+        if (sortedRowIndexes != null) {
+            for (int rowIndex : sortedRowIndexes) {
+                int modelRowIndex = placemarkTable.getActualRowAt(rowIndex);
+                placemarkList.add(placemarkTableModel.getPlacemarkAt(modelRowIndex));
             }
-            return pins;
-        } else {
-            return new Placemark[0];
         }
+        return placemarkList;
     }
 
     void zoomToActivePin() {
         Guardian.assertNotNull("product", product);
-        Placemark activePlacemark = getSelectedPlacemarkFromTable();
+        Placemark activePlacemark = getSelectedPlacemark();
         Guardian.assertNotNull("activePlacemark", activePlacemark);
         final ProductSceneView view = getSceneView();
         final PixelPos imagePos = activePlacemark.getPixelPos();  // in image coordinates on Level 0, can be null
@@ -590,7 +556,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         int numSelectedPins = 0;
         if (productSelected) {
             updatePlacemarkTableSelectionFromView();
-            numSelectedPins = getNumSelectedNodesFromTable();
+            numSelectedPins = getNumSelectedPlacemarks();
             getDescriptor().setTitle(prefixTitle + " - " + product.getDisplayName());
         } else {
             getDescriptor().setTitle(prefixTitle);
@@ -631,15 +597,16 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     }
 
     void importPlacemarks(boolean allPlacemarks) {
-        Placemark[] placemarks;
+        List<Placemark> placemarks;
         try {
             placemarks = loadPlacemarksFromFile();
         } catch (IOException e) {
+            e.printStackTrace();
             showErrorDialog(
                     "I/O error, failed to import " + placemarkDescriptor.getRoleLabel() + "s:\n" + e.getMessage());    /*I18N*/
             return;
         }
-        if (placemarks.length == 0) {
+        if (placemarks.isEmpty()) {
             return;
         }
         int numPinsOutOfBounds = 0;
@@ -688,7 +655,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                     placemarkDescriptor.getRoleLabel())); /*I18N*/
         }
         if (numPinsOutOfBounds > 0) {
-            if (numPinsOutOfBounds == placemarks.length) {
+            if (numPinsOutOfBounds == placemarks.size()) {
                 showErrorDialog(
                         MessageFormat.format(
                                 "No {0}s have been imported, because their pixel\npositions are outside the product''s bounds.",
@@ -732,24 +699,27 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         return false;
     }
 
-    private Placemark[] loadPlacemarksFromFile() throws IOException {
+    private List<Placemark> loadPlacemarksFromFile() throws IOException {
         final BeamFileChooser fileChooser = new BeamFileChooser();
         String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
         fileChooser.setDialogTitle("Import " + roleLabel + "s"); /*I18N*/
         setComponentName(fileChooser, "Import");
-        fileChooser.addChoosableFileFilter(getTextFileFilter());
-        fileChooser.setFileFilter(getPlacemarkFileFilter());
+        fileChooser.addChoosableFileFilter(PlacemarkIO.createTextFileFilter());
+        fileChooser.setFileFilter(PlacemarkIO.createPlacemarkFileFilter());
         fileChooser.setCurrentDirectory(getIODir());
         int result = fileChooser.showOpenDialog(getPaneWindow());
-        Placemark[] placemarks = new Placemark[0];
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             if (file != null) {
                 setIODir(file.getAbsoluteFile().getParentFile());
-                placemarks = readPlacemarksFromFile(file);
+                GeoCoding geoCoding = null;
+                if (product != null) {
+                    geoCoding = product.getGeoCoding();
+                }
+                return PlacemarkIO.readPlacemarks(new FileReader(file), geoCoding, placemarkDescriptor);
             }
         }
-        return placemarks;
+        return Collections.emptyList();
     }
 
     void exportSelectedPlacemarks() {
@@ -757,8 +727,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
         fileChooser.setDialogTitle("Export Selected " + roleLabel + "s");   /*I18N*/
         setComponentName(fileChooser, "Export_Selected");
-        fileChooser.addChoosableFileFilter(getTextFileFilter());
-        fileChooser.setFileFilter(getPlacemarkFileFilter());
+        fileChooser.addChoosableFileFilter(PlacemarkIO.createTextFileFilter());
+        fileChooser.setFileFilter(PlacemarkIO.createPlacemarkFileFilter());
         final File ioDir = getIODir();
         fileChooser.setCurrentDirectory(ioDir);
         fileChooser.setSelectedFile(new File(ioDir, placemarkDescriptor.getRoleName()));
@@ -774,26 +744,21 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                 if (!StringUtils.contains(beamFileFilter.getExtensions(), FileUtils.getExtension(file))) {
                     file = FileUtils.ensureExtension(file, beamFileFilter.getDefaultExtension());
                 }
-                Writer writer = null;
                 try {
-                    if (beamFileFilter.getFormatName().equals(getPlacemarkFileFilter().getFormatName())) {
-                        writePlacemarksFile(file);
+                    if (beamFileFilter.getFormatName().equals(
+                            PlacemarkIO.createPlacemarkFileFilter().getFormatName())) {
+                        PlacemarkIO.writePlacemarksFile(new FileWriter(file), getSelectedPlacemarks());
                     } else {
-                        writer = new FileWriter(file);
-                        writePlacemarkDataTableText(writer);
-                        writer.close();
+                        Writer writer = new FileWriter(file);
+                        try {
+                            writePlacemarkDataTableText(writer);
+                        } finally {
+                            writer.close();
+                        }
                     }
                 } catch (IOException ignored) {
                     showErrorDialog(
                             "I/O Error.\n   Failed to export " + placemarkDescriptor.getRoleLabel() + "s.");    /*I18N*/
-                } finally {
-                    if (writer != null) {
-                        try {
-                            writer.close();
-                        } catch (IOException ignored) {
-                            // ignore
-                        }
-                    }
                 }
             }
         }
@@ -808,7 +773,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
         fileChooser.setDialogTitle("Export " + roleLabel + " Data Table");/*I18N*/
         setComponentName(fileChooser, "Export_Data_Table");
-        fileChooser.setFileFilter(getTextFileFilter());
+        fileChooser.setFileFilter(PlacemarkIO.createTextFileFilter());
         final File ioDir = getIODir();
         fileChooser.setCurrentDirectory(ioDir);
         fileChooser.setSelectedFile(new File(ioDir, "Data"));
@@ -821,11 +786,14 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                     return;
                 }
                 setIODir(file.getAbsoluteFile().getParentFile());
-                file = FileUtils.ensureExtension(file, FILE_EXTENSION_FLAT_TEXT);
+                file = FileUtils.ensureExtension(file, PlacemarkIO.FILE_EXTENSION_FLAT_TEXT);
                 try {
-                    final Writer writer = new FileWriter(file);
-                    writePlacemarkDataTableText(writer);
-                    writer.close();
+                    Writer writer = new FileWriter(file);
+                    try {
+                        writePlacemarkDataTableText(writer);
+                    } finally {
+                        writer.close();
+                    }
                 } catch (IOException ignored) {
                     showErrorDialog("I/O Error.\nFailed to export " + roleLabel + " data table."); /*I18N*/
                 }
@@ -834,220 +802,35 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     }
 
     private void writePlacemarkDataTableText(final Writer writer) {
-        final PrintWriter pw = new PrintWriter(writer);
 
-        final int columnCountMin = placemarkTableModel.getStandardColumnNames().length;
-        final int columnCount = placemarkTable.getColumnCount();
-
-        // Write file header
-        pw.println("# BEAM " + placemarkDescriptor.getRoleLabel() + " export table");
-        pw.println("#");
-        pw.println("# Product:\t" + product.getName());
-        pw.println("# Created on:\t" + new Date());
-        pw.println();
-
-        // Write header columns
-        pw.print(NAME_COL_NAME + "\t");
-        for (String name : placemarkTableModel.getStandardColumnNames()) {
-            pw.print(name + "\t");
+        String roleLabel = placemarkDescriptor.getRoleLabel();
+        String productName = product.getName();
+        final String[] standardColumnNames = placemarkTableModel.getStandardColumnNames();
+        final int columnCountMin = standardColumnNames.length;
+        final int columnCount = placemarkTableModel.getColumnCount();
+        String[] additionalColumnNames = new String[columnCount - columnCountMin];
+        for (int i = 0; i < additionalColumnNames.length; i++) {
+            additionalColumnNames[i] = placemarkTableModel.getColumnName(columnCountMin + i);
         }
-        pw.print(DESC_COL_NAME + "\t");
-        for (int i = columnCountMin; i < columnCount; i++) {
-            pw.print(placemarkTableModel.getColumnName(i) + "\t");
-        }
-        pw.println();
 
+        List<Placemark> placemarkList = new ArrayList<Placemark>();
+        List<Object[]> valueList = new ArrayList<Object[]>();
         for (int sortedRow = 0; sortedRow < placemarkTable.getRowCount(); ++sortedRow) {
             if (placemarkTable.getSelectionModel().isSelectedIndex(sortedRow)) {
                 final int modelRow = placemarkTable.getActualRowAt(sortedRow);
-                final Placemark placemark = placemarkTableModel.getPlacemarkAt(modelRow);
-
-                pw.print(placemark.getName() + "\t");
-                for (int col = 0; col < columnCountMin; col++) {
-
-                    final Object value = placemarkTableModel.getValueAt(modelRow, col);
-                    pw.print(value.toString() + "\t");
+                placemarkList.add(sortedRow, placemarkTableModel.getPlacemarkAt(modelRow));
+                Object[] values = new Object[columnCount];
+                for (int col = 0; col < columnCount; col++) {
+                    values[col] = placemarkTableModel.getValueAt(modelRow, col);
                 }
-                pw.print(placemark.getDescription() + "\t");
-                for (int col = columnCountMin; col < columnCount; col++) {
-                    final Object value = placemarkTableModel.getValueAt(modelRow, col);
-                    pw.print(value.toString() + "\t");
-                }
-                pw.println();
+                valueList.add(sortedRow, values);
             }
         }
-        pw.close();
-    }
 
-    private void writePlacemarksFile(File outputFile) throws IOException {
-        assert outputFile != null;
-
-        XmlWriter writer = new XmlWriter(outputFile);
-        final String[] tags = XmlWriter.createTags(0, "Placemarks");
-        writer.println(tags[0]);
-        for (Placemark placemark : getSelectedNodesFromTable()) {
-            if (placemark != null) {
-                placemark.writeXML(writer, 1);
-            }
-        }
-        writer.println(tags[1]);
-        writer.close();
-    }
-
-    private Placemark[] readPlacemarksFromFile(File inputFile) throws IOException {
-        final DataInputStream dataInputStream = new DataInputStream(new FileInputStream(inputFile));
-        final byte[] magicBytes = new byte[5];
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            dataInputStream.read(magicBytes);  // todo - BAD PRACTICE HERE!!!
-        } finally {
-            dataInputStream.close();
-        }
-        if (XmlWriter.XML_HEADER_LINE.startsWith(new String(magicBytes))) {
-            return readPlacemarksFromXMLFile(inputFile);
-        } else {
-            return readPlacemarksFromFlatFile(inputFile);
-        }
-    }
-
-    private Placemark[] readPlacemarksFromFlatFile(File inputFile) throws IOException {
-        assert inputFile != null;
-        int[] columnIndexes = null;
-        int biggestIndex = 0;
-        ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
-
-        final RandomAccessFile file = new RandomAccessFile(inputFile, "r");
-        int row = 0;
-        while (true) {
-            String line = file.readLine();
-            if (line == null) {
-                break;
-            }
-            line = line.trim(); // cut \n and \r from the end of the line
-            if (line.equals("") || line.startsWith("#")) {
-                continue;
-            }
-            String[] strings = StringUtils.toStringArray(line, "\t");
-            if (columnIndexes == null) {
-                int nameIndex = StringUtils.indexOf(strings, NAME_COL_NAME);
-                int lonIndex = StringUtils.indexOf(strings, LON_COL_NAME);
-                int latIndex = StringUtils.indexOf(strings, LAT_COL_NAME);
-                int descIndex = StringUtils.indexOf(strings, DESC_COL_NAME);
-                int labelIndex = StringUtils.indexOf(strings, LABEL_COL_NAME);
-                if (nameIndex == -1 || lonIndex == -1 || latIndex == -1) {
-                    throw new IOException("Invalid placemark file format:\n" +
-                                          "at least the columns 'Name', 'Lon' and 'Lat' must be given.");
-                }
-                biggestIndex = biggestIndex > nameIndex ? biggestIndex : nameIndex;
-                biggestIndex = biggestIndex > lonIndex ? biggestIndex : lonIndex;
-                biggestIndex = biggestIndex > latIndex ? biggestIndex : latIndex;
-                columnIndexes = new int[5];
-                columnIndexes[INDEX_FOR_NAME] = nameIndex;
-                columnIndexes[INDEX_FOR_LON] = lonIndex;
-                columnIndexes[INDEX_FOR_LAT] = latIndex;
-                columnIndexes[INDEX_FOR_DESC] = descIndex;
-                columnIndexes[INDEX_FOR_LABEL] = labelIndex;
-            } else {
-                row++;
-                if (strings.length > biggestIndex) {
-                    String name = strings[columnIndexes[PlacemarkManagerToolView.INDEX_FOR_NAME]];
-                    float lon;
-                    try {
-                        lon = Float.parseFloat(strings[columnIndexes[PlacemarkManagerToolView.INDEX_FOR_LON]]);
-                    } catch (NumberFormatException ignored) {
-                        throw new IOException("Invalid placemark file format:\n" +
-                                              "data row " + row + ": value for 'Lon' is invalid");      /*I18N*/
-                    }
-                    float lat;
-                    try {
-                        lat = Float.parseFloat(strings[columnIndexes[PlacemarkManagerToolView.INDEX_FOR_LAT]]);
-                    } catch (NumberFormatException ignored) {
-                        throw new IOException("Invalid placemark file format:\n" +
-                                              "data row " + row + ": value for 'Lat' is invalid");      /*I18N*/
-                    }
-                    String desc = null;
-                    if (columnIndexes[PlacemarkManagerToolView.INDEX_FOR_DESC] >= 0 && strings.length > columnIndexes[PlacemarkManagerToolView.INDEX_FOR_DESC]) {
-                        desc = strings[columnIndexes[PlacemarkManagerToolView.INDEX_FOR_DESC]];
-                    }
-                    String label = name;
-                    if (columnIndexes[PlacemarkManagerToolView.INDEX_FOR_LABEL] >= 0 && strings.length > columnIndexes[PlacemarkManagerToolView.INDEX_FOR_LABEL]) {
-                        label = strings[columnIndexes[PlacemarkManagerToolView.INDEX_FOR_LABEL]];
-                    }
-                    GeoCoding geoCoding = null;
-                    if (product != null) {
-                        geoCoding = product.getGeoCoding();
-                    }
-                    Placemark placemark = new Placemark(name, label, "", null, new GeoPos(lat, lon),
-                                                        placemarkDescriptor, geoCoding);
-                    if (desc != null) {
-                        placemark.setDescription(desc);
-                    }
-                    placemarks.add(placemark);
-                } else {
-                    throw new IOException("Invalid placemark file format:\n" +
-                                          "data row " + row + ": values for 'Name', 'Lon' and 'Lat' must be given.");   /*I18N*/
-                }
-            }
-        }
-        file.close();
-
-        return placemarks.toArray(new Placemark[placemarks.size()]);
-    }
-
-    private Placemark[] readPlacemarksFromXMLFile(File inputFile) throws IOException {
-        assert inputFile != null;
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            org.w3c.dom.Document w3cDocument = builder.parse(inputFile);
-            Document document = new DOMBuilder().build(w3cDocument);
-            final Element rootElement = document.getRootElement();
-            List children = rootElement.getChildren(DimapProductConstants.TAG_PLACEMARK);
-            if (children.isEmpty()) {
-                // support for old pin XML format (.pnx)
-                children = rootElement.getChildren(DimapProductConstants.TAG_PIN);
-            }
-            final ArrayList<Placemark> placemarks = new ArrayList<Placemark>(children.size());
-            for (Object child : children) {
-                final Element element = (Element) child;
-                try {
-                    GeoCoding geoCoding = null;
-                    if (product != null) {
-                        geoCoding = product.getGeoCoding();
-                    }
-                    final Placemark placemark = Placemark.createPlacemark(element, placemarkDescriptor, geoCoding);
-                    placemarks.add(placemark);
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-            return placemarks.toArray(new Placemark[placemarks.size()]);
-        } catch (FactoryConfigurationError error) {
-            throw new IOException(error.toString());
-        } catch (ParserConfigurationException e) {
-            throw new IOException(e.toString(), e);
-        } catch (SAXException e) {
-            throw new IOException(e.toString(), e);
-        } catch (IOException e) {
-            throw new IOException(e.toString(), e);
-        }
-    }
-
-    private BeamFileFilter getTextFileFilter() {
-        if (pinTextFileFilter == null) {
-            pinTextFileFilter = new BeamFileFilter("PLACEMARK_TEXT_FILE",
-                                                   new String[]{FILE_EXTENSION_FLAT_TEXT, FILE_EXTENSION_FLAT_OLD},
-                                                   "Placemark files - flat text format");
-        }
-        return pinTextFileFilter;
-    }
-
-    private BeamFileFilter getPlacemarkFileFilter() {
-        if (pinPlacemarkFileFilter == null) {
-            pinPlacemarkFileFilter = new BeamFileFilter("PLACEMARK_XML_FILE",
-                                                        new String[]{FILE_EXTENSION_PLACEMARK, FILE_EXTENSION_XML_OLD},
-                                                        "Placemark files - XML format");
-        }
-        return pinPlacemarkFileFilter;
+        PlacemarkIO.writePlacemarksWithAdditionalData(writer, roleLabel, productName,
+                                                      placemarkList, valueList,
+                                                      standardColumnNames,
+                                                      additionalColumnNames);
     }
 
     private void setIODir(File dir) {
@@ -1124,7 +907,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
         private int _rowIndex;
 
-        public ToolTipSetter() {
+        private ToolTipSetter() {
             _rowIndex = -1;
         }
 
@@ -1204,7 +987,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         private void action(MouseEvent e) {
             if (e.isPopupTrigger()) {
 
-                if (getNumSelectedNodesFromTable() > 0) {
+                if (getNumSelectedPlacemarks() > 0) {
                     final JPopupMenu popupMenu = new JPopupMenu();
                     final JMenuItem menuItem;
                     menuItem = new JMenuItem("Copy selected data to clipboard");
@@ -1251,107 +1034,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
             }
         }
 
-    }
-
-    public static class FloatTableCellRenderer extends DefaultTableCellRenderer {
-
-        private DecimalFormat format;
-
-        public FloatTableCellRenderer(DecimalFormat format) {
-            this.format = format;
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                                                       int row, int column) {
-            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            if (comp instanceof JLabel) {
-                JLabel label = (JLabel) comp;
-                if (value instanceof Float && !Float.isNaN((Float) value)) {
-                    label.setText(format.format(value));
-                } else {
-                    label.setText("n/a");
-                }
-            }
-            return comp;
-        }
-    }
-
-    private class PinCellEditor extends DefaultCellEditor {
-
-        private Border defaultBorder;
-
-        protected PinCellEditor() {
-            super(new JTextField());
-            JTextField textField = (JTextField) getComponent();
-            defaultBorder = textField.getBorder();
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
-                                                     int column) {
-            JComponent component = (JComponent) super.getTableCellEditorComponent(table, value, isSelected, row,
-                                                                                  column);
-            component.setBorder(defaultBorder);
-            return component;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            JTextField textField = (JTextField) getComponent();
-            float value;
-            try {
-                value = Float.parseFloat(textField.getText());
-            } catch (NumberFormatException ignored) {
-                ((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
-                return false;
-            }
-
-
-            Product product = PlacemarkManagerToolView.this.getPlacemarkGroup().getProduct();
-            boolean validValue = validateValue(product, value);
-            if (!validValue) {
-                ((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
-                return false;
-            }
-
-            if (!super.stopCellEditing()) {
-                ((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
-                return false;
-            }
-
-            return true;
-        }
-
-        protected boolean validateValue(Product product, float value) {
-            return true;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            JTextField textField = (JTextField) getComponent();
-            try {
-                return Float.parseFloat(textField.getText());
-            } catch (NumberFormatException ignored) {
-                return Float.NaN;
-            }
-        }
-    }
-
-    private class PinLatCellEditor extends PinCellEditor {
-
-        @Override
-        protected boolean validateValue(Product product, float lat) {
-            return !(lat < -90.0 || lat > 90.0);
-        }
-    }
-
-    private class PinLonCellEditor extends PinCellEditor {
-
-        @Override
-        protected boolean validateValue(Product product, float lon) {
-            return !(lon < -180.0 || lon > 180.0);
-        }
     }
 
     private class ProductSelectionListener extends ProductTreeListenerAdapter {
@@ -1430,6 +1112,21 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
         @Override
         public void selectionContextChanged(SelectionChangeEvent event) {
+        }
+    }
+
+    private static class RightAlignmentTableCellRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                       boolean hasFocus,
+                                                       int row, int column) {
+            final JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                                                                              column);
+            label.setHorizontalAlignment(JLabel.RIGHT);
+            return label;
+
+
         }
     }
 }

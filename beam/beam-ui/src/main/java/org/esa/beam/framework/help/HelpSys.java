@@ -32,7 +32,7 @@ import java.awt.Window;
  * This class can be used in all components which have a context sensitive help.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  */
 public class HelpSys {
 

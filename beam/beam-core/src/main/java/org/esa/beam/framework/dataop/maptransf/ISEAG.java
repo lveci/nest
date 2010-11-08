@@ -23,7 +23,7 @@ package org.esa.beam.framework.dataop.maptransf;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  *
  * @deprecated since BEAM 4.7, no replacement.
  */

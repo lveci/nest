@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.dataio.envisat;
 
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
@@ -14,7 +30,7 @@ import java.util.Map;
  * The <code>AsarProductFile</code> is a specialization of the abstract <code>ProductFile</code> class for ENVISAT
  * ASAR data products.
  */
-public class AsarXCAProductFile extends ProductFile {
+public class AsarXCAProductFile extends ForwardingProductFile {
     private final static String GADS_NAME = "auxiliary_data";
 
     enum IODD {
@@ -175,97 +191,6 @@ public class AsarXCAProductFile extends ProductFile {
     public void setInvalidPixelExpression(Band band) {
         band.setNoDataValueUsed(false);
         band.setNoDataValue(0);
-    }
-
-    /**
-     * Returns an array containing the center wavelengths for all bands in the AATSR product (in nm).
-     */
-    @Override
-    public float[] getSpectralBandWavelengths() {
-        return null;
-    }
-
-    /**
-     * Returns an array containing the bandwidth for each band in nm.
-     */
-    @Override
-    public float[] getSpectralBandBandwidths() {
-        return null;
-    }
-
-    /**
-     * Returns an array containing the solar spectral flux for each band.
-     */
-    @Override
-    public float[] getSpectralBandSolarFluxes() {
-        return null;
-    }
-
-    /**
-     * Returns a new default set of bitmask definitions for this product file.
-     *
-     * @param dsName the name of the flag dataset
-     * @return a new default set, an empty array if no default set is given for this product type, never
-     *         <code>null</code>.
-     */
-    @Override
-    public BitmaskDef[] createDefaultBitmaskDefs(String dsName) {
-        return new BitmaskDef[0];
-    }
-
-    /**
-     * Gets the (sensing) start time associated with the first raster data line.
-     *
-     * @return the sensing start time, can be null e.g. for non-swath products
-     */
-    @Override
-    public ProductData.UTC getSceneRasterStartTime() {
-        return null;
-    }
-
-    /**
-     * Gets the (sensing) stop time associated with the first raster data line.
-     *
-     * @return the sensing stop time, can be null e.g. for non-swath products
-     */
-    @Override
-    public ProductData.UTC getSceneRasterStopTime() {
-        return null;
-    }
-
-    @Override
-    public int getSceneRasterWidth() {
-        return 0;
-    }
-
-    @Override
-    public int getSceneRasterHeight() {
-        return 0;
-    }
-
-    @Override
-    public float getTiePointGridOffsetX(int gridWidth) {
-        return 0;
-    }
-
-    @Override
-    public float getTiePointGridOffsetY(int gridWidth) {
-        return 0;
-    }
-
-    @Override
-    public float getTiePointSubSamplingX(int gridWidth) {
-        return 0;
-    }
-
-    @Override
-    public float getTiePointSubSamplingY(int gridWidth) {
-        return 0;
-    }
-
-    @Override
-    public boolean storesPixelsInChronologicalOrder() {
-        return false;
     }
 
     /**

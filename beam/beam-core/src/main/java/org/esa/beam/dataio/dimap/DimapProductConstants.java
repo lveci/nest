@@ -20,7 +20,7 @@ package org.esa.beam.dataio.dimap;
  *
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.7 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public final class DimapProductConstants {
 
@@ -377,9 +377,24 @@ public final class DimapProductConstants {
      * have been marked as deprecated and replaced with {@code Mask}s.
      * </td>
      * </tr>
+     * <tr>
+     * <td valign="top">2.9.0</td>
+     * <td> For 4.9, the element Geoposition_Points has been introduced.
+     * <pre>
+     *    &lt;Geoposition_Points&gt;
+     *        &lt;INTERPOLATION_METHOD&gt;POLYNOMIAL[1|2|3]&lt;/INTERPOLATION_METHOD&gt;
+     *        &lt;Original_Geocoding&gt;
+     *            ...
+     *        &lt;/Original_Geocoding&gt;
+     *    &lt;/Geoposition_Points&gt;
+     * </pre>
+     * In addition, the persistence of the {@code TiePointGeoCoding} is now written into the {@code Geoposition}
+     * element.
+     * </td>
+     * </tr>
      * </table>
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.9.0";
+    public static final String DIMAP_CURRENT_VERSION = "2.10.0";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";
@@ -419,6 +434,9 @@ public final class DimapProductConstants {
     // BEAM-Dimap geocoding tags
     public static final String TAG_COORDINATE_REFERENCE_SYSTEM = "Coordinate_Reference_System";
     public static final String TAG_GEOCODING_TIE_POINT_GRIDS = "Geocoding_Tie_Point_Grids";
+    public static final String TAG_GEOPOSITION_POINTS = "Geoposition_Points";
+    public static final String TAG_ORIGINAL_GEOCODING = "Original_Geocoding";
+    public static final String TAG_INTERPOLATION_METHOD = "INTERPOLATION_METHOD";
     public static final String TAG_TIE_POINT_GRID_NAME_LAT = "TIE_POINT_GRID_NAME_LAT";
     public static final String TAG_TIE_POINT_GRID_NAME_LON = "TIE_POINT_GRID_NAME_LON";
     public static final String TAG_GEOCODING_MAP = "Geocoding_Map";
@@ -736,5 +754,4 @@ public final class DimapProductConstants {
     public static final String ATTRIB_ORDER = "order";
     public static final String ATTRIB_INDEX = "index";
     public static final String ATTRIB_BAND_TYPE = "bandType";
-
 }

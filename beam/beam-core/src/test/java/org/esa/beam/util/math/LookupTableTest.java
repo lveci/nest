@@ -23,7 +23,7 @@ import java.util.Random;
  * Test methods for class {@link LookupTable}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:51 $
+
  */
 public class LookupTableTest extends TestCase {
 

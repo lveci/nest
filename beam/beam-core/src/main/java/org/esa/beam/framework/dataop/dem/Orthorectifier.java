@@ -44,7 +44,7 @@ import java.awt.geom.AffineTransform;
  * @author Norman Fomferra
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class Orthorectifier implements GeoCoding {
 

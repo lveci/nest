@@ -46,7 +46,7 @@ import java.io.IOException;
  * A file chooser designed for data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-08-05 17:00:55 $
+
  */
 public class ProductFileChooser extends BeamFileChooser {
 

@@ -16,6 +16,7 @@
 package org.esa.beam.framework.ui;
 
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -36,6 +37,10 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
+import org.geotools.geometry.DirectPosition2D;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.PlanarImage;
 import javax.swing.SwingUtilities;
@@ -47,7 +52,7 @@ import java.util.Vector;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.5.2
  */
 class PixelInfoViewModelUpdater {
@@ -207,6 +212,12 @@ class PixelInfoViewModelUpdater {
 
                     geolocModel.addRow("Map-X", "", mapUnit);
                     geolocModel.addRow("Map-Y", "", mapUnit);
+                } else if (geoCoding instanceof CrsGeoCoding) {
+                    String xAxisUnit = geoCoding.getMapCRS().getCoordinateSystem().getAxis(0).getUnit().toString();
+                    String yAxisUnit = geoCoding.getMapCRS().getCoordinateSystem().getAxis(1).getUnit().toString();
+                    geolocModel.addRow("Map-X", "", xAxisUnit);
+                    geolocModel.addRow("Map-Y", "", yAxisUnit);
+
                 }
             }
         }
@@ -336,6 +347,16 @@ class PixelInfoViewModelUpdater {
                     Point2D mapPoint = mapTransform.forward(geoPos, null);
                     tmx = String.valueOf(MathUtils.round(mapPoint.getX(), 10000.0));
                     tmy = String.valueOf(MathUtils.round(mapPoint.getY(), 10000.0));
+                } else if (geoCoding instanceof CrsGeoCoding) {
+                    MathTransform transform = geoCoding.getImageToMapTransform();
+                    try {
+                        DirectPosition position = transform.transform(new DirectPosition2D(pX, pY), null);
+                        double[] coordinate = position.getCoordinate();
+                        tmx = String.valueOf(coordinate[0]);
+                        tmy = String.valueOf(coordinate[1]);
+                    } catch (TransformException ignore) {
+                    }
+
                 }
             }
         }
@@ -344,7 +365,7 @@ class PixelInfoViewModelUpdater {
         if (geoCoding != null) {
             geolocModel.updateValue(tgx, 2);
             geolocModel.updateValue(tgy, 3);
-            if (geoCoding instanceof MapGeoCoding) {
+            if (geoCoding instanceof MapGeoCoding || geoCoding instanceof CrsGeoCoding) {
                 geolocModel.updateValue(tmx, 4);
                 geolocModel.updateValue(tmy, 5);
             }
@@ -355,16 +376,12 @@ class PixelInfoViewModelUpdater {
         final ProductData.UTC utcStartTime = currentProduct.getStartTime();
         final ProductData.UTC utcEndTime = currentProduct.getEndTime();
 
-        final double dStart = utcStartTime != null ? utcStartTime.getMJD() : 0;
-        final double dStop = utcEndTime != null ? utcEndTime.getMJD() : 0;
-        if (dStart == 0 || dStop == 0 || !isSampleValueAvailable(0, levelZeroY, true)) {
+        if (utcStartTime == null || utcEndTime == null || !isSampleValueAvailable(0, levelZeroY, true)) {
             scanlineModel.updateValue("No date information", 0);
             scanlineModel.updateValue("No time information", 1);
         } else {
-            final double vPerLine = (dStop - dStart) / (currentProduct.getSceneRasterHeight() - 1);
             final float pY = levelZeroY + pixelInfoView.getPixelOffsetY();
-            final double currentLine = vPerLine * pY + dStart;
-            final ProductData.UTC utcCurrentLine = new ProductData.UTC(currentLine);
+            final ProductData.UTC utcCurrentLine = ProductUtils.getScanLineTime(currentProduct, pY);
             final Calendar currentLineTime = utcCurrentLine.getAsCalendar();
 
             final String dateString = String.format("%1$tF", currentLineTime);

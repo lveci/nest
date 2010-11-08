@@ -88,15 +88,15 @@ public final class RuntimeActivator implements Activator {
     private void initServiceProviders() {
         ClassLoader providerLoader = initProviderLoader();
         serviceRegistrations = new ArrayList<ServiceRegistration>(32);
-        final ExtensionPoint extensionPoint = moduleContext.getModule().getExtensionPoint("serviceProviders");
-        final Extension[] extensions = extensionPoint.getExtensions();
+        ExtensionPoint extensionPoint = moduleContext.getModule().getExtensionPoint("serviceProviders");
+        Extension[] extensions = extensionPoint.getExtensions();
         for (Extension extension : extensions) {
-            final ConfigurationElement[] children = extension.getConfigurationElement().getChildren("serviceProvider");
+            ConfigurationElement[] children = extension.getConfigurationElement().getChildren("serviceProvider");
             for (ConfigurationElement child : children) {
-                final String providerClassName = child.getValue();
-                final Module declaringModule = extension.getDeclaringModule();
+                String providerClassName = child.getValue();
+                Module declaringModule = extension.getDeclaringModule();
                 if (declaringModule.getState().is(ModuleState.RESOLVED)) {
-                    final Class<?> providerClass = getProviderClass(declaringModule, providerClassName);
+                    Class<?> providerClass = getProviderClass(declaringModule, providerClassName);
                     if (providerClass != null) {
                         try {
                             Set<ServiceRegistration> serviceRegistrationsForClass = getServiceRegistrations(providerClass, providerLoader);

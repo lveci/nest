@@ -33,7 +33,7 @@ import com.bc.jexp.WritableNamespace;
  * Provides an implementation of the <code>{@link com.bc.jexp.Namespace}</code> interface.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public class NamespaceImpl implements WritableNamespace {
 

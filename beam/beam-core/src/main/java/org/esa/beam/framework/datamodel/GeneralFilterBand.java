@@ -42,7 +42,7 @@ import java.util.Arrays;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class GeneralFilterBand extends FilterBand {
 

@@ -26,7 +26,7 @@ package com.bc.jexp;
  * through the parser's current namespace.
  * The resulting term in this case is an instance of <code>{@link Term.Call}</code>.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public interface Function {
 

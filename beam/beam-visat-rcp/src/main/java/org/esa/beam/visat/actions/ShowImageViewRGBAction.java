@@ -38,7 +38,7 @@ import java.awt.Cursor;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
- * @version $Revision: 1.8 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 

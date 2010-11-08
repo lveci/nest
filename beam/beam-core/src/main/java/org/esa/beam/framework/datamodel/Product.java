@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.24 $ $Date: 2010-09-02 20:24:09 $
+ * @version $Revision: 1.25 $ $Date: 2010-11-08 18:54:23 $
  */
 public class Product extends ProductNode {
 
@@ -927,7 +927,7 @@ public class Product extends ProductNode {
         }
         bandGroup.add(band);
 
-        // add gcpGroup for this band
+        // add gcpGroup for this band // NESTMOD
         final ProductNodeGroup<Placemark> thisBandgcpGroup = new ProductNodeGroup<Placemark>(this,
                 "ground_control_points", true);
         bandGCPGroup.put(band, thisBandgcpGroup);
@@ -956,7 +956,7 @@ public class Product extends ProductNode {
      * @return {@code true} if removed succesfully, otherwise {@code false}
      */
     public boolean removeBand(final Band band) {
-		bandGCPGroup.remove(band);
+	bandGCPGroup.remove(band); // NESTMOD
         return bandGroup.remove(band);
     }
 
@@ -1155,6 +1155,7 @@ public class Product extends ProductNode {
      *
      * @return the GCP group.
      */
+    // NESTMOD
     public ProductNodeGroup<Placemark> getGcpGroup(Band band) {
         return bandGCPGroup.get(band);
     }
@@ -1697,6 +1698,7 @@ public class Product extends ProductNode {
                 getMetadataRoot().setModified(false);
             }
 
+	    // NESTMOD
             for(Object key : bandGCPGroup.keySet()) {
                 bandGCPGroup.get(key).clearRemovedList();
             }

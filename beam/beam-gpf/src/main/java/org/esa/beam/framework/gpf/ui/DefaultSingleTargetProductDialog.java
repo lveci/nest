@@ -54,7 +54,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.12 $ $Date: 2010-08-05 17:00:51 $
+ * @version $Revision: 1.13 $ $Date: 2010-11-08 18:54:23 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -127,12 +127,13 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
                         rdnTypeProperties.add(parameterDescriptor);
                     }
                 }
-                rasterDataNodeTypeProperties = rdnTypeProperties.toArray(new PropertyDescriptor[rdnTypeProperties.size()]);
+                rasterDataNodeTypeProperties = rdnTypeProperties.toArray(
+                        new PropertyDescriptor[rdnTypeProperties.size()]);
             }
             PropertyPane parametersPane = new PropertyPane(propertyContainer);
-            final JPanel paremetersPanel = parametersPane.createPanel();
-            paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
-            this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));
+            final JPanel parametersPanel = parametersPane.createPanel();
+            parametersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
+            this.form.add("Processing Parameters", new JScrollPane(parametersPanel));
         }
         if (!sourceProductSelectorList.isEmpty()) {
             productChangedHandler = new ProductChangedHandler();

@@ -23,7 +23,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
  * TODO - Apidoc
  *
  * @author Norman Fomferra
- * @version $revision$ $date$
+
  */
 public class ResolutionLevel {
     public final static ResolutionLevel MAXRES = new ResolutionLevel(0, 1.0);

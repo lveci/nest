@@ -43,7 +43,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class TiePointGrid extends RasterDataNode {
 

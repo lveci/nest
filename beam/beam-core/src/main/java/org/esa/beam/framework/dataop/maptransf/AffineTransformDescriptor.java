@@ -26,7 +26,7 @@ import org.esa.beam.framework.param.Parameter;
  * A map transform which implements an affine transformation.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  * 
  * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.transform.ProjectiveTransform.ProviderAffine} instead.
  */

@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.5.2
  */
 class PixelInfoUpdateService {

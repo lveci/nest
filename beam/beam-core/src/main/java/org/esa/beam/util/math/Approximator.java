@@ -22,7 +22,7 @@ import Jama.SingularValueDecomposition;
  * A utility class which can be used to find approximation functions for a given dataset.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:51 $
+
  */
 public class Approximator {
 

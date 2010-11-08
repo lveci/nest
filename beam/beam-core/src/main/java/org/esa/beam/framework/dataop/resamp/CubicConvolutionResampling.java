@@ -84,6 +84,7 @@ final class CubicConvolutionResampling implements Resampling {
         index.kj[2] = f2(1 - dj);
         index.kj[3] = f1(2 - dj);
         */
+	// NESTMOD
 
         index.i0 = i0;
         index.j0 = j0;

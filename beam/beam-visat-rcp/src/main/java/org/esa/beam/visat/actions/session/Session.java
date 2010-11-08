@@ -72,7 +72,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.16 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 @XStreamAlias("session")

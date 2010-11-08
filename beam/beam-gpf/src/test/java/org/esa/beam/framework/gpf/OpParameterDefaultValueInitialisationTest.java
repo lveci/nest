@@ -26,7 +26,7 @@ import java.io.File;
  * Tests the default value initialisation of GPF operators.
  *
  * @author Marco
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.2
  */
 public class OpParameterDefaultValueInitialisationTest extends TestCase {

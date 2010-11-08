@@ -21,7 +21,7 @@ package org.esa.beam.framework.datamodel;
  * some method you need without implementing methods which are not needed.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ProductNodeListenerAdapter implements ProductNodeListener {
 

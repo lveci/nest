@@ -47,7 +47,7 @@ import org.esa.beam.util.PropertyMap;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $  $Date: 2010-08-05 17:00:54 $
+
  * @see ConfigPage
  */
 public class ConfigDialog extends ModalDialog {

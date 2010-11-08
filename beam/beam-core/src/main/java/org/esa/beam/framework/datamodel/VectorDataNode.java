@@ -35,7 +35,7 @@ import java.util.Iterator;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.10 $ $Date: 2010-08-05 17:00:50 $
+
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */

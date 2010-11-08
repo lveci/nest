@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
  * A geo-coding based on a cartographic map.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2010-08-05 17:00:50 $
+
  * @deprecated since BEAM 4.8, use {@link CrsGeoCoding} instead.
  */
 public class MapGeoCoding extends AbstractGeoCoding {

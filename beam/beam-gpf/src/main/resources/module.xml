@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-gpf</symbolicName>
-    <version>4.8</version>
+    <version>4.9</version>
     <name>BEAM Graph Processing Framework (GPF)</name>
 
     <description>The basic framework for processing using Operators and the GPT.</description>
@@ -14,9 +14,17 @@
 
     <changelog>
         <![CDATA[
+        <p>From 4.8 to 4.9:<br/>
+            [BEAM-1204] Reprojection changes product type<br/>
+            [BEAM-1203] Application returns with exit code zero in error case<br/>
+            [BEAM-1201] GPT does use the user LOCAL instead of ENGLISH<br/>
+            [BEAM-1198] GPF operators should dispose themselves when no longer in use<br/>
+            [BEAM-1156] SubsetOp does not copy metadata<br/>
+            [BEAM-1197] GPF N1 patcher is not thread safe<br/>
+            [BEAM-1172] Boolean parameter values are overridden by default values<br/> 
         <p>From 4.7 to 4.8:<br/>
             [BEAM-1147] Signed byte data type interpreted as unsigned byte<br/>
-            [BEAM-1034] Mosaic with polar stereographic projection<br/>
+            [BEAM-1134] Mosaic with polar stereographic projection<br/>
             [BEAM-1127] GPF geo-physical Tile API doesn't consider the valid-pixel mask<br/>
             [BEAM-1116] GPF Tile API and API-docs to better express difference between raw and physical samples<br/>
             [BEAM-1114] GPF Tile API to provide method to directly check sample validity<br/>
@@ -57,9 +65,6 @@
 
     <dependency>
         <module>ceres-binding</module>
-    </dependency>
-    <dependency>
-        <module>ceres-ui</module>
     </dependency>
     <dependency>
         <module>beam-core</module>

@@ -23,7 +23,7 @@ import java.awt.Rectangle;
  * An editor which is used by tools to draw themselfes and to let them add, remove and query figures.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-08-05 17:00:55 $
+ * @version $Revision: 1.5 $  $Date: 2010-11-08 18:54:24 $
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

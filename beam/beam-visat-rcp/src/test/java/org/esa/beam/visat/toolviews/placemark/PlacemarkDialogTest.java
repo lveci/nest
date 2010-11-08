@@ -22,6 +22,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PinDescriptor;
+import org.esa.beam.visat.toolviews.placemark.PlacemarkDialog;
 
 import java.awt.HeadlessException;
 

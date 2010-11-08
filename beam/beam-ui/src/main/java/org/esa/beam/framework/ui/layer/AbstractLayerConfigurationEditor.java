@@ -39,7 +39,7 @@ import java.util.Map;
  * Base class for editors allowing to modify a layer's configuration.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 public abstract class AbstractLayerConfigurationEditor implements LayerEditor {

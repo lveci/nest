@@ -41,7 +41,7 @@ import java.io.IOException;
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ConvolutionFilterBand extends FilterBand {
 

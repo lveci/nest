@@ -24,7 +24,7 @@ import java.util.List;
  * The <code>BitmaskOverlayInfo</code> class manages a list of <code>{@link BitmaskDef}</code>s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  * @deprecated since BEAM 4.7, use {@link RasterDataNode#getOverlayMaskGroup()} instead.
  */
 @Deprecated

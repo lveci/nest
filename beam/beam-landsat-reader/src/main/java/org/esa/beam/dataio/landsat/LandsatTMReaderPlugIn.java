@@ -1,18 +1,17 @@
 /*
- * $Id: LandsatTMReaderPlugIn.java,v 1.2 2009-08-10 19:18:36 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 
 package org.esa.beam.dataio.landsat;
@@ -49,18 +48,13 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
         LandsatTMFile file = null;
         try {
             if (input instanceof String) {
-                if(isValidExtension((String) input)) {
-                    file = new LandsatTMFile((String) input);
-                }
+                file = new LandsatTMFile((String) input);
             } else if (input instanceof File) {
-                final File inputFile = (File) input;
-                if(isValidExtension(inputFile.getName())) {
-                    file = new LandsatTMFile(inputFile);
-                }
+                file = new LandsatTMFile((File) input);
             } else {
                 return DecodeQualification.UNABLE;
             }
-            if(file != null && file.canDecodeInput()) {
+            if(file.canDecodeInput()) {
                 return DecodeQualification.INTENDED;
             }
         } catch (Throwable e) {
@@ -71,13 +65,6 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
             }
         }
         return DecodeQualification.UNABLE;
-    }
-
-    private static boolean isValidExtension(String name) {
-        for(String ext : LandsatConstants.LANDSAT_EXTENSIONS) {
-
-        }
-        return false;
     }
 
     /**

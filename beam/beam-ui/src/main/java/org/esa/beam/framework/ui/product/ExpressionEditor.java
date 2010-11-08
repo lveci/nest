@@ -39,7 +39,7 @@ import java.awt.event.ActionListener;
  * A value editor for band arithmetic expressions
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.7 $ $Date: 2010-08-05 17:00:55 $
+
  * @since BEAM 4.6
  */
 public class ExpressionEditor extends PropertyEditor {

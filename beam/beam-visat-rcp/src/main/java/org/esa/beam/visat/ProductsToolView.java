@@ -237,6 +237,7 @@ public class ProductsToolView extends AbstractToolView {
                     // ok
                 }
             } else if (clickCount == 2) {
+		// NESTMOD
                 if(raster.getProduct() != null && 
                    raster.getProduct().getProductType().startsWith("ASA_WV") && raster.getName().contains("Spectra")) {
                     final ExecCommand command = visatApp.getCommandManager().getExecCommand("showPolarWaveView");

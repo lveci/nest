@@ -23,7 +23,7 @@ import org.esa.beam.framework.dataop.resamp.Resampling;
  * specified geographical datum for a given geographical position.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $
+
  */
 public interface ElevationModel {
 

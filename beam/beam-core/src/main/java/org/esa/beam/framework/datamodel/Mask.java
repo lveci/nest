@@ -49,7 +49,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.14 $ $Date: 2010-08-05 17:00:50 $
+
  * @since BEAM 4.7
  */
 public class Mask extends Band {

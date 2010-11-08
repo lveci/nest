@@ -23,7 +23,7 @@ import java.util.EventObject;
  * A product node event informs a product change listener about the source of the notification.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+
  * @see ProductNodeListener
  */
 public class ProductNodeEvent extends EventObject {

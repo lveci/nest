@@ -45,6 +45,7 @@ public class SourceList {
      * Gets the {@link NodeSource} at the given index.
      *
      * @param index the index
+     *
      * @return the {@link NodeSource}
      */
     public NodeSource getSource(int index) {
@@ -57,6 +58,12 @@ public class SourceList {
      * @param source the {@link NodeSource}
      */
     public void addSource(NodeSource source) {
+        final String sourceName = source.getName();
+        for (NodeSource nodeSource : sourceList) {
+            if (nodeSource.getName().equals(sourceName)) {
+                throw new IllegalArgumentException("duplicated source node name");
+            }
+        }
         sourceList.add(source);
     }
 
@@ -97,7 +104,7 @@ public class SourceList {
                 String name = hierarchicalStreamReader.getNodeName();
                 if ("sourceProducts".equals(name)) {
                     final String sourceNodeIdsString = hierarchicalStreamReader.getValue().trim();
-                    if(StringUtils.isNotNullAndNotEmpty(sourceNodeIdsString)) {
+                    if (StringUtils.isNotNullAndNotEmpty(sourceNodeIdsString)) {
                         final String[] sourceNodeIds = StringUtils.csvToArray(sourceNodeIdsString);
                         for (int i = 0; i < sourceNodeIds.length; i++) {
                             String sourceNodeId = sourceNodeIds[i];

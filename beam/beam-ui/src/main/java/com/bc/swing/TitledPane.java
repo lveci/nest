@@ -38,7 +38,7 @@ import javax.swing.JLabel;
 /**
  * A pane with a title component (a javax.swing.JLabel) and a content component.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  */
 public class TitledPane extends ContentContainer  { // <JIDE/>
 

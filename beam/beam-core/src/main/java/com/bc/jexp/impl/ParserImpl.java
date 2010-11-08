@@ -27,7 +27,7 @@ import com.bc.jexp.Term;
  * A default implementation for the {@link <code>com.bc.jexp.Parser</code>} interface.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public final class ParserImpl implements Parser {
 

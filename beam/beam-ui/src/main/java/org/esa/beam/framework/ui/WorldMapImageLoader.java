@@ -37,7 +37,7 @@ import java.awt.image.BufferedImage;
  * This utility class is responsible for loading the world map image.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:54 $
+
  */
 public class WorldMapImageLoader {
 

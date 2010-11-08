@@ -55,7 +55,7 @@ import java.util.ArrayList;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.10 $ $Date: 2010-08-05 17:00:54 $
+
  */
 public class WorldMapPane extends JPanel {
 

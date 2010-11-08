@@ -47,7 +47,7 @@ import java.util.List;
  * A navigation control which appears as a screen overlay.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  */
 class ButtonOverlayControl extends JComponent {
 

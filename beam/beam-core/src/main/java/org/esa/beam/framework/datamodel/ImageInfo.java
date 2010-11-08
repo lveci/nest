@@ -28,7 +28,7 @@ import java.awt.image.IndexColorModel;
  * This class contains information about how a product's raster data node is displayed as an image.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ImageInfo implements Cloneable {
 
@@ -362,7 +362,7 @@ public class ImageInfo implements Cloneable {
         }
     }
 
-
+    // NESTMOD
     public double getBias() {
         return bias;
     }

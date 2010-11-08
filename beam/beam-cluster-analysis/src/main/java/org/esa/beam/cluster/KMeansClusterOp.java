@@ -43,7 +43,7 @@ import java.awt.Rectangle;
  * Operator for k-means cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:49 $
+ * @version $Revision: 1.5 $ $Date: 2010-11-08 18:54:22 $
  */
 @OperatorMetadata(alias = "KMeansClusterAnalysis",
                   version = "1.0",

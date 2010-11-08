@@ -51,7 +51,7 @@ import java.util.logging.Level;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class SystemUtils {
 

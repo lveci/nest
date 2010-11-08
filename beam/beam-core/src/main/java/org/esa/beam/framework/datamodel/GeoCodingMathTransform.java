@@ -30,7 +30,7 @@ import org.opengis.referencing.operation.TransformException;
  *
  * @author Marco Peters
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:50 $
+ * @version $Revision: 1.6 $ $Date: 2010-11-08 18:54:23 $
  * @since BEAM 4.6
  */
 public class GeoCodingMathTransform extends AbstractMathTransform implements MathTransform2D{

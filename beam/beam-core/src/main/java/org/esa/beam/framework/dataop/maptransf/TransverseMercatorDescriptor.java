@@ -26,7 +26,7 @@ import java.awt.geom.Point2D;
  * this transformation has taken from the proj4 map projection API (http://remotesensing.org/proj/).
  *
  * @author Tom Block
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:50 $
+
  * 
  * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.TransverseMercator.Provider} instead.
  */

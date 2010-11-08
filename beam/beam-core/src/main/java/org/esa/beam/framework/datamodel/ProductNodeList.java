@@ -26,7 +26,7 @@ import java.util.List;
  * A type-safe list for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public final class ProductNodeList<T extends ProductNode> {
 

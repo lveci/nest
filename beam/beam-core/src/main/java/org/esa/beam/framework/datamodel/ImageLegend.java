@@ -42,7 +42,7 @@ import org.esa.beam.util.math.MathUtils;
  * ImageInfo}</code> instance.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ImageLegend {
 

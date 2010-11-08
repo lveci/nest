@@ -26,7 +26,7 @@ import java.awt.geom.AffineTransform;
  * raster co-ordinate system and back.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.3 $ $Date: 2010-08-05 17:00:50 $
+
  * 
  * @deprecated since BEAM 4.7, use geotools and {@link org.esa.beam.framework.datamodel.CrsGeoCoding} instead.
  */

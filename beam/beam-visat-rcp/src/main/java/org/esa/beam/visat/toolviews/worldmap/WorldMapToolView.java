@@ -44,7 +44,7 @@ import java.awt.Dimension;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:56 $
+
  */
 public class WorldMapToolView extends AbstractToolView {
 

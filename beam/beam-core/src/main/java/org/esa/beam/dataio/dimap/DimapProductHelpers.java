@@ -25,6 +25,7 @@ import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.FXYGeoCoding;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.GcpDescriptor;
+import org.esa.beam.framework.datamodel.GcpGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.IndexCoding;
@@ -35,6 +36,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.Placemark;
+import org.esa.beam.framework.datamodel.PlacemarkGroup;
 import org.esa.beam.framework.datamodel.PointingFactory;
 import org.esa.beam.framework.datamodel.PointingFactoryRegistry;
 import org.esa.beam.framework.datamodel.Product;
@@ -94,13 +96,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import static org.esa.beam.framework.datamodel.GcpGeoCoding.Method;
+
 /**
  * This class defines some static methods used to create and access BEAM DIMAP XML documents.
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.17 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public class DimapProductHelpers {
 
@@ -243,6 +247,7 @@ public class DimapProductHelpers {
         final Element rootElem = dom.getRootElement();
         final Element geopositionElem = rootElem.getChild(DimapProductConstants.TAG_GEOPOSITION);
         final Element coordRefSysElem = rootElem.getChild(DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
+        final Datum datum = createDatum(dom);
         if (geopositionElem != null) {
             if (coordRefSysElem != null) {
                 final Element wktElem = coordRefSysElem.getChild(DimapProductConstants.TAG_WKT);
@@ -250,7 +255,6 @@ public class DimapProductHelpers {
                     return createCrsGeoCoding(product, geopositionElem, wktElem);
                 }
             }
-            final Datum datum = createDatum(dom);
 
             final List geoPosElems = rootElem.getChildren(DimapProductConstants.TAG_GEOPOSITION);
             final GeoCoding[] geoCodings = new GeoCoding[geoPosElems.size()];
@@ -269,6 +273,14 @@ public class DimapProductHelpers {
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_SEARCH_RADIUS) != null &&
                            geoPosElem.getChild(DimapProductConstants.TAG_LATITUDE_BAND) != null) {
                     geoCodings[bandIndex] = createPixelGeoCoding(product, datum, geoPosElem);
+                } else {
+                    final Element geopositionPointsElement
+                            = geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS);
+                    if (geopositionPointsElement != null) {
+                        geoCodings[bandIndex] = createGeoCodingFromGeopositionPointsElement(product,
+                                                                                            datum,
+                                                                                            geopositionPointsElement);
+                    }
                 }
             }
             return geoCodings;
@@ -300,10 +312,9 @@ public class DimapProductHelpers {
                     TiePointGrid tiePointGridLat = product.getTiePointGrid(tpgNameLat);
                     TiePointGrid tiePointGridLon = product.getTiePointGrid(tpgNameLon);
                     if (tiePointGridLat != null && tiePointGridLon != null) {
-                        // TODO - parse datum!!!
                         if (tiePointGridLat.hasRasterData() && tiePointGridLon.hasRasterData()) {
                             return new GeoCoding[]{
-                                    new TiePointGeoCoding(tiePointGridLat, tiePointGridLon/*, Datum.WGS_84*/)
+                                    new TiePointGeoCoding(tiePointGridLat, tiePointGridLon, datum)
                             };
                         } else {
                             Debug.trace(
@@ -387,12 +398,84 @@ public class DimapProductHelpers {
         final TiePointGrid tiePointGridLat = product.getTiePointGrid("latitude");
         final TiePointGrid tiePointGridLon = product.getTiePointGrid("longitude");
         if (tiePointGridLat != null && tiePointGridLon != null) {
-            // TODO - parse datum!!!
-            return new GeoCoding[]{new TiePointGeoCoding(tiePointGridLat, tiePointGridLon/*, Datum.WGS_84*/)};
+            return new GeoCoding[]{new TiePointGeoCoding(tiePointGridLat, tiePointGridLon, datum)};
         }
 
         Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): can't find 'latitude' or 'longitude'");
         return null;
+    }
+
+    private static GeoCoding createGeoCodingFromGeopositionPointsElement(Product product,
+                                                                         Datum datum,
+                                                                         Element geopositionPointsElement) {
+        GcpGeoCoding gcpGeoCoding = null;
+        GeoCoding originalGeoCoding = null;
+        GeoCoding tiePointGeoCoding = null;
+
+        // 1. try creating a tie-point geo-coding
+        final Element latElement =
+                geopositionPointsElement.getChild(DimapProductConstants.TAG_TIE_POINT_GRID_NAME_LAT);
+        final Element lonElement =
+                geopositionPointsElement.getChild(DimapProductConstants.TAG_TIE_POINT_GRID_NAME_LON);
+        if (latElement != null && lonElement != null) {
+            final String latName = latElement.getText();
+            final String lonName = lonElement.getText();
+            final TiePointGrid latGrid = product.getTiePointGrid(latName);
+            final TiePointGrid lonGrid = product.getTiePointGrid(lonName);
+            try {
+                if (latGrid != null && lonGrid != null) {
+                    tiePointGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, datum);
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        // 2. return tie-point geo-coding, if created successfully
+        if (tiePointGeoCoding != null) {
+            return tiePointGeoCoding;
+        }
+        // 3. try creating a GCP geo-coding
+        final Element methodElement = geopositionPointsElement.getChild(DimapProductConstants.TAG_INTERPOLATION_METHOD);
+        if (methodElement != null) {
+            final String methodName = methodElement.getText();
+            final Method method = Method.valueOf(Method.class, methodName);
+            final PlacemarkGroup gcpGroup = product.getGcpGroup();
+            final Placemark[] placemarks = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
+            try {
+                gcpGeoCoding = new GcpGeoCoding(method, placemarks,
+                                                product.getSceneRasterWidth(),
+                                                product.getSceneRasterHeight(),
+                                                datum);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        // 4. try creating the original geo-coding
+        final Element originalGeoCodingElement = geopositionPointsElement.getChild(
+                DimapProductConstants.TAG_ORIGINAL_GEOCODING);
+        if (originalGeoCodingElement != null) {
+            try {
+                originalGeoCoding = createGeoCodingFromElement(product, originalGeoCodingElement);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        // 5. return GCP geo-coding with original geo-coding set; use original geo-coding as fallback
+        if (gcpGeoCoding != null) {
+            gcpGeoCoding.setOriginalGeoCoding(originalGeoCoding);
+            return gcpGeoCoding;
+        } else {
+            return originalGeoCoding;
+        }
+    }
+
+    private static GeoCoding createGeoCodingFromElement(Product product, Element element) {
+        final Content content = element.detach();
+        final GeoCoding[] geoCodings = createGeoCoding(new Document().addContent(content), product);
+        if (geoCodings == null) {
+            return null;
+        }
+        return geoCodings[0];
     }
 
     private static GeoCoding[] createCrsGeoCoding(Product product, Element geopositionElem, Element wktElem) {
@@ -495,19 +578,33 @@ public class DimapProductHelpers {
             final Element hcsElem = crsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_CS);
             if (hcsElem != null) {
                 final Element gcsElem = hcsElem.getChild(DimapProductConstants.TAG_GEOGRAPHIC_CS);
-                final Element horizDatumElem = gcsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_DATUM);
-                final String datumName = horizDatumElem.getChildTextTrim(
-                        DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME);
-                final Element ellipsoidElem = horizDatumElem.getChild(DimapProductConstants.TAG_ELLIPSOID);
-                final String ellipsoidName = ellipsoidElem.getChildTextTrim(DimapProductConstants.TAG_ELLIPSOID_NAME);
-                final Element ellipsoidParamElem = ellipsoidElem.getChild(
-                        DimapProductConstants.TAG_ELLIPSOID_PARAMETERS);
-                final Element majorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS);
-                final double majorAxis = Double.parseDouble(majorAxisElem.getTextTrim());
-                final Element minorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS);
-                final double minorAxis = Double.parseDouble(minorAxisElem.getTextTrim());
+                if (gcsElem != null) {
+                    final Element horizDatumElem = gcsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_DATUM);
+                    if (horizDatumElem != null) {
+                        final Element ellipsoidElem = horizDatumElem.getChild(DimapProductConstants.TAG_ELLIPSOID);
+                        if (ellipsoidElem != null) {
+                            final Element ellipsoidParamElem = ellipsoidElem.getChild(
+                                    DimapProductConstants.TAG_ELLIPSOID_PARAMETERS);
+                            if (ellipsoidParamElem != null) {
+                                final Element majorAxisElem = ellipsoidParamElem.getChild(
+                                        DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS);
+                                final Element minorAxisElem = ellipsoidParamElem.getChild(
+                                        DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS);
+                                if (majorAxisElem != null && minorAxisElem != null) {
+                                    final double majorAxis = Double.parseDouble(majorAxisElem.getTextTrim());
+                                    final double minorAxis = Double.parseDouble(minorAxisElem.getTextTrim());
 
-                return new Datum(datumName, new Ellipsoid(ellipsoidName, minorAxis, majorAxis), 0, 0, 0);
+                                    final String ellipsoidName = ellipsoidElem.getChildTextTrim(
+                                            DimapProductConstants.TAG_ELLIPSOID_NAME);
+                                    final Ellipsoid ellipsoid = new Ellipsoid(ellipsoidName, minorAxis, majorAxis);
+                                    final String datumName = horizDatumElem.getChildTextTrim(
+                                            DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME);
+                                    return new Datum(datumName, ellipsoid, 0, 0, 0);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return Datum.WGS_84;
@@ -728,7 +825,7 @@ public class DimapProductHelpers {
         }
         return null;
     }
-    
+
     static void addPins(Document dom, Product product) {
         Element pinGroup = dom.getRootElement().getChild(DimapProductConstants.TAG_PIN_GROUP);
         List pinElements;
@@ -740,13 +837,15 @@ public class DimapProductHelpers {
         }
         for (Object pinElement : pinElements) {
             final Element pinElem = (Element) pinElement;
-            final Placemark placemark = Placemark.createPlacemark(pinElem, PinDescriptor.INSTANCE, product.getGeoCoding());
+            final Placemark placemark = Placemark.createPlacemark(pinElem, PinDescriptor.INSTANCE,
+                                                                  product.getGeoCoding());
             if (placemark != null) {
                 product.getPinGroup().add(placemark);
             }
         }
     }
 
+// NESTMOD
     static void addGcps(Document dom, Product product) {
         final Element gcpGroupElement = dom.getRootElement().getChild(DimapProductConstants.TAG_GCP_GROUP);
         addGCPsToGroup(gcpGroupElement, product.getGcpGroup(), product);
@@ -775,14 +874,15 @@ public class DimapProductHelpers {
             }
         }
     }
-    
+
     static void addMaskUsages(Document dom, Product product) {
-        final List<Element> imageDisplayElems = dom.getRootElement().getChildren(DimapProductConstants.TAG_IMAGE_DISPLAY);
+        final List<Element> imageDisplayElems = dom.getRootElement().getChildren(
+                DimapProductConstants.TAG_IMAGE_DISPLAY);
         for (Element child : imageDisplayElems) {
             addMaskUsage(dom.getRootElement(), child, product);
         }
     }
-  
+
     private static void addMaskUsage(Element rootElement, Element imageDisplayElem, Product product) {
         final List<Element> maskUsages = imageDisplayElem.getChildren(DimapProductConstants.TAG_MASK_USAGE);
 
@@ -803,7 +903,7 @@ public class DimapProductHelpers {
                     roiNames = StringUtils.csvToArray(roiNamesCSV);
                 }
             }
-            
+
             final Element bandIndexElem = usageElem.getChild(DimapProductConstants.TAG_BAND_INDEX);
             if (bandIndexElem != null) {
                 final String bandName = getBandName(rootElement, bandIndexElem.getTextTrim());
@@ -830,8 +930,9 @@ public class DimapProductHelpers {
             }
         }
     }
-    
-    private static void addMasksToGroup(ProductNodeGroup<Mask> maskGroup, ProductNodeGroup<Mask> usageMaskGroup, String[] maskNames) {
+
+    private static void addMasksToGroup(ProductNodeGroup<Mask> maskGroup, ProductNodeGroup<Mask> usageMaskGroup,
+                                        String[] maskNames) {
         if (maskNames == null) {
             return;
         }
@@ -856,6 +957,7 @@ public class DimapProductHelpers {
     }
 
     // todo - move - only used in tests (nf)
+
     /**
      * Creates a parsed {@link Document} from the given {@link InputStream inputStream}.
      *
@@ -1013,7 +1115,7 @@ public class DimapProductHelpers {
                 final int type = ProductData.getType(attType);
 
                 final String attValue = attribElement.getTextTrim();
-                if (attValue == null) {           // allow blank attribute values
+                if (attValue == null) {           // allow blank attribute values // NESTMOD
                     continue;
                 }
                 final ProductData data;
@@ -1146,7 +1248,7 @@ public class DimapProductHelpers {
                 }
             }
         }
-        
+
         private void setBitmaskOverlayInfo(RasterDataNode rasterDataNode, String[] bitmaskNames) {
             final BitmaskOverlayInfo overlayInfo = new BitmaskOverlayInfo();
             if (rasterDataNode.getBitmaskOverlayInfo() != null) {
@@ -1417,6 +1519,7 @@ public class DimapProductHelpers {
         }
 
         // needed for backward compatibility
+
         private void addBitmaskDefinitions(Product product) {
             final Element bitmaskDefs = getRootElement().getChild(DimapProductConstants.TAG_BITMASK_DEFINITIONS);
             List bitmaskDefList;

@@ -30,8 +30,8 @@ import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PixelGeoCoding;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -138,6 +138,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             println(gcpGroupTags[1]);
         }
 
+	// NESTMOD
         for(Band band : product.getBands()) {
             ProductNodeGroup<Placemark> bandGCPGroup = product.getGcpGroup(band);
             final Placemark[] bandGCPs = bandGCPGroup.toArray(new Placemark[bandGCPGroup.getNodeCount()]);
@@ -597,31 +598,44 @@ public final class DimapHeaderWriter extends XmlWriter {
     }
 
     private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int index) {
+        final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
+        println(crsTags[0]);
+        writeDatum(gcpPointGeoCoding.getDatum(), indent + 1);
+        println(crsTags[1]);
+        final String[] posTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
+        println(posTags[0]);
+        final String[] gcpTags = createTags(indent + 1, DimapProductConstants.TAG_GEOPOSITION_POINTS);
+        println(gcpTags[0]);
+        printLine(indent + 2, DimapProductConstants.TAG_INTERPOLATION_METHOD, gcpPointGeoCoding.getMethod().name());
         final GeoCoding originalGeoCoding = gcpPointGeoCoding.getOriginalGeoCoding();
-
-        if (originalGeoCoding == null || originalGeoCoding instanceof GcpGeoCoding) {
-            return;
+        if (!(originalGeoCoding == null || originalGeoCoding instanceof GcpGeoCoding)) {
+            final String[] ogcTags = createTags(indent + 2, DimapProductConstants.TAG_ORIGINAL_GEOCODING);
+            println(ogcTags[0]);
+            writeGeoCoding(originalGeoCoding, indent + 3, index);
+            println(ogcTags[1]);
         }
-
-        // todo - write GCP geocoding using Geoposition_Points
-        // todo - write original geocoding to Dataset_Sources section ?
-        writeGeoCoding(originalGeoCoding, indent, index);
+        println(gcpTags[1]);
+        println(posTags[1]);
     }
 
     private void writeGeoCoding(final TiePointGeoCoding tiePointGeoCoding, final int indent) {
+        final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
+        println(crsTags[0]);
+        writeDatum(tiePointGeoCoding.getDatum(), indent + 1);
+        println(crsTags[1]);
         final String latGridName = tiePointGeoCoding.getLatGrid().getName();
         final String lonGridName = tiePointGeoCoding.getLonGrid().getName();
         if (latGridName == null || lonGridName == null) {
             return;
         }
-        final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
-        println(crsTags[0]);
-        final String[] gtpgTags = createTags(indent + 1, DimapProductConstants.TAG_GEOCODING_TIE_POINT_GRIDS);
-        println(gtpgTags[0]);
+        final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
+        println(geopositionTags[0]);
+        final String[] pointsTags = createTags(indent + 1, DimapProductConstants.TAG_GEOPOSITION_POINTS);
+        println(pointsTags[0]);
         printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_GRID_NAME_LAT, latGridName);
         printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_GRID_NAME_LON, lonGridName);
-        println(gtpgTags[1]);
-        println(crsTags[1]);
+        println(pointsTags[1]);
+        println(geopositionTags[1]);
     }
 
     private void writeBandIndexIf(final boolean condition, final int index, final int indent) {
@@ -866,6 +880,14 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);
         indent++;
+        indent = writeDatum(fxyGeoCoding.getDatum(), indent);
+        --indent;
+        println(crsTags[1]);
+        --indent;
+        return indent;
+    }
+
+    private int writeDatum(Datum datum, int indent) {
         final String[] horizontalCsTags = createTags(indent, DimapProductConstants.TAG_HORIZONTAL_CS);
         println(horizontalCsTags[0]);
         indent++;
@@ -876,7 +898,6 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] horizontalDatumTags = createTags(indent, DimapProductConstants.TAG_HORIZONTAL_DATUM);
         println(horizontalDatumTags[0]);
         indent++;
-        final Datum datum = fxyGeoCoding.getDatum();
         printLine(indent, DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME, datum.getName());
         final String[] ellipsoidTags = createTags(indent, DimapProductConstants.TAG_ELLIPSOID);
         println(ellipsoidTags[0]);
@@ -900,9 +921,6 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(geographicCsTags[1]);
         --indent;
         println(horizontalCsTags[1]);
-        --indent;
-        println(crsTags[1]);
-        --indent;
         return indent;
     }
 

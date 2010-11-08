@@ -24,7 +24,7 @@ import com.bc.jexp.Variable;
  * A utility class, which can be used to create constants or variables
  * of a primitive boolean or numeric type.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public final class SymbolFactory {
 

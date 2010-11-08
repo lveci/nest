@@ -32,7 +32,7 @@ import java.util.Map;
  * Tests operators with {@link VirtualBand}s contained in source and target products.
  *
  * @author Norman
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.2
  */
 public class OpDealingWithVirtualBandTest extends TestCase {

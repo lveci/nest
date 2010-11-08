@@ -40,7 +40,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public abstract class AbstractBand extends RasterDataNode {
 

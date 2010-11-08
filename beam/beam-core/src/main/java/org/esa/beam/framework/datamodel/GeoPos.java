@@ -21,7 +21,7 @@ import org.esa.beam.util.math.MathUtils;
  * The <code>GeoPos</code> class represents a geographical position measured in longitudes and latitudes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class GeoPos {
 

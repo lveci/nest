@@ -26,7 +26,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.8 $ $Date: 2010-08-05 17:00:50 $
+ * @version $Revision: 1.9 $ $Date: 2010-11-08 18:54:23 $
  */
 public class MetadataElement extends ProductNode {
 

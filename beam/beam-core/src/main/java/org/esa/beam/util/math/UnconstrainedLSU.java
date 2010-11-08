@@ -24,7 +24,7 @@ import java.text.MessageFormat;
  *
  * @author Ralf Quast
  * @author Helmut Schiller (GKSS)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:51 $
+
  * @since 4.1
  */
 public class UnconstrainedLSU implements SpectralUnmixing {

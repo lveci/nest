@@ -47,7 +47,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for VISAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:55 $
+
  */
 public class VisatMain implements RuntimeRunnable {
     /**

@@ -24,7 +24,7 @@ import java.util.Date;
  * This utility class provides some date/time related methods.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-08-05 17:00:50 $
+
  * @see java.util.Date
  */
 public class DateTimeUtils {

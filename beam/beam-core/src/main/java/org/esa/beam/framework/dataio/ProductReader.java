@@ -27,7 +27,7 @@ import java.io.IOException;
  * given data product as input source.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:50 $
+
  * @see ProductWriter
  */
 public interface ProductReader {

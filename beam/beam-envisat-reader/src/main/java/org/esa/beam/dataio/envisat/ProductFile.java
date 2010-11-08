@@ -1,18 +1,17 @@
 /*
- * $Id: ProductFile.java,v 1.7 2010-03-31 13:59:56 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
+ * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
  */
 package org.esa.beam.dataio.envisat;
 
@@ -40,7 +39,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2010-03-31 13:59:56 $
+ * @version $Revision: 1.8 $ $Date: 2010-11-08 18:54:23 $
  */
 public abstract class ProductFile {
 
@@ -717,6 +716,24 @@ public abstract class ProductFile {
             bandNames[i] = bandLineReaders[i].getBandName();
         }
         return bandNames;
+    }
+
+    /**
+     * Gets the auto-grouping applicable to the data sets contained in this product file.
+     * A given {@code pattern} parameter is a textual representation of the auto-grouping.
+     * The syntax for the pattern is:
+     * <pre>
+     * pattern    :=  &lt;groupPath&gt; {':' &lt;groupPath&gt;} | "" (empty string)
+     * groupPath  :=  &lt;groupName&gt; {'/' &lt;groupName&gt;}
+     * groupName  :=  any non-empty string without characters ':' and '/'
+     * </pre>
+     * The default implementation returns the empty string.
+     *
+     * @return The auto-grouping pattern.
+     * @since BEAM 4.8
+     */
+    public String getAutoGroupingPattern() {
+        return "";
     }
 
     /**

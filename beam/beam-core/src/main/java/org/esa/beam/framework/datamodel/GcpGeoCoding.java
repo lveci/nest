@@ -28,7 +28,7 @@ import static java.lang.Math.*;
  * Ground control point (GCP) geo-coding.
  *
  * @author Ralf Quast
- * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class GcpGeoCoding extends AbstractGeoCoding {
 
@@ -383,7 +383,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-     * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:50 $
+
      */
     public enum Method {
 

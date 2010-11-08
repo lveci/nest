@@ -25,7 +25,7 @@ import java.awt.Color;
  * Unstable interface. Do not use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:54 $
+
  * @since BEAM 4.5.1
  */
 public class DefaultImageInfoEditorModel extends AbstractImageInfoEditorModel {

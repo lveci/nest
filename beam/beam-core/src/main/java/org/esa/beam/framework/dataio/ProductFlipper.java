@@ -32,7 +32,7 @@ import java.io.IOException;
 
 /**
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2010-08-05 17:00:50 $
+
  */
 public class ProductFlipper extends AbstractProductBuilder {
 

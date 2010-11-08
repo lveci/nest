@@ -38,7 +38,7 @@ import java.util.Hashtable;
  * @author Ralf Quast
  * @author Marco Zühlke
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:56 $
+
  * @since BEAM 4.6
  */
 public class FeatureLayerEditor implements LayerEditor {

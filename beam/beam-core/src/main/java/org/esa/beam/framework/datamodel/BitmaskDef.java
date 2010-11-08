@@ -29,7 +29,7 @@ import java.awt.Color;
  * transparancy.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-08-05 17:00:50 $
+
  * @deprecated since BEAM 4.7, use {@code Mask} with {@code Mask.BandMathType} instead.
  */
 @Deprecated

@@ -16,7 +16,6 @@
 
 package org.esa.beam.framework.gpf.main;
 
-import com.bc.ceres.binding.ValueRange;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
@@ -44,6 +43,7 @@ class CommandLineArgs {
     private TreeMap<String, String> targetFilepathMap;
     private boolean helpRequested;
     private boolean stackTraceDump;
+    private boolean clearCacheAfterRowWrite;
     private long tileCacheCapacity;
     private static final int K = 1024;
     private static final int M = K * 1024;
@@ -58,16 +58,16 @@ class CommandLineArgs {
         sourceFilepathMap = new TreeMap<String, String>();
         targetFilepathMap = new TreeMap<String, String>();
         parameterMap = new TreeMap<String, String>();
-        tileCacheCapacity = Math.max(512 * M, Runtime.getRuntime().maxMemory() / (2 * M));
-        
+        tileCacheCapacity = CommandLineTool.DEFAULT_TILE_CACHE_SIZE_IN_M * M;
+
         // look for "-e" early do enable verbose error reports 
-        for (int i = 0; i < this.args.length; i++) {
-            if (this.args[i].equals("-e")) {
+        for (String arg : this.args) {
+            if (arg.equals("-e")) {
                 stackTraceDump = true;
             }
         }
     }
-    
+
     public void parseArguments() throws Exception {
         int argCount = 0;
         for (int i = 0; i < this.args.length; i++) {
@@ -84,6 +84,8 @@ class CommandLineArgs {
                     targetFilepathMap.put(pair[0], pair[1]);
                 } else if (arg.equals("-h")) {
                     helpRequested = true;
+                } else if (arg.equals("-x")) {
+                    clearCacheAfterRowWrite = true;
                 } else if (arg.equals("-e")) {
                     // already parsed
                 } else if (arg.equals("-t")) {
@@ -96,9 +98,7 @@ class CommandLineArgs {
                     parameterFilepath = parseOptionArgument(arg, i);
                     i++;
                 } else if (arg.equals("-c")) {
-                    final long maxMem = (Runtime.getRuntime().maxMemory() / M) * M;
-                    final String intervalString = "(0, " + maxMem + "]";
-                    tileCacheCapacity = parseOptionArgumentBytes(arg, i, ValueRange.parseValueRange(intervalString));
+                    tileCacheCapacity = parseOptionArgumentBytes(arg, i);
                     i++;
                 } else {
                     throw error("Unknown option '" + arg + "'");
@@ -112,25 +112,25 @@ class CommandLineArgs {
                     }
                 } else {
                     int index = argCount - 1;
-                    // todo - agree on naming convention:  (nf - 19.12.2007)
-                    // todo - isn't it better to use Java property syntax, e.g. "sourceProducts.0", "sourceProducts.1", ...
-                    // see also OperatorContext.setSourceProducts()
                     if (index == 0) {
                         sourceFilepathMap.put(GPF.SOURCE_PRODUCT_FIELD_NAME, arg);
                     }
+                    sourceFilepathMap.put(GPF.SOURCE_PRODUCT_FIELD_NAME + "." + (index + 1), arg);
+                    // kept for backward compatibility
+                    // since BEAM 4.9 the pattern above is preferred
                     sourceFilepathMap.put(GPF.SOURCE_PRODUCT_FIELD_NAME + (index + 1), arg);
                 }
                 argCount++;
             }
         }
-   
+
         if (operatorName == null && graphFilepath == null && !helpRequested) {
             throw error("Either operator name or graph XML file must be given");
         }
-        if (graphFilepath == null && targetFilepathMap.size() != 0) {
+        if (graphFilepath == null && !targetFilepathMap.isEmpty()) {
             throw error("Defined target products only valid for graph XML");
         }
-        if (targetFilepath == null && targetFilepathMap.size() == 0) {
+        if (targetFilepath == null && targetFilepathMap.isEmpty()) {
             targetFilepath = CommandLineTool.DEFAULT_TARGET_FILEPATH;
         }
         if (targetFormatName == null && targetFilepath != null) {
@@ -175,6 +175,10 @@ class CommandLineArgs {
         return tileCacheCapacity;
     }
 
+    public boolean isClearCacheAfterRowWrite() {
+        return clearCacheAfterRowWrite;
+    }
+
     public SortedMap<String, String> getParameterMap() {
         return parameterMap;
     }
@@ -203,9 +207,9 @@ class CommandLineArgs {
         }
     }
 
-    private int parseOptionArgumentBytes(String arg, int index, ValueRange valueRange) throws Exception {
+    private long parseOptionArgumentBytes(String arg, int index) throws Exception {
         String valueString = parseOptionArgument(arg, index);
-        int factor;
+        long factor = 1;
         if (valueString.toUpperCase().endsWith("K")) {
             factor = K;
             valueString = valueString.substring(0, valueString.length() - 1);
@@ -215,18 +219,16 @@ class CommandLineArgs {
         } else if (valueString.toUpperCase().endsWith("G")) {
             factor = G;
             valueString = valueString.substring(0, valueString.length() - 1);
-        } else {
-            factor = 1;
         }
 
-        final int value = Integer.parseInt(valueString) * factor;
-        if (!valueRange.contains(value)) {
-            throw new Exception(MessageFormat.format("Value ''{0}'' for ''{1}'' is not in the interval {2}", String.valueOf(value), arg, valueRange));
+        long value = Long.parseLong(valueString);
+        if (value < 0L) {
+            throw error(MessageFormat.format("Value for ''{0}'' must not be negative", arg));
         }
-        return value;
+        return factor * value;
     }
 
-    private static String[] parseNameValuePair(String arg) throws Exception {
+    private String[] parseNameValuePair(String arg) throws Exception {
         int pos = arg.indexOf('=');
         if (pos == -1) {
             throw error("Missing '=' in '" + arg + "'");
@@ -239,14 +241,12 @@ class CommandLineArgs {
         return new String[]{name, value};
     }
 
-    private static String detectWriterFormat(String extension) {
+    private String detectWriterFormat(String extension) {
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductWriterPlugIn> ins = registry.getAllWriterPlugIns();
         while (ins.hasNext()) {
             ProductWriterPlugIn productWriterPlugIn = ins.next();
             String[] strings = productWriterPlugIn.getDefaultFileExtensions();
-            if(strings == null)
-                continue;
             for (String string : strings) {
                 if (string.equalsIgnoreCase(extension)) {
                     return productWriterPlugIn.getFormatNames()[0];

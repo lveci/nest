@@ -50,13 +50,13 @@ import javax.media.jai.util.ImagingListener;
 public class OperatorExecutor {
 
     public static OperatorExecutor create(Operator op) {
-        OperatorContext operatorContext = initOperatorContext(op);
-        final Product targetProduct = op.getTargetProduct();
-        final Dimension tileSize = targetProduct.getPreferredTileSize();
+        OperatorContext operatorContext = getOperatorContext(op);
+        Product targetProduct = op.getTargetProduct();
+        Dimension tileSize = targetProduct.getPreferredTileSize();
 
-        final int rasterHeight = targetProduct.getSceneRasterHeight();
-        final int rasterWidth = targetProduct.getSceneRasterWidth();
-        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
+        int rasterHeight = targetProduct.getSceneRasterHeight();
+        int rasterWidth = targetProduct.getSceneRasterWidth();
+        Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
         int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
         int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
         Band[] targetBands = targetProduct.getBands();
@@ -163,14 +163,20 @@ public class OperatorExecutor {
 
     private void scheduleTile(final PlanarImage image, int tileX, int tileY, Semaphore semaphore,
                               TileComputationListener[] listeners, ProgressMonitor pm) {
-        checkForCancellation(pm);
+        checkForCancelation(pm);
         acquirePermits(semaphore, 1);
         if (error != null) {
             semaphore.release(parallelism);
             throw error;
         }
         Point[] points = new Point[] { new Point(tileX, tileY) };
+        /////////////////////////////////////////////////////////////////////
+        //
+        // Note: GPF pull-processing is triggered here!!!
+        //
         tileScheduler.scheduleTiles(image, points, listeners);
+        //
+        /////////////////////////////////////////////////////////////////////
         pm.worked(1);
     }
 
@@ -182,7 +188,7 @@ public class OperatorExecutor {
         }
     }
 
-    private static OperatorContext initOperatorContext(Operator operator) {
+    private static OperatorContext getOperatorContext(Operator operator) {
         try {
             Field field = Operator.class.getDeclaredField("context");
             field.setAccessible(true);
@@ -207,7 +213,7 @@ public class OperatorExecutor {
         return images.toArray(new PlanarImage[images.size()]);
     }
 
-    private static void checkForCancellation(ProgressMonitor pm) {
+    private static void checkForCancelation(ProgressMonitor pm) {
         if (pm.isCanceled()) {
             throw new OperatorException("Operation canceled.");
         }
@@ -219,8 +225,14 @@ public class OperatorExecutor {
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (final PlanarImage image : images) {
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    checkForCancellation(pm);
+                    checkForCancelation(pm);
+                    /////////////////////////////////////////////////////////////////////
+                    //
+                    // Note: GPF pull-processing is triggered here!!!
+                    //
                     image.getTile(tileX, tileY);
+                    //
+                    /////////////////////////////////////////////////////////////////////
                     pm.worked(1);
                 }
             }
@@ -231,8 +243,8 @@ public class OperatorExecutor {
 
         private final Semaphore semaphore;
 
-        OperatorTileComputationListener(Semaphore scheduledTiles) {
-            this.semaphore = scheduledTiles;
+        OperatorTileComputationListener(Semaphore semaphore) {
+            this.semaphore = semaphore;
         }
 
         @Override

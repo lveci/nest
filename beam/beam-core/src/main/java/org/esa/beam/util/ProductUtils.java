@@ -1214,25 +1214,24 @@ public class ProductUtils {
         Guardian.assertNotNull("source", sourceProduct);
         Guardian.assertNotNull("target", targetProduct);
         if (sourceProduct.getFlagCodingGroup().getNodeCount() > 0) {
-            Band sourceBand;
-            Band targetBand;
-            FlagCoding coding;
-
             copyFlagCodings(sourceProduct, targetProduct);
-            copyMasks(sourceProduct, targetProduct);
-            copyOverlayMasks(sourceProduct, targetProduct);
-
 
 // loop over bands and check if they have a flags coding attached
             for (int i = 0; i < sourceProduct.getNumBands(); i++) {
-                sourceBand = sourceProduct.getBandAt(i);
+                Band sourceBand = sourceProduct.getBandAt(i);
                 String bandName = sourceBand.getName();
-                coding = sourceBand.getFlagCoding();
+                FlagCoding coding = sourceBand.getFlagCoding();
                 if (coding != null) {
-                    targetBand = copyBand(bandName, sourceProduct, targetProduct);
+                    Band targetBand = copyBand(bandName, sourceProduct, targetProduct);
                     targetBand.setSampleCoding(targetProduct.getFlagCodingGroup().get(coding.getName()));
                 }
             }
+
+            // first the bands have to be copied and then the masks
+            // other wise the referenced bands, e.g. flag band, is not contained in the target product
+            // and the mask is not copied
+            copyMasks(sourceProduct, targetProduct);
+            copyOverlayMasks(sourceProduct, targetProduct);
         }
     }
 
@@ -1413,7 +1412,7 @@ public class ProductUtils {
             } catch (Exception e) {
                 return;
             }
-        
+
             CoordinateReferenceSystem srcModelCrs = ImageManager.getModelCrs(sourceProduct.getGeoCoding());
             CoordinateReferenceSystem targetModelCrs = ImageManager.getModelCrs(targetProduct.getGeoCoding());
 
@@ -1556,7 +1555,8 @@ public class ProductUtils {
         return image;
     }
 
-    private static BufferedImage getcompatibleBufferedImageForScatterPlot(BufferedImage image, int width, int height, Color background) {
+    private static BufferedImage getcompatibleBufferedImageForScatterPlot(BufferedImage image, int width, int height,
+                                                                          Color background) {
         if (image == null
             || image.getWidth() != width
             || image.getHeight() != height
@@ -2530,6 +2530,27 @@ public class ProductUtils {
             }
         }
         return pathList;
+    }
+
+    public static ProductData.UTC getScanLineTime(Product product, double y) {
+        final ProductData.UTC utcStartTime = product.getStartTime();
+        final ProductData.UTC utcEndTime = product.getEndTime();
+
+        if (utcStartTime == null && utcEndTime == null) {
+            return null;
+        }
+        if (utcStartTime == null) {
+            return utcEndTime;
+        }
+        if (utcEndTime == null) {
+            return utcStartTime;
+        }
+        final double start = utcStartTime.getMJD();
+        final double stop = utcEndTime.getMJD();
+
+        final double timePerLine = (stop - start) / (product.getSceneRasterHeight() - 1);
+        final double currentLine = timePerLine * y + start;
+        return new ProductData.UTC(currentLine);
     }
 
 /////////////////////////////////////////////////////////////////////////

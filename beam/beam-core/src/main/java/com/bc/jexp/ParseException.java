@@ -19,7 +19,7 @@ package com.bc.jexp;
  * An exception thrown by a <code>ParserX.parse()</code> call in order to
  * signal a parser error.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public class ParseException extends Exception {
 

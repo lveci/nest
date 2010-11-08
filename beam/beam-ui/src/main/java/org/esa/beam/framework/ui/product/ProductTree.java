@@ -16,6 +16,7 @@
 package org.esa.beam.framework.ui.product;
 
 import com.bc.ceres.swing.TreeCellExtender;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -50,16 +51,28 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * A tree-view component for multiple <code>Product</code>s. Clients can register one or more
@@ -67,7 +80,7 @@ import java.util.Set;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.20 $ $Date: 2010-08-05 17:00:55 $
+
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -98,8 +111,8 @@ public class ProductTree extends JTree implements PopupMenuFactory {
     public ProductTree(final boolean multipleSelect) {
         super((TreeModel) null);
         getSelectionModel().setSelectionMode(multipleSelect
-                ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
-                : TreeSelectionModel.SINGLE_TREE_SELECTION);
+                                             ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
+                                             : TreeSelectionModel.SINGLE_TREE_SELECTION);
         addTreeSelectionListener(new PTSelectionListener());
         addMouseListener(new PTMouseListener());
         setCellRenderer(new PTCellRenderer());
@@ -121,6 +134,9 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         productTreeModelListener = new ProductTreeModelListener(this);
 
         TreeCellExtender.equip(this);
+        this.setDropTarget(new DropTarget(this,
+                                          DnDConstants.ACTION_COPY_OR_MOVE,
+                                          new ProductTreeDropTarget()));
     }
 
     @Override
@@ -178,6 +194,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Notifies this product tree, that a product scene view has opened.
      *
      * @param view The view.
+     *
      * @deprecated since BEAM 4.7, use {@link #registerOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
      */
     @Deprecated
@@ -189,6 +206,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Notifies this product tree, that a product scene view has closed.
      *
      * @param view The view.
+     *
      * @deprecated since BEAM 4.7, use {@link #deregisterOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
      */
     @Deprecated
@@ -201,6 +219,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Opened product nodes may be differently displayed.
      *
      * @param nodes The products nodes which are in process.
+     *
      * @see #registerActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...)
      */
     public void registerOpenedProductNodes(ProductNode... nodes) {
@@ -219,6 +238,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Opened product nodes may be diffently displayed.
      *
      * @param nodes The products nodes which are in process.
+     *
      * @see #deregisterActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...)
      */
     public void deregisterOpenedProductNodes(ProductNode... nodes) {
@@ -278,6 +298,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Sets the products for this product tree component.
      *
      * @param products a <code>Product[]</code> with the products to be displayed, must not be null.
+     *
      * @deprecated since BEAM 4.7, no replacement. The <code>ProductTree</code> now detects the products automatically.
      */
     @Deprecated
@@ -325,6 +346,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * This method does not have any effect.
      *
      * @param exceptionHandler is ignored
+     *
      * @deprecated since BEAM 4.7, no replacement
      */
     @Deprecated
@@ -358,22 +380,22 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private class PTCellRenderer extends DefaultTreeCellRenderer {
 
-        ImageIcon productIcon, productIconModified, productIconOrigFormat;
-        ImageIcon metadataIcon;
-        ImageIcon tiePointGridVisibleIcon;
-        ImageIcon tiePointGridInvisibleIcon;
-        ImageIcon bandVisibleIcon;
-        ImageIcon bandInvisibleIcon;
-        ImageIcon bandVirtualVisibleIcon;
-        ImageIcon bandVirtualInvisibleIcon;
-        ImageIcon bandFlagsVisibleIcon;
-        ImageIcon bandFlagsInvisibleIcon;
-        ImageIcon bandIndexedVisibleIcon;
-        ImageIcon bandIndexedInvisibleIcon;
-        ImageIcon vectorDataIcon;
+        private ImageIcon productIcon, productIconModified, productIconOrigFormat;
+        private ImageIcon metadataIcon;
+        private ImageIcon tiePointGridVisibleIcon;
+        private ImageIcon tiePointGridInvisibleIcon;
+        private ImageIcon bandVisibleIcon;
+        private ImageIcon bandInvisibleIcon;
+        private ImageIcon bandVirtualVisibleIcon;
+        private ImageIcon bandVirtualInvisibleIcon;
+        private ImageIcon bandFlagsVisibleIcon;
+        private ImageIcon bandFlagsInvisibleIcon;
+        private ImageIcon bandIndexedVisibleIcon;
+        private ImageIcon bandIndexedInvisibleIcon;
+        private ImageIcon vectorDataIcon;
 
-        Font normalFont;
-        Font boldFont;
+        private Font normalFont;
+        private Font boldFont;
 
         // Uncomment for debugging masks:
         // ImageIcon maskIcon;
@@ -469,10 +491,10 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 } else if (productNode instanceof ProductNodeGroup) {
                     text = treeNode.getName();
                 } else if (productNode instanceof MetadataElement) {
-                    MetadataElement metadataElement =(MetadataElement) productNode;
+                    MetadataElement metadataElement = (MetadataElement) productNode;
                     if (metadataElement.getParentElement() != null || metadataElement instanceof SampleCoding) {
                         this.setIcon(metadataIcon);
-                    }else {
+                    } else {
                         text = treeNode.getName();
                     }
                 } else if (productNode instanceof Band) {
@@ -660,6 +682,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
     }
 
     private class ProductManagerListener implements ProductManager.Listener {
+
         @Override
         public void productAdded(ProductManager.Event event) {
             fireProductAdded(event.getProduct());
@@ -678,7 +701,9 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
 // must have this listener and can not use the above ProductManagerListener, because of the order the listeners
 // are called. When the above listener is called the new product is not yet in the model. 
+
     private static class ProductTreeModelListener implements TreeModelListener {
+
         private ProductTree tree;
 
         private ProductTreeModelListener(ProductTree tree) {
@@ -700,7 +725,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         public void treeNodesRemoved(TreeModelEvent e) {
             int selectionRow = tree.getLeadSelectionRow();
             updateUi();
-            while(selectionRow >= tree.getRowCount()) {
+            while (selectionRow >= tree.getRowCount()) {
                 selectionRow -= 1;
             }
             if (selectionRow >= 0) {
@@ -721,6 +746,99 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     }
 
+    private class ProductTreeDropTarget extends DropTargetAdapter {
+
+        private DataFlavor uriListFlavor;
+
+        private ProductTreeDropTarget() {
+            try {
+                uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
+            } catch (ClassNotFoundException ignore) {
+            }
+        }
+
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            final int dropAction = dtde.getDropAction();
+            if ((dropAction & DnDConstants.ACTION_COPY_OR_MOVE) != 0 &&
+                (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                 uriListFlavor != null && dtde.isDataFlavorSupported(uriListFlavor))) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void drop(DropTargetDropEvent dtde) {
+            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+            boolean success = false;
+            try {
+                final Transferable transferable = dtde.getTransferable();
+                @SuppressWarnings({"unchecked"})
+                final List<File> fileList;
+                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    fileList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                } else if (transferable.isDataFlavorSupported(uriListFlavor)) {
+                    // on Unix another mimetype is used, see
+                    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4899516
+                    String data = (String) transferable.getTransferData(uriListFlavor);
+                    fileList = textURIListToFileList(data);
+                } else {
+                    fileList = Collections.emptyList();
+                }
+                for (File file : fileList) {
+                    ProductManager productManager = getModel().getProductManager();
+                    if (!isProductAlreadyOpen(file, productManager)) {
+                        final Product product = ProductIO.readProduct(file);
+                        if (product != null) {
+                            productManager.addProduct(product);
+                            success = true;
+                        }
+                    }
+                }
+            } catch (UnsupportedFlavorException ignored) {
+            } catch (IOException ignored) {
+                // This can happen if the transferred object is not a real file on disk
+                // but a virtual file (e.g. email from Thunderbird or Outlook), see
+                // http://bugs.sun.com/view_bug.do?bug_id=6242241
+                // http://bugs.sun.com/view_bug.do?bug_id=4808793
+            }
+            dtde.dropComplete(success);
+        }
+
+        private boolean isProductAlreadyOpen(File file, ProductManager productManager ) {
+            for (int i = 0; i < productManager.getProductCount(); i++) {
+                final Product product = productManager.getProduct(i);
+                final File productFile = product.getFileLocation();
+                if (file.equals(productFile)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private List<File> textURIListToFileList(String data) {
+            List<File> list = new ArrayList<File>(1);
+            StringTokenizer st = new StringTokenizer(data, "\r\n");
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                if (token.startsWith("#")) {
+                    // the line is a comment (as per the RFC 2483)
+                    continue;
+                }
+                try {
+                    list.add(new File(new URI(token)));
+                } catch (java.net.URISyntaxException ignore) {
+                    // malformed URI
+                } catch (IllegalArgumentException ignore) {
+                    // the URI is not a valid 'file:' URI
+                }
+            }
+            return list;
+        }
+    }
+	
     public static class TreeTransferHandler extends TransferHandler {
 
         @Override

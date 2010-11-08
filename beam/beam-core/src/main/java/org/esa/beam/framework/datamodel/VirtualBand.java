@@ -43,7 +43,7 @@ import java.io.IOException;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2010-08-05 17:00:50 $
+
  * @see ProductData
  * @see #getPixels
  * @see #setPixels

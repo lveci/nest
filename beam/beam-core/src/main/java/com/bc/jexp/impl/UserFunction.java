@@ -35,7 +35,7 @@ import com.bc.jexp.Variable;
  * @see #getStackSizeMax
  * @see #setStackSizeMax
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2010-08-05 17:00:49 $
+
  */
 public final class UserFunction extends AbstractFunction {
 

@@ -58,7 +58,7 @@ import java.util.Random;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2010-09-02 20:24:09 $
+
  * @see ProductData
  * @see #getPixels
  * @see #setPixels

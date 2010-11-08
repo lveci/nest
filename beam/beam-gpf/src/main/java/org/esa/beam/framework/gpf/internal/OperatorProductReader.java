@@ -85,12 +85,13 @@ public class OperatorProductReader implements ProductReader {
                                    int destHeight,
                                    ProductData destBuffer,
                                    ProgressMonitor pm) throws IOException {
+        operatorContext.getLogger().warning("OperatorProductReader.readBandRasterData: Should not come here anymore since raster data shall only be computed by OperatorImage");
         final RenderedImage image = operatorContext.getTargetImage(destBand);
         ProgressMonitor oldPm = OperatorImage.setProgressMonitor(image, pm);
         try {
             /////////////////////////////////////////////////////////////////////
             //
-            // GPF pull-processing is triggered here!!!
+            // Note: GPF pull-processing is triggered here!!!
             //
             Raster data = image.getData(new Rectangle(destOffsetX,
                                                       destOffsetY,
