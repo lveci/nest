@@ -10,14 +10,15 @@
             <excludes>
 				<exclude>**/.svnignore</exclude>
                 <exclude>**/.cvsignore</exclude>
+				<exclude>**/.gitignore</exclude>
                 <exclude>**/*.ipr</exclude>
                 <exclude>**/*.iml</exclude>
                 <exclude>**/*.iws</exclude>
                 <exclude>**/.project</exclude>
                 <exclude>**/.classpath</exclude>
                 <exclude>**/.settings</exclude>
-                <exclude>**/output/**</exclude>
-				<exclude>**/target/**</exclude>
+                <exclude>**/target/**</exclude>
+				<exclude>**/output/**</exclude>
                 <exclude>**/CVS/**</exclude>
 				<exclude>**/.svn/**</exclude>
 				<exclude>**/.git/**</exclude>
