@@ -6,6 +6,7 @@
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
         <version>${nest.version}</version>
+		<relativePath>../../pom.xml</relativePath>
     </parent>
 	
     <groupId>org.esa.nest.maven</groupId>
