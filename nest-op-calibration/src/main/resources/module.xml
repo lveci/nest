@@ -5,9 +5,9 @@
     <name>NEST Calibration Operator</name>
     <description>NEST Calibration Operator</description>
 	
-	<vendor>Array Systems Computing Inc</vendor>
+    <vendor>Array Systems Computing Inc</vendor>
     <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
-    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <copyright>(C) 2010 by Array Systems Computing Inc</copyright>
     <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 

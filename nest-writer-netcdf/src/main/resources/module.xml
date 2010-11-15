@@ -6,6 +6,12 @@
 
     <description>Enables writing to NetCDF supported formats</description>
 
+    <vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2010 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+	
     <dependency>
         <module>beam-core</module>
     </dependency>
