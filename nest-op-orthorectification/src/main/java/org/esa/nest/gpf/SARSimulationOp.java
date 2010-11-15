@@ -187,9 +187,10 @@ public final class SARSimulationOp extends Operator {
     }
 
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         if (dem != null) {
             dem.dispose();
+            dem = null;
         }
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
