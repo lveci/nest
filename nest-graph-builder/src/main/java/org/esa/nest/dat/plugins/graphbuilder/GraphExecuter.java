@@ -277,7 +277,7 @@ public class GraphExecuter extends Observable {
      * @param pm The ProgressMonitor
      */
     public void executeGraph(ProgressMonitor pm) {
-        processor.executeGraphContext(graphContext, pm);
+        processor.executeGraph(graphContext, pm);
     }
 
     void saveGraph() throws GraphException {

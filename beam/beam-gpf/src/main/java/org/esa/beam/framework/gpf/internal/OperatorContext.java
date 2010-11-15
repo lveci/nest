@@ -477,8 +477,11 @@ public class OperatorContext {
         targetNodeME.addAttribute(new MetadataAttribute("operator", ProductData.createInstance(opName), false));
         final MetadataElement targetSourcesME = new MetadataElement("sources");
 
-        for (Product sourceProduct : context.sourceProductList) {
-            final String sourceId = context.getSourceProductId(sourceProduct);
+        // LUIS!!
+        //for (Product sourceProduct : context.sourceProductList) {
+        //    final String sourceId = context.getSourceProductId(sourceProduct);
+	    for (String sourceId : context.sourceProductMap.keySet()) {
+            final Product sourceProduct = context.sourceProductMap.get(sourceId);
             final String sourceNodeId;
             if (sourceProduct.getFileLocation() != null) {
                 sourceNodeId = sourceProduct.getFileLocation().toURI().toASCIIString();
@@ -790,7 +793,8 @@ public class OperatorContext {
     private void processSourceProductsField(Field declaredField, SourceProducts sourceProductsAnnotation) throws
                                                                                                           OperatorException {
         if (declaredField.getType().equals(Product[].class)) {
-            Product[] sourceProducts = getSourceProductsFieldValue(declaredField);
+            // LUIS!!
+	        Product[] sourceProducts = getSourceProductsFieldValue(declaredField);
             if (sourceProducts != null) {
                 for (int i = 0; i < sourceProducts.length; i++) {
                     Product sourceProduct = sourceProducts[i];
@@ -802,8 +806,21 @@ public class OperatorContext {
             }
             sourceProducts = getSourceProducts();
             if (sourceProducts.length > 0) {
-                setSourceProductsFieldValue(declaredField, getUnnamedProducts());
+                setSourceProductsFieldValue(declaredField, sourceProducts);//getUnnamedProducts()); // NESTMOD
             }
+	   /* Product[] sourceProducts = getSourceProducts();
+            if (sourceProducts.length > 0) {
+                setSourceProductsFieldValue(declaredField, sourceProducts);//getUnnamedProducts());
+            } else {
+                sourceProducts = getSourceProductsFieldValue(declaredField);
+                if (sourceProducts != null) {
+                    for (int i = 0; i < sourceProducts.length; i++) {
+                        Product sourceProduct = sourceProducts[i];
+                        setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + i, sourceProduct);
+                    }
+                }
+                sourceProducts = getSourceProducts();
+            }   */
             if (sourceProductsAnnotation.count() < 0) {
                 if (sourceProducts.length == 0) {
                     String msg = formatExceptionMessage("At least a single source product expected.");

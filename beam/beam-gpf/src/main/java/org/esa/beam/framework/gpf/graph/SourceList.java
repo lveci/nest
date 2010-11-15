@@ -58,9 +58,9 @@ public class SourceList {
      * @param source the {@link NodeSource}
      */
     public void addSource(NodeSource source) {
-        final String sourceName = source.getName();
+        final String sourceName = source.getSourceNodeId();
         for (NodeSource nodeSource : sourceList) {
-            if (nodeSource.getName().equals(sourceName)) {
+            if (nodeSource.getSourceNodeId().equals(sourceName)) {
                 throw new IllegalArgumentException("duplicated source node name");
             }
         }
