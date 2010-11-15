@@ -15,6 +15,7 @@
  */
 package org.esa.nest.db;
 
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
@@ -193,7 +194,7 @@ public final class DBScanner extends SwingWorker {
         public boolean accept(final File file) {
             if(!file.isDirectory()) return false;
             final String name = file.getName().toLowerCase();
-            if(name.endsWith(".data"))
+            if(name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
                 return false;
             for(String ext : skip) {
                 if(name.equalsIgnoreCase(ext))

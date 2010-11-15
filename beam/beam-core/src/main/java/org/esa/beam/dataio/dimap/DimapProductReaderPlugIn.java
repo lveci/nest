@@ -108,7 +108,7 @@ public class DimapProductReaderPlugIn implements ProductReaderPlugIn {
                 if (fr.read(cbuf) != -1) {
                     final String s = new String(cbuf);
                     fr.close();
-                    if (s.indexOf("<Dimap_Document") != -1) {
+                    if (s.indexOf("<"+DimapProductConstants.TAG_ROOT) != -1) {
                         return DecodeQualification.INTENDED;
                     }
                 }

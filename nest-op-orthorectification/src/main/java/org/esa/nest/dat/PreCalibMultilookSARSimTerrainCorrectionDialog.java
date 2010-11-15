@@ -35,8 +35,8 @@ class PreCalibMultilookSARSimTerrainCorrectionDialog extends MultiGraphDialog {
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final static File tmpFolder = ResourceUtils.getApplicationUserTempDataDir();
-    private final static File tmpFile1 = new File(tmpFolder, TMP_FILENAME + ".dim");
-    private final static File tmpDataFile1 = new File(tmpFolder, TMP_FILENAME + ".data");
+    private final static File tmpFile1 = new File(tmpFolder, TMP_FILENAME + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+    private final static File tmpDataFile1 = new File(tmpFolder, TMP_FILENAME + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
 
     public PreCalibMultilookSARSimTerrainCorrectionDialog(final AppContext theAppContext, final String title, final String helpID) {
         super(theAppContext, title, helpID, true);

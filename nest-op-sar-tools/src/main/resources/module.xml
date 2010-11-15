@@ -80,6 +80,7 @@
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Resampling</text>
             <parent>tools</parent>
+            <placeAfter>DatasetConversion</placeAfter>
         </action>
 
         <action>

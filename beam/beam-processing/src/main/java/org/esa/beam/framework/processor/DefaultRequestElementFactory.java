@@ -287,7 +287,7 @@ public class DefaultRequestElementFactory implements RequestElementFactory, Proc
             @Override
             public boolean accept(File pathname) {
                 String name = pathname.getName().toLowerCase();
-                return pathname.isDirectory() || name.endsWith(".dim");
+                return pathname.isDirectory() || name.endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
             }
 
             @Override

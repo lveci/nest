@@ -58,6 +58,7 @@ public class ProductExportAction extends ExecCommand {
 
     @Override
     public void updateState(final CommandEvent event) {
+        //setEnabled(false); // DEMO_CODE
         setEnabled(writerPlugin != null && getVisatApp().getSelectedProduct() != null);
     }
 

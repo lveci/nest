@@ -25,10 +25,14 @@ package org.esa.beam.dataio.dimap;
 public final class DimapProductConstants {
 
     public static final String DIMAP_FORMAT_NAME = "BEAM-DIMAP";
+    //public static final String DIMAP_FORMAT_NAME = "DEMO_OUTPUT";  // DEMO_CODE
+
     /**
      * BEAM-Dimap XML-File extension
      */
     public static final String DIMAP_HEADER_FILE_EXTENSION = ".dim";
+    //public static final String DIMAP_HEADER_FILE_EXTENSION = ".demo";     // DEMO_CODE
+
     /**
      * BEAM-Dimap data directory extension
      */
@@ -407,6 +411,7 @@ public final class DimapProductConstants {
 
     // BEAM-Dimap document root tag
     public static final String TAG_ROOT = "Dimap_Document";
+    //public static final String TAG_ROOT = "Demo_Document";  // DEMO_CODE
 
     // BEAM-Dimap metadata ID tags
     public static final String TAG_METADATA_ID = "Metadata_Id";

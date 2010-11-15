@@ -15,6 +15,7 @@
  */
 package org.esa.beam.visat.actions.session;
 
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
@@ -99,7 +100,7 @@ public class SaveSessionAction extends ExecCommand {
                 int i = app.showQuestionDialog(TITLE, message, false, null);
                 if (i == JOptionPane.YES_OPTION) {
                     File sessionDir = sessionFile.getAbsoluteFile().getParentFile();
-                    product.setFileLocation(new File(sessionDir, product.getName() + ".dim"));
+                    product.setFileLocation(new File(sessionDir, product.getName() + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION));
                     VisatApp.getApp().saveProduct(product);
                 } else {
                     return false;
@@ -132,7 +133,7 @@ public class SaveSessionAction extends ExecCommand {
     private void saveProducts(ArrayList<Product> unsavedProducts, File sessionDir) {
         for (Product product : unsavedProducts) {
             if (product.getFileLocation() == null) {
-                product.setFileLocation(new File(sessionDir, product.getName() + ".dim"));
+                product.setFileLocation(new File(sessionDir, product.getName() + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION));
             }
             VisatApp.getApp().saveProduct(product);
         }

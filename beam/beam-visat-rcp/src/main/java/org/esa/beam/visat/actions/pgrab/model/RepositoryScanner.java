@@ -15,6 +15,7 @@
  */
 package org.esa.beam.visat.actions.pgrab.model;
 
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
@@ -58,8 +59,8 @@ public class RepositoryScanner {
     public static class DirectoryFileFilter implements FileFilter {
 
         public boolean accept(final File file) {
-            boolean isDataWithDim = file.getName().endsWith(".data") 
-            && FileUtils.exchangeExtension(file, ".dim").exists();
+            boolean isDataWithDim = file.getName().endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION)
+            && FileUtils.exchangeExtension(file, DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION).exists();
             return file.isDirectory() && !isDataWithDim;
         }
     }

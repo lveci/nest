@@ -80,7 +80,7 @@ public class TargetProductSelectorModel {
 
         setOpenInAppSelected(true);
         setSaveToFileSelected(true);
-        //formatNames = ProductIOPlugInManager.getInstance().getAllProductWriterFormatStrings();
+        formatNames = ProductIOPlugInManager.getInstance().getAllProductWriterFormatStrings();  // DEMO_CODE
         if (StringUtils.contains(formatNames, ProductIO.DEFAULT_FORMAT_NAME)) {
             setFormatName(ProductIO.DEFAULT_FORMAT_NAME);
         } else {

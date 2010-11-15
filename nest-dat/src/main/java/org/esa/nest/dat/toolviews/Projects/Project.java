@@ -16,6 +16,7 @@
 package org.esa.nest.dat.toolviews.Projects;
 
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.*;
@@ -118,7 +119,7 @@ public class Project extends Observable {
 
         for(File f : files) {
             if(f.isDirectory()) {
-                if(!f.getName().endsWith(".data")) {
+                if(!f.getName().endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION)) {
                     final ProjectSubFolder newProjFolder = projSubFolder.addSubFolder(f.getName());
 
                     if(findSubFolders(f, newProjFolder))
@@ -280,7 +281,7 @@ public class Project extends Observable {
         final ProjectFile[] fileList = projSubFolder.getFileList().toArray(new ProjectFile[projSubFolder.getFileList().size()]);
         for(ProjectFile projFile : fileList) {
             final File f = projFile.getFile();
-            if(!f.exists() || f.getName().endsWith(".data")) {
+            if(!f.exists() || f.getName().endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION)) {
                 projSubFolder.removeFile(f);
             }
         }
@@ -484,9 +485,9 @@ public class Project extends Observable {
            parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH)
             file.delete();
         else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
-            if(file.getName().endsWith(".dim")) {
+            if(file.getName().endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION)) {
                 final String pathStr = file.getAbsolutePath();
-                final File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + ".data");
+                final File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
                 if(dataDir.exists()) {
                     ResourceUtils.deleteFile(dataDir);
                     file.delete();

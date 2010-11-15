@@ -22,6 +22,7 @@ import com.bc.ceres.core.CanceledException;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import junit.framework.TestCase;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
@@ -225,7 +226,7 @@ public class SessionTest extends TestCase {
     static Product createProduct(int refNo, String name, String type, int w, int h) {
         final Product product = new Product(name, type, w, h);
         product.setRefNo(refNo);
-        final File file = new File(new File(createSessionRootURI()), "out/DIMAP/" + name + ".dim");
+        final File file = new File(new File(createSessionRootURI()), "out/DIMAP/" + name + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
         product.setFileLocation(file);
         return product;
     }

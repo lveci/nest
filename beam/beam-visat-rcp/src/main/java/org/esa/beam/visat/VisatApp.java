@@ -2039,7 +2039,8 @@ public class VisatApp extends BasicApp implements AppContext {
                     commandIds = new ArrayList<String>(5);
                     toolBar2commandIds.put(toolBarId, commandIds);
 
-                    addDefaultToolViewCommands(commandIds);
+                    if(toolBarId.equals("viewsToolBar"))
+                        addDefaultToolViewCommands(commandIds);
                 }
                 if(!commandIds.contains(commandId))
                     commandIds.add(commandId);
