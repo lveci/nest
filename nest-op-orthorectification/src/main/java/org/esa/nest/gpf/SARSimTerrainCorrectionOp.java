@@ -198,7 +198,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
-    private final Map<Band, WarpOp.WarpData> warpDataMap = new HashMap<Band, WarpOp.WarpData>(10);
+    private final Map<Band, Warp2Op.WarpData> warpDataMap = new HashMap<Band, Warp2Op.WarpData>(10);
+    private String processedSlaveBand;
 
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid latitude = null;
@@ -269,7 +270,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             createTargetProduct();
 
-            computeWARPFunction();
+            processedSlaveBand = absRoot.getAttributeString("processed_slave");
+
+            //computeWARPFunction();
 
             computeSensorPositionsAndVelocities();
 
@@ -299,9 +302,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         if (dem != null) {
             dem.dispose();
+            dem = null;
         }
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
@@ -823,7 +827,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private void computeWARPFunction() {
+    private synchronized void getWarpData() {
+        if (!warpDataMap.isEmpty()) return;
+
         // for all slave bands or band pairs compute a warp
         final Band masterBand = sourceProduct.getBandAt(0);
         masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
@@ -842,36 +848,24 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         " GCPs survived. Try using more GCPs or a larger window");
             }
 
-            final WarpOp.WarpData warpData = new WarpOp.WarpData(slaveGCPGroup);
+            final Warp2Op.WarpData warpData = new Warp2Op.WarpData(slaveGCPGroup);
             warpDataMap.put(srcBand, warpData);
 
-            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
+            Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
 
-            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
+            if (warpData.rmsMean > rmsThreshold && Warp2Op.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
             }
 
-            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
+            if (warpData.rmsMean > rmsThreshold && Warp2Op.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
             }
 
-            WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
-            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
+            Warp2Op.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
+            Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
             outputCoRegistrationInfo(warpData, srcBand.getName(), appendFlag);
             if (!appendFlag) {
                 appendFlag = true;
-            }
-        }
-
-        if(openShiftsFile) {
-            final File shiftsFile = getShiftsFile(sourceProduct);
-            if(Desktop.isDesktopSupported()) {
-                try {
-                    Desktop.getDesktop().open(shiftsFile);
-                } catch(Exception e) {
-                    System.out.println(e.getMessage());
-                    // do nothing
-                }
             }
         }
     }
@@ -933,8 +927,36 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
 
-        final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
         final Set<Band> keySet = targetTiles.keySet();
+
+        if(warpDataMap.isEmpty()) {
+            // find first real slave band
+            for(Band targetBand : keySet) {
+                if(targetBand.getName().equals(processedSlaveBand)) {
+                    final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+                    final Band srcBand = sourceProduct.getBand(srcBandNames[0]);
+                    if(srcBand != null) {
+                        final Tile sourceRaster = getSourceTile(srcBand, targetRectangle, pm);
+                        getWarpData();
+                        break;
+                    }
+                }
+            }
+            if(openShiftsFile) {
+                final File shiftsFile = getShiftsFile(sourceProduct);
+                if(Desktop.isDesktopSupported() && shiftsFile.exists()) {
+                    try {
+                        Desktop.getDesktop().open(shiftsFile);
+                    } catch(Exception e) {
+                        System.out.println(e.getMessage());
+                        // do nothing
+                    }
+                }
+            }
+        }
+
+        final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
+        //final Set<Band> keySet = targetTiles.keySet();
         for(Band targetBand : keySet) {
 
             if(targetBand.getName().equals("elevation")) {
@@ -1084,7 +1106,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             final String[] srcBandName = targetBandNameToSourceBandName.get(tileData.bandName);
                             final Band srcBand = sourceProduct.getBand(srcBandName[0]);
                             final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
-                            WarpOp.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
+                            Warp2Op.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
                                                   (float)rangeIndex, (float)azimuthIndex, pixelPos);
                             if (pixelPos.x < 0.0 || pixelPos.x >= srcMaxRange || pixelPos.y < 0.0 || pixelPos.y >= srcMaxAzimuth) {
                                 tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
@@ -1597,7 +1619,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     private void outputCoRegistrationInfo(
-            final WarpOp.WarpData warpData, final String bandName, boolean appendFlag)
+            final Warp2Op.WarpData warpData, final String bandName, boolean appendFlag)
             throws OperatorException {
 
         final File residualFile = getShiftsFile(sourceProduct);
