@@ -15,7 +15,7 @@ class EnviProjectionInfo {
     }
 
     public void setParameter(double[] parameter) {
-        this.parameter = parameter;
+        this.parameter = parameter.clone();
     }
 
     public String getDatum() {

@@ -39,8 +39,8 @@ public class EnviProductReaderAcceptanceTest extends TestCase {
         final ProductReader productReader = plugIn.createReaderInstance();
         try {
             final Product product = productReader.readProductNodes(headerFile, null);
-            fail("IOException expected");
-        } catch (IOException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 

@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 public class DataTypeUtilsTest extends TestCase {
 
     public void testMapToBEAM() {
-        assertEquals(ProductData.TYPE_INT8, DataTypeUtils.toBeam(EnviConstants.TYPE_ID_BYTE));
+        assertEquals(ProductData.TYPE_UINT8, DataTypeUtils.toBeam(EnviConstants.TYPE_ID_BYTE));
         assertEquals(ProductData.TYPE_INT16, DataTypeUtils.toBeam(EnviConstants.TYPE_ID_INT16));
         assertEquals(ProductData.TYPE_INT32, DataTypeUtils.toBeam(EnviConstants.TYPE_ID_INT32));
         assertEquals(ProductData.TYPE_FLOAT32, DataTypeUtils.toBeam(EnviConstants.TYPE_ID_FLOAT32));

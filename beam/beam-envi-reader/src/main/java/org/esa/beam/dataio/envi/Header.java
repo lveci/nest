@@ -5,10 +5,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 public class Header {
 
@@ -52,17 +51,13 @@ public class Header {
             } else if (line.startsWith(EnviConstants.HEADER_KEY_DESCRIPTION)) {
                 line = assembleMultilineString(reader, line);
                 description = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')).trim();
-                try {
-                    parseBeamProperties(description);
-                } catch (ParseException e) {
-                    //@todo handle this
-                }
+                parseBeamProperties(description);
             }
         }
         // @todo 2 se/** after reading the headerFile validate the HeaderConstraints
     }
 
-    ByteOrder getJavaByteOrder() {
+    public ByteOrder getJavaByteOrder() {
         if (getByteOrder() == 1) {
             return ByteOrder.BIG_ENDIAN;
         } else {
@@ -70,7 +65,7 @@ public class Header {
         }
     }
 
-    String getFileType() {
+    public String getFileType() {
         return fileType;
     }
 
@@ -86,7 +81,7 @@ public class Header {
         return numBands;
     }
 
-    int getHeaderOffset() {
+    public int getHeaderOffset() {
         return headerOffset;
     }
 
@@ -94,7 +89,7 @@ public class Header {
         return dataType;
     }
 
-    String getInterleave() {
+    public String getInterleave() {
         return interleave;
     }
 
@@ -105,15 +100,15 @@ public class Header {
         return sensorType;
     }
 
-    int getByteOrder() {
+    public int getByteOrder() {
         return byteOrder;
     }
 
-    EnviMapInfo getMapInfo() {
+    public EnviMapInfo getMapInfo() {
         return mapInfo;
     }
 
-    EnviProjectionInfo getProjectionInfo() {
+    public EnviProjectionInfo getProjectionInfo() {
         return projectionInfo;
     }
 
@@ -218,7 +213,7 @@ public class Header {
         }
     }
 
-    private void parseBeamProperties(final String txt) throws IOException, ParseException {
+    private void parseBeamProperties(final String txt) throws IOException {
         if (txt.contains(BEAM_PROPERTIES)) {
             final int propsIdx = txt.indexOf(BEAM_PROPERTIES);
             final int openIdx = txt.indexOf('[', propsIdx);
@@ -228,8 +223,8 @@ public class Header {
             final ByteArrayInputStream in = new ByteArrayInputStream(strings.getBytes());
             final Properties properties = loadProperties(in);
             final BeamProperties bean = new BeamProperties();
-            if(properties.containsKey(Header.SENSING_START)) {
-                 bean.setSensingStart(properties.getProperty(Header.SENSING_START));
+            if (properties.containsKey(Header.SENSING_START)) {
+                bean.setSensingStart(properties.getProperty(Header.SENSING_START));
             }
             if (properties.containsKey(Header.SENSING_STOP)) {
                 bean.setSensingStop(properties.getProperty(Header.SENSING_STOP));

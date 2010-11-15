@@ -57,7 +57,7 @@ public class PolsarProProductReader extends NestEnviProductReader {
             if(file.isDirectory())
                 continue;
             if(file.getName().toLowerCase().endsWith("hdr")) {
-                final File imgFile = createEnviImageFile(file);
+                final File imgFile = getEnviImageFile(file);
                 if(!imgFile.exists())
                     continue;
                 
@@ -100,10 +100,10 @@ public class PolsarProProductReader extends NestEnviProductReader {
         product.setFileLocation(inputFile);
         product.setDescription(mainHeader.getDescription());
 
-        initGeocoding(product, mainHeader);
+        initGeoCoding(product, mainHeader);
 
         for(Header header : headerList) {
-            initBands(product, headerFileMap.get(header), header);
+            initBands(headerFileMap.get(header), product, header);
         }
 
         applyBeamProperties(product, mainHeader.getBeamProperties());

@@ -250,7 +250,7 @@ public class HeaderTest extends TestCase {
         assertEquals("Roberts", bandNames[3]);
     }
 
-    public void testParseDescription_WithBeamProperties_SencingStartStop() throws IOException {
+    public void testParseDescription_WithBeamProperties_SensingStartStop() throws IOException {
         final String beamProps = Header.BEAM_PROPERTIES + " = [" + Header.SENSING_START + " = 12324, " + Header.SENSING_STOP + " = 438976]";
         final String description = "any Description\t" + beamProps + "\tany other Description";
         final String line = "description = {" + description + "}";
@@ -265,7 +265,7 @@ public class HeaderTest extends TestCase {
         assertEquals("438976", beamProperties.getSensingStop());
     }
 
-    public void testParseDescription_WithoutSencingStartStop() throws IOException {
+    public void testParseDescription_WithoutSensingStartStop() throws IOException {
         final String noStartStop = "[else other one = 12324; else other two = 438976]";
         final String description = "any Description " + noStartStop + " any other Description";
         final String line = "description = {" + description + "}";

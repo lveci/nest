@@ -1,5 +1,5 @@
 /*
- * $Id: TestUtils.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: TestUtils.java,v 1.2 2010-11-15 17:27:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,10 +17,15 @@
 package org.esa.beam.dataio.envi;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
 
 import java.io.File;
 
-public class TestUtils {
+@Ignore
+class TestUtils {
+
+    private TestUtils() {
+    }
 
     static void deleteFileTree(File treeRoot) {
         final File[] files = treeRoot.listFiles();
