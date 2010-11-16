@@ -61,7 +61,6 @@
                     <id>mosaicAction</id>
                 </excludedActions>
                 <excludedToolViews>
-                    <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
                     <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
@@ -481,6 +480,7 @@
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Metadata</text>
             <parent>tools</parent>
+            <placeAfter>Resampling</placeAfter>
         </action>
 
         <action>
