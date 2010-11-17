@@ -61,6 +61,7 @@
                     <id>mosaicAction</id>
                 </excludedActions>
                 <excludedToolViews>
+                    <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
                     <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
