@@ -77,17 +77,21 @@ final class BilinearInterpolationResampling implements Resampling {
         final int j1 = index.j[0];
         final int j2 = index.j[1];
 
+        final float z11 = raster.getSample(i1, j1);
+        if(Float.isNaN(z11))
+            return raster.getSample(index.i0, index.j0);
+        final float z12 = raster.getSample(i2, j1);
+        if(Float.isNaN(z12))
+            return raster.getSample(index.i0, index.j0);
+        final float z21 = raster.getSample(i1, j2);
+        if(Float.isNaN(z21))
+            return raster.getSample(index.i0, index.j0);
+        final float z22 = raster.getSample(i2, j2);
+        if(Float.isNaN(z22))
+            return raster.getSample(index.i0, index.j0);
+
         final float ki = index.ki[0];
         final float kj = index.kj[0];
-
-        final float z11 = raster.getSample(i1, j1);
-        final float z12 = raster.getSample(i2, j1);
-        final float z21 = raster.getSample(i1, j2);
-        final float z22 = raster.getSample(i2, j2);
-
-        if (Float.isNaN(z11) || Float.isNaN(z12) || Float.isNaN(z21) || Float.isNaN(z22)) {
-            return raster.getSample(index.i0, index.j0);
-        }
 
         return z11 * (1f - ki) * (1f - kj) +
                 z12 * ki * (1f - kj) +

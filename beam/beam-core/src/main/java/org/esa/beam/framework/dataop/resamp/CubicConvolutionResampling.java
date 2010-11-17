@@ -129,6 +129,58 @@ final class CubicConvolutionResampling implements Resampling {
         final int j3 = index.j[2];
         final int j4 = index.j[3];
 
+        final float z11 = raster.getSample(i1, j1);
+        if (Float.isNaN(z11))
+            return raster.getSample(index.i0, index.j0);
+        final float z12 = raster.getSample(i2, j1);
+        if (Float.isNaN(z12))
+            return raster.getSample(index.i0, index.j0);
+        final float z13 = raster.getSample(i3, j1);
+        if (Float.isNaN(z13))
+            return raster.getSample(index.i0, index.j0);
+        final float z14 = raster.getSample(i4, j1);
+        if (Float.isNaN(z14))
+            return raster.getSample(index.i0, index.j0);
+
+        final float z21 = raster.getSample(i1, j2);
+        if (Float.isNaN(z21))
+            return raster.getSample(index.i0, index.j0);
+        final float z22 = raster.getSample(i2, j2);
+        if (Float.isNaN(z22))
+            return raster.getSample(index.i0, index.j0);
+        final float z23 = raster.getSample(i3, j2);
+        if (Float.isNaN(z23))
+            return raster.getSample(index.i0, index.j0);
+        final float z24 = raster.getSample(i4, j2);
+        if (Float.isNaN(z24))
+            return raster.getSample(index.i0, index.j0);
+
+        final float z31 = raster.getSample(i1, j3);
+        if (Float.isNaN(z31))
+            return raster.getSample(index.i0, index.j0);
+        final float z32 = raster.getSample(i2, j3);
+        if (Float.isNaN(z32))
+            return raster.getSample(index.i0, index.j0);
+        final float z33 = raster.getSample(i3, j3);
+        if (Float.isNaN(z33))
+            return raster.getSample(index.i0, index.j0);
+        final float z34 = raster.getSample(i4, j3);
+        if (Float.isNaN(z34))
+            return raster.getSample(index.i0, index.j0);
+
+        final float z41 = raster.getSample(i1, j4);
+        if (Float.isNaN(z41))
+            return raster.getSample(index.i0, index.j0);
+        final float z42 = raster.getSample(i2, j4);
+        if (Float.isNaN(z42))
+            return raster.getSample(index.i0, index.j0);
+        final float z43 = raster.getSample(i3, j4);
+        if (Float.isNaN(z43))
+            return raster.getSample(index.i0, index.j0);
+        final float z44 = raster.getSample(i4, j4);
+        if (Float.isNaN(z44))
+            return raster.getSample(index.i0, index.j0);
+
         final float ki1 = index.ki[0];
         final float ki2 = index.ki[1];
         final float ki3 = index.ki[2];
@@ -138,33 +190,6 @@ final class CubicConvolutionResampling implements Resampling {
         final float kj2 = index.kj[1];
         final float kj3 = index.kj[2];
         final float kj4 = index.kj[3];
-
-        final float z11 = raster.getSample(i1, j1);
-        final float z12 = raster.getSample(i2, j1);
-        final float z13 = raster.getSample(i3, j1);
-        final float z14 = raster.getSample(i4, j1);
-
-        final float z21 = raster.getSample(i1, j2);
-        final float z22 = raster.getSample(i2, j2);
-        final float z23 = raster.getSample(i3, j2);
-        final float z24 = raster.getSample(i4, j2);
-
-        final float z31 = raster.getSample(i1, j3);
-        final float z32 = raster.getSample(i2, j3);
-        final float z33 = raster.getSample(i3, j3);
-        final float z34 = raster.getSample(i4, j3);
-
-        final float z41 = raster.getSample(i1, j4);
-        final float z42 = raster.getSample(i2, j4);
-        final float z43 = raster.getSample(i3, j4);
-        final float z44 = raster.getSample(i4, j4);
-
-        if (Float.isNaN(z11) || Float.isNaN(z12) || Float.isNaN(z13) || Float.isNaN(z14) ||
-            Float.isNaN(z21) || Float.isNaN(z22) || Float.isNaN(z23) || Float.isNaN(z24) ||
-            Float.isNaN(z31) || Float.isNaN(z32) || Float.isNaN(z33) || Float.isNaN(z34) ||
-            Float.isNaN(z41) || Float.isNaN(z42) || Float.isNaN(z43) || Float.isNaN(z44)) {
-            return raster.getSample(index.i0, index.j0);
-        }
 
         // interpolate along 4 lines first
         final float z1 = z11 * ki1 + z12 * ki2 + z13 * ki3 + z14 * ki4;

@@ -64,7 +64,8 @@ public class TestUtils {
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
                                                    "sav", "7z", "zip", "rrd", "lbl", "z", "gz", "exe", "bat", "sh", "rtf",
                                                    "prj", "dbf", "shx", "ace", "ace2", "tar"};
-    private static String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut",
+    private static String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
+                                                 "dfas", "dfdn", "lut",
                                                  "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
