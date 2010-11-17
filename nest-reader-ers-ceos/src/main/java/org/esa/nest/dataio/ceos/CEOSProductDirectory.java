@@ -79,48 +79,51 @@ public abstract class CEOSProductDirectory {
 
     protected static void addTiePointGrids(final Product product, final BaseRecord facility, final BaseRecord scene)
             throws IllegalBinaryFormatException, IOException {
+        try {
+            final int gridWidth = 11;
+            final int gridHeight = 11;
 
-        final int gridWidth = 11;
-        final int gridHeight = 11;
+            final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+            final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
 
-        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
-        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+            // add incidence angle tie point grid
+            if(facility != null) {
 
-        // add incidence angle tie point grid
-        if(facility != null) {
+                final double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
+                final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
+                final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
-            final double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
-            final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
-            final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
+                final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
+                final float[] fineAngles = new float[gridWidth*gridHeight];
 
-            final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
-            final float[] fineAngles = new float[gridWidth*gridHeight];
+                ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
-            ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
+                final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
+                        subSamplingX, subSamplingY, fineAngles);
+                incidentAngleGrid.setUnit(Unit.DEGREES);
 
-            final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
-                    subSamplingX, subSamplingY, fineAngles);
-            incidentAngleGrid.setUnit(Unit.DEGREES);
+                product.addTiePointGrid(incidentAngleGrid);
+            }
+            // add slant range time tie point grid
+            if(scene != null) {
 
-            product.addTiePointGrid(incidentAngleGrid);
-        }
-        // add slant range time tie point grid
-        if(scene != null) {
+                final double time1 = scene.getAttributeDouble("Zero-doppler range time of first range pixel")*1000000; // ms to ns
+                final double time2 = scene.getAttributeDouble("Zero-doppler range time of centre range pixel")*1000000; // ms to ns
+                final double time3 = scene.getAttributeDouble("Zero-doppler range time of last range pixel")*1000000; // ms to ns
 
-            final double time1 = scene.getAttributeDouble("Zero-doppler range time of first range pixel")*1000000; // ms to ns
-            final double time2 = scene.getAttributeDouble("Zero-doppler range time of centre range pixel")*1000000; // ms to ns
-            final double time3 = scene.getAttributeDouble("Zero-doppler range time of last range pixel")*1000000; // ms to ns
+                final float[] times = new float[]{(float)time1, (float)time2, (float)time3};
+                final float[] fineTimes = new float[gridWidth*gridHeight];
 
-            final float[] times = new float[]{(float)time1, (float)time2, (float)time3};
-            final float[] fineTimes = new float[gridWidth*gridHeight];
+                ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
 
-            ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
+                final TiePointGrid slantRangeTimeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
+                        subSamplingX, subSamplingY, fineTimes);
+                slantRangeTimeGrid.setUnit(Unit.NANOSECONDS);
 
-            final TiePointGrid slantRangeTimeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
-                    subSamplingX, subSamplingY, fineTimes);
-            slantRangeTimeGrid.setUnit(Unit.NANOSECONDS);
-            
-            product.addTiePointGrid(slantRangeTimeGrid);
+                product.addTiePointGrid(slantRangeTimeGrid);
+            }
+        } catch(Exception e) {
+
         }
     }
 

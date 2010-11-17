@@ -64,14 +64,16 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
 
-        _leaderFile = new RadarsatLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LEA")));
-        _trailerFile = new RadarsatTrailerFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "TRA")));
+        _leaderFile = new RadarsatLeaderFile(
+                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
+        _trailerFile = new RadarsatTrailerFile(
+                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
 
         BaseRecord histogramRec = _leaderFile.getHistogramRecord();
         if(histogramRec == null)
             histogramRec = _trailerFile.getHistogramRecord();
 
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
         _imageFiles = new RadarsatImageFile[imageFileNames.length];
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i] = new RadarsatImageFile(createInputStream(new File(_baseDir, imageFileNames[i])), histogramRec);

@@ -62,9 +62,10 @@ class JERSProductDirectory extends CEOSProductDirectory {
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new JERSLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LEA")));
+        _leaderFile = new JERSLeaderFile(
+                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
 
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
         _imageFiles = new JERSImageFile[imageFileNames.length];
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i] = new JERSImageFile(createInputStream(new File(_baseDir, imageFileNames[i])));

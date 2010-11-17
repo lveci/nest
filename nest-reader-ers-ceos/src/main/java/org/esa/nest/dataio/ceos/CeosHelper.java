@@ -30,17 +30,15 @@ import java.util.Calendar;
 
 public class CeosHelper {
 
-    private static final String VOLUME_DESC_FILE_PREFIX = "VDF_";
-    private static final String VOLUME_FILE_PREFIX = "VOL-";
-    private static final String LEADER_FILE_PREFIX = "LEA_";
-    private static final String IMAGE_FILE_PREFIX = "DAT_";
-    private static final String TRAILER_FILE_PREFIX = "NUL_";
-
-    public static File getVolumeFile(final File baseDir) throws IOException {
+    public static File getVolumeFile(final File baseDir, final CEOSConstants constants) throws IOException {
         final File[] files = baseDir.listFiles(new FilenameFilter() {
-            public boolean accept(final File dir, final String name) {
-                return name.toUpperCase().startsWith(VOLUME_DESC_FILE_PREFIX) ||
-                        name.toUpperCase().startsWith(VOLUME_FILE_PREFIX);
+            public boolean accept(final File dir, final String fileName) {
+                final String name = fileName.toUpperCase();
+                for(String prefix : constants.getVolumeFilePrefix()) {
+                    if(name.startsWith(prefix))
+                        return true;
+                }
+                return false;
             }
         });
         if (files == null || files.length < 1) {
@@ -66,21 +64,16 @@ public class CeosHelper {
         return filePointers;
     }
 
-    public static File getCEOSFile(final File baseDir, final String prefix) throws IOException {
+    public static File getCEOSFile(final File baseDir, final String[] prefixList) throws IOException {
         final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
-            if (file.getName().toUpperCase().startsWith(prefix))
-                return file;
+            final String name = file.getName().toUpperCase();
+            for(String prefix : prefixList) {
+                if (name.startsWith(prefix))
+                    return file;
+            }
         }
-        throw new IOException("unable to find file starting with " + prefix);
-    }
-
-    public static String getImageFileName(final BaseRecord textRecord, final String ccd) {
-        if (ccd != null && ccd.trim().length() > 0) {
-            return IMAGE_FILE_PREFIX + '0' + ccd + '-' + getProductName(textRecord);
-        } else {
-            return IMAGE_FILE_PREFIX + getProductName(textRecord);
-        }
+        throw new IOException("unable to find file starting with " + prefixList[0]);
     }
 
     public static String getProductName(final BaseRecord textRecord) {

@@ -26,7 +26,11 @@ public class AlosPalsarConstants implements CEOSConstants {
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     private final static String PLUGIN_DESCRIPTION = "ALOS PALSAR CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    private final static String VOLUME_FILE_PREFIX = "VOL";
+
+    private final static String[] VOLUME_FILE_PREFIX = { "VOL" };
+    private static final String[] LEADER_FILE_PREFIX = { "LE" };
+    private static final String[] IMAGE_FILE_PREFIX = { "IM" };
+    private static final String[] TRAILER_FILE_PREFIX = { "TR" };
 
     final static String MISSION = "alos";
 
@@ -65,8 +69,20 @@ public class AlosPalsarConstants implements CEOSConstants {
 
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 
-    public String getVolumeFilePrefix() {
+    public String[] getVolumeFilePrefix() {
         return VOLUME_FILE_PREFIX;
+    }
+
+    public String[] getLeaderFilePrefix() {
+        return LEADER_FILE_PREFIX;
+    }
+
+    public String[] getImageFilePrefix() {
+        return IMAGE_FILE_PREFIX;
+    }
+
+    public String[] getTrailerFilePrefix() {
+        return TRAILER_FILE_PREFIX;
     }
 
     public int getMinimumNumFiles() {

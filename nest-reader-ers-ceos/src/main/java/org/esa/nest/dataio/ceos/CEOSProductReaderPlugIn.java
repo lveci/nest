@@ -47,10 +47,6 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-        if (!filename.startsWith(constants.getVolumeFilePrefix())) {
-            return DecodeQualification.UNABLE; // not the volume file
-        }
 
         final File parentDir = file.getParentFile();
         if (file.isFile() && parentDir.isDirectory()) {
@@ -60,7 +56,13 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     protected DecodeQualification checkProductQualification(File file) {
-        return DecodeQualification.SUITABLE;
+        final String name = file.getName().toUpperCase();
+        for(String prefix : constants.getVolumeFilePrefix()) {
+            if(name.startsWith(prefix)) {
+               return DecodeQualification.SUITABLE;
+            }
+        }
+        return DecodeQualification.UNABLE;
     }
 
     /**
@@ -143,8 +145,14 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
          */
         public boolean accept(final File file) {
             if (super.accept(file)) {
-                if (file.isDirectory() || file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
+                if (file.isDirectory())
                     return true;
+
+                final String name = file.getName().toUpperCase();
+                for(String prefix : constants.getVolumeFilePrefix()) {
+                    if(name.startsWith(prefix)) {
+                        return true;
+                    }
                 }
             }
             return false;

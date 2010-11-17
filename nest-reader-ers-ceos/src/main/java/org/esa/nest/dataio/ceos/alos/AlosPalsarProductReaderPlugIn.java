@@ -42,36 +42,14 @@ public class AlosPalsarProductReaderPlugIn extends CEOSProductReaderPlugIn {
         return new AlosPalsarProductReader(this);
     }
 
-    /**
-     * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
-     * is capable of decoding the input's content.
-     *
-     * @param input any input object
-     *
-     * @return true if this product reader can decode the given input, otherwise false.
-     */
-    @Override
-    public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = ReaderUtils.getFileFromInput(input);
-        if (file == null) {
-            return DecodeQualification.UNABLE;
-        }
-        if (!file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
-            return DecodeQualification.UNABLE; // not the volume file
-        }
-
-        final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
-            return checkProductQualification(file);
-        }
-        return DecodeQualification.UNABLE;
-    }
-
     @Override
     protected DecodeQualification checkProductQualification(File file) {
-        if(file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
-            final AlosPalsarProductReader reader = new AlosPalsarProductReader(this);
-            return reader.checkProductQualification(file);
+        final String name = file.getName().toUpperCase();
+        for(String prefix : constants.getVolumeFilePrefix()) {
+            if(name.startsWith(prefix)) {
+                final AlosPalsarProductReader reader = new AlosPalsarProductReader(this);
+                return reader.checkProductQualification(file);
+            }
         }
         return DecodeQualification.UNABLE;
     }

@@ -24,9 +24,12 @@ public interface CEOSConstants {
 
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
-    public String getVolumeFilePrefix();
-    public int getMinimumNumFiles();
+    public String[] getVolumeFilePrefix();
+    public String[] getLeaderFilePrefix();
+    public String[] getImageFilePrefix();
+    public String[] getTrailerFilePrefix();
 
+    public int getMinimumNumFiles();
     public String getPluginDescription();
     public String[] getFormatNames();
     public String[] getForamtFileExtensions();

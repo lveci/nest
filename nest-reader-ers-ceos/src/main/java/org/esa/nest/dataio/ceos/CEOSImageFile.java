@@ -32,7 +32,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.29 $ $Date: 2010-08-17 16:53:42 $
+ * @version $Revision: 1.30 $ $Date: 2010-11-17 20:45:22 $
  */
 public abstract class CEOSImageFile {
 
@@ -143,12 +143,15 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public static String[] getImageFileNames(File baseDir, String prefix) {
+    public static String[] getImageFileNames(File baseDir, String[] prefixList) {
         final ArrayList<String> list = new ArrayList<String>(2);
         final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
-            if (file.getName().toUpperCase().startsWith(prefix)) {
-                list.add(file.getName());
+            final String name = file.getName().toUpperCase();
+            for(String prefix : prefixList) {
+                if (name.startsWith(prefix)) {
+                    list.add(file.getName());
+                }
             }
         }
         return list.toArray(new String[list.size()]);

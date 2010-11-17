@@ -41,7 +41,7 @@ public class CEOSVolumeDirectoryFile {
 
     public CEOSVolumeDirectoryFile(final File baseDir, CEOSConstants constants)
             throws IOException, IllegalBinaryFormatException {
-        final File volumeFile = CeosHelper.getVolumeFile(baseDir);
+        final File volumeFile = CeosHelper.getVolumeFile(baseDir, constants);
         final BinaryFileReader binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
         _volumeDescriptorRecord = new BaseRecord(binaryReader, -1, constants.getMission(), volume_desc_recordDefinitionFile);
         _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord, constants.getMission());

@@ -64,10 +64,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new AlosPalsarLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
-        _trailerFile = new AlosPalsarTrailerFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "TRL")));
+        _leaderFile = new AlosPalsarLeaderFile(
+                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
+        _trailerFile = new AlosPalsarTrailerFile(
+                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
 
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
         final int numImageFiles = imageFileNames.length;
         _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
@@ -88,7 +90,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     public boolean isALOS() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return true;
+        final String volID = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Volume set ID");
+        return volID.toUpperCase().contains("ALOS");
     }
 
     private static String getMission() {

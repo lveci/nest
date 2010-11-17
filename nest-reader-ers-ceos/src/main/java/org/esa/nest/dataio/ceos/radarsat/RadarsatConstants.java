@@ -26,7 +26,11 @@ public class RadarsatConstants implements CEOSConstants {
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     private static final String PLUGIN_DESCRIPTION = "Radarsat 1 CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    private static final String VOLUME_FILE_PREFIX = "VDF";
+
+    private final static String[] VOLUME_FILE_PREFIX = { "VDF", "VOL" };
+    private static final String[] LEADER_FILE_PREFIX = { "LEA", "SARL" };
+    private static final String[] IMAGE_FILE_PREFIX = { "DAT", "IM" };
+    private static final String[] TRAILER_FILE_PREFIX = { "TR", "SART" };
 
     private final static String MISSION = "radarsat";
 
@@ -37,8 +41,20 @@ public class RadarsatConstants implements CEOSConstants {
 
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 
-    public String getVolumeFilePrefix() {
+    public String[] getVolumeFilePrefix() {
         return VOLUME_FILE_PREFIX;
+    }
+
+    public String[] getLeaderFilePrefix() {
+        return LEADER_FILE_PREFIX;
+    }
+
+    public String[] getImageFilePrefix() {
+        return IMAGE_FILE_PREFIX;
+    }
+
+    public String[] getTrailerFilePrefix() {
+        return TRAILER_FILE_PREFIX;
     }
 
     public int getMinimumNumFiles() {
