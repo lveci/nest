@@ -158,11 +158,19 @@ class CommandLineTool {
             Node lastNode = graph.getNode(graph.getNodeCount() - 1);
             SortedMap<String, String> sourceFilepathsMap = lineArgs.getSourceFilepathMap();
             String readOperatorAlias = OperatorSpi.getOperatorAlias(ReadOp.class);
+            final Node readerNode = findNode(graph, readOperatorAlias);
             for (Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
                 String sourceId = entry.getKey();
                 String sourceFilepath = entry.getValue();
                 String sourceNodeId = sourceNodeIdMap.get(sourceId);
-                if (graph.getNode(sourceNodeId) == null) {
+                if(readerNode != null) {
+                    final Node n = graph.getNode(sourceId);
+                    if(n != null) {
+                        final DomElement parameters = new DefaultDomElement("parameters");
+                        parameters.createChild("file").setValue(sourceFilepath);
+                        n.setConfiguration(parameters);
+                    }
+                } else if (graph.getNode(sourceNodeId) == null) {
 
                     DomElement parameters = new DefaultDomElement("parameters");
                     parameters.createChild("file").setValue(sourceFilepath);
@@ -173,8 +181,24 @@ class CommandLineTool {
                     graph.addNode(sourceNode);
                 }
             }
+            final SortedMap<String, String> parameterMap = lineArgs.getParameterMap();
+            for (Entry<String, String> entry : parameterMap.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                for(Node node : graph.getNodes()) {
+                    final DomElement parameters = node.getConfiguration();
+                    for(DomElement elem : parameters.getChildren()) {
+                        if(elem.getName().equals(name)) {
+                            elem.setValue(value);
+                        }
+                    }
+                }
+
+            }
+
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
-            if (!lastNode.getOperatorName().equals(writeOperatorAlias)) {
+            final Node WriterNode = findNode(graph, writeOperatorAlias);
+            if (WriterNode == null) {
 
                 DomElement parameters = new DefaultDomElement("parameters");
                 parameters.createChild("file").setValue(lineArgs.getTargetFilepath());
@@ -197,6 +221,14 @@ class CommandLineTool {
                 executeGraph(graph);
             }
         }
+    }
+
+    private static Node findNode(final Graph graph, final String alias) {
+        for(Node n : graph.getNodes()) {
+            if(n.getOperatorName().equals(alias))
+                return n;
+        }
+        return null;
     }
 
     private static ProductSetData[] findProductSetStacks(final Graph graph, final String readerName) throws GraphException {
