@@ -316,22 +316,26 @@ public class Warp2Op extends Operator {
                 continue;
 
             final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
-            if (slaveGCPGroup.getNodeCount() < 3) {
-                throw new OperatorException(slaveGCPGroup.getNodeCount() +
-                        " GCPs survived. Try using more GCPs or a larger window");
-            }
-
             final WarpData warpData = new WarpData(slaveGCPGroup);
             warpDataMap.put(srcBand, warpData);
 
+            if (slaveGCPGroup.getNodeCount() < 3) {
+                warpData.notEnoughGCPs = true;
+                continue;
+                //throw new OperatorException(slaveGCPGroup.getNodeCount() +
+                //        " GCPs survived. Try using more GCPs or a larger window");
+            }
+
             int parseIdex = 0;
             computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
+            if(warpData.notEnoughGCPs) continue;
             outputCoRegistrationInfo(
                     sourceProduct, warpPolynomialOrder, warpData, i != 1, 0.0f, parseIdex, srcBand.getName());
 
             if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
                 final float threshold = (float) warpData.rmsMean;
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
+                if(warpData.notEnoughGCPs) continue;
                 outputCoRegistrationInfo(
                         sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
             }
@@ -339,12 +343,14 @@ public class Warp2Op extends Operator {
             if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
                 final float threshold = (float) warpData.rmsMean;
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
+                if(warpData.notEnoughGCPs) continue;
                 outputCoRegistrationInfo(
                         sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
             }
 
             eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
             computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
+            if(warpData.notEnoughGCPs) continue;
             outputCoRegistrationInfo(
                     sourceProduct, warpPolynomialOrder, warpData, true, rmsThreshold, ++parseIdex, srcBand.getName());
 
@@ -413,10 +419,14 @@ public class Warp2Op extends Operator {
                 final Tile sourceRaster = getSourceTile(srcBand, targetRectangle, pm);
                 getWarpData();
 
+                final WarpData warpData = warpDataMap.get(realSrcBand);
+                if(warpData.notEnoughGCPs)
+                    continue;
+
                 final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
                 // get warped image
-                final RenderedOp warpedImage = createWarpImage(warpDataMap.get(realSrcBand).warp, srcImage);
+                final RenderedOp warpedImage = createWarpImage(warpData.warp, srcImage);
 
                 // copy warped image data to target
                 final float[] dataArray = warpedImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
@@ -444,6 +454,7 @@ public class Warp2Op extends Operator {
             final WarpData warpData, final int warpPolynomialOrder, final ProductNodeGroup<Placemark> masterGCPGroup) {
 
         getNumOfValidGCPs(warpData, warpPolynomialOrder);
+        if(warpData.notEnoughGCPs) return;
 
         getMasterAndSlaveGCPCoordinates(warpData, masterGCPGroup);
 
@@ -465,8 +476,9 @@ public class Warp2Op extends Operator {
         warpData.numValidGCPs = warpData.slaveGCPList.size();
         final int requiredGCPs = (warpPolynomialOrder + 2) * (warpPolynomialOrder + 1) / 2;
         if (warpData.numValidGCPs < requiredGCPs) {
-            throw new OperatorException("Order " + warpPolynomialOrder + " requires " + requiredGCPs +
-                    " GCPs, valid GCPs are " + warpData.numValidGCPs + ", try a larger RMS threshold.");
+            warpData.notEnoughGCPs = true;
+            //throw new OperatorException("Order " + warpPolynomialOrder + " requires " + requiredGCPs +
+            //        " GCPs, valid GCPs are " + warpData.numValidGCPs + ", try a larger RMS threshold.");
         }
     }
 
@@ -818,6 +830,7 @@ public class Warp2Op extends Operator {
         public WarpPolynomial warp = null;
 
         public int numValidGCPs = 0;
+        public boolean notEnoughGCPs = false;
         public float[] rms = null;
         public float[] rowResiduals = null;
         public float[] colResiduals = null;

@@ -314,8 +314,7 @@ public class GCPSelection2Op extends Operator {
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
 
-            final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
-            pm.beginTask("computeSlaveGCPs ", targetProduct.getNumBands()+numberOfMasterGCPs);
+            final Map<Band, Band> bandList = new HashMap<Band, Band>();
             for(Band targetBand : targetProduct.getBands()) {
                 final Band slaveBand = sourceRasterMap.get(targetBand);
                 if (slaveBand == masterBand1 || slaveBand == masterBand2)
@@ -323,11 +322,21 @@ public class GCPSelection2Op extends Operator {
                 final String unit = slaveBand.getUnit();
                 if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))
                     continue;
+                bandList.put(targetBand, slaveBand);
+            }
 
+            final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
+            int bandCnt = 0;
+            pm.beginTask("computeSlaveGCPs ", targetProduct.getNumBands()+numberOfMasterGCPs);
+            for(Band targetBand : bandList.keySet()) {
+                ++bandCnt;
+                final Band slaveBand = bandList.get(targetBand);
+
+                final String bandCountStr = bandCnt +" of "+ bandList.size();
                 if(complexCoregistration) {
-                    computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, pm);
+                    computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, bandCountStr, pm);
                 } else {
-                    computeSlaveGCPs(slaveBand, null, targetBand, pm);
+                    computeSlaveGCPs(slaveBand, null, targetBand, bandCountStr, pm);
                 }
 
                 // copy slave data to target
@@ -353,7 +362,7 @@ public class GCPSelection2Op extends Operator {
      * @param targetBand the output band
      */
     private synchronized void computeSlaveGCPs(final Band slaveBand, final Band slaveBand2, final Band targetBand,
-                                               final ProgressMonitor pm) throws OperatorException {
+                                               final String bandCountStr, final ProgressMonitor pm) throws OperatorException {
 
      final VisatApp visatApp = VisatApp.getApp();
      try {
@@ -432,7 +441,8 @@ public class GCPSelection2Op extends Operator {
             if(visatApp != null) {
                 final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
                 if(pct >= lastPct + 1) {
-                    visatApp.setStatusBarMessage("Cross Correlating "+slaveBand.getName()+"... "+pct+"%");
+                    visatApp.setStatusBarMessage("Cross Correlating "+
+                            bandCountStr+" "+slaveBand.getName()+"... "+pct+"%");
                     lastPct = pct;
                 }
             }
