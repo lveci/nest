@@ -59,43 +59,53 @@ public class CEOSLeaderFile {
 
         _leaderFDR = new BaseRecord(reader, -1, mission, defnFile);
         reader.seek(_leaderFDR.getRecordEndPosition());
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data set summary records"); ++i) {
+        int num = _leaderFDR.getAttributeInt("Number of data set summary records");
+        for(int i=0; i < num; ++i) {
             _sceneHeaderRecord = new BaseSceneHeaderRecord(reader, -1, mission, scene_recordDefinitionFile);
             reader.seek(_sceneHeaderRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of map projection data records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of map projection data records");
+        for(int i=0; i < num; ++i) {
             _mapProjRecord = new BaseRecord(reader, -1, mission, mapproj_recordDefinitionFile);
             reader.seek(_mapProjRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data quality summary records"); ++i) {
-            _dataQualityRecord = new BaseRecord(reader, -1, mission, dataQuality_recordDefinitionFile);
-            reader.seek(_dataQualityRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data histograms records"); ++i) {
-            _histogramRecord = new BaseRecord(reader, -1, mission, histogram_recordDefinitionFile);
-            reader.seek(_histogramRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of det. processing records"); ++i) {
-            _detailedProcessingRecord = new BaseRecord(reader, -1, mission, detailedProcessing_recordDefinitionFile);
-            reader.seek(_detailedProcessingRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of platform pos. data records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of platform pos. data records");
+        for(int i=0; i < num; ++i) {
             _platformPositionRecord = new BaseRecord(reader, -1, mission, platformPosition_recordDefinitionFile);
             reader.seek(_platformPositionRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of attitude data records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of attitude data records");
+        for(int i=0; i < num; ++i) {
             _attitudeRecord = new BaseRecord(reader, -1, mission, attitude_recordDefinitionFile);
             reader.seek(_attitudeRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of radiometric data records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of radiometric data records");
+        for(int i=0; i < num; ++i) {
             _radiometricRecord = new BaseRecord(reader, -1, mission, radiometric_recordDefinitionFile);
             reader.seek(_radiometricRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of rad. compensation records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of rad. compensation records");
+        for(int i=0; i < num; ++i) {
             _radiometricCompRecord = new BaseRecord(reader, -1, mission, radiometric_comp_recordDefinitionFile);
             reader.seek(_radiometricCompRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of facility data records"); ++i) {
+        num = _leaderFDR.getAttributeInt("Number of data quality summary records");
+        for(int i=0; i < num; ++i) {
+            _dataQualityRecord = new BaseRecord(reader, -1, mission, dataQuality_recordDefinitionFile);
+            reader.seek(_dataQualityRecord.getRecordEndPosition());
+        }
+        num = _leaderFDR.getAttributeInt("Number of data histograms records");
+        for(int i=0; i < num; ++i) {
+            _histogramRecord = new BaseRecord(reader, -1, mission, histogram_recordDefinitionFile);
+            reader.seek(_histogramRecord.getRecordEndPosition());
+        }
+        num = _leaderFDR.getAttributeInt("Number of det. processing records");
+        for(int i=0; i < num; ++i) {
+            _detailedProcessingRecord = new BaseRecord(reader, -1, mission, detailedProcessing_recordDefinitionFile);
+            reader.seek(_detailedProcessingRecord.getRecordEndPosition());
+        }
+        num = _leaderFDR.getAttributeInt("Number of facility data records");
+        for(int i=0; i < num; ++i) {
             _facilityRecord = new BaseRecord(reader, -1, mission, facility_recordDefinitionFile);
             reader.seek(_facilityRecord.getRecordEndPosition());
         }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ceos version="1.0" mission="jers">
+<ceos version="1.0" mission="radarsat">
 	<rec name="skipBytes" type="0" num="8"/> <!-- skip header -->
 	<!--rec name="Record Number" type="4" num="1"/>
 	<rec name="First Record Subtype" type="3" num="1"/>
@@ -57,8 +57,8 @@
 	<rec name="Calibration record length" type="2" num="6"/>
 	<rec name="Number of GCP records" type="2" num="6"/>
 	<rec name="GCP record length" type="2" num="6"/>
-	<rec name="skipBytes" type="0" num="6"/>
+	<rec name="skipBytes" type="0" num="60"/>
 	<rec name="Number of facility data records" type="2" num="6"/>
 	<rec name="Facility data record maximum length" type="2" num="6"/>
-	<rec name="skipBytes" type="0" num="2"/>
+	<rec name="skipBytes" type="0" num="288"/>
 </ceos>

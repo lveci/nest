@@ -154,8 +154,9 @@ public final class BinaryFileReader {
         } catch (NumberFormatException e) {
 
             final String newStr = createIntegerString(integerStr,
-                new char[]{'.'}, ' ').trim();
+                new char[]{'.', '-'}, ' ').trim();
             try {
+                if(newStr.isEmpty() || newStr.equals(".") || newStr.equals("-")) return 0;
                 number = Long .parseLong(newStr);
             } catch (NumberFormatException e2) {
                 final String message = String.format(EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
@@ -168,8 +169,9 @@ public final class BinaryFileReader {
 
     public double readFn(final int n) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
-        final String doubleString = readAn(n).trim();
+        String doubleString = readAn(n).trim();
         if(doubleString.isEmpty()) return 0;
+        doubleString = doubleString.replaceAll("D","E");
         try {
             return Double.parseDouble(doubleString);
         } catch (NumberFormatException e) {
