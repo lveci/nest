@@ -31,7 +31,7 @@ public class TestGCPSelectionOp extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new GCPSelectionOp.Spi();
+        spi = new GCPSelection2Op.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -47,7 +47,7 @@ public class TestGCPSelectionOp extends TestCase {
         final ProductNodeGroup<Placemark> masterGcpGroup = product.getGcpGroup(product.getBandAt(0));
         assertTrue(masterGcpGroup.getNodeCount() == 1);
 
-        final GCPSelectionOp op = (GCPSelectionOp)spi.createOperator();
+        final GCPSelection2Op op = (GCPSelection2Op)spi.createOperator();
         assertNotNull(op);
 
         op.setSourceProduct(product);
