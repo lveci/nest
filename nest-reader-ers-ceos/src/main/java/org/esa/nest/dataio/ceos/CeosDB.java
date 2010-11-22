@@ -202,7 +202,7 @@ public final class CeosDB {
             }
 
         } catch(Exception e) {
-            System.out.println(" " +e.toString() + " for "+ name);
+            System.out.println(" " +e.toString() +":"+e.getCause().toString() + " for "+ name);
 
             //throw new IllegalBinaryFormatException(e.toString(), reader.getCurrentPos());
         }
