@@ -36,6 +36,7 @@ import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.VersionChecker;
 
@@ -406,7 +407,9 @@ class CommandLineTool {
     }
 
     void executeGraph(Graph graph) throws GraphException {
+        final StopWatch stopWatch = new StopWatch();
         commandLineContext.executeGraph(graph);
+        stopWatch.stopAndTrace("Processing completed in ");
     }
 
     Map<String, String> readParameterFile(String propertiesFilepath) throws IOException {
