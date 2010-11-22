@@ -405,9 +405,9 @@ public abstract class AbstractProductReader implements ProductReader {
                                               float[] tiePoints) {
         final int gridDiscontinutity = getGridDiscontinutity(gridName);
         if (gridDiscontinutity != 0) {
-            Debug.trace("creating tie-point grid '" + gridName +
-                    "' with discontinuity at " + gridDiscontinutity +
-                    " degree");
+            //Debug.trace("creating tie-point grid '" + gridName +
+            //        "' with discontinuity at " + gridDiscontinutity +
+            //        " degree");
         }
         return new TiePointGrid(gridName,
                 gridWidth,

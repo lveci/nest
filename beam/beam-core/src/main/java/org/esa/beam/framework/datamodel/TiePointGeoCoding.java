@@ -519,10 +519,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             _normalizedLonGrid = _lonGrid;
         }
 
-        Debug.trace("TiePointGeoCoding.westNormalized = " + westNormalized);
-        Debug.trace("TiePointGeoCoding.eastNormalized = " + eastNormalized);
-        Debug.trace("TiePointGeoCoding.normalized = " + _normalized);
-        Debug.trace("TiePointGeoCoding.lonDeltaMax = " + lonDeltaMax);
+        //Debug.trace("TiePointGeoCoding.westNormalized = " + westNormalized);
+        //Debug.trace("TiePointGeoCoding.eastNormalized = " + eastNormalized);
+        //Debug.trace("TiePointGeoCoding.normalized = " + _normalized);
+        //Debug.trace("TiePointGeoCoding.lonDeltaMax = " + lonDeltaMax);
     }
 
     private void initLatLonMinMax() {
@@ -548,11 +548,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             _overlapEnd -= 360;
         }
 
-        Debug.trace("TiePointGeoCoding.normalizedLonMin = " + _normalizedLonMin);
-        Debug.trace("TiePointGeoCoding.normalizedLonMax = " + _normalizedLonMax);
-        Debug.trace("TiePointGeoCoding.latMin = " + _latMin);
-        Debug.trace("TiePointGeoCoding.latMax = " + _latMax);
-        Debug.trace("TiePointGeoCoding.overlapRange = " + _overlapStart + " - " + _overlapEnd);
+        //Debug.trace("TiePointGeoCoding.normalizedLonMin = " + _normalizedLonMin);
+        //Debug.trace("TiePointGeoCoding.normalizedLonMax = " + _normalizedLonMax);
+        //Debug.trace("TiePointGeoCoding.latMin = " + _latMin);
+        //Debug.trace("TiePointGeoCoding.latMax = " + _latMax);
+        //Debug.trace("TiePointGeoCoding.overlapRange = " + _overlapStart + " - " + _overlapEnd);
 
     }
 
@@ -591,9 +591,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         int numTilesJ = tileDim.height;
         numTiles = numTilesI * numTilesJ;
 
-        Debug.trace("TiePointGeoCoding.numTiles =  " + numTiles);
-        Debug.trace("TiePointGeoCoding.numTilesI = " + numTilesI);
-        Debug.trace("TiePointGeoCoding.numTilesJ = " + numTilesJ);
+        //Debug.trace("TiePointGeoCoding.numTiles =  " + numTiles);
+       // Debug.trace("TiePointGeoCoding.numTilesI = " + numTilesI);
+        //Debug.trace("TiePointGeoCoding.numTilesJ = " + numTilesJ);
 
         // Compute actual approximations for all tiles
         //
@@ -675,10 +675,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final int j1 = subsetRect.y;
         final int j2 = j1 + sh - 1;
 
-        Debug.trace("Selecting warp points for X/Y approximations");
-        Debug.trace("  subset rectangle (in tie point coordinates): " + subsetRect);
-        Debug.trace("  index i: " + i1 + " to " + i2);
-        Debug.trace("  index j: " + j1 + " to " + j2);
+        //Debug.trace("Selecting warp points for X/Y approximations");
+        //Debug.trace("  subset rectangle (in tie point coordinates): " + subsetRect);
+        //Debug.trace("  index i: " + i1 + " to " + i2);
+        //Debug.trace("  index j: " + j1 + " to " + j2);
 
         // Determine stepI and stepJ so that maximum number of warp points is not exceeded,
         // numU * numV shall be less than _MAX_NUM_POINTS_PER_TILE.
@@ -745,9 +745,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             }
         }
 
-        Debug.assertTrue(k == m);
-        Debug.trace("TiePointGeoCoding: numU=" + numU + ", stepI=" + stepI);
-        Debug.trace("TiePointGeoCoding: numV=" + numV + ", stepJ=" + stepJ);
+        //Debug.assertTrue(k == m);
+        //Debug.trace("TiePointGeoCoding: numU=" + numU + ", stepI=" + stepI);
+        //Debug.trace("TiePointGeoCoding: numV=" + numV + ", stepJ=" + stepJ);
 
         return data;
     }
@@ -787,14 +787,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final double maxErrorX = fX.getMaxError();
         final double maxErrorY = fY.getMaxError();
 
-        Debug.trace(
-                "TiePointGeoCoding: RMSE X      = " + rmseX + ", " + (rmseX < _ABS_ERROR_LIMIT ? "OK" : "too large"));
-        Debug.trace(
-                "TiePointGeoCoding: RMSE Y      = " + rmseY + ", " + (rmseY < _ABS_ERROR_LIMIT ? "OK" : "too large"));
-        Debug.trace(
-                "TiePointGeoCoding: Max.error X = " + maxErrorX + ", " + (maxErrorX < _ABS_ERROR_LIMIT ? "OK" : "too large"));
-        Debug.trace(
-                "TiePointGeoCoding: Max.error Y = " + maxErrorY + ", " + (maxErrorY < _ABS_ERROR_LIMIT ? "OK" : "too large"));
+        //Debug.trace(
+        //        "TiePointGeoCoding: RMSE X      = " + rmseX + ", " + (rmseX < _ABS_ERROR_LIMIT ? "OK" : "too large"));
+        //Debug.trace(
+        //        "TiePointGeoCoding: RMSE Y      = " + rmseY + ", " + (rmseY < _ABS_ERROR_LIMIT ? "OK" : "too large"));
+        //Debug.trace(
+        //        "TiePointGeoCoding: Max.error X = " + maxErrorX + ", " + (maxErrorX < _ABS_ERROR_LIMIT ? "OK" : "too large"));
+        //Debug.trace(
+        //        "TiePointGeoCoding: Max.error Y = " + maxErrorY + ", " + (maxErrorY < _ABS_ERROR_LIMIT ? "OK" : "too large"));
 
         return new Approximation(subsetRect, fX, fY, centerLat, centerLon, maxSquareDistance * 1.1f);
     }

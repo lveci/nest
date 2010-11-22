@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2010-11-08 18:54:23 $
+ * @version $Revision: 1.9 $ $Date: 2010-11-22 17:08:04 $
  */
 public abstract class ProductFile {
 
@@ -1210,13 +1210,13 @@ public abstract class ProductFile {
 
     private void traceDddbFieldSizeParameters() {
         Iterator it = parameters.keySet().iterator();
-        Debug.trace("ProductFile: DDDB field size parameters = {");
+        //Debug.trace("ProductFile: DDDB field size parameters = {");
         while (it.hasNext()) {
             Object name = it.next().toString();
             Object value = parameters.get(name);
             //Debug.trace("  " + name + " = " + value);
         }
-        Debug.trace("}");
+        //Debug.trace("}");
     }
 
     /**
