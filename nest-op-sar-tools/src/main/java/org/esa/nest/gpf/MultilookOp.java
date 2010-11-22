@@ -425,19 +425,16 @@ public final class MultilookOp extends Operator {
         if(sourceRaster2 != null)
             srcData2 = sourceRaster2.getDataBuffer();
 
-        final int tileOffset = targetTile.getScanlineOffset();
-        final int tileStride = targetTile.getScanlineStride();
-        final int tileMinX = targetTile.getMinX();
-        final int tileMinY = targetTile.getMinY();
+        final TileIndex trgIndex = new TileIndex(targetTile);
 
         double meanValue;
         final int maxy = ty0 + th;
         final int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
-            final int stride = ((ty - tileMinY) * tileStride) + tileOffset;
+            trgIndex.calculateStride(ty);
             for (int tx = tx0; tx < maxx; tx++) {
                 meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit);
-                trgData.setElemDoubleAt((tx - tileMinX) + stride, meanValue);
+                trgData.setElemDoubleAt(trgIndex.getIndex(tx), meanValue);
             }
         }
     }

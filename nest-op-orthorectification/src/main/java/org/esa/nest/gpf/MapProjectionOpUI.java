@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * User interface for GCPSelectionOp
+ * User interface for MapProjection
  */
 public class MapProjectionOpUI extends BaseOperatorUI {
 

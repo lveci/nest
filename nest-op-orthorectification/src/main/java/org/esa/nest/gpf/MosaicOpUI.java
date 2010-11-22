@@ -34,7 +34,7 @@ import java.awt.event.KeyListener;
 import java.util.Map;
 
 /**
- * User interface for GCPSelectionOp
+ * User interface for MosaicOp
  */
 public class MosaicOpUI extends BaseOperatorUI {
 

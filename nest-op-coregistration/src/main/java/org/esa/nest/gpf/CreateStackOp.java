@@ -576,16 +576,21 @@ public class CreateStackOp extends Operator {
                 final Tile srcTile = getSourceTile(sourceRaster, srcRectangle, pm);
                 final ProductData srcData = srcTile.getDataBuffer();
 
+                final TileIndex trgIndex = new TileIndex(targetTile);
+                final TileIndex srcIndex = new TileIndex(srcTile);
+
                 for (int ty = ty0; ty < maxY; ++ty) {
+                    final int sy = ty + offset[1];
+                    trgIndex.calculateStride(ty);
+                    srcIndex.calculateStride(sy);
                     for (int tx = tx0; tx < maxX; ++tx) {
-                        final int targIndex = targetTile.getDataBufferIndex(tx, ty);
+                        final int targIndex = trgIndex.getIndex(tx);
                         final int sx = tx + offset[0];
-                        final int sy = ty + offset[1];
+
                         if (sx < 0 || sx >= srcImageWidth || sy < 0 || sy >= srcImageHeight) {
                             trgData.setElemDoubleAt(targIndex, noDataValue);
                         } else {
-                            final int srcIndex = srcTile.getDataBufferIndex(sx, sy);
-                            trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex));
+                            trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
                         }
                     }
                     pm.worked(1);

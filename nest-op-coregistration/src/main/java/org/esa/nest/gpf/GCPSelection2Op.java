@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
@@ -148,6 +149,8 @@ public class GCPSelection2Op extends Operator {
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
     private final Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
     private final Map<Band, Boolean> gcpsComputedMap = new HashMap<Band, Boolean>(10);
+    private Band primarySlaveBand = null;    // the slave band to process
+    private boolean gcpsCalculated = false;
 
     /**
      * Default constructor. The graph processing framework
@@ -277,9 +280,10 @@ public class GCPSelection2Op extends Operator {
                 final String unit = srcBand.getUnit();
                 if(oneSlaveProcessed==false && unit != null && !unit.contains(Unit.IMAGINARY)) {
                     oneSlaveProcessed = true;
+                    primarySlaveBand = srcBand;
                     final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
                     AbstractMetadata.addAbstractedAttribute(absRoot, "processed_slave", ProductData.TYPE_ASCII, "", "");
-                    absRoot.setAttributeString("processed_slave", srcBand.getName());
+                    absRoot.setAttributeString("processed_slave", primarySlaveBand.getName());
                 }
             }
 
@@ -317,6 +321,10 @@ public class GCPSelection2Op extends Operator {
             final Map<Band, Band> bandList = new HashMap<Band, Band>();
             for(Band targetBand : targetProduct.getBands()) {
                 final Band slaveBand = sourceRasterMap.get(targetBand);
+                if(gcpsCalculated && slaveBand == primarySlaveBand) {
+                    bandList.put(targetBand, slaveBand);
+                    break;
+                }
                 if (slaveBand == masterBand1 || slaveBand == masterBand2)
                     continue;
                 final String unit = slaveBand.getUnit();
@@ -346,12 +354,17 @@ public class GCPSelection2Op extends Operator {
                 }
                 pm.worked(1);
             }
+            setGCPsCalculated();
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
         }
+    }
+
+    private synchronized  void setGCPsCalculated() {
+        gcpsCalculated = true;
     }
 
     /**
@@ -372,10 +385,11 @@ public class GCPSelection2Op extends Operator {
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
 
         final ArrayList<Thread> threadList = new ArrayList<Thread>();
-        final int numCPU = Runtime.getRuntime().availableProcessors();
+        final int numCPU = Runtime.getRuntime().availableProcessors()*2;
 
         int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
+        //final StopWatch stopWatch = new StopWatch();
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
             checkForCancellation(pm);
             final Placemark mPin = masterGcpGroup.get(i);
@@ -456,7 +470,8 @@ public class GCPSelection2Op extends Operator {
         }
 
         gcpsComputedMap.put(slaveBand, true);
-
+        //stopWatch.stopAndTrace("XCorr "+bandCountStr);
+         
         //System.gc();
      } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
@@ -552,10 +567,13 @@ public class GCPSelection2Op extends Operator {
                 masterData2 = masterImagetteRaster2.getDataBuffer();
             }
 
+            final TileIndex mstIndex = new TileIndex(masterImagetteRaster1);
+
             int k = 0;
             for (int j = 0; j < cWindowHeight; j++) {
+                mstIndex.calculateStride(yul + j);
                 for (int i = 0; i < cWindowWidth; i++) {
-                    final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yul + j);
+                    final int index = mstIndex.getIndex(xul + i);
                     if (complexCoregistration) {
                         final double v1 = masterData1.getElemDoubleAt(index);
                         final double v2 = masterData2.getElemDoubleAt(index);
@@ -580,10 +598,10 @@ public class GCPSelection2Op extends Operator {
                                         throws OperatorException {
         
         final double[] sI = new double[cWindowWidth*cWindowHeight];
-        final float x0 = gcpPixelPos.x;
-        final float y0 = gcpPixelPos.y;
-        final int xul = (int)x0 - cHalfWindowWidth;
-        final int yul = (int)y0 - cHalfWindowHeight;
+        final float xx = gcpPixelPos.x;
+        final float yy = gcpPixelPos.y;
+        final int xul = (int)xx - cHalfWindowWidth;
+        final int yul = (int)yy - cHalfWindowHeight;
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 3, cWindowHeight + 3);
         int k = 0;
 
@@ -598,17 +616,33 @@ public class GCPSelection2Op extends Operator {
                 slaveData2 = slaveImagetteRaster2.getDataBuffer();
             }
 
-            for (int j = 0; j < cWindowHeight; j++) {
-                final float y = y0 - cHalfWindowHeight + j + 1;
-                for (int i = 0; i < cWindowWidth; i++) {
-                    final float x = x0 - cHalfWindowWidth + i + 1;
+            final int tileOffset = slaveImagetteRaster1.getScanlineOffset();
+            final int tileStride = slaveImagetteRaster1.getScanlineStride();
+            final int tileMinX = slaveImagetteRaster1.getMinX();
+            final int tileMinY = slaveImagetteRaster1.getMinY();
 
+            for (int j = 0; j < cWindowHeight; j++) {
+                final float y = yy - cHalfWindowHeight + j + 1;
+                final int y0 = (int)y;
+                final int y1 = y0 + 1;
+                final int stride0 = ((y0 - tileMinY) * tileStride) + tileOffset;
+                final int stride1 = ((y1 - tileMinY) * tileStride) + tileOffset;
+                final double wy = (double)(y - y0);
+                for (int i = 0; i < cWindowWidth; i++) {
+                    final float x = xx - cHalfWindowWidth + i + 1;
+                    final int x0 = (int)x;
+                    final int x1 = x0 + 1;
+                    final double wx = (double)(x - x0);
+                    
                     if (complexCoregistration) {
-                        final double v1 = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
-                        final double v2 = getInterpolatedSampleValue(slaveImagetteRaster2, slaveData2, x, y);
+                        final double v1 = getInterpolatedSampleValue(slaveData1, x0, x1, wx, wy,
+                                                            stride0, stride1, tileMinX);
+                        final double v2 = getInterpolatedSampleValue(slaveData2, x0, x1, wx, wy,
+                                                            stride0, stride1, tileMinX);
                         sI[k++] = v1*v1 + v2*v2;
                     } else {
-                        sI[k++] = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
+                        sI[k++] = getInterpolatedSampleValue(slaveData1, x0, x1, wx, wy,
+                                                            stride0, stride1, tileMinX);
                     }
                 }
             }
@@ -623,20 +657,15 @@ public class GCPSelection2Op extends Operator {
         }
     }
 
-    private static double getInterpolatedSampleValue(final Tile slaveRaster, final ProductData slaveData,
-                                                     final float x, final float y) {
-        final int x0 = (int)x;
-        final int x1 = x0 + 1;
-        final int y0 = (int)y;
-        final int y1 = y0 + 1;
+    private static double getInterpolatedSampleValue(final ProductData slaveData,
+                                                     final int x0, final int x1, final double wx, final double wy,
+                                                     final int stride0, final int stride1, final int tileMinX) {
 
         try {
-            final double v00 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y0));
-            final double v01 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y1));
-            final double v10 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y0));
-            final double v11 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y1));
-            final double wy = (double)(y - y0);
-            final double wx = (double)(x - x0);
+            final double v00 = slaveData.getElemDoubleAt((x0 - tileMinX) + stride0);//x0, y0));
+            final double v01 = slaveData.getElemDoubleAt((x0 - tileMinX) + stride1);//x0, y1));
+            final double v10 = slaveData.getElemDoubleAt((x1 - tileMinX) + stride0);//x1, y0));
+            final double v11 = slaveData.getElemDoubleAt((x1 - tileMinX) + stride1);//x1, y1));
 
             return MathUtils.interpolate2D(wy, wx, v00, v01, v10, v11);
         } catch (Exception e){
