@@ -189,31 +189,15 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
+                sceneRec.getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "JERS1");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, "Stripmap");
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
-                sceneRec.getAttributeString("Processing system identifier").trim() );
-        // cycle n/a?
 
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-        //       Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
-        
-        ProductData.UTC startTime = getUTCScanStartTime(sceneRec, null);
-        ProductData.UTC endTime = getUTCScanStopTime(sceneRec, null);
-        // fix times if not found
-        if(startTime.equalElems(new ProductData.UTC(0))) {
-            startTime = absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0));
-            endTime = startTime;
-            product.setStartTime(startTime);
-            product.setEndTime(endTime);
-        }
-
+        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, null);
+        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, null);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
@@ -247,7 +231,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
                 mapProjRec.getAttributeString("Name of reference ellipsoid"));
-
         } else if(sceneRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 sceneRec.getAttributeDouble("Pixel spacing"));
@@ -258,8 +241,13 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         //sph
         if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+                sceneRec.getAttributeString("Processing system identifier").trim() );
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                     sceneRec.getAttributeString("Processing algorithm identifier"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
+                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                     ReaderUtils.findPolarizationInBandName(
