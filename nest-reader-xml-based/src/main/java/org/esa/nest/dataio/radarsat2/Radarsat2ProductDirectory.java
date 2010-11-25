@@ -459,7 +459,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         double psi = psi1;
         float[] incidenceAngles = new float[gridWidth];
         int k = 0;
-        for (int i = 0; i < sourceImageWidth; i++) {
+        for (int i = 0; i < gridWidth*subSamplingX; i++) {
             final double ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
             final double alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
             if (i % subSamplingX == 0) {
