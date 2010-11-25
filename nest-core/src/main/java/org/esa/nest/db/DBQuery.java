@@ -180,15 +180,15 @@ public class DBQuery {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
         }
-        if(!selectedAcquisitionMode.equals(ALL_MODES)) {
+        if(!selectedAcquisitionMode.isEmpty() && !selectedAcquisitionMode.equals(ALL_MODES)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+"'";
         }
-        if(!selectedPass.equals(ALL_PASSES)) {
+        if(!selectedPass.isEmpty() && !selectedPass.equals(ALL_PASSES)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+"'";
         }
-        if(!selectedPolarization.equals(ANY)) {
+        if(!selectedPolarization.isEmpty() && !selectedPolarization.equals(ANY)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += "( "+
                     ProductDB.META_TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
@@ -196,14 +196,14 @@ public class DBQuery {
                     ProductDB.META_TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
                     ProductDB.META_TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+"'"+ " )";                              
         }
-        if(!selectedCalibration.equals(ANY)) {
+        if(!selectedCalibration.isEmpty() && !selectedCalibration.equals(ANY)) {
             queryStr += SQLUtils.addAND(queryStr);
             if(selectedCalibration.equals(CALIBRATED))
                 queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1";
             else if(selectedCalibration.equals(NOT_CALIBRATED))
                 queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0";
         }
-        if(!selectedOrbitCorrection.equals(ANY)) {
+        if(!selectedOrbitCorrection.isEmpty() && !selectedOrbitCorrection.equals(ANY)) {
             queryStr = formOrbitCorrectionQuery(queryStr);
         }
 
