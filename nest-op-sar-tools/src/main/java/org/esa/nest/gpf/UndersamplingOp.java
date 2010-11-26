@@ -111,7 +111,7 @@ public class UndersamplingOp extends Operator {
     private int subSamplingY = 2;
 
     @Parameter(valueSet = {IMAGE_SIZE, RATIO, PIXEL_SPACING}, defaultValue = IMAGE_SIZE, label="Output Image By:")
-    private String outputImageBy = IMAGE_SIZE;
+    private String outputImageBy = RATIO;
 
     @Parameter(description = "The row dimension of the output image", defaultValue = "1000", label="Output Image Rows")
     private int targetImageHeight = 1000;
@@ -145,7 +145,7 @@ public class UndersamplingOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
     public static final String SUB_SAMPLING = "Sub-Sampling";
-    public static final String KERNEL_FILTERING = "Kernel Filtering";
+    public static final String KERNEL_FILTERING = "LowPass Filtering";
     public static final String SUMMARY = "Summary";
     public static final String EDGE_DETECT = "Edge Detect";
     public static final String EDGE_ENHANCEMENT = "Edge Enhancement";

@@ -124,6 +124,7 @@ public class FigureLayer extends Layer {
     protected void renderLayer(Rendering rendering) {
         final Graphics2D g2d = rendering.getGraphics();
         final Viewport vp = rendering.getViewport();
+        if(vp == null) return;
         final AffineTransform transformSave = g2d.getTransform();
 
         try {

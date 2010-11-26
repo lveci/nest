@@ -55,15 +55,6 @@
             <helpId>PCA</helpId>
         </action>
 
-        <action>
-            <id>CreateStack</id>
-            <class>org.esa.nest.dat.CreateStackAction</class>
-            <text>Create Stack</text>
-            <shortDescr>Collocate multiple products into one product</shortDescr>
-            <parent>tools</parent>
-            <helpId>CreateStackOp</helpId>
-        </action>
-
     </extension>
 
 </module>
