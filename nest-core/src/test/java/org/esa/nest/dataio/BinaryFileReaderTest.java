@@ -419,20 +419,4 @@ public class BinaryFileReaderTest extends TestCase {
         assertEquals(prefix.length() + 9 * 1, _ios.getStreamPosition());
     }
 
-    public void testReadInArrayWithErrors() throws IOException {
-        final String prefix = "vspdfoperilfdkposnsern";
-        _ios.writeBytes(prefix);
-        _ios.writeBytes("123a45"); // 6 ints with length 1
-        _ios.writeBytes("suffix");
-
-        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
-
-        ceosReader.seek(prefix.length());
-        try {
-            ceosReader.readInArray(6, 1);
-            fail("IllegalBinaryFormatException expected");
-        } catch (IllegalBinaryFormatException e) {
-            Assert.assertEquals(prefix.length() + 3, e.getStreamPos());
-        }
-    }
 }

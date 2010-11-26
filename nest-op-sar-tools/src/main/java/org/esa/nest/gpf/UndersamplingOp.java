@@ -832,7 +832,7 @@ public class UndersamplingOp extends Operator {
      * @param numRows The number of rows.
      * @param numCols The number of columns.
      */
-    public void setOutputImageSaize(int numRows, int numCols) {
+    public void setOutputImageSize(int numRows, int numCols) {
         targetImageHeight = numRows;
         targetImageWidth = numCols;
     }

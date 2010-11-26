@@ -167,8 +167,13 @@ public class TestUtils {
             if(result == null) {
                 throwErr("Metadata attribute "+expectedAttrib.getName()+" is missing");
             }
-            if(!result.getData().equalElems(expectedAttrib.getData())) {
-                if(expectedAttrib.getData().toString().trim().equalsIgnoreCase(result.getData().toString().trim())) {
+            final ProductData expectedData = result.getData();
+            if(!expectedData.equalElems(expectedAttrib.getData())) {
+                if((expectedData.getType() == ProductData.TYPE_FLOAT64 ||
+                    expectedData.getType() == ProductData.TYPE_FLOAT64) &&
+                      Double.compare(expectedData.getElemDouble(), result.getData().getElemDouble()) == 0) {
+
+                } else if(expectedData.toString().trim().equalsIgnoreCase(result.getData().toString().trim())) {
 
                 } else {
                     throwErr("Metadata attribute "+expectedAttrib.getName()+" expecting "+expectedAttrib.getData().toString()

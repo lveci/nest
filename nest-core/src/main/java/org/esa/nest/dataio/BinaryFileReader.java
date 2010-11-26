@@ -157,7 +157,7 @@ public final class BinaryFileReader {
                 new char[]{'.', '-'}, ' ').trim();
             try {
                 if(newStr.isEmpty() || newStr.equals(".") || newStr.equals("-")) return 0;
-                number = Long .parseLong(newStr);
+                number = Long.parseLong(newStr);
             } catch (NumberFormatException e2) {
                 final String message = String.format(EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
                                                                     new Object[]{"integer"});
