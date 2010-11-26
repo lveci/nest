@@ -15,12 +15,14 @@ public class TargetUI extends BaseOperatorUI {
 
     TargetProductSelector targetProductSelector = null;
     private static final String FILE_PARAMETER = "file";
+    private AppContext appContext;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         paramMap = parameterMap;
         targetProductSelector = new TargetProductSelector();
+        this.appContext = appContext;
 
         File saveDir = null;
         final Object value = paramMap.get(FILE_PARAMETER);
@@ -62,6 +64,9 @@ public class TargetUI extends BaseOperatorUI {
         final File file = targetProductSelector.getModel().getProductFile();
         if(file == null)
             return new UIValidation(UIValidation.State.ERROR, "Target file not specified");
+
+        final String productDir = targetProductSelector.getModel().getProductDir().getAbsolutePath();
+        appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
 
         return new UIValidation(UIValidation.State.OK, "");
     }
