@@ -27,7 +27,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
@@ -264,7 +263,9 @@ public class GCPSelection2Op extends Operator {
                                     sourceImageHeight);
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-        
+
+        final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+
         final int numSrcBands = sourceProduct.getNumBands();
         boolean oneSlaveProcessed = false;          // all other use setSourceImage
         for(int i = 0; i < numSrcBands; ++i) {
@@ -274,7 +275,8 @@ public class GCPSelection2Op extends Operator {
             sourceRasterMap.put(targetBand, srcBand);
             gcpsComputedMap.put(srcBand, false);
 
-            if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveProcessed) {
+            if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveProcessed ||
+                    OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
                 final String unit = srcBand.getUnit();
@@ -318,6 +320,8 @@ public class GCPSelection2Op extends Operator {
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
 
+            final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+
             final Map<Band, Band> bandList = new HashMap<Band, Band>();
             for(Band targetBand : targetProduct.getBands()) {
                 final Band slaveBand = sourceRasterMap.get(targetBand);
@@ -325,7 +329,8 @@ public class GCPSelection2Op extends Operator {
                     bandList.put(targetBand, slaveBand);
                     break;
                 }
-                if (slaveBand == masterBand1 || slaveBand == masterBand2)
+                if (slaveBand == masterBand1 || slaveBand == masterBand2 ||
+                        OperatorUtils.isMasterBand(slaveBand, masterBandNames))
                     continue;
                 final String unit = slaveBand.getUnit();
                 if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))

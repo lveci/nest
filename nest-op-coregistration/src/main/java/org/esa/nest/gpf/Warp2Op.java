@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -252,15 +253,16 @@ public class Warp2Op extends Operator {
                 sourceProduct.getSceneRasterWidth(),
                 sourceProduct.getSceneRasterHeight());
 
+        final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+
         final int numSrcBands = sourceProduct.getNumBands();
-        int cnt = 1;
         int inc = 1;
         if (complexCoregistration)
             inc = 2;
         for (int i = 0; i < numSrcBands; i += inc) {
             final Band srcBand = sourceProduct.getBandAt(i);
             Band targetBand;
-            if (srcBand == masterBand || srcBand == masterBand2) {
+            if (srcBand == masterBand || srcBand == masterBand2 || OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
                 targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
@@ -272,7 +274,7 @@ public class Warp2Op extends Operator {
             if (complexCoregistration) {
                 final Band srcBandQ = sourceProduct.getBandAt(i + 1);
                 Band targetBandQ;
-                if (srcBand == masterBand || srcBand == masterBand2) {
+                if (srcBand == masterBand || srcBand == masterBand2 || OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
                     targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
                     targetBandQ.setSourceImage(srcBandQ.getSourceImage());
                 } else {
@@ -301,7 +303,7 @@ public class Warp2Op extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.coregistered_stack, 1);
     }
 
-    private synchronized void getWarpData() throws OperatorException {
+    private synchronized void getWarpData(final ProgressMonitor pm) throws OperatorException {
         if (!warpDataMap.isEmpty()) return;
 
         // for all slave bands or band pairs compute a warp
@@ -356,6 +358,8 @@ public class Warp2Op extends Operator {
 
             addSlaveGCPs(warpData, srcBand.getName());
         }
+
+        announceGCPWarning(pm);
     }
 
     /**
@@ -387,7 +391,7 @@ public class Warp2Op extends Operator {
                         final Band srcBand = sourceRasterMap.get(targetBand);
                         if(srcBand != null) {
                             final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
-                            getWarpData();
+                            getWarpData(pm);
                             break;
                         }
                     }
@@ -417,7 +421,10 @@ public class Warp2Op extends Operator {
 
                 // create source image
                 final Tile sourceRaster = getSourceTile(srcBand, targetRectangle, pm);
-                getWarpData();
+                getWarpData(pm);
+
+                if(pm.isCanceled())
+                    return;
 
                 final WarpData warpData = warpDataMap.get(realSrcBand);
                 if(warpData.notEnoughGCPs)
@@ -851,6 +858,21 @@ public class Warp2Op extends Operator {
         }
     }
 
+    private void announceGCPWarning(final ProgressMonitor pm) {
+        String msg = "";
+        for(Band srcBand : sourceProduct.getBands()) {
+            final WarpData warpData = warpDataMap.get(srcBand);
+            if(warpData != null && warpData.notEnoughGCPs) {
+                msg += srcBand.getName() +" does not have enough valid GCPs for the warp\n";
+            }
+        }
+        if(!msg.isEmpty()) {
+            System.out.println(msg);
+            if(VisatApp.getApp() != null) {
+                VisatApp.getApp().showWarningDialog(msg);
+            }
+        }
+    }
 
     /**
      * The SPI is used to register this operator in the graph processing framework

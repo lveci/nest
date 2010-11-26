@@ -43,6 +43,7 @@ public final class AbstractMetadata {
     private static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
 
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
+    public static final String MASTER_BANDS = "Master_bands";
 
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";

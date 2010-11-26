@@ -33,7 +33,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.FeatureCollectionClipper;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -90,6 +89,8 @@ public class CreateStackOp extends Operator {
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
     private final Map<Product, int[]> slaveOffsettMap = new HashMap<Product, int[]>(10);
 
+    private boolean appendToMaster = false;
+
     @Override
     public void initialize() throws OperatorException {
 
@@ -135,10 +136,18 @@ public class CreateStackOp extends Operator {
                 return;
             }
 
+            appendToMaster = AbstractMetadata.getAbstractedMetadata(masterProduct).
+                    getAttributeInt(AbstractMetadata.coregistered_stack, 0) == 1;
+            final ArrayList<String> masterProductBands = new ArrayList<String>();
+
             final Band[] slaveBandList = getSlaveBands();
             if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
                 targetProduct = OperatorUtils.createDummyTargetProduct(sourceProduct);
                 return;
+            }
+
+            if(appendToMaster) {
+                extent = MASTER_EXTENT;
             }
 
             if(extent.equals(MIN_EXTENT)) {
@@ -148,57 +157,95 @@ public class CreateStackOp extends Operator {
             } else {
 
                 targetProduct = new Product(masterProduct.getName(),
-                                            masterProduct.getProductType(),
-                                            masterProduct.getSceneRasterWidth(),
-                                            masterProduct.getSceneRasterHeight());
+                        masterProduct.getProductType(),
+                        masterProduct.getSceneRasterWidth(),
+                        masterProduct.getSceneRasterHeight());
 
                 OperatorUtils.copyProductNodes(masterProduct, targetProduct);
             }
-            
-            String suffix = "_mst";
-            // add master bands first
-            for (final Band srcBand : slaveBandList) {
-                if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                    suffix = "_mst" + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
 
-                    final Band targetBand = new Band(srcBand.getName() + suffix,
-                            srcBand.getDataType(),
+            if(appendToMaster) {
+                // add all master bands
+                for(Band b : masterProduct.getBands()) {
+                    if(!(b instanceof VirtualBand)) {
+                        final Band targetBand = new Band(b.getName(),
+                            b.getDataType(),
                             targetProduct.getSceneRasterWidth(),
                             targetProduct.getSceneRasterHeight());
-                    ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                    if(extent.equals(MASTER_EXTENT)) {
-                        targetBand.setSourceImage(srcBand.getSourceImage());
+                        ProductUtils.copyRasterDataNodeProperties(b, targetBand);
+                        targetBand.setSourceImage(b.getSourceImage());
+
+                        masterProductBands.add(b.getName());
+                        sourceRasterMap.put(targetBand, b);
+                        targetProduct.addBand(targetBand);
                     }
-                    sourceRasterMap.put(targetBand, srcBand);
-                    targetProduct.addBand(targetBand);
+                }
+            }
+
+            String suffix = "_mst";
+            // add master bands first
+            if(!appendToMaster) {
+                for (final Band srcBand : slaveBandList) {
+                    if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
+                        suffix = "_mst" + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
+
+                        final Band targetBand = new Band(srcBand.getName() + suffix,
+                                srcBand.getDataType(),
+                                targetProduct.getSceneRasterWidth(),
+                                targetProduct.getSceneRasterHeight());
+                        ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                        if(extent.equals(MASTER_EXTENT)) {
+                            targetBand.setSourceImage(srcBand.getSourceImage());
+                        }
+
+                        masterProductBands.add(targetBand.getName());
+                        sourceRasterMap.put(targetBand, srcBand);
+                        targetProduct.addBand(targetBand);
+                    }
                 }
             }
             // then add slave bands
             int cnt = 1;
+            if(appendToMaster) {
+                for(Band trgBand : targetProduct.getBands()) {
+                    final String name = trgBand.getName();
+                    if(name.contains("slv"+cnt))
+                        ++cnt;
+                }
+            }
             for (final Band srcBand : slaveBandList) {
                 if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
                     if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                     } else {
                         suffix = "_slv" + cnt++ + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
                     }
+                    final String tgtBandName = srcBand.getName() + suffix;
 
-                    final Product srcProduct = srcBand.getProduct();
-                    final Band targetBand = new Band(srcBand.getName() + suffix,
-                            srcBand.getDataType(),
-                            targetProduct.getSceneRasterWidth(),
-                            targetProduct.getSceneRasterHeight());
-                    ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                    if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
-                        targetBand.setSourceImage(srcBand.getSourceImage());
+                    if(targetProduct.getBand(tgtBandName) == null) {
+                        final Product srcProduct = srcBand.getProduct();
+                        final Band targetBand = new Band(tgtBandName,
+                                srcBand.getDataType(),
+                                targetProduct.getSceneRasterWidth(),
+                                targetProduct.getSceneRasterHeight());
+                        ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                        if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
+                            targetBand.setSourceImage(srcBand.getSourceImage());
+                        }
+
+                        if(srcBand.getProduct() == masterProduct) {
+                            masterProductBands.add(tgtBandName);
+                        }
+
+                        sourceRasterMap.put(targetBand, srcBand);
+                        targetProduct.addBand(targetBand);
                     }
-
-                    sourceRasterMap.put(targetBand, srcBand);
-                    targetProduct.addBand(targetBand);
                 }
             }
 
             // copy slave abstracted metadata
             copySlaveMetadata();
+
+            saveMasterProductBandNames(targetProduct, masterProductBands);
 
             // copy GCPs if found to master band
             final ProductNodeGroup<Placemark> masterGCPgroup = masterProduct.getGcpGroup();
@@ -237,6 +284,21 @@ public class CreateStackOp extends Operator {
         }
     }
 
+    private static void saveMasterProductBandNames(final Product targetProduct, final ArrayList<String> masterProductBands) {
+        final MetadataElement targetRoot = targetProduct.getMetadataRoot();
+        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+        if(targetSlaveMetadataRoot == null) {
+            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+            targetRoot.addElement(targetSlaveMetadataRoot);
+        }
+        String value = "";
+        for(String name : masterProductBands) {
+            value += name + " ";
+        }
+
+        targetSlaveMetadataRoot.setAttributeString(AbstractMetadata.MASTER_BANDS, value.trim());
+    }
+
     private Product getMasterProduct(final String name) {
         final String masterName = getProductName(name);
         for(Product prod : sourceProduct) {
@@ -258,7 +320,8 @@ public class CreateStackOp extends Operator {
             throw new OperatorException("Master band should be one real band or a real and imaginary band");
         }
         masterBands[0] = masterProduct.getBand(getBandName(masterBandNames[0]));
-        bandList.add(masterBands[0]);
+        if(!appendToMaster)
+            bandList.add(masterBands[0]);
 
         final String unit = masterBands[0].getUnit();
         if(unit != null) {
@@ -275,7 +338,8 @@ public class CreateStackOp extends Operator {
                         masterBands[1] = masterProduct.getBandAt(iBandIdx+1);
                         if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
                             throw new OperatorException("For complex products select a real and an imaginary band");
-                        bandList.add(masterBands[1]);
+                        if(!appendToMaster)
+                            bandList.add(masterBands[1]);
                     }
                 } else {
                     final Product prod = getMasterProduct(masterBandNames[1]);
@@ -285,7 +349,8 @@ public class CreateStackOp extends Operator {
                     masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
                     if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
                         throw new OperatorException("For complex products select a real and an imaginary band");
-                    bandList.add(masterBands[1]);
+                    if(!appendToMaster)
+                        bandList.add(masterBands[1]);
                 }
             }
         }
@@ -298,7 +363,7 @@ public class CreateStackOp extends Operator {
                         continue;
                     if(band instanceof VirtualBand)
                         continue;
-                    if(slvProduct == masterProduct && (band == masterBands[0] || band == masterBands[1]))
+                    if(slvProduct == masterProduct && (band == masterBands[0] || band == masterBands[1] || appendToMaster))
                         continue;
 
                     bandList.add(band);

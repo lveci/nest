@@ -30,6 +30,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Helper methods for working with Operators
@@ -482,6 +483,28 @@ public final class OperatorUtils {
         if(absRoot != null) {
             final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
             if(sampleType.equalsIgnoreCase("complex"))
+                return true;
+        }
+        return false;
+    }
+
+    public static String[] getMasterBandNames(final Product sourceProduct) {
+        final ArrayList<String> masterBandNames = new ArrayList<String>();
+        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+        if(slaveMetadataRoot != null) {
+            final String mstBandNames = slaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS, "");
+            final StringTokenizer st = new StringTokenizer(mstBandNames, " ");
+            final int length = st.countTokens();
+            for (int i = 0; i < length; i++) {
+                masterBandNames.add(st.nextToken());
+            }
+        }
+        return masterBandNames.toArray(new String[masterBandNames.size()]);
+    }
+
+    public static boolean isMasterBand(final Band band, final String[] masterBandNames) {
+        for(String mstName : masterBandNames) {
+            if(mstName.equals(band.getName()))
                 return true;
         }
         return false;
