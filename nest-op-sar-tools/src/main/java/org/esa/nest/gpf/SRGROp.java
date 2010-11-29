@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 
@@ -198,6 +199,7 @@ public class SRGROp extends Operator {
 
         // compute ground range image pixel values
         final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+        final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand); 
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
         final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
 
@@ -258,7 +260,10 @@ public class SRGROp extends Operator {
                     v4 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p4, y));
                     v = MathUtils.interpolationSinc(v0, v1, v2, v3, v4, mu);
                 }
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), Math.max(v, 0.0));
+                if (bandUnit == Unit.UnitType.INTENSITY) {
+                    v = Math.max(v, 0.0);
+                }
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
       } catch(Throwable e) {
