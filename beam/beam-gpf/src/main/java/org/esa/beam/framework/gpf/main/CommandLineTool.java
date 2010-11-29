@@ -170,6 +170,10 @@ class CommandLineTool {
                         final DomElement parameters = new DefaultDomElement("parameters");
                         parameters.createChild("file").setValue(sourceFilepath);
                         n.setConfiguration(parameters);
+                    } else if(sourceId.equals(GPF.SOURCE_PRODUCT_FIELD_NAME)) {
+                        final DomElement parameters = new DefaultDomElement("parameters");
+                        parameters.createChild("file").setValue(sourceFilepath);
+                        readerNode.setConfiguration(parameters);
                     }
                 } else if (graph.getNode(sourceNodeId) == null) {
 
@@ -211,6 +215,18 @@ class CommandLineTool {
                 targetNode.setConfiguration(parameters);
 
                 graph.addNode(targetNode);
+            } else {
+                String targetPath = lineArgs.getTargetFilepath();
+                if(targetPath == null) {
+                    targetPath = lineArgs.getTargetFilepathMap().get(lineArgs.getTargetFilepathMap().firstKey());    
+                }
+
+                final DomElement parameters = new DefaultDomElement("parameters");
+                parameters.createChild("file").setValue(targetPath);
+                if(lineArgs.getTargetFormatName() != null)
+                    parameters.createChild("formatName").setValue(lineArgs.getTargetFormatName());
+                parameters.createChild("clearCacheAfterRowWrite").setValue(Boolean.toString(lineArgs.isClearCacheAfterRowWrite()));
+                WriterNode.setConfiguration(parameters);
             }
 
             final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader");
