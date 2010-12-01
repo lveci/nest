@@ -29,19 +29,14 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.text.MessageFormat;
-import java.util.NoSuchElementException;
-import java.util.ServiceLoader;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -60,7 +55,7 @@ public class SystemUtils {
      */
     public static final String BEAM_HOME_PAGE = "http://envisat.esa.int/beam/";
 
-    public static final String BEAM_HOME_PROPERTY_NAME = "beam.home";
+    public static final String BEAM_HOME_PROPERTY_NAME = getApplicationContextId()+".home";//"beam.home";
     public static final String LAX_INSTALL_DIR_PROPERTY_NAME = "lax.root.install.dir";
     /**
      * SYSTEM_DEPENDENT_LINE_SEPARATOR
@@ -113,6 +108,22 @@ public class SystemUtils {
      * @return the current working directory, never <code>null</code>
      */
     public static File getUserHomeDir() {
+        final File home = getBeamHomeDir();
+        if(home.exists()) {
+            try {
+                final String context = getApplicationContextId();
+                final Properties config = loadConfig(new File(home, "config/"+context+".config"));
+                final String appTmpFolderStr = config.getProperty(context+".application_tmp_folder");
+                if(appTmpFolderStr != null) {
+                    final File appTmpFolder = new File(appTmpFolderStr);
+                    if(!appTmpFolder.exists())
+                        appTmpFolder.mkdirs();
+                    return appTmpFolder;
+                }
+            } catch(Exception e) {
+                //
+            }
+        }
         return new File(System.getProperty("user.home", "."));
     }
 
@@ -161,6 +172,12 @@ public class SystemUtils {
      */
     public static File getCurrentWorkingDir() {
         return new File(System.getProperty("user.dir", "."));
+    }
+
+    private static Properties loadConfig(final File config) throws IOException {
+        final Properties configProp = new Properties();
+        configProp.load(new FileInputStream(config));
+        return configProp;
     }
 
     /**

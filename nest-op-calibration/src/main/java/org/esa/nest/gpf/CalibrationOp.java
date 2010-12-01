@@ -150,6 +150,9 @@ public class CalibrationOp extends Operator {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
+                final String unit = band.getUnit();
+                if(unit != null && unit.equals(Unit.PHASE))
+                    continue;
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
@@ -176,6 +179,7 @@ public class CalibrationOp extends Operator {
             }
 
             String targetUnit = Unit.INTENSITY;
+            int targetType = ProductData.TYPE_FLOAT32;
 
             if(unit.contains(Unit.DB)) {
 
@@ -184,6 +188,7 @@ public class CalibrationOp extends Operator {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
+                targetType = srcBand.getDataType();
                 targetUnit = Unit.PHASE;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -222,7 +227,7 @@ public class CalibrationOp extends Operator {
             // add band only if it doesn't already exist
             if(targetProduct.getBand(targetBandName) == null) {
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT32,
+                                           targetType,
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
 
