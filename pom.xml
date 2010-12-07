@@ -706,6 +706,7 @@
             <email>junlu@array.ca</email>
             <organization>Array Systems Computing Inc</organization>
             <roles>
+				<role>SAR Scientist</role>
                 <role>Software Engineering</role>
             </roles>
         </developer>
