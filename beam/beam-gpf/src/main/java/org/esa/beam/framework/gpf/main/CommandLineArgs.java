@@ -40,6 +40,7 @@ class CommandLineArgs {
     private TreeMap<String, String> sourceFilepathMap;
     private String targetFormatName;
     private String parameterFilepath;
+    private String fileListPath = null;
     private TreeMap<String, String> targetFilepathMap;
     private boolean helpRequested;
     private boolean stackTraceDump;
@@ -99,6 +100,9 @@ class CommandLineArgs {
                     i++;
                 } else if (arg.equals("-c")) {
                     tileCacheCapacity = parseOptionArgumentBytes(arg, i);
+                    i++;
+                } else if (arg.equals("-fileListPath")) {
+                    fileListPath = parseOptionArgument(arg, i);
                     i++;
                 } else {
                     throw error("Unknown option '" + arg + "'");
@@ -169,6 +173,10 @@ class CommandLineArgs {
 
     public String getParameterFilepath() {
         return parameterFilepath;
+    }
+
+    public String getFileListPath() {
+        return fileListPath;
     }
 
     public long getTileCacheCapacity() {

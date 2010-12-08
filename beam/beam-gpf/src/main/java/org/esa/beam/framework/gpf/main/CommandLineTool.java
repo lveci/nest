@@ -37,8 +37,8 @@ import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.StopWatch;
-import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.VersionChecker;
+import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
 import java.io.File;
@@ -229,7 +229,7 @@ class CommandLineTool {
                 WriterNode.setConfiguration(parameters);
             }
 
-            final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader");
+            final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader", lineArgs.getFileListPath());
 
             if(productSetDataList.length != 0) {
                 replaceAllProductSets(graph, productSetDataList);
@@ -248,7 +248,9 @@ class CommandLineTool {
         return null;
     }
 
-    private static ProductSetData[] findProductSetStacks(final Graph graph, final String readerName) throws GraphException {
+    private static ProductSetData[] findProductSetStacks(final Graph graph, final String readerName, final String fileListPath)
+                                                        throws GraphException {
+
         final String SEPARATOR = ",";
         final String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
         final ArrayList<ProductSetData> productSetDataList = new ArrayList<ProductSetData>();
@@ -258,20 +260,36 @@ class CommandLineTool {
                 final ProductSetData psData = new ProductSetData();
                 psData.nodeID = n.getId();
 
-                final DomElement config = n.getConfiguration();
-                final DomElement[] params = config.getChildren();
-                for(DomElement p : params) {
-                    if(p.getName().equals("fileList")) {
-                        if(p.getValue() == null)
-                            throw new GraphException(readerName+" fileList is empty");
-
-                        final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
-                        final int length = st.countTokens();
-                        for (int i = 0; i < length; i++) {
-                            final String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
-                            psData.fileList.add(str);
+                boolean usingFileListPath = false;
+                if(fileListPath != null) {
+                    final File inputFolder = new File(fileListPath);
+                    if(inputFolder.isDirectory() && inputFolder.exists()) {
+                        usingFileListPath = true;
+                        final File[] files = inputFolder.listFiles();
+                        for(File file : files) {
+                            if(ProductUtils.isValidProduct(file)) {
+                                psData.fileList.add(file.getAbsolutePath());
+                            }
                         }
-                        break;
+                    }
+                }
+
+                if(!usingFileListPath) {
+                    final DomElement config = n.getConfiguration();
+                    final DomElement[] params = config.getChildren();
+                    for(DomElement p : params) {
+                        if(p.getName().equals("fileList")) {
+                            if(p.getValue() == null)
+                                throw new GraphException(readerName+" fileList is empty");
+
+                            final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
+                            final int length = st.countTokens();
+                            for (int i = 0; i < length; i++) {
+                                final String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
+                                psData.fileList.add(str);
+                            }
+                            break;
+                        }
                     }
                 }
                 productSetDataList.add(psData);

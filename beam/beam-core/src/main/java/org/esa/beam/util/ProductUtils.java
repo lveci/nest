@@ -62,6 +62,7 @@ import org.esa.beam.util.geotiff.GeoTIFFMetadata;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.math.IndexValidator;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.beam.util.io.FileUtils;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -90,6 +91,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2622,5 +2624,17 @@ public class ProductUtils {
             return (long) band.scale(sample);
         }
         return sample;
+    }
+
+    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5",".tif"};
+
+    public static boolean isValidProduct(final File file) {
+        final String ext = FileUtils.getExtension(file).toLowerCase();
+        for(String str : validExtensions) {
+            if(ext.equals(str))
+                return true;
+        }
+
+        return false;
     }
 }
