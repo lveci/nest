@@ -382,9 +382,10 @@ public class GCPSelection2Op extends Operator {
     private synchronized void computeSlaveGCPs(final Band slaveBand, final Band slaveBand2, final Band targetBand,
                                                final String bandCountStr, final ProgressMonitor pm) throws OperatorException {
 
+     if(gcpsComputedMap.get(slaveBand))
+         return;
      final VisatApp visatApp = VisatApp.getApp();
      try {
-        if(gcpsComputedMap.get(slaveBand)) return;
 
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
@@ -464,6 +465,15 @@ public class GCPSelection2Op extends Operator {
                             bandCountStr+" "+slaveBand.getName()+"... "+pct+"%");
                     lastPct = pct;
                 }
+            } else {
+                final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
+                if(pct >= lastPct + 10) {
+                    if(lastPct==0) {
+                        System.out.print("Cross Correlating "+bandCountStr+" "+slaveBand.getName()+" ...");
+                    } 
+                    System.out.print(" "+pct+"%");
+                    lastPct = pct;
+                }    
             }
             pm.worked(1);
         }
@@ -482,7 +492,9 @@ public class GCPSelection2Op extends Operator {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
          if(visatApp != null)
-                    visatApp.setStatusBarMessage("");
+            visatApp.setStatusBarMessage("");
+         else
+            System.out.println(" 100%");
      }
     }
 

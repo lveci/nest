@@ -403,7 +403,7 @@ public class Warp2Op extends Operator {
                         try {
                             Desktop.getDesktop().open(residualsFile);
                         } catch (Exception e) {
-                            System.out.println(e.getMessage());
+                            System.out.println("Error opening residuals file "+e.getMessage());
                             // do nothing
                         }
                     }
@@ -441,7 +441,7 @@ public class Warp2Op extends Operator {
                 final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
-                sourceRaster.getDataBuffer().dispose();
+                //sourceRaster.getDataBuffer().dispose();
             }
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
