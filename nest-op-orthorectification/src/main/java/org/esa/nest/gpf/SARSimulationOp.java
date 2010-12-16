@@ -379,8 +379,12 @@ public final class SARSimulationOp extends Operator {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
             }
 
-            if (bandSlected && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE))) {
-                throw new OperatorException("Please select amplitude or intensity band for co-registration");
+            if (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE)) {
+                if (bandSlected) {
+                    throw new OperatorException("Please select amplitude or intensity band for co-registration");
+                } else {
+                    continue;
+                }
             }
 
             targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
