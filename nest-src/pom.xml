@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <groupId>org.esa.nest</groupId>
-    <artifactId>src</artifactId>
+    <artifactId>nest-src</artifactId>
     <name>NEST src</name>
     <description>Adds the resources for the runtime environment.</description>
     <version>${nest.version}</version>
