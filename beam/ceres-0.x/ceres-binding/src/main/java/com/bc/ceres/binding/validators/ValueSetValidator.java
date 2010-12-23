@@ -33,6 +33,7 @@ public class ValueSetValidator implements Validator {
     @Override
     public void validateValue(Property property, Object value) throws ValidationException {
         if (!propertyDescriptor.getValueSet().contains(value)) {
+	    // NESTMOD
             //throw new ValidationException(MessageFormat.format("Value for ''{0}'' is invalid.",
             //                                                   property.getDescriptor().getDisplayName()));
         }

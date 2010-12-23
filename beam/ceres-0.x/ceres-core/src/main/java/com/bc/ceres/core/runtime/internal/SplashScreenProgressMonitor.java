@@ -411,7 +411,7 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
                                              image.getHeight());
             bufferImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
             bufferGraphics = bufferImage.createGraphics();
-            //bufferGraphics.drawImage(backgroundImage, null, 0, 0);
+            //bufferGraphics.drawImage(backgroundImage, null, 0, 0); // NESTMOD
             setBounds(bounds);
             setFocusable(false);
             setAlwaysOnTop(false);

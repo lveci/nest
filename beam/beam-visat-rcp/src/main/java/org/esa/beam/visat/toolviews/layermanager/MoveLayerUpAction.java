@@ -26,7 +26,7 @@ import java.awt.event.ActionEvent;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2010-11-08 18:54:24 $
+
  * @since BEAM 4.6
  */
 class MoveLayerUpAction extends AbstractAction {

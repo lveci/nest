@@ -20,7 +20,7 @@ package org.esa.beam.dataio.envisat;
  * related geo-physical (spectral) band raster.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:23 $
+
  */
 public interface BandLineDecoder {
 

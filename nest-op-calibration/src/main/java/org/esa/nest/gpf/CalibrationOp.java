@@ -111,7 +111,7 @@ public class CalibrationOp extends Operator {
             calibrator.setAuxFileFlag(auxFile);
             calibrator.setExternalAuxFile(externalAuxFile);
             calibrator.setOutputImageIndB(outputImageScaleInDb);
-            calibrator.initialize(sourceProduct, targetProduct, false, true);
+            calibrator.initialize(this, sourceProduct, targetProduct, false, true);
 
             if(createGammaBand) {
                 createGammaVirtualBand(targetProduct, outputImageScaleInDb);

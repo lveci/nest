@@ -19,7 +19,7 @@ package com.bc.ceres.core;
  * Base class for an object that can be dynamically extended.
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2010-11-08 18:54:24 $
+
  */
 public class ExtensibleObject implements Extensible {
     /**

@@ -19,6 +19,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 
 public class ALOSCalibrator implements Calibrator {
 
+    private Operator calibrationOp;
     private Product sourceProduct;
     private Product targetProduct;
 
@@ -85,10 +87,11 @@ public class ALOSCalibrator implements Calibrator {
     /**
 
      */
-    public void initialize(Product srcProduct, Product tgtProduct,
-                           boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
+    public void initialize(final Operator op, final Product srcProduct, final Product tgtProduct,
+                           final boolean mustPerformRetroCalibration, final boolean mustUpdateMetadata)
             throws OperatorException {
         try {
+            calibrationOp = op;
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
 
@@ -183,13 +186,13 @@ public class ALOSCalibrator implements Calibrator {
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceRaster1 = OperatorContext.getSourceTile(sourceBand1, targetTileRectangle, pm);
+            sourceRaster1 = calibrationOp.getSourceTile(sourceBand1, targetTileRectangle);
             srcData1 = sourceRaster1.getDataBuffer();
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             final Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
-            sourceRaster1 = OperatorContext.getSourceTile(sourceBand1, targetTileRectangle, pm);
-            final Tile sourceRaster2 = OperatorContext.getSourceTile(sourceBand2, targetTileRectangle, pm);
+            sourceRaster1 = calibrationOp.getSourceTile(sourceBand1, targetTileRectangle);
+            final Tile sourceRaster2 = calibrationOp.getSourceTile(sourceBand2, targetTileRectangle);
             srcData1 = sourceRaster1.getDataBuffer();
             srcData2 = sourceRaster2.getDataBuffer();
         }
@@ -274,10 +277,10 @@ public class ALOSCalibrator implements Calibrator {
         }
     }
 
-    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
+    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName) throws OperatorException {
 
         Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Tile sourceTile = OperatorContext.getSourceTile(sourceBand, targetTile.getRectangle(), pm);
+        Tile sourceTile = calibrationOp.getSourceTile(sourceBand, targetTile.getRectangle());
         targetTile.setRawSamples(sourceTile.getRawSamples());
     }
 }

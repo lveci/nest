@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.16 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {

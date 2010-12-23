@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
  * A binding for a {@link javax.swing.JTextField} component.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:25 $
+
  * @since Ceres 0.6
  * @deprecated since Ceres 0.10, use {@link TextComponentAdapter} directly
  */

@@ -20,6 +20,7 @@ import org.esa.beam.dataio.envisat.EnvisatAuxReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -63,6 +64,7 @@ import java.util.*;
  */
 public final class ERSCalibrator implements Calibrator {
 
+    private Operator calibrationOp;
     private Product sourceProduct;
     private Product targetProduct;
 
@@ -199,11 +201,12 @@ public final class ERSCalibrator implements Calibrator {
     /**
 
      */
-    public void initialize(final Product srcProduct, final Product tgtProduct,
+    public void initialize(final Operator op, final Product srcProduct, final Product tgtProduct,
                            final boolean mustPerformRetroCalibration, final boolean mustUpdateMetadata)
             throws OperatorException {
 
         try {
+        calibrationOp = op;
         sourceProduct = srcProduct;
         targetProduct = tgtProduct;
 
@@ -308,13 +311,13 @@ public final class ERSCalibrator implements Calibrator {
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
+            sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle);
             srcData1 = sourceRaster1.getDataBuffer();
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
-            sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
-            sourceRaster2 = getSourceTile(sourceBand2, targetTileRectangle, pm);
+            sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle);
+            sourceRaster2 = getSourceTile(sourceBand2, targetTileRectangle);
             srcData1 = sourceRaster1.getDataBuffer();
             srcData2 = sourceRaster2.getDataBuffer();
         }
@@ -332,7 +335,7 @@ public final class ERSCalibrator implements Calibrator {
         }
 
         if (applyADCSaturationCorrection && !adcHasBeenTestedFlag) {
-            testADC(sourceBand1, sourceBand2, bandUnit, pm);
+            testADC(sourceBand1, sourceBand2, bandUnit);
         }
 
         boolean applyADCSaturationCorrectionToCurrentTile = false;
@@ -342,7 +345,7 @@ public final class ERSCalibrator implements Calibrator {
 
         double[][] adcPowerLoss = null;
         if (applyADCSaturationCorrectionToCurrentTile) {
-            adcPowerLoss = computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, x0, y0, w, h, pm, bandUnit);
+            adcPowerLoss = computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, x0, y0, w, h, bandUnit);
         }
 
         final double k = calibrationConstant * Math.sin(referenceIncidenceAngle);
@@ -351,7 +354,6 @@ public final class ERSCalibrator implements Calibrator {
         int index;
         int adcJ=0;
         for (int x = x0; x < x0 + w; x++) {
-            OperatorContext.checkForCancellation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
             if (applyADCSaturationCorrectionToCurrentTile) {
@@ -408,9 +410,9 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     private synchronized void testADC(final Band sourceBand1, final Band sourceBand2,
-                                final Unit.UnitType bandUnit, final ProgressMonitor pm) {
+                                final Unit.UnitType bandUnit) {
         if(adcHasBeenTestedFlag) return;
-        if (!isADCNeeded(sourceBand1, sourceBand2, bandUnit, pm)) {
+        if (!isADCNeeded(sourceBand1, sourceBand2, bandUnit)) {
             applyADCSaturationCorrection = false;
         }
 
@@ -1702,7 +1704,7 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     private boolean isADCNeeded(final Band sourceBand1, final Band sourceBand2,
-                                final Unit.UnitType bandUnit, final ProgressMonitor pm) {
+                                final Unit.UnitType bandUnit) {
 
         final int w = Math.min(windowWidth, sourceImageWidth);
         final int h = Math.min(windowHeight, sourceImageHeight);
@@ -1710,10 +1712,10 @@ public final class ERSCalibrator implements Calibrator {
         final int y0 = (sourceImageHeight - h)/2;
 
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
         Tile sourceRaster2 = null;
         if(sourceBand2 != null) {
-            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle);
         }
 
         final ProductData srcData1 = sourceRaster1.getDataBuffer();
@@ -1849,14 +1851,14 @@ public final class ERSCalibrator implements Calibrator {
 
     private double[][] computeADCPowerLossValuesForCurrentTile(final Band sourceBand1, final Band sourceBand2,
             final int tx0, final int ty0, final int tw, final int th,
-            final ProgressMonitor pm, final Unit.UnitType bandUnit) {
+            final Unit.UnitType bandUnit) {
 
         // 1. Get source tile rectangle
         TileDescriptionFlags tileDescriptionFlags = new TileDescriptionFlags();
         Rectangle sourceTileRectangle = getSourceTileRectangle(tx0, ty0, tw, th, tileDescriptionFlags);
 
         // 2. Compute intensity image
-        RenderedImage intendityImage = getIntensityImage(sourceBand1, sourceBand2, sourceTileRectangle, pm, bandUnit);
+        RenderedImage intendityImage = getIntensityImage(sourceBand1, sourceBand2, sourceTileRectangle, bandUnit);
         //System.out.println("intendityImage width: " + intendityImage.getWidth());
         //System.out.println("intendityImage height: " + intendityImage.getHeight());
         //outputRealImage(intendityImage, 0, 999);
@@ -1931,7 +1933,7 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     private RenderedImage getIntensityImage(final Band sourceBand1, final Band sourceBand2,
-            final Rectangle sourceTileRectangle, final ProgressMonitor pm, final Unit.UnitType bandUnit) {
+            final Rectangle sourceTileRectangle, final Unit.UnitType bandUnit) {
 
         final int sx0 = sourceTileRectangle.x;
         final int sy0 = sourceTileRectangle.y;
@@ -1939,10 +1941,10 @@ public final class ERSCalibrator implements Calibrator {
         final int sh = sourceTileRectangle.height;
         final double[] array = new double[sw*sh];
 
-        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
         Tile sourceRaster2 = null;
         if(sourceBand2 != null) {
-            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle);
         }
 
         final ProductData srcData1 = sourceRaster1.getDataBuffer();
@@ -2426,13 +2428,11 @@ public final class ERSCalibrator implements Calibrator {
      *                       e.g. a {@link org.esa.beam.framework.datamodel.Band Band} or
      *                       {@link org.esa.beam.framework.datamodel.TiePointGrid TiePointGrid}.
      * @param rectangle      the raster rectangle in pixel coordinates
-     * @param pm             The progress monitor passed into the
-     *                       the computeTile method or the computeTileStack method.
      * @return a tile.
      * @throws OperatorException if the tile request cannot be processed
      */
-    public static Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
-        return OperatorContext.getSourceTile(rasterDataNode, rectangle, pm);
+    public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle rectangle) throws OperatorException {
+        return calibrationOp.getSourceTile(rasterDataNode, rectangle);
     }
 
     //==================================== pixel calibration used by RD ======================================
@@ -2525,7 +2525,7 @@ public final class ERSCalibrator implements Calibrator {
         return gain; // see Andrea's email dated Nov. 11, 2008
     }
 
-    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm)
+    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName)
             throws OperatorException {
 
         // For ground range product,
@@ -2549,7 +2549,7 @@ public final class ERSCalibrator implements Calibrator {
         //System.out.println("RetroOp: tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
         final Band sourceBand1 = sourceProduct.getBand(srcBandName);
-        final Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle, pm);
+        final Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle);
         final ProductData srcData = sourceTile.getDataBuffer();
         final String[] srcBandNames = {targetBand.getName()};
         Band sourceBand2 = null;
@@ -2560,7 +2560,7 @@ public final class ERSCalibrator implements Calibrator {
         final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
 
         if (applyADCSaturationCorrection && !adcHasBeenTestedFlag) {
-            testADC(sourceBand1, sourceBand2, bandUnit, pm);
+            testADC(sourceBand1, sourceBand2, bandUnit);
         }
 
 
@@ -2572,13 +2572,12 @@ public final class ERSCalibrator implements Calibrator {
         double[][] adcPowerLoss = null;
         if (applyADCSaturationCorrectionToCurrentTile) {
             adcPowerLoss = computeADCPowerLossValuesForCurrentTile(
-                    sourceBand1, sourceBand2, tx0, ty0, tw, th, pm, bandUnit);
+                    sourceBand1, sourceBand2, tx0, ty0, tw, th, bandUnit);
         }
 
         double sigma = 0.0;
         int adcJ = 0;
         for (int x = tx0; x < tx0 + tw; x++) {
-            OperatorContext.checkForCancellation(pm);
 
             double antennaPatternByRangeSpreadingLoss = 0.0;
             if (isDetectedSampleType) {

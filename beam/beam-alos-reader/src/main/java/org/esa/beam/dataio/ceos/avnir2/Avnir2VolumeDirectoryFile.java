@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * This class represents a volume directory file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:22 $
+
  */
 class Avnir2VolumeDirectoryFile {
 

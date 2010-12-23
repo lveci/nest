@@ -18,7 +18,7 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf</artifactId>
-            <version>4.2</version>
+            <version>4.1.18</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j.slf4j</groupId>
@@ -49,7 +49,7 @@
                                 <artifactItem>
                                     <groupId>edu.ucar</groupId>
                                     <artifactId>netcdf</artifactId>
-                                    <version>4.2</version>
+                                    <version>4.1.18</version>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

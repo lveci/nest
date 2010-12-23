@@ -243,16 +243,15 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        if (_approximations != null) {
+        Approximation[] approximations = _approximations;
+        if (approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
             // ensure that pixel is out of image (= no source position)
             if (pixelPos == null) {
-                pixelPos = new PixelPos(-1.0f, -1.0f);
-            } else {
-                pixelPos.x = -1;
-                pixelPos.y = -1;
+                pixelPos = new PixelPos();
             }
+            pixelPos.setInvalid();
 
             if (lat != Float.NaN && lon != Float.NaN) { //(!Float.isNaN(lat) && !Float.isNaN(lon)) {
                 Approximation approximation = getBestApproximation(_approximations, lat, lon);
@@ -261,7 +260,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                     // solves the problem with overlapping normalized and unnormalized orbit areas (AATSR)
                     if (lon >= _overlapStart && lon <= _overlapEnd) {
                         lon += 360;
-                        approximation = getBestApproximation(_approximations, lat, lon);
+                        approximation = getBestApproximation(approximations, lat, lon);
                     }
                 }
                 if (approximation != null) {
@@ -278,6 +277,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return pixelPos;
     }
 
+    // NESTMOD
     public PixelPos getAccuratePixelPos(GeoPos geoPos, PixelPos pixelPos) {
 
         final PixelPos approximatedPixelPos = new PixelPos();
@@ -592,7 +592,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         numTiles = numTilesI * numTilesJ;
 
         //Debug.trace("TiePointGeoCoding.numTiles =  " + numTiles);
-       // Debug.trace("TiePointGeoCoding.numTilesI = " + numTilesI);
+        // Debug.trace("TiePointGeoCoding.numTilesI = " + numTilesI);
         //Debug.trace("TiePointGeoCoding.numTilesJ = " + numTilesJ);
 
         // Compute actual approximations for all tiles
@@ -815,8 +815,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private static Approximation getBestApproximation(final Approximation[] approximations, float lat, float lon) {
         Approximation approximation = null;
         if (approximations.length == 1) {
-            final Approximation a = approximations[0];
-            if (a.getSquareDistance(lat, lon) < a.getMinSquareDistance()) {
+            Approximation a = approximations[0];
+            final float squareDistance = a.getSquareDistance(lat, lon);
+            if (squareDistance < a.getMinSquareDistance()) {
                 approximation = a;
             }
         } else {
@@ -857,12 +858,12 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final String lonGridName = getLonGrid().getName();
         final Product destProduct = destScene.getProduct();
         TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
-        if(latGrid == null) {
+        if (latGrid == null) {
             latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
             destProduct.addTiePointGrid(latGrid);
         }
         TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
-        if(lonGrid == null) {
+        if (lonGrid == null) {
             lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
             destProduct.addTiePointGrid(lonGrid);
         }

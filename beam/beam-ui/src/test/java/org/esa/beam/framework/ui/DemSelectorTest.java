@@ -26,7 +26,7 @@ import org.esa.beam.framework.param.ParamValidateException;
  * Description of DemSelectorTest
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-11-08 18:54:24 $
+
  */
 public class DemSelectorTest extends TestCase {
 

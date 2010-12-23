@@ -14,19 +14,22 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.dataio.netcdf.metadata;
+package org.esa.beam.dataio.netcdf;
 
 import ucar.nc2.NetcdfFileWriteable;
 
 /**
- * A context for writing metadata from the BEAM product model into netCDF.
+ * A context for writing metadata from the BEAM product model into NetCDF.
+ * While writing a product this context can be used to store properties to
+ * share them between multiple {@link org.esa.beam.dataio.netcdf.metadata.ProfilePartWriter ProfilePartWriter}.
  */
-public interface ProfileWriteContext {
+public interface ProfileWriteContext extends PropertyStore {
 
-    public void setProperty(String name, Object property);
-
-    public Object getProperty(String name);
-
+    /**
+     * Returns th instance of {@link NetcdfFileWriteable} which is used during writing.
+     *
+     * @return the {@link NetcdfFileWriteable}
+     */
     public NetcdfFileWriteable getNetcdfFileWriteable();
 
 }

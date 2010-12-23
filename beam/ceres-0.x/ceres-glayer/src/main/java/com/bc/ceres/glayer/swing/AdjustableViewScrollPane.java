@@ -43,7 +43,7 @@ import java.awt.geom.Rectangle2D;
  * the view component must implement the {@link AdjustableView} interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2010-11-08 18:54:24 $
+
  */
 public class AdjustableViewScrollPane extends JPanel {
     private static final long serialVersionUID = -2634482999458990218L;

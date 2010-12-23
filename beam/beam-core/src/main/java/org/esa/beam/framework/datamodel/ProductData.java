@@ -2566,6 +2566,7 @@ public abstract class ProductData implements Cloneable {
         public UTC(double mjd) {
             super(3);
 
+	    // NESTMOD
             final double days = (int) mjd;
             double seconds = (int)((mjd - days) * SECONDS_PER_DAY);
             double microSeconds = (int)(((mjd - days)*SECONDS_PER_DAY - seconds) * MICROS_PER_SECOND);

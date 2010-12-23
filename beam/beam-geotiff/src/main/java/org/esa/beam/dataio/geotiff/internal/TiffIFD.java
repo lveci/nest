@@ -43,7 +43,7 @@ import java.util.List;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- 
+ * @version $Revision: 1.5 $ $Date: 2010-12-23 14:35:09 $
  */
 public class TiffIFD {
 

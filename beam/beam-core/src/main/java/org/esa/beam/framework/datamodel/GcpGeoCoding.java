@@ -383,7 +383,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-
+    
      */
     public enum Method {
 

@@ -35,7 +35,7 @@ import java.util.SortedMap;
  * Intentionally no API doc
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-11-08 18:54:23 $
+
  * @since BEAM 4.5
  */
 class TiffTagToMetadataConverter {

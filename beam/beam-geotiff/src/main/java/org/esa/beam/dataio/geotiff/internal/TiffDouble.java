@@ -24,7 +24,7 @@ import org.esa.beam.framework.datamodel.ProductData;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision: 1.3 $ $Date: 2010-12-23 14:35:09 $
  */
 class TiffDouble extends TiffValue {
 

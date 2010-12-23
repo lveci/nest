@@ -30,7 +30,7 @@ import java.io.IOException;
  * <code>readFrom</code> operation of all of its fields.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.Record
  * @see org.esa.beam.dataio.envisat.FieldInfo
  * @see org.esa.beam.framework.datamodel.ProductData

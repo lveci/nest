@@ -33,7 +33,7 @@ import java.awt.event.ActionEvent;
  * A binding for a set of {@link javax.swing.AbstractButton} components sharing a multiple-exclusion scope.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:24 $
+
  * @since BEAM 4.2
  */
 public class ButtonGroupAdapter extends ComponentAdapter implements ActionListener {

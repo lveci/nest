@@ -37,7 +37,7 @@ import java.util.Map;
  * Operator for cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.6 $ $Date: 2010-11-08 18:54:22 $
+
  */
 @OperatorMetadata(alias = "EMClusterAnalysis",
                   version = "1.0",

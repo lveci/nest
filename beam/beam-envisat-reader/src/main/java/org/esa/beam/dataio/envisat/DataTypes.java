@@ -21,7 +21,7 @@ package org.esa.beam.dataio.envisat;
  * record.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.Record
  * @see org.esa.beam.dataio.envisat.RecordInfo
  * @see org.esa.beam.dataio.envisat.Field

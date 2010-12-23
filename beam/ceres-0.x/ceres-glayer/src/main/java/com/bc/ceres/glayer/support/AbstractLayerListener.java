@@ -27,7 +27,7 @@ import java.beans.PropertyChangeEvent;
  * An (empty) {@code LayerListener} implementation.
  *
  * @author Norman Fomferra
- * @version $revision$ $date$
+
  */
 public abstract class AbstractLayerListener implements LayerListener {
 

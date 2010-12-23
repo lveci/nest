@@ -14,24 +14,25 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.dataio.netcdf.metadata;
-
-import org.esa.beam.framework.datamodel.Product;
-
-import java.io.IOException;
+package org.esa.beam.dataio.netcdf;
 
 /**
- * A metadata profile.
- * <p/>
- * This interface is NOT intended to be implemented by clients.
+ * Provides storage for properties.
  */
-public interface Profile {
+interface PropertyStore {
+    /**
+     * Sets a property value with the given name.
+     *
+     * @param name  the name of the property
+     * @param value the value of the property
+     */
+    void setProperty(String name, Object value);
 
-    void addProfilePart(ProfilePart profilePart);
-
-    void setInitialisationPart(ProfileInitPart initPart);
-
-    Product readProduct(ProfileReadContext ctx) throws IOException;
-
-    void writeProduct(ProfileWriteContext ctx, Product product) throws IOException;
+    /**
+     * Retrieves the value of a property.
+     *
+     * @param name  the name of the property
+     * @return The value of the property or {@code null} if the property name is unknown.
+     */
+    Object getProperty(String name);
 }

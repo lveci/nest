@@ -32,7 +32,7 @@ import java.io.IOException;
  * <p/>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+
  */
 public class ErsProductReaderPlugIn extends EnvisatProductReaderPlugIn {
 

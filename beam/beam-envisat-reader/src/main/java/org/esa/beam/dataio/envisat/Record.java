@@ -27,7 +27,7 @@ import java.io.IOException;
  * <p> A record performs its <code>readFrom</code> operation by delegating it sequentially to all of its fields.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-11-08 18:54:23 $
+
  */
 public final class Record {
 

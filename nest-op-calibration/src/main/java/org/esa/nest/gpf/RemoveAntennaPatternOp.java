@@ -77,7 +77,7 @@ public class RemoveAntennaPatternOp extends Operator {
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
 
-            calibrator.initialize(sourceProduct, targetProduct, true, false);
+            calibrator.initialize(this, sourceProduct, targetProduct, true, false);
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -194,7 +194,7 @@ public class RemoveAntennaPatternOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
             final String srcBandName = targetBand.getName();
-            calibrator.removeFactorsForCurrentTile(targetBand, targetTile, srcBandName, pm);
+            calibrator.removeFactorsForCurrentTile(targetBand, targetTile, srcBandName);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }

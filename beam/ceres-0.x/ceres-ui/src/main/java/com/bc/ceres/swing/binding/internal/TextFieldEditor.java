@@ -31,7 +31,7 @@ import javax.swing.JTextField;
  * Otherwise it would take precedence over other editors.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:25 $
+
  * @since Ceres 0.9
  */
 public class TextFieldEditor extends PropertyEditor {

@@ -66,7 +66,7 @@ import org.esa.beam.util.StringUtils;
  * The <code>UIUtils</code> class provides methods frequently used in connection with graphical user interfaces.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $  $Date: 2010-11-08 18:54:24 $
+ * @version $Revision: 1.5 $  $Date: 2010-12-23 14:35:09 $
  */
 public class UIUtils {
 

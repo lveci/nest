@@ -34,7 +34,7 @@ import java.util.Map;
  * MERIS data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.AatsrProductFile
  */
 public class MerisProductFile extends ProductFile {

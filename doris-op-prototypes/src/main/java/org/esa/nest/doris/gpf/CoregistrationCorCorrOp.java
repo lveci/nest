@@ -354,7 +354,7 @@ public class CoregistrationCorCorrOp extends Operator {
                 // copy slave data to target
                 final Tile targetTile = targetTileMap.get(targetBand);
                 if(targetTile != null) {
-                    targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
+                    targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle).getRawSamples());
                 }
                 pm.worked(1);
             }
@@ -575,12 +575,12 @@ public class CoregistrationCorCorrOp extends Operator {
         final Rectangle masterImagetteRectangle = new Rectangle(xul, yul, cWindowWidth, cWindowHeight);
 
         try {
-            final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle, null);
+            final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle);
             final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
 
             ProductData masterData2 = null;
             if (complexCoregistration) {
-                final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle, null);
+                final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle);
                 masterData2 = masterImagetteRaster2.getDataBuffer();
             }
 
@@ -626,13 +626,13 @@ public class CoregistrationCorCorrOp extends Operator {
 
 
         try {
-            final Tile slaveImagetteRaster1 = getSourceTile(slaveBand, slaveImagetteRectangle, null);
+            final Tile slaveImagetteRaster1 = getSourceTile(slaveBand, slaveImagetteRectangle);
             final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
 
             Tile slaveImagetteRaster2 = null;
             ProductData slaveData2 = null;
             if (complexCoregistration) {
-                slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle, null);
+                slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle);
                 slaveData2 = slaveImagetteRaster2.getDataBuffer();
             }
 
@@ -1039,8 +1039,8 @@ public class CoregistrationCorCorrOp extends Operator {
         final int yul = y0 - compleData.fHalfWindowHeight + 1;
         final Rectangle masterImagetteRectangle = new Rectangle(xul, yul, compleData.fWindowWidth, compleData.fWindowHeight);
 
-        final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle, null);
-        final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle, null);
+        final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle);
+        final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle);
 
         final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
         final ProductData masterData2 = masterImagetteRaster2.getDataBuffer();
@@ -1076,8 +1076,8 @@ public class CoregistrationCorCorrOp extends Operator {
         final int yul = y0 - compleData.fHalfWindowHeight + 1;
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, compleData.fWindowWidth, compleData.fWindowHeight);
 
-        final Tile slaveImagetteRaster1 = getSourceTile(slaveBand1, slaveImagetteRectangle, null);
-        final Tile slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle, null);
+        final Tile slaveImagetteRaster1 = getSourceTile(slaveBand1, slaveImagetteRectangle);
+        final Tile slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle);
 
         final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
         final ProductData slaveData2 = slaveImagetteRaster2.getDataBuffer();

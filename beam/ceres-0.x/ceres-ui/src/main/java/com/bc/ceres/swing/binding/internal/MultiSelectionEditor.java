@@ -29,7 +29,7 @@ import javax.swing.JScrollPane;
  * A many-of-many selection editor using a JList.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:25 $
+
  * @since BEAM 4.6
  */
 public class MultiSelectionEditor extends PropertyEditor {

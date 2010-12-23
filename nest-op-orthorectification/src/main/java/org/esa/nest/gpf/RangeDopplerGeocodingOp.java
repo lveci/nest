@@ -279,7 +279,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.setAuxFileFlag(auxFile);
                 calibrator.setExternalAuxFile(externalAuxFile);
-                calibrator.initialize(sourceProduct, targetProduct, true, true);
+                calibrator.initialize(this, sourceProduct, targetProduct, true, true);
                 calibrator.setIncidenceAngleForSigma0(incidenceAngleForSigma0);
             }
 

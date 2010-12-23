@@ -26,7 +26,7 @@ import java.util.Date;
  * header parameters are stored as fields within a single <code>Record</code> which this class encloses.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.Record
  */
 public final class Header {

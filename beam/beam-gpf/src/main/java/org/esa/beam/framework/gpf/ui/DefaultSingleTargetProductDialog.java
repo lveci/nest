@@ -54,7 +54,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2010-11-08 18:54:23 $
+ * @version $Revision: 1.14 $ $Date: 2010-12-23 14:35:09 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 

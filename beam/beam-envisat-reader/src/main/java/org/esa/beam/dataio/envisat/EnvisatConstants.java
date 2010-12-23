@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * This interface is a container for constants specific for ENVISAT-products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:23 $
+
  */
 public interface EnvisatConstants {
 

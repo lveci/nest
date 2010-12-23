@@ -29,7 +29,7 @@ import java.awt.image.Raster;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+ * @version $Revision: 1.3 $ $Date: 2010-12-23 14:35:09 $
  * @since BEAM 4.5.1
  */
 class SummaryStxOp implements StxOp {

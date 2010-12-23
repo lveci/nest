@@ -54,7 +54,7 @@ public class Stx {
     private final double mean;
     private final double coefficientOfVariation;
     private final double enl;
-	private double median;
+    private double median;
 
     public static Stx create(RasterDataNode raster, int level, ProgressMonitor pm) {
         return createImpl(raster, level, null, null, DEFAULT_BIN_COUNT, pm);

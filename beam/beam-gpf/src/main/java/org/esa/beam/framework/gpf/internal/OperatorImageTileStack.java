@@ -16,6 +16,7 @@
 package org.esa.beam.framework.gpf.internal;
 
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.jai.ImageManager;
@@ -92,7 +93,7 @@ public class OperatorImageTileStack extends OperatorImage {
     @Override
     protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
 
-        long nanos1 = System.nanoTime();
+        long startNanos = System.nanoTime();
 
         Band[] targetBands = getOperatorContext().getTargetProduct().getBands();
         Map<Band, Tile> targetTiles = new HashMap<Band, Tile>(targetBands.length * 2);
@@ -105,12 +106,12 @@ public class OperatorImageTileStack extends OperatorImage {
                 Tile targetTile = createTargetTile(band, tileRaster, destRect);
                 targetTiles.put(band, targetTile);
             } else if (requiresAllBands()) {
-                Tile targetTile = getOperatorContext().getSourceTile(band, destRect, getProgressMonitor());
+                Tile targetTile = getOperatorContext().getSourceTile(band, destRect);
                 targetTiles.put(band, targetTile);
             }
         }
 
-        getOperatorContext().getOperator().computeTileStack(targetTiles, destRect, getProgressMonitor());
+        getOperatorContext().getOperator().computeTileStack(targetTiles, destRect, ProgressMonitor.NULL);
 
         for (Entry<Band, WritableRaster> entry : writableRasters.entrySet()) {
             Band band = entry.getKey();
@@ -129,9 +130,7 @@ public class OperatorImageTileStack extends OperatorImage {
 
         }
 
-
-        long nanos2 = System.nanoTime();
-        updatePerformanceMetrics(nanos1, nanos2, destRect);
+        updateMetrics(destRect, startNanos);
     }
 
     private WritableRaster getWritableRaster(Band band, WritableRaster targetTileRaster) {

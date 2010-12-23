@@ -201,7 +201,7 @@ public class ProductImportAction extends ExecCommand {
             product = visatApp.getOpenProduct(selectedFile);
             if (product != null) {
                 visatApp.showErrorDialog("The product is already open.\n"
-                                         + "A product can only be opened once.");
+                        + "A product can only be opened once.");
                 visatApp.setSelectedProductNode(product);
                 return;
             }
@@ -271,12 +271,12 @@ public class ProductImportAction extends ExecCommand {
                             visatApp.showErrorDialog("File is empty:\n" + file.getPath());
                             file = null;
                         } else if (isFileOfFormat(file, DimapProductConstants.DIMAP_FORMAT_NAME)
-                                   && !getFormatName().equals(DimapProductConstants.DIMAP_FORMAT_NAME)) {
+                                && !getFormatName().equals(DimapProductConstants.DIMAP_FORMAT_NAME)) {
                             visatApp.showInfoDialog(
                                     "The selected file\n"
-                                    + "'" + file.getPath() + "'\n"
-                                    + "appears to be a BEAM-DIMAP product.\n\n"
-                                    + "Please use 'Open' in the file menu to open such product types.\n"
+                                            + "'" + file.getPath() + "'\n"
+                                            + "appears to be a BEAM-DIMAP product.\n\n"
+                                            + "Please use 'Open' in the file menu to open such product types.\n"
                                     , null);
                             file = null;
                         }
@@ -303,7 +303,7 @@ public class ProductImportAction extends ExecCommand {
                 product = reader.readProductNodes(file, null);
             } else {
                 visatApp.showWarningDialog("Cannot decode the selected product file\n" +
-                                           "'" + file.getPath() + "'");
+                        "'" + file.getPath() + "'");
             }
             visatApp.getMainFrame().setCursor(Cursor.getDefaultCursor());
             visatApp.clearStatusBarMessage();
@@ -472,7 +472,7 @@ public class ProductImportAction extends ExecCommand {
                         approve = _subsetProduct != null;
                         if (!approve && newProductDialog.getException() != null) {
                             visatApp.showErrorDialog("The product subset could not be created:\n" +
-                                                     newProductDialog.getException().getMessage());
+                                    newProductDialog.getException().getMessage());
                         }
                     }
                 }

@@ -23,7 +23,7 @@ import org.esa.beam.util.Guardian;
  * <code>ProcessorStatusEvent</code>s occur if the status of a processor changes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $  $Date: 2010-11-08 18:54:24 $
+
  * @see ProcessorStatusListener
  * @see Processor#addProcessorStatusListener
  * @see Processor#removeProcessorStatusListener

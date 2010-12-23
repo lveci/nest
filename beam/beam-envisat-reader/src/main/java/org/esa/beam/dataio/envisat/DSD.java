@@ -26,7 +26,7 @@ import org.esa.beam.util.Guardian;
  * method, which corrects a DSD instance created from a defective SPH.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.DSD#adjust(long, int)
  * @see org.esa.beam.dataio.envisat
  */

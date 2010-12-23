@@ -557,12 +557,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
     }
 
-    private static Tile getSrcTile(Band sourceBand, int minX, int minY, int width, int height) {
+    private Tile getSrcTile(Band sourceBand, int minX, int minY, int width, int height) {
         if(sourceBand == null)
             return null;
 
         final Rectangle srcRect = new Rectangle(minX, minY, width, height);
-        return getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
+        return getSourceTile(sourceBand, srcRect);
     }
     
     /**

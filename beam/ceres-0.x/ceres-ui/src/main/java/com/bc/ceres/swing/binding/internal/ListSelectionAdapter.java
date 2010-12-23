@@ -37,7 +37,7 @@ import java.lang.reflect.Array;
  * A binding for a selection within a {@link javax.swing.JList} component.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:25 $
+
  * @since Ceres 0.6
  */
 public class ListSelectionAdapter extends ComponentAdapter implements ListSelectionListener, PropertyChangeListener {

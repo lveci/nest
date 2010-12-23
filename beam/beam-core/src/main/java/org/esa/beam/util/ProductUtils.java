@@ -1218,7 +1218,7 @@ public class ProductUtils {
         if (sourceProduct.getFlagCodingGroup().getNodeCount() > 0) {
             copyFlagCodings(sourceProduct, targetProduct);
 
-// loop over bands and check if they have a flags coding attached
+            // loop over bands and check if they have a flags coding attached
             for (int i = 0; i < sourceProduct.getNumBands(); i++) {
                 Band sourceBand = sourceProduct.getBandAt(i);
                 String bandName = sourceBand.getName();
@@ -2061,6 +2061,21 @@ public class ProductUtils {
             target.addAttribute(attribute.createDeepClone());
         }
     }
+
+    /**
+     * Copies the source product's preferred tile size (if any) to the target product.
+     * @param sourceProduct The source product.
+     * @param targetProduct The target product.
+     */
+    public static void copyPreferredTileSize(Product sourceProduct, Product targetProduct) {
+        final Dimension preferredTileSize = sourceProduct.getPreferredTileSize();
+        if (preferredTileSize != null) {
+            final Rectangle targetRect = new Rectangle(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
+            final Rectangle tileRect = new Rectangle(preferredTileSize).intersection(targetRect);
+            targetProduct.setPreferredTileSize(tileRect.width, tileRect.height);
+        }
+    }
+
 
     public static GeoTIFFMetadata createGeoTIFFMetadata(final Product product) {
         final GeoCoding geoCoding = product.getGeoCoding();

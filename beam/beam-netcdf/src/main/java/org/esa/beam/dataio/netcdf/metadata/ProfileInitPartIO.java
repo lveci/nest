@@ -16,15 +16,15 @@
 
 package org.esa.beam.dataio.netcdf.metadata;
 
-import org.esa.beam.framework.dataio.ProductIOException;
+import org.esa.beam.dataio.netcdf.ProfileReadContext;
+import org.esa.beam.dataio.netcdf.ProfileWriteContext;
 import org.esa.beam.framework.datamodel.Product;
-import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.IOException;
 
-public interface ProfileInitPart {
+public abstract class ProfileInitPartIO implements ProfileInitPartReader, ProfileInitPartWriter {
 
-    Product readProductBody(ProfileReadContext ctx) throws ProductIOException;
+    public abstract Product readProductBody(ProfileReadContext ctx) throws IOException;
 
-    void writeProductBody(NetcdfFileWriteable writeable, Product p) throws IOException;
+    public abstract void writeProductBody(ProfileWriteContext ctx, Product p) throws IOException;
 }

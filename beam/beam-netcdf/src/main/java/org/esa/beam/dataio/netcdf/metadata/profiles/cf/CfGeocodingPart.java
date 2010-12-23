@@ -15,9 +15,9 @@
  */
 package org.esa.beam.dataio.netcdf.metadata.profiles.cf;
 
-import org.esa.beam.dataio.netcdf.metadata.ProfilePart;
-import org.esa.beam.dataio.netcdf.metadata.ProfileReadContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfileWriteContext;
+import org.esa.beam.dataio.netcdf.ProfileReadContext;
+import org.esa.beam.dataio.netcdf.ProfileWriteContext;
+import org.esa.beam.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.beam.dataio.netcdf.util.Constants;
 import org.esa.beam.dataio.netcdf.util.Dimension;
 import org.esa.beam.dataio.netcdf.util.ReaderUtils;
@@ -39,20 +39,19 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
 import java.util.List;
 
-public class CfGeocodingPart extends ProfilePart {
+public class CfGeocodingPart extends ProfilePartIO {
 
     private boolean usePixelGeoCoding;
     private boolean latLonAlreadyPresent;
 
     @Override
-    public void read(ProfileReadContext ctx, Product p) throws IOException {
+    public void decode(ProfileReadContext ctx, Product p) throws IOException {
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
             geoCoding = readPixelGeoCoding(ctx, p);
@@ -63,10 +62,10 @@ public class CfGeocodingPart extends ProfilePart {
     }
 
     @Override
-    public void define(ProfileWriteContext ctx, Product product) throws IOException {
+    public void preEncode(ProfileWriteContext ctx, Product product) throws IOException {
         final GeoCoding geoCoding = product.getGeoCoding();
         if (geoCoding == null) {
-            // we don't need to write a geo coding if there is none present
+            // we don't need to encode a geo coding if there is none present
             return;
         }
         usePixelGeoCoding = !isGeographicLatLon(geoCoding);
@@ -78,17 +77,18 @@ public class CfGeocodingPart extends ProfilePart {
             if (!latLonAlreadyPresent) {
                 addLatLonBands(ncFile);
             }
+            ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
         } else {
             GeoPos ul = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
             GeoPos br = geoCoding.getGeoPos(
                     new PixelPos(product.getSceneRasterWidth() - 0.5f, product.getSceneRasterHeight() - 0.5f), null);
             addLatLonCoordVariables(ncFile, ul, br);
+            ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, true);
         }
-        ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, true);
     }
 
     @Override
-    public void write(ProfileWriteContext ctx, Product product) throws IOException {
+    public void encode(ProfileWriteContext ctx, Product product) throws IOException {
         if (!usePixelGeoCoding && !latLonAlreadyPresent) {
             return;
         }
@@ -285,21 +285,8 @@ public class CfGeocodingPart extends ProfilePart {
             latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
         }
         if (latBand != null && lonBand != null) {
-            final NetcdfFile netcdfFile = ctx.getNetcdfFile();
-            ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME,
-                            detectFlipping(netcdfFile.getRootGroup().findVariable(latBand.getName())));
             return new PixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
         }
         return null;
-    }
-
-    private static boolean detectFlipping(Variable latVar) throws IOException {
-        final Array latData = latVar.read();
-        final Index j0 = latData.getIndex().set(0);
-        final Index j1 = latData.getIndex().set(1);
-        double pixelSizeY = latData.getDouble(j1) - latData.getDouble(j0);
-
-        // this should be the 'normal' case
-        return pixelSizeY >= 0;
     }
 }

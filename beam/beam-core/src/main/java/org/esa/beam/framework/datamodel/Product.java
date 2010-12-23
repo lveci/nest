@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.25 $ $Date: 2010-11-08 18:54:23 $
+ * @version $Revision: 1.26 $ $Date: 2010-12-23 14:35:08 $
  */
 public class Product extends ProductNode {
 

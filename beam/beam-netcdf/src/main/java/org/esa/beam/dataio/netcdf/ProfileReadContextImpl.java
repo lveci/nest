@@ -14,29 +14,40 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.dataio.netcdf.metadata;
+package org.esa.beam.dataio.netcdf;
 
-import ucar.nc2.NetcdfFileWriteable;
+import org.esa.beam.dataio.netcdf.util.RasterDigest;
+import ucar.nc2.NetcdfFile;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * No API.
- */
-public class ProfileWriteContextImpl implements ProfileWriteContext {
+class ProfileReadContextImpl implements ProfileReadContext {
 
     private final Map<String, Object> propertyMap;
-    private final NetcdfFileWriteable netcdfWritable;
+    private final NetcdfFile netcdfFile;
 
-    public ProfileWriteContextImpl(NetcdfFileWriteable netcdfWritable) {
-        this.netcdfWritable = netcdfWritable;
-        propertyMap = new HashMap<String, Object>();
+    private RasterDigest rasterDigest;
+
+    public ProfileReadContextImpl(NetcdfFile netcdfFile) {
+        this.netcdfFile = netcdfFile;
+        this.propertyMap = new HashMap<String, Object>();
+    }
+
+
+    @Override
+    public void setRasterDigest(RasterDigest rasterDigest) {
+        this.rasterDigest = rasterDigest;
     }
 
     @Override
-    public void setProperty(String name, Object property) {
-        propertyMap.put(name, property);
+    public RasterDigest getRasterDigest() {
+        return rasterDigest;
+    }
+
+    @Override
+    public void setProperty(String name, Object value) {
+        propertyMap.put(name, value);
     }
 
     @Override
@@ -45,7 +56,8 @@ public class ProfileWriteContextImpl implements ProfileWriteContext {
     }
 
     @Override
-    public NetcdfFileWriteable getNetcdfFileWriteable() {
-        return netcdfWritable;
+    public NetcdfFile getNetcdfFile() {
+        return netcdfFile;
     }
+
 }

@@ -25,7 +25,7 @@ import com.bc.ceres.binding.PropertySet;
  *
  * @author Marco Peters
  * @author Norman Fomferra
- * @version $revision$ $date$
+
  */
 public class CollectionLayer extends Layer {
 

@@ -159,7 +159,7 @@ public class Property {
     public void setValue(Object value) throws ValidationException {
         Object oldValue = getValue();
         if (equalObjects(oldValue, value)) {
-            //return;
+            //return; //NESTMOD
         }
         validate(value);
         accessor.setValue(value);

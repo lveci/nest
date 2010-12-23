@@ -38,13 +38,15 @@ public abstract class PointOperator extends Operator {
                                             getClass().getName(),
                                             sourceProduct.getSceneRasterWidth(),
                                             sourceProduct.getSceneRasterHeight());
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         configureTargetProduct(targetProduct);
         return targetProduct;
     }
 
-    protected abstract void configureTargetProduct(Product product);
+    protected abstract void configureTargetProduct(Product targetProduct);
 
     protected abstract void configureSourceSamples(Configurator configurator);
 

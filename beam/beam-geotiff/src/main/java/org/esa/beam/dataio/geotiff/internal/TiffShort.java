@@ -24,7 +24,7 @@ import org.esa.beam.framework.datamodel.ProductData;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-11-08 18:54:23 $
+ * @version $Revision: 1.3 $ $Date: 2010-12-23 14:35:09 $
  */
 public class TiffShort extends TiffValue {
 

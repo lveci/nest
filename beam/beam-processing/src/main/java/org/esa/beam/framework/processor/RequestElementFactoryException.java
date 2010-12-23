@@ -22,7 +22,7 @@ package org.esa.beam.framework.processor;
  * the desired data type</li> <li>Missing or incomplete information in general</li> </ld>
  *
  * @author Norman Fomferra
- * @version $Date: 2010-11-08 18:54:24 $
+ * @version
  */
 public class RequestElementFactoryException extends ProcessorException {
 

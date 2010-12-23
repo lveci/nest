@@ -483,7 +483,7 @@ public final class DeburstWSSOp extends Operator {
                 if (!burstLines.isEmpty()) {
 
                     final boolean ok = deburstTile(burstLines, y, targetRectangle.x, maxX, cBand.i, cBand.q,
-                            targetTileI, targetTileQ, targetTileIntensity, pm);
+                            targetTileI, targetTileQ, targetTileIntensity);
                 }
             }
 
@@ -563,7 +563,7 @@ public final class DeburstWSSOp extends Operator {
     private boolean deburstTile(final Vector<Integer> burstLines, final int targetLine, final int startX, final int endX,
                               final Band srcBandI, final Band srcBandQ,
                               final Tile targetTileI, final Tile targetTileQ,
-                              final Tile targetTileIntensity, final ProgressMonitor pm) {
+                              final Tile targetTileIntensity) {
 
         final Integer[] burstLineList = new Integer[burstLines.size()];
         burstLines.toArray(burstLineList);
@@ -584,7 +584,7 @@ public final class DeburstWSSOp extends Operator {
 
         try {
             // get all burst lines
-            getBurstLines(burstLineList, srcBandI, srcBandQ, startX, endX, srcDataListI, srcDataListQ, pm);
+            getBurstLines(burstLineList, srcBandI, srcBandQ, startX, endX, srcDataListI, srcDataListQ);
 
             if(srcDataListI.isEmpty())
                 return false;
@@ -673,10 +673,9 @@ public final class DeburstWSSOp extends Operator {
         return false;
     }
 
-    private static void getBurstLines(final Integer[] burstLineList, final Band srcBandI, final Band srcBandQ,
+    private void getBurstLines(final Integer[] burstLineList, final Band srcBandI, final Band srcBandQ,
                                final int startX, final int endX,
-                               final Vector<short[]> srcDataListI, final Vector<short[]> srcDataListQ,
-                               final ProgressMonitor pm) {
+                               final Vector<short[]> srcDataListI, final Vector<short[]> srcDataListQ) {
         Tile sourceRasterI, sourceRasterQ;
         final int srcBandHeight = srcBandI.getRasterHeight() - 1;
         final int srcBandWidth = srcBandI.getRasterWidth() - 1;
@@ -685,9 +684,9 @@ public final class DeburstWSSOp extends Operator {
             if (y > srcBandHeight) continue;
 
             final Rectangle sourceRectangle = new Rectangle(startX, y, endX, 1);
-            sourceRasterI = getSourceTile(srcBandI, sourceRectangle, pm);
+            sourceRasterI = getSourceTile(srcBandI, sourceRectangle);
             final short[] srcDataI = (short[]) sourceRasterI.getRawSamples().getElems();
-            sourceRasterQ = getSourceTile(srcBandQ, sourceRectangle, pm);
+            sourceRasterQ = getSourceTile(srcBandQ, sourceRectangle);
             final short[] srcDataQ = (short[]) sourceRasterQ.getRawSamples().getElems();
 
           /*  int invalidCount = 0;

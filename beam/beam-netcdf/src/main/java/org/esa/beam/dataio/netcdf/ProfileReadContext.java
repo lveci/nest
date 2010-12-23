@@ -14,28 +14,40 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.dataio.netcdf.metadata;
+package org.esa.beam.dataio.netcdf;
 
 import org.esa.beam.dataio.netcdf.util.RasterDigest;
-import org.esa.beam.dataio.netcdf.util.VariableMap;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * A context for reading metadata from netCDF into the BEAM product model.
+ * While reading a product this context can be used to store properties to
+ * share them between multiple {@link org.esa.beam.dataio.netcdf.metadata.ProfilePartReader ProfilePartReader}.
  */
-public interface ProfileReadContext {
+public interface ProfileReadContext extends PropertyStore {
 
-    public void setProperty(String name, Object property);
-
-    public Object getProperty(String name);
-
+    /**
+     * Gets the {@link NetcdfFile} to be read.
+     *
+     * @return the {@link NetcdfFile}
+     */
     public NetcdfFile getNetcdfFile();
 
-    public VariableMap getRasterVariableMap();
+    /**
+     * Sets the {@link RasterDigest}.
+     *
+     * @param rasterDigest the {@link RasterDigest}
+     *
+     * @see AbstractNetCdfReaderPlugIn#initReadContext(org.esa.beam.dataio.netcdf.ProfileReadContext)
+     */
+    public void setRasterDigest(RasterDigest rasterDigest);
 
+    /**
+     * Gets the {@link RasterDigest}.
+     *
+     * @return the {@link RasterDigest}
+     */
     public RasterDigest getRasterDigest();
+
+
 }

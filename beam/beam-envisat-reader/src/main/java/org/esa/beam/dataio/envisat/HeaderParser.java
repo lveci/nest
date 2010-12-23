@@ -32,7 +32,7 @@ import java.util.List;
  * (MPH and SPH) in order to create instances of the <code>Header</code> class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2010-11-08 18:54:23 $
+
  * @see org.esa.beam.dataio.envisat.Header
  */
 public class HeaderParser {
