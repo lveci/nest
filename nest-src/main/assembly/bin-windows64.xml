@@ -94,6 +94,14 @@
                         <excludes>
 							<exclude>ncsa.hdf:lib-hdf</exclude>
 							<exclude>ucar.netcdf:lib-netcdf</exclude>
+							<exclude>edu.ucar:netcdf</exclude>
+                            <exclude>org.slf4j.slf4j:slf4j-api</exclude> <!--logging from netcdf -->
+							<exclude>org.slf4j.slf4j:slf4j-jdk14</exclude>
+							<exclude>jdom:jdom</exclude>
+                            <exclude>javax.media:jai</exclude> <!--jai from geotools, we have our own -->
+							<exclude>javax.media:jai_codec</exclude>
+							<exclude>javax.media:jai_core</exclude>
+							<exclude>javax.media:jai_imageio</exclude>
 							<exclude>org.esa.nest:nest-core</exclude>
 							<exclude>org.esa.nest:nest-graph-builder</exclude>
 							<exclude>org.esa.nest:nest-reader-generic</exclude>
