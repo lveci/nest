@@ -384,7 +384,7 @@ public class EnviProductReader extends AbstractProductReader {
         final String[] bandNames = getBandNames(header);
         for (int i = 0; i < bandNames.length; i++) {
             final String originalBandName = bandNames[i];
-            final String validBandName;
+            String validBandName;
             final String description;
             if (ProductNode.isValidNodeName(originalBandName)) {
                 validBandName = originalBandName;
@@ -393,6 +393,8 @@ public class EnviProductReader extends AbstractProductReader {
                 validBandName = createValidNodeName(originalBandName);
                 description = "non formatted band name: " + originalBandName;
             }
+            validBandName = formatBandName(validBandName);
+
             final Band band = new Band(validBandName,
                                        dataType,
                                        product.getSceneRasterWidth(),
@@ -435,6 +437,12 @@ public class EnviProductReader extends AbstractProductReader {
         while (name.endsWith("_")) {
             name = name.substring(0, name.length() - 1);
         }
+        return name;
+    }
+
+    private static String formatBandName(String name) {
+        if(name.endsWith(".bin"))
+            name = name.substring(0, name.lastIndexOf(".bin"));
         return name;
     }
 }

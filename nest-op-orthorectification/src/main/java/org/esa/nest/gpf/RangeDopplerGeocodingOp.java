@@ -748,7 +748,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
 
                 if (saveSigmaNought) {
-                    if (pol != null && !pol.isEmpty()) {
+                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Sigma0";
@@ -765,7 +765,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    if (pol != null && !pol.isEmpty()) {
+                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
                         targetBandName = "Intensity_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Intensity";
@@ -784,7 +784,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
                 if (saveSigmaNought) {
                     targetBandName = "Sigma0";
-                    if (pol != null && !pol.isEmpty()) {
+                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
                         targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
@@ -800,7 +800,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 if (saveSelectedSourceBand) {
                     targetBandName = srcBand.getName();
-                    if (pol != null && !pol.isEmpty() && !srcBand.getName().toLowerCase().contains(pol)) {
+                    if (pol != null && !pol.isEmpty() && !isPolsarPro && !srcBand.getName().toLowerCase().contains(pol)) {
                         targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, unit, srcBand)) {
