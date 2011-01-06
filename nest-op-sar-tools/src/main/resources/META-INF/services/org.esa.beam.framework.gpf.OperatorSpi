@@ -17,4 +17,5 @@ org.esa.nest.gpf.oceantools.OilSpillClusteringOp$Spi
 org.esa.nest.gpf.oceantools.WindFieldEstimationOp$Spi
 org.esa.nest.gpf.FillHoleOp$Spi
 org.esa.nest.gpf.ReplaceMetadataOp$Spi
+org.esa.nest.gpf.LinearTodBOp$Spi
 org.esa.nest.gpf.TileStackOp$Spi
