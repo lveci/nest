@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -371,13 +372,18 @@ public class MosaicOp extends Operator {
                     final Band srcBand = srcBandMap.get(srcProduct);
                     double min = 0, max = 0, mean = 0;
                     if(normalizeByMean) {                  // get stat values
-                        final Stx stats = srcBand.getStx();
-                        mean = stats.getMean();
-                        min = stats.getMin();
-                        max = stats.getMax();
+                        try {
+                            final Stx stats = srcBand.getStx();
+                            mean = stats.getMean();
+                            min = stats.getMin();
+                            max = stats.getMax();
+                        } catch (Throwable e) {
+                            //OperatorUtils.catchOperatorException(getId(), e);
+                            normalizeByMean = false; // temporary disable
+                        }
                     }
 
-                    final Tile srcTile = getSourceTile(srcBand, sourceRectangle, ProgressMonitor.NULL);
+                    final Tile srcTile = getSourceTile(srcBand, sourceRectangle);
                     if(srcTile != null) {
                         validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean));
                     }
@@ -416,13 +422,13 @@ public class MosaicOp extends Operator {
                 overalMean = sum / cnt;
             }
 
+            final ArrayList<Float> sampleList = new ArrayList<Float>();
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                checkForCancellation(pm);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                     final int trgIndex = targetTile.getDataBufferIndex(x, y);
 
-                    cnt = 0;
                     double targetVal = 0;
+                    sampleList.clear();
                     for(SourceData srcDat : validSourceData) {
                         final PixelPos sourcePixelPos = srcDat.srcPixPos[index];
                         if(sourcePixelPos == null)
@@ -432,22 +438,40 @@ public class MosaicOp extends Operator {
                                 srcDat.srcRasterWidth, srcDat.srcRasterHeight, srcDat.resamplingIndex);
                         sample = resampling.resample(srcDat.resamplingRaster, srcDat.resamplingIndex);
 
-                        if (!Float.isNaN(sample) && sample != srcDat.nodataValue) {
+                        if (!Float.isNaN(sample) && sample != srcDat.nodataValue && !MathUtils.equalValues(sample, 0.0F, 1e-4F)) {
 
                             if (normalizeByMean) {
                                 sample /= srcDat.srcMean;
                             }
+
+                            targetVal = sample;
                             if (average) {
-                                targetVal += sample;
-                                ++cnt;
-                            } else {
-                                targetVal = sample;
+                                sampleList.add(sample);
                             }
                         }
                     }
                     if(targetVal != 0) {
-                        if (average) {
-                            targetVal /= cnt;
+                        if (average && sampleList.size() > 1) {
+                            double sum = 0;
+                            for(Float f : sampleList) {
+                                sum += f;
+                            }
+                            cnt = sampleList.size();
+                            final double localMean = sum / cnt;
+                            double varSum = 0;
+                            for(Float f : sampleList) {
+                                final double diff = f-localMean;
+                                varSum += diff*diff;
+                            }
+                            final double stdDev = Math.sqrt(varSum/(cnt-1));
+                            for(Float f : sampleList) {
+                                final double var = (f-localMean)*(f-localMean);
+                                if(var > stdDev && cnt > 1) {
+                                    sum -= f;
+                                    --cnt;
+                                }
+                            }
+                            targetVal = sum / cnt;
                         }
                         if(normalizeByMean) {
                             targetVal *= overalMean;
