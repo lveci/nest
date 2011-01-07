@@ -378,24 +378,32 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             final int height = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line, 0);
             final int width = absRoot.getAttributeInt(AbstractMetadata.num_output_lines, 0);
 
+            final boolean polsUnique = arePolarizationsUnique();
+            String extraInfo = "";         // if pols not unique add the extra info
+
             for (final File file : cosarFileList) {
 
-                final String pol = ReaderUtils.findPolarizationInBandName(file.getName());
+                final String fileName = file.getName().toUpperCase();
+                final String pol = ReaderUtils.findPolarizationInBandName(fileName);
+                if(!polsUnique) {
+                    final int polIndex = fileName.indexOf(pol);
+                    extraInfo = fileName.substring(polIndex+2, fileName.indexOf("_", polIndex+3));
+                }
 
-                final Band realBand = new Band("i_"+pol,
+                final Band realBand = new Band("i_"+pol+extraInfo,
                         ProductData.TYPE_INT16,
                         width, height);
                 realBand.setUnit(Unit.REAL);
                 product.addBand(realBand);
 
-                final Band imaginaryBand = new Band("q_"+pol,
+                final Band imaginaryBand = new Band("q_"+pol+extraInfo,
                         ProductData.TYPE_INT16,
                         width, height);
                 imaginaryBand.setUnit(Unit.IMAGINARY);
                 product.addBand(imaginaryBand);
 
-                ReaderUtils.createVirtualIntensityBand(product, realBand, imaginaryBand, '_'+pol);
-                ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+pol);
+                ReaderUtils.createVirtualIntensityBand(product, realBand, imaginaryBand, '_'+pol+extraInfo);
+                ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+pol+extraInfo);
 
                 try {
                     cosarBandMap.put(realBand.getName(), FileImageInputStreamExtImpl.createInputStream(file));
@@ -405,6 +413,20 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 }
             }
         }
+    }
+
+    private boolean arePolarizationsUnique() {
+        final ArrayList<String> pols = new ArrayList<String>();
+        for (final File file : cosarFileList) {
+            pols.add(ReaderUtils.findPolarizationInBandName(file.getName()));
+        }
+        for(int i=0; i < pols.size(); ++i) {
+            for(int j=i+1; j < pols.size(); ++j) {
+                if(pols.get(i).equals(pols.get(j)))
+                   return false;
+            }
+        }
+        return true;
     }
 
     private static void addOrbitStateVectors(MetadataElement absRoot, MetadataElement orbitInformation) {
