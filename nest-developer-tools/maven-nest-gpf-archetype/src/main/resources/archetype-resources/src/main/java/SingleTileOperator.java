@@ -155,7 +155,7 @@ public class SingleTileOperator extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle targetTileRectangle = targetTile.getRectangle();
         final Band srcBand = targetBandToSourceBandMap.get(targetBand);
-        final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
+        final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle);
 
         final int x0 = targetTileRectangle.x;
         final int y0 = targetTileRectangle.y;

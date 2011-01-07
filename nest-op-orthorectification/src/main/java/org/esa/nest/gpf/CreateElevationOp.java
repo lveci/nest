@@ -226,7 +226,7 @@ public final class CreateElevationOp extends Operator {
                     //System.out.println("skipping virtual band");
                 } else {
                     final Band sourceBand = sourceRasterMap.get(targetBand);
-                    targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle, pm).getRawSamples());
+                    targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle).getRawSamples());
                 }
             }
         } catch(Throwable e) {

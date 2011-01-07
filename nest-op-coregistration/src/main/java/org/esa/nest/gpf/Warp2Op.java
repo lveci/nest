@@ -390,7 +390,7 @@ public class Warp2Op extends Operator {
                     if(targetBand.getName().equals(processedSlaveBand)) {
                         final Band srcBand = sourceRasterMap.get(targetBand);
                         if(srcBand != null) {
-                            final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle, pm);
+                            final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle);
                             getWarpData(pm);
                             break;
                         }
@@ -420,7 +420,7 @@ public class Warp2Op extends Operator {
                     realSrcBand = srcBand;
 
                 // create source image
-                final Tile sourceRaster = getSourceTile(srcBand, targetRectangle, pm);
+                final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
                 getWarpData(pm);
 
                 if(pm.isCanceled())

@@ -157,7 +157,7 @@ public class TileStackOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         final Band[] targetBands = targetTiles.keySet().toArray(new Band[targetTiles.keySet().size()]);
-        final Tile sourceRaster = getSourceTile(targetBandToSourceBandMap.get(targetBands[0]), targetRectangle, pm);
+        final Tile sourceRaster = getSourceTile(targetBandToSourceBandMap.get(targetBands[0]), targetRectangle);
 
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;

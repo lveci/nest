@@ -156,15 +156,15 @@ public final class MultilookOp extends Operator {
             Band sourceBand1;
             if (srcBandNames.length == 1) {
                 sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
                 if (sourceRaster1 == null) {
                     throw new OperatorException("Cannot get source tile");
                 }
             } else {
                 sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-                Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
-                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-                sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+                final Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
+                sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle);
                 if (sourceRaster1 == null || sourceRaster2 == null) {
                     throw new OperatorException("Cannot get source tile");
                 }
@@ -363,7 +363,7 @@ public final class MultilookOp extends Operator {
                     targetBandName += "_" + suff;
                 }
                 final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
+                if (pol != null && !pol.isEmpty() && !isPolsarPro && !targetBandName.toLowerCase().contains(pol)) {
                     targetBandName += "_" + pol.toUpperCase();
                 }
                 if(isPolsarPro) {

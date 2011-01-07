@@ -185,7 +185,7 @@ public class DataAnalysisOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        computeStatistics(targetBand, targetTile, targetTile.getRectangle(), pm);
+        computeStatistics(targetBand, targetTile, targetTile.getRectangle());
     }
 
     /**
@@ -193,12 +193,11 @@ public class DataAnalysisOp extends Operator {
      * @param targetBand
      * @param targetTile
      * @param targetTileRectangle
-     * @param pm
      */
-    void computeStatistics(Band targetBand, Tile targetTile, Rectangle targetTileRectangle, ProgressMonitor pm) {
+    void computeStatistics(Band targetBand, Tile targetTile, Rectangle targetTileRectangle) {
 
         final Band sourceBand1 = sourceProduct.getBand(targetBand.getName());
-        final Tile sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle);
         final ProductData rawSamples1 = sourceRaster1.getRawSamples();
 
         final int idx = statisticsBandIndex.get(targetBand.getName());

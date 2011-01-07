@@ -228,12 +228,11 @@ public class PCAImageOp extends Operator {
             final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
-                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
+                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle).getRawSamples();
             }
             final int n = bandsRawSamples[0].getNumElems();
 
             for (int i = 0; i < numPCA; i++) {
-                checkForCancellation(pm);
 
                 final Band targetBand = targetProduct.getBand("PC" + i);
                 final Tile targetTile = targetTileMap.get(targetBand);

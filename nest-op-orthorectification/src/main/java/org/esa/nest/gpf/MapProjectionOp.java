@@ -198,7 +198,7 @@ public final class MapProjectionOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
         try {
-            final Tile sourceTile = getSourceTile(projectedProduct.getBand(targetBand.getName()), targetTile.getRectangle(), pm);
+            final Tile sourceTile = getSourceTile(projectedProduct.getBand(targetBand.getName()), targetTile.getRectangle());
             targetTile.setRawSamples(sourceTile.getRawSamples());
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);

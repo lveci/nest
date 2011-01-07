@@ -177,7 +177,7 @@ public class FilterOperator extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final Tile sourceRaster = getSourceTile(bandMap.get(targetBand), targetTileRectangle, pm);
+        final Tile sourceRaster = getSourceTile(bandMap.get(targetBand), targetTileRectangle);
 
         final ProductData masterData = sourceRaster.getDataBuffer();
         final ProductData targetData = targetTile.getDataBuffer();

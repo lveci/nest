@@ -936,7 +936,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
                     final Band srcBand = sourceProduct.getBand(srcBandNames[0]);
                     if(srcBand != null) {
-                        final Tile sourceRaster = getSourceTile(srcBand, targetRectangle, pm);
+                        final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
                         getWarpData();
                         break;
                     }
@@ -1089,7 +1089,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
                         if (saveLayoverShadowMask) {
                             final Rectangle srcRect = new Rectangle((int)(rangeIndex+0.5), (int)(azimuthIndex+0.5), 1, 1);
-                            final Tile sourceTile = getSourceTile(maskBand, srcRect, pm);
+                            final Tile sourceTile = getSourceTile(maskBand, srcRect);
                             final int m = sourceTile.getDataBuffer().getElemIntAt(sourceTile.getDataBufferIndex(
                                     (int)(rangeIndex+0.5), (int)(azimuthIndex+0.5)));
                             layoverShadowingMasksBuffer.setElemIntAt(index, m);
@@ -1376,7 +1376,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final Band sourceBand = sourceProduct.getBand(bandName);
         final Rectangle srcRect = new Rectangle(minX, minY, width, height);
-        return getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
+        return getSourceTile(sourceBand, srcRect);
     }
 
     /**

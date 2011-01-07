@@ -1578,9 +1578,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 1, 1);
-            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
             if (srcBands.length > 1) {
-                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
+                sourceTile2 = getSourceTile(srcBands[1], srcRect);
             }
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
@@ -1588,9 +1588,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 2, 2);
-            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
             if (srcBands.length > 1) {
-                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
+                sourceTile2 = getSourceTile(srcBands[1], srcRect);
             }
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
@@ -1599,9 +1599,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final Rectangle srcRect = new Rectangle(Math.max(0, (int)rangeIndex - 1),
                                          Math.max(0, (int)azimuthIndex - 1), 4, 4);
-            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
             if (srcBands.length > 1) {
-                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
+                sourceTile2 = getSourceTile(srcBands[1], srcRect);
             }
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);

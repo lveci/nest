@@ -487,7 +487,6 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
-                checkForCancellation(pm);
 
                 if (targetBands[i].getUnit().equals(Unit.REAL)) {
 
@@ -498,15 +497,13 @@ public class OversamplingOp extends Operator {
                     computeOverSampledTileForComplexImage(targetBands[i].getName(),
                                                           targetBands[i+1].getName(),
                                                           targetTileMap.get(targetBands[i]),
-                                                          targetTileMap.get(targetBands[i+1]),
-                                                          pm);
+                                                          targetTileMap.get(targetBands[i+1]));
                     i++;
 
                 } else {
 
                     computeOverSampledTileForRealImage(targetBands[i].getName(),
-                                                       targetTileMap.get(targetBands[i]),
-                                                       pm);
+                                                       targetTileMap.get(targetBands[i]));
                 }
             }
 
@@ -517,7 +514,7 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void computeOverSampledTileForRealImage(String targetBandName, Tile targetTile, ProgressMonitor pm) {
+    private void computeOverSampledTileForRealImage(String targetBandName, Tile targetTile) {
 
         final ProductData tgtData = targetTile.getDataBuffer();
 
@@ -537,7 +534,7 @@ public class OversamplingOp extends Operator {
         final double[][]tmpQ = new double[targetTileHeight][sourceTileWidth];
 
         final Band srcBand = sourceProduct.getBand(targetBandName);
-        final Tile srcRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
+        final Tile srcRaster = getSourceTile(srcBand, sourceTileRectangle);
         final ProductData srcData = srcRaster.getDataBuffer();
 
         final double[] rowArray = new double[sourceTileWidth*2];
@@ -596,7 +593,7 @@ public class OversamplingOp extends Operator {
     //==================================================================================================================
 
     private void computeOverSampledTileForComplexImage(
-            String iBandName, String qBandName, Tile iTargetTile, Tile qTargetTile, ProgressMonitor pm) {
+            String iBandName, String qBandName, Tile iTargetTile, Tile qTargetTile) {
 
         final ProductData iTgtData = iTargetTile.getDataBuffer();
         final ProductData qTgtData = qTargetTile.getDataBuffer();
@@ -619,8 +616,8 @@ public class OversamplingOp extends Operator {
         final Band iBand = sourceProduct.getBand(iBandName);
         final Band qBand = sourceProduct.getBand(qBandName);
 
-        final Tile iRaster = getSourceTile(iBand, sourceTileRectangle, pm);
-        final Tile qRaster = getSourceTile(qBand, sourceTileRectangle, pm);
+        final Tile iRaster = getSourceTile(iBand, sourceTileRectangle);
+        final Tile qRaster = getSourceTile(qBand, sourceTileRectangle);
 
         final ProductData iSrcData = iRaster.getDataBuffer();
         final ProductData qSrcData = qRaster.getDataBuffer();

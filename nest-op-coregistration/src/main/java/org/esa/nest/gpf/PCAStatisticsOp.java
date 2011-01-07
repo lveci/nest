@@ -279,7 +279,7 @@ public class PCAStatisticsOp extends Operator {
             final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
-                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
+                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle).getRawSamples();
             }
 
             final double[] tileSum = new double[numOfSourceBands];
@@ -288,7 +288,7 @@ public class PCAStatisticsOp extends Operator {
             if (subtractMeanImage) {
 
                 final ProductData meanBandRawSamples =
-                        getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle, pm).getRawSamples();
+                        getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle).getRawSamples();
 
                 computeTileStatisticsWithMeanImageSubstract(
                         bandsRawSamples, meanBandRawSamples, tileSum, tileSumCross, pm);

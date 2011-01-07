@@ -668,7 +668,7 @@ public class UndersamplingOp extends Operator {
             if (method.equals(SUB_SAMPLING)) {
                 computeTileUsingSubSampling(targetBand, targetTile, pm);
             } else if (method.equals(KERNEL_FILTERING)) {
-                computeTileUsingKernelFiltering(targetBand, targetTile, pm);
+                computeTileUsingKernelFiltering(targetBand, targetTile);
             } else {
                 throw new OperatorException("Unknown undersampling method: " + method);
             }
@@ -696,7 +696,7 @@ public class UndersamplingOp extends Operator {
         }
     }
 
-    private void computeTileUsingKernelFiltering(Band targetBand, Tile targetTile, ProgressMonitor pm) {
+    private void computeTileUsingKernelFiltering(Band targetBand, Tile targetTile) {
 
         final Rectangle targetTileRectangle = targetTile.getRectangle();
         final int tx0 = targetTileRectangle.x;
@@ -719,15 +719,15 @@ public class UndersamplingOp extends Operator {
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
             if (sourceRaster1 == null) {
                 throw new OperatorException("Cannot get source tile");
             }
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             final Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle);
+            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle);
             if (sourceRaster1 == null || sourceRaster2 == null) {
                 throw new OperatorException("Cannot get source tile");
             }            

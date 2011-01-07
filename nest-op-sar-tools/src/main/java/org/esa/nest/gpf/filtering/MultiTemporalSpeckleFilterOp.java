@@ -245,7 +245,7 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
         final double[] bandNoDataValues = new double[numBands];
         for (int i = 0; i < numBands; i++) {
             final Band srcBand = sourceProduct.getBand(targetBands[i].getName());
-            sourceTile[i] = getSourceTile(srcBand, sourceRectangle, pm);
+            sourceTile[i] = getSourceTile(srcBand, sourceRectangle);
             sourceData[i] = sourceTile[i].getDataBuffer();
             bandNoDataValues[i] = srcBand.getNoDataValue();
         }

@@ -355,7 +355,7 @@ public class GCPSelection2Op extends Operator {
                 // copy slave data to target
                 final Tile targetTile = targetTileMap.get(targetBand);
                 if(targetTile != null) {
-                    targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
+                    targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle).getRawSamples());
                 }
                 pm.worked(1);
             }

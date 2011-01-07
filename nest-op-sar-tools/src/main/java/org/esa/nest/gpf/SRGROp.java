@@ -201,7 +201,7 @@ public class SRGROp extends Operator {
         final Band sourceBand = sourceProduct.getBand(targetBand.getName());
         final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand); 
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
-        final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
+        final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle);
 
         final ProductData trgData = targetTile.getDataBuffer();
         final ProductData srcData = sourceRaster.getDataBuffer();

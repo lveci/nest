@@ -276,7 +276,7 @@ public class PCAMinOp extends Operator {
             final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
-                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
+                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle).getRawSamples();
             }
             final int n = bandsRawSamples[0].getNumElems();
 

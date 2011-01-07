@@ -235,7 +235,7 @@ public final class CreateCoherenceImageOp extends Operator {
             final Band srcBand = sourceProduct.getBand(targetBand.getName());
             if(!targetBand.getUnit().contains("coherence")) { // master and slave bands
 
-                final Tile srcRaster = getSourceTile(srcBand, targetTileRectangle, pm);
+                final Tile srcRaster = getSourceTile(srcBand, targetTileRectangle);
                 final ProductData srcData = srcRaster.getDataBuffer();
                 final ProductData targetData = targetTile.getDataBuffer();
                 for (int y = y0; y < y0 + h; y++) {
@@ -251,11 +251,11 @@ public final class CreateCoherenceImageOp extends Operator {
                 float[] dataArray;
                 if (!complexCoregistration) { // real image
                     final Band slaveBand = sourceProduct.getBand(iqBandNames[0]);
-                    dataArray = createCoherenceImage(targetTileRectangle, slaveBand, pm);
+                    dataArray = createCoherenceImage(targetTileRectangle, slaveBand);
                 } else { // complex image
                     final Band iSlaveBand = sourceProduct.getBand(iqBandNames[0]);
                     final Band qSlaveBand = sourceProduct.getBand(iqBandNames[1]);
-                    dataArray = createCoherenceImage(targetTileRectangle, iSlaveBand, qSlaveBand, pm);
+                    dataArray = createCoherenceImage(targetTileRectangle, iSlaveBand, qSlaveBand);
                 }
 
                 final ProductData rawTargetData = ProductData.createInstance(dataArray);
@@ -267,7 +267,7 @@ public final class CreateCoherenceImageOp extends Operator {
         }
     }
 
-    private float[] createCoherenceImage(Rectangle targetTileRectangle, Band slaveBand, ProgressMonitor pm) {
+    private float[] createCoherenceImage(Rectangle targetTileRectangle, Band slaveBand) {
 
         final int x0 = targetTileRectangle.x;
         final int y0 = targetTileRectangle.y;
@@ -278,7 +278,7 @@ public final class CreateCoherenceImageOp extends Operator {
         int k = 0;
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                getMasterSlaveDataForCurWindow(x, y, slaveBand, realData, pm);
+                getMasterSlaveDataForCurWindow(x, y, slaveBand, realData);
                 array[k++] = computeCoherence(realData);
             }
         }
@@ -287,7 +287,7 @@ public final class CreateCoherenceImageOp extends Operator {
     }
 
     private float[] createCoherenceImage(
-            Rectangle targetTileRectangle, Band iSlaveBand, Band qSlaveBand, ProgressMonitor pm) {
+            Rectangle targetTileRectangle, Band iSlaveBand, Band qSlaveBand) {
 
         final int x0 = targetTileRectangle.x;
         final int y0 = targetTileRectangle.y;
@@ -298,7 +298,7 @@ public final class CreateCoherenceImageOp extends Operator {
         int k = 0;
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                getMasterSlaveDataForCurWindow(x, y, iSlaveBand, qSlaveBand, complexData, pm);
+                getMasterSlaveDataForCurWindow(x, y, iSlaveBand, qSlaveBand, complexData);
                 array[k++] = computeCoherence(complexData);
             }
         }
@@ -306,7 +306,7 @@ public final class CreateCoherenceImageOp extends Operator {
     }
 
     private void getMasterSlaveDataForCurWindow(
-            int xC, int yC, Band slaveBand, RealCoherenceData realData, ProgressMonitor pm) {
+            int xC, int yC, Band slaveBand, RealCoherenceData realData) {
 
         // compute upper left corner coordinate (xUL, yUL)
         final int halfWindowSize = coherenceWindowSize / 2;
@@ -325,8 +325,8 @@ public final class CreateCoherenceImageOp extends Operator {
         realData.s = new double[w*h];
 
         final Rectangle windowRectangle = new Rectangle(xUL, yUL, w, h);
-        final Tile masterRaster = getSourceTile(masterBandI, windowRectangle, pm);
-        final Tile slaveRaster = getSourceTile(slaveBand, windowRectangle, pm);
+        final Tile masterRaster = getSourceTile(masterBandI, windowRectangle);
+        final Tile slaveRaster = getSourceTile(slaveBand, windowRectangle);
         final ProductData masterData = masterRaster.getDataBuffer();
         final ProductData slaveData = slaveRaster.getDataBuffer();
 
@@ -342,7 +342,7 @@ public final class CreateCoherenceImageOp extends Operator {
     }
 
     private void getMasterSlaveDataForCurWindow(
-            int xC, int yC, Band iSlaveBand, Band qSlaveBand, ComplexCoherenceData complexData, ProgressMonitor pm) {
+            int xC, int yC, Band iSlaveBand, Band qSlaveBand, ComplexCoherenceData complexData) {
 
         // compute upper left corner coordinate (xUL, yUL)
         final int halfWindowSize = coherenceWindowSize / 2;
@@ -363,12 +363,12 @@ public final class CreateCoherenceImageOp extends Operator {
         complexData.sQ = new double[w*h];
 
         final Rectangle windowRectangle = new Rectangle(xUL, yUL, w, h);
-        final Tile masterRasterI = getSourceTile(masterBandI, windowRectangle, pm);
-        final Tile masterRasterQ = getSourceTile(masterBandQ, windowRectangle, pm);
+        final Tile masterRasterI = getSourceTile(masterBandI, windowRectangle);
+        final Tile masterRasterQ = getSourceTile(masterBandQ, windowRectangle);
         final ProductData masterDataI = masterRasterI.getDataBuffer();
         final ProductData masterDataQ = masterRasterQ.getDataBuffer();
-        final Tile slaveRasterI = getSourceTile(iSlaveBand, windowRectangle, pm);
-        final Tile slaveRasterQ = getSourceTile(qSlaveBand, windowRectangle, pm);
+        final Tile slaveRasterI = getSourceTile(iSlaveBand, windowRectangle);
+        final Tile slaveRasterQ = getSourceTile(qSlaveBand, windowRectangle);
         final ProductData slaveDataI = slaveRasterI.getDataBuffer();
         final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
 

@@ -638,7 +638,7 @@ public class CreateStackOp extends Operator {
                 final int sw = Math.min(sx0 + tw - 1, srcImageWidth - 1) - sx0 + 1;
                 final int sh = Math.min(sy0 + th - 1, srcImageHeight - 1) - sy0 + 1;
                 final Rectangle srcRectangle = new Rectangle(sx0, sy0, sw, sh);
-                final Tile srcTile = getSourceTile(sourceRaster, srcRectangle, pm);
+                final Tile srcTile = getSourceTile(sourceRaster, srcRectangle);
                 final ProductData srcData = srcTile.getDataBuffer();
 
                 final TileIndex trgIndex = new TileIndex(targetTile);
@@ -707,11 +707,10 @@ public class CreateStackOp extends Operator {
                 }
                 final Resampling.Index resamplingIndex = resampling.createIndex();
 
-                final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
+                final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle);
                 final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
 
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    checkForCancellation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         final PixelPos sourcePixelPos = sourcePixelPositions[index];
 
@@ -737,7 +736,6 @@ public class CreateStackOp extends Operator {
                 sourceTile.getDataBuffer().dispose();
             } else {
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    checkForCancellation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
                     }

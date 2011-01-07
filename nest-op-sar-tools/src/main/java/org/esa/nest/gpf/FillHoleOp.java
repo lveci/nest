@@ -161,7 +161,7 @@ public final class FillHoleOp extends Operator {
 
             final Rectangle sourceTileRectangle = getSourceRectangle(x0, y0, w, h);
             final Band sourceBand = sourceProduct.getBand(targetBand.getName());
-            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
             final ProductData srcData = sourceTile.getDataBuffer();
             final ProductData trgData = targetTile.getDataBuffer();
 

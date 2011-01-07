@@ -180,7 +180,7 @@ public class ConvertDataTypeOp extends Operator {
 
         try {
             final Band sourceBand = sourceProduct.getBand(targetBand.getName());
-            final Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle(), pm);
+            final Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle());
 
             final Stx stx = sourceBand.getStx();
             double origMin = stx.getMin();
