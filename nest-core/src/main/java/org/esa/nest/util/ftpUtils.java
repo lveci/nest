@@ -45,7 +45,7 @@ public final class ftpUtils {
         this(server, "anonymous", "anonymous");
     }
 
-    private ftpUtils(final String server, final String user, final String password) throws IOException {
+    public ftpUtils(final String server, final String user, final String password) throws IOException {
         ftpClient.setRemoteVerificationEnabled(false);
         ftpClient.connect(server);
         int reply = ftpClient.getReplyCode();

@@ -75,7 +75,7 @@ public final class PrareOrbitReader {
      * @param file The file.
      * @return The reader.
      */
-    private static BufferedReader getBufferedReader(File file) {
+    private static BufferedReader getBufferedReader(File file) throws IOException {
 
         final String fileName = file.getAbsolutePath();
         final String fileLower = fileName.toLowerCase();
@@ -84,8 +84,7 @@ public final class PrareOrbitReader {
                 final InputStream zipstream = ResourceUtils.getInflaterInputStream(file);
                 return new BufferedReader(new InputStreamReader(zipstream));
             } catch(Exception e) {
-                System.out.println(e.getMessage());
-                // try as a plain file
+                throw new IOException(e);
             }
         }
 

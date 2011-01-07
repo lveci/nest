@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This operator applies orbit file to a given product.
@@ -82,7 +83,7 @@ public final class ApplyOrbitFileOp extends Operator {
     @Parameter(valueSet = {DORIS_POR+" (ENVISAT)", DORIS_VOR+" (ENVISAT)",
             DELFT_PRECISE+" (ENVISAT, ERS1&2)", PRARE_PRECISE+" (ERS1&2)" },
             defaultValue = DORIS_VOR+" (ENVISAT)", label="Orbit Type")
-    private String orbitType = DORIS_VOR;
+    private String orbitType = null;
 
     private MetadataElement absRoot = null;
     private EnvisatOrbitReader dorisReader = null;
@@ -140,6 +141,13 @@ public final class ApplyOrbitFileOp extends Operator {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            if(orbitType == null) {
+                if(mission.equals("ENVISAT")) {
+                    orbitType = DORIS_VOR;
+                } else if(mission.equals("ERS1") || mission.equals("ERS2")) {
+                    orbitType = DELFT_PRECISE;
+                }
+            }
             if(mission.equals("ENVISAT")) {
                 if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(DORIS_POR) && !orbitType.startsWith(DORIS_VOR)) {
                     throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
@@ -509,10 +517,13 @@ public final class ApplyOrbitFileOp extends Operator {
 
         // construct path to the orbit file folder
         String orbitPath = "";
+        String prefix = "";
         if(orbitType.contains(DORIS_VOR)) {
             orbitPath = Settings.instance().get("OrbitFiles/dorisVOROrbitPath");
+            prefix = "vor";
         } else if(orbitType.contains(DORIS_POR)) {
             orbitPath = Settings.instance().get("OrbitFiles/dorisPOROrbitPath");
+            prefix = "por";
         }
 
         final Date startDate = sourceProduct.getStartTime().getAsDate();
@@ -523,9 +534,16 @@ public final class ApplyOrbitFileOp extends Operator {
         }
         folder += month;
         orbitPath += File.separator + folder;
+        final File localPath = new File(orbitPath);
 
         // find orbit file in the folder
-        orbitFile = FindDorisOrbitFile(dorisReader, new File(orbitPath), startDate, absOrbit);
+        orbitFile = FindDorisOrbitFile(dorisReader, localPath, startDate, absOrbit);
+        if(orbitFile == null) {
+            final String remotePath = "/"+prefix + "/" + folder;
+            getRemoteDorisFiles(remotePath, localPath);
+        }
+        // find again in newly downloaded folder
+        orbitFile = FindDorisOrbitFile(dorisReader, localPath, startDate, absOrbit);
 
         if(orbitFile == null) {
             throw new IOException("Unable to find suitable DORIS orbit file in\n"+orbitPath);
@@ -575,6 +593,35 @@ public final class ApplyOrbitFileOp extends Operator {
         }
 
         return null;
+    }
+
+    private void getRemoteDorisFiles(final String remotePath, final File localPath) {
+        final String dorisFTP = Settings.instance().get("OrbitFiles/dorisFTP");
+        try {
+            if(ftp == null) {
+                ftp = new ftpUtils(dorisFTP, "dorisusr", "env_data");
+                fileSizeMap = ftpUtils.readRemoteFileList(ftp, dorisFTP, remotePath);
+            }
+
+            if(!localPath.exists())
+                localPath.mkdirs();
+
+            final Set<String> remoteFileNames = fileSizeMap.keySet();
+            for(String fileName : remoteFileNames) {
+                final long fileSize = fileSizeMap.get(fileName);
+                final File localFile = new File(localPath, fileName);
+                if(localFile.exists() && localFile.length() == fileSize)
+                    continue;
+
+                final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
+                if(result != ftpUtils.FTPError.OK) {
+                    localFile.delete();
+                }
+            }
+
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     // ====================================== DELFT ORBIT FILE ===============================================
@@ -712,12 +759,48 @@ public final class ApplyOrbitFileOp extends Operator {
         final Date startDate = sourceProduct.getStartTime().getAsDate();
         final String folder = String.valueOf(startDate.getYear() + 1900);
         orbitPath += File.separator + folder;
+        final File localPath = new File(orbitPath);
 
         // find orbit file in the folder
-        orbitFile = FindPrareOrbitFile(prareReader, new File(orbitPath), startDate);
+        orbitFile = FindPrareOrbitFile(prareReader, localPath, startDate);
+        if(orbitFile == null) {
+            final String remotePath = "/orbprc/"+mission + "/" + folder;
+            getRemotePrareFiles(remotePath, localPath);
+        }
+        // find again in newly downloaded folder
+        orbitFile = FindPrareOrbitFile(prareReader, localPath, startDate);
 
         if(orbitFile == null) {
             throw new IOException("Unable to find suitable orbit file \n"+orbitPath);
+        }
+    }
+
+    private void getRemotePrareFiles(final String remotePath, final File localPath) {
+        final String prareFTP = Settings.instance().get("OrbitFiles/prareFTP");
+        try {
+            if(ftp == null) {
+                ftp = new ftpUtils(prareFTP, "dpafftp", "sunshine");
+                fileSizeMap = ftpUtils.readRemoteFileList(ftp, prareFTP, remotePath);
+            }
+
+            if(!localPath.exists())
+                localPath.mkdirs();
+
+            final Set<String> remoteFileNames = fileSizeMap.keySet();
+            for(String fileName : remoteFileNames) {
+                final long fileSize = fileSizeMap.get(fileName);
+                final File localFile = new File(localPath, fileName);
+                if(localFile.exists() && localFile.length() == fileSize)
+                    continue;
+
+                final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
+                if(result != ftpUtils.FTPError.OK) {
+                    localFile.delete();
+                }
+            }
+
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
