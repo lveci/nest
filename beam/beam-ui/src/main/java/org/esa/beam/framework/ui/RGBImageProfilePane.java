@@ -18,6 +18,7 @@ package org.esa.beam.framework.ui;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RGBImageProfile;
 import org.esa.beam.framework.datamodel.RGBImageProfileManager;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.product.ProductExpressionPane;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
@@ -169,6 +170,26 @@ public class RGBImageProfilePane extends JPanel {
         }
 
         setRgbaExpressionsFromSelectedProfile();
+
+        if(_rgbaExprBoxes[0].getSelectedIndex() < 0) {
+            // default
+            if(bandNames.length == 3) {
+                _rgbaExprBoxes[0].setSelectedIndex(0);
+                _rgbaExprBoxes[1].setSelectedIndex(1);
+                _rgbaExprBoxes[2].setSelectedIndex(2);
+            } else {
+                int cnt = 0, i = 0;
+                for(Band band : _product.getBands()) {
+                    final String unit = band.getUnit();
+                    if(unit != null && unit.contains("intensity")) {
+                        _rgbaExprBoxes[i++].setSelectedIndex(cnt);
+                    }
+                    if(i >= _rgbaExprBoxes.length)
+                        break;
+                    ++cnt;
+                }
+            }
+        }
     }
 
     public Product getProduct() {
