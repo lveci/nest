@@ -451,7 +451,7 @@
 
 
     <build>
-        <outputDirectory>${outputdir}/modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
 
         <!-- Maven plugin configurations common to all BEAM modules -->
         <pluginManagement>
@@ -459,26 +459,24 @@
 
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
                     <configuration>
                         <source>1.6</source>
                         <target>1.6</target>
                         <debug>true</debug>
-			<optimize>true</optimize>
+						<optimize>true</optimize>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.2-beta-2</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.2</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
                     <executions>
                         <execution>
                             <phase>verify</phase>
@@ -508,6 +506,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
+					<version>2.7.1</version>
                     <configuration>
                         <!-- TODO
                              If enabled some assertions in GeoTools fail.
@@ -533,6 +532,7 @@
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.7</version>
                     <configuration>
                         <links>
                             <link>http://java.sun.com/javase/6/docs/api/</link>
@@ -550,10 +550,6 @@
                 </plugin>
 
                 <plugin>
-                    <artifactId>maven-surefire-report-plugin</artifactId>
-                </plugin>
-
-                <plugin>
                     <artifactId>maven-eclipse-plugin</artifactId>
                     <version>2.3-bc</version>
                     <configuration>
@@ -563,6 +559,7 @@
 
                 <plugin>
                     <artifactId>maven-idea-plugin</artifactId>
+					<version>2.2</version>
                     <configuration>
                         <downloadSources>true</downloadSources>
                         <downloadJavadocs>true</downloadJavadocs>
@@ -582,10 +579,12 @@
         <plugins>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
             </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2</version>
                 <configuration>
                     <finalName>beam</finalName>
                     <descriptors>
@@ -598,6 +597,7 @@
 
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -617,6 +617,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
             </plugin>
         </plugins>
     </reporting>

@@ -19,7 +19,7 @@
     <version>${nest.version}</version>
 
 	<build>
-        <outputDirectory>${outputdir}/modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
 		<pluginManagement>
 	        <plugins>
 				<plugin>
