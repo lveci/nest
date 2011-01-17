@@ -471,7 +471,6 @@
 	        <plugins>
 	            <plugin>
 	                <artifactId>maven-compiler-plugin</artifactId>
-					<version>2.3.2</version>
 	                <configuration>
 	                    <source>1.6</source>
 	                    <target>1.6</target>
@@ -521,17 +520,15 @@
 				
 				<plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.2</version>
+                    <version>2.2-beta-1</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.7</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-					<version>2.1.2</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -561,7 +558,6 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-					<version>2.7.1</version>
                     <configuration>
                         <skip>true</skip>
                         <printSummary>true</printSummary>
@@ -588,7 +584,6 @@
 
                 <plugin>
                     <artifactId>maven-idea-plugin</artifactId>
-					<version>2.2</version>
                     <configuration>
                         <downloadSources>true</downloadSources>
                         <downloadJavadocs>true</downloadJavadocs>
@@ -600,7 +595,6 @@
                 </plugin>
 				<plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-				<version>2.4.1</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -618,16 +612,15 @@
 		<plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2</version>
                 <configuration>
                     <descriptors>
-						<descriptor>nest-src/main/assembly/repository.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin-windows.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin-windows64.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin-linux.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin-linux64.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin-mac.xml</descriptor>
 						<descriptor>nest-src/main/assembly/bin.xml</descriptor>
+						<descriptor>nest-src/main/assembly/repository.xml</descriptor>
                         <descriptor>nest-src/main/assembly/src.xml</descriptor>
                     </descriptors>
                 </configuration>
@@ -642,7 +635,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
 				<configuration>
 					<aggregate>true</aggregate>
 					<maxmemory>1024m</maxmemory>

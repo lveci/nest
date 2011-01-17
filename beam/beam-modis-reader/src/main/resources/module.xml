@@ -26,9 +26,9 @@
     <dependency>
         <module>beam-core</module>
     </dependency>
-    <dependency>
+    <!--dependency>
         <module>lib-hdf</module>
-    </dependency>
+    </dependency-->
     <dependency>
         <module>beam-visat</module>
         <optional>true</optional>

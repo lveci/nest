@@ -80,7 +80,6 @@
 				
                 <exclude>com.bc.ceres:ceres-launcher</exclude>
                 <exclude>com.bc.ceres:ceres-deploy</exclude>
-                <exclude>com.bc.ceres:ceres-fs</exclude>
                 <exclude>com.bc.ceres:ceres-site</exclude>				
 				<exclude>com.bc.ceres:ceres-binding</exclude>
 				<exclude>com.bc.ceres:ceres-core</exclude>
@@ -88,6 +87,8 @@
 				<exclude>com.bc.ceres:ceres-ui</exclude>
 				<exclude>com.bc.ceres:ceres-binio</exclude>
 				<exclude>com.bc.ceres:ceres-jai</exclude>
+				<exclude>ncsa.hdf:lib-hdf</exclude>
+				<exclude>ucar.netcdf:lib-netcdf</exclude>
 				<exclude>org.esa.nest.doris:doris-core-prototypes</exclude>
 				<exclude>org.esa.nest:doris-op-prototypes</exclude>
             </excludes>
@@ -109,11 +110,6 @@
                         <outputDirectory>lib</outputDirectory>
 						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
                         <excludes>
-							<exclude>ncsa.hdf:lib-hdf</exclude>
-							<exclude>ucar.netcdf:lib-netcdf</exclude>
-							<exclude>edu.ucar:netcdf</exclude>
-                            <exclude>org.slf4j.slf4j:slf4j-api</exclude> <!--logging from netcdf -->
-							<exclude>org.slf4j.slf4j:slf4j-jdk14</exclude>
 							<exclude>jdom:jdom</exclude>
                             <exclude>javax.media:jai</exclude> <!--jai from geotools, we have our own -->
 							<exclude>javax.media:jai_codec</exclude>

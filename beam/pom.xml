@@ -129,7 +129,7 @@
         <module>beam-cluster-analysis</module>
 
         <module>beam-alos-reader</module>
-        <module>beam-netcdf</module>
+        <!--module>beam-netcdf</module-->
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
         <module>beam-modis-reader</module>
@@ -459,7 +459,6 @@
 
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-					<version>2.3.2</version>
                     <configuration>
                         <source>1.6</source>
                         <target>1.6</target>
@@ -471,12 +470,11 @@
 
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.2</version>
+                    <version>2.2-beta-2</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-					<version>2.1.2</version>
                     <executions>
                         <execution>
                             <phase>verify</phase>
@@ -506,7 +504,6 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-					<version>2.7.1</version>
                     <configuration>
                         <!-- TODO
                              If enabled some assertions in GeoTools fail.
@@ -532,7 +529,6 @@
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.7</version>
                     <configuration>
                         <links>
                             <link>http://java.sun.com/javase/6/docs/api/</link>
@@ -559,7 +555,6 @@
 
                 <plugin>
                     <artifactId>maven-idea-plugin</artifactId>
-					<version>2.2</version>
                     <configuration>
                         <downloadSources>true</downloadSources>
                         <downloadJavadocs>true</downloadJavadocs>
@@ -579,12 +574,10 @@
         <plugins>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
             </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2</version>
                 <configuration>
                     <finalName>beam</finalName>
                     <descriptors>
@@ -597,7 +590,6 @@
 
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-				<version>2.4.1</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -617,7 +609,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
             </plugin>
         </plugins>
     </reporting>
