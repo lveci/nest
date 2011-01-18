@@ -204,6 +204,13 @@ public final class DBScanner extends SwingWorker {
         }
     }
 
+    public static class ProductFileFilter implements java.io.FileFilter {
+
+        public boolean accept(final File file) {
+            return !file.isDirectory() && !TestUtils.isNotProduct(file);
+        }
+    }
+
     public interface DBScannerListener {
 
         public enum MSG { DONE, FOLDERS_SCANNED, QUICK_LOOK_GENERATED }

@@ -272,53 +272,55 @@ public class TestUtils {
         return false;
     }
 
-    public static int recurseProcessFolder(final OperatorSpi spi, final File folder, int iterations,
+    public static int recurseProcessFolder(final OperatorSpi spi, final File origFolder, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
-        final DBScanner.DirectoryFileFilter dirFilter = new DBScanner.DirectoryFileFilter();
-        for(File file : folder.listFiles(dirFilter)) {
+
+        final File[] folderList = origFolder.listFiles(new DBScanner.DirectoryFileFilter());
+        for(File folder : folderList) {
+            if(maxIteration > 0 && iterations >= maxIteration)
+                break;
+            if(!folder.getName().contains("skipTest")) {
+                iterations = recurseProcessFolder(spi, folder, iterations, productTypeExemptions, exceptionExemptions);
+            }
+        }
+
+        final File[] fileList = origFolder.listFiles(new DBScanner.ProductFileFilter());
+        for(File file : fileList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
 
-            if(file.isDirectory()) {
-                if(!file.getName().contains("skipTest")) {
-                    iterations = recurseProcessFolder(spi, file, iterations, productTypeExemptions, exceptionExemptions);
-                }
-            } else {
-                try {
-                    if(isNotProduct(file))
+            try {
+                final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                if(reader != null) {
+                    final Product sourceProduct = reader.readProductNodes(file, null);
+                    if(contains(sourceProduct.getProductType(), productTypeExemptions))
                         continue;
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if(reader != null) {
-                        final Product sourceProduct = reader.readProductNodes(file, null);
-                        if(contains(sourceProduct.getProductType(), productTypeExemptions))
-                            continue;
 
-                        final Operator op = spi.createOperator();
-                        op.setSourceProduct(sourceProduct);
+                    final Operator op = spi.createOperator();
+                    op.setSourceProduct(sourceProduct);
 
-                        System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
-                        TestUtils.executeOperator(op);
+                    System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
+                    TestUtils.executeOperator(op);
 
-                        ++iterations;
-                    } else {
-                        System.out.println(file.getName() + " is non valid");
-                    }
-                } catch(Exception e) {
-                    boolean ok = false;
-                    if(exceptionExemptions != null) {
-                        for(String excemption : exceptionExemptions) {
-                            if(e.getMessage().contains(excemption)) {
-                                ok = true;
-                                System.out.println("Excemption for "+e.getMessage());
-                                break;
-                            }
+                    ++iterations;
+                } else {
+                    System.out.println(file.getAbsolutePath() + " is non valid");
+                }
+            } catch(Exception e) {
+                boolean ok = false;
+                if(exceptionExemptions != null) {
+                    for(String excemption : exceptionExemptions) {
+                        if(e.getMessage().contains(excemption)) {
+                            ok = true;
+                            System.out.println("Excemption for "+e.getMessage());
+                            break;
                         }
                     }
-                    if(!ok) {
-                        //System.out.println("Failed to process "+ file.toString());
-                        throw e;
-                    }
+                }
+                if(!ok) {
+                    System.out.println("Failed to process "+ file.toString());
+                    throw e;
                 }
             }
         }
