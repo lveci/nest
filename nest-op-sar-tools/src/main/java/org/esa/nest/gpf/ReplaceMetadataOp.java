@@ -97,8 +97,8 @@ public class ReplaceMetadataOp extends Operator {
             targetProduct.setDescription(slaveProduct.getDescription());
 
             final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(masterProduct);
-            final int isPolsarPro = absRootMst.getAttributeInt(AbstractMetadata.polsarProData, 0);
-            if(isPolsarPro > 0) {
+            final int isPolsar = absRootMst.getAttributeInt(AbstractMetadata.polsarData, 0);
+            if(isPolsar > 0) {
                 resetPolarizations(AbstractMetadata.getAbstractedMetadata(targetProduct));
             }
 
@@ -112,7 +112,7 @@ public class ReplaceMetadataOp extends Operator {
         absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
         absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
         absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
-        absRoot.setAttributeInt(AbstractMetadata.polsarProData, 1);
+        absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
     }
 
     /**

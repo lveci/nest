@@ -111,7 +111,7 @@ public class PolsarProProductReader extends NestEnviProductReader {
         initMetadata(product, mainHeaderFile);
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        absRoot.setAttributeInt(AbstractMetadata.polsarProData, 1);
+        absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
 
         return product;
     }

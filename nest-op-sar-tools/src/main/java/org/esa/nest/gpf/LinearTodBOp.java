@@ -202,7 +202,7 @@ public final class LinearTodBOp extends Operator {
         }
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-        final boolean isPolsarPro = absRoot.getAttributeInt(AbstractMetadata.polsarProData, 0) == 1;
+        final boolean isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
 
         String targetBandName;
         for (int i = 0; i < sourceBands.length; i++) {
@@ -237,7 +237,7 @@ public final class LinearTodBOp extends Operator {
                 if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
                     targetBandName += "_" + pol.toUpperCase();
                 }
-                if(isPolsarPro) {
+                if(isPolsar) {
                     final String pre = OperatorUtils.getprefixFromBandName(srcBandNames[0]);
                     targetBandName = "Intensity_" + pre;
                 }

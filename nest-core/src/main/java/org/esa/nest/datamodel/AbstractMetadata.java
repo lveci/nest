@@ -80,7 +80,7 @@ public final class AbstractMetadata {
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
     public static final String mds3_tx_rx_polar = "mds3_tx_rx_polar";
     public static final String mds4_tx_rx_polar = "mds4_tx_rx_polar";
-    public static final String polsarProData = "polsarpro_data";
+    public static final String polsarData = "polsar_data";
     public static final String[] polarTags = { AbstractMetadata.mds1_tx_rx_polar,AbstractMetadata.mds2_tx_rx_polar,
                                                AbstractMetadata.mds3_tx_rx_polar,AbstractMetadata.mds4_tx_rx_polar };
     public static final String algorithm = "algorithm";
@@ -207,7 +207,7 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds3_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds4_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
-        addAbstractedAttribute(absRoot, polsarProData, ProductData.TYPE_UINT8, "flag", "PolSARPro Imported Data");
+        addAbstractedAttribute(absRoot, polsarData, ProductData.TYPE_UINT8, "flag", "Polarimetric Data");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");

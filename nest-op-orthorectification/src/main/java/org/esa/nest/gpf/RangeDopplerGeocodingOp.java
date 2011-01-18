@@ -215,7 +215,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private Calibrator calibrator = null;
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
-    private boolean isPolsarPro = false;
+    private boolean isPolsar = false;
 
     private boolean flipIndex = false; // temp fix for descending Radarsat2
 
@@ -422,7 +422,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        isPolsarPro = absRoot.getAttributeInt(AbstractMetadata.polsarProData, 0) == 1;
+        isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
 
     /**
@@ -731,7 +731,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             if (unit != null && unit.contains(Unit.PHASE)) {
                 continue;
-            } else if (unit != null && !isPolsarPro &&
+            } else if (unit != null && !isPolsar &&
                     (unit.equals(Unit.REAL)||unit.equals(Unit.IMAGINARY))) {
 
                 if (i == sourceBands.length - 1) {
@@ -748,7 +748,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
 
                 if (saveSigmaNought) {
-                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
+                    if (pol != null && !pol.isEmpty() && !isPolsar) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Sigma0";
@@ -765,7 +765,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
+                    if (pol != null && !pol.isEmpty() && !isPolsar) {
                         targetBandName = "Intensity_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Intensity";
@@ -784,7 +784,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
                 if (saveSigmaNought) {
                     targetBandName = "Sigma0";
-                    if (pol != null && !pol.isEmpty() && !isPolsarPro) {
+                    if (pol != null && !pol.isEmpty() && !isPolsar) {
                         targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
@@ -800,7 +800,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 if (saveSelectedSourceBand) {
                     targetBandName = srcBand.getName();
-                    if (pol != null && !pol.isEmpty() && !isPolsarPro && !srcBand.getName().toLowerCase().contains(pol)) {
+                    if (pol != null && !pol.isEmpty() && !isPolsar && !srcBand.getName().toLowerCase().contains(pol)) {
                         targetBandName += "_" + pol.toUpperCase();
                     }
                     if (addTargetBand(targetBandName, unit, srcBand)) {
@@ -1629,7 +1629,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
+        if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
@@ -1681,7 +1681,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
+        if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
@@ -1792,7 +1792,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (!isPolsarPro && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
+        if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {
