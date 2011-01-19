@@ -12,8 +12,8 @@ IF [%NEST_HOME:~-1%]==[\] set NEST_HOME=%NEST_HOME:~0,-1%
     "-Dnest.mainClass=org.esa.beam.framework.gpf.main.Main" ^
     "-Dnest.home=%NEST_HOME%" ^
     "-Dnest.debug=false" ^
-    "-Dncsa.hdf.hdflib.HDFLibrary.hdflib=%NEST_HOME%\modules\lib-hdf-2.3\lib\win\jhdf.dll" ^
-    "-Dncsa.hdf.hdf5lib.H5.hdf5lib=%NEST_HOME%\modules\lib-hdf-2.3\lib\win\jhdf5.dll" ^
+    "-Dncsa.hdf.hdflib.HDFLibrary.hdflib=%NEST_HOME%\jhdf.dll" ^
+    "-Dncsa.hdf.hdf5lib.H5.hdf5lib=%NEST_HOME%\jhdf5.dll" ^
     -jar "%NEST_HOME%\bin\ceres-launcher.jar" %*
 
 exit /B 0
