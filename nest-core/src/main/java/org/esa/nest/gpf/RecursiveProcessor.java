@@ -13,11 +13,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.util;
+package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.util.TestUtils;
 
 import java.io.File;
 

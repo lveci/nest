@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Settings>	
-	<dataPath value="${HOME}/NestData"/>
-	<demPath value="${dataPath}/DEMs"/>
+	<AuxDataPath value="${HOME}/AuxData"/>
+	<demPath value="${AuxDataPath}/DEMs"/>
 	
 	<AuxData>
 		<ersAuxDataPath value="${NEST_HOME}/auxdata/ers"/>
@@ -20,12 +20,12 @@
 	</DEM>
 	<OrbitFiles label="Orbit Files">
 		<dorisFTP value="diss-nas-fp.eo.esa.int"/>
-		<dorisVOROrbitPath value="${dataPath}/Orbits/Doris/vor"/>
-		<dorisPOROrbitPath value="${dataPath}/Orbits/Doris/por"/>
+		<dorisVOROrbitPath value="${AuxDataPath}/Orbits/Doris/vor"/>
+		<dorisPOROrbitPath value="${AuxDataPath}/Orbits/Doris/por"/>
 		
-		<delftEnvisatOrbitPath value="${dataPath}/Orbits/Delft Precise Orbits/ODR.ENVISAT1/eigen-cg03c"/>
-		<delftERS1OrbitPath value="${dataPath}/Orbits/Delft Precise Orbits/ODR.ERS-1/dgm-e04"/>
-		<delftERS2OrbitPath value="${dataPath}/Orbits/Delft Precise Orbits/ODR.ERS-2/dgm-e04"/>
+		<delftEnvisatOrbitPath value="${AuxDataPath}/Orbits/Delft Precise Orbits/ODR.ENVISAT1/eigen-cg03c"/>
+		<delftERS1OrbitPath value="${AuxDataPath}/Orbits/Delft Precise Orbits/ODR.ERS-1/dgm-e04"/>
+		<delftERS2OrbitPath value="${AuxDataPath}/Orbits/Delft Precise Orbits/ODR.ERS-2/dgm-e04"/>
 		
 		<delftFTP value="dutlru2.lr.tudelft.nl"/>
 		<delftFTP_ENVISAT_precise_remotePath value="/pub/orbits/ODR.ENVISAT1/eigen-cg03c/"/>
@@ -33,7 +33,7 @@
 		<delftFTP_ERS2_precise_remotePath value="/pub/orbits/ODR.ERS-2/dgm-e04/"/>		
 		
 		<prareFTP value="esaftp.dfd.dlr.de"/>
-		<prareERS1OrbitPath value="${dataPath}/Orbits/ers_precise_orb/ERS1"/>
-		<prareERS2OrbitPath value="${dataPath}/Orbits/ers_precise_orb/ERS2"/>
+		<prareERS1OrbitPath value="${AuxDataPath}/Orbits/ers_precise_orb/ERS1"/>
+		<prareERS2OrbitPath value="${AuxDataPath}/Orbits/ers_precise_orb/ERS2"/>
 	</OrbitFiles>
 </Settings>

@@ -23,6 +23,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.beam.nest_mods.StdOutProgressMonitor;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -144,13 +145,22 @@ public class OperatorExecutor {
     }
 
     private void scheduleRowBandColumn(Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
+        final StdOutProgressMonitor stdOutPM = new StdOutProgressMonitor(tileCountY);
+
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (final PlanarImage image : images) {
                 BeamLogManager.getSystemLogger().info("Scheduling tile row " + tileY + " for " + image);
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
                     scheduleTile(image, tileX, tileY, semaphore, listeners, pm);
                 }
+
+                if(pm == ProgressMonitor.NULL) {
+                    stdOutPM.worked(tileY);
+                }
             }
+        }
+        if(pm == ProgressMonitor.NULL) {
+            stdOutPM.done();
         }
     }
 

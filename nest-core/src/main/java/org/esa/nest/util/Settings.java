@@ -56,9 +56,13 @@ public final class Settings {
         Load();
     }
 
-    private static String getSettingsFileName() {
+    public static boolean isWindowsOS() {
         final String osName = System.getProperty("os.name");
-        if (osName.toLowerCase().contains("win")) {
+        return (osName.toLowerCase().contains("win"));
+    }
+
+    private static String getSettingsFileName() {
+        if (isWindowsOS()) {
             return "settings_win.xml";
         } else {
             return "settings_unix.xml";
@@ -169,10 +173,7 @@ public final class Settings {
         return settingMap.get(key);
     }
 
-    //public void set(String key, String value)
-    //{
-        //rootXML
-
-        //settingMap.put(key, value);
-    //}
+    public static File getAuxDataFolder() {
+        return new File(Settings.instance().get("AuxDataPath"));
+    }
 }

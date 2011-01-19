@@ -31,6 +31,7 @@ import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -83,6 +84,21 @@ public class DatApp extends VisatApp {
 
             HelpSys.showTheme("top");
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
+        }
+
+        validateAuxDataFolder();
+    }
+
+    private void validateAuxDataFolder() {
+        File NestData = new File("~\\NestData");
+        if(Settings.isWindowsOS()) {
+            NestData = new File("c:\\NestData");
+        }
+        File auxDataFolder = Settings.getAuxDataFolder();
+        if(!auxDataFolder.exists()) {
+            if(NestData.exists()) {
+                NestData.renameTo(auxDataFolder);
+            }
         }
     }
 

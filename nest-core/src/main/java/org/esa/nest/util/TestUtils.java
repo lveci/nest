@@ -28,6 +28,7 @@ import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.DBScanner;
+import org.esa.nest.gpf.RecursiveProcessor;
 
 import java.io.File;
 import java.io.IOException;

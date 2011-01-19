@@ -23,6 +23,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.internal.OperatorConfiguration;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
+import org.esa.beam.nest_mods.StdOutProgressMonitor;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -209,11 +210,6 @@ public class GraphProcessor {
         final Semaphore semaphore = new Semaphore(parallelism, true);
         final TileComputationListener tcl = new GraphTileComputationListener(semaphore, parallelism);
         final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
-
-        int percentComplete;
-        final int percentStep = 10;
-        int lastPercentComplete = percentStep;
-        int cnt=0;
         
         try {
             pm.beginTask("Computing raster data...", numPmTicks);
@@ -221,6 +217,7 @@ public class GraphProcessor {
                 List<NodeContext> nodeContextList = tileDimMap.get(dimension);
                 final int numXTiles = dimension.width;
                 final int numYTiles = dimension.height;
+                final StdOutProgressMonitor stdOutPM = new StdOutProgressMonitor(numYTiles);
                 Dimension tileSize = nodeContextList.get(0).getTargetProduct().getPreferredTileSize();
                 for (int tileY = 0; tileY < numYTiles; tileY++) {
                     for (int tileX = 0; tileX < numXTiles; tileX++) {
@@ -279,15 +276,11 @@ public class GraphProcessor {
                     }
 
                     if(pm == ProgressMonitor.NULL) {
-                        percentComplete = (int)((tileY / (float)numYTiles) * 100.0f);
-                        if(percentComplete > lastPercentComplete) {
-                            System.out.print(" "+ lastPercentComplete + "%");
-                            lastPercentComplete = ((percentComplete / percentStep) * percentStep) + percentStep;
-                        }
+                        stdOutPM.worked(tileY);
                     }
                 }
                 if(pm == ProgressMonitor.NULL) {
-                    System.out.println(" 100%");
+                    stdOutPM.done();   
                 }
             }
             acquirePermits(semaphore, parallelism);
