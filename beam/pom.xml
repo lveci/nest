@@ -492,7 +492,7 @@
                 <plugin>
                     <groupId>com.bc.maven.plugins</groupId>
                     <artifactId>maven-javahelp-plugin</artifactId>
-                    <version>1.0</version>
+					<version>1.0</version>
                     <executions>
                         <execution>
                             <goals>
@@ -566,7 +566,6 @@
 
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>
