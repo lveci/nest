@@ -134,8 +134,6 @@
 	
 	<!--Analysis Operators-->
 	<mapID target="PCAOp" url="operators/PCAOp.html"/>
-	<mapID target="clusterAnalysisEM" url="operators/EM.html"/>
-	<mapID target="clusterAnalysisKMeans" url="operators/KMeans.html"/>
 	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
 	
 	<!--Utility Operators-->
@@ -143,8 +141,6 @@
 	<mapID target="SubsetOp" url="operators/SubsetOp.html"/>
 	<mapID target="BandArithmeticOp" url="operators/BandArithmeticOp.html"/>
 	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
-	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
-	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	<mapID target="FillHoleOp" url="operators/FillHoleOp.html"/>
 	<mapID target="FilterOperator" url="visat/CreateFilteredBand.html"/>
 	

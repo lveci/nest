@@ -279,4 +279,10 @@
 
     </extension>
 
+	<extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/sartools.hs</path>
+        </helpSet>
+    </extension>
 </module>

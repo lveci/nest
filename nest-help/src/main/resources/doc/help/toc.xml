@@ -149,8 +149,6 @@
 		</tocitem>	
 		<tocitem text="Analysis Operators">
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
-			<tocitem text="EM Cluster Analysis" target="clusterAnalysisEM"/>
-			<tocitem text="K-Means Cluster Analysis" target="clusterAnalysisKMeans"/>
 			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
 		</tocitem>	
 		<tocitem text="Utility Operators">
@@ -158,8 +156,6 @@
 			<tocitem text="Create Subset" target="SubsetOp"/>
 			<tocitem text="Band Arithmetic" target="BandArithmeticOp"/>
 			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
-			<tocitem text="Over Sample" target="OverSampleOp"/>	
-			<tocitem text="Under Sample" target="UnderSampleOp"/>
 			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
 			<tocitem text="Image Filtering" target="FilterOperator"/>
 		</tocitem>	
