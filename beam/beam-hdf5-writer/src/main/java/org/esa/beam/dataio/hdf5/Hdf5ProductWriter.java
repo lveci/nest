@@ -331,7 +331,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         _fileID = -1;
     }
 
-    private int getJH5DataType(int productDataType) {
+    private int getH5DataType(int productDataType) {
         int jh5DataType = -1;
         if (productDataType == ProductData.TYPE_INT8) {
             jh5DataType = HDF5Constants.H5T_NATIVE_INT8;
@@ -361,9 +361,8 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
     private int createH5TypeID(int productDataType) throws IOException {
         try {
-            final int jh5DataType = getJH5DataType(productDataType);
-            final int ch5DataType = H5.J2C(jh5DataType);
-            return H5.H5Tcopy(ch5DataType);
+            final int h5DataType = getH5DataType(productDataType);
+            return H5.H5Tcopy(h5DataType);
         } catch (HDF5LibraryException e) {
             throw new ProductIOException(createErrorMessage(e));
         }
@@ -403,9 +402,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     private void writeMetadata() throws IOException {
         final MetadataElement root = getSourceProduct().getMetadataRoot();
         if (root != null) {
-            for (int i = 0; i < root.getNumElements(); i++) {
-                writeMetadataElement(_fileID, root.getElementAt(i));
-            }
+            writeMetadataElement(_fileID, root);
         }
     }
 
@@ -413,61 +410,13 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
         int groupID = createH5G(locationID, element.getName());
         try {
-            final Map<String, Integer> dupeCntAtrib = new HashMap<String, Integer>();
-
             for (int i = 0; i < element.getNumAttributes(); i++) {
-                final MetadataAttribute attribute = element.getAttributeAt(i);
-                final String name = attribute.getName();
-                boolean lastDupe = true;
-                for (int j = i+1; j < element.getNumAttributes(); j++) {
-                    final MetadataAttribute dupeAtrib = element.getAttributeAt(j);
-                    if(dupeAtrib.getName().equals(name)) {
-                        Integer cnt = dupeCntAtrib.get(name);
-                        if(cnt == null)
-                            dupeCntAtrib.put(name, 1);
-                        else {
-                            ++cnt;
-                            dupeCntAtrib.put(name, cnt);
-                        }
-                        lastDupe = false;
-                        break;
-                    }
-                }
-                if(dupeCntAtrib.get(name) != null) {
-                    int cnt = dupeCntAtrib.get(name);
-                    if(lastDupe)
-                        ++cnt;
-                    attribute.setName(attribute.getName()+"."+cnt);
-                }
+                MetadataAttribute attribute = element.getAttributeAt(i);
                 writeMetadataAttribute(groupID, attribute);
             }
 
-            final Map<String, Integer> dupeCntElem = new HashMap<String, Integer>();
-
             for (int i = 0; i < element.getNumElements(); i++) {
-                final MetadataElement subElement = element.getElementAt(i);
-                final String name = subElement.getName();
-                boolean lastDupe = true;
-                for (int j = i+1; j < element.getNumElements(); j++) {
-                    final MetadataElement dupeElement = element.getElementAt(j);
-                    if(dupeElement.getName().equals(name)) {
-                        Integer cnt = dupeCntElem.get(name);
-                        if(cnt == null)
-                            dupeCntElem.put(name, 1);
-                        else {
-                            ++cnt;
-                            dupeCntElem.put(name, cnt);
-                        }
-                        lastDupe = false;
-                        break;
-                    }
-                }
-                if(dupeCntElem.get(name) != null) {
-                    int cnt = dupeCntElem.get(name);
-                    if(lastDupe)
-                        ++cnt;
-                    subElement.setName(subElement.getName()+"."+cnt);
-                }
+                MetadataElement subElement = element.getElementAt(i);
                 writeMetadataElement(groupID, subElement);
             }
         } catch (IOException e) {
@@ -487,12 +436,12 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         } else if (attribute.getData().isScalar()) {
             createScalarAttribute(locationID,
                                   attribute.getName(),
-                                  getJH5DataType(productDataType),
+                                  getH5DataType(productDataType),
                                   attribute.getData().getElems());
         } else {
             createArrayAttribute(locationID,
                                  attribute.getName(),
-                                 getJH5DataType(productDataType),
+                                 getH5DataType(productDataType),
                                  attribute.getData().getNumElems(),
                                  attribute.getData().getElems());
         }
@@ -609,7 +558,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         int attrSpaceID = -1;
         int attributeID = -1;
         try {
-            attrTypeID = H5.H5Tcopy(H5.J2C(jh5DataType));
+            attrTypeID = H5.H5Tcopy(jh5DataType);
             if (typeSize > 0) {
                 H5.H5Tset_size(attrTypeID, typeSize);
             }
@@ -636,7 +585,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         int attrSpaceID = -1;
         int attributeID = -1;
         try {
-            attrTypeID = H5.H5Tcopy(H5.J2C(jh5DataType));
+            attrTypeID = H5.H5Tcopy(jh5DataType);
             attrSpaceID = H5.H5Screate_simple(1, new long[]{arraySize}, null);
             attributeID = H5.H5Acreate(locationID, name, attrTypeID, attrSpaceID, HDF5Constants.H5P_DEFAULT);
             H5.H5Awrite(attributeID, attrTypeID, value);
