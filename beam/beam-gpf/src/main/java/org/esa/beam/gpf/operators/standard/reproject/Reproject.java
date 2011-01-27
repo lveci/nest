@@ -53,7 +53,7 @@ import java.awt.image.renderable.ParameterBlock;
 
 
 
-final class Reproject {
+public final class Reproject {
     
 
     private static final int DIMENSION_X_INDEX = 0;
@@ -65,7 +65,7 @@ final class Reproject {
     
     private OpImage[] leveledWarpImages;
     
-    Reproject(int numLevels) {
+    public Reproject(int numLevels) {
         leveledWarpImages = new OpImage[numLevels];
     }
     private synchronized Warp getCachingWarp(Warp warp, int width, int height, Dimension tileSize, int level) {

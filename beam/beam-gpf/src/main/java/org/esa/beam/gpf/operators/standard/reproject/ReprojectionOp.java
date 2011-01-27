@@ -94,12 +94,12 @@ public class ReprojectionOp extends Operator {
 
 
     @SourceProduct(alias = "source", description = "The product which will be reprojected.")
-    private Product sourceProduct;
+    protected Product sourceProduct;
     @SourceProduct(alias = "collocateWith", optional = true, label = "Collocation product",
                    description = "The source product will be collocated with this product.")
     private Product collocationProduct;
     @TargetProduct
-    private Product targetProduct;
+    protected Product targetProduct;
 
     @Parameter(description = "A file which contains the target Coordinate Reference System in WKT format.")
     private File wktFile;
@@ -108,7 +108,7 @@ public class ReprojectionOp extends Operator {
                              "authority code. For appropriate EPSG authority codes see (www.epsg-registry.org). " +
                              "AUTO authority can be used with code 42001 (UTM), and 42002 (Transverse Mercator) " +
                              "where the scene center is used as reference. Examples: EPSG:4326, AUTO:42001")
-    private String crs;
+    protected String crs;
 
     @Parameter(alias = "resampling",
                label = "Resampling Method",
@@ -119,7 +119,7 @@ public class ReprojectionOp extends Operator {
 
     @Parameter(description = "Whether tie-point grids should be included in the output product.",
                defaultValue = "true")
-    private boolean includeTiePointGrids;
+    protected boolean includeTiePointGrids;
 
     // Referencing  todo - parameter object?
     @Parameter(description = "The X-position of the reference pixel.")
@@ -156,9 +156,9 @@ public class ReprojectionOp extends Operator {
     private Double noDataValue;
 
     private ElevationModel elevationModel;
-    private MultiLevelModel srcModel;
-    private MultiLevelModel targetModel;
-    private Reproject reprojection;
+    protected MultiLevelModel srcModel;
+    protected MultiLevelModel targetModel;
+    protected Reproject reprojection;
 
 
     @Override
@@ -262,7 +262,7 @@ public class ReprojectionOp extends Operator {
     }
 
 
-    private void reprojectRasterDataNodes(RasterDataNode[] rasterDataNodes) {
+    protected void reprojectRasterDataNodes(RasterDataNode[] rasterDataNodes) {
         for (RasterDataNode raster : rasterDataNodes) {
             reprojectSourceRaster(raster);
         }
@@ -452,7 +452,7 @@ public class ReprojectionOp extends Operator {
         return sourceLevel;
     }
 
-    private void copyIndexCoding() {
+    protected void copyIndexCoding() {
         final ProductNodeGroup<IndexCoding> indexCodingGroup = sourceProduct.getIndexCodingGroup();
         for (int i = 0; i < indexCodingGroup.getNodeCount(); i++) {
             IndexCoding sourceIndexCoding = indexCodingGroup.get(i);
@@ -460,7 +460,7 @@ public class ReprojectionOp extends Operator {
         }
     }
 
-    private static void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
+    protected static void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
                                        ProductNodeGroup<Placemark> targetPlacemarkGroup,
                                        PlacemarkDescriptor descriptor) {
         final Placemark[] placemarks = sourcePlacemarkGroup.toArray(new Placemark[0]);
@@ -490,7 +490,7 @@ public class ReprojectionOp extends Operator {
         }
     }
 
-    private CoordinateReferenceSystem createTargetCRS() throws OperatorException {
+    protected CoordinateReferenceSystem createTargetCRS() throws OperatorException {
         try {
             if (wktFile != null) {
                 return CRS.parseWKT(FileUtils.readText(wktFile));
@@ -572,13 +572,13 @@ public class ReprojectionOp extends Operator {
         return resamplingType;
     }
 
-    void validateResamplingParameter() {
+    protected void validateResamplingParameter() {
         if (getResampleType() == -1) {
             throw new OperatorException("Invalid resampling method: " + resamplingName);
         }
     }
 
-    void validateReferencingParameters() {
+    protected void validateReferencingParameters() {
         if (!((referencePixelX == null && referencePixelY == null && easting == null && northing == null)
               || (referencePixelX != null && referencePixelY != null && easting != null && northing != null))) {
             throw new OperatorException("Invalid referencing parameters: \n" +
@@ -586,14 +586,14 @@ public class ReprojectionOp extends Operator {
         }
     }
 
-    void validateTargetGridParameters() {
+    protected void validateTargetGridParameters() {
         if ((pixelSizeX != null && pixelSizeY == null) ||
             (pixelSizeX == null && pixelSizeY != null)) {
             throw new OperatorException("'pixelSizeX' and 'pixelSizeY' must be specifies both or not at all.");
         }
     }
 
-    private ImageGeometry createImageGeometry(CoordinateReferenceSystem targetCrs) {
+    protected ImageGeometry createImageGeometry(CoordinateReferenceSystem targetCrs) {
         ImageGeometry imageGeometry;
         if (collocationProduct != null) {
             imageGeometry = ImageGeometry.createCollocationTargetGeometry(sourceProduct, collocationProduct);

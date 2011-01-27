@@ -26,15 +26,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.jai.SingleBandedSampleModel;
 
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.OpImage;
-import javax.media.jai.OperationDescriptor;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.ParameterListDescriptor;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.TiledImage;
+import javax.media.jai.*;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -53,6 +45,22 @@ public class JaiOpTest extends TestCase {
             fail("OperatorException expected");
         } catch (OperatorException e) {
             // ok
+        }
+    }
+
+    public void testListJAIOps() {
+        final OperationRegistry or = JAI.getDefaultInstance().getOperationRegistry();
+        String[] modeNames = RegistryMode.getModeNames();
+        String[] descriptorNames;
+
+        for (int i = 0; i < modeNames.length; i++) {
+          System.out.println("For registry mode: " + modeNames[i]);
+
+          descriptorNames = or.getDescriptorNames(modeNames[i]);
+          for (int j = 0; j < descriptorNames.length; j++) {
+            System.out.print("\tRegistered Operator: ");
+            System.out.println(descriptorNames[j]);
+          }
         }
     }
 

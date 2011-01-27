@@ -32,7 +32,7 @@ public class TestMapProjectionOp extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new MapProjectionOp.Spi();
+        spi = new MapReProjectionOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
