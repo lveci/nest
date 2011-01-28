@@ -104,11 +104,11 @@ class DatAboutBox extends ModalDialog {
         final String pattern =
                 "<html>" +
                 "<b>NEST DAT Version "+ver+"</b>" +
-                "<br>(c) Copyright 2007-2010 by Array Systems Computing Inc. and contributors. All rights reserved." +
+                "<br>(c) Copyright 2007-2011 by Array Systems Computing Inc. and contributors. All rights reserved." +
                 "<br>Visit http://www.array.ca/nest" +
                 "<br>" +
                 "<b>BEAM </b>" +
-                "<br>(c) Copyright 2002-2010 by Brockmann Consult and contributors. All rights reserved." +
+                "<br>(c) Copyright 2002-2011 by Brockmann Consult and contributors. All rights reserved." +
                 "<br>Visit http://www.brockmann-consult.de/beam/" +
                 "<br>" +
                 "<br>This program has been developed under contract to ESA (ESRIN)." +
