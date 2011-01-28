@@ -173,7 +173,10 @@ public class RGBImageProfilePane extends JPanel {
 
         if(_rgbaExprBoxes[0].getSelectedIndex() < 0) {
             // default
-            if(bandNames.length == 3) {
+            if(bandNames.length == 2) {
+                _rgbaExprBoxes[0].setSelectedIndex(0);
+                _rgbaExprBoxes[1].setSelectedIndex(1);
+            } else if(bandNames.length == 3) {
                 _rgbaExprBoxes[0].setSelectedIndex(0);
                 _rgbaExprBoxes[1].setSelectedIndex(1);
                 _rgbaExprBoxes[2].setSelectedIndex(2);

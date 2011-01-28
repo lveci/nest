@@ -239,7 +239,7 @@ public class NavigationToolView extends AbstractToolView {
         final JSpinner.NumberEditor editor = (JSpinner.NumberEditor) rotationAngleSpinner.getEditor();
         rotationAngleField = editor.getTextField();
         final DecimalFormat rotationFormat;
-        rotationFormat = new DecimalFormat("#####.##°", decimalFormatSymbols);
+        rotationFormat = new DecimalFormat("#####.##", decimalFormatSymbols);
         rotationFormat.setGroupingUsed(false);
         rotationFormat.setDecimalSeparatorAlwaysShown(false);
         rotationAngleField.setFormatterFactory(new JFormattedTextField.AbstractFormatterFactory() {
