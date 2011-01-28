@@ -84,7 +84,7 @@ public final class PrareOrbitReader {
                 final InputStream zipstream = ResourceUtils.getInflaterInputStream(file);
                 return new BufferedReader(new InputStreamReader(zipstream));
             } catch(Exception e) {
-                throw new IOException(e);
+                throw new IOException(e.getMessage() +": "+ file.getAbsolutePath());
             }
         }
 

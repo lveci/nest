@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.OrbitalDataRecordReader;
 import org.esa.nest.dataio.PrareOrbitReader;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -141,11 +142,14 @@ public final class ApplyOrbitFileOp extends Operator {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            System.out.println("mission is "+mission);
+            System.out.println("orbitType is "+orbitType);
+
             if(orbitType == null) {
                 if(mission.equals("ENVISAT")) {
                     orbitType = DORIS_VOR;
                 } else if(mission.equals("ERS1") || mission.equals("ERS2")) {
-                    orbitType = DELFT_PRECISE;
+                    orbitType = PRARE_PRECISE;
                 }
             }
             if(mission.equals("ENVISAT")) {
@@ -541,9 +545,9 @@ public final class ApplyOrbitFileOp extends Operator {
         if(orbitFile == null) {
             final String remotePath = "/"+prefix + "/" + folder;
             getRemoteDorisFiles(remotePath, localPath);
+            // find again in newly downloaded folder
+            orbitFile = FindDorisOrbitFile(dorisReader, localPath, startDate, absOrbit);
         }
-        // find again in newly downloaded folder
-        orbitFile = FindDorisOrbitFile(dorisReader, localPath, startDate, absOrbit);
 
         if(orbitFile == null) {
             throw new IOException("Unable to find suitable DORIS orbit file in\n"+orbitPath);
@@ -575,20 +579,25 @@ public final class ApplyOrbitFileOp extends Operator {
                 }
             }
 
-            // open each orbit file
-            dorisReader.readProduct(f);
+            try {
+                // open each orbit file
+                dorisReader.readProduct(f);
 
-            // get the start and end dates and compare them against product start date
-            final Date startDate = dorisReader.getSensingStart();
-            final Date stopDate = dorisReader.getSensingStop();
-            if (productDate.after(startDate) && productDate.before(stopDate)) {
+                // get the start and end dates and compare them against product start date
+                final Date startDate = dorisReader.getSensingStart();
+                final Date stopDate = dorisReader.getSensingStop();
+                if (productDate.after(startDate) && productDate.before(stopDate)) {
 
-                // get the absolute orbit code and compare it against the orbit code in the product
-                dorisReader.readOrbitData();
-                //EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(0);
-                //if (absOrbit == orb.absOrbit) {
-                    return f;
-                //}
+                    // get the absolute orbit code and compare it against the orbit code in the product
+                    dorisReader.readOrbitData();
+                    //EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(0);
+                    //if (absOrbit == orb.absOrbit) {
+                        return f;
+                    //}
+                }
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+                // continue    
             }
         }
 
@@ -766,9 +775,9 @@ public final class ApplyOrbitFileOp extends Operator {
         if(orbitFile == null) {
             final String remotePath = "/orbprc/"+mission + "/" + folder;
             getRemotePrareFiles(remotePath, localPath);
+            // find again in newly downloaded folder
+            orbitFile = FindPrareOrbitFile(prareReader, localPath, startDate);
         }
-        // find again in newly downloaded folder
-        orbitFile = FindPrareOrbitFile(prareReader, localPath, startDate);
 
         if(orbitFile == null) {
             throw new IOException("Unable to find suitable orbit file \n"+orbitPath);
@@ -796,6 +805,9 @@ public final class ApplyOrbitFileOp extends Operator {
                 final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
                 if(result != ftpUtils.FTPError.OK) {
                     localFile.delete();
+                }
+                if(VisatApp.getApp() != null) {
+                    VisatApp.getApp().setStatusBarMessage("hello");
                 }
             }
 
@@ -825,18 +837,23 @@ public final class ApplyOrbitFileOp extends Operator {
             if (f.isDirectory()) {
                 continue;
             }
-            
-            // read header record of each orbit file
-            prareReader.readOrbitHeader(f);
 
-            // get the start and end dates and compare them against product start date
-            final float startDateInMJD = prareReader.getSensingStart(); // in days
-            final float stopDateInMJD = prareReader.getSensingStop(); // in days
-            if (startDateInMJD <= productDateInMJD && productDateInMJD < stopDateInMJD) {
+            try {
+                // read header record of each orbit file
+                prareReader.readOrbitHeader(f);
 
-                // read orbit data records in each orbit file
-                prareReader.readOrbitData(f);
-                return f;
+                // get the start and end dates and compare them against product start date
+                final float startDateInMJD = prareReader.getSensingStart(); // in days
+                final float stopDateInMJD = prareReader.getSensingStop(); // in days
+                if (startDateInMJD <= productDateInMJD && productDateInMJD < stopDateInMJD) {
+
+                    // read orbit data records in each orbit file
+                    prareReader.readOrbitData(f);
+                    return f;
+                }
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+                // continue
             }
         }
 
