@@ -136,8 +136,10 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private void performSelectAction() {
         updateStatusLabel();
+        final ProductEntry[] selections = getSelectedProductEntries();
+        setOpenProductButtonsEnabled(selections.length > 0);
 
-        worldMapUI.setSelectedProductEntryList(getSelectedProductEntries());
+        worldMapUI.setSelectedProductEntryList(selections);
     }
 
     private void performOpenAction() {
@@ -187,15 +189,40 @@ public class ProductLibraryToolView extends AbstractToolView {
         for (final File file : filesList) {
             final String name = file.getName();
             if(file.isDirectory() && !file.isHidden() && !name.equalsIgnoreCase("internal")) {
-                //final JPopupMenu subMenu = new JPopupMenu(name);
-                //menu.add(subMenu);
-                createGraphMenu(menu, file);
+                final JMenu subMenu = new JMenu(name);
+                menu.add(subMenu);
+                createGraphMenu(subMenu, file);
             } else if(name.toLowerCase().endsWith(".xml")) {
                 final JMenuItem item = new JMenuItem(name.substring(0, name.indexOf(".xml")));
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
-                        batchProcess(getSelectedProductEntries(), file);
+                        if(batchProcessButton.isEnabled())
+                            batchProcess(getSelectedProductEntries(), file);
+                    }
+                });
+                menu.add(item);
+            }
+        }
+    }
+
+    private void createGraphMenu(final JMenu menu, final File path) {
+        final File[] filesList = path.listFiles();
+        if(filesList == null || filesList.length == 0) return;
+
+        for (final File file : filesList) {
+            final String name = file.getName();
+            if(file.isDirectory() && !file.isHidden() && !name.equalsIgnoreCase("internal")) {
+                final JMenu subMenu = new JMenu(name);
+                menu.add(subMenu);
+                createGraphMenu(subMenu, file);
+            } else if(name.toLowerCase().endsWith(".xml")) {
+                final JMenuItem item = new JMenuItem(name.substring(0, name.indexOf(".xml")));
+                item.addActionListener(new ActionListener() {
+
+                    public void actionPerformed(final ActionEvent e) {
+                        if(batchProcessButton.isEnabled())
+                            batchProcess(getSelectedProductEntries(), file);
                     }
                 });
                 menu.add(item);
@@ -257,12 +284,17 @@ public class ProductLibraryToolView extends AbstractToolView {
             while(repositoryListCombo.getItemCount() > 1) {
                 final File baseDir = (File)repositoryListCombo.getItemAt(1);
                 libConfig.removeBaseDir(baseDir);
-                repositoryListCombo.removeItemAt(index);
+                repositoryListCombo.removeItemAt(1);
                 dbPane.removeProducts(baseDir);
+            }
+            try {
+                dbPane.getDB().removeAllProducts();
+            } catch(Exception e) {
+                //
             }
         } else if(selectedItem instanceof File) {
             final File baseDir = (File)selectedItem;
-            final int status=VisatApp.getApp().showQuestionDialog("This will remove all products within" +
+            final int status=VisatApp.getApp().showQuestionDialog("This will remove all products within " +
                     baseDir.getAbsolutePath()+" from the database\n" +
                     "Are you sure you wish to continue?", null);
             if (status == JOptionPane.NO_OPTION)
@@ -276,12 +308,15 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private void setUIComponentsEnabled(final boolean enable) {
-        addToProjectButton.setEnabled(enable);
-        openAllSelectedButton.setEnabled(enable);
-        batchProcessButton.setEnabled(enable);
         removeButton.setEnabled(enable);
         updateButton.setEnabled(enable);
         repositoryListCombo.setEnabled(enable);
+    }
+
+    private void setOpenProductButtonsEnabled(final boolean enable) {
+        addToProjectButton.setEnabled(enable);
+        openAllSelectedButton.setEnabled(enable);
+        batchProcessButton.setEnabled(enable);
     }
 
     private void toggleUpdateButton(final String command) {
@@ -362,6 +397,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         batchProcessButton = new JButton();
         setComponentName(batchProcessButton, "batchProcessButton");
         batchProcessButton.setText("Batch Process");
+        batchProcessButton.setToolTipText("Right click to select a graph");
         batchProcessButton.setComponentPopupMenu(createPopup());
         batchProcessButton.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
@@ -546,6 +582,8 @@ public class ProductLibraryToolView extends AbstractToolView {
     private void updateStatusLabel() {
         String selectedText = "";
         final int selecteRows = productEntryTable.getSelectedRowCount();
+        
+        setOpenProductButtonsEnabled(selecteRows > 0);
         if(selecteRows > 0)
             selectedText = ", "+selecteRows+" Selected";
         statusLabel.setText(productEntryTable.getRowCount() + " Products"+ selectedText);

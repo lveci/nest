@@ -125,11 +125,20 @@ public class ProductDB extends DAO {
 
     public void deleteProductEntry(final ProductEntry entry) throws SQLException {
         productTable.deleteRecord(entry.getId());
+        metadataTable.deleteRecord(entry.getId());
         QuickLookGenerator.deleteQuickLook(entry.getId());
     }
 
     public void removeProducts(final File baseDir) throws SQLException {
         final String queryStr = AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+        final ProductEntry[] list = queryProduct(queryStr);
+        for(ProductEntry entry : list) {
+            deleteProductEntry(entry);
+        }
+    }
+
+    public void removeAllProducts() throws SQLException {
+        final String queryStr = "";
         final ProductEntry[] list = queryProduct(queryStr);
         for(ProductEntry entry : list) {
             deleteProductEntry(entry);
