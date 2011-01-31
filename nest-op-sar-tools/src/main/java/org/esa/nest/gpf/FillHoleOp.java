@@ -113,20 +113,9 @@ public final class FillHoleOp extends Operator {
      */
     private void addSelectedBands() throws OperatorException {
 
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
-            }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
+        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
-        for (String sourceBandName : sourceBandNames) {
-            final Band sourceBand = sourceProduct.getBand(sourceBandName);
-            if (sourceBand == null) {
-                throw new OperatorException("Source band not found: " + sourceBandName);
-            }
+        for (Band sourceBand : sourceBands) {
 
             final Band targetBand = new Band(sourceBand.getName(),
                                              ProductData.TYPE_FLOAT32,

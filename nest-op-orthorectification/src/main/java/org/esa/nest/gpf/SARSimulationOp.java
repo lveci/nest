@@ -355,7 +355,8 @@ public final class SARSimulationOp extends Operator {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
-                bandNameList.add(band.getName());
+                if(!(band instanceof VirtualBand))
+                    bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
             bandSlected = false;

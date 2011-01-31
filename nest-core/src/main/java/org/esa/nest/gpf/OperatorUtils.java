@@ -337,14 +337,16 @@ public final class OperatorUtils {
      * @param sourceProduct the input product
      * @param sourceBandNames the select band names
      * @return band list
+     * @throws OperatorException if source band not found
      */
-    public static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames) {
+    public static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames) throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
-                bandNameList.add(band.getName());
+                if(!(band instanceof VirtualBand))
+                    bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }

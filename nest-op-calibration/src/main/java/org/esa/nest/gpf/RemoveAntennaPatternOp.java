@@ -137,7 +137,7 @@ public class RemoveAntennaPatternOp extends Operator {
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 final String unit = band.getUnit();
-                if (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY)) {
+                if (unit != null && (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY))) {
                     continue;
                 }
                 bandNameList.add(band.getName());

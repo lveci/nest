@@ -375,24 +375,7 @@ public class OversamplingOp extends Operator {
     }
 
     private void addSelectedBands() {
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
-            }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
-
-        final Band[] sourceBands = new Band[sourceBandNames.length];
-        for (int i = 0; i < sourceBandNames.length; i++) {
-            final String sourceBandName = sourceBandNames[i];
-            final Band sourceBand = sourceProduct.getBand(sourceBandName);
-            if (sourceBand == null) {
-                throw new OperatorException("Source band not found: " + sourceBandName);
-            }
-            sourceBands[i] = sourceBand;
-        }
+        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
         for(Band srcBand : sourceBands) {
 
