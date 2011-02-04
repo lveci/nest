@@ -186,8 +186,8 @@ public final class MultilookOp extends Operator {
      */
     private void getRangeAzimuthSpacing() throws Exception {
 
-        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+        rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 1);
+        azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing, 1);
         //System.out.println("Range spacing is " + rangeSpacing);
         //System.out.println("Azimuth spacing is " + azimuthSpacing);
     }
@@ -198,8 +198,8 @@ public final class MultilookOp extends Operator {
      */
     private void getRangeAzimuthLooks() throws Exception {
 
-        azimuthLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_looks);
-        rangeLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_looks);
+        azimuthLooks = absRoot.getAttributeDouble(AbstractMetadata.azimuth_looks, 1);
+        rangeLooks = absRoot.getAttributeDouble(AbstractMetadata.range_looks, 1);
         //System.out.println("Azimuth looks is " + azimuthLooks);
         //System.out.println("Range looks is " + rangeLooks);
     }
@@ -494,11 +494,15 @@ public final class MultilookOp extends Operator {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
         final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
-        final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
-        final double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
+        double rangeSpacing = abs.getAttributeDouble(AbstractMetadata.range_spacing, 1);
+        double azimuthSpacing = abs.getAttributeDouble(AbstractMetadata.azimuth_spacing, 1);
 
         double groundRangeSpacing = rangeSpacing;
-        if (!srgrFlag) {
+        if(rangeSpacing == AbstractMetadata.NO_METADATA) {
+            rangeSpacing = 1;
+            azimuthSpacing = 1;
+            groundRangeSpacing = 1;
+        } else if (!srgrFlag) {
             final double incidenceAngleAtCentreRangePixel = getIncidenceAngleAtCentreRangePixel(srcProduct);
             groundRangeSpacing /= Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
         }

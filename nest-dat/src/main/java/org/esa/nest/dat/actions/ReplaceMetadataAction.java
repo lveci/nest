@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2010-08-17 16:05:27 $
+ * @version $Revision: 1.4 $ $Date: 2011-02-04 18:33:37 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 
@@ -50,6 +50,9 @@ public class ReplaceMetadataAction extends ExecCommand {
         dlg.show();
         if(dlg.IsOK()) {
             try {
+                final MetadataElement origAbsRoot = AbstractMetadata.getAbstractedMetadata(destProduct);
+                final int isPolsar = origAbsRoot.getAttributeInt(AbstractMetadata.polsarData, 0);
+
                 final String srcProductName = dlg.getSelectedProductName();
                 final Product[] products = VisatApp.getApp().getProductManager().getProducts();
 
@@ -73,6 +76,10 @@ public class ReplaceMetadataAction extends ExecCommand {
                 final MetadataElement destAbsRoot = AbstractMetadata.getAbstractedMetadata(destProduct);
                 AbstractMetadataIO.Load(destProduct, destAbsRoot, tmpMetadataFile);                
                 VisatApp.getApp().addProduct(destProduct);
+    
+                if(isPolsar > 0) {
+                    resetPolarizations(AbstractMetadata.getAbstractedMetadata(destProduct));
+                }
 
                 tmpMetadataFile.delete();
             } catch(Exception e) {
@@ -85,6 +92,14 @@ public class ReplaceMetadataAction extends ExecCommand {
     public void updateState(final CommandEvent event) {
         final Product product = VisatApp.getApp().getSelectedProduct();
         setEnabled(product != null);
+    }
+
+    private static void resetPolarizations(final MetadataElement absRoot) {
+        absRoot.setAttributeString(AbstractMetadata.mds1_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
+        absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
+        absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
     }
 
     private static String[] getCompatibleProducts(final Product destProduct) {

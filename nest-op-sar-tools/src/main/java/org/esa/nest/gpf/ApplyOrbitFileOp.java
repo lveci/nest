@@ -16,6 +16,9 @@
 package org.esa.nest.gpf;
 
 import Jama.Matrix;
+import com.bc.ceres.core.NullProgressMonitor;
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -37,6 +40,8 @@ import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.ftpUtils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -615,22 +620,46 @@ public final class ApplyOrbitFileOp extends Operator {
             if(!localPath.exists())
                 localPath.mkdirs();
 
-            final Set<String> remoteFileNames = fileSizeMap.keySet();
-            for(String fileName : remoteFileNames) {
-                final long fileSize = fileSizeMap.get(fileName);
-                final File localFile = new File(localPath, fileName);
-                if(localFile.exists() && localFile.length() == fileSize)
-                    continue;
+            if(VisatApp.getApp() != null) {
+                final SwingWorker<Exception, Object> worker = new SwingWorker<Exception, Object>() {
 
-                final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
-                if(result != ftpUtils.FTPError.OK) {
-                    localFile.delete();
-                }
+                    @Override
+                    protected Exception doInBackground() throws Exception {
+                        final ProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
+                                                            "Downloading Orbit...",
+                                                            Dialog.ModalityType.APPLICATION_MODAL);
+
+                        getRemoteFiles(remotePath, localPath, pm);
+                        return null;
+                    }
+                };
+                worker.execute();
+            } else {
+                getRemoteFiles(remotePath, localPath, new NullProgressMonitor());
             }
 
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private void getRemoteFiles(final String remotePath, final File localPath, final ProgressMonitor pm) {
+        final Set<String> remoteFileNames = fileSizeMap.keySet();
+        pm.beginTask("Downloading Orbit Files...", remoteFileNames.size());
+        for(String fileName : remoteFileNames) {
+            final long fileSize = fileSizeMap.get(fileName);
+            final File localFile = new File(localPath, fileName);
+            if(localFile.exists() && localFile.length() == fileSize)
+                continue;
+
+            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
+            if(result != ftpUtils.FTPError.OK) {
+                localFile.delete();
+            }
+
+            pm.worked(1);
+        }
+        pm.done();
     }
 
     // ====================================== DELFT ORBIT FILE ===============================================
@@ -795,20 +824,22 @@ public final class ApplyOrbitFileOp extends Operator {
             if(!localPath.exists())
                 localPath.mkdirs();
 
-            final Set<String> remoteFileNames = fileSizeMap.keySet();
-            for(String fileName : remoteFileNames) {
-                final long fileSize = fileSizeMap.get(fileName);
-                final File localFile = new File(localPath, fileName);
-                if(localFile.exists() && localFile.length() == fileSize)
-                    continue;
+            if(VisatApp.getApp() != null) {
+                final SwingWorker<Exception, Object> worker = new SwingWorker<Exception, Object>() {
 
-                final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
-                if(result != ftpUtils.FTPError.OK) {
-                    localFile.delete();
-                }
-                if(VisatApp.getApp() != null) {
-                    VisatApp.getApp().setStatusBarMessage("hello");
-                }
+                    @Override
+                    protected Exception doInBackground() throws Exception {
+                        final ProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
+                                                            "Downloading Orbit...",
+                                                            Dialog.ModalityType.APPLICATION_MODAL);
+
+                        getRemoteFiles(remotePath, localPath, pm);
+                        return null;
+                    }
+                };
+                worker.execute();
+            } else {
+                getRemoteFiles(remotePath, localPath, new NullProgressMonitor());
             }
 
         } catch(Exception e) {

@@ -137,6 +137,21 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             }
         });
 
+        final JButton addAllOpenButton = DialogUtils.CreateButton("addAllOpenButton", "Add All Open", null, panel);
+        addAllOpenButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                final Product[] products = VisatApp.getApp().getProductManager().getProducts();
+                for(Product prod : products) {
+                    final File file = prod.getFileLocation();
+                    if(file != null && file.exists()) {
+                        fileModel.addFile(file);
+                    }
+                }
+                countLabel.setText(fileModel.getRowCount()+" Products");
+            }
+        });
+
         final JButton removeButton = DialogUtils.CreateButton("removeButton", "Remove", null, panel);
         removeButton.addActionListener(new ActionListener() {
 
@@ -160,6 +175,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         });
 
         panel.add(addButton);
+        panel.add(addAllOpenButton);
         panel.add(removeButton);
         panel.add(clearButton);
         panel.add(countLabel);
