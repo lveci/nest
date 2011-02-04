@@ -451,6 +451,15 @@
         </action>
 
         <action>
+            <id>launchPolsarPro</id>
+            <parent>polarimetrictools</parent>
+            <class>org.esa.nest.dat.actions.LaunchPolsarProAction</class>
+            <text>Launch PolSARPro</text>
+            <shortDescr>Start PolSARPro</shortDescr>
+            <separatorAfter>true</separatorAfter>
+        </action>
+
+        <action>
             <id>attachNestPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
             <text>Attach Pixel Geo-Coding...</text>

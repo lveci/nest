@@ -17,19 +17,23 @@ package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
+import org.esa.beam.util.PropertyMap;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.io.FilenameFilter;
 import java.net.URI;
 
 /**
- * This action lauchches PolSARPro
+ * This action launches PolSARPro
  *
  */
 public class LaunchPolsarProAction extends ExecCommand {
-    private static final String HOME_PAGE_URL_DEFAULT = "http://www.array.ca/nest/";
 
+    private final static String PolsarProPathStr = "external.polsarpro.path";
     /**
      * Launches PolSARPro
      * Invoked when a command action is performed.
@@ -38,8 +42,63 @@ public class LaunchPolsarProAction extends ExecCommand {
      */
     @Override
     public void actionPerformed(CommandEvent event) {
-        final Desktop desktop = Desktop.getDesktop();
+        final PropertyMap pref = VisatApp.getApp().getPreferences();
+        final String path = pref.getPropertyString(PolsarProPathStr);
+        File polsarProFile = new File(path);
+        
+        if(!polsarProFile.exists()) {
+            polsarProFile = findPolsarPro();
+        }
+        if(!polsarProFile.exists()) {
+            // ask for location
+        }
+        if(polsarProFile.exists()) {
+            externalExecute(polsarProFile);
 
-
+            // save location
+            pref.setPropertyString(PolsarProPathStr, polsarProFile.getAbsolutePath());
+            VisatApp.getApp().savePreferences();
+        } else {
+            // report error
+        }
     }
+
+    private void externalExecute(File prog) {
+        final File homeFolder = ResourceUtils.findHomeFolder();
+        final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
+
+        try {
+            final String args = prog.getParent()+" "+prog.getName();
+            Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+        } catch(Exception e) {
+            VisatApp.getApp().showErrorDialog(e.getMessage());
+        }
+    }
+
+    private static File findPolsarPro() {
+        File progFiles = new File("C:\\Program Files (x86)");
+        if(!progFiles.exists())
+            progFiles = new File("C:\\Program Files");
+        if(progFiles.exists()) {
+            final File[] progs = progFiles.listFiles(new PolsarFileFilter());
+            for(File prog : progs) {
+                final File[] fileList = prog.listFiles(new PolsarFileFilter());
+                for(File file : fileList) {
+                    if(file.getName().toLowerCase().endsWith("tcl")) {
+                        return file;
+                    }
+                }
+            }
+        }
+        return new File("");
+    }
+
+    private static class PolsarFileFilter implements FilenameFilter {
+
+        public boolean accept(File dir, String name) {
+
+            return name.toLowerCase().startsWith("polsar");
+        }
+    }
+
 }

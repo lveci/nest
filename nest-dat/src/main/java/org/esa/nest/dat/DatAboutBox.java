@@ -69,8 +69,8 @@ class DatAboutBox extends ModalDialog {
         labelPane.add(BorderLayout.NORTH, versionLabel);
 
         dialogContent.setLayout(new BorderLayout(4, 4));
-        dialogContent.add(BorderLayout.WEST, imageLabel);
-        dialogContent.add(BorderLayout.EAST, labelPane);
+        dialogContent.add(BorderLayout.NORTH, imageLabel);
+        dialogContent.add(BorderLayout.SOUTH, labelPane);
 
         setContent(dialogContent);
     }
@@ -103,9 +103,12 @@ class DatAboutBox extends ModalDialog {
         final String ver = System.getProperty(ResourceUtils.getContextID()+".version");
         final String pattern =
                 "<html>" +
-                "<b>NEST DAT Version "+ver+"</b>" +
+                "<b>NEST  Version "+ver+"</b>" +
                 "<br>(c) Copyright 2007-2011 by Array Systems Computing Inc. and contributors. All rights reserved." +
                 "<br>Visit http://www.array.ca/nest" +
+                "<br>" +
+                "<b>NEST-DORIS</b>" +
+                "<br>(c) Copyright 2009-2011 by PPO.labs. All rights reserved." +
                 "<br>" +
                 "<b>BEAM </b>" +
                 "<br>(c) Copyright 2002-2011 by Brockmann Consult and contributors. All rights reserved." +
