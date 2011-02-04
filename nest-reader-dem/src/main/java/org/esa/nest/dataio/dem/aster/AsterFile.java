@@ -15,14 +15,11 @@
  */
 package org.esa.nest.dataio.dem.aster;
 
-import com.bc.io.FileUnpacker;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,7 +39,6 @@ public final class AsterFile {
     private boolean errorInLocalFile = false;
     private AsterElevationTile tile = null;
     private boolean unrecoverableError = false;
-    private boolean checkOnceForUnzippedTiles = true; // look for bulk Tiles_ files
     private final static File appTmpDir = ResourceUtils.getApplicationUserTempDataDir();
 
     public AsterFile(AsterElevationModel model, File localFile, ProductReader reader) {
@@ -87,30 +83,8 @@ public final class AsterFile {
                         tile = new AsterElevationTile(demModel, product);
                     }
                 }
-            } else if(checkOnceForUnzippedTiles) {
-                final File parentFolder = localFile.getParentFile();
-                final File[] files = parentFolder.listFiles();
-                Component component = null;
-                if(VisatApp.getApp() != null) {
-                    component = VisatApp.getApp().getApplicationWindow();
-                }
-                for(File f : files) {
-                    if(f.getName().startsWith("Tiles_") && f.getName().endsWith(".zip")) {
-                        FileUnpacker.unpackZip(f, parentFolder, component);
-                        f.delete();
-                    }
-                }
-                checkOnceForUnzippedTiles = false;
-                if (localFile.exists() && localFile.isFile() && localFile.length() > 0) {
-                    final File dataFile = getFileFromZip(localFile);
-                    if(dataFile != null) {
-                        final Product product = productReader.readProductNodes(dataFile, null);
-                        if(product != null) {
-                            tile = new AsterElevationTile(demModel, product);
-                        }
-                    }
-                }
             }
+                
             if(tile != null) {
                 demModel.updateCache(tile);
                 errorInLocalFile = false;

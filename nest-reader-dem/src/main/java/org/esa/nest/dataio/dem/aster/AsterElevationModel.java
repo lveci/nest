@@ -21,6 +21,7 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 
 import java.io.File;
@@ -28,6 +29,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.awt.*;
+
+import com.bc.io.FileUnpacker;
 
 public final class AsterElevationModel implements ElevationModel, Resampling.Raster {
 
@@ -40,11 +44,11 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
     private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
-    private final AsterElevationModelDescriptor _descriptor;
+    private final AsterElevationModelDescriptor descriptor;
     private final AsterFile[][] elevationFiles;
-    private Resampling _resampling;
-    private Resampling.Index _resamplingIndex;
-    private final Resampling.Raster _resamplingRaster;
+    private Resampling resampling;
+    private Resampling.Index resamplingIndex;
+    private final Resampling.Raster resamplingRaster;
     private final float noDataValue;
 
     private final List<AsterElevationTile> elevationTileCache;
@@ -52,13 +56,14 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
-        _descriptor = descriptor;
-        _resampling = resamplingMethod;
-        _resamplingIndex = _resampling.createIndex();
-        _resamplingRaster = this;
+        this.descriptor = descriptor;
+        resampling = resamplingMethod;
+        resamplingIndex = resampling.createIndex();
+        resamplingRaster = this;
         elevationFiles = createElevationFiles();
-        noDataValue = _descriptor.getNoDataValue();
+        noDataValue = this.descriptor.getNoDataValue();
         this.elevationTileCache = new ArrayList<AsterElevationTile>();
+        unpackTileBundles();
     }
 
     /**
@@ -66,25 +71,25 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
      * @since BEAM 4.6
      */
     public Resampling getResampling() {
-        return _resampling;
+        return resampling;
     }
 
     public ElevationModelDescriptor getDescriptor() {
-        return _descriptor;
+        return descriptor;
     }
 
     public synchronized float getElevation(GeoPos geoPos) throws Exception {
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 83.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
         if(pixelY < 0)
             return noDataValue;
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
 
-        _resampling.computeIndex(pixelX, pixelY,
+        resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
                                  RASTER_HEIGHT,
-                                 _resamplingIndex);
+                resamplingIndex);
 
-        final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
+        final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
         if (Float.isNaN(elevation)) {
             return noDataValue;
         }
@@ -114,7 +119,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
-        final AsterElevationTile tile = elevationFiles[tileXIndex][tileYIndex+7].getTile();
+        final AsterElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if(tile == null) {
             return Float.NaN;
         }
@@ -129,7 +134,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
     private AsterFile[][] createElevationFiles() throws IOException {
         final AsterFile[][] elevationFiles = new AsterFile[NUM_X_TILES][NUM_Y_TILES];
-        final File demInstallDir = _descriptor.getDemInstallDir();
+        final File demInstallDir = descriptor.getDemInstallDir();
         for (int x = 0; x < NUM_X_TILES; x++) {
             final int minLon = x - 180;
 
@@ -139,9 +144,33 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
                 final String fileName = AsterElevationModelDescriptor.createTileFilename(minLon, minLat);
                 final File localFile = new File(demInstallDir, fileName);
                 elevationFiles[x][NUM_Y_TILES - 1 - y] = new AsterFile(this, localFile, productReaderPlugIn.createReaderInstance());
+
+                //int cy = NUM_Y_TILES - 1 - y;
+                //System.out.println("["+x+"]["+cy+"]="+ fileName);
             }
         }
         return elevationFiles;
+    }
+
+    private void unpackTileBundles() {
+
+        final File parentFolder = descriptor.getDemInstallDir();
+        final File[] files = parentFolder.listFiles();
+
+        try {
+            for(File f : files) {
+                if(f.getName().startsWith("Tiles_") && f.getName().endsWith(".zip")) {
+                    Component component = null;
+                    if(VisatApp.getApp() != null) {
+                        component = VisatApp.getApp().getApplicationWindow();
+                    }
+                    FileUnpacker.unpackZip(f, parentFolder, component);
+                    f.delete();
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateCache(AsterElevationTile tile) {
