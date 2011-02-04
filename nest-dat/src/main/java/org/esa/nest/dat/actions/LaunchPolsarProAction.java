@@ -68,7 +68,9 @@ public class LaunchPolsarProAction extends ExecCommand {
         final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
 
         try {
-            final String args = prog.getParent()+" "+prog.getName();
+            final String args = prog.getParent()+" "+"wish"+" "+prog.getName();
+
+            System.out.println("Launching PolSARPro "+args);
             Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
         } catch(Exception e) {
             VisatApp.getApp().showErrorDialog(e.getMessage());
