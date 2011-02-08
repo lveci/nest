@@ -139,12 +139,27 @@ class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b>Rajesh Jha</b> (project manager)<br>" +
                 "&nbsp;&nbsp;<b>Luis Veci</b> (software lead)<br>" +
                 "&nbsp;&nbsp;<b>Jun Lu</b> (scientist/developer)<br>" +
-                "&nbsp;&nbsp;<b>Shengli Dai</b> (project scientist)<br>" +
+                "&nbsp;&nbsp;<b>Shengli Dai</b> (scientist)<br>" +
                 "</td><td>" +
                 "&nbsp;&nbsp;<b>Andrew Taylor</b> (IT support)<br>" +
                 "&nbsp;&nbsp;<b>Iris Buchan</b> (quality assurance)<br>" +
                 "&nbsp;&nbsp;<b>Nisso Keslassy</b> (contracts officer)<br>" +
                 "&nbsp;&nbsp;<b></b> <br>" +
+                "</td></tr>" +
+                "</table>" +
+                "<br><hr>The NEST-DORIS team at PPO.Labs/TU Delft is:" +
+                "<table border=0>" +
+                "<tr><td>" +
+                "&nbsp;&nbsp;<b>Ramon Hanssen</b> (project manager)<br>" +
+                "&nbsp;&nbsp;<b>Petar Marinkovic</b> (software lead/scientist)<br>" +
+                "</td></tr>" +
+                "</table>" +
+                "<br><hr>The NEST team at ESA/ESRIN is:" +
+                "<table border=0>" +
+                "<tr><td>" +
+                "&nbsp;&nbsp;<b>Marcus Engdahl</b> (technical officer)<br>" +
+                "&nbsp;&nbsp;<b>Andrea Minchella</b> (scientist)<br>" +
+                "&nbsp;&nbsp;<b>Romain Husson</b> (scientist)<br>" +
                 "</td></tr>" +
                 "</table>" +
                 "<br><hr>The BEAM team at Brockmann Consult is:" +
@@ -165,19 +180,10 @@ class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b>Marco Zühlke</b> (programming)<br>" +
                 "</td></tr>" +
                 "</table>" +
-                 "<br><hr>The NEST-DORIS team at PPO.Labs/TU Delft is:" +
+                "<br><hr>Special contributions made by:" +
                 "<table border=0>" +
                 "<tr><td>" +
-                "&nbsp;&nbsp;<b>Ramon Hanssen</b> (project manager)<br>" +
-                "&nbsp;&nbsp;<b>Petar Marinkovic</b> (software lead/scientist)<br>" +
-                "</td></tr>" +
-                "</table>" +
-                "<br><hr>The NEST team at ESA/ESRIN is:" +
-                "<table border=0>" +
-                "<tr><td>" +
-                "&nbsp;&nbsp;<b>Marcus Engdahl</b> (technical officer)<br>" +
-                "&nbsp;&nbsp;<b>Andrea Minchella</b> (scientist)<br>" +
-                "&nbsp;&nbsp;<b>Romain Husson</b> (scientist)<br>" +
+                "&nbsp;&nbsp;<b>Jason Fritz</b> (Cosmo-Skymed Calibration)<br>" +
                 "</td></tr>" +
                 "</table>" +
                 "<br><hr>The NEST developers would also like to say thank you to" +
