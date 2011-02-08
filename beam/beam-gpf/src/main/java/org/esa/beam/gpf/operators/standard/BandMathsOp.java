@@ -35,7 +35,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.ui.BandArithmeticOpUI;
+import org.esa.beam.gpf.operators.standard.BandMathsOpUI;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
@@ -82,6 +82,7 @@ public class BandMathsOp extends Operator {
         public String type;
         public String validExpression;
         public String noDataValue;
+        public String unit;
         public Integer spectralBandIndex;
         public Float spectralWavelength;
         public Float spectralBandwidth;
@@ -110,6 +111,10 @@ public class BandMathsOp extends Operator {
     @Parameter
     private String bandName;
     @Parameter
+    private String bandUnit;
+    @Parameter
+    private String bandNodataValue;
+    @Parameter
     private String bandExpression = null;
 
     private Map<Band, BandDescriptor> descriptorMap;
@@ -127,14 +132,42 @@ public class BandMathsOp extends Operator {
         return bandMathsOp;
     }
 
+    static String SubstitutePlaceHolders(final Product[] srcProducts, String bandExpression) throws OperatorException {
+        while(bandExpression.contains("$Band")) {
+            final int length = bandExpression.length();
+            final int start = bandExpression.indexOf("$Band");
+            int end = start+5;
+            while(end < length && Character.isDigit(bandExpression.charAt(end))) {
+                ++end;
+            }
+            String placeHolder = bandExpression.substring(start, end);
+            final int bandNum = Integer.parseInt(placeHolder.substring(5, placeHolder.length()));
+
+            final Product prod0 = srcProducts[0];
+            final Band band = prod0.getBandAt(bandNum);
+            if(band == null) {
+                throw new OperatorException(placeHolder+" not found in product "+prod0.getName());
+            }
+            bandExpression = bandExpression.replace(placeHolder, band.getName());
+        }
+        return bandExpression;
+    }
+
     @Override
     public void initialize() throws OperatorException {
+        if(bandName != null)
+            bandName = SubstitutePlaceHolders(sourceProducts, bandName);
+        if(bandExpression != null)
+            bandExpression = SubstitutePlaceHolders(sourceProducts, bandExpression);
+
         if (targetBandDescriptors == null || targetBandDescriptors.length == 0) {
         //    throw new OperatorException("No target bands specified.");
             if(bandExpression != null) {
                 targetBandDescriptors = new BandMathsOp.BandDescriptor[1];
                 final BandMathsOp.BandDescriptor bandDesc = new BandMathsOp.BandDescriptor();
-                bandDesc.name =  bandName;
+                bandDesc.name = bandName;
+                bandDesc.unit = bandUnit;
+                bandDesc.noDataValue = bandNodataValue;
                 bandDesc.type =  ProductData.TYPESTRING_FLOAT32;
                 bandDesc.expression = bandExpression;
                 targetBandDescriptors[0] = bandDesc;
@@ -171,7 +204,7 @@ public class BandMathsOp extends Operator {
         RasterDataSymbol[] refRasterDataSymbols = BandArithmetic.getRefRasterDataSymbols(term);
 
         for (RasterDataSymbol symbol : refRasterDataSymbols) {
-            Tile tile = getSourceTile(symbol.getRaster(), rect, pm);
+            Tile tile = getSourceTile(symbol.getRaster(), rect);
             if (tile.getRasterDataNode().isScalingApplied()) {
                 ProductData dataBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32,
                                                                     tile.getWidth() * tile.getHeight());
@@ -220,6 +253,9 @@ public class BandMathsOp extends Operator {
         Band band = targetProduct.addBand(bandDescriptor.name, ProductData.getType(bandDescriptor.type.toLowerCase()));
         if (StringUtils.isNotNullAndNotEmpty(bandDescriptor.description)) {
             band.setDescription(bandDescriptor.description);
+        }
+        if (StringUtils.isNotNullAndNotEmpty(bandDescriptor.unit)) {
+            band.setUnit(bandDescriptor.unit);
         }
         if (StringUtils.isNotNullAndNotEmpty(bandDescriptor.validExpression)) {
             band.setValidPixelExpression(bandDescriptor.validExpression);
@@ -286,7 +322,7 @@ public class BandMathsOp extends Operator {
 
         public Spi() {
             super(BandMathsOp.class);
-            setOperatorUI(BandArithmeticOpUI.class);
+            setOperatorUI(BandMathsOpUI.class);
         }
     }
 
