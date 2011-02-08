@@ -112,10 +112,10 @@ public class PCAStatisticsOpUI extends BaseOperatorUI {
     public void updateParameters() {
 
         if (sourceProducts == null) {
-            OperatorUIUtils.updateBandList(bandList, paramMap);
+            OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         } else {
             if (bandList.getSelectedValues().length > 0) {
-                OperatorUIUtils.updateBandList(bandList, paramMap);
+                OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
             } else {
                 paramMap.put("sourceBandNames", sourceProducts[0].getBandNames());
             }

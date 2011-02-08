@@ -82,9 +82,9 @@ public class CreateStackOp extends Operator {
                label="Output Extents")
     private String extent = MASTER_EXTENT;
 
-    protected final static String MASTER_EXTENT = "Master";
-    protected final static String MIN_EXTENT = "Minimum";
-    protected final static String MAX_EXTENT = "Maximum";
+    final static String MASTER_EXTENT = "Master";
+    final static String MIN_EXTENT = "Minimum";
+    final static String MAX_EXTENT = "Maximum";
 
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
     private final Map<Product, int[]> slaveOffsettMap = new HashMap<Product, int[]>(10);
@@ -846,6 +846,7 @@ public class CreateStackOp extends Operator {
 
         public Spi() {
             super(CreateStackOp.class);
+            setOperatorUI(CreateStackOpUI.class);
         }
     }
 }
