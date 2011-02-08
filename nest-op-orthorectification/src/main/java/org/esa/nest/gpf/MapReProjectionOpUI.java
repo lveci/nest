@@ -179,7 +179,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
         paramMap.put("resamplingName", reprojectionModel.resamplingMethod);
         paramMap.put("includeTiePointGrids", reprojectionModel.reprojTiePoints);
@@ -255,7 +255,6 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         parameterPanel.add(infoForm.createUI());
 
         crsSelectionPanel.addPropertyChangeListener("crs", new PropertyChangeListener() {
-            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 updateCRS();
             }
@@ -406,7 +405,6 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
             wktButton = new JButton("Show WKT");
             wktButton.addActionListener(new ActionListener() {
 
-                @Override
                 public void actionPerformed(ActionEvent e) {
                     JTextArea wktArea = new JTextArea(30, 40);
                     wktArea.setEditable(false);
@@ -446,7 +444,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         preserveResolutionCheckBox = new JCheckBox("Preserve resolution");
         context.bind(Model.PRESERVE_RESOLUTION, preserveResolutionCheckBox);
         collocationCrsUI.getCrsUI().addPropertyChangeListener("collocate", new PropertyChangeListener() {
-            @Override
+
             public void propertyChange(PropertyChangeEvent evt) {
                 final boolean collocate = (Boolean) evt.getNewValue();
                 reprojectionContainer.setValue(Model.PRESERVE_RESOLUTION,
@@ -479,7 +477,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         outputSettingsPanel.add(resampleComboBox);
 
         reprojectionContainer.addPropertyChangeListener(Model.PRESERVE_RESOLUTION, new PropertyChangeListener() {
-            @Override
+
             public void propertyChange(PropertyChangeEvent evt) {
                 updateOutputParameterState();
             }
@@ -503,7 +501,6 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
 
     private class OutputParamActionListener implements ActionListener {
 
-        @Override
         public void actionPerformed(ActionEvent event) {
             try {
                 if(sourceProducts == null) return;
