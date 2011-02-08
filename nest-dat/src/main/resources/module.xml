@@ -509,11 +509,23 @@
         <action>
             <id>searchMetadata</id>
             <class>org.esa.nest.dat.actions.SearchMetadataAction</class>
-            <text>Search Metadata</text>
+            <text>Search Metadata Name</text>
             <shortDescr>Search product metadata</shortDescr>
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
             <parent>MetadataTools</parent>
+            <context>metadata</context>
+        </action>
+
+        <action>
+            <id>searchMetadataValue</id>
+            <class>org.esa.nest.dat.actions.SearchMetadataValueAction</class>
+            <text>Search Metadata Value</text>
+            <shortDescr>Search product metadata for a value</shortDescr>
+            <description>Search product metadata for a value</description>
+            <helpId>searchMetadata</helpId>
+            <parent>MetadataTools</parent>
+            <placeAfter>searchMetadata</placeAfter>
             <context>metadata</context>
         </action>
 
