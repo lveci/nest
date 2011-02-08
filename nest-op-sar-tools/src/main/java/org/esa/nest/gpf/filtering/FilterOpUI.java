@@ -92,7 +92,7 @@ public class FilterOpUI extends BaseOperatorUI {
 
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
         final FilterOperator.Filter filter = getSelectedFilter(tree);
         if(filter != null) {

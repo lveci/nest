@@ -158,7 +158,7 @@ public class MosaicOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
         //paramMap.put("projectionName", projectionName.getSelectedItem());
         paramMap.put("pixelSize", Double.parseDouble(pixelSize.getText()));

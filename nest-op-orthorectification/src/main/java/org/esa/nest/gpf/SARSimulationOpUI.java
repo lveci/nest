@@ -141,7 +141,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());

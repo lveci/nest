@@ -36,7 +36,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "SubsetOp",
+@OperatorMetadata(alias = "Subset",
         category = "Utilities",
         description = "Create a spatial subset of the source product.")
 public class SubsetOp extends Operator {

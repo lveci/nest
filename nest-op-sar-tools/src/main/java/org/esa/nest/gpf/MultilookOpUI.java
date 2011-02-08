@@ -92,7 +92,7 @@ public class MultilookOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
         final String nRgLooksStr = nRgLooks.getText();
         final String nAzLooksStr = nAzLooks.getText();

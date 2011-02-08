@@ -86,7 +86,7 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);        
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);        
 
         paramMap.put("filter", filter.getSelectedItem());
         paramMap.put("filterSizeX", Integer.parseInt(filterSizeX.getText()));

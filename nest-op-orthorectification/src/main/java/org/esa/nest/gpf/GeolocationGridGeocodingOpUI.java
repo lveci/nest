@@ -75,7 +75,7 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
+        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("projectionName", projectionName.getSelectedItem());
     }

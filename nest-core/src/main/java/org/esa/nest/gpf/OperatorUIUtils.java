@@ -26,16 +26,13 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Dec 3, 2008
- * Time: 1:05:18 PM
- * To change this template use File | Settings | File Templates.
+ * Helper functions for OperatorUIs
  */
 public final class OperatorUIUtils {
 
+    public final static String SOURCE_BAND_NAMES = "sourceBandNames";
 
-    public static void initBandList(JList bandList, String[] bandNames) {
+    public static void initBandList(final JList bandList, final String[] bandNames) {
         final Object selectedValues[] = bandList.getSelectedValues();
 
         bandList.removeAll();
@@ -44,7 +41,7 @@ public final class OperatorUIUtils {
         bandList.setMinimumSize(new Dimension(50, 4));
         
         final int size = bandList.getModel().getSize();
-        final ArrayList<Integer> indeces = new ArrayList<Integer>(size);
+        final ArrayList<Integer> indices = new ArrayList<Integer>(size);
 
         for (Object selectedValue : selectedValues) {
             final String selValue = (String) selectedValue;
@@ -52,29 +49,33 @@ public final class OperatorUIUtils {
             for (int j = 0; j < size; ++j) {
                 final String val = (String) bandList.getModel().getElementAt(j);
                 if (val.equals(selValue)) {
-                    indeces.add(j);
+                    indices.add(j);
                     break;
                 }
             }
         }
-        final int[] selIndex = new int[indeces.size()];
-        for(int i=0; i < indeces.size(); ++i) {
-            selIndex[i] = indeces.get(i);
-        }
-        bandList.setSelectedIndices(selIndex);
+        setSelectedListIndices(bandList, indices);
     }
 
-    public static void updateBandList(JList bandList, Map<String, Object> paramMap) {
+    public static void setSelectedListIndices(final JList list, final ArrayList<Integer> indices) {
+        final int[] selIndex = new int[indices.size()];
+        for(int i=0; i < indices.size(); ++i) {
+            selIndex[i] = indices.get(i);
+        }
+        list.setSelectedIndices(selIndex);
+    }
+
+    public static void updateBandList(final JList bandList, final Map<String, Object> paramMap, final String paramName) {
         final Object selectedValues[] = bandList.getSelectedValues();
         final String bandNames[] = new String[selectedValues.length];
         for(int i=0; i<selectedValues.length; ++i) {
             bandNames[i] = (String)selectedValues[i];
         }
 
-        paramMap.put("sourceBandNames", bandNames);
+        paramMap.put(paramName, bandNames);
     }
 
-    public static double getNoDataValue(File extFile) {
+    public static double getNoDataValue(final File extFile) {
         try {
             final ProductReader productReader = ProductIO.getProductReaderForFile(extFile);
             final Product product = productReader.readProductNodes(extFile, null);
