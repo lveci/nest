@@ -25,6 +25,7 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -108,7 +109,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -123,15 +124,19 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement radarParameters = sourceAttributes.getElement("radarParameters");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 radarParameters.getAttributeString("acquisitionType", defStr));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE,
-                radarParameters.getAttributeString("acquisitionType", defStr));
+        final String aquisitionMode = radarParameters.getAttributeString("acquisitionType", defStr);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, aquisitionMode);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAM_MODE,
                 radarParameters.getAttributeString("beams", defStr));
 
 
         final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
-                pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt));
+        double prf = pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt);
+        if(aquisitionMode.equalsIgnoreCase("UltraFine")) {
+            prf *= 2.0;
+        }
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency, prf);
+
         final MetadataElement radarCenterFrequency = radarParameters.getElement("radarCenterFrequency");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                 radarCenterFrequency.getAttributeDouble("radarCenterFrequency", defInt) / 1000000.0);
@@ -179,9 +184,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         product.setStartTime(startTime);
         product.setEndTime(stopTime);
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
-
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
                 sarProcessingInformation.getAttributeInt("numberOfRangeLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
@@ -192,6 +194,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         // imageAttributes
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
         final MetadataElement rasterAttributes = imageAttributes.getElement("rasterAttributes");
+
+        final String imageProductFormat = imageAttributes.getAttributeString("productFormat");
+        if(!imageProductFormat.equalsIgnoreCase("GeoTIFF")) {
+            throw new IOException("Radarsat2 "+imageProductFormat+" format is not supported");
+        }               
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getDataType(rasterAttributes));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,

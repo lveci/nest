@@ -57,7 +57,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 

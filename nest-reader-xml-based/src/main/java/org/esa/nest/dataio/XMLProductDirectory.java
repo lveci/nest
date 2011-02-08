@@ -83,7 +83,7 @@ public class XMLProductDirectory {
         _sceneHeight = height;
     }
 
-    public Product createProduct() {
+    public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             getProductType(),
                                             _sceneWidth, _sceneHeight);
@@ -139,7 +139,7 @@ public class XMLProductDirectory {
 
     }
 
-    private void addMetaData(final Product product) {
+    private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
         final Element rootElement = xmlDoc.getRootElement();
         AbstractMetadataIO.AddXMLMetadata(rootElement, root);
@@ -151,7 +151,7 @@ public class XMLProductDirectory {
         return xmlDoc.getRootElement();
     }
 
-    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException  {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
     }
