@@ -145,15 +145,8 @@ public final class DBScanner extends SwingWorker {
     
                     final File file = qlProductFiles.get(j);
                     try {
-                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                        if(reader != null) {
-                            final Product sourceProduct = reader.readProductNodes(file, null);
-                            if(sourceProduct != null) {
-                                QuickLookGenerator.createQuickLook(qlIDs.get(j), sourceProduct);
-                                notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
-                                sourceProduct.dispose();
-                            }
-                        }
+                        QuickLookGenerator.createQuickLook(qlIDs.get(j), file);
+                        notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
                     } catch(Throwable e) {
                         System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                     }

@@ -16,6 +16,8 @@
 package org.esa.nest.db;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -174,8 +176,36 @@ public class QuickLookGenerator {
         return new BufferedImage(cm, writeraster, cm.isAlphaPremultiplied(), null);
     }
 
-    public static void createQuickLook(final int id, final Product product) {
+    private static File findProductBrowseImage(File productFile) {
 
+        final File parentFolder = productFile.getParentFile();
+        // try TerraSAR-X
+        File browseFile = new File(parentFolder, "PREVIEW"+File.separator+"BROWSE.tif");
+        if(browseFile.exists()) return browseFile;
+        // try Radarsat-2
+        browseFile = new File(parentFolder, "BrowseImage.tif");
+        if(browseFile.exists()) return browseFile;
+
+        return productFile;
+    }
+
+    public static void createQuickLook(final int id, File productFile) throws IOException {
+
+        // check if quicklook exist with product
+        productFile = findProductBrowseImage(productFile);
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(productFile);
+        if(reader != null) {
+            final Product sourceProduct = reader.readProductNodes(productFile, null);
+            if(sourceProduct != null) {
+                createQuickLook(id, sourceProduct);
+
+                sourceProduct.dispose();
+            }
+        }
+    }
+
+    public static void createQuickLook(final int id, final Product product) {
         final File quickLookFile = getQuickLookFile(dbStorageDir, id);
         try {
             if(!dbStorageDir.exists())
