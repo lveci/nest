@@ -54,16 +54,20 @@ public class IDProvider implements DataProvider {
                                                        final boolean isSelected,
                                                        final boolean hasFocus,
                                                        final int row, final int column) {
-            final ProductEntry entry = (ProductEntry) value;
-            if(entry != null) {
-                final String text = String.valueOf(entry.getId());
+            try {
+                final ProductEntry entry = (ProductEntry) value;
+                if(entry != null) {
+                    final String text = String.valueOf(entry.getId());
 
-                final JLabel jlabel = (JLabel) super
-                        .getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
+                    final JLabel jlabel = (JLabel) super
+                            .getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
 
-                jlabel.setFont(jlabel.getFont().deriveFont(Font.BOLD));
-                jlabel.setToolTipText(entry.getFile().getAbsolutePath());
-                return jlabel;
+                    jlabel.setFont(jlabel.getFont().deriveFont(Font.BOLD));
+                    jlabel.setToolTipText(entry.getFile().getAbsolutePath());
+                    return jlabel;
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
             }
             return null;
         }

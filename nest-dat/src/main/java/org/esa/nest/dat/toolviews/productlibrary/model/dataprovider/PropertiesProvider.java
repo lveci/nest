@@ -213,12 +213,17 @@ public class PropertiesProvider implements DataProvider {
             public Component getTableCellRendererComponent(final JTable table, final Object value,
                                                            final boolean isSelected, final boolean hasFocus,
                                                            final int row, final int column) {
-                final JLabel jLabel = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
-                                                                                   row, column);
-                jLabel.setHorizontalAlignment(JLabel.LEFT);
-                if(row == 0)
-                    jLabel.setFont(_font);
-                return jLabel;
+                try {
+                    final JLabel jLabel = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+                                                                                       row, column);
+                    jLabel.setHorizontalAlignment(JLabel.LEFT);
+                    if(row == 0)
+                        jLabel.setFont(_font);
+                    return jLabel;
+                } catch(Throwable e) {
+                    e.printStackTrace();   
+                }
+                return null;
             }
         }
     }

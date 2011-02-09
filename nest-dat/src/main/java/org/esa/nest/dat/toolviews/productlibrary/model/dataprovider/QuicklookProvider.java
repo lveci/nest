@@ -80,52 +80,58 @@ public class QuicklookProvider implements DataProvider {
                                                        final boolean hasFocus,
                                                        final int row,
                                                        final int column) {
-            if (tableComponent == null) {
-                tableComponent = (JLabel) super.getTableCellRendererComponent(table,
-                                                                              value,
-                                                                              isSelected,
-                                                                              hasFocus,
-                                                                              row,
-                                                                              column);
-                tableComponent.setText("");
-                tableComponent.setVerticalAlignment(SwingConstants.CENTER);
-                tableComponent.setHorizontalAlignment(SwingConstants.CENTER);
-            }
+            try {
+                if (tableComponent == null) {
+                    tableComponent = (JLabel) super.getTableCellRendererComponent(table,
+                            value,
+                            isSelected,
+                            hasFocus,
+                            row,
+                            column);
+                    tableComponent.setText("");
+                    tableComponent.setVerticalAlignment(SwingConstants.CENTER);
+                    tableComponent.setHorizontalAlignment(SwingConstants.CENTER);
+                }
 
-            setBackground(table, isSelected);
+                setBackground(table, isSelected);
 
-            if (value == null) {
-                tableComponent.setIcon(null);
-                tableComponent.setText("");
-                return tableComponent;
-            }
+                if (value == null) {
+                    tableComponent.setIcon(null);
+                    tableComponent.setText("");
+                    return tableComponent;
+                }
 
-            if (value instanceof ProductEntry) {
-                final BufferedImage image = ((ProductEntry)value).getQuickLook();
-                if(image == null) {
+                if (value instanceof ProductEntry) {
+                    final BufferedImage image = ((ProductEntry)value).getQuickLook();
+                    if(image == null) {
+                        tableComponent.setIcon(null);
+                        tableComponent.setText("Not available!");
+                    } else {
+                        final TableColumn tableColumn = table.getColumnModel().getColumn(column);
+                        int cellWidth = tableColumn.getWidth();
+                        int cellHeight = tableColumn.getWidth();
+                        if(image.getHeight() > image.getWidth())
+                            cellWidth = -1;
+                        else
+                            cellHeight = -1;
+                        tableComponent.setIcon(
+                                new ImageIcon(image.getScaledInstance(cellWidth, cellHeight, BufferedImage.SCALE_FAST)));
+                        tableComponent.setText("");
+                        setTableRowHeight(table, row);
+                    }
+                } else {
                     tableComponent.setIcon(null);
                     tableComponent.setText("Not available!");
-                } else {
-                    final TableColumn tableColumn = table.getColumnModel().getColumn(column);
-                    int cellWidth = tableColumn.getWidth();
-                    int cellHeight = tableColumn.getWidth();
-                    if(image.getHeight() > image.getWidth())
-                        cellWidth = -1;
-                    else
-                        cellHeight = -1;
-                    tableComponent.setIcon(
-                            new ImageIcon(image.getScaledInstance(cellWidth, cellHeight, BufferedImage.SCALE_FAST)));
-                    tableComponent.setText("");
-                    setTableRowHeight(table, row);
                 }
-            } else {
-                tableComponent.setIcon(null);
-                tableComponent.setText("Not available!");
+            } catch(Throwable e) {
+                e.printStackTrace();
             }
             return tableComponent;
         }
 
         private void setBackground(final JTable table, final boolean isSelected) {
+            if(tableComponent == null) return;
+            
             Color backGroundColor = table.getBackground();
             if (isSelected) {
                 backGroundColor = table.getSelectionBackground();
