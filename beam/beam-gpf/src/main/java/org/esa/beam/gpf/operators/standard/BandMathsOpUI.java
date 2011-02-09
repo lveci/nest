@@ -163,6 +163,8 @@ public class BandMathsOpUI extends BaseOperatorUI {
         editExpressionButton.setName("editExpressionButton");
         editExpressionButton.addActionListener(createEditExpressionButtonListener());
 
+        final JLabel infoLabel = new JLabel("Variables $Band0, $Band1, etc can be used in place of Band names for batch processing");
+
         final JPanel gridPanel = GridBagUtils.createPanel();
         int line = 0;
         final GridBagConstraints gbc = new GridBagConstraints();
@@ -193,6 +195,10 @@ public class BandMathsOpUI extends BaseOperatorUI {
         gbc.gridy = ++line;
         GridBagUtils.addToPanel(gridPanel, editExpressionButton, gbc,
                                 "weighty=0, insets.top=3, gridwidth=3, fill=NONE, anchor=EAST");
+
+        gbc.gridy = ++line;
+        GridBagUtils.addToPanel(gridPanel, infoLabel, gbc,
+                                "gridx=1, insets.top=3, gridwidth=2, fill=HORIZONTAL, anchor=WEST");
 
         return gridPanel;
     }
