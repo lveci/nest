@@ -29,7 +29,7 @@ import java.awt.Color;
  * Basic editor for image layers.
  *
  * @author Ralf Quast
- * @version $ Revision: $ $ Date: $
+
  * @since BEAM 4.6
  */
 public class ImageLayerEditor extends AbstractLayerConfigurationEditor {

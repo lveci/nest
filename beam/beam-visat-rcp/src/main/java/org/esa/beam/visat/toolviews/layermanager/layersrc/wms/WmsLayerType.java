@@ -58,7 +58,7 @@ import java.util.List;
 
 /**
  * @author Marco Peters
- * @version $ Revision $ Date $
+
  * @since BEAM 4.6
  */
 public class WmsLayerType extends ImageLayer.Type {

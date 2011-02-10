@@ -32,7 +32,7 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
- * @version $ Revision $ Date $
+
  * @since BEAM 4.7
  */
 abstract class MaskAction extends AbstractAction {
