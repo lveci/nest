@@ -37,7 +37,7 @@ import java.lang.ref.WeakReference;
  * resets itsself whenever the referred vector data have changed.
  *
  * @author Ralf Quast
- * @version $Revision: 1.6 $ $Date: 2010-12-23 14:35:09 $
+
  * @since BEAM 4.7
  */
 class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {

@@ -35,7 +35,7 @@ import java.awt.image.RenderedImage;
  * A layer used to display {@link Mask}s.
  *
  * @author Norman Fomferra
- * @version $ Revision: $ Date: $
+
  * @since BEAM 4.7
  */
 public class MaskLayerType extends ImageLayer.Type {

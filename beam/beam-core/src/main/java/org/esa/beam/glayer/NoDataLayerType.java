@@ -35,7 +35,7 @@ import java.beans.PropertyChangeEvent;
  * A layer used to display the no-data mask of a raster data node.
  *
  * @author Marco Peters
- * @version $ Revision: $ Date: $
+
  * @since BEAM 4.6
  */
 public class NoDataLayerType extends ImageLayer.Type {
