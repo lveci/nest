@@ -30,7 +30,7 @@ import org.esa.beam.glayer.ProductLayerContext;
 /**
  * @author Marco Peters
  * @author Ralf Quast
- * @version $ Revision $ Date $
+
  * @since BEAM 4.7
  */
 public class VectorDataLayerType extends LayerType {

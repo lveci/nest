@@ -71,7 +71,7 @@ import java.util.Set;
 /**
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $ Revision $ Date $
+
  * @since BEAM 4.7
  */
 public class CustomCrsPanel extends JPanel {
