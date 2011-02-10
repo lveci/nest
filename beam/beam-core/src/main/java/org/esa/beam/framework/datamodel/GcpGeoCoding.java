@@ -386,7 +386,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
     
      */
     public enum Method {
-
+        // todo - use better names instead of  POLYNOMIAL<i> (nf - 18.01.2011)
         /**
          * Linear polynomial.
          */

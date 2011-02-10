@@ -22,7 +22,7 @@ import org.jdom.Element;
 
 /**
  * @author Marco Peters
- * @version $ Revision $ Date $
+
  * @since BEAM 4.7
  */
 public class RangeTypeMaskPersistableSpi implements DimapPersistableSpi{
