@@ -71,6 +71,17 @@ public final class AsarAbstractMetadata {
         addAbstractedAttribute("PRODUCT_TYPE", _productType, absRoot, "Product type");
         addAbstractedAttribute("SPH_DESCRIPTOR",  sph.getAttributeString("SPH_DESCRIPTOR", ""), absRoot, "Description");
         addAbstractedAttribute("MISSION", getMission(_productType, _file), absRoot, "Satellite mission");
+
+        String mode = "ScanSAR";
+        if(productType.startsWith("ASA_IM") || waveProduct || productType.startsWith("SAR"))
+            mode = "Stripmap";
+        addAbstractedAttribute("ACQUISITION_MODE", mode, absRoot, "Acquisition Mode");
+        if(waveProduct) {
+            addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH_1", ""), absRoot, "Swath name");    
+        } else {
+            addAbstractedAttribute("BEAMS", sph.getAttributeString("SWATH", ""), absRoot, "Swath Name");
+        }
+
         addAbstractedAttribute("PROC_TIME", mph.getAttributeUTC("PROC_TIME", new ProductData.UTC(0)), absRoot,
                                 "Processed time");
         addAbstractedAttribute("Processing_system_identifier", mph.getAttributeString("SOFTWARE_VER", ""), absRoot,
@@ -82,11 +93,6 @@ public final class AsarAbstractMetadata {
                                 "Time of orbit state vector");
         addAbstractedAttribute("VECTOR_SOURCE", mph.getAttributeString("VECTOR_SOURCE", ""), absRoot,
                                 "State vector source");
-
-        if(productType.contains("ASA_WS") || productType.contains("ASA_GM"))
-            addAbstractedAttribute("ACQUISITION_MODE", "ScanSAR", absRoot, "Acquisition Mode");
-        else
-            addAbstractedAttribute("ACQUISITION_MODE", "Stripmap", absRoot, "Acquisition Mode");
 
         // SPH
         addAbstractedAttribute("NUM_SLICES", mph.getAttributeInt("NUM_SLICES", 0), "", absRoot, "Number of slices");
@@ -104,8 +110,6 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("last_far_lat", 0, "deg", absRoot, "");
             addAbstractedAttribute("last_far_long", 0, "deg", absRoot, "");
 
-
-            addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH_1", ""), absRoot, "Swath name");
             addAbstractedAttribute(sph, "PASS", absRoot, "ASCENDING or DESCENDING");
             addAbstractedAttribute("SAMPLE_TYPE", " ", absRoot, "DETECTED or COMPLEX");
 
@@ -132,7 +136,6 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("last_far_lat", sph.getAttributeDouble("last_far_lat", 0) / million, "deg", absRoot, "");
             addAbstractedAttribute("last_far_long", sph.getAttributeDouble("last_far_long", 0) / million, "deg", absRoot, "");
 
-            addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH", ""), absRoot, "Swath name");
             addAbstractedAttribute("PASS", sph.getAttributeString("PASS", ""), absRoot, "ASCENDING or DESCENDING");
             addAbstractedAttribute("SAMPLE_TYPE", sph.getAttributeString("SAMPLE_TYPE").trim(), absRoot, "DETECTED or COMPLEX");
 
@@ -146,7 +149,8 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
         }
 
-        addAbstractedAttribute("ALGORITHM", sph.getAttributeString("ALGORITHM", ""), absRoot, "Processing algorithm");
+        addAbstractedAttribute("polsar_data", "0", absRoot, "Polarimetric Matrix");
+        addAbstractedAttribute("algorithm", sph.getAttributeString("ALGORITHM", ""), absRoot, "Processing algorithm");
         addAbstractedAttribute("azimuth_looks", sph.getAttributeDouble("azimuth_looks", 0), "", absRoot, "");
         addAbstractedAttribute("range_looks", sph.getAttributeDouble("range_looks", 0), "", absRoot, "");
         addAbstractedAttribute("range_spacing", sph.getAttributeDouble("range_spacing", 0), "m", absRoot, "Range sample spacing");
@@ -182,7 +186,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("map_projection", mapProjection, absRoot, "Map projection applied");
 
             addAbstractedAttribute("is_terrain_corrected", 0, "flag", absRoot, "orthorectification applied");
-            addAbstractedAttribute("dem", "", absRoot, "Digital Elevation Model used");
+            addAbstractedAttribute("DEM", "", absRoot, "Digital Elevation Model used");
             addAbstractedAttribute("geo_ref_system", geoRefSystem, absRoot, "geographic reference system");
             addAbstractedAttribute("lat_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
             addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
@@ -207,6 +211,12 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("calibration_factor",
                 mppAds.getAttributeDouble("ASAR_Main_ADSR.sd/calibration_factors.1.ext_cal_fact", 0), "", absRoot,
                     "Calibration constant");
+            addAbstractedAttribute("inc_angle_comp_flag", 0, "flag", absRoot, "incidence angle compensation applied");
+            addAbstractedAttribute("ref_inc_angle", 99999.0, "", absRoot, "Reference incidence angle");
+            addAbstractedAttribute("ref_slant_range", 99999.0, "", absRoot, "Reference slant range");
+            addAbstractedAttribute("ref_slant_range_exp", 99999.0, "", absRoot, "Reference slant range exponent");
+            addAbstractedAttribute("rescaling_factor", 99999.0, "", absRoot, "Rescaling factor");
+
             addAbstractedAttribute("range_sampling_rate",
                 mppAds.getAttributeDouble("range_samp_rate", 0) / 1000000.0, "MHz", absRoot, "Range Sampling Rate");
             addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag",
@@ -224,7 +234,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("map_projection", " ", absRoot, "Map projection applied");
 
             addAbstractedAttribute("is_terrain_corrected", 0, "flag", absRoot, "orthorectification applied");
-            addAbstractedAttribute("dem", "", absRoot, "Digital Elevation Model used");
+            addAbstractedAttribute("DEM", "", absRoot, "Digital Elevation Model used");
             addAbstractedAttribute("geo_ref_system", "", absRoot, "geographic reference system");
             addAbstractedAttribute("lat_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
             addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
@@ -241,6 +251,12 @@ public final class AsarAbstractMetadata {
                     "Replica pulse power correction applied", absRoot);
             addAbstractedAttribute("abs_calibration_flag", ProductData.TYPE_UINT8, "flag","Product calibrated", absRoot);
             addAbstractedAttribute("calibration_factor", 0, "", absRoot, "Calibration constant");
+            addAbstractedAttribute("inc_angle_comp_flag", 0, "flag", absRoot, "incidence angle compensation applied");
+            addAbstractedAttribute("ref_inc_angle", 99999.0, "", absRoot, "Reference incidence angle");
+            addAbstractedAttribute("ref_slant_range", 99999.0, "", absRoot, "Reference slant range");
+            addAbstractedAttribute("ref_slant_range_exp", 99999.0, "", absRoot, "Reference slant range exponent");
+            addAbstractedAttribute("rescaling_factor", 99999.0, "", absRoot, "Rescaling factor");
+
             addAbstractedAttribute("range_sampling_rate",  0, "MHz", absRoot, "Range Sampling Rate");
             addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag", "Product multilooked", absRoot);
             addAbstractedAttribute("coregistered_stack", ProductData.TYPE_UINT8, "flag","Coregistration applied", absRoot);

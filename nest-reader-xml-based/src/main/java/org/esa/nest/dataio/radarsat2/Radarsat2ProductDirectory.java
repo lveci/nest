@@ -126,7 +126,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 radarParameters.getAttributeString("acquisitionType", defStr));
         final String aquisitionMode = radarParameters.getAttributeString("acquisitionType", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, aquisitionMode);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAM_MODE,
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
                 radarParameters.getAttributeString("beams", defStr));
 
 
@@ -205,7 +205,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 rasterAttributes.getAttributeInt("numberOfLines", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 rasterAttributes.getAttributeInt("numberOfSamplesPerLine", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 

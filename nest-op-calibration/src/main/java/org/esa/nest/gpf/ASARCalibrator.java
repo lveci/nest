@@ -266,7 +266,7 @@ public class ASARCalibrator implements Calibrator {
      * @throws Exception The exceptions.
      */
     private void getProductSwath() throws Exception {
-        swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
+        swath = absRoot.getAttributeString(AbstractMetadata.BEAMS);
         wideSwathProductFlag = swath.contains("WS");
     }
 

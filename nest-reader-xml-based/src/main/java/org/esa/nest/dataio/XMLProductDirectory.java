@@ -98,6 +98,9 @@ public class XMLProductDirectory {
         product.setProductType(getProductType());
         product.setDescription(getProductDescription());
 
+        AbstractMetadata.setAttribute(AbstractMetadata.getAbstractedMetadata(product),
+                AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
+
         return product;
     }
 

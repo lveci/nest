@@ -253,6 +253,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
                     ReaderUtils.findPolarizationInBandName(
                             sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
 
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
+                    sceneRec.getAttributeString("Processing algorithm identifier"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                     sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,

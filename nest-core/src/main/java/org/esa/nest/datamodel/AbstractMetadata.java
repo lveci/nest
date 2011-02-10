@@ -51,7 +51,7 @@ public final class AbstractMetadata {
     public static final String PATH = "PATH";
     public static final String MISSION = "MISSION";
     public static final String ACQUISITION_MODE = "ACQUISITION_MODE";
-    public static final String BEAM_MODE = "BEAM_MODE";
+    public static final String BEAMS = "BEAMS";
     public static final String PROC_TIME = "PROC_TIME";
     public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
     public static final String CYCLE = "CYCLE";
@@ -73,7 +73,6 @@ public final class AbstractMetadata {
     public static final String last_far_lat = "last_far_lat";
     public static final String last_far_long = "last_far_long";
 
-    public static final String SWATH = "SWATH";
     public static final String PASS = "PASS";
     public static final String SAMPLE_TYPE = "SAMPLE_TYPE";
     public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
@@ -178,7 +177,7 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "Satellite mission");
         addAbstractedAttribute(absRoot, ACQUISITION_MODE, ProductData.TYPE_ASCII, "", "Acquisition Mode");
-        addAbstractedAttribute(absRoot, BEAM_MODE, ProductData.TYPE_ASCII, "", "Beams used");
+        addAbstractedAttribute(absRoot, BEAMS, ProductData.TYPE_ASCII, "", "Beams used/Swath Name");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "Processed time");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "Processing system identifier");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "Cycle");
@@ -199,15 +198,14 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, last_near_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_far_long, ProductData.TYPE_FLOAT64, "deg", "");
-        
-        addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
+
         addAbstractedAttribute(absRoot, PASS, ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
         addAbstractedAttribute(absRoot, SAMPLE_TYPE, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
         addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds3_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds4_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
-        addAbstractedAttribute(absRoot, polsarData, ProductData.TYPE_UINT8, "flag", "Polarimetric Data");
+        addAbstractedAttribute(absRoot, polsarData, ProductData.TYPE_UINT8, "flag", "Polarimetric Matrix");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");

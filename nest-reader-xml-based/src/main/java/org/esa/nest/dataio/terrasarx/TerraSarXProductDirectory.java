@@ -106,6 +106,11 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, imageDataInfo.getAttributeString("imageDataType", defStr));
 
         final MetadataElement acquisitionInfo = productInfo.getElement("acquisitionInfo");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE,
+                getAcquisitionMode(acquisitionInfo.getAttributeString("imagingMode")));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
+                acquisitionInfo.getAttributeString("elevationBeamConfiguration"));
+
         final MetadataElement polarisationList = acquisitionInfo.getElement("polarisationList");
         final MetadataAttribute[] polList = polarisationList.getAttributes();
         for(int i=0; i < polList.length; ++i) {
@@ -140,7 +145,6 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 imageRaster.getAttributeInt("numberOfColumns", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 imageRaster.getAttributeInt("numberOfRows", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         // See Andrea's email dated Sept. 30, 2010
         final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
@@ -195,6 +199,16 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         addOrbitStateVectors(absRoot, orbit);
         addSRGRCoefficients(absRoot, productSpecific);
+    }
+
+    private static String  getAcquisitionMode(final String mode) {
+        if(mode.equalsIgnoreCase("SM"))
+            return "Stripmap";
+        else if(mode.equalsIgnoreCase("SL") || mode.equalsIgnoreCase("HS"))
+            return "Spotlight";
+        else if(mode.equalsIgnoreCase("SC"))
+            return "ScanSAR";
+        return " ";
     }
 
     private static void setFlag(MetadataElement elem, String attribTag, String trueValue,
