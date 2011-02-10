@@ -62,7 +62,7 @@ import java.util.Map;
 
 /**
  * @author Marco Peters
- * @version $ Revision $ Date $
+
  * @since BEAM 4.7
  */
 class MosaicIOPanel extends JPanel {

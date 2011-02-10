@@ -124,8 +124,8 @@ public class ProductFlipDialog extends ModalDialog {
         _numNewFlippings++;
 
         _paramNewName = new Parameter("productName",
-                                      _numNewFlippings + "_"
-                                      + getSourceProduct().getName()+"_Flip");
+                                      "flip_" + _numNewFlippings + "_"
+                                      + getSourceProduct().getName());
         _paramNewName.getProperties().setLabel("Name"); /* I18N */
         _paramNewName.getProperties().setNullValueAllowed(false);
         _paramNewName.getProperties().setValidatorClass(ProductNodeNameValidator.class);

@@ -24,7 +24,6 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.ProfileReaderPlugIn;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeList;
 import org.esa.beam.framework.help.HelpSys;
@@ -130,11 +129,6 @@ public class ProductImportAction extends ExecCommand {
                         MessageFormat.format("Configuration error: No product reader found for format ''{0}''.",
                                              formatName)));
             }
-        }
-        String profileClassName = getConfigString(config, "profileClassName");
-        if (profileClassName != null && readerPlugIn instanceof ProfileReaderPlugIn) {
-            ProfileReaderPlugIn profileReaderPlugIn = (ProfileReaderPlugIn) readerPlugIn;
-            readerPlugIn = profileReaderPlugIn.createProfileReaderPlugin(profileClassName);
         }
 
         Boolean useAllFileFilterObj = getConfigBoolean(config, "useAllFileFilter");

@@ -19,14 +19,17 @@ package org.esa.beam.framework.gpf.graph;
 import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.*;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.internal.OperatorConfiguration;
+import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.framework.dataio.ProductCache;
 
-import java.lang.reflect.Field;
-
 import javax.media.jai.PlanarImage;
+import java.lang.reflect.Field;
 
 /**
  * Default implementation for {@link org.esa.beam.framework.gpf.internal.OperatorContext}.
@@ -96,7 +99,7 @@ public class NodeContext {
         operator.setSourceProduct(id, sourceProduct);
     }
 
-    public void setParameters(OperatorConfiguration opConfiguration) {
+    public void setOperatorConfiguration(OperatorConfiguration opConfiguration) {
         operatorContext.setConfiguration(opConfiguration);
     }
 

@@ -107,12 +107,9 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
         final PropertyContainer valueContainer = PropertyContainer.createMapBacked(parameterMap,
                                                 operatorSpi.getOperatorClass(), parameterDescriptorFactory);
-        try {
-            valueContainer.setDefaultValues();
-        } catch (ValidationException e) {
-            e.printStackTrace();
-            showErrorDialog(e.getMessage());
-        }
+
+        valueContainer.setDefaultValues();
+
         if (valueContainer.getProperties().length > 0) {
 
             final JComponent paremetersPanel = opUI.CreateOpTab(operatorName, parameterMap, appContext);

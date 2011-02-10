@@ -66,7 +66,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -87,33 +86,37 @@ import java.util.regex.Pattern;
  */
 public class OperatorContext {
 
-    static final String SYS_PROP_PERFORMANCE_FILE = "beam.gpf.performance.file";
-    static final String SYS_PROP_PERFORMANCE_TRACE = "beam.gpf.performance.trace";
+    private static final String SYS_PROP_NAME_PERFORMANCE_FILE = "beam.gpf.performance.file";
+    private static final String SYS_PROP_NAME_PERFORMANCE_TRACE = "beam.gpf.performance.trace";
 
-    private static final String OPERATION_CANCELED_MESSAGE = "Operation canceled.";
+    private static final String SYS_PROP_VALUE_PERFORMANCE_FILE = System.getProperty(SYS_PROP_NAME_PERFORMANCE_FILE, "gpf-performance.txt");
+    static final boolean SYS_PROP_VALUE_PERFORMANCE_TRACE = Boolean.parseBoolean(System.getProperty(SYS_PROP_NAME_PERFORMANCE_TRACE, "false"));
+
+    private final Operator operator;
+    private final List<Product> sourceProductList;
+    private final Map<String, Product> sourceProductMap;
+    private final Map<String, Object> targetPropertyMap;
+    private final RenderingHints renderingHints;
+
     private String id;
     private Product targetProduct;
     private OperatorSpi operatorSpi;
-    private Operator operator;
     private boolean computeTileMethodUsable;
     private boolean computeTileStackMethodUsable;
-    private boolean passThrough;
-    private List<Product> sourceProductList;
     private Map<String, Object> parameters;
-    private Map<String, Product> sourceProductMap;
-    private Map<String, Object> targetPropertyMap;
     private Map<Band, OperatorImage> targetImageMap;
     private OperatorConfiguration configuration;
     private Logger logger;
     private boolean cancelled;
     private boolean disposed;
     private PropertyContainer propertyContainer;
-    private RenderingHints renderingHints;
     private boolean initialising;
     private boolean requiresAllBands;
-    private final boolean tracePerformance;
 
     public OperatorContext(Operator operator) {
+        if (operator == null) {
+            throw new NullPointerException("operator");
+        }
         this.operator = operator;
         this.computeTileMethodUsable = canOperatorComputeTile(operator.getClass());
         this.computeTileStackMethodUsable = canOperatorComputeTileStack(operator.getClass());
@@ -122,12 +125,11 @@ public class OperatorContext {
         this.targetPropertyMap = new HashMap<String, Object>(3);
         this.logger = BeamLogManager.getSystemLogger();
         this.renderingHints = new RenderingHints(JAI.KEY_TILE_CACHE_METRIC, this);
-        this.tracePerformance = Boolean.getBoolean(OperatorContext.SYS_PROP_PERFORMANCE_TRACE);
     }
 
     public String getId() {
         if (id == null) {
-            id = getOperatorSpi().getOperatorAlias() + "$" + Long.toHexString(System.currentTimeMillis()).toUpperCase();
+            id = getOperatorSpi().getOperatorAlias() + '$' + Long.toHexString(System.currentTimeMillis()).toUpperCase();
         }
         return id;
     }
@@ -169,7 +171,7 @@ public class OperatorContext {
         for (int i = 0; i < products.length; i++) {
             Product product = products[i];
             final int productIndex = i + 1;
-            setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + "." + productIndex, product);
+            setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + '.' + productIndex, product);
             // kept for backward compatibility
             // since BEAM 4.9 the pattern above is preferred
             setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + productIndex, product);
@@ -189,6 +191,7 @@ public class OperatorContext {
         Set<Map.Entry<String, Product>> entrySet = sourceProductMap.entrySet();
         List<String> mappedIds = new ArrayList<String>();
         for (Map.Entry<String, Product> entry : entrySet) {
+            //noinspection ObjectEquality
             if (entry.getValue() == product) {
                 mappedIds.add(entry.getKey());
             }
@@ -223,13 +226,6 @@ public class OperatorContext {
         return targetPropertyMap.get(name);
     }
 
-    public boolean isPassThrough() {
-        return passThrough;
-    }
-
-    public boolean isTracePerformance() {
-        return tracePerformance;
-    }
 
     public boolean isCancelled() {
         return cancelled;
@@ -241,7 +237,7 @@ public class OperatorContext {
 
     public void checkForCancellation() throws OperatorException {
         if (isCancelled()) {
-            throw new OperatorException(OPERATION_CANCELED_MESSAGE);
+            throw new OperatorException("Operation canceled.");
         }
     }
 
@@ -431,9 +427,6 @@ public class OperatorContext {
             operator.initialize();
             initTargetProduct();
             initTargetProperties();
-            if (!(operator instanceof GraphOp)) {
-                initPassThrough();
-            }
             initTargetImages();
             initGraphMetadata();
 
@@ -447,6 +440,8 @@ public class OperatorContext {
      * Updates this operator forcing it to recreate the target product.
      * <i>Warning: Experimental API added by nf (25.02.2010)</i><br/>
      *
+     * @throws org.esa.beam.framework.gpf.OperatorException
+     *          If an error occurs.
      * @since BEAM 4.8
      */
     public void updateOperator() throws OperatorException {
@@ -455,7 +450,7 @@ public class OperatorContext {
     }
 
 
-    private PropertyContainer getOperatorValueContainer() {
+    private PropertyContainer getOperatorPropertyContainer() {
         if (propertyContainer == null) {
             PropertyDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory(sourceProductMap);
             propertyContainer = PropertyContainer.createObjectBacked(operator, parameterDescriptorFactory);
@@ -549,7 +544,7 @@ public class OperatorContext {
             final List<DomElement> elementList = entry.getValue();
             if (elementList.size() > 1) {
                 for (int i = 0; i < elementList.size(); i++) {
-                    addDomToMetadata(elementList.get(i), name + "." + i, parentME);
+                    addDomToMetadata(elementList.get(i), name + '.' + i, parentME);
                 }
             } else {
                 addDomToMetadata(elementList.get(0), name, parentME);
@@ -581,17 +576,6 @@ public class OperatorContext {
             final MetadataAttribute attribute = new MetadataAttribute(name, valueME, true);
             parentME.addAttribute(attribute);
         }
-    }
-
-    private boolean initPassThrough() {
-        passThrough = false;
-        Product[] sourceProducts = getSourceProducts();
-        for (Product sourceProduct : sourceProducts) {
-            if (targetProduct == sourceProduct) {
-                passThrough = true;
-            }
-        }
-        return passThrough;
     }
 
     private void initTargetImages() {
@@ -654,6 +638,7 @@ public class OperatorContext {
         }
         // If the OperatorImage's context is not us, then it is not ours
         OperatorImage operatorImage = (OperatorImage) renderedImage;
+        //noinspection ObjectEquality
         if (this != operatorImage.getOperatorContext()) {
             return null;
         }
@@ -680,6 +665,7 @@ public class OperatorContext {
 
     public static boolean isRegularBand(Band targetBand) {
         // Note: "instanceof" has intentionally not been used here.
+        //noinspection ObjectEquality
         return targetBand.getClass() == Band.class;
     }
 
@@ -816,7 +802,7 @@ public class OperatorContext {
             if (sourceProducts != null) {
                 for (int i = 0; i < sourceProducts.length; i++) {
                     Product sourceProduct = sourceProducts[i];
-                    setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + "." + (i + 1), sourceProduct);
+                    setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + '.' + (i + 1), sourceProduct);
                     // kept for backward compatibility
                     // since BEAM 4.9 the pattern above is preferred
                     setSourceProduct(GPF.SOURCE_PRODUCT_FIELD_NAME + (i + 1), sourceProduct);
@@ -863,11 +849,12 @@ public class OperatorContext {
         return productSet.toArray(new Product[productSet.size()]);
     }
 
-    private Field[] getAnnotatedSourceProductFields(Operator operator1) {
+    private static Field[] getAnnotatedSourceProductFields(Operator operator1) {
         Field[] declaredFields = operator1.getClass().getDeclaredFields();
         List<Field> fieldList = new ArrayList<Field>();
         for (Field declaredField : declaredFields) {
             SourceProduct sourceProductAnnotation = declaredField.getAnnotation(SourceProduct.class);
+            //noinspection VariableNotUsedInsideIf
             if (sourceProductAnnotation != null) {
                 fieldList.add(declaredField);
             }
@@ -959,9 +946,8 @@ public class OperatorContext {
         }
     }
 
-    private void configureOperator(Operator operator, OperatorConfiguration operatorConfiguration) throws
-            ValidationException,
-            ConversionException {
+    private void configureOperator(Operator operator, OperatorConfiguration operatorConfiguration)
+            throws ValidationException, ConversionException {
         ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory(sourceProductMap);
         DefaultDomConverter domConverter = new DefaultDomConverter(operator.getClass(), parameterDescriptorFactory);
         domConverter.convertDomToValue(operatorConfiguration.getConfiguration(), operator);
@@ -975,19 +961,25 @@ public class OperatorContext {
     }
 
     public void injectParameterDefaultValues() throws OperatorException {
-        try {
-            getOperatorValueContainer().setDefaultValues();
-        } catch (ValidationException e) {
-            throw new OperatorException(formatExceptionMessage("%s", e.getMessage()), e);
-        }
+        getOperatorPropertyContainer().setDefaultValues();
     }
 
     private void injectParameterValues() throws OperatorException {
         if (parameters != null) {
             for (String parameterName : parameters.keySet()) {
-                final Property property = getOperatorValueContainer().getProperty(parameterName);
+                final Property property = getOperatorPropertyContainer().getProperty(parameterName);
                 if (property == null) {
-                    throw new OperatorException(formatExceptionMessage("Unknown parameter '%s'.", parameterName));
+                    // Note: "Unknown parameter" exception commented out by Norman on 09.02.2011
+                    // Intention is to reuse parameter maps for multiple operators. (see OpParameterInitialisationTest)
+                    // Clients of GPF should test parameter compatibility before calling GPF.createProduct() methods.
+                    // todo - must add to OperatorSpi (nf,mp,mz,rq - 09.02.2011)
+                    //    ProductDescriptor getSourceProductDescriptors();
+                    //    PropertyDescriptor[] getParameterDescriptors();
+                    //    PropertyDescriptor[] getTargetPropertyDescriptors();
+                    //    ProductDescriptor getTargetProductDescriptor();
+
+                    //throw new OperatorException(formatExceptionMessage("Unknown parameter '%s'.", parameterName));
+                    continue;
                 }
                 try {
                     PropertyDescriptor descriptor = property.getDescriptor();
@@ -1036,15 +1028,15 @@ public class OperatorContext {
     }
 
     public void logPerformanceAnalysis() {
-        if (Boolean.getBoolean(SYS_PROP_PERFORMANCE_TRACE)) {
-            File file = new File(System.getProperty(SYS_PROP_PERFORMANCE_FILE, "gpf-performance.txt"));
+        if (SYS_PROP_VALUE_PERFORMANCE_TRACE) {
+            File file = new File(SYS_PROP_VALUE_PERFORMANCE_FILE);
             try {
-                FileWriter fileWriter = new FileWriter(file);
+                PrintWriter writer = new PrintWriter(new FileWriter(file));
                 try {
-                    logPerformanceAnalysis(new PrintWriter(fileWriter));
+                    logPerformanceAnalysis(writer);
                     getLogger().info("GPF performance analysis has been written to " + file);
                 } finally {
-                    fileWriter.close();
+                    writer.close();
                 }
             } catch (IOException e) {
                 getLogger().severe("Failed to write GPF performance analysis to " + file);

@@ -253,10 +253,10 @@ public class GraphExecuter extends Observable {
 
     private void recreateGraphContext() throws GraphException {
         if(graphContext != null)
-            GraphProcessor.disposeGraphContext(graphContext);
+            graphContext.dispose();
 
         processor = new GraphProcessor();
-        graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+        graphContext = new GraphContext(graph);
     }
 
     private void updateGraphNodes() {
@@ -269,7 +269,7 @@ public class GraphExecuter extends Observable {
     }
 
     public void disposeGraphContext() {
-        GraphProcessor.disposeGraphContext(graphContext);
+        graphContext.dispose();
     }
 
     /**

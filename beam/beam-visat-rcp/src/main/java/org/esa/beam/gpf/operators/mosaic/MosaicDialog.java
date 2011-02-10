@@ -16,12 +16,17 @@
 
 package org.esa.beam.gpf.operators.mosaic;
 
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.jexp.Namespace;
 import com.bc.jexp.ParseException;
 import com.bc.jexp.impl.ParserImpl;
+import com.jidesoft.action.CommandMenuBar;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
+import org.esa.beam.framework.gpf.ui.OperatorParametersSupport;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.TargetProductSelector;
 import org.esa.beam.framework.ui.AppContext;
@@ -30,6 +35,8 @@ import org.esa.beam.util.StringUtils;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import java.util.Map;
 
 class MosaicDialog extends SingleTargetProductDialog {
@@ -43,6 +50,23 @@ class MosaicDialog extends SingleTargetProductDialog {
         selector.getModel().setProductName("mosaic");
         selector.getSaveToFileCheckBox().setEnabled(false);
         form = new MosaicForm(selector, appContext);
+
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi("Mosaic");
+        if (operatorSpi != null) {
+            final PropertyContainer properties = PropertyContainer.createMapBacked(
+                    form.getFormModel().getParameterMap(),
+                    operatorSpi.getOperatorClass(),
+                    new ParameterDescriptorFactory());
+            OperatorParametersSupport parametersSupport = new OperatorParametersSupport(operatorSpi.getOperatorClass(),
+                                                                                        properties);
+
+            JMenu fileMenu = new JMenu("File");
+            fileMenu.add(parametersSupport.createLoadParametersAction());
+            fileMenu.add(parametersSupport.createStoreParametersAction());
+            JMenuBar menuBar = new CommandMenuBar();
+            getJDialog().setJMenuBar(menuBar);
+            getJDialog().getJMenuBar().add(fileMenu);
+        }
     }
 
     @Override
@@ -158,5 +182,5 @@ class MosaicDialog extends SingleTargetProductDialog {
             return false;
         }
         return true;
-    }    
+    }
 }

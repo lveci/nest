@@ -56,7 +56,7 @@ public abstract class BaseOperatorUI implements OperatorUI {
         if(paramMap.isEmpty()) {
             try {
                 valueContainer.setDefaultValues();
-            } catch (ValidationException e) {
+            } catch (IllegalStateException e) {
                 // todo - handle exception here
                 e.printStackTrace();
             }

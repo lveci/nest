@@ -22,6 +22,7 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.FileLoadDescriptor;
 import java.awt.image.ColorModel;
+import java.awt.image.MultiPixelPackedSampleModel;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.File;
@@ -32,6 +33,7 @@ import java.io.Writer;
 import java.util.Properties;
 
 public class ImageHeader {
+
     private final ImageLayout imageLayout;
     private final String tileFormat;
 
@@ -61,7 +63,10 @@ public class ImageHeader {
     public static ImageHeader load(Reader reader, Properties defaultImageProperties, File imageDir) throws IOException {
         Properties imageProperties = new Properties(defaultImageProperties);
         imageProperties.load(reader);
+        return load(imageProperties, imageDir);
+    }
 
+    public static ImageHeader load(Properties imageProperties, File imageDir) throws IOException {
         int dataType = Integer.parseInt(imageProperties.getProperty("dataType"));
         int minX = Integer.parseInt(imageProperties.getProperty("minX", "0"));
         int minY = Integer.parseInt(imageProperties.getProperty("minY", "0"));
@@ -71,15 +76,21 @@ public class ImageHeader {
         int tileGridYOffset = Integer.parseInt(imageProperties.getProperty("tileGridYOffset", "0"));
         int tileWidth = Integer.parseInt(imageProperties.getProperty("tileWidth"));
         int tileHeight = Integer.parseInt(imageProperties.getProperty("tileHeight"));
+        int numberOfBits = Integer.parseInt(imageProperties.getProperty("numberOfBits", "0"));
         String tileFormat = imageProperties.getProperty("tileFormat", "raw.zip");
         SampleModel sampleModel;
         ColorModel colorModel;
         if (tileFormat.startsWith("raw")) {
-            sampleModel = ImageUtils.createSingleBandedSampleModel(dataType, width, height);
+            if (numberOfBits == 1 || numberOfBits == 2 || numberOfBits == 4) {
+                sampleModel = new MultiPixelPackedSampleModel(dataType, tileWidth, tileHeight, numberOfBits);
+            } else {
+                sampleModel = ImageUtils.createSingleBandedSampleModel(dataType, tileWidth, tileHeight);
+            }
             colorModel = null;
         } else {
-            RenderedOp tile00 = FileLoadDescriptor.create(new File(imageDir, "0-0." + tileFormat).getPath(), null, true, null);
-            sampleModel = tile00.getSampleModel().createCompatibleSampleModel(width, height);
+            RenderedOp tile00 = FileLoadDescriptor.create(new File(imageDir, "0-0." + tileFormat).getPath(), null, true,
+                                                          null);
+            sampleModel = tile00.getSampleModel().createCompatibleSampleModel(tileWidth, tileHeight);
             colorModel = tile00.getColorModel();
         }
         ImageLayout imageLayout = new ImageLayout(minX, minY,

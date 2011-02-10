@@ -24,7 +24,7 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  * Geographic collocation action.
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2010-12-23 14:35:10 $
+ * @version $Revision: 1.5 $ $Date: 2011-02-10 19:37:02 $
  */
 public class ReprojectionAction extends AbstractVisatAction {
     

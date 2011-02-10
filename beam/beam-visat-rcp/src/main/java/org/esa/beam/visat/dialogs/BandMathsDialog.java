@@ -158,7 +158,7 @@ public class BandMathsDialog extends ModalDialog {
     private void setBandProperties(Band band, String validMaskExpression) {
         band.setDescription(bandDescription);
         band.setUnit(bandUnit);
-        //band.setSpectralWavelength(bandWavelength);
+        band.setSpectralWavelength(bandWavelength);
         band.setGeophysicalNoDataValue(noDataValue);
         band.setNoDataValueUsed(noDataValueUsed);
         band.setValidPixelExpression(validMaskExpression);
@@ -280,7 +280,7 @@ public class BandMathsDialog extends ModalDialog {
         productName = targetProduct.getDisplayName();
         PropertyDescriptor descriptor = container.getDescriptor(PROPERTY_NAME_PRODUCT);
         descriptor.setValueSet(new ValueSet(productsList.getDisplayNames()));
-        descriptor.setDisplayName("Target Product");
+        descriptor.setDisplayName("Target product");
 
         descriptor = container.getDescriptor(PROPERTY_NAME_BAND_NAME);
         descriptor.setDisplayName("Name");
@@ -317,10 +317,7 @@ public class BandMathsDialog extends ModalDialog {
         descriptor = container.getDescriptor(PROPERTY_NAME_NO_DATA_VALUE);
         descriptor.setDefaultValue(Double.NaN);
 
-        try {
-            container.setDefaultValues();
-        } catch (ValidationException ignore) {
-        }
+        container.setDefaultValues();
 
         context.addPropertyChangeListener(PROPERTY_NAME_SAVE_EXPRESSION_ONLY, new PropertyChangeListener() {
             @Override
