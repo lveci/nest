@@ -121,19 +121,14 @@
 	<mapID target="batch_processing" url="operators/batch_processing.html"/>
 	
 	<!--SAR Operators-->
-	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>
-	<mapID target="CalibrationOp" url="operators/CalibrationOp.html"/>	
-	<mapID target="RemoveAntennaPatternOp" url="operators/RemoveAntennaPatternOp.html"/>	
-	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>	
+	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>		
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>	
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	
-	<mapID target="MultiTemporalSpeckleFilterOp" url="operators/MultiTemporalSpeckleFilterOp.html"/>	
-	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
+	<mapID target="MultiTemporalSpeckleFilterOp" url="operators/MultiTemporalSpeckleFilterOp.html"/>		
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
 	<mapID target="WSSMosaic" url="operators/WSSMosaicOp.html"/>
 	
 	<!--Analysis Operators-->
-	<mapID target="PCAOp" url="operators/PCAOp.html"/>
 	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
 	
 	<!--Utility Operators-->
@@ -143,17 +138,6 @@
 	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
 	<mapID target="FillHoleOp" url="operators/FillHoleOp.html"/>
 	<mapID target="FilterOperator" url="visat/CreateFilteredBand.html"/>
-	
-	<!--Geometry Operators-->
-	<mapID target="CreateElevationOp" url="operators/CreateElevationOp.html"/>
-	<mapID target="RangeDopplerGeocodingOp" url="operators/RangeDopplerGeocodingOp.html"/>
-	<mapID target="SARSimGeocodingOp" url="operators/SARSimTerrainCorrectionOp.html"/>
-	<mapID target="SARSimOp" url="operators/SARSimulationOp.html"/>
-	<mapID target="GeolocationGridGeocodingOp" url="operators/GeolocationGridGeocodingOp.html"/>
-	<mapID target="EllipsoidCorrectionRDOp" url="operators/EllipsoidCorrectionRDOp.html"/>
-	<mapID target="MapProjectionOp" url="operators/MapProjectionOp.html"/>
-	<mapID target="SRGROp" url="operators/SRGROp.html"/>
-	<mapID target="MosaicOp" url="operators/MosaicOp.html"/>
 	
 	<!--InSAR-->
 	<mapID target="InSAR" url="operators/InSAR.html"/>

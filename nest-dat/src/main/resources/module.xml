@@ -456,6 +456,7 @@
             <class>org.esa.nest.dat.actions.LaunchPolsarProAction</class>
             <text>Launch PolSARPro</text>
             <shortDescr>Start PolSARPro</shortDescr>
+			<separatorBefore>true</separatorBefore>
             <separatorAfter>true</separatorAfter>
         </action>
 

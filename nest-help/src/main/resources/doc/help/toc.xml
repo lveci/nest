@@ -136,20 +136,15 @@
 		</tocitem>
 		
 		<tocitem text="SAR Operators">
-			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
-			<tocitem text="Calibration" target="CalibrationOp"/>
-			<tocitem text="Remove Antenna Pattern" target="RemoveAntennaPatternOp"/>
-			<tocitem text="GCP Selection" target="GCPSelectionOp"/>			
+			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>		
 			<tocitem text="Multilook" target="MultilookOp"/>			
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
 	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
-			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="WSS Mosaic" target="WSSMosaic"/>
 		</tocitem>	
 		<tocitem text="Analysis Operators">
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
-			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
 		</tocitem>	
 		<tocitem text="Utility Operators">
 			<tocitem text="Create Stack" target="CreateStackOp"/>
@@ -158,18 +153,7 @@
 			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
 			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
 			<tocitem text="Image Filtering" target="FilterOperator"/>
-		</tocitem>	
-		<tocitem text="Geometry Operators">
-			<tocitem text="CreateElevation" target="CreateElevationOp"/>
-			<tocitem text="Range Doppler Terrain Correction" target="RangeDopplerGeocodingOp"/>
-			<tocitem text="SAR Simulation Terrain Correction" target="SARSimGeocodingOp"/>
-			<tocitem text="SAR Simulation" target="SARSimOp"/>
-			<tocitem text="Geolocation Grid Ellipsoid Correction" target="GeolocationGridGeocodingOp"/>
-			<tocitem text="Average Height RD Ellipsoid Correction" target="EllipsoidCorrectionRDOp"/>
-			<tocitem text="Map Projection" target="MapProjectionOp"/>
-			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
-			<tocitem text="Mosaic" target="MosaicOp"/>
-		</tocitem>	
+		</tocitem>		
 		<tocitem text="InSAR">
 			<tocitem text="InSAR functionality" target="InSAR"/>
 			<tocitem text="Interferogram formation" target="ComplexIfgOp"/>

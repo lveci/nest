@@ -66,15 +66,21 @@
       <artifactId>nest-writer-netcdf</artifactId>
       <version>${nest.version}</version>
     </dependency>
-        <dependency>
-            <groupId>org</groupId>
-            <version>1.0.1</version>
-            <!-- scope>system</scope -->
-            <!-- systemPath>~/.m2/repository/org/jblas/1.0.1/jblas-1.0.1.jar</systemPath -->
-            <artifactId>jblas</artifactId>
-        </dependency>
-
-
+    <dependency>
+        <groupId>org</groupId>
+        <version>1.0.1</version>
+        <!-- scope>system</scope -->
+        <!-- systemPath>~/.m2/repository/org/jblas/1.0.1/jblas-1.0.1.jar</systemPath -->
+        <artifactId>jblas</artifactId>
+    </dependency>
   </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.bc.maven.plugins</groupId>
+                <artifactId>maven-javahelp-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
