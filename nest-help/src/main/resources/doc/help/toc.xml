@@ -138,14 +138,6 @@
 			<tocitem text="Batch Processing" target="batch_processing"/>
 		</tocitem>
 		
-		<tocitem text="SAR Operators">
-			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>		
-			<tocitem text="Multilook" target="MultilookOp"/>			
-	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
-	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
-			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<tocitem text="WSS Mosaic" target="WSSMosaic"/>
-		</tocitem>	
 		<tocitem text="Analysis Operators">
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
 		</tocitem>	
@@ -156,6 +148,14 @@
 			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
 			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
 			<tocitem text="Image Filtering" target="FilterOperator"/>
+		</tocitem>	
+		<tocitem text="SAR Operators">
+			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>		
+			<tocitem text="Multilook" target="MultilookOp"/>			
+	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
+	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
+			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
+			<tocitem text="WSS Mosaic" target="WSSMosaic"/>
 		</tocitem>		
 		<tocitem text="Ocean Tools">
 			<tocitem text="Object Detection" target="ObjectDetection"/>
