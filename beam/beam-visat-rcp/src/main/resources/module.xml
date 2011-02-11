@@ -1379,8 +1379,8 @@
             <mnemonic>T</mnemonic>
             <accelerator>F1</accelerator>
             <separatorBefore>false</separatorBefore>
-            <shortDescr>VISAT help</shortDescr>
-            <description>Opens the VISAT help browser.</description>
+            <shortDescr>Help</shortDescr>
+            <description>Opens the help browser.</description>
             <smallIcon>icons/Help16.gif</smallIcon>
             <largeIcon>icons/Help24.gif</largeIcon>
             <helpId>top</helpId>
