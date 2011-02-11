@@ -1,0 +1,61 @@
+<?xml version="1.0"?><project>
+  <parent>
+    <artifactId>nest</artifactId>
+    <groupId>org.esa.nest</groupId>
+    <version>${nest.version}</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.esa.nest</groupId>
+  <artifactId>nest-ocean-tools</artifactId>
+  <name>NEST Ocean Tools</name>
+  <version>${nest.version}</version>
+  <description>Provides operators for ocean SAR applications</description>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-graph-builder</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-gpf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-visat-rcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-reader-dem</artifactId>
+      <version>${nest.version}</version>
+    </dependency>
+	<dependency>
+      <groupId>edu.emory.mathcs</groupId>
+      <artifactId>jtransforms</artifactId>
+	  <version>2.0</version>
+    </dependency>
+  </dependencies>
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.bc.maven.plugins</groupId>
+                <artifactId>maven-javahelp-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+  
+</project>
