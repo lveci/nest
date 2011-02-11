@@ -110,7 +110,6 @@
             <context>createElevationBand</context>
             <helpId>createElevationBand</helpId>
             <parent>geometry</parent>
-            <placeAfter>createElevationOp</placeAfter>
         </action>
 
         <action>

@@ -5,9 +5,14 @@
 
 <map version="2.0">
 
+	<!--Analysis Operators-->
+	<mapID target="PCAOp" url="operators/PCAOp.html"/>
+	
+	<!--Utility Operators-->
+	<mapID target="CreateStackOp" url="operators/CollocateOp.html"/>
+	
+	<!--SAR Operators-->
     <mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>
 	
-	<!--Analysis Operators-->
-	<mapID target="PCAOp" url="operators/PCAOp.html"/>
 </map>
