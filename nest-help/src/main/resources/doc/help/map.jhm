@@ -18,6 +18,8 @@
 
     <mapID target="visat" url="visat/dat.html"/>
 	<mapID target="dat" url="visat/dat.html"/>	
+	
+	<!-- Tool Views -->
 	<mapID target="ToolWindows" url="visat/ToolWindows.html"/>
     <mapID target="mainToolbar" url="visat/Toolbars.html"/>
     <mapID target="fileMenu" url="visat/FileMenu.html"/>
@@ -138,11 +140,6 @@
 	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
 	<mapID target="FillHoleOp" url="operators/FillHoleOp.html"/>
 	<mapID target="FilterOperator" url="visat/CreateFilteredBand.html"/>
-	
-	<!--InSAR-->
-	<mapID target="InSAR" url="operators/InSAR.html"/>
-    <mapID target="ComplexIfgOp" url="operators/ComplexIfgOp.html"/>
-    <mapID target="CplxCohOp" url="operators/CplxCohOp.html"/>
 
 	<!--Ocean Tools-->
 	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>

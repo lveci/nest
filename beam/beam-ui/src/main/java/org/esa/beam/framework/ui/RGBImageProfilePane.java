@@ -180,7 +180,7 @@ public class RGBImageProfilePane extends JPanel {
                 _rgbaExprBoxes[0].setSelectedIndex(0);
                 _rgbaExprBoxes[1].setSelectedIndex(1);
                 _rgbaExprBoxes[2].setSelectedIndex(2);
-            } else {
+            } else if(_product != null) {
                 int cnt = 0, i = 0;
                 for(Band band : _product.getBands()) {
                     final String unit = band.getUnit();

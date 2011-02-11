@@ -17,21 +17,24 @@
 
     <tocitem text="DAT">
         <tocitem text="Display and Analysis Tool" target="dat"/>
-		<tocitem text="Tool Windows" target="ToolWindows"/>
-		<tocitem text="Project View" target="projectView"/>
-		<tocitem text="Product View" target="productBrowser"/>
-        <tocitem text="Pixel Info View" target="pixelInfoView"/>
-		<tocitem text="Image View" target="imageView"/>
-        <tocitem text="Navigation Window" target="showNavigationWnd"/>
-        <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
-		<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
-		<tocitem text="World Map" target="showWorldMapWnd"/>
-		<tocitem text="WorldWind View" target="WorldWind"/>
-		<tocitem text="Product Library" target="productLibrary"/>
-        <tocitem text="Preferences Dialog" target="preferences"/>
-		<tocitem text="Settings Dialog" target="settings"/>
-		<tocitem text="Wave Mode Polar View" target="polarView"/>
-        
+		
+		<tocitem text="Tool Views">
+			<tocitem text="Tool Windows" target="ToolWindows"/>
+			<tocitem text="Project View" target="projectView"/>
+			<tocitem text="Product View" target="productBrowser"/>
+	        <tocitem text="Pixel Info View" target="pixelInfoView"/>
+			<tocitem text="Image View" target="imageView"/>
+	        <tocitem text="Navigation Window" target="showNavigationWnd"/>
+	        <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
+			<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
+			<tocitem text="World Map" target="showWorldMapWnd"/>
+			<tocitem text="WorldWind View" target="WorldWind"/>
+			<tocitem text="Product Library" target="productLibrary"/>
+	        <tocitem text="Preferences Dialog" target="preferences"/>
+			<tocitem text="Settings Dialog" target="settings"/>
+			<tocitem text="Wave Mode Polar View" target="polarView"/>
+        </tocitem>
+		
 		<tocitem text="Menus">
 			<tocitem text="Main Toolbar" target="mainToolbar"/>
 	        <tocitem text="File Menu" target="fileMenu"/>
@@ -154,11 +157,6 @@
 			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
 			<tocitem text="Image Filtering" target="FilterOperator"/>
 		</tocitem>		
-		<tocitem text="InSAR">
-			<tocitem text="InSAR functionality" target="InSAR"/>
-			<tocitem text="Interferogram formation" target="ComplexIfgOp"/>
-			<tocitem text="Coherence estimation" target="CplxCohOp"/>
-		</tocitem>
 		<tocitem text="Ocean Tools">
 			<tocitem text="Object Detection" target="ObjectDetection"/>
 			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
