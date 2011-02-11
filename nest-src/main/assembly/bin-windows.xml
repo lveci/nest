@@ -93,10 +93,6 @@
 						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
                         <excludes>
 							<exclude>jdom:jdom</exclude>
-							<exclude>javax.media:jai</exclude> 
-							<exclude>javax.media:jai_codec</exclude>
-							<exclude>javax.media:jai_core</exclude>
-							<exclude>javax.media:jai_imageio</exclude>
 							<exclude>org.esa.nest:nest-core</exclude>
 							<exclude>org.esa.nest:nest-graph-builder</exclude>
 							<exclude>org.esa.nest:nest-reader-generic</exclude>
