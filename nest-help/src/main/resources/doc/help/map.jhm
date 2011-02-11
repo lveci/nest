@@ -122,30 +122,9 @@
 	<mapID target="graph_builder" url="operators/graph_builder.html"/>
 	<mapID target="batch_processing" url="operators/batch_processing.html"/>
 	
-	<!--Analysis Operators-->
-	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
-	
 	<!--Utility Operators-->
-	<mapID target="CreateStackOp" url="operators/CollocateOp.html"/>
 	<mapID target="SubsetOp" url="operators/SubsetOp.html"/>
 	<mapID target="BandArithmeticOp" url="operators/BandArithmeticOp.html"/>
-	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
-	<mapID target="FillHoleOp" url="operators/FillHoleOp.html"/>
-	<mapID target="FilterOperator" url="visat/CreateFilteredBand.html"/>
-	
-	<!--SAR Operators-->
-	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>		
-	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>	
-	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	
-	<mapID target="MultiTemporalSpeckleFilterOp" url="operators/MultiTemporalSpeckleFilterOp.html"/>		
-	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
-	<mapID target="WSSMosaic" url="operators/WSSMosaicOp.html"/>
-
-	<!--Ocean Tools-->
-	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
-	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
-	<mapID target="CreateLandMask" url="operators/CreateLandMask.html"/>
-	<mapID target="WindFieldEstimation" url="operators/WindFieldEstimationOp.html"/>
 	
 	<!--Tutorials-->
 	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>

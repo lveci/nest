@@ -137,32 +137,12 @@
 	        <tocitem text="Graph Builder Tool" target="graph_builder"/>
 			<tocitem text="Batch Processing" target="batch_processing"/>
 		</tocitem>
-		
-		<tocitem text="Analysis Operators">
-			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
-		</tocitem>	
+			
 		<tocitem text="Utility Operators">
-			<tocitem text="Create Stack" target="CreateStackOp"/>
 			<tocitem text="Create Subset" target="SubsetOp"/>
 			<tocitem text="Band Arithmetic" target="BandArithmeticOp"/>
-			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
-			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
-			<tocitem text="Image Filtering" target="FilterOperator"/>
 		</tocitem>	
-		<tocitem text="SAR Operators">
-			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>		
-			<tocitem text="Multilook" target="MultilookOp"/>			
-	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
-	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
-			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<tocitem text="WSS Mosaic" target="WSSMosaic"/>
-		</tocitem>		
-		<tocitem text="Ocean Tools">
-			<tocitem text="Object Detection" target="ObjectDetection"/>
-			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
-			<tocitem text="Create Land Mask" target="CreateLandMask"/>
-			<tocitem text="Wind Field Estimation" target="WindFieldEstimation"/>
-		</tocitem>
+			
 	</tocitem>
 	
 	<tocitem text="Tutorials">
