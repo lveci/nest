@@ -75,11 +75,12 @@ public final class AsarAbstractMetadata {
         String mode = "ScanSAR";
         if(productType.startsWith("ASA_IM") || waveProduct || productType.startsWith("SAR"))
             mode = "Stripmap";
-        addAbstractedAttribute("ACQUISITION_MODE", mode, absRoot, "Acquisition Mode");
+        addAbstractedAttribute("ACQUISITION_MODE", mode, absRoot, "Acquisition mode");
+        addAbstractedAttribute("BEAMS", " ", absRoot, "Beams used");
         if(waveProduct) {
             addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH_1", ""), absRoot, "Swath name");    
         } else {
-            addAbstractedAttribute("BEAMS", sph.getAttributeString("SWATH", ""), absRoot, "Swath Name");
+            addAbstractedAttribute("SWATH", sph.getAttributeString("SWATH", ""), absRoot, "Swath Name");
         }
 
         addAbstractedAttribute("PROC_TIME", mph.getAttributeUTC("PROC_TIME", new ProductData.UTC(0)), absRoot,

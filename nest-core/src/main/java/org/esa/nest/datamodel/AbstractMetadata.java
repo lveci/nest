@@ -52,6 +52,7 @@ public final class AbstractMetadata {
     public static final String MISSION = "MISSION";
     public static final String ACQUISITION_MODE = "ACQUISITION_MODE";
     public static final String BEAMS = "BEAMS";
+    public static final String SWATH = "SWATH";
     public static final String PROC_TIME = "PROC_TIME";
     public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
     public static final String CYCLE = "CYCLE";
@@ -176,8 +177,9 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product type");
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "Satellite mission");
-        addAbstractedAttribute(absRoot, ACQUISITION_MODE, ProductData.TYPE_ASCII, "", "Acquisition Mode");
-        addAbstractedAttribute(absRoot, BEAMS, ProductData.TYPE_ASCII, "", "Beams used/Swath Name");
+        addAbstractedAttribute(absRoot, ACQUISITION_MODE, ProductData.TYPE_ASCII, "", "Acquisition mode");
+        addAbstractedAttribute(absRoot, BEAMS, ProductData.TYPE_ASCII, "", "Beams used");
+        addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "Processed time");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "Processing system identifier");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "Cycle");

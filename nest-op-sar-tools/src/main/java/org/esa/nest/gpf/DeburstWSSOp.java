@@ -189,7 +189,7 @@ public final class DeburstWSSOp extends Operator {
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.BEAMS, subSwath);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SWATH, subSwath);
         if(produceIntensitiesOnly)
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
 
