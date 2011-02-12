@@ -101,7 +101,7 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
-            <path>doc/help/help.hs</path>
+            <path>doc/help/calibration.hs</path>
         </helpSet>
     </extension>
 </module>
