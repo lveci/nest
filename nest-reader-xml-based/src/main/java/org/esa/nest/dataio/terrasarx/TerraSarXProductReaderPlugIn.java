@@ -20,6 +20,7 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;
 import java.util.Locale;
@@ -39,7 +40,7 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = TerraSarXProductReader.getFileFromInput(input);
+        final File file = ReaderUtils.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }

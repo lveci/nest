@@ -45,6 +45,7 @@ public class XMLProductDirectory {
     private final File imgFolder;
     private org.jdom.Document xmlDoc = null;
 
+    private boolean isSLC = false;
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
@@ -70,7 +71,8 @@ public class XMLProductDirectory {
     }
 
     protected void addImageFile(final File file) throws IOException {
-        if (file.getName().toUpperCase().endsWith("TIF") && !file.getName().toLowerCase().contains("browse")) {
+        final String name = file.getName().toLowerCase();
+        if (name.endsWith("tif") && !name.contains("browse")) {
             final ImageIOFile img = new ImageIOFile(file, ImageIOFile.getTiffIIOReader(file));
             bandImageFileMap.put(img.getName(), img);
 
@@ -81,6 +83,14 @@ public class XMLProductDirectory {
     protected void setSceneWidthHeight(final int width, final int height) {
         _sceneWidth = width;
         _sceneHeight = height;
+    }
+
+    protected boolean isSLC() {
+        return isSLC;
+    }
+
+    protected void setSLC(boolean flag) {
+        isSLC = flag;
     }
 
     public Product createProduct() throws IOException {

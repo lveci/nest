@@ -22,6 +22,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.Text;
 import org.jdom.input.DOMBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -168,6 +169,28 @@ public final class XMLSupport {
         if(attrib != null)
             return attrib.getValue();
         return "";
+    }
+
+    public static Element getElement(final Element root, final String name) throws IOException {
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element elem = (Element) aChild;
+                if(elem.getName().equalsIgnoreCase(name))
+                    return elem;
+            }
+        }
+        throw new IOException("Element "+name+" not found");
+    }
+
+    public static Text getElementText(final Element root) throws IOException {
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Text) {
+                return (Text)aChild;
+            }
+        }
+        throw new IOException("Element Text not found");
     }
 
     public static String[] getStringList(final Element elem) {

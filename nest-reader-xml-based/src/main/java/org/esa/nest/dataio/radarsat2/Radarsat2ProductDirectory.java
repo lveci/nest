@@ -23,6 +23,8 @@ import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +40,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     private String productType = "Radarsat2";
     private final String productDescription = "";
 
-    private boolean isSLC = false;
     private final transient Map<String, String> polarizationMap = new HashMap<String, String>(4);
 
     private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
@@ -61,7 +62,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
             for(int i=0; i < img.getNumImages(); ++i) {
 
-                if(isSLC) {
+                if(isSLC()) {
                     for(int b=0; b < img.getNumBands(); ++b) {
                         final String imgName = img.getName().toLowerCase();
                         if(real) {
@@ -157,7 +158,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         productType = generalProcessingInformation.getAttributeString("productType", defStr);
         if(productType.contains("SLC"))
-            isSLC = true;
+            setSLC(true);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         productName = getMission() +'-'+ productType + '-' + productElem.getAttributeString("productId", defStr);
@@ -175,7 +176,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 getFlag(sarProcessingInformation, "elevationPatternCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
                 getFlag(sarProcessingInformation, "rangeSpreadingLossCorrection"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isSLC ? 0 : 1);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isSLC() ? 0 : 1);
 
         final ProductData.UTC startTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine", timeFormat);
         final ProductData.UTC stopTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeLastLine", timeFormat);
@@ -195,10 +196,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
         final MetadataElement rasterAttributes = imageAttributes.getElement("rasterAttributes");
 
-        final String imageProductFormat = imageAttributes.getAttributeString("productFormat");
-        if(!imageProductFormat.equalsIgnoreCase("GeoTIFF")) {
-            throw new IOException("Radarsat2 "+imageProductFormat+" format is not supported");
-        }               
+        verifyProductFormat(imageAttributes);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getDataType(rasterAttributes));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
@@ -220,6 +218,13 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         addOrbitStateVectors(absRoot, orbitInformation);
         addSRGRCoefficients(absRoot, imageGenerationParameters);
+    }
+
+    protected void verifyProductFormat(final MetadataElement imageAttributes) throws IOException {
+        final String imageProductFormat = imageAttributes.getAttributeString("productFormat");
+        if(!imageProductFormat.equalsIgnoreCase("GeoTIFF")) {
+            throw new IOException("Radarsat2 "+imageProductFormat+" format is not supported by this reader\n Contact nest_pr@array.ca");
+        }
     }
 
     private static int getFlag(final MetadataElement elem, String tag) {

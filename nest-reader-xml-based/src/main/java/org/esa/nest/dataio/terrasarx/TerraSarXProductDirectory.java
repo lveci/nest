@@ -24,6 +24,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Constants;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 import org.jdom.Text;
 
@@ -282,51 +283,26 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if (file.getName().toUpperCase().endsWith("COS")) {
 
             cosarFileList.add(file);
+            setSLC(true);
 
-            setSceneDimensions();
+            setSceneDimensionsFromXML();
         } else {
             super.addImageFile(file);
         }
     }
 
-    public boolean isComplex() {
-        return !cosarFileList.isEmpty();
-    }
-
-    private void setSceneDimensions() throws IOException {
+    private void setSceneDimensionsFromXML() throws IOException {
 
         final Element root = getXMLRootElement();
-        final Element productInfo = getElement(root, "productInfo");
-        final Element imageDataInfo = getElement(productInfo, "imageDataInfo");
-        final Element imageRaster = getElement(imageDataInfo, "imageRaster");
-        final Element numRows = getElement(imageRaster, "numberOfRows");
-        final Element numColumns = getElement(imageRaster, "numberOfColumns");
+        final Element productInfo = XMLSupport.getElement(root, "productInfo");
+        final Element imageDataInfo = XMLSupport.getElement(productInfo, "imageDataInfo");
+        final Element imageRaster = XMLSupport.getElement(imageDataInfo, "imageRaster");
+        final Element numRows = XMLSupport.getElement(imageRaster, "numberOfRows");
+        final Element numColumns = XMLSupport.getElement(imageRaster, "numberOfColumns");
 
-        final int height = Integer.parseInt(getElementText(numRows).getValue());
-        final int width = Integer.parseInt(getElementText(numColumns).getValue());
+        final int height = Integer.parseInt(XMLSupport.getElementText(numRows).getValue());
+        final int width = Integer.parseInt(XMLSupport.getElementText(numColumns).getValue());
         setSceneWidthHeight(width, height);
-    }
-
-    private static Text getElementText(final Element root) throws IOException {
-        final List children = root.getContent();
-        for (Object aChild : children) {
-            if (aChild instanceof Text) {
-                return (Text)aChild;
-            }
-        }
-        throw new IOException("Element Text not found");
-    }
-
-    private static Element getElement(final Element root, final String name) throws IOException {
-        final List children = root.getContent();
-        for (Object aChild : children) {
-            if (aChild instanceof Element) {
-                final Element elem = (Element) aChild;
-                if(elem.getName().equalsIgnoreCase(name))
-                    return elem;
-            }
-        }
-        throw new IOException("Element "+name+" not found");
     }
 
     @Override

@@ -44,9 +44,15 @@ public class Radarsat2ProductReaderPlugIn implements ProductReaderPlugIn {
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
+        final String filename = file.getName().toUpperCase();
         if (filename.startsWith(Radarsat2Constants.PRODUCT_HEADER_PREFIX)  &&
-                file.toString().toUpperCase().endsWith(Radarsat2Constants.getIndicationKey())) {
+                filename.endsWith(Radarsat2Constants.getIndicationKey())) {
+            final File[] files = file.getParentFile().listFiles();
+            for(File f : files) {
+                if(f.getName().toLowerCase().endsWith("ntf")) {
+                    return DecodeQualification.SUITABLE;
+                }
+            }
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;

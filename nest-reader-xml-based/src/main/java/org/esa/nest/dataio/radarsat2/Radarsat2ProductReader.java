@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public class Radarsat2ProductReader extends AbstractProductReader {
 
-    private Radarsat2ProductDirectory _dataDir = null;
+    protected Radarsat2ProductDirectory dataDir = null;
 
     private static final String lutsigma = "lutSigma";
     private static final String lutgamma = "lutGamma";
@@ -64,9 +64,9 @@ public class Radarsat2ProductReader extends AbstractProductReader {
      */
     @Override
     public void close() throws IOException {
-        if (_dataDir != null) {
-            _dataDir.close();
-            _dataDir = null;
+        if (dataDir != null) {
+            dataDir.close();
+            dataDir = null;
         }
         super.close();
     }
@@ -86,9 +86,9 @@ public class Radarsat2ProductReader extends AbstractProductReader {
         final File fileFromInput = ReaderUtils.getFileFromInput(input);
         Product product;
         try {
-            _dataDir = new Radarsat2ProductDirectory(fileFromInput, fileFromInput.getParentFile());
-            _dataDir.readProductDirectory();
-            product = _dataDir.createProduct();
+            dataDir = createDirectory(fileFromInput);
+            dataDir.readProductDirectory();
+            product = dataDir.createProduct();
             product.setFileLocation(fileFromInput);
             addCalibrationLUT(product, fileFromInput.getParentFile());
         } catch (Exception e) {
@@ -101,6 +101,10 @@ public class Radarsat2ProductReader extends AbstractProductReader {
         product.setModified(false);
 
         return product;
+    }
+
+    protected Radarsat2ProductDirectory createDirectory(final File fileFromInput) {
+        return new Radarsat2ProductDirectory(fileFromInput, fileFromInput.getParentFile());
     }
 
     /**
@@ -154,7 +158,7 @@ public class Radarsat2ProductReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
 
-        ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
+        final ImageIOFile.BandInfo bandInfo = dataDir.getBandInfo(destBand);
         if(bandInfo != null && bandInfo.img != null) {
             bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
                                                 destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
