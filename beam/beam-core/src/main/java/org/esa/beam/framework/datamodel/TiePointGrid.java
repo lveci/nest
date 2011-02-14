@@ -427,6 +427,30 @@ public class TiePointGrid extends RasterDataNode {
         return interpolate(fi - i, fj - j, i, j);
     }
 
+    public final float getPixelFloat(final InterpInput in) {
+        if (_discontinuity != DISCONT_NONE) {
+            if (isDiscontNotInit()) {
+                initDiscont();
+            }
+            final float sinAngle = _sinGrid.getPixelFloat(in);
+            final float cosAngle = _cosGrid.getPixelFloat(in);
+            final float v = (float) (MathUtils.RTOD * Math.atan2(sinAngle, cosAngle));
+            if (_discontinuity == DISCONT_AT_360 && v < 0.0) {
+                return 360.0F + v;  // = 180 + (180 - abs(v))
+            }
+            return v;
+        }
+        return interpolate(in.wi, in.wj, in.i0, in.j0);
+    }
+
+    public InterpInput calcInterp(final float x, final float y) {
+        final float fi = (x - _offsetX) / _subSamplingX;
+        final float fj = (y - _offsetY) / _subSamplingY;
+        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, _rasterWidthMinus2);
+        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, _rasterHeightMinus2);
+        return new InterpInput(fi - i, fj - j, i, j);
+    }
+
     /**
      * Gets the interpolated sample for the pixel located at (x,y) as a double value. <p/>
      * <p/>
@@ -1228,6 +1252,16 @@ public class TiePointGrid extends RasterDataNode {
         } else {
 
             throw new IllegalArgumentException("unsupported interpolation method");
+        }
+    }
+
+    public final static class InterpInput {
+        final float wi; final float wj; final int i0; final int j0;
+        InterpInput(float wi, float wj, int i0, int j0) {
+            this.wi = wi;
+            this.wj = wj;
+            this.i0 = i0;
+            this.j0 = j0;
         }
     }
 }

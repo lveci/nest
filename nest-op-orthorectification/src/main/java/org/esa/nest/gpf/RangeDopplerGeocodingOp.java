@@ -45,10 +45,7 @@ import org.esa.nest.util.MathUtils;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -303,7 +300,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if(!orthoDataProduced && processingStarted) {
-            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
+            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().showErrorDialog(errMsg);
@@ -1052,15 +1049,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         try {
             float[][] localDEM = null; // DEM for current tile for computing slope angle
-            if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
+            if (true) { //saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
                 localDEM = new float[h+2][w+2];
                 final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
                 if(!valid && !useAvgSceneHeight && !saveDEM)
                     return;
             }
 
-//            final GeoPos geoPos = new GeoPos();
-            GeoPos geoPos = null;
+            final GeoPos geoPos = new GeoPos();
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
             final int srcMaxRange = sourceImageWidth - 1;
@@ -1115,24 +1111,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 for (int x = x0; x < maxX; x++) {
 
-                    geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
-                    final double lat = geoPos.lat;
-                    double lon = geoPos.lon;
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
-                    if (lon >= 180.0) {
-                        lon -= 360.0;
-                    }
 
-                    double alt;
-                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) { // localDEM is available
-                        alt = (double)localDEM[yy][x-x0+1];
-                    } else {
-                        if (useAvgSceneHeight) {
-                            alt = avgSceneHeight;
-                        } else {
-                            alt = getLocalElevation(geoPos);
-                        }
-                    }
+                    final double alt = (double)localDEM[yy][x-x0+1];
 
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
@@ -1141,6 +1122,13 @@ public class RangeDopplerGeocodingOp extends Operator {
                     if (!useAvgSceneHeight && alt == demNoDataValue) {
                         saveNoDataValueToTarget(index, trgTiles);
                         continue;
+                    }
+
+                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
+                    if (lon >= 180.0) {
+                        lon -= 360.0;
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
@@ -1247,7 +1235,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return true if all dem values are valid
      * @throws Exception from DEM
      */
-    private boolean getLocalDEM(final int x0, final int y0,
+    private final boolean getLocalDEM(final int x0, final int y0,
                                 final int tileWidth, final int tileHeight,
                                 final float[][] localDEM) throws Exception {
 
@@ -1265,34 +1253,30 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
         */
-        GeoPos geoPos = null;
+        final GeoPos geoPos = new GeoPos();
         float alt;
+        float avg = (float)avgSceneHeight;
+
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
-                alt = getLocalElevation(geoPos);
+                if(useAvgSceneHeight) {
+                    alt = avg;
+                } else {
+                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
+                    if(externalDEMFile == null) {
+                        alt = dem.getElevation(geoPos);
+                    } else {
+                        alt = fileElevationModel.getElevation(geoPos);
+                    }
+                    if(alt != demNoDataValue)
+                        valid = true;
+                }
                 localDEM[yy][x - x0 + 1] = alt;
-                if(alt != demNoDataValue)
-                    valid = true;
             }
         }
-        return valid;
-    }
-
-    /**
-     * Get local elevation (in meter) for given latitude and longitude.
-     * @param geoPos The latitude and longitude in degrees.
-     * @return The elevation in meter.
-     * @throws Exception from DEM
-     */
-    private synchronized float getLocalElevation(final GeoPos geoPos) throws Exception {
-
-        if(externalDEMFile == null) {
-            return dem.getElevation(geoPos);
-        }
-        return fileElevationModel.getElevation(geoPos);
+        return valid || useAvgSceneHeight;
     }
 
     private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
@@ -1334,7 +1318,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
+    private final static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
         for(TileData tileData : trgTiles) {
             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
@@ -1352,7 +1336,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The zero Doppler time in days if it is found, -1 otherwise.
      * @throws OperatorException The operator exception.
      */
-    public static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
+    public final static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
                                                       final double lineTimeInterval, final double wavelength,
                                                       final double[] earthPoint, final double[][] sensorPosition,
                                                       final double[][] sensorVelocity) throws OperatorException {
@@ -1405,7 +1389,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param wavelength The ragar wavelength.
      * @return The Doppler frequency in Hz.
      */
-    private static double getDopplerFrequency(
+    private final static double getDopplerFrequency(
             final int y, final int sourceImageHeight, final double[] earthPoint, final double[][] sensorPosition,
             final double[][] sensorVelocity, final double wavelength) {
 
@@ -1628,22 +1612,17 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
-        double v = 0.0;
+        double v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+        if (tileData.noDataValue != 0 && (v == tileData.noDataValue))
+            return tileData.noDataValue;
+
         if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
-            final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
-            if (tileData.noDataValue != 0 && (vi == tileData.noDataValue || vq == tileData.noDataValue)) {
+            if (tileData.noDataValue != 0 && vq == tileData.noDataValue)
                 return tileData.noDataValue;
-            }
-            v = vi*vi + vq*vq;
 
-        } else {
-
-            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            if (tileData.noDataValue != 0 && (v == tileData.noDataValue)) {
-                return tileData.noDataValue;
-            }
+            v = v*v + vq*vq;
         }
 
         if (tileData.applyRetroCalibration) {
@@ -1680,46 +1659,40 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final ProductData srcData = sourceTile.getDataBuffer();
 
-        double v00, v01, v10, v11;
+        double v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+        if(v00 == tileData.noDataValue && tileData.noDataValue != 0)
+            return tileData.noDataValue;
+        double v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+        if(v01 == tileData.noDataValue && tileData.noDataValue != 0)
+            return tileData.noDataValue;
+        double v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+        if(v10 == tileData.noDataValue && tileData.noDataValue != 0)
+            return tileData.noDataValue;
+        double v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
+        if(v11 == tileData.noDataValue && tileData.noDataValue != 0)
+            return tileData.noDataValue;
+
         if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
-            final double vi00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            final double vi01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
-            final double vi10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
-            final double vi11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
-
             final double vq00 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            if(vq00 == tileData.noDataValue && tileData.noDataValue != 0)
+                return tileData.noDataValue;
             final double vq01 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y0));
+            if(vq01 == tileData.noDataValue && tileData.noDataValue != 0)
+                return tileData.noDataValue;
             final double vq10 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y1));
+            if(vq10 == tileData.noDataValue && tileData.noDataValue != 0)
+                return tileData.noDataValue;
             final double vq11 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y1));
-
-            if (tileData.noDataValue != 0 &&
-               (vi00 == tileData.noDataValue || vi01 == tileData.noDataValue ||
-                vi10 == tileData.noDataValue || vi11 == tileData.noDataValue ||
-                vq00 == tileData.noDataValue || vq01 == tileData.noDataValue ||
-                vq10 == tileData.noDataValue || vq11 == tileData.noDataValue)) {
+            if(vq11 == tileData.noDataValue && tileData.noDataValue != 0)
                 return tileData.noDataValue;
-            }
 
-            v00 = vi00*vi00 + vq00*vq00;
-            v01 = vi01*vi01 + vq01*vq01;
-            v10 = vi10*vi10 + vq10*vq10;
-            v11 = vi11*vi11 + vq11*vq11;
-
-        } else {
-
-            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
-            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
-            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
-
-            if (tileData.noDataValue != 0 &&
-               (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
-                v10 == tileData.noDataValue || v11 == tileData.noDataValue)) {
-                return tileData.noDataValue;
-            }
+            v00 = v00*v00 + vq00*vq00;
+            v01 = v01*v01 + vq01*vq01;
+            v10 = v10*v10 + vq10*vq10;
+            v11 = v11*v11 + vq11*vq11;
         }
 
         final int[] subSwathIndex00 = {0};
@@ -1818,7 +1791,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        int[][][] ss = new int[4][4][1];
+        final int[][][] ss = new int[4][4][1];
         if (tileData.applyRetroCalibration) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {

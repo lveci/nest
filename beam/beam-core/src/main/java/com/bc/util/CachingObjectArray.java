@@ -51,7 +51,7 @@ public class CachingObjectArray {
         maxIndex = _objectArray.getMaxIndex();
     }
 
-    public synchronized final Object getObject(final int index) throws Exception {
+    public final Object getObject(final int index) throws Exception {
         if (index < minIndex || index > maxIndex) {
             return _objectFactory.createObject(index);
         } else {

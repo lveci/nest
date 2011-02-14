@@ -19,8 +19,16 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.nest.util.TestUtils;
 
 import java.io.File;
@@ -77,6 +85,33 @@ public class TestRangeDopplerOp extends TestCase {
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
         TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
+    }
+
+    public void testGetLocalDEM() throws Exception {
+
+        final File inputFile = new File("P:\\nest\\nest\\ESA Data\\NestBox\\GEOCODED_DATA\\ASA_IMS_1PNDPA20050405_00115_16201_8523\\ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.N1");
+        if(!inputFile.exists()) return;
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+
+        final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
+        final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec GeoTiff");
+        final ElevationModel dem = demDescriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
+        final GeoCoding targetGeoCoding = sourceProduct.getGeoCoding();
+
+        final int width = sourceProduct.getSceneRasterWidth();
+        final int height = sourceProduct.getSceneRasterHeight();
+
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos pixPos = new PixelPos();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pixPos.setLocation(x, y);
+                targetGeoCoding.getGeoPos(pixPos, geoPos);
+                dem.getElevation(geoPos);
+            }
+        }
     }
 
     /**

@@ -67,7 +67,7 @@ public final class SRTM3GeoTiffElevationTile {
         final Band band = _product.getBandAt(0);
         final int width = _product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
-            public synchronized Object createObject(int index) throws Exception {
+            public Object createObject(int index) throws Exception {
                 final float[] line =  band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
                 final int rowIdxInEGMArray = index / 300; // tile_height / numEGMSamplesInCol
                 for (int i = 0; i < line.length; i++) {

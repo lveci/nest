@@ -226,8 +226,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             pixelPos.y < 0 || pixelPos.y > sceneRasterHeight) {
             geoPos.setInvalid();
         } else {
-            geoPos.lat = _latGrid.getPixelFloat(pixelPos.x, pixelPos.y);
-            geoPos.lon = _lonGrid.getPixelFloat(pixelPos.x, pixelPos.y);
+            final TiePointGrid.InterpInput in = _latGrid.calcInterp(pixelPos.x, pixelPos.y);
+            geoPos.lat = _latGrid.getPixelFloat(in);
+            geoPos.lon = _lonGrid.getPixelFloat(in);
         }
         return geoPos;
     }
