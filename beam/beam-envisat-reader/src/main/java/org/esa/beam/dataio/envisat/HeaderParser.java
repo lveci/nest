@@ -83,7 +83,8 @@ public class HeaderParser {
 
                 int assignPos = line.indexOf('=');
                 if (assignPos <= 0) {
-                    error(headerName, reader, "invalid header entry found: " + line);
+                    //error(headerName, reader, "invalid header entry found: " + line);
+                    continue;
                 }
 
                 String name = line.substring(0, assignPos).trim();
@@ -92,6 +93,8 @@ public class HeaderParser {
 
                 int unitStartPos = value.lastIndexOf('<');
                 int unitEndPos = value.lastIndexOf('>');
+                if(unitStartPos > 0 && unitEndPos < 0)
+                    unitEndPos = value.length()-1;
                 if (unitStartPos > 0
                     && unitEndPos == value.length() - 1
                     && unitStartPos < unitEndPos) {
@@ -103,8 +106,8 @@ public class HeaderParser {
                 recordInfo.add(fieldInfo);
                 recordTokens.add(value);
             }
-        } catch (HeaderParseException e) {
-            error(headerName, reader, e.getMessage());
+        //} catch (HeaderParseException e) {
+        //    error(headerName, reader, e.getMessage());
         } catch (IOException e) {
             error(headerName, reader, e.getMessage());
         }

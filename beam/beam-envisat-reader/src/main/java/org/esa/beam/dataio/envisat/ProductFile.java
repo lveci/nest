@@ -574,7 +574,7 @@ public abstract class ProductFile {
             int n = 0;
             for (int i = 0; i < getNumDSDs(); i++) {
                 DSD dsd = getDSDAt(i);
-                if (dsd.getDatasetType() == datasetType && !dsd.isDatasetEmpty()) {
+                if (dsd != null && dsd.getDatasetType() == datasetType && !dsd.isDatasetEmpty()) {
                     if (dsds != null) {
                         dsds[n] = dsd;
                     }
@@ -1112,10 +1112,13 @@ public abstract class ProductFile {
             byte[] dsdBytes = new byte[dsdSize];
             dsdArray = new DSD[numDSDs];
 
-            if(sphSizeActual + numDSDs * dsdSize > sphSize)
-                return;
+            int total = sphSizeActual + numDSDs * dsdSize;
+            //if(total > sphSize)
+            //    return;
             
             for (int i = 0; i < numDSDs; i++) {
+                if(sphSizeActual + (i * dsdSize) + dsdSize > sphSize)
+                    break;
                 System.arraycopy(sphBytesAll, sphSizeActual + i * dsdSize, dsdBytes, 0, dsdSize);
                 String dsdKey = "DSD(" + (i + 1) + ")";
                 Header dsd = HeaderParser.getInstance().parseHeader(dsdKey, dsdBytes);
