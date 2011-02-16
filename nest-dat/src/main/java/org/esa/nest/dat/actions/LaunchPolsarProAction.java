@@ -22,9 +22,7 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.net.URI;
 
 /**
@@ -50,7 +48,7 @@ public class LaunchPolsarProAction extends ExecCommand {
             polsarProFile = findPolsarPro();
         }
         if(!polsarProFile.exists()) {
-            // ask for location
+            // todo ask for location
         }
         if(polsarProFile.exists()) {
             externalExecute(polsarProFile);
@@ -58,8 +56,6 @@ public class LaunchPolsarProAction extends ExecCommand {
             // save location
             pref.setPropertyString(PolsarProPathStr, polsarProFile.getAbsolutePath());
             VisatApp.getApp().savePreferences();
-        } else {
-            // report error
         }
     }
 
@@ -68,10 +64,13 @@ public class LaunchPolsarProAction extends ExecCommand {
         final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
 
         try {
-            final String args = prog.getParent()+" "+"wish"+" "+prog.getName();
+            final String args = "\""+prog.getParent()+"\" "+"wish"+" "+prog.getName();
 
             System.out.println("Launching PolSARPro "+args);
-            Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+            final Process proc = Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+
+            outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getInputStream())));
+            outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
         } catch(Exception e) {
             VisatApp.getApp().showErrorDialog(e.getMessage());
         }
@@ -103,4 +102,11 @@ public class LaunchPolsarProAction extends ExecCommand {
         }
     }
 
+    private void outputTextBuffers(BufferedReader in) throws IOException {
+        char c;
+        while ((c = (char)in.read()) != -1 && c != 65535) {
+            //errStr += c;
+            System.out.print(c);
+        }
+    }
 }
