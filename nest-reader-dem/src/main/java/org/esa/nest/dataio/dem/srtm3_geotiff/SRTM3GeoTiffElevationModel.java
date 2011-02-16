@@ -144,7 +144,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     public void updateCache(SRTM3GeoTiffElevationTile tile) {
         elevationTileCache.remove(tile);
         elevationTileCache.add(0, tile);
-        while (elevationTileCache.size() > 6) {
+        while (elevationTileCache.size() > 12) {
             final int index = elevationTileCache.size() - 1;
             final SRTM3GeoTiffElevationTile lastTile = elevationTileCache.get(index);
             lastTile.clearCache();

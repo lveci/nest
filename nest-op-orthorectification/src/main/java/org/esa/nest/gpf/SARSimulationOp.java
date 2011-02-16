@@ -181,6 +181,7 @@ public final class SARSimulationOp extends Operator {
                 RangeDopplerGeocodingOp.checkIfDEMInstalled(demName);
             }
 
+            RangeDopplerGeocodingOp.validateDEM(demName, sourceProduct);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }

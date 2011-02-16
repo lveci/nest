@@ -14,7 +14,7 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <formatName>BEAM-DIMAP</formatName>
-      <file>gcp_selected_TC.dim</file>
+      <file>SarSimTC.dim</file>
     </parameters>
   </node>
   <node id="3-SAR-Simulation">
@@ -40,8 +40,8 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <numGCPtoGenerate>200</numGCPtoGenerate>
-      <coarseRegistrationWindowWidth>64</coarseRegistrationWindowWidth>
-      <coarseRegistrationWindowHeight>64</coarseRegistrationWindowHeight>
+      <coarseRegistrationWindowWidth>128</coarseRegistrationWindowWidth>
+      <coarseRegistrationWindowHeight>128</coarseRegistrationWindowHeight>
       <rowInterpFactor>2</rowInterpFactor>
       <columnInterpFactor>2</columnInterpFactor>
       <maxIteration>2</maxIteration>

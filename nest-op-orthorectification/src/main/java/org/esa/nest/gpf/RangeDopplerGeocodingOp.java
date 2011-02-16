@@ -285,6 +285,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(externalDEMFile == null) {
                 checkIfDEMInstalled(demName);
             }
+
+            validateDEM(demName, sourceProduct);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -304,6 +306,24 @@ public class RangeDopplerGeocodingOp extends Operator {
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().showErrorDialog(errMsg);
+            }
+        }
+    }
+
+    static void validateDEM(final String demName, final Product srcProduct) {
+        // check if outside dem area
+        if(demName.equals("SRTM 3Sec GeoTiff")) {
+            final GeoCoding geocoding = srcProduct.getGeoCoding();
+            final int w = srcProduct.getSceneRasterWidth();
+            final int h = srcProduct.getSceneRasterHeight();
+            final GeoPos geo1 = geocoding.getGeoPos(new PixelPos(0,0), null);
+            final GeoPos geo2 = geocoding.getGeoPos(new PixelPos(w,0), null);
+            final GeoPos geo3 = geocoding.getGeoPos(new PixelPos(w,h), null);
+            final GeoPos geo4 = geocoding.getGeoPos(new PixelPos(0, h), null);
+
+            if((geo1.getLat() > 60 && geo2.getLat() > 60 && geo3.getLat() > 60 && geo4.getLat() > 60) ||
+                    (geo1.getLat() < -60 && geo2.getLat() < -60 && geo3.getLat() < -60 && geo4.getLat() < -60)) {
+                throw new OperatorException("Entire image is outside of SRTM valid area.\nPlease use another DEM.");
             }
         }
     }
@@ -908,7 +928,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Update metadata in the target product.
      * @throws OperatorException The exception.
      */
-    private void updateTargetProductMetadata() throws OperatorException, Exception {
+    private void updateTargetProductMetadata() throws Exception {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
@@ -1048,13 +1068,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         try {
-            float[][] localDEM = null; // DEM for current tile for computing slope angle
-            if (true) { //saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
-                localDEM = new float[h+2][w+2];
-                final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
-                if(!valid && !useAvgSceneHeight && !saveDEM)
-                    return;
-            }
+            float[][] localDEM = new float[h+2][w+2];
+            final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
+            if(!valid && !useAvgSceneHeight)
+                return;
 
             final GeoPos geoPos = new GeoPos();
             final double[] earthPoint = new double[3];
@@ -1235,7 +1252,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return true if all dem values are valid
      * @throws Exception from DEM
      */
-    private final boolean getLocalDEM(final int x0, final int y0,
+    private boolean getLocalDEM(final int x0, final int y0,
                                 final int tileWidth, final int tileHeight,
                                 final float[][] localDEM) throws Exception {
 
@@ -1244,15 +1261,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
-        /*
-        if(demName.equals("SRTM 3Sec GeoTiff")) {
-            double maxLat = (imageGeoBoundary.latMax - maxY*delLat);
-            double minLat = (imageGeoBoundary.latMax - y0*delLat);
-            if((maxLat > 60 && minLat > 60) || (maxLat < -60 && minLat < -60)) {
-                return false;
-            }
-        }
-        */
+
         final GeoPos geoPos = new GeoPos();
         float alt;
         float avg = (float)avgSceneHeight;
@@ -1318,7 +1327,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private final static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
+    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
         for(TileData tileData : trgTiles) {
             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
@@ -1336,7 +1345,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The zero Doppler time in days if it is found, -1 otherwise.
      * @throws OperatorException The operator exception.
      */
-    public final static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
+    public static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
                                                       final double lineTimeInterval, final double wavelength,
                                                       final double[] earthPoint, final double[][] sensorPosition,
                                                       final double[][] sensorVelocity) throws OperatorException {
@@ -1389,7 +1398,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param wavelength The ragar wavelength.
      * @return The Doppler frequency in Hz.
      */
-    private final static double getDopplerFrequency(
+    private static double getDopplerFrequency(
             final int y, final int sourceImageHeight, final double[] earthPoint, final double[][] sensorPosition,
             final double[][] sensorVelocity, final double wavelength) {
 

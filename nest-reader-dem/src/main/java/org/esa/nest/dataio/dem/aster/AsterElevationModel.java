@@ -53,7 +53,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
     private final List<AsterElevationTile> elevationTileCache;
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
-    private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
+    static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         this.descriptor = descriptor;
@@ -176,7 +176,8 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     public void updateCache(AsterElevationTile tile) {
         elevationTileCache.remove(tile);
         elevationTileCache.add(0, tile);
-        while (elevationTileCache.size() > 6) {
+        //System.out.println("Caching tile "+tile.getName());
+        while (elevationTileCache.size() > 12) {
             final int index = elevationTileCache.size() - 1;
             final AsterElevationTile lastTile = elevationTileCache.get(index);
             lastTile.clearCache();
@@ -187,9 +188,5 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     private static ProductReaderPlugIn getReaderPlugIn() {
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns("GeoTIFF");
         return (ProductReaderPlugIn) readerPlugIns.next();
-    }
-
-    public EarthGravitationalModel96 getEarthGravitationalModel96() {
-        return egm;
     }
 }
