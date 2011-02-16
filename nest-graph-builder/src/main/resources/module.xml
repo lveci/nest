@@ -62,4 +62,11 @@
 
     </extension>
 
+	<extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+			<id>graphHelp</id>
+            <path>doc/help/graph.hs</path>
+        </helpSet>
+    </extension>
 </module>

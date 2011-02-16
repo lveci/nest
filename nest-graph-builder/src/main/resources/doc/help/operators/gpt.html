@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+
+
+    
+    
+  
+  
+  
+  
+  
+  
+  
+  <title>Help - Graph Processing Tool</title><link rel="stylesheet" href="../style.css"></head>
+<body>
+
+
+
+
+<table class="header">
+
+
+
+
+    <tbody>
+
+
+
+    <tr class="header">
+
+
+
+
+        <td class="header">&nbsp;Graph Processing Tool</td>
+
+
+
+
+        
+    <td class="header" align="right"><a href="../general/Overview.html"><img src="../images/HeaderLogo.jpg" border="0"></a></td>
+
+
+
+
+    </tr>
+
+
+
+
+  
+  
+  
+  </tbody>
+</table>
+
+
+
+
+
+<h3>GPT</h3>
+
+
+
+
+
+
+
+<p>The Graph Processing Tool (GPT) is the command line interface for
+executing graphs created using the Graph Builder. Data sources and
+parameters found in the graph file can be replaced at teh command line
+using arguements passed to the GPT.</p>
+<p>The GPT could also be used to read a product, execute a single
+operator and produce output in the specified format without the use of
+a graph.</p>
+
+<br>
+
+<br>
+
+Usage:<br>
+
+&nbsp; {0} &lt;op&gt;|&lt;graph-file&gt; [options] [&lt;source-file-1&gt; &lt;source-file-2&gt; ...]<br>
+
+<br>
+
+Description:<br>
+
+&nbsp; This tool is used to execute raster data operators in batch-mode.<br>
+
+&nbsp; The operators can be used stand-alone or combined as a directed acyclic<br>
+
+&nbsp; graph (DAG). Processing graphs are represented using XML.&nbsp;<br>
+
+<br>
+
+Arguments:<br>
+
+&nbsp;
+&lt;op&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name
+of an operator. See below for the list of &lt;op&gt;s.<br>
+
+&nbsp; &lt;graph-file&gt;&nbsp;Operator graph file (XML format).<br>
+
+&nbsp; &lt;source-file-i&gt;&nbsp;&nbsp;&nbsp; The &lt;i&gt;th source product file. The actual number of<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+source file arguments is specified by &lt;op&gt;. May be<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+optional for operators which use the '-S' option.<br>
+
+<br>
+
+Options:<br>
+
+&nbsp;
+-h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Displays command usage. If &lt;op&gt; is given, the specific<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+operator usage is displayed.<br>
+
+&nbsp; -t &lt;file&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The target file. Default value is ''{1}''.<br>
+
+&nbsp; -c &lt;cache-size&gt;&nbsp;&nbsp;&nbsp; Sets the tile cache size in bytes. Must be greater zero<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp; and less than maximum available heap space.<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;Value can be suffixed with ''K'', ''M'' and ''G''.<br>
+
+&nbsp; -f &lt;format&gt;&nbsp;Output file format, e.g. ''GeoTIFF'', ''HDF5'',<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+''BEAM-DIMAP''. If not specified, format will be<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+derived from the target filename extension, if any,<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+otherwise the default format is ''{2}''.<br>
+
+&nbsp; -p &lt;file&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A (Java Properties) file containing processing<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+parameters in the form &lt;name&gt;=&lt;value&gt;.<br>
+
+&nbsp; -T&lt;target&gt;=&lt;file&gt;&nbsp; Defines a target product. Valid for graphs only.<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;target&gt; must be the identifier of a node in the graph.<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The node''s output will be written to &lt;file&gt;.<br>
+
+&nbsp; -S&lt;source&gt;=&lt;file&gt;&nbsp; Defines a source product. &lt;source&gt; is specified by<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+the operator or the graph. In an XML graph, all<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+occurences of $'{&lt;source&gt;'} will be replaced with<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+references to a source product located at &lt;file&gt;.<br>
+
+&nbsp; -P&lt;name&gt;=&lt;value&gt;&nbsp;&nbsp; Defines a processing parameter, &lt;name&gt; is specified by<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+the operator or the graph. In an XML graph, all<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+occurences of $'{&lt;name&gt;'} will be replaced with &lt;value&gt;.<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Overwrites parameter values specified by the ''-p''<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; option.<br>
+
+&nbsp;
+-e&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Displays Java stack trace, if an error occurs.<br>
+
+
+
+<br>
+
+
+
+<br><h4>Running from the Command Line</h4><p>To be able to properly run
+the GPT from the comman line, make sure the environment variable
+NEST_HOME is set to the installation folder of NEST. Also, add the
+installation folder to the PATH so you may call the GPT from any folder.</p><p>Some example graphs can be found in $NEST_HOME/commandline.</p><ul><li>asar-caibrate.bat - a windows batch file as an example how to calibrate all ASAR products in a given folder</li><li>ers-cailbrate.bat - &nbsp;a windows batch file as an example how to calibrate all ERS products in a given folder</li><li>coregister.bat
+- a windows batch file as an example how to run multiple graphs
+together, in this case, GCPSelectionGraph and WarpGraph</li><li>MapProjGraph.xml - a graph for applying a map projection on a product</li><li>TC_Graph.xml - a graph for applying Terrain Correction on a product</li><li>write.xml - a graph to write products in another format, in this case, it will write to GeoTIFF</li></ul><br><p></p>
+
+
+
+
+<hr>
+</body></html>

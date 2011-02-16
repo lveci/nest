@@ -601,5 +601,12 @@
 
     </extension>
 
+	<extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+			<id>DATHelp</id>
+            <path>doc/help/dat.hs</path>
+        </helpSet>
+    </extension>
 
 </module>
