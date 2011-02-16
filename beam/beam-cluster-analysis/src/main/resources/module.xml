@@ -70,6 +70,7 @@
     <extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
+			<id>clusteranalysisHelp</id>
             <path>doc/help/clusteranalysis.hs</path>
         </helpSet>
     </extension>

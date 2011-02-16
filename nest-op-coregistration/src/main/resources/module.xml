@@ -60,6 +60,7 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
+			<id>coregistrationHelp</id>
             <path>doc/help/coregistration.hs</path>
         </helpSet>
     </extension>

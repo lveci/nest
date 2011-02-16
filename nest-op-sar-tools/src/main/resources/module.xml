@@ -228,6 +228,7 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
+			<id>sartoolsHelp</id>
             <path>doc/help/sartools.hs</path>
         </helpSet>
     </extension>

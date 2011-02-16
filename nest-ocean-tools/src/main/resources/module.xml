@@ -91,6 +91,7 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
+			<id>oceanToolsHelp</id>
             <path>doc/help/ocean-tools.hs</path>
         </helpSet>
     </extension>

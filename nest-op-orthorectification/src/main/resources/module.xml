@@ -126,6 +126,7 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
+			<id>orthorectificationHelp</id>
             <path>doc/help/orthorectification.hs</path>
         </helpSet>
     </extension>

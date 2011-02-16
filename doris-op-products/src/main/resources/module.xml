@@ -62,7 +62,8 @@
 	<extension point="beam-ui:helpSets">
         <helpSet>
             <parent>beam-help</parent>
-            <path>doc/help/help.hs</path>
+			<id>dorisproductsHelp</id>
+            <path>doc/help/doris-products.hs</path>
         </helpSet>
     </extension>
 </module>
