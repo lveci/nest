@@ -347,7 +347,7 @@ public class BandMathsDialog extends ModalDialog {
     private Product[] getCompatibleProducts() {
         List<Product> compatibleProducts = new ArrayList<Product>(productsList.size());
         compatibleProducts.add(targetProduct);
-        final float geolocationEps = getGeolocationEps();
+        final float geolocationEps = 180;//getGeolocationEps();    //NESTMOD
         Debug.trace("BandMathsDialog.geolocationEps = " + geolocationEps);
         Debug.trace("BandMathsDialog.getCompatibleProducts:");
         Debug.trace("  comparing: " + targetProduct.getName());
