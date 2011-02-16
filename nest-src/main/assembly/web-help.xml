@@ -24,4 +24,11 @@
             </sources>
         </moduleSet>
     </moduleSets>
+	
+	<fileSets>
+		<fileSet>
+            <directory>nest-src/main/help</directory>
+            <outputDirectory></outputDirectory>
+        </fileSet>
+	</fileSets>
 </assembly>
