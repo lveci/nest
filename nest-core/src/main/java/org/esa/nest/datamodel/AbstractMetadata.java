@@ -96,6 +96,9 @@ public final class AbstractMetadata {
     public static final String num_output_lines = "num_output_lines";
     public static final String num_samples_per_line = "num_samples_per_line";
 
+    public static final String subset_offset_x = "subset_offset_x";
+    public static final String subset_offset_y = "subset_offset_y";
+
     // SRGR
     public static final String srgr_flag = "srgr_flag";
     public static final String map_projection = "map_projection";
@@ -221,9 +224,12 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
         addAbstractedAttribute(absRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");
 
+        addAbstractedAttribute(absRoot, subset_offset_x, ProductData.TYPE_UINT32, "samples", "X coordinate of UL corner of subset in original image");
+        addAbstractedAttribute(absRoot, subset_offset_y, ProductData.TYPE_UINT32, "samples", "Y coordinate of UL corner of subset in original image");
+
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
-        MetadataAttribute att = addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "Average scene height ellipsoid");
+        MetadataAttribute att = addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "m", "Average scene height ellipsoid");
         att.getData().setElemInt(0);
         addAbstractedAttribute(absRoot, map_projection, ProductData.TYPE_ASCII, "", "Map projection applied");
 
