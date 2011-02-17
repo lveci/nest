@@ -165,14 +165,16 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("pulse_repetition_frequency", 0, "Hz", absRoot, "PRF");
             addAbstractedAttribute("radar_frequency", 0, "MHz", absRoot, "Radar frequency");
         }
-        addAbstractedAttribute("line_time_interval", sph.getAttributeDouble("line_time_interval", 0), "", absRoot, "");
+        addAbstractedAttribute("line_time_interval", sph.getAttributeDouble("line_time_interval", 0), "s", absRoot, "");
         addAbstractedAttribute("total_size", (int)(product.getRawStorageSize() / (1024.0f * 1024.0f)), "Mb", absRoot,
                             "Total product size");
 
         //MPP
         if(mppAds != null) {
-            addAbstractedAttribute("num_output_lines", product.getSceneRasterHeight(), "", absRoot, "");
-            addAbstractedAttribute("num_samples_per_line", product.getSceneRasterWidth(), "", absRoot, "");
+            addAbstractedAttribute("num_output_lines", product.getSceneRasterHeight(), "lines", absRoot, "Raster height");
+            addAbstractedAttribute("num_samples_per_line", product.getSceneRasterWidth(), "samples", absRoot, "Raster width");
+            addAbstractedAttribute("subset_offset_x", 0, "samples", absRoot, "X coordinate of UL corner of subset in original image");
+            addAbstractedAttribute("subset_offset_y", 0, "samples", absRoot, "Y coordinate of UL corner of subset in original image");
             addAbstractedAttribute(mppAds, "srgr_flag", absRoot, "SRGR applied");
             addAbstractedAttribute("avg_scene_height", mppAds.getAttributeDouble("avg_scene_height_ellpsoid", 0),
                     "m", absRoot, "Average scene height ellipsoid");
@@ -224,7 +226,10 @@ public final class AsarAbstractMetadata {
                     "Product multilooked", absRoot);
             addAbstractedAttribute("coregistered_stack", ProductData.TYPE_UINT8, "flag","Coregistration applied", absRoot);
         } else {
-            addAbstractedAttribute("num_output_lines", 0, "", absRoot, "");
+            addAbstractedAttribute("num_output_lines", 0, "lines", absRoot, "Raster height");
+            addAbstractedAttribute("num_samples_per_line", 0, "samples", absRoot, "Raster width");
+            addAbstractedAttribute("subset_offset_x", 0, "samples", absRoot, "X coordinate of UL corner of subset in original image");
+            addAbstractedAttribute("subset_offset_y", 0, "samples", absRoot, "Y coordinate of UL corner of subset in original image");
             addAbstractedAttribute("num_samples_per_line", 0, "", absRoot, "");
             if(waveProduct)
                 addAbstractedAttribute("srgr_flag", sph.getAttributeInt("SR_GR", 0), "flag", absRoot, "SRGR applied");
