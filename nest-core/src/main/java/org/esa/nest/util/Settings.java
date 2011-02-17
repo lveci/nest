@@ -173,7 +173,12 @@ public final class Settings {
         return settingMap.get(key);
     }
 
-    public static File getAuxDataFolder() {
-        return new File(Settings.instance().get("AuxDataPath"));
+    public static File getAuxDataFolder() throws IOException {
+        String auxDataPath = Settings.instance().get("AuxDataPath");
+        if(auxDataPath == null)
+            auxDataPath = Settings.instance().get("dataPath");
+        if(auxDataPath == null)
+            throw new IOException("Cannot find AuxDataPath in setting.xml file");
+        return new File(auxDataPath);
     }
 }

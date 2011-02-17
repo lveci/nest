@@ -39,6 +39,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -78,18 +79,22 @@ public class DatApp extends VisatApp {
 
     @Override
     protected void postInit() {
-        final String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
-        if(getStarted == null || getStarted.equals("true")) {
-            LoadTabbedLayoutAction.loadTabbedLayout();
+        try {
+            final String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
+            if(getStarted == null || getStarted.equals("true")) {
+                LoadTabbedLayoutAction.loadTabbedLayout();
 
-            HelpSys.showTheme("top");
-            VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
+                HelpSys.showTheme("top");
+                VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");
+            }
+
+            validateAuxDataFolder();
+        } catch(Throwable t) {
+            VisatApp.getApp().showErrorDialog("PostInit failed. "+t.toString());
         }
-
-        validateAuxDataFolder();
     }
 
-    private void validateAuxDataFolder() {
+    private void validateAuxDataFolder() throws IOException {
         File NestData = new File("~\\NestData");
         if(Settings.isWindowsOS()) {
             NestData = new File("c:\\NestData");
