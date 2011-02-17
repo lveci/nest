@@ -54,6 +54,10 @@ public class Radarsat2Calibrator implements Calibrator {
     private double offset = 0.0;
     private double[] gains = null;
 
+    private int subsetOffsetX = 0;
+    private int subsetOffsetY = 0;
+    private MetadataElement absRoot = null;
+
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
@@ -99,20 +103,15 @@ public class Radarsat2Calibrator implements Calibrator {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
 
-            final MetadataElement abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            final String mission = abstractedMetadata.getAttributeString(AbstractMetadata.MISSION);
-            if(!mission.equals("RS2"))
-                throw new OperatorException(mission + " is not a valid mission for Radarsat2 Calibration");
+            getMission();
 
-            if (abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
-                throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
-            }
+            getCalibrationFlag();
 
-            final String sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-            if(sampleType.equals("COMPLEX")) {
-                isComplex = true;
-            }
+            getSampleType();
+
+            getSubsetOffset();
 
             getLUT();
 
@@ -127,6 +126,46 @@ public class Radarsat2Calibrator implements Calibrator {
         }
     }
 
+    /**
+     * Get product mission from abstract metadata.
+     */
+    private void getMission() {
+        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+        if(!mission.equals("RS2")) {
+            throw new OperatorException(mission + " is not a valid mission for Radarsat2 Calibration");
+        }
+    }
+
+    /**
+     * Get calibration flag from abstract metadata.
+     */
+    private void getCalibrationFlag() {
+        if (absRoot.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
+            throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
+        }
+    }
+
+    /**
+     * Get sample type from abstract metadata.
+     */
+    private void getSampleType() {
+        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+        if(sampleType.equals("COMPLEX")) {
+            isComplex = true;
+        }
+    }
+
+    /**
+     * Get subset x and y offsets from abstract metadata.
+     */
+    private void getSubsetOffset() {
+        subsetOffsetX = absRoot.getAttributeInt(AbstractMetadata.subset_offset_x);
+        subsetOffsetY = absRoot.getAttributeInt(AbstractMetadata.subset_offset_y);
+    }
+
+    /**
+     * Get antenna pattern gain array from metadata.
+     */
     private void getLUT() {
         final MetadataElement root = sourceProduct.getMetadataRoot();
         final MetadataElement lutSigmaElem = root.getElement(lutsigma);
@@ -245,12 +284,12 @@ public class Radarsat2Calibrator implements Calibrator {
 
                 if(isComplex) {
                     if(gains != null) {
-                        sigma /= (gains[x] * gains[x]);
+                        sigma /= (gains[x + subsetOffsetX] * gains[x + subsetOffsetX]);
                     }
                 } else {
                     sigma += offset;
                     if(gains != null) {
-                        sigma /= gains[x];
+                        sigma /= gains[x + subsetOffsetX];
                     }
                 }
 
