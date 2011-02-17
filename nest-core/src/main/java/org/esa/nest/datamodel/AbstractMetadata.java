@@ -226,6 +226,8 @@ public final class AbstractMetadata {
 
         addAbstractedAttribute(absRoot, subset_offset_x, ProductData.TYPE_UINT32, "samples", "X coordinate of UL corner of subset in original image");
         addAbstractedAttribute(absRoot, subset_offset_y, ProductData.TYPE_UINT32, "samples", "Y coordinate of UL corner of subset in original image");
+        setAttribute(absRoot, subset_offset_x, 0);
+        setAttribute(absRoot, subset_offset_y, 0);
 
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
