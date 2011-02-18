@@ -56,8 +56,8 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
     public void start(VisatApp visatApp) {
         final String contextID = ResourceUtils.getContextID();
 
-        remoteVersionUrl += contextID + "_getversion.php?u="+System.getProperty("user.name")+"&r="+System.getProperty("user.country"
-                            +"&v="+System.getProperty("nest.version"));
+        remoteVersionUrl += contextID + "_getversion.php?u="+System.getProperty("user.name")+
+                "&r="+System.getProperty("user.country")+"&v="+System.getProperty(contextID+".version");
 
         if (!isVersionCheckQuestionSuppressed() || isVersionCheckEnabled()) {
             final Timer timer = new Timer(DELAY_MILLIS, new ActionListener() {
