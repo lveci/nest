@@ -247,6 +247,10 @@ public class CreateStackOp extends Operator {
 
             saveMasterProductBandNames(targetProduct, masterProductBands);
 
+            // create temporary metadata
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+            absRoot.setAttributeInt("collocated_stack", 1);
+
             // copy GCPs if found to master band
             final ProductNodeGroup<Placemark> masterGCPgroup = masterProduct.getGcpGroup();
             if (masterGCPgroup.getNodeCount() > 0) {

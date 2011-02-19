@@ -150,6 +150,7 @@ public class GCPSelection2Op extends Operator {
     private final Map<Band, Boolean> gcpsComputedMap = new HashMap<Band, Boolean>(10);
     private Band primarySlaveBand = null;    // the slave band to process
     private boolean gcpsCalculated = false;
+    private boolean collocatedStack = false;
 
     /**
      * Default constructor. The graph processing framework
@@ -197,6 +198,8 @@ public class GCPSelection2Op extends Operator {
 
             sourceImageWidth = sourceProduct.getSceneRasterWidth();
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
+
+            getCollocatedStackFlag();
 
             createTargetProduct();
 
@@ -250,6 +253,17 @@ public class GCPSelection2Op extends Operator {
         }
         final String label = PlacemarkNameFactory.createLabel(placemarkDescriptor, pinNumber, true);
         return new String[]{name, label};
+    }
+
+    private void getCollocatedStackFlag() {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        MetadataAttribute attr = absRoot.getAttribute("collocated_stack");
+        if (attr == null) {
+            collocatedStack = false;
+        } else {
+            collocatedStack = true;
+            absRoot.removeAttribute(attr);
+        }
     }
 
     /**
@@ -341,15 +355,24 @@ public class GCPSelection2Op extends Operator {
             final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
             int bandCnt = 0;
             pm.beginTask("computeSlaveGCPs ", targetProduct.getNumBands()+numberOfMasterGCPs);
+            Band firstTargetBand = null;
             for(Band targetBand : bandList.keySet()) {
                 ++bandCnt;
                 final Band slaveBand = bandList.get(targetBand);
 
-                final String bandCountStr = bandCnt +" of "+ bandList.size();
-                if(complexCoregistration) {
-                    computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, bandCountStr, pm);
+                if (collocatedStack || !collocatedStack && bandCnt == 1) {
+                    final String bandCountStr = bandCnt +" of "+ bandList.size();
+                    if(complexCoregistration) {
+                        computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, bandCountStr, pm);
+                    } else {
+                        computeSlaveGCPs(slaveBand, null, targetBand, bandCountStr, pm);
+                    }
+
+                    if (bandCnt == 1) {
+                        firstTargetBand = targetBand;
+                    }
                 } else {
-                    computeSlaveGCPs(slaveBand, null, targetBand, bandCountStr, pm);
+                    copyFirstTargetBandGCPs(firstTargetBand, targetBand);
                 }
 
                 // copy slave data to target
@@ -496,6 +519,21 @@ public class GCPSelection2Op extends Operator {
          else
             System.out.println(" 100%");
      }
+    }
+
+    /**
+     * Copy GCPs of the first target band to current target band.
+     * @param firstTargetBand First target band.
+     * @param targetBand Current target band.
+     */
+    private void copyFirstTargetBandGCPs(final Band firstTargetBand, final Band targetBand) {
+
+        ProductNodeGroup<Placemark> firstTargetBandGcpGroup = targetProduct.getGcpGroup(firstTargetBand);
+        final ProductNodeGroup<Placemark> currentTargetBandGCPGroup = targetProduct.getGcpGroup(targetBand);
+        final int numberOfGCPs = firstTargetBandGcpGroup.getNodeCount();
+        for(int i = 0; i < numberOfGCPs; ++i) {
+            currentTargetBandGCPGroup.add(firstTargetBandGcpGroup.get(i));
+        }
     }
 
     /**
