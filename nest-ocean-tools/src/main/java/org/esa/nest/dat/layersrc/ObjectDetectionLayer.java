@@ -34,6 +34,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -184,6 +185,7 @@ public class ObjectDetectionLayer extends Layer {
         final double[] mpts = new double[4];
         final double[] vpts = new double[4];
 
+        final DecimalFormat frmt = new DecimalFormat("0.00");
         for(ObjectDiscriminationOp.ShipRecord target : targetList) {
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
@@ -201,6 +203,9 @@ public class ObjectDetectionLayer extends Layer {
             final double h = vpts[3]-vpts[1];
             final Ellipse2D.Double circle = new Ellipse2D.Double(vpts[0], vpts[1], w, h);
             graphics.draw(circle);
+
+            final double size = Math.sqrt(target.length*target.length+target.width*target.width);
+            graphics.drawString(frmt.format(size)+"m", (int)vpts[0], (int)vpts[1]);
         }
     }
 }

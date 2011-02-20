@@ -609,18 +609,8 @@
                     </configuration>
                 </plugin>
 				<plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${outputdir}</directory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -641,7 +631,25 @@
                     </descriptors>
                 </configuration>
             </plugin>
-
+			<plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${outputdir}</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+						<fileset>
+                            <directory>target</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
         </plugins>
 		
     </build>
