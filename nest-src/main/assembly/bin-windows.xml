@@ -37,8 +37,8 @@
             <outputDirectory></outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
-                <include>*.bat</include>
-				<include>*.ini</include>
+                <include>**/*.bat</include>
+				<include>**/*.ini</include>
             </includes>
         </fileSet>
 
@@ -46,8 +46,8 @@
             <directory>nest-src/main/bin/win</directory>
             <outputDirectory></outputDirectory>
             <includes>
-                <include>*.exe</include>
-				<include>*.dll</include>
+                <include>**/*.exe</include>
+				<include>**/*.dll</include>
             </includes>
         </fileSet>
 		
@@ -59,7 +59,7 @@
         <moduleSet>
             <excludes>
 				<exclude>org.esa.nest:nest-bootstrap</exclude>
-				
+				<exclude>org.esa.nest:nest-src</exclude>
                 <exclude>com.bc.ceres:ceres-launcher</exclude>
                 <exclude>com.bc.ceres:ceres-deploy</exclude>
                 <exclude>com.bc.ceres:ceres-site</exclude>				

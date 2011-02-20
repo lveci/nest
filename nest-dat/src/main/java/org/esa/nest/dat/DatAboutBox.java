@@ -57,7 +57,7 @@ class DatAboutBox extends ModalDialog {
             }
         });
 
-        final File imgFile = ResourceUtils.findInHomeFolder(File.separator+"res"+File.separator+"NEST_Splash.png");
+        final File imgFile = ResourceUtils.findInHomeFolder(File.separator+"res"+File.separator+"nest_splash.png");
         final Icon icon = new ImageIcon(imgFile.getAbsolutePath());
 
         final JLabel imageLabel = new JLabel(icon);

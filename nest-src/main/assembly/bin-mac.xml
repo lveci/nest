@@ -33,9 +33,22 @@
             <outputDirectory>commandline</outputDirectory>
         </fileSet>
 
-        <fileSet>
+		<fileSet>
             <directory>nest-src/main/bin/macosx</directory>
             <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.so</include>
+			</includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+		
+		<fileSet>
+            <directory>nest-src/main/bin/macosx</directory>
+            <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
@@ -49,7 +62,7 @@
         <moduleSet>
             <excludes>
 				<exclude>org.esa.nest:nest-bootstrap</exclude>
-				
+				<exclude>org.esa.nest:nest-src</exclude>
                 <exclude>com.bc.ceres:ceres-launcher</exclude>
                 <exclude>com.bc.ceres:ceres-deploy</exclude>
                 <exclude>com.bc.ceres:ceres-site</exclude>				

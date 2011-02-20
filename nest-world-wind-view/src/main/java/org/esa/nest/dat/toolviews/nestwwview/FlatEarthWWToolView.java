@@ -77,7 +77,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
         productLayer.setOpacity(1.0);
         productLayer.setPickEnabled(false);
-        productLayer.setName("NEST Opened Products");
+        productLayer.setName("Opened Products");
         layerList.add(productLayer);
 
         final Layer placeNameLayer = layerList.getLayerByName("Place Names");

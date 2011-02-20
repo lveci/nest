@@ -71,7 +71,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.18 $ $Date: 2010-08-17 16:58:51 $
+ * @version $Revision: 1.19 $ $Date: 2011-02-19 23:20:59 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -164,7 +164,7 @@ public class NestWWToolView extends AbstractToolView {
 
         productLayer.setOpacity(0.8);
         productLayer.setPickEnabled(false);
-        productLayer.setName("NEST Opened Products");
+        productLayer.setName("Opened Products");
         insertTiledLayer(getWwd(), productLayer);
 
         // Add an internal frame listener to VISAT so that we can update our

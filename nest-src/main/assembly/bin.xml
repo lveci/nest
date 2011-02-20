@@ -39,8 +39,8 @@
             <outputDirectory></outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
-                <include>*.bat</include>
-				<include>*.ini</include>
+                <include>**/*.bat</include>
+				<include>**/*.ini</include>
             </includes>
         </fileSet>
 
@@ -48,14 +48,26 @@
             <directory>nest-src/main/bin/win</directory>
             <outputDirectory></outputDirectory>
             <includes>
-                <include>*.exe</include>
-				<include>*.dll</include>
+                <include>**/*.exe</include>
+				<include>**/*.dll</include>
             </includes>
         </fileSet>
 		
         <fileSet>
             <directory>nest-src/main/bin/linux</directory>
             <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.so</include>
+			</includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>	
+		<fileSet>
+            <directory>nest-src/main/bin/linux</directory>
+            <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
@@ -64,6 +76,18 @@
         <fileSet>
             <directory>nest-src/main/bin/macosx</directory>
             <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.so</include>
+			</includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>		
+		<fileSet>
+            <directory>nest-src/main/bin/macosx</directory>
+            <outputDirectory></outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
@@ -77,7 +101,7 @@
         <moduleSet>
             <excludes>
 				<exclude>org.esa.nest:nest-bootstrap</exclude>
-				
+				<exclude>org.esa.nest:nest-src</exclude>
                 <exclude>com.bc.ceres:ceres-launcher</exclude>
                 <exclude>com.bc.ceres:ceres-deploy</exclude>
                 <exclude>com.bc.ceres:ceres-site</exclude>				
