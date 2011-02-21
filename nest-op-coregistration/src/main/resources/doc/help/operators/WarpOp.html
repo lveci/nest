@@ -34,7 +34,9 @@ RMS. GCP pairs with RMS greater than the mean RMS&nbsp;are eliminated.</li><li>T
 same procedure (step 1 to 3) is repeated up to 2 times if needed and
 each time&nbsp;the remaining master-slave GCP pairs from previous
 elimination are used.</li>
-<li>Finally&nbsp;the master-slave GCP pairs are filtered with the user selected RMS threshold and the final warp function is computed with the remaining master-slave GCP pairs.</li></ol>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; The WARP polynomial order is specified by user in the dialog box.<br><ul><li>The valid values for the&nbsp;polynomial order are
+<li>Finally&nbsp;the master-slave GCP pairs are filtered with the user
+selected RMS threshold and the final warp function is computed with the
+remaining master-slave GCP pairs.</li></ol>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; The WARP polynomial order is specified by user in the dialog box.<br><ul><li>The valid values for the&nbsp;polynomial order are
 1, 2 and 3.</li><li>For most cases where the input images do not suffer from a high level of
 distortion, linear&nbsp;warp is generally enough and is recommended as&nbsp;default.</li><li>Higher order warp should be used only&nbsp;when image suffers from a high level distortion and a very good co-registration
 accuracy is required.</li><li>Higher order&nbsp;warp requires more GCPs and can introduce large distortions
@@ -48,15 +50,15 @@ supported:<br>
 <li>Nearest-neighbour interpolation</li>
 <li>Bilinear interpolation</li>
 <li>Bicubic interpolation</li>
-<li>Cubic interpolation (4 and 6 points) (New in NEST4A)</li>
-<li>Truncated sinc interpolation (6, 8 and 16 points) (New in NEST4A)</li>
+<li>Cubic interpolation (4 and 6 points)</li>
+<li>Truncated sinc interpolation (6, 8 and 16 points)</li>
 
 </ol><h4>Interpolation for InSAR</h4>&nbsp;&nbsp;&nbsp;
 
 For interferometric applications Cubic or Truncated sinc kernels are recommended.
 These kernels assure the optimal interpolation in terms of Signal-to-Noise ratio.  
 
-</ol><h4>Residual File</h4>&nbsp;&nbsp;&nbsp;The residual file is a
+<h4>Residual File</h4>&nbsp;&nbsp;&nbsp;The residual file is a
 text file containing information about master and slave GCPs before and
 after each elimination. The residual for a GCP pair is&nbsp;the errors
 introduced by the warping function and can be used as a good indicator

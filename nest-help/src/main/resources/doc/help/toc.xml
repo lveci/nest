@@ -9,7 +9,6 @@
 
     <tocitem text="General">
         <tocitem text="Overview" target="Overview"/>
-        <tocitem text="Definitions" target="beamDefinitions"/>
 		<tocitem text="Supported Products" target="SupportedProducts"/>
     </tocitem>
 	

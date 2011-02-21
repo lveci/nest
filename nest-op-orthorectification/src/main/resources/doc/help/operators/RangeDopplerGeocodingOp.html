@@ -30,22 +30,21 @@ state
 vector information in the metadata or <a href="ApplyOrbitFileOp.html">external
 precise orbit</a> (only for ERS and ASAR), the radar timing annotations, the slant to ground range
 conversion parameters together with the reference DEM data to derive the precise
-geolocation information.&nbsp;</p><h4>Product Supported</h4><ul><li>ASAR (IMS, IMP, IMM, APP, APM, WSM) and ERS products (SLC, IMP) are fully supported.</li><li>Third party mission: not fully supported. Please refer to Supported_Products&amp;MainTools_4A.xls file available from <span style="text-decoration: underline;">http://liferay.array.ca:8080/web/nest/documentation</span>.</li></ul><h4>DEM Supported</h4><p>Right now only the DEMs with geographic coordinates (P<sub>lat</sub>, P<sub>lon</sub>, P<sub>h</sub>) referred to global geodetic ellipsoid reference WGS84 (and height in meters) are properly supported by NEST.</p><p>NEST
-offers the possibility to employ different types of Digital Elevation
-models (ACE, GETASSE30, ACE 5min, ASTER, SRTM 3Sec&nbsp;GeoTiff).</p><p>By
-default directory C:\NestData and two sub-directories DEMs
-and&nbsp;Orbits are created by NEST&nbsp;and NEST will look for the
-default DEMs selected by user from operator UI in the DEMs
-sub-directory. However, the C:\NestData directory and&nbsp;DEMs and
-Orbits sub-directories are customizable from the Settings dialog (which
+geolocation information.&nbsp;</p><h4>Product Supported</h4><ul><li>ASAR (IMS, IMP, IMM, APP, APM, WSM) and ERS products (SLC, IMP) are fully supported.</li><li>Third party mission: not fully supported. Please refer to Supported_Products&amp;MainTools_4A.xls file available from <span style="text-decoration: underline;">http://liferay.array.ca:8080/web/nest/documentation</span>.</li></ul><h4>DEM Supported</h4><p>Currently, only the DEMs with geographic coordinates (P<sub>lat</sub>, P<sub>lon</sub>, P<sub>h</sub>) referred to global geodetic ellipsoid reference WGS84 (and height in meters) are properly supported.</p><p>Various different types of Digital Elevation
+models can be used (ACE, GETASSE30,&nbsp;ASTER, SRTM 3Sec&nbsp;GeoTiff).</p><p>By
+default directory C:\AuxData and two sub-directories DEMs
+and&nbsp;Orbits are used to store the DEMs. However, the AuxData
+directory and&nbsp;DEMs sub-directories are customizable from the
+Settings dialog (which
 can be found under Edit tab in the main menu bar).</p><p>The location
 of the default DEMs must be specified in dataPath field in the Setting
 Dialog in order to be properly used by Terrain Correction
-Operator.&nbsp;</p><p>At the moment, NEST is able to download
-automatically the STRM v.4 (3&#8221; tiles) from the Joint Research Center
-FTP (xftp.jrc.it), for&nbsp; the area covered by the image to be
+Operator.&nbsp;</p><p>The STRM v.4 (3&#8221; tiles) from the Joint Research Center
+FTP (xftp.jrc.it) will automatically be downloaded in tiles for&nbsp; the area covered by the image to be
 orthorectified. The tiles will be downloaded to the folder
-C:\NestData\DEMs\SRTM_DEM\tiff.</p><p>The Test Connectivity functionality under the Help tab in the main menu bar allows user to verify if the SRTM downloading is working properly. </p><p>Please
+C:\AuxData\DEMs\SRTM_DEM\tiff.</p><p>The
+Test Connectivity functionality under the Help tab in the main menu bar
+allows user to verify if the SRTM downloading is working properly. </p><p>Please
 note that for ACE and SRTM, the height information (being referred to
 geoid EGM96) is automatically corrected to obtain height relative to
 the WGS84 ellipsoid. For Aster Dem height correction is not yet
@@ -59,7 +58,7 @@ pixel spacing can be entered in both meters and degrees. If the pixel
 spacing in one unit is entered, then &nbsp;the pixel spacing in another
 unit is computed
 automatically.</p><p> The calculations of the pixel spacing in meters and in
-degrees&nbsp;are given by the following equations:&nbsp;<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></p><p style="margin-left: 40px;">pixelSpacingInDegree = pixelSpacingInMeter / EquatorialEarthRadius * 180 / PI;</p><p style="margin-left: 40px;">pixelSpacingInMeter = pixelSpacingInDegree * PolarEarthRadius&nbsp; * PI / 180;</p><p>where&nbsp;EquatorialEarthRadius = 6378137.0 m and PolarEarthRadius = 6356752.314245 m as given in WGS84.&nbsp;</p><h4>Projection Supported</h4><p>Right now&nbsp;the following projections&nbsp;<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span>are&nbsp;supported by NEXT:&nbsp;</p><ul><li> Geographic Lat/Lon</li><li>Lambert Conformal Conic</li><li>Stereographic</li><li>Transverse Mercator</li><li>UTM</li><li>Universal Polar Stereographic North</li><li>Universal Polar Stereographic South</li></ul><h4>Radiometric Normalization</h4><p>This option implements a radiometric normalization based on the approach proposed by Kellndorfer et al., TGRS, Sept. 1998 where <br><img style="width: 233px; height: 67px;" alt="" src="images/range_doppler_eq5.jpg"></p><p>In current implementation <span style="font-style: italic;">&#952;</span><sub style="font-style: italic;">DEM</sub>
+degrees&nbsp;are given by the following equations:&nbsp;<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></p><p style="margin-left: 40px;">pixelSpacingInDegree = pixelSpacingInMeter / EquatorialEarthRadius * 180 / PI;</p><p style="margin-left: 40px;">pixelSpacingInMeter = pixelSpacingInDegree * PolarEarthRadius&nbsp; * PI / 180;</p><p>where&nbsp;EquatorialEarthRadius = 6378137.0 m and PolarEarthRadius = 6356752.314245 m as given in WGS84.&nbsp;</p><h4>Projection Supported</h4><p>Right now&nbsp;the following projections&nbsp;<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB"></span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB"></span>are&nbsp;supported:&nbsp;</p><ul><li> Geographic Lat/Lon</li><li>Lambert Conformal Conic</li><li>Stereographic</li><li>Transverse Mercator</li><li>UTM</li><li>Universal Polar Stereographic North</li><li>Universal Polar Stereographic South</li></ul><h4>Radiometric Normalization</h4><p>This option implements a radiometric normalization based on the approach proposed by Kellndorfer et al., TGRS, Sept. 1998 where <br><img style="width: 233px; height: 67px;" alt="" src="images/range_doppler_eq5.jpg"></p><p>In current implementation <span style="font-style: italic;">&#952;</span><sub style="font-style: italic;">DEM</sub>
 is the local incidence angle projected into the range plane and defined
 as the angle between the incoming radiation vector and the projected
 surface normal vector into range plane[2]. The range plane is the plane
@@ -77,12 +76,10 @@ most recent ASAR XCA available from C:\Program
 Files\NEST4A\auxdata\envisat compatible with product date is
 automatically selected. According to this XCA file, calibration
 constant, range spreading loss and antenna pattern gain are obtained.</p></li><ul><li><span style="text-decoration: underline;">Applied factors</span>:</li></ul><ul><ol><li><p>apply projected local incidence angle into the range plane correction</p></li><li><p>apply calibration constant correction based on the XCA file<br></p></li><li><p>apply range spreading loss correction based on the XCA file and DEM geometry<br></p></li><li><p>apply antenna pattern gain correction based on the XCA file and DEM geometry<br></p></li></ol></ul><li><span style="font-weight: bold;">External AUX File</span>&nbsp;(&amp; use projected local incidence angle computed from DEM):<p>&nbsp;User
-can select a specific ASAR XCA file available from C:\Program
-Files\NEST4A\auxdata\envisat or from another repository. According to
+can select a specific ASAR XCA file available from the installation folder or from another repository. According to
 this selected XCA file, calibration constant, range spreading loss and
 antenna pattern gain are computed.</p></li><ul><li><span style="text-decoration: underline;">Applied factors</span>:</li></ul><ul><ol><li><p>apply projected local incidence angle into the range plane correction</p></li><li><p>apply calibration constant correction based on the selected XCA file<br></p></li><li><p>apply range spreading loss correction based on the selected XCA file and DEM geometry<br></p></li><li><p>apply antenna pattern gain correction based on the selected XCA file and DEM geometry<br></p></li></ol></ul></ul><h4>Detected Product (IMP, IMM, APP, APM, WSM)</h4><ul><li><span style="font-weight: bold;">Latest AUX File</span>&nbsp;(&amp; use projected local incidence angle computed from DEM):<p>The
-most recent ASAR XCA available from C:\Program
-Files\NEST4A\auxdata\envisat compatible with product date is
+most recent ASAR XCA available from the installation folder compatible with product date is
 automatically selected. Basically with this option all the correction
 factors applied to the original SAR image based on product XCA file
 used during the focusing, such as antenna pattern gain and range
@@ -95,8 +92,7 @@ option the antenna pattern gain and range spreading loss are kept from
 the original product and only the calibration constant and local
 incidence angle correction factors are applied during the radiometric
 normalisation process.</p></li><ul><li><span style="text-decoration: underline;">Applied factors</span>:</li></ul><ul><ol><li><p>apply projected local incidence angle into the range plane correction</p></li><li><p>apply calibration constant correction based on product XCA file<br></p></li></ol></ul></ul><ul><li><span style="font-weight: bold;">External AUX File</span>&nbsp;(&amp; use projected local incidence angle computed from DEM):<p>&nbsp;User
-can select a specific ASAR XCA file available from C:\Program
-Files\NEST4A\auxdata\envisat or from another repository. Basically with
+can select a specific ASAR XCA file available from the installation folder or from another repository. Basically with
 this option all the correction factors applied to the original SAR
 image based on product XCA file used during the focusing, such as
 antenna pattern gain and range spreading loss, are removed first. Then
