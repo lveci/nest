@@ -23,7 +23,7 @@ import java.beans.PropertyChangeEvent;
  * TODO - Apidoc
 *
 * @author Norman Fomferra
-* @version $revision$ $date$
+
 */
 public class TracingPropertyChangeListener implements PropertyChangeListener {
     public String trace = "";
