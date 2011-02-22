@@ -50,7 +50,7 @@ public class CalibrationOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Band")
+            label="Source Band")
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {LATEST_AUX, PRODUCT_AUX, EXTERNAL_AUX}, description = "The auxiliary file",

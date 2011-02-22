@@ -50,7 +50,7 @@ public class OversamplingOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
+            label="Source Bands")
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {UndersamplingOp.IMAGE_SIZE, UndersamplingOp.RATIO, UndersamplingOp.PIXEL_SPACING},

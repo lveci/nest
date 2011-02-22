@@ -53,7 +53,7 @@ public class MosaicOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId = "source", label = "Source Bands")
+            label = "Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,

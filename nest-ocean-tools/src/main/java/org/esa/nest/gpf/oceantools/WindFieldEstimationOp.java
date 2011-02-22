@@ -76,7 +76,7 @@ public class WindFieldEstimationOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId = "source", label = "Source Bands")
+            label = "Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(description = "Window size", defaultValue = "20.0", label="Window Size (km)")

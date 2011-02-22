@@ -37,7 +37,7 @@ public class Experiment_2Op extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
+            label="Source Bands")
     private
     String[] sourceBandNames;
 

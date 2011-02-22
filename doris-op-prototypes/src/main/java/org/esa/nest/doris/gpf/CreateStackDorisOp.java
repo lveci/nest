@@ -53,11 +53,11 @@ public class CreateStackDorisOp extends Operator {
     private Product[] sourceProduct;
 
     @Parameter(description = "The list of source bands.", alias = "masterBands", itemAlias = "band",
-            sourceProductId="source", label="Master Band")
+            label="Master Band")
     private String[] masterBandNames = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="sourceProduct", label="Slave Bands")
+            label="Slave Bands")
     private String[] slaveBandNames = null;
 
     private Product masterProduct = null;

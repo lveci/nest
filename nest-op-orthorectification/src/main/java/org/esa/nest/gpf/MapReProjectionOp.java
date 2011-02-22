@@ -37,7 +37,7 @@ import java.awt.*;
 public final class MapReProjectionOp extends ReprojectionOp {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
+            label="Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(description = "Whether to keep original or use custom resolution.",

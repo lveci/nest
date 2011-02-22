@@ -61,7 +61,7 @@ public final class MultilookOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
+            label="Source Bands")
     private String[] sourceBandNames;
 
     @Parameter(description = "The user defined number of range looks", interval = "[1, *)", defaultValue = "1",

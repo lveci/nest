@@ -51,7 +51,7 @@ public class CreateLandMaskOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId = "source", label = "Source Bands")
+            label = "Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(label="Mask the Land", defaultValue = "true")
