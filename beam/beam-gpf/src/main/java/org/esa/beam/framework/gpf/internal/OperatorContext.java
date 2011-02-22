@@ -28,7 +28,6 @@ import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -58,17 +57,11 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,11 +79,8 @@ import java.util.regex.Pattern;
  */
 public class OperatorContext {
 
-    private static final String SYS_PROP_NAME_PERFORMANCE_FILE = "beam.gpf.performance.file";
-    private static final String SYS_PROP_NAME_PERFORMANCE_TRACE = "beam.gpf.performance.trace";
-
-    private static final String SYS_PROP_VALUE_PERFORMANCE_FILE = System.getProperty(SYS_PROP_NAME_PERFORMANCE_FILE, "gpf-performance.txt");
-    static final boolean SYS_PROP_VALUE_PERFORMANCE_TRACE = Boolean.parseBoolean(System.getProperty(SYS_PROP_NAME_PERFORMANCE_TRACE, "false"));
+    private static final String SYS_PROP_NAME_TILE_COMPUTATION_HANDLER = "beam.gpf.tileComputationHandler";
+    private static TileComputationHandler tileComputationHandler;
 
     private final Operator operator;
     private final List<Product> sourceProductList;
@@ -117,6 +107,7 @@ public class OperatorContext {
         if (operator == null) {
             throw new NullPointerException("operator");
         }
+
         this.operator = operator;
         this.computeTileMethodUsable = canOperatorComputeTile(operator.getClass());
         this.computeTileStackMethodUsable = canOperatorComputeTileStack(operator.getClass());
@@ -125,6 +116,8 @@ public class OperatorContext {
         this.targetPropertyMap = new HashMap<String, Object>(3);
         this.logger = BeamLogManager.getSystemLogger();
         this.renderingHints = new RenderingHints(JAI.KEY_TILE_CACHE_METRIC, this);
+
+        startTileComputationObservation();
     }
 
     public String getId() {
@@ -1014,90 +1007,42 @@ public class OperatorContext {
         return String.format("Operator '%s': " + format, allArgs);
     }
 
-    /**
-     * @param product The product.
-     * @return The operator context for the given product, or null.
-     */
-    static OperatorContext getOperatorContext(Product product) {
-        ProductReader productReader = product.getProductReader();
-        if (productReader instanceof OperatorProductReader) {
-            OperatorProductReader operatorProductReader = (OperatorProductReader) productReader;
-            return operatorProductReader.getOperatorContext();
-        }
-        return null;
-    }
-
-    public void logPerformanceAnalysis() {
-        if (SYS_PROP_VALUE_PERFORMANCE_TRACE) {
-            File file = new File(SYS_PROP_VALUE_PERFORMANCE_FILE);
-            try {
-                PrintWriter writer = new PrintWriter(new FileWriter(file));
+    private void startTileComputationObservation() {
+        if (tileComputationHandler == null) {
+            String tchClass = System.getProperty(SYS_PROP_NAME_TILE_COMPUTATION_HANDLER);
+            if (tchClass != null) {
                 try {
-                    logPerformanceAnalysis(writer);
-                    getLogger().info("GPF performance analysis has been written to " + file);
-                } finally {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                getLogger().severe("Failed to write GPF performance analysis to " + file);
-            }
-        }
-    }
-
-    public void logPerformanceAnalysis(PrintWriter writer) {
-        writer.printf("Depth\tBand\tTile\tCalls\tMin(s)\tMax(s)\n");
-        logPerformanceAnalysis(writer, 0);
-    }
-
-    private void logPerformanceAnalysis(PrintWriter writer, int depth) {
-
-        String operatorName = getOperatorSpi().getOperatorAlias();
-        String productName = getTargetProduct().getName();
-
-        ArrayList<OperatorImage> operatorImages = new ArrayList<OperatorImage>(new HashSet<OperatorImage>(targetImageMap.values()));
-        Collections.sort(operatorImages, new Comparator<OperatorImage>() {
-            @Override
-            public int compare(OperatorImage o1, OperatorImage o2) {
-                return o1.getTargetBand().getName().compareTo(o2.getTargetBand().getName());
-            }
-        });
-
-        for (OperatorImage operatorImage : operatorImages) {
-            Band targetBand = operatorImage.getTargetBand();
-            String imageType = String.format("%s@%s",
-                                             Integer.toHexString(System.identityHashCode(operatorImage)),
-                                             operatorImage instanceof OperatorImageTileStack ? "Stack" : "Single");
-            TileComputationStatistic[] tileComputationStatistics = operatorImage.getTileComputationStatistics();
-            for (int i = 0, tileComputationStatisticsLength = tileComputationStatistics.length; i < tileComputationStatisticsLength; i++) {
-                TileComputationStatistic tileComputationStatistic = tileComputationStatistics[i];
-                if (tileComputationStatistic != null) {
-                    writer.printf("%d\t%s.%s\t%s.%s.%d.%d\t%d\t%f\t%f\n",
-                                  depth,
-                                  productName,
-                                  targetBand.getName(),
-                                  operatorName,
-                                  imageType,
-                                  tileComputationStatistic.getTileX(),
-                                  tileComputationStatistic.getTileY(),
-                                  tileComputationStatistic.getCount(),
-                                  tileComputationStatistic.getNanosMin() / 1.0E9,
-                                  tileComputationStatistic.getNanosMax() / 1.0E9);
+                    tileComputationHandler = (TileComputationHandler) Class.forName(tchClass).newInstance();
+                    tileComputationHandler.setLogger(logger);
+                    tileComputationHandler.start();
+                } catch (Throwable t) {
+                    getLogger().warning("Failed to instantiate tile computation handler: " + t.getMessage());
                 }
             }
         }
+    }
 
-        for (Product product : sourceProductList) {
-            OperatorContext operatorContext = getOperatorContext(product);
-            if (operatorContext != null) {
-                operatorContext.logPerformanceAnalysis(writer, depth + 1);
-            }
+    public void stopTileComputationObservation() {
+        if (tileComputationHandler != null) {
+            tileComputationHandler.stop();
+            tileComputationHandler = null;
         }
     }
 
-    boolean isComputing(Band band) {
+    public void fireTileComputed(OperatorImage operatorImage, Rectangle destRect, long startNanos) {
+         if (tileComputationHandler != null) {
+             long endNanos = System.nanoTime();
+             int tileX = operatorImage.XToTileX(destRect.x);
+             int tileY = operatorImage.YToTileY(destRect.y);
+             tileComputationHandler.tileComputed(new TileComputationEvent(operatorImage, tileX, tileY, startNanos, endNanos));
+         }
+     }
+
+     boolean isComputingImageOf(Band band) {
         if (band.isSourceImageSet()) {
             RenderedImage sourceImage = band.getSourceImage().getImage(0);
             OperatorImage targetImage = getTargetImage(band);
+            //noinspection ObjectEquality
             return targetImage == sourceImage || (operator instanceof ReadOp && targetImage == null);  // NESTMOD
         } else {
             return false;
