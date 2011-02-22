@@ -34,10 +34,12 @@ import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,6 +56,7 @@ class CommandLineTool {
     static final String DEFAULT_TARGET_FILEPATH = "./target.dim";
     static final String DEFAULT_FORMAT_NAME = ProductIO.DEFAULT_FORMAT_NAME;
     static final int DEFAULT_TILE_CACHE_SIZE_IN_M = 512;
+    static final int DEFAULT_TILE_SCHEDULER_PARALLELSIM = Runtime.getRuntime().availableProcessors();
 
     private final CommandLineContext commandLineContext;
 
@@ -113,6 +116,12 @@ class CommandLineTool {
             JAI.getDefaultInstance().getTileCache().setMemoryCapacity(0L);
             JAI.disableDefaultTileCache();
         }
+        int parallelism = lineArgs.getTileSchedulerParallelism();
+        if (parallelism > 0) {
+            JAI.getDefaultInstance().getTileScheduler().setParallelism(parallelism);
+        }
+        BeamLogManager.getSystemLogger().info(MessageFormat.format("JAI tile cache size is {0} MB", JAI.getDefaultInstance().getTileCache().getMemoryCapacity() / (1024*1024)));
+        BeamLogManager.getSystemLogger().info(MessageFormat.format("JAI tile scheduler parallelism is {0}", JAI.getDefaultInstance().getTileScheduler().getParallelism()));
 
         if (lineArgs.getOperatorName() != null) {
             // Operator name given: parameters and sources are parsed from command-line args

@@ -56,7 +56,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.15 $ $Date: 2011-02-10 19:37:02 $
+ * @version $Revision: 1.16 $ $Date: 2011-02-22 03:53:28 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -111,7 +111,8 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         PropertyContainer propertyContainer = PropertyContainer.createMapBacked(parameterMap,
                                                                                 operatorSpi.getOperatorClass(),
                                                                                 new ParameterDescriptorFactory());
-        OperatorParametersSupport parametersSupport = new OperatorParametersSupport(operatorSpi.getOperatorClass(),
+        OperatorParametersSupport parametersSupport = new OperatorParametersSupport(this.getJDialog(),
+                                                                                    operatorSpi.getOperatorClass(),
                                                                                     propertyContainer);
         propertyContainer.setDefaultValues();
         if (propertyContainer.getProperties().length > 0) {
