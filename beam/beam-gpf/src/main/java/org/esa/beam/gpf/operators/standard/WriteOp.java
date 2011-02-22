@@ -40,7 +40,6 @@ import org.esa.beam.util.math.MathUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
-import javax.xml.crypto.Data;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -48,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,7 +210,7 @@ public class WriteOp extends Operator {
                                                   seconds / h,
                                                   seconds / h / w));
 
-            logPerformanceAnalysis();
+            stopTileComputationObservation();
         } catch (OperatorException e) {
             try {
                 productWriter.deleteOutput();
