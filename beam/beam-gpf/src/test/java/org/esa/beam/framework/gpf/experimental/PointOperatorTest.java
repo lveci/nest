@@ -66,6 +66,10 @@ public class PointOperatorTest extends TestCase {
         testPointOp(new NdviPixelOp(), 128L * M);
     }
 
+    public void testNdviPixelOpWithGaps() throws ParseException {
+        testPointOp(new NdviPixelOpWithGaps(), 128L * M);
+    }
+
     private void testPointOp(Operator op, long cacheSize) throws ParseException {
 
         if (cacheSize <= 0L) {
@@ -193,6 +197,38 @@ public class PointOperatorTest extends TestCase {
 
     }
 
+    public static class  NdviPixelOpWithGaps extends PixelOperator {
+
+        @Override
+        public void configureTargetProduct(Product targetProduct) {
+            targetProduct.addBand("ndvi", ProductData.TYPE_FLOAT32);
+            targetProduct.addBand("ndvi_flags", ProductData.TYPE_INT16);
+        }
+
+        @Override
+        protected void configureSourceSamples(Configurator configurator) {
+            configurator.defineSample(86, "radiance_10");
+            configurator.defineSample(423, "radiance_8");
+        }
+
+        @Override
+        public void configureTargetSamples(Configurator configurator) {
+            configurator.defineSample(34, "ndvi");
+            configurator.defineSample(687, "ndvi_flags");
+        }
+
+        @Override
+        protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+            double rad1 = sourceSamples[86].getDouble();
+            double rad2 = sourceSamples[423].getDouble();
+            double ndvi = (rad1 - rad2) / (rad1 + rad2);
+            int ndviFlags = (ndvi < 0 ? 1 : 0) | (ndvi > 1 ? 2 : 0);
+            targetSamples[34].set(ndvi);
+            targetSamples[687].set(ndviFlags);
+        }
+
+    }
+
     public static class NdviStdOp extends Operator {
 
         @Override
@@ -202,6 +238,8 @@ public class PointOperatorTest extends TestCase {
             final int sceneHeight = getSourceProduct().getSceneRasterHeight();
             Product targetProduct = new Product("ndvi", "NDVI_TYPE", sceneWidth, sceneHeight);
 
+            targetProduct.setStartTime(inputProduct.getStartTime());
+            targetProduct.setEndTime(inputProduct.getEndTime());
             ProductUtils.copyTiePointGrids(inputProduct, targetProduct);
             ProductUtils.copyGeoCoding(inputProduct, targetProduct);
 
