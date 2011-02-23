@@ -72,6 +72,10 @@ public final class MultilookOp extends Operator {
                 label="Number of Azimuth Looks")
     private int nAzLooks = 1;
 
+    @Parameter(description = "For complex product output intensity or i and q", defaultValue = "true",
+                label="Output Intensity")
+    private boolean outputIntensity = true;
+
     @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
     String note;
 
@@ -244,27 +248,27 @@ public final class MultilookOp extends Operator {
 
     private void addGeoCoding() {
 
-        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
-        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
-        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        final TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        final TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        final TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         if (lat == null || lon == null || incidenceAngle == null || slantRgTime == null) { // for unit test
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
             return;
         }
 
-        int gridWidth = 11;
-        int gridHeight = 11;
-        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
-        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-        PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        final float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+        final PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
 
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
-            float y = (nAzLooks - 1)/2 + Math.min(j*subSamplingY, targetImageHeight - 1)*nAzLooks;
+            final float y = (nAzLooks - 1)/2 + Math.min(j*subSamplingY, targetImageHeight - 1)*nAzLooks;
             for (int i = 0; i < gridWidth; i++) {
-                float x = (nRgLooks - 1)/2 + Math.min(i*subSamplingX, targetImageWidth - 1)*nRgLooks;
+                final float x = (nRgLooks - 1)/2 + Math.min(i*subSamplingX, targetImageWidth - 1)*nRgLooks;
                 newTiePointPos[k] = new PixelPos();
                 newTiePointPos[k].x = x;
                 newTiePointPos[k].y = y;
@@ -326,7 +330,7 @@ public final class MultilookOp extends Operator {
 
             String targetUnit = "";
 
-            if (unit.equals(Unit.REAL) || unit.equals(Unit.IMAGINARY)) {
+            if (outputIntensity && (unit.equals(Unit.REAL) || unit.equals(Unit.IMAGINARY))) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
@@ -415,7 +419,7 @@ public final class MultilookOp extends Operator {
         for (int ty = ty0; ty < maxy; ty++) {
             trgIndex.calculateStride(ty);
             for (int tx = tx0; tx < maxx; tx++) {
-                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit);
+                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit, outputIntensity);
                 trgData.setElemDoubleAt(trgIndex.getIndex(tx), meanValue);
             }
         }
@@ -428,15 +432,17 @@ public final class MultilookOp extends Operator {
      * @param sourceRaster1 The source raster for the 1st band.
      * @param srcData1 The product data for i band in case of complex product.
      * @param srcData2 The product data for q band in case of complex product.
-     * @param nRgLooks
-     * @param nAzLooks
+     * @param nRgLooks number of range looks
+     * @param nAzLooks number of azimuth looks
      * @param bandUnit Integer indicating the unit of source data.
+     * @param outputIntensity intensity or i and q
      * @return The mean value.
      */
     private static double getMeanValue(final int tx, final int ty, final Tile sourceRaster1,
                                        final ProductData srcData1, final ProductData srcData2,
                                        final int nRgLooks, final int nAzLooks,
-                                       final Unit.UnitType bandUnit) {
+                                       final Unit.UnitType bandUnit,
+                                       final boolean outputIntensity) {
 
         final int xStart = tx * nRgLooks;
         final int yStart = ty * nAzLooks;
@@ -459,7 +465,7 @@ public final class MultilookOp extends Operator {
 
             meanValue /= (nRgLooks * nAzLooks);
             return 10.0*Math.log10(meanValue); // linear to dB
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) { // COMPLEX
+        } else if (outputIntensity && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) { // COMPLEX
             double i, q;
             int index;
             for (int y = yStart; y < yEnd; y++) {

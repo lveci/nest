@@ -65,7 +65,7 @@ public class SourceUI extends BaseOperatorUI {
         if(value != null) {
 
             try {
-                final Product product = ProductIO.readProduct((File)value, null);
+                final Product product = ProductIO.readProduct((File)value);
                 sourceProductSelector.setSelectedProduct(product);
             } catch (IOException e) {
                 // do nothing

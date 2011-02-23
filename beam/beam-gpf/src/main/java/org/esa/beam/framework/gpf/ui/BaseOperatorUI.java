@@ -6,6 +6,8 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Band;
 
 import javax.swing.*;
 import java.util.Map;
@@ -137,6 +139,18 @@ public abstract class BaseOperatorUI implements OperatorUI {
         return bandNames.toArray(new String[bandNames.size()]);
     }
 
+    protected boolean isComplexSrcProduct() {
+        if(sourceProducts != null && sourceProducts.length > 0) {
+            for(Band band : sourceProducts[0].getBands()) {
+                final String unit = band.getUnit();
+                if(unit != null && (unit.contains("real") || unit.contains("imaginary"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     protected String[] getGeometries() {
         final ArrayList<String> geometryNames = new ArrayList<String>(5);
         if(sourceProducts != null) {
@@ -173,14 +187,14 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
     private void setParamsToConfiguration(final Xpp3Dom config) {
         if(paramMap == null) return;
-        final Set keys = paramMap.keySet();                     // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = paramMap.keySet();                     // The set of keys in the map.
+        for (String key : keys) {
             final Object value = paramMap.get(key);             // Get the value for that key.
             if (value == null) continue;
 
-            Xpp3Dom xml = config.getChild((String) key);
+            Xpp3Dom xml = config.getChild(key);
             if (xml == null) {
-                xml = new Xpp3Dom((String) key);
+                xml = new Xpp3Dom(key);
                 config.addChild(xml);
             }
 

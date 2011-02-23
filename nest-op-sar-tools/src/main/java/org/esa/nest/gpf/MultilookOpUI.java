@@ -22,10 +22,7 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.util.Map;
 
 /**
@@ -42,12 +39,21 @@ public class MultilookOpUI extends BaseOperatorUI {
     private final JRadioButton grSquarePixel = new JRadioButton("GR Square Pixel");
     private final JRadioButton independentLooks = new JRadioButton("Independent Looks");
 
+    private final JCheckBox outputIntensityCheckBox = new JCheckBox("Output Intensity");
+    private Boolean outputIntensity = true;
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
+
+        outputIntensityCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    outputIntensity = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
 
         return new JScrollPane(panel);
     }
@@ -58,7 +64,14 @@ public class MultilookOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         nRgLooks.setText(String.valueOf(paramMap.get("nRgLooks")));
-        
+
+        outputIntensity = (Boolean)paramMap.get("outputIntensity");
+        if(outputIntensity != null) {
+            outputIntensityCheckBox.setSelected(outputIntensity);
+            outputIntensityCheckBox.getModel().setPressed(outputIntensity);
+        }
+        outputIntensityCheckBox.setVisible(isComplexSrcProduct());
+
         setAzimuthLooks();
     }
 
@@ -100,6 +113,7 @@ public class MultilookOpUI extends BaseOperatorUI {
             paramMap.put("nRgLooks", Integer.parseInt(nRgLooksStr));
         if(nAzLooksStr != null && !nAzLooksStr.isEmpty())
             paramMap.put("nAzLooks", Integer.parseInt(nAzLooksStr));
+        paramMap.put("outputIntensity", outputIntensity);
     }
 
     private JComponent createPanel() {
@@ -160,6 +174,9 @@ public class MultilookOpUI extends BaseOperatorUI {
             }
         });
 
+        gbc.gridy++;
+        contentPane.add(outputIntensityCheckBox, gbc);
+        
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Note:",
                 new JLabel("Currently, detection for complex data is done without resampling"));
