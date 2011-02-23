@@ -12,19 +12,22 @@
     <name>HDF Library</name>
     <groupId>ncsa.hdf</groupId>
     <artifactId>lib-hdf</artifactId>
-    <version>2.3</version>
+    <version>${hdf.version}</version>
 
     <dependencies>
+
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf</artifactId>
-            <version>2.3</version>
+            <version>${hdf.version}</version>
         </dependency>
+
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf5</artifactId>
-            <version>2.3</version>
+            <version>${hdf.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -41,18 +44,21 @@
                         <configuration>
                             <stripVersion>true</stripVersion>
                             <artifactItems>
+
                                 <artifactItem>
                                     <groupId>ncsa.hdf</groupId>
                                     <artifactId>jhdf</artifactId>
-                                    <version>2.3</version>
+                                    <version>${hdf.version}</version>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
+
                                 <artifactItem>
                                     <groupId>ncsa.hdf</groupId>
                                     <artifactId>jhdf5</artifactId>
-                                    <version>2.3</version>
+                                    <version>${hdf.version}</version>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
+
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -67,7 +73,7 @@
                                 <artifactItem>
                                     <groupId>ncsa.hdf</groupId>
                                     <artifactId>hdf-natives</artifactId>
-                                    <version>2.3</version>
+                                    <version>${hdf.version}</version>
                                     <type>zip</type>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
