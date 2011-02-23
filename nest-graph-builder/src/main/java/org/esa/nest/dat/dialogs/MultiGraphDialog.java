@@ -231,7 +231,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
             for(File file : fileList) {
                 try {
 
-                    final Product product = ProductIO.readProduct(file, null);
+                    final Product product = ProductIO.readProduct(file);
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
                     }

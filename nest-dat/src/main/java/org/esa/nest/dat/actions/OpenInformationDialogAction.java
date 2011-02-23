@@ -25,7 +25,7 @@ public class OpenInformationDialogAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        StatisticsToolView statisticsToolView = (StatisticsToolView) VisatApp.getApp().getPage().getToolView(StatisticsToolView.ID);
+        StatisticsToolView statisticsToolView = (StatisticsToolView) VisatApp.getApp().getApplicationPage().getToolView(StatisticsToolView.ID);
         statisticsToolView.show(StatisticsToolView.INFORMATION_TAB_INDEX);
     }
 

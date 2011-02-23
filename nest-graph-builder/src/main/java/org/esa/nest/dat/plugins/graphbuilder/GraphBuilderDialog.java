@@ -505,7 +505,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             for(File file : fileList) {
                 try {
 
-                    final Product product = ProductIO.readProduct(file, null);
+                    final Product product = ProductIO.readProduct(file);
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
                     }
