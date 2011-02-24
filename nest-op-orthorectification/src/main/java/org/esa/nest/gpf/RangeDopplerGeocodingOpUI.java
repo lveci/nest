@@ -66,6 +66,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private final JButton externalDEMBrowseButton = new JButton("...");
     private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
     private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
+    private JLabel sourcePixelSpacingsLabelPart1 = new JLabel("Source GR Pixel Spacings (az x rg):");
+    private JLabel sourcePixelSpacingsLabelPart2 = new JLabel("0.0(m) x 0.0(m)");
 
     final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
     final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
@@ -90,6 +92,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private Boolean saveGammaNought = false;
     private Boolean saveSigmaNought = false;
     private Double extNoDataValue = 0.0;
+    private Double azimuthPixelSpacing = 0.0;
+    private Double rangePixelSpacing = 0.0;
 
     String savedProductName = null;
 
@@ -300,15 +304,33 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             productName = sourceProducts[0].getName();
         }
 
-        if(sourceProducts != null && (pixelSpacingInMeter.getText().isEmpty() || !productName.equals(savedProductName))) {
+        Boolean productChanged = false;
+        if (sourceProducts != null && !productName.equals(savedProductName)) {
+            productChanged = true;
+            savedProductName = productName;
+        }
+
+        if (sourceProducts != null && (azimuthPixelSpacing == 0.0 || rangePixelSpacing == 0.0 || productChanged)) {
+            try {
+                azimuthPixelSpacing = RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProducts[0]);
+                rangePixelSpacing = RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProducts[0]);
+            } catch (Exception e) {
+                azimuthPixelSpacing = 0.0;
+                rangePixelSpacing = 0.0;
+            }
+            String text = Double.toString(azimuthPixelSpacing) + "(m) x " + Double.toString(rangePixelSpacing) + "(m)";
+            sourcePixelSpacingsLabelPart2.setText(text);
+        }
+
+        if(sourceProducts != null && (pixelSpacingInMeter.getText().isEmpty() || productChanged)) {
             Double pixM, pixD;
             try {
                 pixM = (Double)paramMap.get("pixelSpacingInMeter");
                 if(pixM == null || pixM == 0) {
-                    pixM = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                    //pixM = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+                    pixM = Math.max(azimuthPixelSpacing, rangePixelSpacing);
                 } 
                 pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
-                savedProductName = productName;
             } catch (Exception e) {
                 pixM = 0.0;
                 pixD = 0.0;
@@ -509,6 +531,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, sourcePixelSpacingsLabelPart1, sourcePixelSpacingsLabelPart2);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacingInMeter);
         gbc.gridy++;

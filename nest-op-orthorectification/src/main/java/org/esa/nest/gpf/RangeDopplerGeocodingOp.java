@@ -1964,6 +1964,34 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
+     * Get azimuth pixel spacing (in m).
+     * @param srcProduct The source product.
+     * @return The azimuth pixel spacing.
+     * @throws Exception The exception.
+     */
+    public static double getAzimuthPixelSpacing(Product srcProduct) throws Exception {
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
+        return AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
+    }
+
+    /**
+     * Get range pixel spacing (in m).
+     * @param srcProduct The source product.
+     * @return The range pixel spacing.
+     * @throws Exception The exception.
+     */
+    public static double getRangePixelSpacing(Product srcProduct) throws Exception {
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
+        final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
+        final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
+        if (srgrFlag) {
+            return rangeSpacing;
+        } else {
+            return rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(srcProduct));
+        }
+    }
+
+    /**
      * Compute pixel spacing (in m).
      * @param srcProduct The source product.
      * @return The pixel spacing.
