@@ -277,6 +277,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         for (int i = 0; i < numBands; i++) {
             final String bandName = String.format("band_%d", i + 1);
             final Band band = product.addBand(bandName, productDataType);
+            band.setUnit("amplitude");
             if (tiffInfo.containsField(
                     BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel) {
                 band.setImageInfo(createIndexedImageInfo(product, baseImage, band));

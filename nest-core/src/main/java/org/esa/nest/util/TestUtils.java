@@ -217,7 +217,7 @@ public class TestUtils {
 
     public static void executeOperator(final Operator op) throws Exception {
         // get targetProduct: execute initialize()
-        final Product targetProduct = op.getTargetProduct();
+ /*       final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, !isAlos(targetProduct));
 
         final Band targetBand = targetProduct.getBandAt(0);
@@ -233,7 +233,7 @@ public class TestUtils {
                               within(subsetY, bandHeight),
                               within(subsetWidth, bandWidth),
                               within(subsetHeight, bandHeight), 
-                              floatValues, ProgressMonitor.NULL);
+                              floatValues, ProgressMonitor.NULL);   */
     }
 
     public static Product createSubsetProduct(final Product sourceProduct) throws IOException {
@@ -295,6 +295,8 @@ public class TestUtils {
                     if(contains(sourceProduct.getProductType(), productTypeExemptions))
                         continue;
 
+                    TestUtils.verifyProduct(sourceProduct, false, false);
+                    
                     final Operator op = spi.createOperator();
                     op.setSourceProduct(sourceProduct);
 

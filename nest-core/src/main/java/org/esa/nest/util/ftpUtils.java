@@ -84,6 +84,10 @@ public final class ftpUtils {
                     return FTPError.READ_ERROR;
             }
 
+            final File parentFolder = localFile.getParentFile();
+            if(!parentFolder.exists()) {
+                parentFolder.mkdirs();
+            }
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
             final VisatApp visatApp = VisatApp.getApp();

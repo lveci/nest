@@ -10,6 +10,7 @@
 	           TODO: Move the sourceEncoding property to the build tag if version 3.0 is released
 	           -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skipTests>true</skipTests>
 
 		<beam.version>4.9-SNAPSHOT</beam.version>
         <ceres.version>0.12-SNAPSHOT</ceres.version>
@@ -574,8 +575,10 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <skip>true</skip>
+                        <skipTests>${skipTests}</skipTests>
                         <printSummary>true</printSummary>
+						<disableXmlReport>true</disableXmlReport>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<workingDirectory>${outputdir}</workingDirectory>
                         <excludes>
                             <exclude>**/TestRaster.java</exclude>

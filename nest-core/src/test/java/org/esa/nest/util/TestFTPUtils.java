@@ -44,11 +44,12 @@ public class TestFTPUtils extends TestCase {
     public void testConnect() throws IOException {
         final String server = "xftp.jrc.it";
         final String remotePath = "/pub/srtmV4/tiff/";
-        final File localFile = new File("c:\\NESTDATA\\srtm_35_03.zip");
 
         final ftpUtils ftp = new ftpUtils(server);
         final Map<String, Long> fileSizeMap = ftpUtils.readRemoteFileList(ftp, server, remotePath);
-        
+
+        final String localPath = Settings.instance().get("DEM/srtm3GeoTiffDEMDataPath");
+        final File localFile = new File(localPath, "srtm_35_03.zip");
         final String remoteFileName = localFile.getName();
         final Long fileSize = fileSizeMap.get(remoteFileName);
 
