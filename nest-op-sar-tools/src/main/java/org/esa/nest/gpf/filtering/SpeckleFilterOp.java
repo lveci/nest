@@ -70,7 +70,13 @@ public class SpeckleFilterOp extends Operator {
                 label="Edge detection threshold")
     private double edgeThreshold = 5000.0;
 
-    private double enl;
+    @Parameter(defaultValue="false", label="Estimate Eqivalent Number of Looks")
+    private boolean estimateENL = true;
+
+    @Parameter(description = "The number of looks", interval = "(0, *)", defaultValue = "1.0",
+                label="Number of looks")
+    private double enl = 1.0;
+
     private double cu, cu2;
 
     static final String MEAN_SPECKLE_FILTER = "Mean";
@@ -301,12 +307,22 @@ public class SpeckleFilterOp extends Operator {
 
             } else if(filter.equals(GAMMA_MAP_SPECKLE_FILTER)) {
 
-                computeEquivalentNumberOfLooks(sourceRaster1, sourceRaster2, bandUnit, x0, y0, w, h);
+                if (estimateENL) {
+                    computeEquivalentNumberOfLooks(sourceRaster1, sourceRaster2, bandUnit, x0, y0, w, h);
+                }
+                cu = 1.0 / Math.sqrt(enl);
+                cu2 = cu*cu;
+
                 computeGammaMap(sourceRaster1, sourceRaster2, bandUnit, targetTile, x0, y0, w, h, pm);
 
             } else if(filter.equals(LEE_SPECKLE_FILTER)) {
 
-                computeEquivalentNumberOfLooks(sourceRaster1, sourceRaster2, bandUnit, x0, y0, w, h);
+                if (estimateENL) {
+                    computeEquivalentNumberOfLooks(sourceRaster1, sourceRaster2, bandUnit, x0, y0, w, h);
+                }
+                cu = 1.0 / Math.sqrt(enl);
+                cu2 = cu*cu;
+                
                 computeLee(sourceRaster1, sourceRaster2, bandUnit, targetTile, x0, y0, w, h, pm);
 
             } else if(filter.equals(LEE_REFINED_FILTER)) {
@@ -892,8 +908,6 @@ public class SpeckleFilterOp extends Operator {
             final double m2m2 = m2*m2;
             enl = m2m2 / (m4 - m2m2);
         }
-        cu = 1.0 / Math.sqrt(enl);
-        cu2 = cu*cu;
     }
 
     /**

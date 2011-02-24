@@ -55,12 +55,30 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
     private final JTextField dampingFactor = new JTextField("");
     private final JTextField edgeThreshold = new JTextField("");
 
+    private final JLabel estimateENLCheckBoxLabel = new JLabel("Estimate Equivalent Number of Looks");
+    private final JCheckBox estimateENLCheckBox = new JCheckBox("");
+    private final JLabel enlLabel = new JLabel("Number of Looks:   ");
+    private final JTextField enl = new JTextField("");
+    private Boolean estimateENL = true;
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
+
+        estimateENLCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+
+                    estimateENL = (e.getStateChange() == ItemEvent.SELECTED);
+                    if (estimateENL) {
+                        enl.setEnabled(false);
+                    } else {
+                        enl.setEnabled(true);
+                    }
+                }
+        });
 
         return panel;
     }
@@ -75,6 +93,11 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
         filterSizeY.setText(String.valueOf(paramMap.get("filterSizeY")));
         dampingFactor.setText(String.valueOf(paramMap.get("dampingFactor")));
         edgeThreshold.setText(String.valueOf(paramMap.get("edgeThreshold")));
+        estimateENLCheckBox.getModel().setPressed(true);
+        estimateENLCheckBox.setSelected(true);
+        estimateENL = true;
+        enl.setEnabled(false);
+        enl.setText(String.valueOf(paramMap.get("enl")));
     }
 
     @Override
@@ -93,6 +116,8 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
         paramMap.put("filterSizeY", Integer.parseInt(filterSizeY.getText()));
         paramMap.put("dampingFactor", Integer.parseInt(dampingFactor.getText()));
         paramMap.put("edgeThreshold", Double.parseDouble(edgeThreshold.getText()));
+        paramMap.put("estimateENL", estimateENL);
+        paramMap.put("enl", Double.parseDouble(enl.getText()));
     }
 
     private JComponent createPanel() {
@@ -129,6 +154,18 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
                     DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
                     DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
                 }
+
+                if (item.equals(SpeckleFilterOp.GAMMA_MAP_SPECKLE_FILTER) ||
+                    item.equals(SpeckleFilterOp.LEE_SPECKLE_FILTER)) {
+                    DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, true);
+                    DialogUtils.enableComponents(enlLabel, enl, true);
+                    estimateENLCheckBox.getModel().setPressed(true);
+                    estimateENLCheckBox.setSelected(true);
+                    enl.setEnabled(false);
+                } else {
+                    DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, false);
+                    DialogUtils.enableComponents(enlLabel, enl, false);
+                }
             }
         });
 
@@ -142,6 +179,13 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
         _gbc.gridy++;
         DialogUtils.addComponent(contentPane, _gbc, dampingFactorLabel, dampingFactor);
         DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
+
+        DialogUtils.addComponent(contentPane, _gbc, estimateENLCheckBoxLabel, estimateENLCheckBox);
+        DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, false);
+
+        _gbc.gridy++;
+        DialogUtils.addComponent(contentPane, _gbc, enlLabel, enl);
+        DialogUtils.enableComponents(enlLabel, enl, false);
 
         _gbc.gridy = savedY;
         DialogUtils.addComponent(contentPane, _gbc, edgeThresholdLabel, edgeThreshold);
