@@ -17,9 +17,9 @@ package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
 
 import java.io.File;
 import java.util.HashMap;

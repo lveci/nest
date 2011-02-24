@@ -48,7 +48,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
+    private final transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
 
     public ERSProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
@@ -75,7 +75,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
     }
 
-    public boolean isERS() throws IOException, IllegalBinaryFormatException {
+    public boolean isERS() throws IOException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return isERS1() || isERS2();
@@ -100,7 +100,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public Product createProduct() throws IOException, IllegalBinaryFormatException {
+    public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
@@ -150,7 +150,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
+    public CEOSImageFile getImageFile(final Band band) {
         return bandImageFileMap.get(band.getName());
     }
 

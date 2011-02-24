@@ -18,10 +18,9 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.dataio.envisat.EnvisatAuxReader;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
@@ -1844,9 +1843,7 @@ public final class ERSCalibrator implements Calibrator {
         final double[] antennaPatternGainArray = new double[w];
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGainArray);
 
-        for (int x = x0; x < x0 + w; x++) {
-            antennaPatternGain[x - x0] = antennaPatternGainArray[x - x0];
-        }
+        System.arraycopy(antennaPatternGainArray, x0 - x0, antennaPatternGain, x0 - x0, x0 + w - x0);
     }
 
     private double[][] computeADCPowerLossValuesForCurrentTile(final Band sourceBand1, final Band sourceBand2,

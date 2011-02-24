@@ -24,7 +24,6 @@ import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,7 @@ public final class CeosDB {
     private final Map<String, Object> metaMap;
     private org.jdom.Document xmlDoc = null;
 
-    public CeosDB(String defFile) throws IOException {
+    public CeosDB(String defFile) {
 
         try {
             xmlDoc = XMLSupport.LoadXML(defFile);
@@ -72,27 +71,26 @@ public final class CeosDB {
 
     public void assignMetadataTo(final MetadataElement elem) {
 
-        final Set keys = metaMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = metaMap.keySet();                           // The set of keys in the map.
+        for (String key : keys) {
             final Object value = metaMap.get(key);                   // Get the value for that key.
             if (value == null) continue;
 
             if(value instanceof String) {
-                elem.setAttributeString((String)key, value.toString());
+                elem.setAttributeString(key, value.toString());
             } else if(value instanceof Integer) {
-                elem.setAttributeInt((String)key, (Integer)value);
+                elem.setAttributeInt(key, (Integer)value);
             } else if(value instanceof Double) {
-                MetadataAttribute attrib = new MetadataAttribute((String)key, ProductData.TYPE_FLOAT64, 1);
+                MetadataAttribute attrib = new MetadataAttribute(key, ProductData.TYPE_FLOAT64, 1);
                 attrib.getData().setElemDouble((Double)value);
                 elem.addAttribute(attrib);
             } else {
-                elem.setAttributeString((String)key, String.valueOf(value));
+                elem.setAttributeString(key, String.valueOf(value));
             }
         }
     }
 
-    public void readRecord(BinaryFileReader reader) throws IOException, IllegalBinaryFormatException
-    {
+    public void readRecord(BinaryFileReader reader) {
         final Element root = xmlDoc.getRootElement();
         
         final List children = root.getContent();
@@ -130,8 +128,7 @@ public final class CeosDB {
 
     }
 
-    private static void DecodeElement(BinaryFileReader reader, Map metaMap, Element child, String suffix)
-            throws IOException, IllegalBinaryFormatException {
+    private static void DecodeElement(BinaryFileReader reader, Map metaMap, Element child, String suffix) {
 
         String name="";
         try {

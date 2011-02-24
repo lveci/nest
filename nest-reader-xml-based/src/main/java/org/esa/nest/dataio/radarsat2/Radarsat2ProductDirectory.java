@@ -23,8 +23,6 @@ import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
-import org.esa.nest.util.XMLSupport;
-import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;

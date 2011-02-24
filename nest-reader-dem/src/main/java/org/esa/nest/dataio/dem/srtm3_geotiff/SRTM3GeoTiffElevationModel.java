@@ -41,8 +41,8 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
     private final SRTM3GeoTiffFile[][] elevationFiles;
-    private Resampling _resampling;
-    private Resampling.Index _resamplingIndex;
+    private final Resampling _resampling;
+    private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
     private final float noDataValue;
 
@@ -50,7 +50,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
     private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
-    public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
+    public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         _descriptor = descriptor;
         _resampling = resamplingMethod;
         _resamplingIndex = _resampling.createIndex();
@@ -126,7 +126,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         return sample;
     }
 
-    private SRTM3GeoTiffFile[][] createElevationFiles() throws IOException {
+    private SRTM3GeoTiffFile[][] createElevationFiles() {
         final SRTM3GeoTiffFile[][] elevationFiles = new SRTM3GeoTiffFile[NUM_X_TILES][NUM_Y_TILES];
         final File demInstallDir = _descriptor.getDemInstallDir();
         for (int x = 0; x < elevationFiles.length; x++) {

@@ -16,7 +16,6 @@
 package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
@@ -35,7 +34,7 @@ class AlosPalsarImageFile extends CEOSImageFile {
     private final int productLevel;
 
     public AlosPalsarImageFile(final ImageInputStream imageStream, int prodLevel, String fileName)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
         this.productLevel = prodLevel;
         imageFileName = fileName.toUpperCase();
 
@@ -50,7 +49,7 @@ class AlosPalsarImageFile extends CEOSImageFile {
        _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");         
     }
 
-    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+    protected ImageRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
         if(productLevel == AlosPalsarConstants.LEVEL1_5)
             return new ImageRecord(binaryReader, pos, mission, processedData_recordDefinition);

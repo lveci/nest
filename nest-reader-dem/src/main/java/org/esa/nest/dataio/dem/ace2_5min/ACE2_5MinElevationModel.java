@@ -85,9 +85,9 @@ public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raste
 
     public void dispose() {
         _elevationTileCache.clear();
-        for (int i = 0; i < _elevationTiles.length; i++) {
-            for (int j = 0; j < _elevationTiles[i].length; j++) {
-                _elevationTiles[i][j].dispose();
+        for (ACE2_5MinElevationTile[] _elevationTile : _elevationTiles) {
+            for (ACE2_5MinElevationTile a_elevationTile : _elevationTile) {
+                a_elevationTile.dispose();
             }
         }
     }

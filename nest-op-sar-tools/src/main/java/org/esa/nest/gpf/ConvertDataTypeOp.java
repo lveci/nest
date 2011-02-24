@@ -32,8 +32,6 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.Histogram;
 import org.esa.beam.util.math.Range;
 
-import java.util.ArrayList;
-
 /**
  * Format-Change
  */
@@ -111,7 +109,6 @@ public class ConvertDataTypeOp extends Operator {
 
             addSelectedBands();
 
-            updateMetadata();
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -140,12 +137,6 @@ public class ConvertDataTypeOp extends Operator {
             targetBand.setDescription(srcBand.getDescription());
             targetProduct.addBand(targetBand);
         }
-    }
-
-    private void updateMetadata() {
-        //final MetadataElement root = targetProduct.getMetadataRoot();
-        //final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        
     }
 
     /**

@@ -919,7 +919,7 @@ public class Warp2Op extends Operator {
             TS6P, TS8P, TS16P,
             CC4P, CC6P,
             RS_KNAB4P, RS_KNAB6P, RS_KNAB8P, RS_KNAB10P, RS_KNAB16P,
-            RS_RC6P, RS_RC12P;
+            RS_RC6P, RS_RC12P
         }
 
         public static double[] constructKernel(double[] kernelAxis, final String resampleMethod) {

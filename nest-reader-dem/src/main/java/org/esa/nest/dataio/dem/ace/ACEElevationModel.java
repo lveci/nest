@@ -43,21 +43,21 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
 
     private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
-    private final ACEElevationModelDescriptor _descriptor;
-    private final ACEElevationTile[][] _elevationTiles;
-    private final List _elevationTileCache;
-    private final Resampling _resampling;
-    private final Resampling.Index _resamplingIndex;
-    private final Resampling.Raster _resamplingRaster;
+    private final ACEElevationModelDescriptor descriptor;
+    private final ACEElevationTile[][] elevationTiles;
+    private final List elevationTileCache;
+    private final Resampling resampling;
+    private final Resampling.Index resamplingIndex;
+    private final Resampling.Raster resamplingRaster;
     private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
-        _descriptor = descriptor;
-        _resampling = resamplingMethod;
-        _resamplingIndex = _resampling.createIndex();
-        _resamplingRaster = this;
-        _elevationTiles = createEleveationTiles();
-        _elevationTileCache = new ArrayList();
+        this.descriptor = descriptor;
+        resampling = resamplingMethod;
+        resamplingIndex = resampling.createIndex();
+        resamplingRaster = this;
+        elevationTiles = createEleveationTiles();
+        elevationTileCache = new ArrayList();
     }
 
     /**
@@ -65,22 +65,22 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
      * @since BEAM 4.6
      */
     public Resampling getResampling() {
-        return _resampling;
+        return resampling;
     }
 
     public ElevationModelDescriptor getDescriptor() {
-        return _descriptor;
+        return descriptor;
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
-        _resampling.computeIndex(pixelX, pixelY,
+        resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
                                  RASTER_HEIGHT,
-                                 _resamplingIndex);
+                resamplingIndex);
 
-        final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
+        final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
         if (Float.isNaN(elevation)) {
             return NO_DATA_VALUE;
         }
@@ -88,11 +88,11 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     }
 
     public void dispose() {
-        _elevationTileCache.clear();
-        for (int i = 0; i < _elevationTiles.length; i++) {
-            for (int j = 0; j < _elevationTiles[i].length; j++) {
-                if(_elevationTiles[i][j] != null)
-                    _elevationTiles[i][j].dispose();
+        elevationTileCache.clear();
+        for (ACEElevationTile[] _elevationTile : elevationTiles) {
+            for (ACEElevationTile a_elevationTile : _elevationTile) {
+                if (a_elevationTile != null)
+                    a_elevationTile.dispose();
             }
         }
     }
@@ -108,7 +108,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
-        final ACEElevationTile tile = _elevationTiles[tileXIndex][tileYIndex];
+        final ACEElevationTile tile = elevationTiles[tileXIndex][tileYIndex];
         if(tile == null) {
             return Float.NaN;
         }
@@ -131,7 +131,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
                 final ProductReader productReader = ACEReaderPlugIn.createReaderInstance();
                 final int minLat = j * DEGREE_RES - 90;
 
-                final File file = _descriptor.getTileFile(minLon, minLat);
+                final File file = descriptor.getTileFile(minLon, minLat);
                 if (file != null && file.exists() && file.isFile()) {
                     final Product product = productReader.readProductNodes(file, null);
                     elevationTiles[i][NUM_Y_TILES - 1 - j] = new ACEElevationTile(this, product);
@@ -144,13 +144,13 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     }
 
     public void updateCache(ACEElevationTile tile) {
-        _elevationTileCache.remove(tile);
-        _elevationTileCache.add(0, tile);
-        while (_elevationTileCache.size() > 60) {
-            final int index = _elevationTileCache.size() - 1;
-            ACEElevationTile lastTile = (ACEElevationTile) _elevationTileCache.get(index);
+        elevationTileCache.remove(tile);
+        elevationTileCache.add(0, tile);
+        while (elevationTileCache.size() > 60) {
+            final int index = elevationTileCache.size() - 1;
+            ACEElevationTile lastTile = (ACEElevationTile) elevationTileCache.get(index);
             lastTile.clearCache();
-            _elevationTileCache.remove(index);
+            elevationTileCache.remove(index);
         }
     }
 

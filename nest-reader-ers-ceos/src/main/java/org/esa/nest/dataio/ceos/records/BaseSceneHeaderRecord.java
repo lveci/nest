@@ -1,7 +1,6 @@
 package org.esa.nest.dataio.ceos.records;
 
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -29,7 +28,7 @@ public class BaseSceneHeaderRecord extends BaseRecord {
 
     public BaseSceneHeaderRecord(final BinaryFileReader reader, final long startPos,
                                  String mission, String definitionFile)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
         super(reader, startPos, mission, definitionFile);
         //readGeneralFields(reader);
         //reader.seek(getAbsolutPosition(getRecordLength()));

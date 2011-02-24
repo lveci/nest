@@ -15,7 +15,6 @@
  */
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 
 import javax.imageio.stream.ImageInputStream;
@@ -27,7 +26,7 @@ class RadarsatLeaderFile extends CEOSLeaderFile {
     private final static String mission = "radarsat";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
 
-    public RadarsatLeaderFile(final ImageInputStream stream) throws IOException, IllegalBinaryFormatException {
+    public RadarsatLeaderFile(final ImageInputStream stream) throws IOException {
         super(stream, mission, leader_recordDefinitionFile);
 
     }

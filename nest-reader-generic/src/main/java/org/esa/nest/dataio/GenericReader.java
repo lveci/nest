@@ -543,8 +543,7 @@ public class GenericReader extends AbstractProductReader {
                                              final int imageStartOffset, int imageRecordLength,
                                              final int destWidth, final ProductData destBuffer,
                                              final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
         final long xpos = imageStartOffset + x;

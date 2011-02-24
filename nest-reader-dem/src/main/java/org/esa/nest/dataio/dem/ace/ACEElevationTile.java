@@ -25,21 +25,21 @@ import java.io.IOException;
 
 public class ACEElevationTile {
 
-    private EarthGravitationalModel96 _egm;
-    private ACEElevationModel _dem;
-    private CachingObjectArray _linesCache;
-    private Product _product;
-    private float _noDataValue;
-    private float[][] _egmArray = null;
+    private final EarthGravitationalModel96 egm;
+    private ACEElevationModel dem;
+    private CachingObjectArray linesCache;
+    private Product product;
+    private final float noDataValue;
+    private float[][] egmArray = null;
 
     public ACEElevationTile(final ACEElevationModel dem, final Product product) {
-        _egm = dem.getEarthGravitationalModel96();
-        _dem = dem;
-        _product = product;
-        _noDataValue = dem.getDescriptor().getNoDataValue();
+        egm = dem.getEarthGravitationalModel96();
+        this.dem = dem;
+        this.product = product;
+        noDataValue = dem.getDescriptor().getNoDataValue();
 
-        _linesCache = new CachingObjectArray(getLineFactory());
-        _linesCache.setCachedRange(0, product.getSceneRasterHeight());
+        linesCache = new CachingObjectArray(getLineFactory());
+        linesCache.setCachedRange(0, product.getSceneRasterHeight());
 
         computeEGMArray();
     }
@@ -47,7 +47,7 @@ public class ACEElevationTile {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final float[] line;
         try {
-            line = (float[]) _linesCache.getObject(pixelY);
+            line = (float[]) linesCache.getObject(pixelY);
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
@@ -56,30 +56,30 @@ public class ACEElevationTile {
 
     public void dispose() {
         clearCache();
-        _linesCache = null;
-        if (_product != null) {
-            _product.dispose();
-            _product = null;
+        linesCache = null;
+        if (product != null) {
+            product.dispose();
+            product = null;
         }
-        _dem = null;
+        dem = null;
     }
 
     public void clearCache() {
-        _linesCache.clear();
+        linesCache.clear();
     }
 
     private CachingObjectArray.ObjectFactory getLineFactory() {
-        final Band band = _product.getBandAt(0);
-        final int width = _product.getSceneRasterWidth();
+        final Band band = product.getBandAt(0);
+        final int width = product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
             public Object createObject(int index) throws Exception {
-                _dem.updateCache(ACEElevationTile.this);
+                dem.updateCache(ACEElevationTile.this);
                 final float[] line =  band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
                 final int rowIdxInEGMArray = index / 30; // tile_height / numEGMSamplesInCol = 1800 / 60 = 30
                 for (int i = 0; i < line.length; i++) {
-                    if (line[i] != _noDataValue) {
+                    if (line[i] != noDataValue) {
                         final int colIdxInEGMArray = i / 30; // tile_width / numEGMSamplesInRow = 1800 / 60 = 30
-                        line[i] += _egmArray[rowIdxInEGMArray][colIdxInEGMArray];
+                        line[i] += egmArray[rowIdxInEGMArray][colIdxInEGMArray];
                     }
                 }
                 return line;
@@ -102,9 +102,9 @@ public class ACEElevationTile {
 
         final int numEGMSamplesInRow = 60;
         final int numEGMSamplesInCol = 60;
-        _egmArray = new float[numEGMSamplesInRow][numEGMSamplesInCol]; // 15 deg / 15 min
+        egmArray = new float[numEGMSamplesInRow][numEGMSamplesInCol]; // 15 deg / 15 min
 
-        final GeoCoding geoCoding = _product.getGeoCoding();
+        final GeoCoding geoCoding = product.getGeoCoding();
         if(geoCoding == null) {
             throw new OperatorException("Product does not contain a geocoding");
         }
@@ -117,7 +117,7 @@ public class ACEElevationTile {
         for (int r = 0; r < numEGMSamplesInCol; r++) {
             final double lat = lat0 - delLat*r;
             for (int c = 0; c < numEGMSamplesInRow; c++) {
-                _egmArray[r][c] = _egm.getEGM(lat, lon0 + delLon*c);
+                egmArray[r][c] = egm.getEGM(lat, lon0 + delLon*c);
             }
         }
     }

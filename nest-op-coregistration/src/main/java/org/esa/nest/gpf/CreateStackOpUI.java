@@ -39,8 +39,8 @@ public class CreateStackOpUI extends BaseOperatorUI {
     private final JList mstBandList = new JList();
     private final JList slvBandList = new JList();
 
-    private ArrayList<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
-    private ArrayList<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
+    private final ArrayList<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
+    private final ArrayList<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
 
     private final JComboBox resamplingType = new JComboBox(new String[] { "NONE",
                                                                            ResamplingFactory.NEAREST_NEIGHBOUR_NAME,

@@ -233,7 +233,7 @@ public class UndersamplingOp extends Operator {
         }
     }
 
-    private void updateTargetProductMetadata(int subSamplingX, int subSamplingY) throws Exception {
+    private void updateTargetProductMetadata(int subSamplingX, int subSamplingY) {
 
         getSrcImagePixelSpacings();
 
@@ -480,9 +480,8 @@ public class UndersamplingOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),

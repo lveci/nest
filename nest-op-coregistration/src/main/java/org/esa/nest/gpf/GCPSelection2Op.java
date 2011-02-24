@@ -111,10 +111,10 @@ public class GCPSelection2Op extends Operator {
 
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
-    private double coherenceFuncToler = 1.e-5;
+    private final double coherenceFuncToler = 1.e-5;
 //    @Parameter(description = "The coherence value tolerance", interval = "(0, *)", defaultValue = "1.e-3",
 //                label="Coherence Value Tolerance")
-    private double coherenceValueToler = 1.e-2;
+    private final double coherenceValueToler = 1.e-2;
     // =========================================================================================
 
     private Band masterBand1 = null;

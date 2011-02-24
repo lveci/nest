@@ -18,10 +18,9 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.dataio.envisat.EnvisatAuxReader;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
@@ -265,7 +264,7 @@ public class ASARCalibrator implements Calibrator {
      * Get product swath.
      * @throws Exception The exceptions.
      */
-    private void getProductSwath() throws Exception {
+    private void getProductSwath() {
         swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
         wideSwathProductFlag = swath.contains("WS");
     }
@@ -296,7 +295,7 @@ public class ASARCalibrator implements Calibrator {
      * Get SRGR conversion parameters.
      * @throws Exception The exceptions.
      */
-    private void getSrgrCoeff() throws Exception {
+    private void getSrgrCoeff() {
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
     }
 
@@ -314,7 +313,7 @@ public class ASARCalibrator implements Calibrator {
      * @return The complete path to the XCA file.
      * @throws Exception The exceptions.
      */
-    private String getOldXCAFile() throws Exception {
+    private String getOldXCAFile() {
         oldXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
         return Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + oldXCAFileName;
     }
@@ -642,7 +641,7 @@ public class ASARCalibrator implements Calibrator {
      * Get orbit state vectors from the abstracted metadata.
      * @throws Exception The exceptions.
      */
-    private void getOrbitStateVectors() throws Exception {
+    private void getOrbitStateVectors() {
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
     }
 
@@ -650,7 +649,7 @@ public class ASARCalibrator implements Calibrator {
      * Get first line time from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getFirstLineTime() throws Exception {
+    private void getFirstLineTime() {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
     }
 
@@ -658,7 +657,7 @@ public class ASARCalibrator implements Calibrator {
      * Get line time interval from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getLineTimeInterval() throws Exception {
+    private void getLineTimeInterval() {
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
     }
 
@@ -674,7 +673,7 @@ public class ASARCalibrator implements Calibrator {
      * Get the new antenna pattern gain from the latest XCA file available.
      * @throws Exception The exceptions.
      */
-    private void getNewAntennaPattern() throws Exception {
+    private void getNewAntennaPattern() {
 
         if (wideSwathProductFlag) {
 

@@ -25,7 +25,6 @@ public class JERSConstants implements CEOSConstants {
     private final static String[] FORMAT_NAMES = new String[]{"JERS CEOS"};
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     private final static String PLUGIN_DESCRIPTION = "JERS CEOS Products";      /*I18N*/
-    final static String PRODUCT_TYPE_PREFIX = "";
 
     private final static String[] VOLUME_FILE_PREFIX = { "VDF", "VOL" };
     private static final String[] LEADER_FILE_PREFIX = { "LEA", "SARL" };

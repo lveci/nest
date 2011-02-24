@@ -31,7 +31,6 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**

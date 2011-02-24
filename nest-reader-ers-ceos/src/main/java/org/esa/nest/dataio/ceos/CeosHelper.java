@@ -19,7 +19,6 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
@@ -53,7 +52,7 @@ public class CeosHelper {
     }
 
     public static FilePointerRecord[] readFilePointers(final BaseRecord vdr, final String mission)
-            throws IllegalBinaryFormatException, IOException {
+            throws IOException {
         final int numFilePointers = vdr.getAttributeInt("Number of filepointer records");
         final BinaryFileReader reader = vdr.getReader();
         reader.seek(vdr.getRecordLength());

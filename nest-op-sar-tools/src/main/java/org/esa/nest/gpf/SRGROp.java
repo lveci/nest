@@ -33,7 +33,6 @@ import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Slant Range to Ground Range Conversion.
@@ -218,7 +217,7 @@ public class SRGROp extends Operator {
                 p0 = Math.min((int)p, sourceImageWidth - 2);
                 p1 = p0 + 1;
                 mu = p - p0;
-            } else if (interpMethod.equals(Interpolation.CUBIC) || interpolationMethod.equals(Interpolation.CUBIC2)) {
+            } else if (interpMethod.equals(Interpolation.CUBIC) || interpMethod.equals(Interpolation.CUBIC2)) {
                 p1 = Math.min((int)p, sourceImageWidth - 1);
                 p0 = Math.max(p1 - 1, 0);
                 p2 = Math.min(p1 + 1, sourceImageWidth - 1);

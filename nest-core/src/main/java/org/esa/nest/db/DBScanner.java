@@ -19,7 +19,6 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.TestUtils;
 
 import javax.swing.*;

@@ -2,7 +2,6 @@ package org.esa.nest.dataio.ceos.records;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 
 import java.io.IOException;
 
@@ -12,12 +11,11 @@ public class FilePointerRecord extends BaseRecord {
 
     private final static String recordDefinitionFile = "file_pointer_record.xml";
 
-    public FilePointerRecord(final BinaryFileReader reader, String mission) throws IOException, IllegalBinaryFormatException {
+    public FilePointerRecord(final BinaryFileReader reader, String mission) throws IOException {
         this(reader, mission, -1);
     }
 
-    public FilePointerRecord(final BinaryFileReader reader, String mission, final long startPos) throws IOException,
-                                                                                      IllegalBinaryFormatException {
+    public FilePointerRecord(final BinaryFileReader reader, String mission, final long startPos) throws IOException {
         super(reader, startPos, mission, recordDefinitionFile);
     }
 

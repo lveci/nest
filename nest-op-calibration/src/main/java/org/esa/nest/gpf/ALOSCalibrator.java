@@ -17,10 +17,9 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
@@ -124,7 +123,7 @@ public class ALOSCalibrator implements Calibrator {
      * Get calibration factor.
      * @throws Exception for missing metadata
      */
-    private void getCalibrationFactor() throws Exception {
+    private void getCalibrationFactor() {
 
         calibrationFactor = abstractedMetadata.getAttributeDouble(AbstractMetadata.calibration_factor);
 

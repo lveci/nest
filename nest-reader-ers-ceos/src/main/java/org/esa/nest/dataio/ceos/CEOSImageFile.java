@@ -19,7 +19,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 import org.esa.nest.util.Constants;
@@ -32,7 +31,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.30 $ $Date: 2010-11-17 20:45:22 $
+ * @version $Revision: 1.31 $ $Date: 2011-02-23 22:23:34 $
  */
 public abstract class CEOSImageFile {
 
@@ -63,9 +62,9 @@ public abstract class CEOSImageFile {
         return _imageFDR.getAttributeInt("Number of bits per sample");
     }
 
-    protected abstract ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException;
+    protected abstract ImageRecord createNewImageRecord(final int line) throws IOException;
 
-    ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
+    ImageRecord getImageRecord(int line) throws IOException {
         if(_imageRecords[line] == null) {
 
             binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
@@ -101,7 +100,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLatCorners() {
         try {
             final ImageRecord imgRec0 = getImageRecord(0);
             final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
@@ -116,7 +115,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLonCorners() {
         try {
             final ImageRecord imgRec0 = getImageRecord(0);
             final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);

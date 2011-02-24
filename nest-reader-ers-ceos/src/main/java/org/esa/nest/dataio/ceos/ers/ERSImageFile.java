@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.20 $ $Date: 2010-08-17 16:53:42 $
+ * @version $Revision: 1.21 $ $Date: 2011-02-23 22:23:34 $
  */
 class ERSImageFile extends CEOSImageFile {
 
@@ -47,7 +47,7 @@ class ERSImageFile extends CEOSImageFile {
         _imageHeaderLength = 12;
     }
 
-    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+    protected ImageRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
         return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
     }

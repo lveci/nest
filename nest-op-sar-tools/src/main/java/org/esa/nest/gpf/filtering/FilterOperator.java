@@ -32,7 +32,6 @@ import org.esa.nest.gpf.UndersamplingOp;
 import java.awt.*;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class FilterOperator extends Operator {
     private File userDefinedKernelFile = null;
 
     private transient Map<Band, Band> bandMap;
-    private transient Map<String, Filter> filterMap = new HashMap<String, Filter>(5);
+    private transient final Map<String, Filter> filterMap = new HashMap<String, Filter>(5);
 
     /**
      * Default constructor. The graph processing framework
@@ -204,7 +203,7 @@ public class FilterOperator extends Operator {
 
     static abstract class Filter {
 
-        private String name;
+        private final String name;
 
         public Filter(String name) {
             this.name = name;
@@ -221,7 +220,7 @@ public class FilterOperator extends Operator {
 
     private static class KernelFilter extends Filter {
 
-        private Kernel kernel;
+        private final Kernel kernel;
 
         public KernelFilter(String name, Kernel kernel) {
             super(name);
@@ -242,9 +241,9 @@ public class FilterOperator extends Operator {
 
     private static class GeneralFilter extends Filter {
 
-        int width;
-        int height;
-        GeneralFilterBand.Operator operator;
+        final int width;
+        final int height;
+        final GeneralFilterBand.Operator operator;
 
         public GeneralFilter(String name, int width, int height, GeneralFilterBand.Operator operator) {
             super(name);

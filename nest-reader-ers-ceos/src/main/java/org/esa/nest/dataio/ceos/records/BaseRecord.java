@@ -2,7 +2,6 @@ package org.esa.nest.dataio.ceos.records;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosDB;
 import org.esa.nest.util.ResourceUtils;
 
@@ -20,7 +19,7 @@ public class BaseRecord {
 
     public BaseRecord(final BinaryFileReader reader, final long startPos,
                       final String mission, final String recordDefinitionFileName)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
         _reader = reader;
         // reposition start if needed
         if (startPos != -1) {

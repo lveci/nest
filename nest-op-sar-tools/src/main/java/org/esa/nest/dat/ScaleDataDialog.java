@@ -32,10 +32,10 @@ import java.awt.*;
  */
 class ScaleDataDialog extends ModelessDialog {
 
-    private JTextField gainField = new JTextField("1");
-    private JTextField biasField = new JTextField("0");
-    private JTextField expField = new JTextField("1");
-    private JCheckBox logCheck = new JCheckBox();
+    private final JTextField gainField = new JTextField("1");
+    private final JTextField biasField = new JTextField("0");
+    private final JTextField expField = new JTextField("1");
+    private final JCheckBox logCheck = new JCheckBox();
 
     private final Product _product;
     private final Band _band;

@@ -51,7 +51,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
+    private final transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
 
     public RadarsatProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
@@ -85,7 +85,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public Product createProduct() throws IOException, IllegalBinaryFormatException {
+    public Product createProduct() throws IOException {
         assert(productType != null);
         productType = extractProductType(productType);
 
@@ -192,14 +192,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return productType;
     }
 
-    public boolean isRadarsat() throws IOException, IllegalBinaryFormatException {
+    public boolean isRadarsat() throws IOException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("RSAT") || productType.contains("RADARSAT")) && !productType.contains("RAW");
     }
 
     @Override
-    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
+    public CEOSImageFile getImageFile(final Band band) {
         return bandImageFileMap.get(band.getName());
     }
 
@@ -233,7 +233,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return band;
     }
 
-    private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
+    private void addMetaData(final Product product) throws IOException {
 
         final MetadataElement root = product.getMetadataRoot();
 

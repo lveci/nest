@@ -16,10 +16,9 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
@@ -174,7 +173,7 @@ public class CosmoSkymedCalibrator implements Calibrator {
      * Get calibration factors from abstracted metadata.
      * @throws Exception for missing metadata
      */
-    private void getCalibrationFactors() throws Exception {
+    private void getCalibrationFactors() {
 
     	String pol;
     	double factor = 0.0;

@@ -38,7 +38,7 @@ public final class AsterFile {
     private boolean localFileExists = false;
     private boolean errorInLocalFile = false;
     private AsterElevationTile tile = null;
-    private boolean unrecoverableError = false;
+    private final boolean unrecoverableError = false;
     private final static File appTmpDir = ResourceUtils.getApplicationUserTempDataDir();
 
     public AsterFile(AsterElevationModel model, File localFile, ProductReader reader) {

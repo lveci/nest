@@ -85,7 +85,7 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
     public ElevationModel createDem() {
         try {
             return new AsterElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -93,7 +93,7 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
     public ElevationModel createDem(Resampling resamplingMethod) {
         try {
             return new AsterElevationModel(this, resamplingMethod);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }

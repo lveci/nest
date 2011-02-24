@@ -17,7 +17,6 @@ package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
@@ -40,7 +39,7 @@ public class CEOSVolumeDirectoryFile {
     private final static String text_recordDefinitionFile = "text_record.xml";
 
     public CEOSVolumeDirectoryFile(final File baseDir, CEOSConstants constants)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
         final File volumeFile = CeosHelper.getVolumeFile(baseDir, constants);
         final BinaryFileReader binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
         _volumeDescriptorRecord = new BaseRecord(binaryReader, -1, constants.getMission(), volume_desc_recordDefinitionFile);

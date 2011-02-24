@@ -85,7 +85,7 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     public ElevationModel createDem() {
         try {
             return new SRTM3GeoTiffElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -93,7 +93,7 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     public ElevationModel createDem(Resampling resamplingMethod) {
         try {
             return new SRTM3GeoTiffElevationModel(this, resamplingMethod);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }

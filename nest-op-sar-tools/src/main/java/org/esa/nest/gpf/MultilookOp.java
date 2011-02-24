@@ -31,7 +31,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -145,9 +144,9 @@ public final class MultilookOp extends Operator {
         final int th  = targetTileRectangle.height;
 
         final int x0 = tx0 * nRgLooks;
-        final int y0 = (int)(ty0 * nAzLooks);
+        final int y0 = ty0 * nAzLooks;
         final int w  = tw * nRgLooks;
-        final int h  = (int)(th * nAzLooks);
+        final int h  = th * nAzLooks;
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
 
         //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
@@ -186,9 +185,8 @@ public final class MultilookOp extends Operator {
 
     /**
      * Get the range and azimuth spacings (in meter).
-     * @throws Exception when metadata is missing or equal to default no data value
      */
-    private void getRangeAzimuthSpacing() throws Exception {
+    private void getRangeAzimuthSpacing() {
 
         rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 1);
         azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing, 1);
@@ -198,9 +196,8 @@ public final class MultilookOp extends Operator {
 
     /**
      * Get azimuth and range looks.
-     * @throws Exception when metadata is missing or equal to default no data value
      */
-    private void getRangeAzimuthLooks() throws Exception {
+    private void getRangeAzimuthLooks() {
 
         azimuthLooks = absRoot.getAttributeDouble(AbstractMetadata.azimuth_looks, 1);
         rangeLooks = absRoot.getAttributeDouble(AbstractMetadata.range_looks, 1);
@@ -220,9 +217,8 @@ public final class MultilookOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetImageWidth = sourceImageWidth / nRgLooks;
         targetImageHeight = sourceImageHeight / nAzLooks;

@@ -15,6 +15,7 @@
  */
 package org.esa.nest.dataio.dem.aster;
 
+import com.bc.io.FileUnpacker;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -24,14 +25,12 @@ import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.awt.*;
-
-import com.bc.io.FileUnpacker;
 
 public final class AsterElevationModel implements ElevationModel, Resampling.Raster {
 
@@ -46,8 +45,8 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
     private final AsterElevationModelDescriptor descriptor;
     private final AsterFile[][] elevationFiles;
-    private Resampling resampling;
-    private Resampling.Index resamplingIndex;
+    private final Resampling resampling;
+    private final Resampling.Index resamplingIndex;
     private final Resampling.Raster resamplingRaster;
     private final float noDataValue;
 
@@ -55,7 +54,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
     static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
-    public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
+    public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         this.descriptor = descriptor;
         resampling = resamplingMethod;
         resamplingIndex = resampling.createIndex();
@@ -132,7 +131,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
         return sample;
     }
 
-    private AsterFile[][] createElevationFiles() throws IOException {
+    private AsterFile[][] createElevationFiles() {
         final AsterFile[][] elevationFiles = new AsterFile[NUM_X_TILES][NUM_Y_TILES];
         final File demInstallDir = descriptor.getDemInstallDir();
         for (int x = 0; x < NUM_X_TILES; x++) {

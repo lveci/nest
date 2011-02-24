@@ -17,12 +17,10 @@ package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * The product reader for Radarsat products.
@@ -41,7 +39,7 @@ public class RadarsatProductReader extends CEOSProductReader {
     }
 
     @Override
-    protected CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalBinaryFormatException {
+    protected CEOSProductDirectory createProductDirectory(File inputFile) {
         return new RadarsatProductDirectory(inputFile.getParentFile());
     }
 

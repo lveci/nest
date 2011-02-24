@@ -59,7 +59,7 @@ public class EarthGravitationalModel96 {
     private static final int BLOCK_HEIGHT = 20;
     private static final int NUM_OF_BLOCKS_PER_LAT = 9;
 
-    private float[][] egm = new float[NUM_LATS][NUM_LONS];
+    private final float[][] egm = new float[NUM_LATS][NUM_LONS];
 
     public EarthGravitationalModel96() {
 

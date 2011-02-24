@@ -530,7 +530,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException, IOException, Exception {
+    private void createTargetProduct() throws Exception {
 
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
                                                 sourceProduct,
@@ -1333,8 +1333,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
-                                 final RangeDopplerGeocodingOp.TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
-            throws IOException {
+                                 final RangeDopplerGeocodingOp.TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(tileData.bandName);
         final String iBandName = srcBandNames[0];

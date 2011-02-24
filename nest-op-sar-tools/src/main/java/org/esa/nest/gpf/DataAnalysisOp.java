@@ -62,7 +62,7 @@ public class DataAnalysisOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private boolean writeToFile = true;
+    private final boolean writeToFile = true;
 
     private boolean statsCalculated = false;
     private boolean sampleTypeIsComplex;

@@ -25,7 +25,6 @@ public class AlosPalsarConstants implements CEOSConstants {
     private final static String[] FORMAT_NAMES = new String[]{"ALOS PALSAR CEOS"};
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     private final static String PLUGIN_DESCRIPTION = "ALOS PALSAR CEOS Products";      /*I18N*/
-    final static String PRODUCT_TYPE_PREFIX = "";
 
     private final static String[] VOLUME_FILE_PREFIX = { "VOL" };
     private static final String[] LEADER_FILE_PREFIX = { "LE" };
@@ -44,28 +43,6 @@ public class AlosPalsarConstants implements CEOSConstants {
     final static int LEVEL1_5 = 3;
     final static int LEVEL4_1 = 4;
     final static int LEVEL4_2 = 5;
-
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_1 = 420.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_2 = 520.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_3 = 610.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_4 = 760.0F;
-
-    private final static float BANDWIDTH_BAND_1 = 80.0F;
-    final static float BANDWIDTH_BAND_2 = BANDWIDTH_BAND_1;
-    final static float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
-    final static float BANDWIDTH_BAND_4 = 130.0F;
 
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 

@@ -16,7 +16,6 @@
 package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
@@ -35,7 +34,7 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
 
     private int productLevel = -1;
 
-    public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException, IllegalBinaryFormatException {
+    public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException {
                 final BinaryFileReader reader = new BinaryFileReader(stream);
 
         _leaderFDR = new BaseRecord(reader, -1, mission, leader_recordDefinitionFile);

@@ -87,7 +87,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    public boolean isALOS() throws IOException, IllegalBinaryFormatException {
+    public boolean isALOS() throws IOException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         final String volID = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Volume set ID");
@@ -103,7 +103,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public Product createProduct() throws IOException, IllegalBinaryFormatException {
+    public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             productType, _sceneWidth, _sceneHeight);
 
@@ -136,7 +136,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
+    private void addTiePointGrids(final Product product) {
 
         final int gridWidth = 11;
         final int gridHeight = 11;
@@ -271,7 +271,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
+    public CEOSImageFile getImageFile(final Band band) {
         return bandImageFileMap.get(band.getName());
     }
 

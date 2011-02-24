@@ -126,10 +126,7 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
          */
         @Override
         public boolean accept(final File file) {
-            if (super.accept(file)) {
-                return true;
-            }
-            return false;
+            return super.accept(file);
         }
 
     }

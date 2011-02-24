@@ -45,13 +45,13 @@ public abstract class CEOSProductDirectory {
 
     protected abstract void readProductDirectory() throws IOException, IllegalBinaryFormatException;
 
-    public abstract Product createProduct() throws IOException, IllegalBinaryFormatException;
+    public abstract Product createProduct() throws IOException;
 
-    public abstract CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException;
+    public abstract CEOSImageFile getImageFile(final Band band);
 
     public abstract void close() throws IOException;
 
-    protected void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
+    protected void readVolumeDirectoryFile() throws IOException {
         Guardian.assertNotNull("_baseDir", _baseDir);
         Guardian.assertNotNull("constants", constants);
 
@@ -77,8 +77,7 @@ public abstract class CEOSProductDirectory {
         return productType;
     }
 
-    protected static void addTiePointGrids(final Product product, final BaseRecord facility, final BaseRecord scene)
-            throws IllegalBinaryFormatException, IOException {
+    protected static void addTiePointGrids(final Product product, final BaseRecord facility, final BaseRecord scene) {
         try {
             final int gridWidth = 11;
             final int gridHeight = 11;

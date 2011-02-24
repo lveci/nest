@@ -17,7 +17,6 @@ package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSProductReaderPlugIn;
 
 import java.io.File;

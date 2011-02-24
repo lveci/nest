@@ -43,7 +43,7 @@ class JERSImageFile extends CEOSImageFile {
         _imageHeaderLength = 12;
     }
 
-    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+    protected ImageRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
         return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
     }

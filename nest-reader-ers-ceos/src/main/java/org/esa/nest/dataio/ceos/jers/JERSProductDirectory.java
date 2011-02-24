@@ -78,7 +78,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     @Override
-    public Product createProduct() throws IOException, IllegalBinaryFormatException {
+    public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
@@ -122,14 +122,14 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    public boolean isJERS() throws IOException, IllegalBinaryFormatException {
+    public boolean isJERS() throws IOException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("JERS"));
     }
 
     @Override
-    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
+    public CEOSImageFile getImageFile(final Band band) {
         return bandImageFileMap.get(band.getName());
     }
 

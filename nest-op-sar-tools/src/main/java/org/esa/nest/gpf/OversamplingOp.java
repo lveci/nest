@@ -31,7 +31,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -183,9 +182,8 @@ public class OversamplingOp extends Operator {
 
     /**
      * Compute Doppler centroid frequency for all columns in a range line.
-     * @throws Exception The exception.
      */
-    private void computeDopplerCentroidFrequencies() throws Exception {
+    private void computeDopplerCentroidFrequencies() {
 
         if (productFormat.contains(CEOS)) { // CEOS
             computeDopplerCentroidFreqForERSProd();
@@ -198,7 +196,6 @@ public class OversamplingOp extends Operator {
 
     /**
      * Compute Doppler centroid frequency for all columns for ERS product.
-     * @throws Exception when metadata not found
      */
     private void computeDopplerCentroidFreqForERSProd() {
 
@@ -346,7 +343,7 @@ public class OversamplingOp extends Operator {
         widthRatioByHeightRatio = widthRatio*heightRatio;
     }
 
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),

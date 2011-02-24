@@ -17,10 +17,9 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -174,7 +173,7 @@ public class TerraSARXCalibrator implements Calibrator {
      * Get first line time from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getFirstLineTime() throws Exception {
+    private void getFirstLineTime() {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
     }
 
@@ -182,7 +181,7 @@ public class TerraSARXCalibrator implements Calibrator {
      * Get line time interval from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getLineTimeInterval() throws Exception {
+    private void getLineTimeInterval() {
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
     }
 

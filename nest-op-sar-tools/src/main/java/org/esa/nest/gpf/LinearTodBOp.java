@@ -16,7 +16,10 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -25,13 +28,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -165,9 +165,8 @@ public final class LinearTodBOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),

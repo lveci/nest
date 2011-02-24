@@ -15,7 +15,10 @@
  */
 package org.esa.nest.dat.dialogs;
 
-import com.bc.ceres.binding.*;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.TableLayout;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;

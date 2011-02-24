@@ -60,12 +60,12 @@ public class TestUtils {
     public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetWidth"));
     public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
-    private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
+    private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
                                                    "sav", "7z", "zip", "rrd", "lbl", "z", "gz", "exe", "bat", "sh", "rtf",
                                                    "prj", "dbf", "shx", "ace", "ace2", "tar"};
-    private static String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
+    private static final String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
                                                  "dfas", "dfdn", "lut",
                                                  "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
 
@@ -267,10 +267,7 @@ public class TestUtils {
 
     private static boolean isAlos(Product prod) {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(prod);
-        if(absRoot != null) {
-            return absRoot.getAttributeString(AbstractMetadata.MISSION).contains("ALOS");
-        }
-        return false;
+        return absRoot != null && absRoot.getAttributeString(AbstractMetadata.MISSION).contains("ALOS");
     }
 
     public static int recurseProcessFolder(final OperatorSpi spi, final File origFolder, int iterations,

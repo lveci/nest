@@ -119,9 +119,6 @@ public class GenericWriter extends AbstractProductWriter {
      */
     @Override
     public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        }
-        return super.shouldWrite(node);
+        return !(node instanceof VirtualBand) && super.shouldWrite(node);
     }
 }

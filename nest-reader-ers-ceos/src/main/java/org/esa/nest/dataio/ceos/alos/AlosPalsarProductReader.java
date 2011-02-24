@@ -20,7 +20,6 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
 import org.esa.nest.datamodel.Unit;
@@ -45,7 +44,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
     }
 
     @Override
-    protected CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalBinaryFormatException {
+    protected CEOSProductDirectory createProductDirectory(File inputFile) {
         return new AlosPalsarProductDirectory(inputFile.getParentFile());
     }
 

@@ -853,10 +853,8 @@ public final class ApplyOrbitFileOp extends Operator {
      * @param path The path to the orbit file.
      * @param productDate The start date of the product.
      * @return The orbit file.
-     * @throws IOException The exceptions.
      */
-    private static File FindPrareOrbitFile(PrareOrbitReader prareReader, File path, Date productDate)
-            throws IOException {
+    private static File FindPrareOrbitFile(PrareOrbitReader prareReader, File path, Date productDate) {
 
         final File[] list = path.listFiles();
         if(list == null) return null;

@@ -19,7 +19,6 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;

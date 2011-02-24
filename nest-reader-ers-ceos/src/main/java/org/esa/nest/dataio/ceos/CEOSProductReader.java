@@ -22,7 +22,6 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.Unit;
 
@@ -47,8 +46,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
        super(readerPlugIn);
     }
  
-    protected abstract CEOSProductDirectory createProductDirectory(File inputFile)
-            throws IOException, IllegalBinaryFormatException;
+    protected abstract CEOSProductDirectory createProductDirectory(File inputFile);
 
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children

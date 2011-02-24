@@ -119,8 +119,8 @@ public class XMLProductDirectory {
     }
 
     public void close() throws IOException {
-        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (String key : keys) {
             final ImageIOFile img = bandImageFileMap.get(key);
             img.close();
         }
@@ -128,8 +128,8 @@ public class XMLProductDirectory {
 
     protected void addBands(final Product product) {
         int bandCnt = 1;
-        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (String key : keys) {
             final ImageIOFile img = bandImageFileMap.get(key);
 
             for(int i=0; i < img.getNumImages(); ++i) {

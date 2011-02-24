@@ -26,12 +26,14 @@ import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
-import org.jdom.Text;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents a product directory.
@@ -342,8 +344,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
     @Override
     protected void addBands(final Product product) {
-        final Set ImageKeys = bandImageFileMap.keySet();                           // The set of keys in the map.
-        for (Object key : ImageKeys) {
+        final Set<String> ImageKeys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (String key : ImageKeys) {
             final ImageIOFile img = bandImageFileMap.get(key);
 
             for(int i=0; i < img.getNumImages(); ++i) {
@@ -497,8 +499,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     @Override
     public void close() throws IOException {
         super.close();
-        final Set keys = cosarBandMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = cosarBandMap.keySet();                           // The set of keys in the map.
+        for (String key : keys) {
             final ImageInputStream img = cosarBandMap.get(key);
             img.close();
         }

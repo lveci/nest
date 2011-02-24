@@ -45,7 +45,10 @@ import org.esa.nest.util.MathUtils;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the

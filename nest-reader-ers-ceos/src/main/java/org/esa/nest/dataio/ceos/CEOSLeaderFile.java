@@ -17,7 +17,6 @@ package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 
@@ -54,7 +53,7 @@ public class CEOSLeaderFile {
     }
 
     protected CEOSLeaderFile(final ImageInputStream stream, final String mission, final String defnFile)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
         final BinaryFileReader reader = new BinaryFileReader(stream);
 
         _leaderFDR = new BaseRecord(reader, -1, mission, defnFile);
@@ -141,7 +140,7 @@ public class CEOSLeaderFile {
         return _detailedProcessingRecord;
     }
 
-    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLatCorners() {
         if(_mapProjRecord == null) return null;
 
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
@@ -151,7 +150,7 @@ public class CEOSLeaderFile {
         return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLonCorners() {
         if(_mapProjRecord == null) return null;
 
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");

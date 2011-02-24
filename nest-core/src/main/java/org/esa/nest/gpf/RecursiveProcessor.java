@@ -77,5 +77,5 @@ public abstract class RecursiveProcessor {
         return iterations;
     }
 
-    protected abstract void process(final Product sourceProduct) throws Exception;
+    protected abstract void process(final Product sourceProduct);
 }

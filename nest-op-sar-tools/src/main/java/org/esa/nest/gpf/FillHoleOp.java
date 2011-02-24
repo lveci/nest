@@ -31,7 +31,6 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Fill hole pixels in source product with linear interpolations in both x and y directions.
@@ -93,9 +92,8 @@ public final class FillHoleOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),

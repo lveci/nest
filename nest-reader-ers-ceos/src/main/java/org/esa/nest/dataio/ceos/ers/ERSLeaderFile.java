@@ -17,7 +17,6 @@ package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
@@ -47,7 +46,7 @@ class ERSLeaderFile {
     private final static String facilityRelatedPCS_recordDefinitionFile = "facility_related_pcs_record.xml";
 
     public ERSLeaderFile(final ImageInputStream leaderStream)
-            throws IOException, IllegalBinaryFormatException {
+            throws IOException {
 
         final BinaryFileReader reader = new BinaryFileReader(leaderStream);
         _leaderFDR = new BaseRecord(reader, -1, mission, leader_recordDefinitionFile);
