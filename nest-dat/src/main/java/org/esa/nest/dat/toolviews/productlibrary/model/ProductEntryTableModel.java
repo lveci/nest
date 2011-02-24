@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class ProductEntryTableModel extends AbstractTableModel {
 
-    private ProductEntry[] productEntryList;
+    private final ProductEntry[] productEntryList;
     final ArrayList<DataProvider> dataProviders = new ArrayList<DataProvider>(5);
     private final ArrayList<TableColumn> columnList = new ArrayList<TableColumn>();
 

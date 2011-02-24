@@ -21,9 +21,7 @@ import org.esa.beam.util.PropertyMap;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
-import java.awt.*;
 import java.io.*;
-import java.net.URI;
 
 /**
  * This action launches PolSARPro

@@ -23,7 +23,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Comparator;
 
 public class QuicklookProvider implements DataProvider {
@@ -32,7 +31,7 @@ public class QuicklookProvider implements DataProvider {
     private TableColumn quickLookColumn;
     private static final int preferredWidth = 100;
 
-    public QuicklookProvider() throws IOException {
+    public QuicklookProvider() {
     }
 
     /**
