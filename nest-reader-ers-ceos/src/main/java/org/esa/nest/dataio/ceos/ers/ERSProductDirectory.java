@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * This class represents a product directory.
@@ -64,11 +65,17 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final int numImageFiles = imageFileNames.length;
-        _imageFiles = new ERSImageFile[numImageFiles];
-        for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new ERSImageFile(createInputStream(new File(_baseDir, imageFileNames[i])));
+        final ArrayList<ERSImageFile> imgArray = new ArrayList<ERSImageFile>(imageFileNames.length);
+        for (String fileName : imageFileNames) {
+            try {
+                final ERSImageFile imgFile = new ERSImageFile(createInputStream(new File(_baseDir, fileName)));
+                imgArray.add(imgFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // continue
+            }
         }
+        _imageFiles = imgArray.toArray(new ERSImageFile[imgArray.size()]);
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();

@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * This class represents a product directory.
@@ -74,10 +75,17 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             histogramRec = _trailerFile.getHistogramRecord();
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        _imageFiles = new RadarsatImageFile[imageFileNames.length];
-        for (int i = 0; i < _imageFiles.length; i++) {
-            _imageFiles[i] = new RadarsatImageFile(createInputStream(new File(_baseDir, imageFileNames[i])), histogramRec);
+        final ArrayList<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
+        for (String fileName : imageFileNames) {
+            try {
+                final RadarsatImageFile imgFile = new RadarsatImageFile(createInputStream(new File(_baseDir, fileName)), histogramRec);
+                imgArray.add(imgFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // continue
+            }
         }
+        _imageFiles = imgArray.toArray(new RadarsatImageFile[imgArray.size()]);
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
