@@ -45,10 +45,7 @@ import org.esa.nest.util.MathUtils;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -1260,35 +1257,41 @@ public class RangeDopplerGeocodingOp extends Operator {
                                 final float[][] localDEM) throws Exception {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
-        //       the left and 1 extra column to the right of the tile.            
+        //       the left and 1 extra column to the right of the tile.
+
+        float alt = (float)avgSceneHeight;
+        if(useAvgSceneHeight) {
+            for (float[] row : localDEM) {
+                Arrays.fill(row, alt);
+            }
+            return true;
+        }
 
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
 
         final GeoPos geoPos = new GeoPos();
-        float alt;
-        float avg = (float)avgSceneHeight;
+        final PixelPos pixPos = new PixelPos();
+
+        boolean useDEM = externalDEMFile == null;
 
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                if(useAvgSceneHeight) {
-                    alt = avg;
+                pixPos.setLocation(x,y);
+                targetGeoCoding.getGeoPos(pixPos, geoPos);
+                if(useDEM) {
+                    alt = dem.getElevation(geoPos);
                 } else {
-                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
-                    if(externalDEMFile == null) {
-                        alt = dem.getElevation(geoPos);
-                    } else {
-                        alt = fileElevationModel.getElevation(geoPos);
-                    }
-                    if(alt != demNoDataValue)
-                        valid = true;
+                    alt = fileElevationModel.getElevation(geoPos);
                 }
+                if(alt != demNoDataValue)
+                    valid = true;
                 localDEM[yy][x - x0 + 1] = alt;
             }
         }
-        return valid || useAvgSceneHeight;
+        return valid;
     }
 
     private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
