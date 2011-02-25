@@ -575,6 +575,7 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
+						<!--  to test from the command line mvn test -DskipTests=false -->
                         <skipTests>${skipTests}</skipTests>
                         <printSummary>true</printSummary>
 						<disableXmlReport>true</disableXmlReport>
