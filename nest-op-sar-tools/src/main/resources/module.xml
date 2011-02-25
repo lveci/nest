@@ -94,7 +94,7 @@
 
         <action>
             <id>ConvertDatatypeOp</id>
-            <class>org.esa.nest.dat.FormatChangeOpAction</class>
+            <class>org.esa.nest.dat.ConvertDataTypeOpAction</class>
             <text>Convert Datatype</text>
             <shortDescr>Change the datatype of the product</shortDescr>
             <parent>DatasetConversion</parent>

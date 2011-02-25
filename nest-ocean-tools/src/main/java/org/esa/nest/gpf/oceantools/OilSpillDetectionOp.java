@@ -60,7 +60,7 @@ public class OilSpillDetectionOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label = "Source Bands")
+            rasterDataNodeType = Band.class, label = "Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(description = "Background window size", defaultValue = "13", label="Background Window Size")

@@ -49,7 +49,7 @@ public class CalibrationOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Source Band")
+            rasterDataNodeType = Band.class, label="Source Band")
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {LATEST_AUX, PRODUCT_AUX, EXTERNAL_AUX}, description = "The auxiliary file",

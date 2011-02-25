@@ -55,11 +55,11 @@ public class CreateStackOp extends Operator {
     private Product[] sourceProduct;
 
     @Parameter(description = "The list of source bands.", alias = "masterBands", itemAlias = "band",
-            label="Master Band")
+            rasterDataNodeType = Band.class, label="Master Band")
     private String[] masterBandNames = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Slave Bands")
+            rasterDataNodeType = Band.class, label="Slave Bands")
     private String[] slaveBandNames = null;
 
     private Product masterProduct = null;

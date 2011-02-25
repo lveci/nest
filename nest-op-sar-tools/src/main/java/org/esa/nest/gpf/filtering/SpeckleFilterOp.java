@@ -48,7 +48,7 @@ public class SpeckleFilterOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band", 
-            label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {MEAN_SPECKLE_FILTER, MEDIAN_SPECKLE_FILTER, FROST_SPECKLE_FILTER,

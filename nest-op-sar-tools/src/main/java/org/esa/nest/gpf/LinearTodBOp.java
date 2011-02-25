@@ -49,7 +49,7 @@ public final class LinearTodBOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
     private static final String dBStr = "_"+Unit.DB;

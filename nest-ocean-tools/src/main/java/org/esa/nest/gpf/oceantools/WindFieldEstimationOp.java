@@ -79,7 +79,7 @@ public class WindFieldEstimationOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label = "Source Bands")
+            rasterDataNodeType = Band.class, label = "Source Bands")
     private String[] sourceBandNames = null;
 
     @Parameter(description = "Window size", defaultValue = "20.0", label="Window Size (km)")

@@ -47,7 +47,7 @@ public final class CreateCoherenceImageOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The coherence window size", interval = "(1, 10]", defaultValue = "5",
-                label="Coherence Window Size")
+                rasterDataNodeType = Band.class, label="Coherence Window Size")
     private int coherenceWindowSize = 5;
 
     private Band masterBandI = null;

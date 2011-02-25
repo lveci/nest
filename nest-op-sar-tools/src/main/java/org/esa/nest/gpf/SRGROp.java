@@ -49,7 +49,7 @@ public class SRGROp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, *)", defaultValue = "4",

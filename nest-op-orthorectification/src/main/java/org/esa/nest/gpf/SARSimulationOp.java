@@ -88,7 +88,7 @@ public final class SARSimulationOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",

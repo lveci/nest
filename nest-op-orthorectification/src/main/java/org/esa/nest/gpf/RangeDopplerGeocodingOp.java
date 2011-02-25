@@ -88,7 +88,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     private
     String[] sourceBandNames = null;
 
