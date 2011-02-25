@@ -506,6 +506,29 @@ public class TiePointGrid extends RasterDataNode {
      * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
      */
     @Override
+    public short[] getPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm) {
+        pixels = ensureMinLengthArray(pixels, w * h);
+        final float[] fpixels = getPixels(x, y, w, h, (float[]) null, pm);
+        for (int i = 0; i < fpixels.length; i++) {
+            pixels[i] = (short)Math.round(fpixels[i]);
+        }
+        return pixels;
+    }
+
+    /**
+     * Retrieves an array of tie point data interpolated to the product with and height as integer array. If the given
+     * array is <code>null</code> a new one was created and returned.
+     *
+     * @param x      the x coordinate of the array to be read
+     * @param y      the y coordinate of the array to be read
+     * @param w      the width of the array to be read
+     * @param h      the height of the array to be read
+     * @param pixels the integer array to be filled with data
+     * @param pm     a monitor to inform the user about progress
+     *
+     * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
+     */
+    @Override
     public int[] getPixels(int x, int y, int w, int h, int[] pixels, ProgressMonitor pm) {
         pixels = ensureMinLengthArray(pixels, w * h);
         final float[] fpixels = getPixels(x, y, w, h, (float[]) null, pm);
@@ -635,6 +658,23 @@ public class TiePointGrid extends RasterDataNode {
     @Override
     public void setPixels(int x, int y, int w, int h, double[] pixels) {
         raisePixelsAreReadOnlyError();
+    }
+
+    /**
+     * Retrieves an array of tie point data interpolated to the product with and height as float array. If the given
+     * array is <code>null</code> a new one was created and returned.
+     *
+     * @param x      the x coordinate of the array to be read
+     * @param y      the y coordinate of the array to be read
+     * @param w      the width of the array to be read
+     * @param h      the height of the array to be read
+     * @param pixels the integer array to be filled with data
+     *
+     * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
+     */
+    @Override
+    public short[] readPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm) throws IOException {
+        return getPixels(x, y, w, h, pixels, pm);
     }
 
     /**
@@ -940,6 +980,16 @@ public class TiePointGrid extends RasterDataNode {
                                     base.getSubSamplingX(),
                                     base.getSubSamplingY(),
                                     cosTiePoints);
+    }
+
+    protected static short[] ensureMinLengthArray(short[] array, int length) {
+        if (array == null) {
+            return new short[length];
+        }
+        if (array.length < length) {
+            throw new IllegalArgumentException("The length of the given array is less than " + length);
+        }
+        return array;
     }
 
     protected static int[] ensureMinLengthArray(int[] array, int length) {

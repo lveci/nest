@@ -115,43 +115,50 @@ public class GeoTiffProductReader extends AbstractProductReader {
                                                        int destWidth, int destHeight,
                                                        ProductData destBuffer, ProgressMonitor pm) throws IOException {
         final int destSize = destWidth * destHeight;
-        pm.beginTask("Reading data...", 3);
-        try {
+
             final TIFFImageReadParam readParam = (TIFFImageReadParam) imageReader.getDefaultReadParam();
             readParam.setSourceSubsampling(sourceStepX, sourceStepY,
                                            sourceOffsetX % sourceStepX,
                                            sourceOffsetY % sourceStepY);
             TIFFRenderedImage subsampledImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE,
                                                                                                     readParam);
-            pm.worked(1);
 
             final Raster data = subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY,
                                                                       destWidth, destHeight));
-            final double[] dArray = new double[destSize];
+
             Integer bandIdx = bandMap.get(destBand);
             if (bandIdx == null) {
                 bandIdx = 0;
             }
             final DataBuffer dataBuffer = data.getDataBuffer();
             final SampleModel sampleModel = data.getSampleModel();
-            sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
-            pm.worked(1);
+            final int dataBufferType = dataBuffer.getDataType();
+            if(dataBufferType == DataBuffer.TYPE_FLOAT &&
+               destBuffer.getElems() instanceof float[]) {
+                final float[] dArray = new float[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
 
-            final int length = dArray.length;
-            if(destBuffer.getElems() instanceof double[]) {
-                System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+            } else if(dataBufferType == DataBuffer.TYPE_INT &&
+               destBuffer.getElems() instanceof int[]) {
+                final int[] dArray = new int[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+
             } else {
-                for (int i = 0; i < length; ++i) {
-                    destBuffer.setElemDoubleAt(i, dArray[i]);
+
+                final double[] dArray = new double[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+
+                final int length = dArray.length;
+                if(destBuffer.getElems() instanceof double[]) {
+                    System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+                } else {
+                    for (int i = 0; i < length; ++i) {
+                        destBuffer.setElemDoubleAt(i, dArray[i]);
+                    }
                 }
             }
-
-            pm.worked(1);
-
-        } finally {
-            pm.done();
-        }
-
     }
 
     @Override

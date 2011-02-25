@@ -1085,6 +1085,19 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @param pixels integer array to be filled with data
      * @param pm     a monitor to inform the user about progress
      */
+    public abstract short[] getPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm);
+
+    /**
+     * Retrieves the range of pixels specified by the coordinates as integer array. Throws exception when the data is
+     * not read from disk yet. If the given array is <code>null</code> a new one was created and returned.
+     *
+     * @param x      x offset into the band
+     * @param y      y offset into the band
+     * @param w      width of the pixel array to be read
+     * @param h      height of the pixel array to be read.
+     * @param pixels integer array to be filled with data
+     * @param pm     a monitor to inform the user about progress
+     */
     public abstract int[] getPixels(int x, int y, int w, int h, int[] pixels, ProgressMonitor pm);
 
     /**
@@ -1176,6 +1189,25 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     public int[] readPixels(int x, int y, int w, int h, int[] pixels) throws IOException {
         return readPixels(x, y, w, h, pixels, ProgressMonitor.NULL);
     }
+
+    /**
+         * Retrieves the band data at the given offset (x, y), width and height as int data. If the data is already in
+         * memory, it merely copies the data to the buffer provided. If not, it calls the attached product reader to
+         * retrieve the data from the disk file. If the given buffer is <code>null</code> a new one was created and
+         * returned.
+         *
+         * @param x      x offset into the band
+         * @param y      y offset into the band
+         * @param w      width of the pixel array to be read
+         * @param h      height of the pixel array to be read
+         * @param pixels array to be filled with data
+         * @param pm     a progress monitor
+         *
+         * @return the pixels read
+         * @throws IOException if this band has no raster data
+         */
+    public abstract short[] readPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm) throws IOException;
+
 
     /**
      * Retrieves the band data at the given offset (x, y), width and height as int data. If the data is already in

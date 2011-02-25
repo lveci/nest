@@ -180,6 +180,47 @@ public abstract class AbstractBand extends RasterDataNode {
         setModified(true);
     }
 
+        /**
+     * Retrieves the band data at the given offset (x, y), width and height as integer data. If the data is already in
+     * memory, it merely copies the data to the buffer provided. If not, it calls the attached product reader to
+     * retrieve the data from the disk file. If the given buffer is <code>null</code> a new one was created and
+     * returned.
+     *
+     * @param x      x offest of upper left corner
+     * @param y      y offset of upper left corner
+     * @param w      width of the desired data array
+     * @param h      height of the desired data array
+     * @param pixels array of integer pixels to be filled with data
+     * @param pm     a monitor to inform the user about progress
+     *
+     * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
+     */
+    @Override
+    public short[] readPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm) throws IOException {
+        if (hasRasterData()) {
+            pixels = getPixels(x, y, w, h, pixels, pm);
+        } else {
+            final ProductData rawData = readSubRegionRasterData(x, y, w, h, pm);
+            final int n = w * h;
+            pixels = ensureMinLengthArray(pixels, n);
+            // check for performance boost using native System.arraycopy
+            if (!isScalingApplied() && rawData.getElems() instanceof short[]) {
+                System.arraycopy(rawData.getElems(), 0, pixels, 0, n);
+            } else {
+                if (isScalingApplied()) {
+                    for (int i = 0; i < n; i++) {
+                        pixels[i] = (short) Math.round(scale(rawData.getElemDoubleAt(i)));
+                    }
+                } else {
+                    for (int i = 0; i < n; i++) {
+                        pixels[i] = (short)rawData.getElemIntAt(i);
+                    }
+                }
+            }
+        }
+        return pixels;
+    }
+
     /**
      * Retrieves the band data at the given offset (x, y), width and height as integer data. If the data is already in
      * memory, it merely copies the data to the buffer provided. If not, it calls the attached product reader to
@@ -407,6 +448,54 @@ public abstract class AbstractBand extends RasterDataNode {
             }
         }
         writeRasterData(x, y, w, h, subRasterData, pm);
+    }
+
+    /**
+     * Retrieves the range of pixels specified by the coordinates as integer array. Throws exception when the data is
+     * not read from disk yet. If the given array is <code>null</code> a new one was created and returned.
+     *
+     * @param x      x offset into the band
+     * @param y      y offset into the band
+     * @param w      width of the pixel array to be read
+     * @param h      height of the pixel array to be read.
+     * @param pixels integer array to be filled with data
+     * @param pm     a monitor to inform the user about progress
+     *
+     * @throws NullPointerException     if this band has no raster data
+     * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
+     */
+    @Override
+    public short[] getPixels(int x, int y, int w, int h, short[] pixels, ProgressMonitor pm) {
+        pixels = ensureMinLengthArray(pixels, w * h);
+        final ProductData rasterData = getRasterDataSafe();
+        final int x1 = x;
+        final int y1 = y;
+        final int x2 = x1 + w - 1;
+        final int y2 = y1 + h - 1;
+        int pos = 0;
+        pm.beginTask("Retrieving pixels...", y2 - y1);
+        try {
+            if (isScalingApplied()) {
+                for (y = y1; y <= y2; y++) {
+                    final int xOffs = y * getRasterWidth();
+                    for (x = x1; x <= x2; x++) {
+                        pixels[pos++] = (short) Math.round(scale(rasterData.getElemDoubleAt(xOffs + x)));
+                    }
+                    pm.worked(1);
+                }
+            } else {
+                for (y = y1; y <= y2; y++) {
+                    final int xOffs = y * getRasterWidth();
+                    for (x = x1; x <= x2; x++) {
+                        pixels[pos++] = (short)rasterData.getElemIntAt(xOffs + x);
+                    }
+                    pm.worked(1);
+                }
+            }
+        } finally {
+            pm.done();
+        }
+        return pixels;
     }
 
     /**
@@ -815,6 +904,16 @@ public abstract class AbstractBand extends RasterDataNode {
             viewModeId = VIEW_MODE_FORWARD;
         }
         return viewModeId;
+    }
+
+    protected static short[] ensureMinLengthArray(short[] array, int length) {
+        if (array == null) {
+            return new short[length];
+        }
+        if (array.length < length) {
+            throw new IllegalArgumentException("The length of the given array is less than " + length);
+        }
+        return array;
     }
 
     protected static int[] ensureMinLengthArray(int[] array, int length) {
