@@ -104,6 +104,7 @@ public class ExpressionPane extends JPanel {
     };
 
     private static final String[] OPERATOR_PATTERNS = new String[]{
+            "IF @ THEN @ ELSE @",
             "@ ? @ : @",
             "@ || @",
             "@ or @",

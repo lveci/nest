@@ -69,8 +69,8 @@ public class TestGCPSelectionOp extends TestCase {
 
         final Placemark pin = targetGcpGroup.get(0);
         final PixelPos pixelPos = pin.getPixelPos();
-        assertTrue(Float.compare(pixelPos.x, 16.0f) == 0);
-        assertTrue(Float.compare(pixelPos.y, 21.0f) == 0);
+        assertTrue(Float.compare(pixelPos.x, 19.0f) == 0);
+        assertTrue(Float.compare(pixelPos.y, 19.5f) == 0);
     }
 
     private static Product createTestMasterProduct(int w, int h) {

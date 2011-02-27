@@ -41,32 +41,36 @@
     <mapID target="windowMenu" url="visat/WindowMenu.html"/>
     <mapID target="helpMenu" url="visat/HelpMenu.html"/>
 	
-	<!-- Product Readers -->
-    <mapID target="importDimapProduct" url="general/BeamDimapFormat.html"/>
+	<!-- Product Readers -->   
     <mapID target="importEnvisatProduct" url="readers/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="readers/ImportErs.html"/>
 	<mapID target="ImportERSCeos" url="readers/ImportERSCeos.html"/>
 	<mapID target="ImportJERSCeos" url="readers/ImportJERSCeos.html"/>
+	<mapID target="ImportAlosPalsar" url="readers/ImportAlosPalsar.html"/>
 	<mapID target="ImportRadarsat1" url="readers/ImportRadarsat1.html"/>
 	<mapID target="ImportRadarsat2" url="readers/ImportRadarsat2.html"/>
 	<mapID target="ImportTerraSarX" url="readers/ImportTerraSarX.html"/>
 	<mapID target="ImportCosmoSkymed" url="readers/ImportCosmoSkymed.html"/>
-	<mapID target="ImportEnvi" url="readers/ImportEnvi.html"/>
 	<mapID target="ImportPolsarPro" url="readers/ImportPolsarPro.html"/>
-	<mapID target="ImportAlosPalsar" url="readers/ImportAlosPalsar.html"/>
-	<mapID target="ImportAlosAVNIR2" url="readers/ImportAVNIR2.html"/>
-	<mapID target="ImportAlosPRISM" url="readers/ImportPRISM.html"/>
+	<!-- DEMs -->
+    <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
+	<mapID target="importGTOPO30" url="readers/ImportGTOPO30.html"/>
+	<mapID target="importACE" url="readers/ImportACE.html"/>
+	<mapID target="importSRTM" url="readers/ImportSRTM.html"/>
+	<!-- Common File Formats -->
 	<mapID target="ImportGeoTIFF" url="readers/ImportGeoTIFF.html"/>
 	<mapID target="ImportImageIO" url="readers/ImportImageIO.html"/>
 	<mapID target="importNetCDF" url="readers/ImportNetCDF.html"/>
 	<mapID target="importHDF" url="readers/ImportHDF.html"/>
 	<mapID target="importGenericBinary" url="readers/ImportGenericBinary.html"/>
-    <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
-	<mapID target="importGTOPO30" url="readers/ImportGTOPO30.html"/>
-	<mapID target="importACE" url="readers/ImportACE.html"/>
-	<mapID target="importSRTM" url="readers/ImportSRTM.html"/>
-    <mapID target="importTransectData" url="readers/ImportTransectData.html"/>
+	<mapID target="importDimapProduct" url="readers/BeamDimapFormat.html"/>
+	<mapID target="ImportEnvi" url="readers/ImportEnvi.html"/>
+	<!-- Multispectral -->
     <mapID target="importLandsatTMProduct" url="readers/ImportLandsatTM.html"/>
+	<mapID target="ImportAlosAVNIR2" url="readers/ImportAVNIR2.html"/>
+	<mapID target="ImportAlosPRISM" url="readers/ImportPRISM.html"/>
+	
+	<mapID target="importTransectData" url="readers/ImportTransectData.html"/>
 	
 	<!-- Product Writers -->
     <mapID target="exportDimapProduct" url="writers/ExportDimapProduct.html"/>

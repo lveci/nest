@@ -1,5 +1,5 @@
 /*
- * $Id: CloseAllOthersAction.java,v 1.1 2009-11-12 16:02:18 lveci Exp $
+ * $Id: CloseAllOthersAction.java,v 1.1 2011-02-27 18:40:09 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package org.esa.beam.visat.actions;
+package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;

@@ -53,6 +53,7 @@
             <shortDescr>Import a NetCDF file or file subset.</shortDescr>
             <description>Import a NetCDF file or file subset.</description>
             <helpId>importNetCDF</helpId>
+            <parent>importFileFormats</parent>
         </action>
 
         <action>
@@ -75,6 +76,7 @@
             <largeIcon>icons/Import24.gif</largeIcon>
             <placeAfter>importNetCDF</placeAfter>
             <helpId>importHDF</helpId>
+            <parent>importFileFormats</parent>
         </action>
 
         <action>

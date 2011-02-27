@@ -29,11 +29,12 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
+            <text>Import ERS1/2 CEOS Product...</text>
             <shortDescr>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</shortDescr>
             <description>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importERSProduct</helpId>
-            <placeAfter>importErsProduct</placeAfter>
+            <placeAfter>importErsSARProduct</placeAfter>
         </action>
         <action>
             <id>importJERSCEOSProduct</id>

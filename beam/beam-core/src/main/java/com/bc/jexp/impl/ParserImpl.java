@@ -136,11 +136,22 @@ public final class ParserImpl implements Parser {
         if (namespace != null && namespace != defaultNamespace) {
             _defaultNamespace = new NamespaceImpl(namespace);
         }
-        _tokenizer = new Tokenizer(code);
+        final String newCode = replaceIfThenElse(code);
+        _tokenizer = new Tokenizer(newCode);
         Term term = parseImpl();
         _tokenizer = null;
         _defaultNamespace = defaultNamespace;
         return term;
+    }
+
+    private static String replaceIfThenElse(String code) {
+        code = code.replace("IF", "");
+        code = code.replace("if", "");
+        code = code.replace("THEN", "?");
+        code = code.replace("then", "?");
+        code = code.replace("ELSE", ":");
+        code = code.replace("else", ":");
+        return code;
     }
 
     /**

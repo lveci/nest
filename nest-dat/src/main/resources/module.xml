@@ -319,7 +319,7 @@
 
         <action>
             <id>closeAllOthers</id>
-            <class>org.esa.beam.visat.actions.CloseAllOthersAction</class>
+            <class>org.esa.nest.dat.actions.CloseAllOthersAction</class>
             <parent>file</parent>
             <text>Close All Others</text>
             <placeAfter>closeAll</placeAfter>

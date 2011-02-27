@@ -31,6 +31,12 @@
 
     <extension point="beam-ui:actions">
         <action>
+            <id>importFileFormats</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Common File Formats</text>
+            <parent>import</parent>
+        </action>
+        <action>
             <id>importOptical</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Multispectral</text>
@@ -41,14 +47,14 @@
             <id>importImageIO</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ImageIO</formatName>
-            <text>Import ImageIO (bmp, jpg, png) Products...</text>
+            <text>Import ImageIO (bmp, jpg, png) Product...</text>
             <readerPlugin>org.esa.nest.dataio.ImageIOReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import an ImageIO supported file formats</shortDescr>
             <description>Import an ImageIO supported file formats</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-            <placeAfter>importTerraSarXProduct</placeAfter>
             <helpId>importImageIO</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>importNestEnvi</id>
@@ -60,6 +66,7 @@
             <shortDescr>Import an ENVI data product.</shortDescr>
             <placeAfter>importImageIO</placeAfter>
             <helpId>importEnvi</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>importPolsarPro</id>
@@ -70,7 +77,7 @@
             <useAllFileFilter>true</useAllFileFilter>
             <useFilesAndFolders>true</useFilesAndFolders>
             <shortDescr>Import a PolsarPro data product.</shortDescr>
-            <placeAfter>importNestEnvi</placeAfter>
+            <placeAfter>importCosmoSkymed</placeAfter>
             <helpId>importPolsarPro</helpId>
         </action>
         <action>
@@ -84,6 +91,7 @@
             <shortDescr>Import a GeoTIFF data product or subset.</shortDescr>
             <description>Import a GeoTIFF data product or product subset.</description>
             <helpId>importGeoTIFFProduct</helpId>
+            <parent>importFileFormats</parent>
         </action>
 
         <action>
@@ -93,9 +101,8 @@
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
-            <placeAfter>importPolsarPro</placeAfter>
-            <parent>import</parent>
             <helpId>importGenericBinary</helpId>
+            <parent>importFileFormats</parent>
         </action>
 
         <action>
