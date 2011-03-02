@@ -54,10 +54,11 @@ public class TestProject extends TestCase {
         File[] files = projectFolder.listFiles();
         assertEquals(files.length, 4);
 
+        /* order not the same on different OS
         assertEquals(files[0].getName(), "Graphs");
         assertEquals(files[1].getName(), "Imported Products");
         assertEquals(files[2].getName(), "Processed Products");
-        assertEquals(files[3].getName(), "ProductSets");
+        assertEquals(files[3].getName(), "ProductSets");  */
 
     }
 
