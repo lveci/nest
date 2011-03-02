@@ -205,7 +205,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
+    enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
 
     boolean useAvgSceneHeight = false;
@@ -262,15 +262,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_CUBIC;
-            } else {
-                throw new OperatorException("Unknown interpolation method");
-            }
+            imgResampling = getResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -307,6 +299,18 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().showErrorDialog(errMsg);
             }
+        }
+    }
+
+    static ResampleMethod getResampling(final String method) throws OperatorException {
+        if (method.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
+            return ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
+        } else if (method.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
+            return ResampleMethod.RESAMPLE_BILINEAR;
+        } else if (method.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
+            return ResampleMethod.RESAMPLE_CUBIC;
+        } else {
+            throw new OperatorException("Unknown interpolation method");
         }
     }
 

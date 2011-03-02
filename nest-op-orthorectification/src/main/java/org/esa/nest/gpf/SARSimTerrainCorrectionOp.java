@@ -51,10 +51,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The operator generates orthorectified image using rigorous SAR simulation.
@@ -164,6 +161,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean useExternalDEMFile = false;
     private boolean saveLayoverShadowMask = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
+    private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
 
     private String demName = null;
@@ -208,8 +206,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
-    private ResampleMethod imgResampling = null;
+    private RangeDopplerGeocodingOp.ResampleMethod imgResampling = null;
 
     private boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
@@ -217,6 +214,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
+    private boolean isPolsar = false;
 
     private boolean flipIndex = false; // temp fix for descending Radarsat2
 
@@ -251,12 +249,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             getTiePointGrid();
 
-//            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
-
-//            computeDEMTraversalSampleInterval();
-
-//            computedTargetImageDimension();
-
             if (useAvgSceneHeight) {
                 saveSigmaNought = false;
                 saveGammaNought = false;
@@ -272,19 +264,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             processedSlaveBand = absRoot.getAttributeString("processed_slave");
 
-            //computeWARPFunction();
-
             computeSensorPositionsAndVelocities();
 
-            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_CUBIC;
-            } else {
-                throw new OperatorException("Unknown interpolation method");
-            }
+            imgResampling = RangeDopplerGeocodingOp.getResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -296,6 +278,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             updateTargetProductMetadata();
 
+            RangeDopplerGeocodingOp.validateDEM(demName, sourceProduct);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -312,7 +295,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         if(!orthoDataProduced && processingStarted) {
-            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
+            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().showErrorDialog(errMsg);
@@ -403,79 +386,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 flipIndex = true;
             }
         }
-    }
 
-    /**
-     * Compute DEM traversal step sizes (in degree) in latitude and longitude.
-     */
-    private void computeDEMTraversalSampleInterval() {
-
-        /*
-        double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
-        double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
-
-        delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
-        delLon = delLat;
-        */
-
-        /*
-        double spacing = 0.0;
-        if (pixelSpacingInMeter > 0.0) {
-            spacing = pixelSpacingInMeter;
-        } else {
-            if (srgrFlag) {
-                spacing = Math.min(rangeSpacing, azimuthSpacing);
-            } else {
-                spacing = Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(sourceProduct)), azimuthSpacing);
-            }
-        }
-        */
-        double spacing = pixelSpacingInMeter;
-        double minAbsLat;
-        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
-            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
-                    Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        } else {
-            minAbsLat = 0.0;
-        }
-        delLat = spacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = spacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-        delLat = Math.min(delLat, delLon);
-        delLon = delLat;
-    }
-
-    /**
-     * Get incidence angle at centre range pixel (in radian).
-     * @param srcProduct The source product.
-     * @throws OperatorException The exceptions.
-     * @return The incidence angle.
-     */
-    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) throws OperatorException {
-
-        final int sourceImageWidth = srcProduct.getSceneRasterWidth();
-        final int sourceImageHeight = srcProduct.getSceneRasterHeight();
-        final int x = sourceImageWidth / 2;
-        final int y = sourceImageHeight / 2;
-        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(srcProduct);
-        if(incidenceAngle == null) {
-            throw new OperatorException("incidence_angle tie point grid not found in product");
-        }
-        return incidenceAngle.getPixelFloat((float)x, (float)y)*org.esa.beam.util.math.MathUtils.DTOR;
-    }
-    
-    /**
-     * Compute target image dimension.
-     */
-    private void computedTargetImageDimension() {
-        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
-        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
+        isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
 
     /**
      * Get elevation model.
      * @throws Exception The exceptions.
      */
-    private void getElevationModel() throws Exception {
+    private synchronized void getElevationModel() throws Exception {
+
+        if(isElevationModelAvailable) return;
 
         demName = absRoot.getAttributeString(AbstractMetadata.DEM);
         final String demResamplingMethod = absRoot.getAttributeString("DEM resampling method");
@@ -504,6 +425,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             demName = externalDemFile.getName();
             useExternalDEMFile = true;
         }
+        isElevationModelAvailable = true;
     }
 
     /**
@@ -585,20 +507,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         addSelectedBands();
 
         targetGeoCoding = targetProduct.getGeoCoding();
-        /*
-        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                                    sourceProduct.getProductType(),
-                                    targetImageWidth,
-                                    targetImageHeight);
 
-        addSelectedBands();
-
-        addGeoCoding();
-
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        */
         addLayoverShadowBitmasks(targetProduct);
-
     }
 
     private static void addLayoverShadowBitmasks(final Product product) {
@@ -626,7 +536,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final Band[] sourceBands = sourceProduct.getBands();
         if (sourceBands.length == 1) {
-            throw new OperatorException("Source product should have more than one band");
+            throw new OperatorException("Source product should have more than one band. Only "+sourceBands[0].getName()+" found");
         }
 
         String targetBandName;
@@ -741,48 +651,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         return false;
-    }
-
-    /**
-     * Add geocoding to the target product.
-     */
-    private void addGeoCoding() {
-
-        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
-                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
-        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
-                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
-
-        final int gridWidth = 10;
-        final int gridHeight = 10;
-
-        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
-
-        float subSamplingX = (float)targetImageWidth / (gridWidth - 1);
-        float subSamplingY = (float)targetImageHeight / (gridHeight - 1);
-
-        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLatTiePoints);
-        latGrid.setUnit(Unit.DEGREES);
-
-        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
-
-        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
-        lonGrid.setUnit(Unit.DEGREES);
-
-        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        targetProduct.addTiePointGrid(latGrid);
-        targetProduct.addTiePointGrid(lonGrid);
-        targetProduct.setGeoCoding(tpGeoCoding);
-
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
-
-        ReaderUtils.createMapGeocoding(targetProduct, IdentityTransformDescriptor.NAME,
-                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
     }
 
     /**
@@ -907,14 +775,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-
-        float[][] localDEM = null; // DEM for current tile for computing slope angle
-        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
-            localDEM = new float[h+2][w+2];
-            getLocalDEM(x0, y0, w, h, localDEM);
-        }
-
-        GeoPos geoPos = null;
+        final GeoPos geoPos = new GeoPos();
         final double[] earthPoint = new double[3];
         final double[] sensorPos = new double[3];
         final int srcMaxRange = sourceImageWidth - 1;
@@ -956,7 +817,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
-        //final Set<Band> keySet = targetTiles.keySet();
         for(Band targetBand : keySet) {
 
             if(targetBand.getName().equals("elevation")) {
@@ -999,29 +859,19 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final RangeDopplerGeocodingOp.TileData[] trgTiles = trgTileList.toArray(new RangeDopplerGeocodingOp.TileData[trgTileList.size()]);
 
         try {
+            final float[][] localDEM = new float[h+2][w+2];
+            final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
+            if(!valid && !useAvgSceneHeight)
+                return;
+
             for (int y = y0; y < y0 + h; y++) {
+                final int yy = y-y0+1;
 
                 for (int x = x0; x < x0 + w; x++) {
 
-                    geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
-                    final double lat = geoPos.lat;
-                    double lon = geoPos.lon;
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
-                    if (lon >= 180.0) {
-                        lon -= 360.0;
-                    }
 
-                    double alt;
-                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) { // localDEM is available
-                        alt = (double)localDEM[y-y0+1][x-x0+1];
-                    } else {
-                        if (useAvgSceneHeight) {
-                            alt = avgSceneHeight;
-                        } else {
-                            geoPos.setLocation((float)lat, (float)lon);
-                            alt = getLocalElevation(geoPos);
-                        }
-                    }
+                    final double alt = (double)localDEM[yy][x-x0+1];
 
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
@@ -1030,6 +880,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     if (!useAvgSceneHeight && alt == demNoDataValue) {
                         saveNoDataValueToTarget(index, trgTiles);
                         continue;
+                    }
+
+                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
+                    if (lon >= 180.0) {
+                        lon -= 360.0;
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
@@ -1152,54 +1009,46 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param tileHeight The tile height.
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
+     * @throws Exception from DEM
      */
-    private boolean getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+    private boolean getLocalDEM(final int x0, final int y0, final int tileWidth,
+                                final int tileHeight, final float[][] localDEM) throws Exception {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
+        float alt = (float)avgSceneHeight;
+        if(useAvgSceneHeight) {
+            for (float[] row : localDEM) {
+                Arrays.fill(row, alt);
+            }
+            return true;
+        }
+
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
-        /*
-        if(demName.equals("SRTM 3Sec GeoTiff")) {
-            double maxLat = (imageGeoBoundary.latMax - maxY*delLat);
-            double minLat = (imageGeoBoundary.latMax - y0*delLat);
-            if((maxLat > 60 && minLat > 60) || (maxLat < -60 && minLat < -60)) {
-                return false;
-            }
-        }
-        */
-        GeoPos geoPos = null;
-        float alt;
+
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos pixPos = new PixelPos();
+
+        boolean useDEM = fileElevationModel == null;
+
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
-                alt = getLocalElevation(geoPos);
-                localDEM[yy][x - x0 + 1] = alt;
+                pixPos.setLocation(x,y);
+                targetGeoCoding.getGeoPos(pixPos, geoPos);
+                if(useDEM) {
+                    alt = dem.getElevation(geoPos);
+                } else {
+                    alt = fileElevationModel.getElevation(geoPos);
+                }
                 if(alt != demNoDataValue)
                     valid = true;
+                localDEM[yy][x - x0 + 1] = alt;
             }
         }
         return valid;
-    }
-
-    /**
-     * Get local elevation (in meter) for given latitude and longitude.
-     * @param geoPos The latitude and longitude in degrees.
-     * @return The elevation in meter.
-     */
-    private float getLocalElevation(final GeoPos geoPos) {
-        try {
-            if (!useExternalDEMFile) {
-                return dem.getElevation(geoPos);
-            }
-            return fileElevationModel.getElevation(geoPos);
-        } catch (Exception e) {
-            //
-        }
-        return demNoDataValue;
     }
 
     private boolean isValidCell(final double rangeIndex, final double azimuthIndex, final double lat, final double lon,
@@ -1342,21 +1191,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
             qBandName = srcBandNames[1];
         }
 
-        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_BILINEAR)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_CUBIC)) {
 
             final Tile sourceTile = getSrcTile(iBandName, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);

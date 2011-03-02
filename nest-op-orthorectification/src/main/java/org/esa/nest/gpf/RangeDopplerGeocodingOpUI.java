@@ -433,9 +433,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 final boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-                final int isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0);
+                final boolean isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
 
-                if(isPolsar > 0 && applyRadiometricNormalization) {
+                if(isPolsar && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization is" +
                             " not available for products imported from PolSARPro");
