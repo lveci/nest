@@ -95,11 +95,11 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 width.getData().setElemUInt(product.getSceneRasterWidth());
 
             final MetadataAttribute offsetX = absRoot.getAttribute("subset_offset_x");
-            if(offsetX != null)
+            if(offsetX != null && subsetDef.getRegion() != null)
                 offsetX.getData().setElemUInt(subsetDef.getRegion().x);
 
             final MetadataAttribute offsetY = absRoot.getAttribute("subset_offset_y");
-            if(offsetY != null)
+            if(offsetY != null && subsetDef.getRegion() != null)
                 offsetY.getData().setElemUInt(subsetDef.getRegion().y);
 
             final MetadataAttribute slantRange = absRoot.getAttribute("slant_range_to_first_pixel");
