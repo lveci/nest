@@ -31,20 +31,20 @@
 
     <extension point="beam-ui:actions">
 
-		<action>
+		<!--action>
             <id>InSARProducts</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>InSAR Products</text>
             <parent>insar</parent>
-            <!--<separatorAfter>true</separatorAfter>-->
-        </action>
+            <!-<separatorAfter>true</separatorAfter>->
+        </action-->
 
         <action>
             <id>ComplexgIfgAction</id>
             <class>org.esa.nest.dat.ComplexIfgAction</class>
             <text>Interferogram formation</text>
             <shortDescr>Interferogram from stack with optional subtraction of 'flat earth' phase</shortDescr>
-            <parent>InSARProducts</parent>
+            <parent>insar</parent>
         </action>
 
         <action>
@@ -52,7 +52,7 @@
             <class>org.esa.nest.dat.CplxCohAction</class>
             <text>Coherence</text>
             <shortDescr>Estimate coherence from stack of coregistered images</shortDescr>
-            <parent>InSARProducts</parent>
+            <parent>insar</parent>
         </action>
 
 
