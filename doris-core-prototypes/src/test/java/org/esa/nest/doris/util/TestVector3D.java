@@ -36,7 +36,7 @@ public class TestVector3D extends TestCase {
 //    }
 //
     @Test
-   public void twoPlusThree() { // Press Ctrl-Shift-F10 here to run only twoPlusThree test
+   public void testTwoPlusThree() { // Press Ctrl-Shift-F10 here to run only twoPlusThree test
 //        assertThat( 2+3, is( 5 ) );
     }
 //}
