@@ -101,6 +101,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.LOW_PASS);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -141,6 +142,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.HIGH_PASS);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -181,6 +183,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.EDGE_DETECT);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -221,6 +224,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.EDGE_ENHANCEMENT);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -261,6 +265,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.HORIZONTAL);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -301,6 +306,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.VERTICAL);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -341,6 +347,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setUndersamplingMethod(op.KERNEL_FILTERING);
         op.setFilterType(op.SUMMARY);
         op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageBy(op.IMAGE_SIZE);
         op.setOutputImageSize(2, 4);
 
         // get targetProduct: execute initialize()
@@ -401,7 +408,7 @@ public class TestUndersamplingOperator extends TestCase {
         AbstractMetadata.setAttribute(abs, AbstractMetadata.line_time_interval, 0.01F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.first_line_time,
                 AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
-
+        
         return testProduct;
     }
 
