@@ -494,7 +494,8 @@ public final class AsarAbstractMetadata {
 
             final MetadataAttribute srgrCoefAttrib = srgrSrc.getAttribute("srgr_coeff");
             final ProductData data = srgrCoefAttrib.getData();
-            for(int i=0; i < data.getNumElems(); ++i) {
+            final int numElems = data.getNumElems();
+            for(int i=0; i < numElems; ++i) {
                 coefList.add(data.getElemDoubleAt(i));
             }
         } catch(Exception e) {
@@ -544,7 +545,8 @@ public final class AsarAbstractMetadata {
 
             final MetadataAttribute dopCoefAttrib = dopplerCentroidSrc.getAttribute("dop_coef");
             final ProductData data = dopCoefAttrib.getData();
-            for(int i=0; i < data.getNumElems(); ++i) {
+            final int numElems = data.getNumElems();
+            for(int i=0; i < numElems; ++i) {
                 coefList.add(data.getElemDoubleAt(i));
             }
         } catch(Exception e) {

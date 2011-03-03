@@ -214,22 +214,46 @@ public class ImageIOFile {
         final RenderedImage image = reader.readAsRenderedImage(0, param);
         final Raster data = image.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
 
-        final double[] dArray = new double[destWidth * destHeight];
         final DataBuffer dataBuffer = data.getDataBuffer();
         final SampleModel sampleModel = data.getSampleModel();
-        sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
-        pm.worked(1);
+        final int dataBufferType = dataBuffer.getDataType();
+        final int destSize = destWidth * destHeight;
 
-        final int length = dArray.length;
-        if(destBuffer.getElems() instanceof double[]) {
-            System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+        if(dataBufferType == DataBuffer.TYPE_FLOAT &&
+                destBuffer.getElems() instanceof float[]) {
+            final float[] dArray = new float[destSize];
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
+            System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+
+        } else if(dataBufferType == DataBuffer.TYPE_INT &&
+                destBuffer.getElems() instanceof int[]) {
+            final int[] dArray = new int[destSize];
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
+            System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+        } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
+                destBuffer.getElems() instanceof int[]) {
+            final int[] dArray = new int[destSize];
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
+            //System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+            int i=0;
+            for (int val : dArray) {
+                destBuffer.setElemIntAt(i++, val);
+            }
         } else {
-            for (int i = 0; i < length; ++i) {
-                destBuffer.setElemDoubleAt(i, dArray[i]);
+
+            final double[] dArray = new double[destSize];
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
+
+            final int length = dArray.length;
+            if(destBuffer.getElems() instanceof double[]) {
+                System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+            } else {
+                int i=0;
+                for (double val : dArray) {
+                    destBuffer.setElemDoubleAt(i++, val);
+                }
             }
         }
-
-        pm.worked(1);
     }
 
     public static class BandInfo {

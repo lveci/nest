@@ -144,7 +144,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 final int[] dArray = new int[destSize];
                 sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
                 System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
-
+             } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
+                destBuffer.getElems() instanceof int[]) {
+                final int[] dArray = new int[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                //System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+                int i=0;
+                for (int val : dArray) {
+                    destBuffer.setElemIntAt(i++, val);
+                }
             } else {
 
                 final double[] dArray = new double[destSize];
@@ -154,8 +162,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 if(destBuffer.getElems() instanceof double[]) {
                     System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
                 } else {
-                    for (int i = 0; i < length; ++i) {
-                        destBuffer.setElemDoubleAt(i, dArray[i]);
+                    int i=0;
+                    for (double val : dArray) {
+                        destBuffer.setElemDoubleAt(i++, val);
                     }
                 }
             }
