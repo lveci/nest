@@ -2,8 +2,9 @@ package org.esa.nest.doris.util;
 
 import org.junit.Test;
 import org.junit.Assert;
+import junit.framework.TestCase;
 
-public class TestVector3D {
+public class TestVector3D extends TestCase {
 
 //    double[] arrayX = {1,2,3};
 //    private Vector3D vectorX = new Vector3D(arrayX);
@@ -34,10 +35,10 @@ public class TestVector3D {
 //        assertThat( 2+2, is( 4 ) );
 //    }
 //
-//    @Test
-//    public void twoPlusThree() { // Press Ctrl-Shift-F10 here to run only twoPlusThree test
+    @Test
+   public void twoPlusThree() { // Press Ctrl-Shift-F10 here to run only twoPlusThree test
 //        assertThat( 2+3, is( 5 ) );
-//    }
+    }
 //}
 
 
