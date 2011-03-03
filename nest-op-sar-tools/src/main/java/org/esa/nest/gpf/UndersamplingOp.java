@@ -820,6 +820,14 @@ public class UndersamplingOp extends Operator {
     }
 
     /**
+     * Set the output image method. The function is for unit test only.
+     * @param method The output image method.
+     */
+    public void setOutputImageBy(String method) {
+        outputImageBy = method;
+    }
+
+    /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
      * {@code META-INF/services/org.esa.beam.framework.gpf.OperatorSpi}.
