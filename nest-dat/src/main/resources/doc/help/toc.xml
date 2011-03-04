@@ -78,7 +78,7 @@
 				<tocitem text="Open ALOS AVNIR2 Data Product" target="ImportAlosAVNIR2"/>
 				<tocitem text="Open ALOS PRISM Data Product" target="ImportAlosPRISM"/>
 			</tocitem>
-			<tocitem text="Open Transect Data" target="importTransectData"/>
+			<tocitem text="Open Geometry/Shapes" target="importGeometry"/>
 		</tocitem>
 		
 		<tocitem text="Product Writers">

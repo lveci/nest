@@ -70,7 +70,7 @@
 	<mapID target="ImportAlosAVNIR2" url="readers/ImportAVNIR2.html"/>
 	<mapID target="ImportAlosPRISM" url="readers/ImportPRISM.html"/>
 	
-	<mapID target="importTransectData" url="readers/ImportTransectData.html"/>
+	<mapID target="importGeometry" url="readers/ImportGeometry.html"/>
 	
 	<!-- Product Writers -->
     <mapID target="exportDimapProduct" url="writers/ExportDimapProduct.html"/>

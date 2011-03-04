@@ -19,30 +19,28 @@
 <li><span style="font-weight: bold;">SAR simulation:</span> Generate simulated SAR image using DEM, the geocoding and orbit state
 vectors from the original SAR image, and mathematical modeling of SAR imaging geometry.
 The simulated SAR image will have the same dimension and resolution as the original image.
-For detailed steps and parameters used in SAR simulation, the reader is referred to NEST
-help for <a href="SARSimulationOp.html">SAR Simulation Operator</a>.</li>
+For detailed steps and parameters used in SAR simulation, please refer to the <a href="SARSimulationOp.html">SAR Simulation Operator</a>.</li>
 
 <li><span style="font-weight: bold;">Co-registration:</span> The simulated SAR image (master) and the original SAR image (slave)
 are co-registered and a WARP function is produced. The WARP function maps each pixel in the
 simulated SAR image to its corresponding position in the original SAR image. For detailed
-steps and parameters used in co-registration, the reader is referred to Help for
-<a href="GCPSelectionOp.html">GCP Selection Operator</a>.</li>
+steps and parameters used in co-registration, please refer to the&nbsp;<a href="GCPSelectionOp.html">GCP Selection Operator</a>.</li>
 
 <li><span style="font-weight: bold;">Terrain correction:</span> Traverse DEM grid that covers the imaging area. For each cell in
 the DEM grid, compute its corresponding pixel position in the simulated SAR image using
 SAR model. Then its corresponding pixel position in the original SAR image can be found
 with the help of the WARP function. Finally the pixel value for the
-orthorectified image can be obtained from the original SAR image using&nbsp;interpolation.</li></ol><h4>DEM Supported</h4><p>Right now only the DEMs with geographic coordinates (P<sub>lat</sub>, P<sub>lon</sub>, P<sub>h</sub>) referred to global geodetic ellipsoid reference WGS84 (and height in meters) are properly supported by NEST.</p><p>Various&nbsp;different types of Digital Elevation
+orthorectified image can be obtained from the original SAR image using&nbsp;interpolation.</li></ol><h4>DEM Supported</h4><p>Right now only the DEMs with geographic coordinates (P<sub>lat</sub>, P<sub>lon</sub>, P<sub>h</sub>) referred to global geodetic ellipsoid reference WGS84 (and height in meters) are properly supported.</p><p>Various&nbsp;different types of Digital Elevation
 models can be used (ACE, GETASSE30, ACE 5min, ASTER, SRTM 3Sec&nbsp;GeoTiff).</p><p>By
 default directory C:\NestData and two sub-directories DEMs
-and&nbsp;Orbits are created by NEST&nbsp;and NEST will look for the
+and&nbsp;Orbits are created and the Toolbox will look for the
 default DEMs selected by user from operator UI in the DEMs
 sub-directory. However, the C:\NestData directory and&nbsp;DEMs and
 Orbits sub-directories are customizable from the Settings dialog (which
 can be found under Edit tab in the main menu bar).</p><p>The location
 of the default DEMs must be specified in dataPath field in the Setting
 Dialog in order to be properly used by Terrain Correction
-Operator.&nbsp;</p><p>At the moment, NEST is able to download
+Operator.&nbsp;</p><p>The Toolbox is able to download
 automatically the STRM v.4 (3&#8221; tiles) from the Joint Research Center
 FTP (xftp.jrc.it), for&nbsp; the area covered by the image to be
 orthorectified. The tiles will be downloaded to the folder
@@ -71,7 +69,7 @@ the earth centre.&nbsp;</p><p>Note that among&nbsp;<span style="font-style: ital
 by default the projected local incidence angle from DEM [2] (local
 incidence angle projected into range plane) option is selected, but the
 option of incidence angle from ellipsoid correction (incidence angle
-from tie points of the source product) is also available.<br></p><h4>Product Supported</h4><ul><li>ASAR (IMS, IMP, IMM, APP, APM, WSM) and ERS products (SLC, IMP) are fully supported.</li><li>Third party mission: not fully supported. Please refer to Supported_Products&amp;MainTools_4A.xls file available from <span style="text-decoration: underline;">http://liferay.array.ca:8080/web/nest/documentation</span>.</li></ul><h4>ENVISAT ASAR</h4>
+from tie points of the source product) is also available.<br></p><h4>ENVISAT ASAR</h4>
 <p>
 The correction factors [3] applied to the original image depend on if
 the product is complex or detected and&nbsp;the selection of Auxiliary
