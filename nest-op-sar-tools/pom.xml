@@ -33,10 +33,6 @@
       <groupId>org.esa.beam</groupId>
       <artifactId>beam-gpf</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.esa.beam</groupId>
-      <artifactId>beam-visat-rcp</artifactId>
-    </dependency>
 	<dependency>
       <groupId>edu.emory.mathcs</groupId>
       <artifactId>jtransforms</artifactId>
@@ -45,6 +41,11 @@
     <dependency>
       <groupId>org.esa.beam</groupId>
       <artifactId>beam-envisat-reader</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-dat</artifactId>
+      <version>${nest.version}</version>
     </dependency>
     <dependency>
       <groupId>org.esa.nest</groupId>

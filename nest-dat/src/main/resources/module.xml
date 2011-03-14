@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-dat</symbolicName>
-    <version>4B</version>
+    <version>4B-1.0</version>
     <name>NEST Display and Analysis Tool</name>
 
     <description>NEST Display and Analysis Tool</description>
@@ -527,16 +527,6 @@
             <helpId>searchMetadata</helpId>
             <parent>MetadataTools</parent>
             <placeAfter>searchMetadata</placeAfter>
-            <context>metadata</context>
-        </action>
-
-        <action>
-            <id>replaceMetadata</id>
-            <class>org.esa.nest.dat.actions.ReplaceMetadataAction</class>
-            <text>Replace Metadata</text>
-            <shortDescr>Replace product metadata with that of another product</shortDescr>
-            <description>Replace product metadata with that of another product</description>
-            <parent>MetadataTools</parent>
             <context>metadata</context>
         </action>
 

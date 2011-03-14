@@ -16,7 +16,7 @@
         <ceres.version>0.12-SNAPSHOT</ceres.version>
         <geotools.version>2.6.5</geotools.version>
 		<jide.version>2.9.5</jide.version>
-		<nest.version>4B</nest.version>
+		<nest.version>4B-1.0</nest.version>
 		<outputdir>../output</outputdir>
     </properties>
 	
@@ -149,8 +149,8 @@
 		<module>nest-developer-tools</module>
 		<module>nest-src</module>
 		
-		<module>doris-core-prototypes</module>
-		<module>doris-op-prototypes</module>
+		<!--module>doris-core-prototypes</module-->
+		<!--module>doris-op-prototypes</module-->
 		<module>doris-op-products</module>
   </modules>
 

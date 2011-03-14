@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-graph-builder</symbolicName>
-    <version>4B</version>
+    <version>4B-1.0</version>
     <name>NEST Graph Builder</name>
 
     <description>
