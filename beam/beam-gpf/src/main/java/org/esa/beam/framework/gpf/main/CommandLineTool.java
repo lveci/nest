@@ -22,11 +22,13 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.core.ServiceRegistry;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
@@ -40,11 +42,8 @@ import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * The common command-line tool for the GPF.
@@ -96,14 +95,37 @@ class CommandLineTool {
                     commandLineContext.print(CommandLineUsage.getUsageText());
                 }
                 return;
+            } else if(lineArgs.isPrintAllHelpRequested()) {
+                printAllHelp();
             }
-
             run(lineArgs);
         } catch (Exception e) {
             if (lineArgs.isStackTraceDump()) {
                 e.printStackTrace(System.err);
             }
             throw e;
+        }
+    }
+
+    private void printAllHelp() {
+        commandLineContext.print(CommandLineUsage.getUsageText());
+
+        final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        final ServiceRegistry<OperatorSpi> serviceRegistry = registry.getServiceRegistry();
+        final Set<OperatorSpi> spiSet = serviceRegistry.getServices();
+        for (OperatorSpi operatorSpi : spiSet) {
+            final String opAlias = operatorSpi.getOperatorAlias();
+            final int n = opAlias.length()+6;
+            String title = "\n\n";
+            for(int i=0; i < n; ++i)
+                title += "-";
+            title += "\n   "+opAlias+"\n";
+            for(int i=0; i < n; ++i)
+                title += "-";
+            title += "\n\n";
+            commandLineContext.print(title);
+
+            commandLineContext.print(CommandLineUsage.getUsageTextForOperator(opAlias));
         }
     }
 

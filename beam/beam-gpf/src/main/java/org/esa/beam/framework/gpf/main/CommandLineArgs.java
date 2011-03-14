@@ -46,6 +46,7 @@ class CommandLineArgs {
     private String parameterFilepath;
     private TreeMap<String, String> targetFilepathMap;
     private boolean helpRequested;
+    private boolean printAllHelp = false;
     private boolean stackTraceDump;
     private boolean clearCacheAfterRowWrite;
     private long tileCacheCapacity;
@@ -88,6 +89,8 @@ class CommandLineArgs {
                     targetFilepathMap.put(pair[0], pair[1]);
                 } else if (arg.equals("-h")) {
                     helpRequested = true;
+                } else if (arg.equals("-printHelp")) {
+                    printAllHelp = true;
                 } else if (arg.equals("-x")) {
                     clearCacheAfterRowWrite = true;
                 } else if (arg.equals("-e")) {
@@ -131,7 +134,7 @@ class CommandLineArgs {
             }
         }
 
-        if (operatorName == null && graphFilepath == null && !helpRequested) {
+        if (operatorName == null && graphFilepath == null && !helpRequested && !printAllHelp) {
             throw error("Either operator name or graph XML file must be given");
         }
         if (graphFilepath == null && !targetFilepathMap.isEmpty()) {
@@ -204,6 +207,10 @@ class CommandLineArgs {
 
     public boolean isHelpRequested() {
         return helpRequested;
+    }
+
+    public boolean isPrintAllHelpRequested() {
+        return printAllHelp;
     }
 
     public boolean isStackTraceDump() {
