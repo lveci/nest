@@ -98,21 +98,26 @@ public class ReplaceMetadataOp extends Operator {
 
             final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(masterProduct);
             final int isPolsar = absRootMst.getAttributeInt(AbstractMetadata.polsarData, 0);
-            if(isPolsar > 0) {
-                resetPolarizations(AbstractMetadata.getAbstractedMetadata(targetProduct));
-            }
+            final int isCalibrated = absRootMst.getAttributeInt(AbstractMetadata.abs_calibration_flag, 0);
+
+            resetPolarizations(AbstractMetadata.getAbstractedMetadata(targetProduct), isPolsar, isCalibrated);
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
-    private static void resetPolarizations(final MetadataElement absRoot) {
-        absRoot.setAttributeString(AbstractMetadata.mds1_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
-        absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
+    public static void resetPolarizations(final MetadataElement absRoot, final int isPolsar, final int isCal) {
+        if(isPolsar > 0) {
+            absRoot.setAttributeString(AbstractMetadata.mds1_tx_rx_polar, " ");
+            absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
+            absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
+            absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
+            absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
+        }
+        if(isCal > 0) {     // polsarpro input already calibrated -- set by polsarpro reader
+            absRoot.setAttributeInt(AbstractMetadata.abs_calibration_flag, 1);
+        }
     }
 
     /**

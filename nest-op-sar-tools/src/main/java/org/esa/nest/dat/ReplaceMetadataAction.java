@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dat.actions;
+package org.esa.nest.dat;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -24,6 +24,7 @@ import org.esa.nest.dat.dialogs.ProductSelectorDialog;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.gpf.ReplaceMetadataOp;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.4 $ $Date: 2011-02-04 18:33:37 $
+ * @version $Revision: 1.1 $ $Date: 2011-03-14 19:58:01 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 
@@ -52,6 +53,7 @@ public class ReplaceMetadataAction extends ExecCommand {
             try {
                 final MetadataElement origAbsRoot = AbstractMetadata.getAbstractedMetadata(destProduct);
                 final int isPolsar = origAbsRoot.getAttributeInt(AbstractMetadata.polsarData, 0);
+                final int isCalibrated = origAbsRoot.getAttributeInt(AbstractMetadata.abs_calibration_flag, 0);
 
                 final String srcProductName = dlg.getSelectedProductName();
                 final Product[] products = VisatApp.getApp().getProductManager().getProducts();
@@ -74,12 +76,11 @@ public class ReplaceMetadataAction extends ExecCommand {
                 VisatApp.getApp().removeProduct(destProduct);
 
                 final MetadataElement destAbsRoot = AbstractMetadata.getAbstractedMetadata(destProduct);
-                AbstractMetadataIO.Load(destProduct, destAbsRoot, tmpMetadataFile);                
+                AbstractMetadataIO.Load(destProduct, destAbsRoot, tmpMetadataFile);
                 VisatApp.getApp().addProduct(destProduct);
-    
-                if(isPolsar > 0) {
-                    resetPolarizations(AbstractMetadata.getAbstractedMetadata(destProduct));
-                }
+
+                ReplaceMetadataOp.resetPolarizations(AbstractMetadata.getAbstractedMetadata(destProduct),
+                                                     isPolsar, isCalibrated);
 
                 tmpMetadataFile.delete();
             } catch(Exception e) {
@@ -92,14 +93,6 @@ public class ReplaceMetadataAction extends ExecCommand {
     public void updateState(final CommandEvent event) {
         final Product product = VisatApp.getApp().getSelectedProduct();
         setEnabled(product != null);
-    }
-
-    private static void resetPolarizations(final MetadataElement absRoot) {
-        absRoot.setAttributeString(AbstractMetadata.mds1_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds2_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds3_tx_rx_polar, " ");
-        absRoot.setAttributeString(AbstractMetadata.mds4_tx_rx_polar, " ");
-        absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
     }
 
     private static String[] getCompatibleProducts(final Product destProduct) {
