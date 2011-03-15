@@ -1012,12 +1012,12 @@ public class WindFieldEstimationOp extends Operator {
 
         public WindFieldRecord(final double lat, final double lon, final double speed, final double dx, final double dy,
                                final double ratio) {
-            this.lat = lat;
-            this.lon = lon;
-            this.speed = speed;
-            this.dx = dx;
-            this.dy = dy;
-            this.ratio = ratio;
+            this.lat = Math.round(lat*100.0)/100.0;
+            this.lon = Math.round(lon*100.0)/100.0;
+            this.speed = Math.round(speed*100.0)/100.0;
+            this.dx = Math.round(dx*100.0)/100.0;
+            this.dy = Math.round(dy*100.0)/100.0;
+            this.ratio = Math.round(ratio*100.0)/100.0;
         }
     }
 
