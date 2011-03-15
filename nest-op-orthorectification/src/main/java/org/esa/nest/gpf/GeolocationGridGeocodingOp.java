@@ -406,7 +406,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                         lon -= 360.0;
                     }
                     final PixelPos pixPos = computePixelPosition(lat, lon);
-                    if (pixPos.x < 0 || pixPos.y < 0) {
+                    if (Float.isNaN(pixPos.x) || Float.isNaN(pixPos.y)) {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
                         continue;
                     }
