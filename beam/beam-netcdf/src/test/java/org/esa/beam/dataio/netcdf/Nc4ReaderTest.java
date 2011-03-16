@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2011-02-22 22:11:26 $
+ * @version $Revision: 1.4 $ $Date: 2011-03-16 16:08:35 $
  */
 public class Nc4ReaderTest {
 

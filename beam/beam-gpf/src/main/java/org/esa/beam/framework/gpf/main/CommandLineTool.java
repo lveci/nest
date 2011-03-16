@@ -30,6 +30,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
+import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.Node;
@@ -44,6 +45,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map.Entry;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * The common command-line tool for the GPF.
@@ -215,9 +217,11 @@ class CommandLineTool {
         return convertParameterMap(operatorName, parameterMap);
     }
 
-    private static Map<String, Object> convertParameterMap(String operatorName, Map<String, String> parameterMap) throws ValidationException {
+    private static Map<String, Object> convertParameterMap(String operatorName, Map<String, String> parameterMap) throws
+                                                                                                                  ValidationException {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
-        PropertyContainer container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer(operatorName, parameters);
+        PropertyContainer container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer(operatorName,
+                                                                                                          parameters);
         // explicitly set default values for putting them into the backing map
         container.setDefaultValues();
         for (Entry<String, String> entry : parameterMap.entrySet()) {
@@ -288,7 +292,8 @@ class CommandLineTool {
         return commandLineContext.readProduct(productFilepath);
     }
 
-    void writeProduct(Product targetProduct, String filePath, String formatName, boolean clearCacheAfterRowWrite) throws IOException {
+    void writeProduct(Product targetProduct, String filePath, String formatName, boolean clearCacheAfterRowWrite) throws
+                                                                                                                  IOException {
         commandLineContext.writeProduct(targetProduct, filePath, formatName, clearCacheAfterRowWrite);
     }
 
@@ -304,7 +309,8 @@ class CommandLineTool {
         return commandLineContext.readParameterFile(propertiesFilepath);
     }
 
-    private Product createOpProduct(String opName, Map<String, Object> parameters, Map<String, Product> sourceProducts) throws OperatorException {
+    private Product createOpProduct(String opName, Map<String, Object> parameters,
+                                    Map<String, Product> sourceProducts) throws OperatorException {
         return commandLineContext.createOpProduct(opName, parameters, sourceProducts);
     }
 }
