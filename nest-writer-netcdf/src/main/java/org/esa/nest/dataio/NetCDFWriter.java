@@ -20,6 +20,7 @@ import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.util.StringUtils;
 import ucar.ma2.*;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -110,7 +111,7 @@ public class NetCDFWriter extends AbstractProductWriter {
         netCDFWriteable.addVariableAttribute(NetcdfConstants.LON_VAR_NAMES[0], "units", "degrees_east (+E/-W)");
 
         for(Band band : product.getBands()) {
-            final String name = band.getName();
+            final String name = StringUtils.createValidName(band.getName(), new char[]{'_'}, '_');
             netCDFWriteable.addVariable(name, DataType.DOUBLE,
                     new Dimension[]{rootGroup.findDimension(NetcdfConstants.LAT_VAR_NAMES[0]),
                                     rootGroup.findDimension(NetcdfConstants.LON_VAR_NAMES[0])});
