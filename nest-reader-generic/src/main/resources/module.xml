@@ -73,7 +73,7 @@
             <text>Import PolsarPro Product...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.polsarpro.PolsarProProductReaderPlugIn</readerPlugin>
-            <formatName>PolsarPro</formatName>
+            <formatName>PolSARPro</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <useFilesAndFolders>true</useFilesAndFolders>
             <shortDescr>Import a PolsarPro data product.</shortDescr>

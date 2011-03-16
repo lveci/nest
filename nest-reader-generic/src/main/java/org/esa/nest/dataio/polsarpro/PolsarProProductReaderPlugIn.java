@@ -20,12 +20,23 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 
 import java.io.File;
+import java.util.Locale;
 
 public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
         return new PolsarProProductReader(this);
+    }
+
+    @Override
+    public String[] getFormatNames() {
+        return new String[]{"PolSARPro"};
+    }
+
+    @Override
+    public String getDescription(Locale locale) {
+        return "PolSARPro";
     }
 
     @Override

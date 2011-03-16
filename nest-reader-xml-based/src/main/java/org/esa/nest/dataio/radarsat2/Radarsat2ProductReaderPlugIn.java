@@ -123,6 +123,7 @@ public class Radarsat2ProductReaderPlugIn implements ProductReaderPlugIn {
         public FileFilter() {
             super();
             setFormatName(Radarsat2Constants.getFormatNames()[0]);
+            setExtensions(Radarsat2Constants.getForamtFileExtensions());
             setDescription(Radarsat2Constants.getPluginDescription());
         }
 

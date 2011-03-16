@@ -23,7 +23,7 @@ import java.io.File;
 class TerraSarXConstants  {
 
     private final static String[] FORMAT_NAMES = new String[]{"TerraSarX"};
-    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{"xml"};
     private final static String PLUGIN_DESCRIPTION = "TerraSarX Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
     final static String TSX1_HEADER_PREFIX = "TSX1_SAR";

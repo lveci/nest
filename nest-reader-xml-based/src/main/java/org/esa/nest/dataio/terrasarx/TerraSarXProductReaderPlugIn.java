@@ -118,6 +118,7 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
         public FileFilter() {
             super();
             setFormatName(TerraSarXConstants.getFormatNames()[0]);
+            setExtensions(TerraSarXConstants.getForamtFileExtensions());
             setDescription(TerraSarXConstants.getPluginDescription());
         }
 
