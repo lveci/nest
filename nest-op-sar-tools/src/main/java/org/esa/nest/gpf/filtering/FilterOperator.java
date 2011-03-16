@@ -417,10 +417,10 @@ public class FilterOperator extends Operator {
             new GeneralFilter("Mean 5x5", 5, 5, GeneralFilterBand.MEAN),
             new GeneralFilter("Median 3x3", 3, 3, GeneralFilterBand.MEDIAN),
             new GeneralFilter("Median 5x5", 5, 5, GeneralFilterBand.MEDIAN),
-            new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.STDDEV),
-            new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.STDDEV),
-            new GeneralFilter("Root-Mean-Square 3x3", 3, 3, GeneralFilterBand.RMS),
-            new GeneralFilter("Root-Mean-Square 5x5", 5, 5, GeneralFilterBand.RMS),
+            //new GeneralFilter("Standard Deviation 3x3", 3, 3, GeneralFilterBand.STDDEV),
+            //new GeneralFilter("Standard Deviation 5x5", 5, 5, GeneralFilterBand.STDDEV),
+            //new GeneralFilter("Root-Mean-Square 3x3", 3, 3, GeneralFilterBand.RMS),
+            //new GeneralFilter("Root-Mean-Square 5x5", 5, 5, GeneralFilterBand.RMS),
     };
 
     /**
