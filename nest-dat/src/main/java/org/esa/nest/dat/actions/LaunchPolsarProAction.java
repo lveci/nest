@@ -46,7 +46,8 @@ public class LaunchPolsarProAction extends ExecCommand {
             polsarProFile = findPolsarPro();
         }
         if(!polsarProFile.exists()) {
-            // todo ask for location
+            // ask for location
+            polsarProFile = ResourceUtils.GetFilePath("PolSARPro Location", "tcl", "tcl", null, "PolSARPro File", false);
         }
         if(polsarProFile.exists()) {
             externalExecute(polsarProFile);
@@ -61,17 +62,26 @@ public class LaunchPolsarProAction extends ExecCommand {
         final File homeFolder = ResourceUtils.findHomeFolder();
         final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
 
-        try {
-            final String args = "\""+prog.getParent()+"\" "+"wish"+" "+prog.getName();
+        final String args = "\""+prog.getParent()+"\" "+"wish"+" "+prog.getName();
 
-            System.out.println("Launching PolSARPro "+args);
-            final Process proc = Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+        System.out.println("Launching PolSARPro "+args);
 
-            outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getInputStream())));
-            outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
-        } catch(Exception e) {
-            VisatApp.getApp().showErrorDialog(e.getMessage());
-        }
+        final Thread worker = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    final Process proc = Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+
+                    outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getInputStream())));
+                    outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
+
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+            }
+        };
+        worker.start();   
     }
 
     private static File findPolsarPro() {
@@ -100,7 +110,7 @@ public class LaunchPolsarProAction extends ExecCommand {
         }
     }
 
-    private void outputTextBuffers(BufferedReader in) throws IOException {
+    private static void outputTextBuffers(BufferedReader in) throws IOException {
         char c;
         while ((c = (char)in.read()) != -1 && c != 65535) {
             //errStr += c;
