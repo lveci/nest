@@ -263,7 +263,8 @@ public class ObjectDiscriminationOp extends Operator {
 
                     final ShipRecord record = generateRecord(x0, y0, w, h, clusterPixels);
 
-                    if (record.length >= minTargetSizeInMeter && record.length <= maxTargetSizeInMeter) {
+                    final double size = Math.sqrt(record.length*record.length + record.width*record.width);
+                    if (size >= minTargetSizeInMeter && size <= maxTargetSizeInMeter) {
                         getClusterIntensity(clusterPixels, srcData, sourceTile, record);
                         clusterList.add(record);
                     }
