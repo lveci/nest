@@ -204,8 +204,10 @@ public class ObjectDetectionLayer extends Layer {
             final Ellipse2D.Double circle = new Ellipse2D.Double(vpts[0], vpts[1], w, h);
             graphics.draw(circle);
 
-            final double size = Math.sqrt(target.length*target.length+target.width*target.width);
-            graphics.drawString(frmt.format(size)+"m", (int)vpts[0], (int)vpts[1]);
+            final double targetWidthInMeter = (target.width - border)*rangeSpacing;
+            final double targetlengthInMeter = (target.length - border)*azimuthSpacing;
+            final double size = Math.sqrt(targetWidthInMeter*targetWidthInMeter + targetlengthInMeter*targetlengthInMeter);
+            graphics.drawString(frmt.format(size) + "m", (int)vpts[0], (int)vpts[1]);
         }
     }
 }
