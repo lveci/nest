@@ -34,7 +34,7 @@ import org.esa.beam.util.SystemUtils;
  */
 public class BeamLogManager {
 
-    private static String _systemLoggerName = "beam";
+    private static String _systemLoggerName = SystemUtils.getApplicationContextId();
 
     /**
      * Gets the name of the system logger. This method is used to determine the system logger used by all low-level
