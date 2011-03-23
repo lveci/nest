@@ -37,7 +37,7 @@ public class NetCDFUtils {
 
     public static Band createBand(final Variable variable, final int rasterWidth, final int rasterHeight) {
         final NcAttributeMap attMap = NcAttributeMap.create(variable);
-        final Band band = new Band(variable.getName(),
+        final Band band = new Band(variable.getShortName(),
                                    getRasterDataType(variable),
                                    rasterWidth,
                                    rasterHeight);
