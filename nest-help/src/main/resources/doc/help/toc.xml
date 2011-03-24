@@ -18,14 +18,6 @@
 	<tocitem text="Graph Processing">
 	</tocitem>
 	
-	<tocitem text="Tutorials">
-        <tocitem text="Remote Sensing" target="remote_sensing"/>
-		<tocitem text="Synthetic Aperture Radar" target="sar"/>
-		<tocitem text="Quick Start With The DAT" target="using_dat"/>
-		<tocitem text="Coregistration" target="coregistering_products"/>
-		<tocitem text="Orthorectification" target="terrain_correction"/>
-	</tocitem>
-	
 	<tocitem text="Development">
         <tocitem text="General Design" target="general_design"/>
 		<tocitem text="Detailed Design" target="detailed_design"/>

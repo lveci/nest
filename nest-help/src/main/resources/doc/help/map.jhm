@@ -12,13 +12,6 @@
 
     <mapID target="Overview" url="general/Overview.html"/>
 	<mapID target="SupportedProducts" url="general/SupportedProducts.html"/>
-	
-	<!--Tutorials-->
-	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>
-	<mapID target="sar" url="tutorials/sar.html"/>
-	<mapID target="using_dat" url="tutorials/using_dat.html"/>
-	<mapID target="coregistering_products" url="tutorials/coregistering_products.html"/>
-	<mapID target="terrain_correction" url="tutorials/terrain_correction.html"/>
 		
 	<!--Development-->
 	<mapID target="general_design" url="development/general_design.html"/>

@@ -26,7 +26,7 @@ taken at different times using multiple sensors or from multiple
 passages of the same satellite.</p><p><br>The achievable
 co-registration accuracy for images in the same acquisition geometry
 and over flat areas will be better than 0.2 pixels for two real images
-and better than 0.05 pixels for two complex images.</p><p><br>The image co-registration is accomplished in three major processing steps (see Figure 1) with three operators: <a href="../operators/CollocateOp.html">Create Stack operator</a>,&nbsp;<a href="../operators/GCPSelectionOp.html">GCP Selection operator</a> and&nbsp;<a href="../operators/WarpOp.html">Warp operator</a>. </p><br><img style="width: 404px; height: 448px;" alt="" src="../operators/images/coregistration_diagram.jpg"><br><div style="margin-left: 80px;">Figure 1. Image co-registration<br></div><h4>Input Images</h4><p>The input images for the co-registration function can be
+and better than 0.05 pixels for two complex images.</p><p><br>The image co-registration is accomplished in three major processing steps (see Figure 1) with three operators: <a href="../operators/CollocateOp.html">Create Stack operator</a>,&nbsp;<a href="../operators/GCPSelectionOp.html">GCP Selection operator</a> and&nbsp;<a href="../operators/WarpOp.html">Warp operator</a>. </p><br><img style="width: 404px; height: 448px;" alt="" src="images/coregistration_diagram.jpg"><br><div style="margin-left: 80px;">Figure 1. Image co-registration<br></div><h4>Input Images</h4><p>The input images for the co-registration function can be
 complex&nbsp;or real. But all&nbsp;images must belong to the same type
 (i.e. they must all be complex or all real) and have the same
 projection system (all slant range or all ground range projected or all
@@ -59,15 +59,9 @@ the&nbsp;GCP Selection operator, readers are referred to&nbsp;<a href="../operat
 the master-slave GCP pairs selected, a warp function is created by the
 Warp operator, which&nbsp;maps pixels
 in the slave image into pixels in the master image.&nbsp;For details of
-the&nbsp;Warp operator, readers are referred to <a href="../operators/WarpOp.html">Warp operator</a>.</p><h4>Co-Registration from NEST DAT</h4>&nbsp;&nbsp;&nbsp;Detailed steps of using this operator are given below:<br><ol><li>From the SAR Tools menu, select Coregistration.</li><li>Add a master product to the ProductSet Reader.</li><li>Add any slave products to the ProductSet reader or drag and drop products from a Project.</li><li>In the CreateStack tab, select one source band from the master and one
+the&nbsp;Warp operator, readers are referred to <a href="../operators/WarpOp.html">Warp operator</a>.</p><h4>Co-Registration from the DAT</h4>&nbsp;&nbsp;&nbsp;Detailed steps of using this operator are given below:<br><ol><li>From the SAR Tools menu, select Coregistration.</li><li>Add a master product to the ProductSet Reader.</li><li>Add any slave products to the ProductSet reader or drag and drop products from a Project.</li><li>In the CreateStack tab, select one source band from the master and one
 source band from the slave for detected products. If you are using
 complex data products, select&nbsp;bands i and q for the master and select
-bands i and q from the slaves. &nbsp;For interferometric processing, select no resampling and Master extents in the CreateStack.</li><li>In the GCP Selection tab enter the number of GCPs to create.</li><li>In the Warp tab select the RMS threshold and warp polynomial order.</li><li>In the Target tab enter in the output product name and location.</li><li>Press the Run button to begin processing.</li></ol><h4>Co-Registration from Command Line</h4><span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;</span>To coregister from the command line run the gpt with the graphs found in the folder nest installation/command line/.<br><br>&nbsp;&nbsp;&nbsp;First, run the GCP Selection<br>&nbsp;&nbsp;&nbsp; <br>&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp; gpt GCPSelectionGraph.xml
--Pfilelist="masterProduct.N1,slaveProduct1.N1,slaveProduct2.E1,slaveProduct3.E1"
--Ptarget="gcp_selected.dim" <br><br>&nbsp;&nbsp;&nbsp;The input parameter filelist should be in the form "master,slave1,slave2".<br><br>&nbsp;&nbsp;&nbsp;Then, run the the Warp<br><br>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; gpt WarpGraph.xml
--Pfile="gcp_selected.dim" -Ptarget=coregistered_stack.dim<br><br><br>&nbsp;&nbsp;&nbsp;You
-can combine the operations in a script. An example Windows batch file
-can be found in the folder NEST installation/command line/.<br><br>&nbsp;&nbsp;&nbsp;To run the batch file, type the following<br><br>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; coregister "masterProduct.N1, slaveProduct1.N1, slaveProduct2.E1, slaveProduct2.E1"<br><br><br><br><br><br>
+bands i and q from the slaves. &nbsp;For interferometric processing, select no resampling and Master extents in the CreateStack.</li><li>In the GCP Selection tab enter the number of GCPs to create.</li><li>In the Warp tab select the RMS threshold and warp polynomial order.</li><li>In the Target tab enter in the output product name and location.</li><li>Press the Run button to begin processing.</li></ol><br><br><br><br><br><br>
 <hr>
 </body></html>
