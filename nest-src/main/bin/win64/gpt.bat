@@ -6,7 +6,7 @@ IF [%NEST_HOME:~-1%]==[/] set NEST_HOME=%NEST_HOME:~0,-1%
 IF [%NEST_HOME:~-1%]==[\] set NEST_HOME=%NEST_HOME:~0,-1%
 
 "%NEST_HOME%\jre\bin\java.exe" ^
-    -server -Xms512M -Xmx4096M -XX:CompileThreshold=100 -Xverify:none ^
+    -server -Xms512M -Xmx3000M -XX:CompileThreshold=100 -Xverify:none ^
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio ^
     -Dceres.context=nest ^
     "-Dnest.mainClass=org.esa.beam.framework.gpf.main.Main" ^

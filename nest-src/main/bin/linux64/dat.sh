@@ -1,7 +1,7 @@
 #! /bin/sh
 
 $NEST_HOME/jre/bin/java \
-    -server -Xmx4096M -XX:CompileThreshold=100 -Xverify:none \
+    -server -Xmx3000M -XX:CompileThreshold=100 -Xverify:none \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio \
     -Dceres.context=nest \
     -Dnest.debug=false \
