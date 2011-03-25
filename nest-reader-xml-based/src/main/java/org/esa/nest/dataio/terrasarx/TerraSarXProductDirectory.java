@@ -80,6 +80,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement platform = level1Elem.getElement("platform");
         final MetadataElement orbit = platform.getElement("orbit");
         final MetadataElement complexImageInfo = productSpecific.getElement("complexImageInfo");
+        final MetadataElement geocodedImageInfo = productSpecific.getElement("geocodedImageInfo");
 
         MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
@@ -127,7 +128,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         product.setStartTime(startTime);
         product.setEndTime(stopTime);
 
-        getCornerCoords(sceneInfo);
+        getCornerCoords(sceneInfo, geocodedImageInfo);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat, latCorners[0]);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long, lonCorners[0]);
@@ -222,7 +223,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, absTag, val);
     }
 
-    private void getCornerCoords(MetadataElement sceneInfo) {
+    private void getCornerCoords(MetadataElement sceneInfo, MetadataElement geocodedImageInfo) {
 
         int maxRow = 0, maxCol = 0;
         int minRow = Integer.MAX_VALUE, minCol = Integer.MAX_VALUE;
@@ -247,13 +248,43 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             }
         }
 
+        int[] indexArray = {0, 1, 2, 3};
+        if(minRow == maxRow && minCol == maxCol && geocodedImageInfo != null) {
+            final MetadataElement geoParameter = geocodedImageInfo.getElement("geoParameter");
+            final MetadataElement sceneCoordsGeographic = geoParameter.getElement("sceneCoordsGeographic");
+            final float latUL = (float)sceneCoordsGeographic.getAttributeDouble("upperLeftLatitude", 0);
+            final float latUR = (float)sceneCoordsGeographic.getAttributeDouble("upperRightLatitude", 0);
+            final float latLL = (float)sceneCoordsGeographic.getAttributeDouble("lowerLeftLatitude", 0);
+            final float latLR = (float)sceneCoordsGeographic.getAttributeDouble("lowerRightLatitude", 0);
+
+            final float lonUL = (float)sceneCoordsGeographic.getAttributeDouble("upperLeftLongitude", 0);
+            final float lonUR = (float)sceneCoordsGeographic.getAttributeDouble("upperRightLongitude", 0);
+            final float lonLL = (float)sceneCoordsGeographic.getAttributeDouble("lowerLeftLongitude", 0);
+            final float lonLR = (float)sceneCoordsGeographic.getAttributeDouble("lowerRightLongitude", 0);
+
+            int k = 0;
+            final double e = 1e-3;
+            for(CornerCoord coord : coordList) {
+                if (Math.abs(coord.lat - latUL) < e && Math.abs(coord.lon - lonUL) < e) {
+                    indexArray[k] = 0;
+                } else if (Math.abs(coord.lat - latUR) < e && Math.abs(coord.lon - lonUR) < e) {
+                    indexArray[k] = 1;
+                } else if (Math.abs(coord.lat - latLL) < e && Math.abs(coord.lon - lonLL) < e) {
+                    indexArray[k] = 2;
+                } else if (Math.abs(coord.lat - latLR) < e && Math.abs(coord.lon - lonLR) < e) {
+                    indexArray[k] = 3;
+                }
+                k++;
+            }
+        }
+
         int index = 0;
         for(CornerCoord coord : coordList) {
             if(minRow == maxRow && minCol == maxCol) {
-                latCorners[index] = coord.lat;
-                lonCorners[index] = coord.lon;
-                slantRangeCorners[index] = coord.rangeTime;
-                incidenceCorners[index] = coord.incidenceAngle;
+                latCorners[indexArray[index]] = coord.lat;
+                lonCorners[indexArray[index]] = coord.lon;
+                slantRangeCorners[indexArray[index]] = coord.rangeTime;
+                incidenceCorners[indexArray[index]] = coord.incidenceAngle;
                 ++index;
             } else {
                 index = -1;
