@@ -64,8 +64,16 @@ public class SubsetOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter()
+    //@Parameter()
     private Rectangle region;
+    @Parameter(label = "X", defaultValue="0")
+    private int regionX = 0;
+    @Parameter(label = "Y", defaultValue="0")
+    private int regionY = 0;
+    @Parameter(label = "Width", defaultValue="1000")
+    private int width = 1000;
+    @Parameter(label = "Height", defaultValue="1000")
+    private int height = 1000;
     @Parameter(defaultValue = "1")
     private int subSamplingX;
     @Parameter(defaultValue = "false", description = "Forces the operator to extend the subset region to the full swath.")
@@ -90,6 +98,7 @@ public class SubsetOp extends Operator {
     public SubsetOp() {
         subSamplingX = 1;
         subSamplingY = 1;
+        region = new Rectangle(regionX, regionY, width, height);
     }
 
     public String[] getTiePointGridNames() {
@@ -194,7 +203,7 @@ public class SubsetOp extends Operator {
         }
     }
 
-    static Rectangle computePixelRegion(Product product, Geometry geoRegion, int numBorderPixels) {
+    public static Rectangle computePixelRegion(Product product, Geometry geoRegion, int numBorderPixels) {
         final Geometry productGeometry = computeProductGeometry(product);
         final Geometry regionIntersection = geoRegion.intersection(productGeometry);
         if (regionIntersection.isEmpty()) {
