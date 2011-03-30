@@ -13,7 +13,7 @@
 		<tocitem text="Graph Tools">
 	        <tocitem text="Graph Processing Tool" target="gpt"/>			
 	        <tocitem text="Graph Builder Tool" target="graph_builder"/>
-			<tocitem text="Batch Processing" target="batch_processing"/>
+			<tocitem text="Batch Processing" target="batchProcessing"/>
 		</tocitem>
 			
 		<tocitem text="Utility Operators">
