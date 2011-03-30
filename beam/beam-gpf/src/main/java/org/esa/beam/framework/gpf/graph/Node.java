@@ -44,6 +44,10 @@ public class Node {
     private SourceList sourceList;
     private DomElement configuration;
 
+    public Node() {
+
+    }
+
     /**
      * Constructs a new <code>Node</code> instance.
      *
