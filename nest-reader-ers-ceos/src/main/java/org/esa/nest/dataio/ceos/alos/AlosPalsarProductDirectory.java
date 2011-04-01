@@ -17,6 +17,7 @@ package org.esa.nest.dataio.ceos.alos;
 
 import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
@@ -30,6 +31,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -140,6 +142,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             addGeoCodingFromWorkReport(product);
         }
 
+        if (product.getGeoCoding() == null) {
+            addTPGGeoCoding(product, _leaderFile.getSceneRecord());
+        }
+         
         return product;
     }
 
@@ -249,16 +255,39 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         if(workReportElem != null) {
 
             try {
-                final float latUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLatitude", "0"));
-                final float latUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLatitude", "0"));
-                final float latLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLatitude", "0"));
-                final float latLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLatitude", "0"));
-                final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
+                float latUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLatitude", "0"));
+                float latUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLatitude", "0"));
+                float latLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLatitude", "0"));
+                float latLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLatitude", "0"));
 
-                final float lonUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLongitude", "0"));
-                final float lonUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLongitude", "0"));
-                final float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
-                final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
+                float lonUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLongitude", "0"));
+                float lonUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLongitude", "0"));
+                float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
+                float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
+
+                // The corner point geo positions above are given with respect to the scene, not the SAR image.
+                // Therefore, they should first be mapped to the corner points of the SAR image before being used
+                // in generating the geocoding of the SAR image. Here we assume that the SAR image is always
+                // displayed with the first azimuth line on the top and the near range side on the left.
+                // For level 1.5 detective product, this is not a problem because it is projected product.
+                String pass = absRoot.getAttributeString("PASS");
+                String prodType = absRoot.getAttributeString("PRODUCT_TYPE");
+                if (prodType.contains("1.1")) {
+                    float temp;
+                    if (pass.equals("ASCENDING")) {
+                        temp = latUL; latUL = latLL; latLL = temp;
+                        temp = latUR; latUR = latLR; latLR = temp;
+                        temp = lonUL; lonUL = lonLL; lonLL = temp;
+                        temp = lonUR; lonUR = lonLR; lonLR = temp;
+                    } else { // DESCENDING
+                        temp = latUL; latUL = latUR; latUR = temp;
+                        temp = latLL; latLL = latLR; latLR = temp;
+                        temp = lonUL; lonUL = lonUR; lonUR = temp;
+                        temp = lonLL; lonLL = lonLR; lonLR = temp;
+                    }
+                }
+
+                final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
                 final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
 
                 absRoot.setAttributeDouble(AbstractMetadata.first_near_lat, latUL);
@@ -490,6 +519,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                         }
                     }
                 }
+
                 final MetadataElement workReportElem = root.getElement("Work Report");
                 if(workReportElem != null) {
                     for(MetadataAttribute workRep : workReportElem.getAttributes()) {
@@ -499,6 +529,21 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                         }
                     }
                 }
+
+                final MetadataElement imageDescriptorElem = root.getElement("Image Descriptor 1");
+                if (imageDescriptorElem != null) {
+                    final MetadataElement imageRecordElem = imageDescriptorElem.getElement("Image Record");
+                    if (imageRecordElem != null) {
+                        final int year = imageRecordElem.getAttributeInt("Sensor acquisition year", 0);
+                        final int days = imageRecordElem.getAttributeInt("Sensor acquisition day of year", 0);
+                        final int milliseconds = imageRecordElem.getAttributeInt("Sensor acquisition milliseconds of day", 0);
+                        final int days_since_2000 = (year - 2000)*365 + days + 1;
+                        final int seconds = milliseconds / 1000;
+                        final int microseconds = (milliseconds - seconds*1000) * 1000;
+                        return new ProductData.UTC(days_since_2000, seconds, microseconds);
+                    }
+                }
+
                 final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
                 return AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
             } catch(Exception e) {
@@ -523,6 +568,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                         }
                     }
                 }
+
                 final MetadataElement workReportElem = root.getElement("Work Report");
                 if(workReportElem != null) {
                     for(MetadataAttribute workRep : workReportElem.getAttributes()) {
@@ -535,6 +581,24 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                         }
                     }
                 }
+
+                final MetadataElement imageDescriptorElem = root.getElement("Image Descriptor 1");
+                if (imageDescriptorElem != null) {
+                    final int numRecords = imageDescriptorElem.getAttributeInt("Number of SAR DATA records", 0);
+                    final MetadataElement imageRecordElem = imageDescriptorElem.getElement("Image Record");
+                    if (imageRecordElem != null) {
+                        final int year = imageRecordElem.getAttributeInt("Sensor acquisition year", 0);
+                        final int days = imageRecordElem.getAttributeInt("Sensor acquisition day of year", 0);
+                        int milliseconds = imageRecordElem.getAttributeInt("Sensor acquisition milliseconds of day", 0);
+                        final int prf = imageRecordElem.getAttributeInt("PRF", 0); // in mHz
+                        final int days_since_2000 = (year - 2000)*365 + days + 1;
+                        milliseconds += (int)((double)(numRecords - 1) * 1000000.0 / (double)prf);
+                        final int seconds = milliseconds / 1000;
+                        final int microseconds = (milliseconds - seconds*1000) * 1000;
+                        return new ProductData.UTC(days_since_2000, seconds, microseconds);
+                    }
+                }
+                
                 final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
                 final ProductData.UTC centreTime =  AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
                 final double diff = centreTime.getMJD() - startTime.getMJD();
@@ -553,4 +617,268 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private String getProductDescription() {
         return AlosPalsarConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
+
+    /**
+     * Update target product GEOCoding. A new tie point grid is generated.
+     * @param product The product.
+     * @param sceneRec The scene record.
+     * @throws IOException The exceptions.
+     */
+    private static void addTPGGeoCoding(final Product product, final BaseRecord sceneRec) throws IOException {
+
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
+        final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
+        final int sourceImageWidth = product.getSceneRasterWidth();
+        final int sourceImageHeight = product.getSceneRasterHeight();
+
+        final float subSamplingX = sourceImageWidth / (float)(gridWidth - 1);
+        final float subSamplingY = sourceImageHeight / (float)(gridHeight - 1);
+
+        final TiePointGrid slantRangeTime = product.getTiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+
+        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        final double latMid = sceneRec.getAttributeDouble("scene centre geodetic latitude");
+        final double lonMid = sceneRec.getAttributeDouble("scene centre geodetic longitude");
+
+        AbstractMetadata.OrbitStateVector[] orbitStateVectors;
+        try {
+            orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
+
+        if(!checkStateVectorValidity(orbitStateVectors))
+            return;
+
+        final int numVectors = orbitStateVectors.length;
+        int startIdx = 0;
+        int endIdx = 0;
+        final double t1 = Math.min(firstLineUTC, lastLineUTC);
+        final double t2 = Math.max(firstLineUTC, lastLineUTC);
+        for (int i = 0; i < numVectors; i++) {
+            double time = orbitStateVectors[i].time_mjd;
+            if (time < t1) {
+                startIdx = i;
+            }
+
+            if (time < t2) {
+                endIdx = i;
+            }
+        }
+
+        while (endIdx - startIdx + 1 < Math.min(5, numVectors)) {
+            startIdx = Math.max(startIdx - 1, 0);
+            endIdx = Math.min(endIdx + 1, numVectors - 1);
+        }
+        final int numVectorsUsed = endIdx - startIdx + 1;
+
+        final double[] timeArray = new double[numVectorsUsed];
+        final double[] xPosArray = new double[numVectorsUsed];
+        final double[] yPosArray = new double[numVectorsUsed];
+        final double[] zPosArray = new double[numVectorsUsed];
+        final double[] xVelArray = new double[numVectorsUsed];
+        final double[] yVelArray = new double[numVectorsUsed];
+        final double[] zVelArray = new double[numVectorsUsed];
+
+        for (int i = startIdx; i <= endIdx; i++) {
+            timeArray[i - startIdx] = orbitStateVectors[i].time_mjd;
+            xPosArray[i - startIdx] = orbitStateVectors[i].x_pos; // m
+            yPosArray[i - startIdx] = orbitStateVectors[i].y_pos; // m
+            zPosArray[i - startIdx] = orbitStateVectors[i].z_pos; // m
+            xVelArray[i - startIdx] = orbitStateVectors[i].x_vel; // m/s
+            yVelArray[i - startIdx] = orbitStateVectors[i].y_vel; // m/s
+            zVelArray[i - startIdx] = orbitStateVectors[i].z_vel; // m/s
+        }
+
+        // Create new tie point grid
+        int k = 0;
+        for (int r = 0; r < gridHeight; r++) {
+            // get the zero Doppler time for the rth line
+            int y;
+            if (r == gridHeight - 1) { // last row
+                y = sourceImageHeight - 1;
+            } else { // other rows
+                y = (int)(r * subSamplingY);
+            }
+            final double curLineUTC = firstLineUTC + y*lineTimeInterval;
+            //System.out.println((new ProductData.UTC(curLineUTC)).toString());
+
+            // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
+            final OrbitData data = getOrbitData(curLineUTC, timeArray, xPosArray, yPosArray, zPosArray,
+                                                xVelArray, yVelArray, zVelArray);
+
+            for (int c = 0; c < gridWidth; c++) {
+                int x;
+                if (c == gridWidth - 1) { // last column
+                    x = sourceImageWidth - 1;
+                } else { // other columns
+                    x = (int)(c * subSamplingX);
+                }
+
+                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
+                final GeoPos geoPos = computeLatLon(latMid, lonMid, slrgTime, data);
+                targetLatTiePoints[k] = geoPos.lat;
+                targetLonTiePoints[k] = geoPos.lon;
+                ++k;
+            }
+        }
+
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight,
+                0.0f, 0.0f, subSamplingX, subSamplingY, targetLatTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight,
+                0.0f, 0.0f, subSamplingX, subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        product.addTiePointGrid(latGrid);
+        product.addTiePointGrid(lonGrid);
+        product.setGeoCoding(tpGeoCoding);
+    }
+
+    /**
+     * Compute accurate target geo position.
+     * @param latMid The scene latitude.
+     * @param lonMid The scene longitude.
+     * @param slrgTime The slant range time of the given pixel.
+     * @param data The orbit data.
+     * @return The geo position of the target.
+     */
+    private static GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, OrbitData data) {
+
+        final double[] xyz = new double[3];
+        final GeoPos geoPos = new GeoPos((float)latMid, (float)lonMid);
+
+        // compute initial (x,y,z) coordinate from lat/lon
+        GeoUtils.geo2xyz(geoPos, xyz);
+
+        // compute accurate (x,y,z) coordinate using Newton's method
+        computeAccurateXYZ(data, xyz, slrgTime);
+
+        // compute (lat, lon, alt) from accurate (x,y,z) coordinate
+        GeoUtils.xyz2geo(xyz, geoPos);
+
+        return geoPos;
+    }
+
+    /**
+     * Compute accurate target position for given orbit information using Newton's method.
+     * @param data The orbit data.
+     * @param xyz The xyz coordinate for the target.
+     * @param time The slant range time in seconds.
+     */
+    private static void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
+
+        final double a = Constants.semiMajorAxis;
+        final double b = Constants.semiMinorAxis;
+        final double a2 = a*a;
+        final double b2 = b*b;
+        final double del = 1e-8;//0.002;
+        final int maxIter = 200;
+
+        Matrix X = new Matrix(3, 1);
+        final Matrix F = new Matrix(3, 1);
+        final Matrix J = new Matrix(3, 3);
+
+        X.set(0, 0, xyz[0]);
+        X.set(1, 0, xyz[1]);
+        X.set(2, 0, xyz[2]);
+
+        J.set(0, 0, data.xVel);
+        J.set(0, 1, data.yVel);
+        J.set(0, 2, data.zVel);
+
+        for (int i = 0; i < maxIter; i++) {
+
+            final double x = X.get(0,0);
+            final double y = X.get(1,0);
+            final double z = X.get(2,0);
+
+            final double dx = x - data.xPos;
+            final double dy = y - data.yPos;
+            final double dz = z - data.zPos;
+
+            F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
+            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
+            F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
+
+            J.set(1, 0, 2.0*dx);
+            J.set(1, 1, 2.0*dy);
+            J.set(1, 2, 2.0*dz);
+            J.set(2, 0, 2.0*x/a2);
+            J.set(2, 1, 2.0*y/a2);
+            J.set(2, 2, 2.0*z/b2);
+
+            X = X.minus(J.inverse().times(F));
+
+            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
+                break;
+            }
+        }
+
+        xyz[0] = X.get(0,0);
+        xyz[1] = X.get(1,0);
+        xyz[2] = X.get(2,0);
+    }
+
+    private static boolean checkStateVectorValidity(AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
+
+        if(orbitStateVectors == null) {
+            return false;
+        }
+        if(orbitStateVectors.length <= 1) {
+            return false;
+        }
+
+        for (int i = 1; i < orbitStateVectors.length; i++) {
+            if (orbitStateVectors[i].time_mjd == orbitStateVectors[0].time_mjd) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get orbit information for given time.
+     * @param utc The UTC in days.
+     * @param timeArray Array holding zeros Doppler times for all state vectors.
+     * @param xPosArray Array holding x coordinates for sensor positions in all state vectors.
+     * @param yPosArray Array holding y coordinates for sensor positions in all state vectors.
+     * @param zPosArray Array holding z coordinates for sensor positions in all state vectors.
+     * @param xVelArray Array holding x velocities for sensor positions in all state vectors.
+     * @param yVelArray Array holding y velocities for sensor positions in all state vectors.
+     * @param zVelArray Array holding z velocities for sensor positions in all state vectors.
+     * @return The orbit information.
+     */
+    private static OrbitData getOrbitData(final double utc, final double[] timeArray,
+                                         final double[] xPosArray, final double[] yPosArray, final double[] zPosArray,
+                                         final double[] xVelArray, final double[] yVelArray, final double[] zVelArray) {
+
+        // Lagrange polynomial interpolation
+        final OrbitData orbitData = new OrbitData();
+        orbitData.xPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
+        orbitData.yPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
+        orbitData.zPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
+        orbitData.xVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, utc);
+        orbitData.yVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, utc);
+        orbitData.zVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, utc);
+
+        return orbitData;
+    }
+
+    private final static class OrbitData {
+        public double xPos;
+        public double yPos;
+        public double zPos;
+        public double xVel;
+        public double yVel;
+        public double zVel;
+    }
+    
 }
