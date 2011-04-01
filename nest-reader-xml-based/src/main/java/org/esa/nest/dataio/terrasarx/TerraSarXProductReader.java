@@ -134,7 +134,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
                                                  oneOfTwo, iiStream, pm);
             }
         } catch(Exception e) {
-            //
+            System.out.println(e.getMessage());
         }
     }
 
@@ -153,9 +153,10 @@ public class TerraSarXProductReader extends AbstractProductReader {
         final int bi = iiStream.readInt();
         final int rtnb = iiStream.readInt();
         final int tnl = iiStream.readInt();
-        //System.out.println("bib"+bib+" rsri"+rsri+" rs"+rs+" as"+as+" bi"+bi+" rtbn"+rtnb+" tnl"+tnl);
-        
-        final int imageRecordLength = rtnb;
+        //System.out.print("bib"+bib+" rsri"+rsri+" rs"+rs+" as"+as+" bi"+bi+" rtbn"+rtnb+" tnl"+tnl);
+        //System.out.println(" sourceOffsetX="+sourceOffsetX+" sourceOffsetY="+sourceOffsetY);
+
+        final long imageRecordLength = (long)rtnb;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final int filler = 2;
