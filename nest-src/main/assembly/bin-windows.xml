@@ -51,6 +51,10 @@
             </includes>
         </fileSet>
 		
+		<fileSet>
+            <directory>../dist/jdk6/win32/jre</directory>
+            <outputDirectory>jre</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <moduleSets>

@@ -51,6 +51,10 @@
             </includes>
         </fileSet>
 		
+		<fileSet>
+            <directory>../dist/jdk7/linux64/jre</directory>
+            <outputDirectory>jre</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <moduleSets>

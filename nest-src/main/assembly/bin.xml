@@ -93,6 +93,10 @@
             <directoryMode>0755</directoryMode>
         </fileSet>
 		
+		<fileSet>
+            <directory>../dist/jdk6/win32/jre</directory>
+            <outputDirectory>jre</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <moduleSets>
