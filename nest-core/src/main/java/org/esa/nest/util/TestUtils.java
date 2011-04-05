@@ -256,7 +256,8 @@ public class TestUtils {
 
         final Product subsetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
         final File tmpFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmp_subset.dim");
-        WriteOp.writeProduct(subsetProduct, tmpFile, DimapProductConstants.DIMAP_FORMAT_NAME, ProgressMonitor.NULL);           
+        final WriteOp writer = new WriteOp(subsetProduct, tmpFile, DimapProductConstants.DIMAP_FORMAT_NAME);
+        writer.writeProduct(ProgressMonitor.NULL);
 
         return ProductIO.readProduct(tmpFile);
     }

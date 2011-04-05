@@ -18,6 +18,7 @@ package org.esa.nest.dataio.dem.ace;
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,7 +40,7 @@ public class TestACEElevationModel extends TestCase {
 
         if(!demDescriptor.isDemInstalled()) return;
 
-        final ElevationModel dem = demDescriptor.createDem();
+        final ElevationModel dem = demDescriptor.createDem(Resampling.BILINEAR_INTERPOLATION);
         float[] demValues = new float[expectedValues.length];
         int count = 0;
 

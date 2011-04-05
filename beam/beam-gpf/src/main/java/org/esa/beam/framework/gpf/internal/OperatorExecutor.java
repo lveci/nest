@@ -153,10 +153,9 @@ public class OperatorExecutor {
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
                     scheduleTile(image, tileX, tileY, semaphore, listeners, pm);
                 }
-
-                if(pm == ProgressMonitor.NULL) {
-                    stdOutPM.worked(tileY);
-                }
+            }
+            if(pm == ProgressMonitor.NULL) {
+                stdOutPM.worked(tileY);
             }
         }
         if(pm == ProgressMonitor.NULL) {
