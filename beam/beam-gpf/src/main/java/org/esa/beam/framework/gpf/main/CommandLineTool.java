@@ -22,7 +22,9 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.core.ServiceRegistry;
+import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
@@ -38,6 +40,9 @@ import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.StopWatch;
+import org.esa.beam.util.VersionChecker;
+import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
 import java.io.File;
@@ -87,6 +92,8 @@ class CommandLineTool {
         try {
             lineArgs.parseArguments();
 
+            getVersion();
+
             if (lineArgs.isHelpRequested()) {
                 if (lineArgs.getOperatorName() != null) {
                     commandLineContext.print(CommandLineUsage.getUsageTextForOperator(lineArgs.getOperatorName()));
@@ -106,6 +113,27 @@ class CommandLineTool {
                 e.printStackTrace(System.err);
             }
             throw e;
+        }
+    }
+public static String getContextID() {
+        if (RuntimeActivator.getInstance() != null
+                && RuntimeActivator.getInstance().getModuleContext() != null) {
+            return RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
+        }
+        return System.getProperty("ceres.context", "nest");
+    }
+
+    private void getVersion() {
+        try {
+            // check version
+            String remoteVersionUrl = "http://www.array.ca/nest-web/";
+            remoteVersionUrl += getContextID() + "_getversion.php?u="+System.getProperty("user.name")+"&r=GPT";  
+
+            final VersionChecker versionChecker = new VersionChecker();
+            versionChecker.setRemoteVersionUrlString(remoteVersionUrl);
+            versionChecker.getRemoteVersion();
+        } catch(IOException e) {
+            //
         }
     }
 
@@ -170,11 +198,23 @@ class CommandLineTool {
 
             // For each source path add a ReadOp to the graph
             String readOperatorAlias = OperatorSpi.getOperatorAlias(ReadOp.class);
+            final Node readerNode = findNode(graph, readOperatorAlias);
             for (Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
                 String sourceId = entry.getKey();
                 String sourceFilepath = entry.getValue();
                 String sourceNodeId = sourceNodeIdMap.get(sourceId);
-                if (graph.getNode(sourceNodeId) == null) {
+                if(readerNode != null) {
+                    final Node n = graph.getNode(sourceId);
+                    if(n != null) {
+                        final DomElement param = new DefaultDomElement("parameters");
+                        param.createChild("file").setValue(sourceFilepath);
+                        n.setConfiguration(param);
+                    } else if(sourceId.equals(GPF.SOURCE_PRODUCT_FIELD_NAME)) {
+                        final DomElement param = new DefaultDomElement("parameters");
+                        param.createChild("file").setValue(sourceFilepath);
+                        readerNode.setConfiguration(param);
+                    }
+                } else if (graph.getNode(sourceNodeId) == null) {
 
                     DomElement configuration = new DefaultDomElement("parameters");
                     configuration.createChild("file").setValue(sourceFilepath);
@@ -185,10 +225,24 @@ class CommandLineTool {
                     graph.addNode(sourceNode);
                 }
             }
+            final SortedMap<String, String> parameterMap = lineArgs.getParameterMap();
+            for (Entry<String, String> entry : parameterMap.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                for(Node node : graph.getNodes()) {
+                    final DomElement param = node.getConfiguration();
+                    for(DomElement elem : param.getChildren()) {
+                        if(elem.getName().equals(name)) {
+                            elem.setValue(value);
+                        }
+                    }
+                }
+            }
 
             // If the graph's last node isn't a WriteOp, then add one
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
-            if (!lastNode.getOperatorName().equals(writeOperatorAlias)) {
+            final Node WriterNode = findNode(graph, writeOperatorAlias);
+            if (WriterNode == null) {
 
                 DomElement configuration = new DefaultDomElement("parameters");
                 configuration.createChild("file").setValue(lineArgs.getTargetFilepath());
@@ -200,11 +254,149 @@ class CommandLineTool {
                 targetNode.setConfiguration(configuration);
 
                 graph.addNode(targetNode);
+            } else {
+                String targetPath = lineArgs.getTargetFilepath();
+                if(targetPath == null) {
+                    targetPath = lineArgs.getTargetFilepathMap().get(lineArgs.getTargetFilepathMap().firstKey());    
+                }
+
+                final DomElement param = new DefaultDomElement("parameters");
+                param.createChild("file").setValue(targetPath);
+                if(lineArgs.getTargetFormatName() != null)
+                    param.createChild("formatName").setValue(lineArgs.getTargetFormatName());
+                param.createChild("clearCacheAfterRowWrite").setValue(Boolean.toString(lineArgs.isClearCacheAfterRowWrite()));
+                WriterNode.setConfiguration(param);
             }
 
-            executeGraph(graph);
+            final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader", lineArgs.getFileListPath());
+
+            if(productSetDataList.length != 0) {
+                replaceAllProductSets(graph, productSetDataList);
+                executeGraph(graph);
+            } else {
+                executeGraph(graph);
+            }
         }
     }
+
+    private static Node findNode(final Graph graph, final String alias) {
+        for(Node n : graph.getNodes()) {
+            if(n.getOperatorName().equals(alias))
+                return n;
+        }
+        return null;
+    }
+
+    private static ProductSetData[] findProductSetStacks(final Graph graph, final String readerName, final String fileListPath)
+                                                        throws GraphException {
+
+        final String SEPARATOR = ",";
+        final String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
+        final ArrayList<ProductSetData> productSetDataList = new ArrayList<ProductSetData>();
+
+        for(Node n : graph.getNodes()) {
+            if(n.getOperatorName().equalsIgnoreCase(readerName)) {
+                final ProductSetData psData = new ProductSetData();
+                psData.nodeID = n.getId();
+
+                boolean usingFileListPath = false;
+                if(fileListPath != null) {
+                    final File inputFolder = new File(fileListPath);
+                    if(inputFolder.isDirectory() && inputFolder.exists()) {
+                        usingFileListPath = true;
+                        final File[] files = inputFolder.listFiles();
+                        for(File file : files) {
+                            if(ProductUtils.isValidProduct(file)) {
+                                psData.fileList.add(file.getAbsolutePath());
+                            }
+                        }
+                    }
+                }
+
+                if(!usingFileListPath) {
+                    final DomElement config = n.getConfiguration();
+                    final DomElement[] params = config.getChildren();
+                    for(DomElement p : params) {
+                        if(p.getName().equals("fileList")) {
+                            if(p.getValue() == null)
+                                throw new GraphException(readerName+" fileList is empty");
+
+                            final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
+                            final int length = st.countTokens();
+                            for (int i = 0; i < length; i++) {
+                                final String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
+                                psData.fileList.add(str);
+                            }
+                            break;
+                        }
+                    }
+                }
+                productSetDataList.add(psData);
+            }
+        }
+        return productSetDataList.toArray(new ProductSetData[productSetDataList.size()]);
+    }
+
+    private static void replaceAllProductSets(final Graph graph, final ProductSetData[] productSetDataList)
+                                              throws GraphException {
+        int cnt = 0;
+        for(ProductSetData psData : productSetDataList) {
+
+            final Node psNode = graph.getNode(psData.nodeID);
+            for(String filePath : psData.fileList) {
+
+                ReplaceProductSetWithReaders(graph, psNode, "inserted--"+psNode.getId()+"--"+ cnt++, filePath);
+            }
+            if(!psData.fileList.isEmpty()) {
+                for(Node n : graph.getNodes()) {
+                    disconnectNodeSource(n, psNode.getId());        
+                }
+                graph.removeNode(psNode.getId());
+            }
+        }
+    }
+
+    private static void ReplaceProductSetWithReaders(final Graph graph, final Node psNode, final String id, String value) {
+
+        final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
+        final Xpp3DomElement config = new Xpp3DomElement("parameters");
+        final Xpp3DomElement fileParam = new Xpp3DomElement("file");
+        fileParam.setValue(value);
+        config.addChild(fileParam);
+        newNode.setConfiguration(config);
+
+        graph.addNode(newNode);
+        switchConnections(graph, newNode, psNode);
+    }
+
+    private static void switchConnections(final Graph graph, final Node newNode, final Node oldNode) {
+        for(Node n : graph.getNodes()) {
+            if(isNodeSource(n, oldNode)) {
+                final NodeSource ns = new NodeSource("sourceProduct", newNode.getId());
+                n.addSource(ns);
+            }
+        }
+    }
+
+    private static void disconnectNodeSource(final Node node, final String id) {
+        for (NodeSource ns : node.getSources()) {
+            if (ns.getSourceNodeId().equals(id)) {
+                node.removeSource(ns);
+            }
+        }
+    }
+
+    private static boolean isNodeSource(final Node node, final Node source) {
+
+        final NodeSource[] sources = node.getSources();
+        for (NodeSource ns : sources) {
+            if (ns.getSourceNodeId().equals(source.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private Map<String, Object> getParameterMap(CommandLineArgs lineArgs) throws ValidationException, IOException {
         Map<String, String> parameterMap = new HashMap<String, String>();
@@ -265,7 +457,7 @@ class CommandLineTool {
         return product;
     }
 
-    private Map<String, String> getSourceNodeIdMap(CommandLineArgs lineArgs) throws IOException {
+    private static Map<String, String> getSourceNodeIdMap(CommandLineArgs lineArgs) throws IOException {
         SortedMap<File, String> fileToNodeIdMap = new TreeMap<File, String>();
         SortedMap<String, String> nodeIdMap = new TreeMap<String, String>();
         SortedMap<String, String> sourceFilepathsMap = lineArgs.getSourceFilepathMap();
@@ -278,7 +470,7 @@ class CommandLineTool {
         return nodeIdMap;
     }
 
-    private String addNodeId(String sourceFilepath, Map<File, String> fileToNodeId) throws IOException {
+    private static String addNodeId(String sourceFilepath, Map<File, String> fileToNodeId) throws IOException {
         File sourceFile = new File(sourceFilepath).getCanonicalFile();
         String nodeId = fileToNodeId.get(sourceFile);
         if (nodeId == null) {
@@ -302,7 +494,9 @@ class CommandLineTool {
     }
 
     void executeGraph(Graph graph) throws GraphException {
+        final StopWatch stopWatch = new StopWatch();
         commandLineContext.executeGraph(graph);
+        stopWatch.stopAndTrace("Processing completed in ");
     }
 
     Map<String, String> readParameterFile(String propertiesFilepath) throws IOException {
@@ -312,5 +506,10 @@ class CommandLineTool {
     private Product createOpProduct(String opName, Map<String, Object> parameters,
                                     Map<String, Product> sourceProducts) throws OperatorException {
         return commandLineContext.createOpProduct(opName, parameters, sourceProducts);
+    }
+
+    private static class ProductSetData {
+        String nodeID = null;
+        final ArrayList<String> fileList = new ArrayList<String>();
     }
 }

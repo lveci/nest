@@ -149,7 +149,7 @@ public class OperatorExecutor {
 
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (final PlanarImage image : images) {
-                BeamLogManager.getSystemLogger().info("Scheduling tile row " + tileY + " for " + image);
+                //BeamLogManager.getSystemLogger().info("Scheduling tile row " + tileY + " for " + image);
                 for (int tileX = 0; tileX < tileCountX; tileX++) {
                     scheduleTile(image, tileX, tileY, semaphore, listeners, pm);
                 }
@@ -187,6 +187,7 @@ public class OperatorExecutor {
         //
         // Note: GPF pull-processing is triggered here!!!
         //
+        //System.out.println("sched ("+tileX+","+tileY+") ");   //NESTMOD
         tileScheduler.scheduleTiles(image, points, listeners);
         //
         /////////////////////////////////////////////////////////////////////

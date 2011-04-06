@@ -17,6 +17,7 @@
 package org.esa.beam.framework.gpf.main;
 
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
+import com.bc.ceres.core.runtime.RuntimeConfig;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 
@@ -37,6 +38,7 @@ public class Main {
         try {
             Locale.setDefault(Locale.ENGLISH); // Force usage of english locale
             SystemUtils.init3rdPartyLibs(Main.class.getClassLoader());
+            RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
             new CommandLineTool().run(args);
         } catch (Exception e) {
             System.err.println("\nError: " + e.getMessage());
