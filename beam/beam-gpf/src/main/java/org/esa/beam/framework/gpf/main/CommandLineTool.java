@@ -304,12 +304,7 @@ public static String getContextID() {
                     final File inputFolder = new File(fileListPath);
                     if(inputFolder.isDirectory() && inputFolder.exists()) {
                         usingFileListPath = true;
-                        final File[] files = inputFolder.listFiles();
-                        for(File file : files) {
-                            if(ProductUtils.isValidProduct(file)) {
-                                psData.fileList.add(file.getAbsolutePath());
-                            }
-                        }
+                        ProductUtils.scanForValidProducts(inputFolder, psData.fileList);
                     }
                 }
 
@@ -331,6 +326,9 @@ public static String getContextID() {
                         }
                     }
                 }
+                if(psData.fileList.size() == 0)
+                    throw new GraphException("no input products found in "+fileListPath);
+
                 productSetDataList.add(psData);
             }
         }
