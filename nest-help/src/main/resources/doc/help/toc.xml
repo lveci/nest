@@ -16,6 +16,9 @@
 	</tocitem>
 	
 	<tocitem text="Graph Processing">
+		<tocitem text="Introduction" target="introduction"/>
+		<tocitem text="Graph Tools">
+		</tocitem>
 	</tocitem>
 	
 	<tocitem text="Development">

@@ -32,7 +32,6 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.beam.framework.gpf.experimental.Output;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.Node;
@@ -50,7 +49,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map.Entry;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * The common command-line tool for the GPF.
@@ -268,7 +266,7 @@ public static String getContextID() {
                 WriterNode.setConfiguration(param);
             }
 
-            final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader", lineArgs.getFileListPath());
+            final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader", lineArgs.getInFolderPath());
 
             if(productSetDataList.length != 0) {
                 replaceAllProductSets(graph, productSetDataList);
