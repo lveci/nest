@@ -414,7 +414,7 @@ public class GCPSelection2Op extends Operator {
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
 
         final ArrayList<Thread> threadList = new ArrayList<Thread>();
-        final int numCPU = Runtime.getRuntime().availableProcessors()*2;
+        final int numCPU = Runtime.getRuntime().availableProcessors();
 
         int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
@@ -492,7 +492,7 @@ public class GCPSelection2Op extends Operator {
                 final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
                 if(pct >= lastPct + 10) {
                     if(lastPct==0) {
-                        System.out.print("Cross Correlating "+bandCountStr+" "+slaveBand.getName()+" ...");
+                        System.out.print("Cross Correlating "+bandCountStr+" "+slaveBand.getName()+"...");
                     } 
                     System.out.print(" "+pct+"%");
                     lastPct = pct;

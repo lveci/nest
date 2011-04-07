@@ -38,7 +38,7 @@ import java.awt.image.*;
  * {@link DataBuffer#TYPE_FLOAT TYPE_FLOAT} and
  * {@link DataBuffer#TYPE_DOUBLE TYPE_DOUBLE} datatypes.
  */
-public class SingleBandedSampleModel extends ComponentSampleModelJAI {
+public final class SingleBandedSampleModel extends ComponentSampleModelJAI {
     /**
      * Constructs a SingleBandSampleModel with the specified parameters.
      * The number of bands will be given by the length of the bandOffsets
@@ -235,12 +235,19 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public int[] getSamples(int x, int y, int w, int h, int b, int array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (array == null) {
             array = new int[w * h];
         }
         if (dataType == DataBuffer.TYPE_INT) {
             getSamplesFast(x, y, w, h, array, ((DataBufferInt) data).getData(), data.getOffset());
+        } else if (dataType == DataBuffer.TYPE_SHORT) {
+            final short[] dataArray = new short[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferShort) data).getData(), data.getOffset());
+            int i =0;
+            for(short v : dataArray) {
+                array[i++] = v;
+            }
         } else {
             super.getSamples(x, y, w, h, b, array, data);
         }
@@ -252,29 +259,71 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public float[] getSamples(int x, int y, int w, int h, int b, float array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (array == null) {
             array = new float[w * h];
         }
         if (dataType == DataBuffer.TYPE_FLOAT) {
             getSamplesFast(x, y, w, h, array, ((DataBufferFloat) data).getData(), data.getOffset());
+        } else if (dataType == DataBuffer.TYPE_SHORT) {
+            final short[] dataArray = new short[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferShort) data).getData(), data.getOffset());
+            int i =0;
+            for(short v : dataArray) {
+                array[i++] = v;
+            }
+        } else if (dataType == DataBuffer.TYPE_INT) {
+            final int[] dataArray = new int[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferInt) data).getData(), data.getOffset());
+            int i =0;
+            for(int v : dataArray) {
+                array[i++] = v;
+            }
         } else {
-            super.getSamples(x, y, w, h, b, array, data);
+            //super.getSamples(x, y, w, h, b, array, data);
+            int   Offset=0;
+            for (int i=y; i<(h+y); i++) {
+                for (int j=x; j<(w+x); j++) {
+                array[Offset++] = getSampleFloat(j, i, b, data);
+                }
+            }
         }
         return array;
     }
+
 
     /**
      * @inheritDoc
      */
     @Override
     public double[] getSamples(int x, int y, int w, int h, int b, double array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (array == null) {
             array = new double[w * h];
         }
         if (dataType == DataBuffer.TYPE_DOUBLE) {
             getSamplesFast(x, y, w, h, array, ((DataBufferDouble) data).getData(), data.getOffset());
+        } else if (dataType == DataBuffer.TYPE_SHORT) {
+            final short[] dataArray = new short[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferShort) data).getData(), data.getOffset());
+            int i =0;
+            for(short v : dataArray) {
+                array[i++] = v;
+            }
+        } else if (dataType == DataBuffer.TYPE_INT) {
+            final int[] dataArray = new int[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferInt) data).getData(), data.getOffset());
+            int i =0;
+            for(int v : dataArray) {
+                array[i++] = v;
+            }
+        } else if (dataType == DataBuffer.TYPE_FLOAT) {
+            final float[] dataArray = new float[w * h];
+            getSamplesFast(x, y, w, h, dataArray, ((DataBufferFloat) data).getData(), data.getOffset());
+            int i =0;
+            for(float v : dataArray) {
+                array[i++] = v;
+            }
         } else {
             super.getSamples(x, y, w, h, b, array, data);
         }
@@ -286,7 +335,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSamples(int x, int y, int w, int h, int b, int array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (dataType == DataBuffer.TYPE_INT) {
             setSamplesFast(x, y, w, h, array, ((DataBufferInt) data).getData(), data.getOffset());
         } else {
@@ -299,7 +348,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSamples(int x, int y, int w, int h, int b, float array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (dataType == DataBuffer.TYPE_FLOAT) {
             setSamplesFast(x, y, w, h, array, ((DataBufferFloat) data).getData(), data.getOffset());
         } else {
@@ -312,7 +361,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSamples(int x, int y, int w, int h, int b, double array[], DataBuffer data) {
-        checkBounds(x, y, w, h);
+        //checkBounds(x, y, w, h);
         if (dataType == DataBuffer.TYPE_DOUBLE) {
             setSamplesFast(x, y, w, h, array, ((DataBufferDouble) data).getData(), data.getOffset());
         } else {
@@ -325,7 +374,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public int getSample(int x, int y, int b, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         return data.getElem(y * width + x);
     }
 
@@ -334,7 +383,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public float getSampleFloat(int x, int y, int b, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         return data.getElemFloat(y * width + x);
     }
 
@@ -343,7 +392,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public double getSampleDouble(int x, int y, int b, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         return data.getElemDouble(y * width + x);
     }
 
@@ -352,7 +401,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSample(int x, int y, int b, int s, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         data.setElem(y * width + x, s);
     }
 
@@ -361,7 +410,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSample(int x, int y, int b, float s, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         data.setElemFloat(y * width + x, s);
     }
 
@@ -370,7 +419,7 @@ public class SingleBandedSampleModel extends ComponentSampleModelJAI {
      */
     @Override
     public void setSample(int x, int y, int b, double s, DataBuffer data) {
-        checkBounds(x, y);
+        //checkBounds(x, y);
         data.setElemDouble(y * width + x, s);
     }
 

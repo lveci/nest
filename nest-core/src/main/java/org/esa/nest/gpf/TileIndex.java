@@ -5,7 +5,7 @@ import org.esa.beam.framework.gpf.Tile;
 /**
  * calculates the index into a tile
  */
-public class TileIndex {
+public final class TileIndex {
 
     private final int tileOffset;
     private final int tileStride;

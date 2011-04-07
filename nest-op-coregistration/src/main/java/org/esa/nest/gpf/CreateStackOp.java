@@ -648,18 +648,29 @@ public class CreateStackOp extends Operator {
                 final TileIndex trgIndex = new TileIndex(targetTile);
                 final TileIndex srcIndex = new TileIndex(srcTile);
 
+                boolean isInt = false;
+                final int trgDataType = trgData.getType();
+                if(trgDataType == srcData.getType() &&
+                  (trgDataType == ProductData.TYPE_INT16 || trgDataType == ProductData.TYPE_INT32)) {
+                    isInt = true;
+                }
+
                 for (int ty = ty0; ty < maxY; ++ty) {
                     final int sy = ty + offset[1];
+                    final boolean yOutofBounds = sy < 0 || sy >= srcImageHeight;
                     trgIndex.calculateStride(ty);
                     srcIndex.calculateStride(sy);
                     for (int tx = tx0; tx < maxX; ++tx) {
                         final int targIndex = trgIndex.getIndex(tx);
                         final int sx = tx + offset[0];
 
-                        if (sx < 0 || sx >= srcImageWidth || sy < 0 || sy >= srcImageHeight) {
+                        if (sx < 0 || sx >= srcImageWidth || yOutofBounds) {
                             trgData.setElemDoubleAt(targIndex, noDataValue);
                         } else {
-                            trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
+                            if(isInt)
+                                trgData.setElemIntAt(targIndex, srcData.getElemIntAt(srcIndex.getIndex(sx)));
+                            else
+                                trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
                         }
                     }
                     pm.worked(1);

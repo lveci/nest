@@ -2653,7 +2653,7 @@ public class ProductUtils {
 
     //NESTMOD
 
-    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5",".tif",".xml"};
+    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5",".tif"};
 
     private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
@@ -2669,12 +2669,12 @@ public class ProductUtils {
         for(String str : validExtensions) {
             if(ext.equals(str)) {
                 return true;
-            } else {
-                final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                if(reader != null)
-                    return true;
             }
         }
+        // test with readers
+        final ProductReader reader = ProductIO.getProductReaderForFile(file);
+        if(reader != null)
+            return true;
 
         return false;
     }
