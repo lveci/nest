@@ -12,18 +12,8 @@
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 	<funding>European Space Agency</funding>
 	
-	<dependency>
-        <module>beam-core</module>
-    </dependency>
     <dependency>
-        <module>beam-visat-rcp</module>
-        <optional>true</optional>
-    </dependency>
-    <dependency>
-        <module>beam-gpf</module>
-    </dependency>
-    <dependency>
-      <module>nest-core</module>
+      <module>nest-reader-dem</module>
     </dependency>
     <dependency>
       <module>nest-graph-builder</module>

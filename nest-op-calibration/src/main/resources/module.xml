@@ -11,25 +11,18 @@
     <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 	<funding>European Space Agency</funding>
-	
+
     <dependency>
-        <module>beam-core</module>
-    </dependency>
-    <dependency>
-        <module>beam-visat-rcp</module>
-        <optional>true</optional>
-    </dependency>
-    <dependency>
-        <module>beam-gpf</module>
+        <module>nest-graph-builder</module>
     </dependency>
     <dependency>
         <module>beam-envisat-reader</module>
     </dependency>
     <dependency>
-        <module>nest-core</module>
+        <module>nest-reader-ers-ceos</module>
     </dependency>
     <dependency>
-        <module>nest-graph-builder</module>
+        <module>nest-reader-xml-based</module>
     </dependency>
 
     <categories>VISAT,Processing</categories>
