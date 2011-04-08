@@ -124,4 +124,5 @@
 	<mapID target="using_dat" url="tutorials/using_dat.html"/>
 	<mapID target="coregistration" url="tutorials/coregistering_products.html"/>
 	<mapID target="terrain_correction" url="tutorials/terrain_correction.html"/>
+	<mapID target="commandLineProcessing" url="tutorials/commandLineProcessing.html"/>
 </map>
