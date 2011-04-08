@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.8 $ $Date: 2011-02-08 14:39:51 $
+ * @version $Revision: 1.9 $ $Date: 2011-04-08 18:23:59 $
  */
 public class SearchMetadataAction extends ExecCommand {
 

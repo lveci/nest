@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.21 $ $Date: 2011-02-23 22:23:34 $
+ * @version $Revision: 1.22 $ $Date: 2011-04-08 18:23:59 $
  */
 class ERSImageFile extends CEOSImageFile {
 

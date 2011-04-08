@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -71,7 +71,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.19 $ $Date: 2011-02-19 23:20:59 $
+ * @version $Revision: 1.20 $ $Date: 2011-04-08 18:23:59 $
  */
 public class NestWWToolView extends AbstractToolView {
 

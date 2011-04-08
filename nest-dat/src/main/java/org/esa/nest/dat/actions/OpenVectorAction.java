@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,7 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.SelectLayerSourceAssis
  * This action opens a vector dataset
  *
  * @author lveci
- * @version $Revision: 1.6 $ $Date: 2010-08-17 16:05:27 $
+ * @version $Revision: 1.7 $ $Date: 2011-04-08 18:23:59 $
  */
 public class OpenVectorAction extends AbstractVisatAction {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,7 +23,7 @@ import org.esa.nest.dat.toolviews.Projects.Project;
  * This action opens a project.
  *
  * @author lveci
- * @version $Revision: 1.2 $ $Date: 2010-08-17 16:05:27 $
+ * @version $Revision: 1.3 $ $Date: 2011-04-08 18:23:59 $
  */
 public class CloseProjectAction extends ExecCommand {
 

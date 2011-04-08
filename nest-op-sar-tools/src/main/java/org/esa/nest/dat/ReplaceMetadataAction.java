@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.1 $ $Date: 2011-03-14 19:58:01 $
+ * @version $Revision: 1.2 $ $Date: 2011-04-08 18:23:59 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 
