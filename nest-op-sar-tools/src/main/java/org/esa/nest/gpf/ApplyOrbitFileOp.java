@@ -651,10 +651,14 @@ public final class ApplyOrbitFileOp extends Operator {
             final File localFile = new File(localPath, fileName);
             if(localFile.exists() && localFile.length() == fileSize)
                 continue;
-
-            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
-            if(result != ftpUtils.FTPError.OK) {
+            try {
+                final ftpUtils.FTPError result = ftp.retrieveFile(remotePath +"/"+ fileName, localFile, fileSize);
+                if(result != ftpUtils.FTPError.OK) {
+                    localFile.delete();
+                }
+            } catch(Exception e) {
                 localFile.delete();
+                System.out.println(e.getMessage());
             }
 
             pm.worked(1);

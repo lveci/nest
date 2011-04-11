@@ -131,8 +131,6 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
         final VersionChecker versionChecker = new VersionChecker();
         versionChecker.setLocalVersionFile(new File(ResourceUtils.findHomeFolder(), "VERSION.txt"));
         versionChecker.setRemoteVersionUrlString(remoteVersionUrl);
-        VisatApp.getApp().getLogger().info(
-                "comparing local software version with the one from " + versionChecker.getRemoteVersionUrlString());
         return versionChecker.compareVersions();
     }
 

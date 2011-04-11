@@ -40,9 +40,9 @@ public class TestDatUtils extends TestCase {
 
     public void testFindHomeFolder()
     {
-        final File file = ResourceUtils.findInHomeFolder(File.separator + "config" + File.separator + "settings_win.xml");
+        final File homeFolder = ResourceUtils.findHomeFolder();
+        final File file = new File(homeFolder, "config" + File.separator + "settings_win.xml");
 
-        assertTrue(file != null);
         assertTrue(file.exists());
     }
 }

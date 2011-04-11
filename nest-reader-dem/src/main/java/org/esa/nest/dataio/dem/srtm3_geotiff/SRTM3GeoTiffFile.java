@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -146,12 +147,16 @@ public final class SRTM3GeoTiffFile {
                 localFile.delete();
             }
             return false;
+        } catch(SocketException e) {
+            unrecoverableError = true;
+            throw e;
         } catch(Exception e) {
             System.out.println(e.getMessage());
             if(ftp == null) {
                 unrecoverableError = false;      // allow to continue
                 remoteFileExists = false;
-                throw new IOException("Failed to connect to FTP "+ remoteFTP);
+                throw new IOException("Failed to connect to FTP "+ remoteFTP+
+                                      "\n"+e.getMessage());
             }
             dispose();
         }

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ public final class ftpUtils {
         }
     }
 
-    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) {
+    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws SocketException {
         FileOutputStream fos = null;
         InputStream fis = null;
         try {
@@ -123,6 +124,9 @@ public final class ftpUtils {
             ftpClient.completePendingCommand();
             return FTPError.OK;
 
+        } catch (SocketException e) {
+            System.out.println(e.getMessage());
+            throw new SocketException(e.getMessage()+"\nPlease verify that FTP is not blocked by your firewall.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return FTPError.READ_ERROR;

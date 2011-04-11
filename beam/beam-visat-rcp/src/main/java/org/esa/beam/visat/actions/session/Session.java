@@ -86,6 +86,12 @@ public class Session {
     @XStreamAlias("views")
     final ViewRef[] viewRefs;
 
+    public Session() {
+        modelVersion = CURRENT_MODEL_VERSION;
+        productRefs = null;
+        viewRefs = null;
+    }
+
     public Session(URI rootURI, Product[] products, ProductNodeView[] views) {
         modelVersion = CURRENT_MODEL_VERSION;
 
@@ -497,6 +503,11 @@ public class Session {
         @XStreamConverter(URIConverterWrapper.class)
         final URI uri;
 
+        public ProductRef() {
+            refNo = 0;
+            uri = null;
+        }
+
         public ProductRef(int refNo, URI uri) {
             this.refNo = refNo;
             this.uri = uri;
@@ -521,6 +532,20 @@ public class Session {
 
         @XStreamAlias("layers")
         final LayerRef[] layerRefs;
+
+        public ViewRef() {
+            this.id = 0;
+            this.type = "";
+            this.bounds = null;
+            this.viewportDef = null;
+            this.productRefNo = 0;
+            this.productNodeName = "";
+            this.viewName = "";
+            this.expressionR = "";
+            this.expressionG = "";
+            this.expressionB = "";
+            this.layerRefs = null;
+        }
 
         public ViewRef(int id, String type, Rectangle bounds,
                        ViewportDef viewportDef, int productRefNo,
