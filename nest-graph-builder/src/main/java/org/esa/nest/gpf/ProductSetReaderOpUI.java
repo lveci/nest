@@ -200,6 +200,12 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         return files;
     }
 
+    public void setProductFileList(final File[] productFileList) {
+        fileModel.clear();
+        for(File file : productFileList) {
+            fileModel.addFile(file);
+        }
+    }
 
     public static class FileModel extends AbstractTableModel {
 

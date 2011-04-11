@@ -24,6 +24,8 @@ import org.esa.nest.db.ProductEntry;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -32,17 +34,15 @@ import java.util.ArrayList;
  * User: lveci
  * Date: Feb 5, 2009
  */
-public class ProductSetPanel {
+public class ProductSetPanel extends JPanel {
 
-    private final AppContext appContext;
     private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
-    private final JTable productSetTable = new JTable(fileModel);
     private final TargetFolderSelector targetProductSelector;
 
     private String targetProductNameSuffix = "";
 
-    ProductSetPanel(final AppContext theAppContext, final JTabbedPane tabbedPane) {
-        this.appContext = theAppContext;
+    public ProductSetPanel(final AppContext theAppContext) {
+        super(new BorderLayout());
 
         final TableLayout tableLayout = new TableLayout(1);
         tableLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
@@ -50,20 +50,18 @@ public class ProductSetPanel {
         tableLayout.setTableFill(TableLayout.Fill.BOTH);
         tableLayout.setTablePadding(1, 1);
 
+        final JTable productSetTable = new JTable(fileModel);
         final JComponent productSetContent = ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
-        final JPanel ioParametersPanel = new JPanel(tableLayout);
-        ioParametersPanel.add(productSetContent);
+        this.add(productSetContent, BorderLayout.NORTH);
 
         targetProductSelector = new TargetFolderSelector();
-        String homeDirPath = SystemUtils.getUserHomeDir().getPath();
-        String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
+        final String homeDirPath = SystemUtils.getUserHomeDir().getPath();
+        final String saveDir = theAppContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
         targetProductSelector.getModel().setProductDir(new File(saveDir));
-        targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
+        targetProductSelector.getOpenInAppCheckBox().setText("Open in " + theAppContext.getApplicationName());
         targetProductSelector.getOpenInAppCheckBox().setVisible(false);
 
-        ioParametersPanel.add(targetProductSelector.createPanel());
-
-        tabbedPane.add("I/O Parameters", ioParametersPanel);
+        this.add(targetProductSelector.createPanel(), BorderLayout.SOUTH);
     }
 
     public void setTargetProductName(final String name) {
@@ -110,6 +108,13 @@ public class ProductSetPanel {
 
     public Object getValueAt(final int r, final int c) {
         return fileModel.getValueAt(r, c);
+    }
+
+    public void setProductFileList(final File[] productFileList) {
+        fileModel.clear();
+        for(File file : productFileList) {
+            fileModel.addFile(file);
+        }
     }
 
     public void setProductEntryList(final ProductEntry[] productEntryList) {

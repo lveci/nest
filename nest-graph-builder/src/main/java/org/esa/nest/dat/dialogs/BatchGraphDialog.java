@@ -86,8 +86,6 @@ public class BatchGraphDialog extends ModelessDialog {
         });
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
-        productSetPanel = new ProductSetPanel(appContext, tabbedPane);
-
         // status
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));
@@ -111,17 +109,22 @@ public class BatchGraphDialog extends ModelessDialog {
         progressPanel.setVisible(false);
         mainPanel.add(progressPanel, BorderLayout.SOUTH);
 
+        productSetPanel = new ProductSetPanel(appContext);
+        tabbedPane.add("I/O Parameters", productSetPanel);
+
         getButton(ID_APPLY).setText("Run");
         getButton(ID_YES).setText("Load");
 
         graphFile = new File(graphPath+File.separator+"internal", "importGraph.xml");
+
+        setContent(mainPanel);
         super.getJDialog().setMinimumSize(new Dimension(400, 300));
     }
 
     @Override
     public int show() {
-        productSetPanel.initProducts();
-        setContent(mainPanel);
+        //productSetPanel.initProducts();
+        //setContent(mainPanel);
         //initGraphs();
         //addGraphTabs("", true);
         return super.show();
@@ -159,6 +162,12 @@ public class BatchGraphDialog extends ModelessDialog {
         listenerList.remove(listener);
     }
 
+    private void notifyMSG(final BatchProcessListener.BatchMSG msg, final String text) {
+        for (final BatchProcessListener listener : listenerList) {
+            listener.notifyMSG(msg, text);
+        }
+    }
+
     private void notifyMSG(final BatchProcessListener.BatchMSG msg) {
         for (final BatchProcessListener listener : listenerList) {
             listener.notifyMSG(msg, targetFileMap);
@@ -176,6 +185,10 @@ public class BatchGraphDialog extends ModelessDialog {
         if(file != null) {
             LoadGraphFile(file);
         }
+    }
+
+    public void setInputFiles(final File[] productFileList) {
+        productSetPanel.setProductFileList(productFileList);
     }
 
     public void setInputFiles(final ProductEntry[] productEntryList) {
@@ -271,6 +284,8 @@ public class BatchGraphDialog extends ModelessDialog {
     private boolean ValidateAllNodes() {
         if(isProcessing) return false;
         if(productSetPanel == null)
+            return false;
+        if(graphExecuterList.isEmpty())
             return false;
 
         boolean result;
@@ -373,7 +388,7 @@ public class BatchGraphDialog extends ModelessDialog {
                 name = FileUtils.getFilenameWithoutExtension(f);
 
             final File targetFile = new File(productSetPanel.getTargetFolder(), name);
-            targetFileMap.put(f, targetFile);
+            targetFileMap.put(f, new File(productSetPanel.getTargetFolder(), f.getName()));
 
             setIO(graphExecuterList.get(graphIndex),
                 "Read", f,
@@ -452,6 +467,11 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
+    public ArrayList<File> getBatchProcessedTargetProducts() {
+        final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
+        return graphEx.getProductsToOpenInDAT();
+    }
+
     void cleanUpTempFiles() {
 
     }
@@ -483,7 +503,9 @@ public class BatchGraphDialog extends ModelessDialog {
 
                     try {
                         final String nOfm = String.valueOf(graphIndex+1)+" of "+fileList.length + ' ';
-                        statusLabel.setText("Processing "+ nOfm +fileList[graphIndex].getName());
+                        final String statusText = "Processing "+ nOfm +fileList[graphIndex].getName();
+                        statusLabel.setText(statusText);
+                        notifyMSG(BatchProcessListener.BatchMSG.UPDATE, statusText);
 
                         JAI.getDefaultInstance().getTileCache().flush();
                         System.gc();
@@ -547,9 +569,10 @@ public class BatchGraphDialog extends ModelessDialog {
 
     public interface BatchProcessListener {
 
-        public enum BatchMSG { DONE, CLOSE }
+        public enum BatchMSG { DONE, UPDATE, CLOSE }
 
         public void notifyMSG(final BatchMSG msg, final Map<File, File> targetFileMap);
+        public void notifyMSG(final BatchMSG msg, final String text);
     }
 
 }

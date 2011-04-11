@@ -28,6 +28,8 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.gpf.ProductSetReaderOpUI;
+import org.esa.nest.gpf.ProductSetReaderOp;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -344,6 +346,19 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphPanel.repaint();
         initGraphEnabled = true;
         statusLabel.setText("");
+    }
+
+    /**
+     * pass in a file list for a ProductSetReader
+     * @param productFileList the product files
+     */
+    public void setInputFiles(final File[] productFileList) {
+        final GraphNode productSetNode = graphEx.findGraphNodeByOperator(
+                ProductSetReaderOp.Spi.getOperatorAlias(ProductSetReaderOp.class));
+        if(productSetNode != null) {
+            ProductSetReaderOpUI ui = (ProductSetReaderOpUI)productSetNode.GetOperatorUI();
+            ui.setProductFileList(productFileList);
+        }
     }
 
     /**
