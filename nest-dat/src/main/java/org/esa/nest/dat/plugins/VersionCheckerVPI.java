@@ -24,6 +24,7 @@ import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.VersionChecker;
 import org.esa.beam.visat.AbstractVisatPlugIn;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.nest_mods.VersionUtil;
 import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
@@ -54,10 +55,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
      * @param visatApp a reference to the VISAT application instance.
      */
     public void start(VisatApp visatApp) {
-        final String contextID = ResourceUtils.getContextID();
-
-        remoteVersionUrl += contextID + "_getversion.php?u="+System.getProperty("user.name")+
-                "&r="+System.getProperty("user.country")+"&v="+System.getProperty(contextID+".version");
+        remoteVersionUrl = VersionUtil.getRemoteVersionURL("DAT");
 
         if (!isVersionCheckQuestionSuppressed() || isVersionCheckEnabled()) {
             final Timer timer = new Timer(DELAY_MILLIS, new ActionListener() {
