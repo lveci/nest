@@ -86,7 +86,7 @@ public final class DBScanner extends SwingWorker {
         try {
             for(File file : fileList) {
                 ++i;
-                pm.setTaskName("Scanning Files... "+i+" of "+total);
+                pm.setTaskName("Scanning "+i+" of "+total);
                 pm.worked(1);
 
                 if(!file.isDirectory()) {

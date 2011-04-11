@@ -16,13 +16,16 @@
 package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
 
@@ -254,5 +257,19 @@ public class ProductEntry {
         geoBound[2] = getLastFarGeoPos();
         geoBound[3] = getLastNearGeoPos();
         return geoBound;
+    }
+
+    public static ProductEntry[] createProductEntryList(final File[] fileList) {
+        final ArrayList<ProductEntry> entryList = new ArrayList<ProductEntry>(fileList.length);
+        for(File file : fileList) {
+            try {
+                final Product prod = ProductIO.readProduct(file);
+                entryList.add(new ProductEntry(prod));
+                prod.dispose();
+            } catch(IOException e) {
+                // continue
+            }
+        }
+        return entryList.toArray(new ProductEntry[entryList.size()]);
     }
 }

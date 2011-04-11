@@ -266,7 +266,8 @@ public final class ResourceUtils {
                 return outFile3;
         }
 
-        return findInHomeFolder(File.separator + "config" + File.separator + filename);
+        final File homeFolder = ResourceUtils.findHomeFolder();
+        return new File(homeFolder, "config" + File.separator + filename);
     }
 
     public static File findHomeFolder()
