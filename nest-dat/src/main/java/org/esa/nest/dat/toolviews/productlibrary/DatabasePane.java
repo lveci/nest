@@ -235,6 +235,8 @@ public class DatabasePane extends JPanel {
         gbc.gridwidth = 1;
         this.add(updateButton, gbc);
         updateButton.setMaximumSize(new Dimension(3, 3));
+
+        DialogUtils.fillPanel(this, gbc);
     }
 
     private void connectToDatabase() throws Exception {

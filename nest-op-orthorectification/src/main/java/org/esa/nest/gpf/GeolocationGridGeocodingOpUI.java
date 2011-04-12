@@ -80,23 +80,22 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("projectionName", projectionName.getSelectedItem());
     }
 
-    JComponent createPanel() {
+    private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
+        final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 1;
         contentPane.add(new JScrollPane(bandList), gbc);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }

@@ -122,76 +122,77 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
 
     private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints _gbc = DialogUtils.createGridBagConstraints();
-        
-        contentPane.add(new JLabel("Source Bands:"), _gbc);
-        _gbc.fill = GridBagConstraints.BOTH;
-        _gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), _gbc);
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
-        _gbc.gridy++;
-        _gbc.gridx = 0;
-        contentPane.add(new JLabel("Filter:"), _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(filter, _gbc);
+        final JPanel contentPane = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
+
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Filter:", filter);
+
         filter.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                String item = (String)filter.getSelectedItem();
-                if(item.equals(SpeckleFilterOp.FROST_SPECKLE_FILTER)) {
-                    DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, true);
-                } else {
-                    DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
-                }
-
-                if (item.equals(SpeckleFilterOp.LEE_REFINED_FILTER)) {
-                    DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, true);
-                    DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, false);
-                    DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, false);
-                } else {
-                    DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, false);
-                    DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
-                    DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
-                }
-
-                if (item.equals(SpeckleFilterOp.GAMMA_MAP_SPECKLE_FILTER) ||
-                    item.equals(SpeckleFilterOp.LEE_SPECKLE_FILTER)) {
-                    DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, true);
-                    DialogUtils.enableComponents(enlLabel, enl, true);
-                    estimateENLCheckBox.getModel().setPressed(true);
-                    estimateENLCheckBox.setSelected(true);
-                    enl.setEnabled(false);
-                } else {
-                    DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, false);
-                    DialogUtils.enableComponents(enlLabel, enl, false);
-                }
+                updateFilterSelection();
             }
         });
 
-        int savedY = ++_gbc.gridy;
-        DialogUtils.addComponent(contentPane, _gbc, filterSizeXLabel, filterSizeX);
+        gbc.gridy++;
+        final int savedY = gbc.gridy;
+        DialogUtils.addComponent(contentPane, gbc, filterSizeXLabel, filterSizeX);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, filterSizeYLabel, filterSizeY);
+
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, dampingFactorLabel, dampingFactor);
+
+        DialogUtils.addComponent(contentPane, gbc, estimateENLCheckBoxLabel, estimateENLCheckBox);
+
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, enlLabel, enl);
+
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, edgeThresholdLabel, edgeThreshold);
+
+        gbc.weightx = 1.0;
+        contentPane.add(new JPanel(), gbc);
+
         DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, filterSizeYLabel, filterSizeY);
         DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
-
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, dampingFactorLabel, dampingFactor);
         DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
-
-        DialogUtils.addComponent(contentPane, _gbc, estimateENLCheckBoxLabel, estimateENLCheckBox);
         DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, false);
-
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, enlLabel, enl);
         DialogUtils.enableComponents(enlLabel, enl, false);
-
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, edgeThresholdLabel, edgeThreshold);
         DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, false);
 
         return contentPane;
     }
 
+    private void updateFilterSelection() {
+        final String item = (String)filter.getSelectedItem();
+        if(item.equals(SpeckleFilterOp.FROST_SPECKLE_FILTER)) {
+            DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, true);
+        } else {
+            DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
+        }
+
+        if (item.equals(SpeckleFilterOp.LEE_REFINED_FILTER)) {
+            DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, true);
+            DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, false);
+            DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, false);
+        } else {
+            DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, false);
+            DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
+            DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
+        }
+
+        if (item.equals(SpeckleFilterOp.GAMMA_MAP_SPECKLE_FILTER) ||
+                item.equals(SpeckleFilterOp.LEE_SPECKLE_FILTER)) {
+            DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, true);
+            DialogUtils.enableComponents(enlLabel, enl, true);
+            estimateENLCheckBox.getModel().setPressed(true);
+            estimateENLCheckBox.setSelected(true);
+            enl.setEnabled(false);
+        } else {
+            DialogUtils.enableComponents(estimateENLCheckBoxLabel, estimateENLCheckBox, false);
+            DialogUtils.enableComponents(enlLabel, enl, false);
+        }
+    }
 }

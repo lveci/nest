@@ -145,20 +145,13 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
     private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints _gbc = DialogUtils.createGridBagConstraints();
+        final JPanel contentPane = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), _gbc);
-        _gbc.fill = GridBagConstraints.BOTH;
-        _gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), _gbc);
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
-        _gbc.gridy++;
-        _gbc.gridx = 0;
-        contentPane.add(new JLabel("Under-Sampling Method:"), _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(method, _gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
+
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Under-Sampling Method:", method);
         method.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
                 String item = (String)method.getSelectedItem();
@@ -174,17 +167,17 @@ public class UndersamplingOpUI extends BaseOperatorUI {
             }
         });
 
-        int savedY = ++_gbc.gridy;
-        DialogUtils.addComponent(contentPane, _gbc, subSamplingXLabel, subSamplingX);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, subSamplingYLabel, subSamplingY);
+        int savedY = ++gbc.gridy;
+        DialogUtils.addComponent(contentPane, gbc, subSamplingXLabel, subSamplingX);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, subSamplingYLabel, subSamplingY);
 
-        _gbc.gridy = savedY;
-        _gbc.gridx = 0;
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, filterSizeLabel, filterSize);
         /*
-        contentPane.add(filterTypeLabel, _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(filterType, _gbc);
+        contentPane.add(filterTypeLabel, gbc);
+        gbc.gridx = 1;
+        contentPane.add(filterType, gbc);
         filterType.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
                 String item = (String)filterType.getSelectedItem();
@@ -198,45 +191,40 @@ public class UndersamplingOpUI extends BaseOperatorUI {
             }
         });
 
-        savedY = ++_gbc.gridy;
-        _gbc.gridx = 0;
+        savedY = ++gbc.gridy;
+        gbc.gridx = 0;
         */
-        contentPane.add(filterSizeLabel, _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(filterSize, _gbc);
         enableKernelFiltering(false);
         /*
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, kernelFileLabel, kernelFile);
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, kernelFileLabel, kernelFile);
         DialogUtils.enableComponents(kernelFileLabel, kernelFile, false);
         */
-        _gbc.gridy++;
-        _gbc.gridx = 0;
-        contentPane.add(outputImageByLabel, _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(outputImageBy, _gbc);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, outputImageByLabel, outputImageBy);
         outputImageBy.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
                 updateOutputImageBy(true);
             }
         });
 
-        savedY = ++_gbc.gridy;
-        DialogUtils.addComponent(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        savedY = ++gbc.gridy;
+        DialogUtils.addComponent(contentPane, gbc, targetImageHeightLabel, targetImageHeight);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, targetImageWidthLabel, targetImageWidth);
         
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, widthRatioLabel, widthRatio);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, heightRatioLabel, heightRatio);
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, widthRatioLabel, widthRatio);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, heightRatioLabel, heightRatio);
 
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, rangeSpacingLabel, rangeSpacing);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(false);
+        DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }

@@ -157,18 +157,16 @@ public class CalibrationOpUI extends BaseOperatorUI {
         paramMap.put("createBetaBand", createBeta0VirtualBand);
     }
 
-    JComponent createPanel() {
+    private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
+        final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 1;
         contentPane.add(new JScrollPane(bandList), gbc);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Auxiliary File:", auxFile);
@@ -185,7 +183,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
         gbc.gridy++;
         contentPane.add(createBeta0VirtualBandCheckBox, gbc);
 
-        //DialogUtils.fillPanel(contentPane, gbc);
+        DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }

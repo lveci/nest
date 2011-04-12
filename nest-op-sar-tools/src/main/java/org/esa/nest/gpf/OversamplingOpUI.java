@@ -98,43 +98,36 @@ public class OversamplingOpUI extends BaseOperatorUI {
 
     private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints _gbc = DialogUtils.createGridBagConstraints();
+        final JPanel contentPane = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), _gbc);
-        _gbc.fill = GridBagConstraints.BOTH;
-        _gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), _gbc);
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
 
-        _gbc.gridy++;
-        _gbc.gridx = 0;
-        contentPane.add(outputImageByLabel, _gbc);
-        _gbc.gridx = 1;
-        contentPane.add(outputImageBy, _gbc);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, outputImageByLabel, outputImageBy);
         outputImageBy.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
                 updateOutputImageBy(true);
             }
         });
 
-        int savedY = ++_gbc.gridy;
-        DialogUtils.addComponent(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        int savedY = ++gbc.gridy;
+        DialogUtils.addComponent(contentPane, gbc, targetImageHeightLabel, targetImageHeight);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, targetImageWidthLabel, targetImageWidth);
 
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, widthRatioLabel, widthRatio);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, heightRatioLabel, heightRatio);
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, widthRatioLabel, widthRatio);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, heightRatioLabel, heightRatio);
 
-        _gbc.gridy = savedY;
-        DialogUtils.addComponent(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, gbc, rangeSpacingLabel, rangeSpacing);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(true);
+        DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }
