@@ -39,8 +39,8 @@ import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.StopWatch;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.nest_mods.VersionUtil;
+import org.esa.beam.nest_mods.ProductFunctions;
 
 import javax.media.jai.JAI;
 import java.io.File;
@@ -280,7 +280,7 @@ class CommandLineTool {
                     final File inputFolder = new File(fileListPath);
                     if(inputFolder.isDirectory() && inputFolder.exists()) {
                         usingFileListPath = true;
-                        ProductUtils.scanForValidProducts(inputFolder, psData.fileList);
+                        ProductFunctions.scanForValidProducts(inputFolder, psData.fileList);
                     }
                 }
 
