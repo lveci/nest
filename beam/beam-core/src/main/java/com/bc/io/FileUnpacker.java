@@ -36,7 +36,7 @@ import javax.swing.ProgressMonitor;
  * A utility class for unpacking file archives.
  *
  * @author Norman Fomferra
- * @version
+
  */
 public class FileUnpacker {
 
