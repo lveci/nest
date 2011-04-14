@@ -606,7 +606,7 @@ public class ProductUtils {
     /**
      * Creates the boundary in map coordinates for the given product, source rectangle (in product pixel coordinates)
      * and the given map transfromation. The method delegates to {@link #createMapEnvelope(org.esa.beam.framework.datamodel.Product,
-     * java.awt.Rectangle,int,org.esa.beam.framework.dataop.maptransf.MapTransform) createMapEnvelope(product, rect,
+     * java.awt.Rectangle, int, org.esa.beam.framework.dataop.maptransf.MapTransform) createMapEnvelope(product, rect,
      * step, mapTransform)} where <code>step</code> is the half of the minimum of the product scene raster width and
      * height.
      *
@@ -626,7 +626,7 @@ public class ProductUtils {
     /**
      * Creates the boundary in map coordinates for the given product, source rectangle (in product
      * pixel coordinates) and the given map transfromation. The method delegates to
-     * {@link #createMapBoundary(Product, Rectangle,int,MapTransform) createMapBoundary(product, rect,
+     * {@link #createMapBoundary(Product, Rectangle, int, MapTransform) createMapBoundary(product, rect,
      * step, mapTransform)} where <code>step</code> is the half of the minimum of the product scene
      * raster width and height.
      *
@@ -690,7 +690,7 @@ public class ProductUtils {
     /**
      * Creates the geographical boundary of the given region within the given product and returns it as a list of
      * geographical coordinates.
-     * <p> This method delegates to {@link #createGeoBoundary(org.esa.beam.framework.datamodel.Product,java.awt.Rectangle,int,boolean) createGeoBoundary(Product, Rectangle, int, boolean)}
+     * <p> This method delegates to {@link #createGeoBoundary(org.esa.beam.framework.datamodel.Product, java.awt.Rectangle, int, boolean) createGeoBoundary(Product, Rectangle, int, boolean)}
      * and the additional boolean parameter <code>usePixelCenter</code> is <code>true</code>.
      *
      * @param product the input product, must not be null
@@ -788,7 +788,7 @@ public class ProductUtils {
      * the product does not intersect the 180 degree meridian, a single general path is returned. Otherwise two or three
      * shapes are created and returned in the order from west to east.
      * <p/>
-     * This method delegates to {@link #createGeoBoundaryPaths(org.esa.beam.framework.datamodel.Product,java.awt.Rectangle,int,boolean) createGeoBoundaryPaths(Product, Rectangle, int, boolean)}
+     * This method delegates to {@link #createGeoBoundaryPaths(org.esa.beam.framework.datamodel.Product, java.awt.Rectangle, int, boolean) createGeoBoundaryPaths(Product, Rectangle, int, boolean)}
      * and the additional parameter <code>usePixelCenter</code> is <code>true</code>.
      * <p/>
      * The geographic boundary of the given product are returned as shapes comprising (longitude,latitude) pairs.
@@ -813,7 +813,6 @@ public class ProductUtils {
      * shapes are created and returned in the order from west to east.
      * <p/>
      * The geographic boundary of the given product are returned as shapes comprising (longitude,latitude) pairs.
-     *
      *
      * @param product        the input product
      * @param region         the region rectangle in product pixel coordinates, can be null for entire product
@@ -847,7 +846,7 @@ public class ProductUtils {
      * <p/>
      * <p>This method is used for an intermediate step when determining a product boundary expressed in geographical
      * co-ordinates.
-     * <p> This method delegates to {@link #createPixelBoundary(org.esa.beam.framework.datamodel.Product,java.awt.Rectangle,int,boolean) createPixelBoundary(Product, Rectangle, int, boolean)}
+     * <p> This method delegates to {@link #createPixelBoundary(org.esa.beam.framework.datamodel.Product, java.awt.Rectangle, int, boolean) createPixelBoundary(Product, Rectangle, int, boolean)}
      * and the additional boolean parameter <code>usePixelCenter</code> is <code>true</code>.
      *
      * @param product the product
@@ -923,7 +922,7 @@ public class ProductUtils {
      * + 2 * (5 - 2) = 26 pixel positions.
      * <p>This method is used for an intermediate step when determining a product boundary expressed in geographical
      * co-ordinates.
-     * <p> This method delegates to {@link #createRectBoundary(java.awt.Rectangle,int,boolean) createRectBoundary(Rectangle, int, boolean)}
+     * <p> This method delegates to {@link #createRectBoundary(java.awt.Rectangle, int, boolean) createRectBoundary(Rectangle, int, boolean)}
      * and the additional boolean parameter <code>usePixelCenter</code> is <code>true</code>.
      *
      * @param rect the source rectangle
@@ -1026,6 +1025,10 @@ public class ProductUtils {
      * @param target           the target product
      */
     public static void copyFlagCoding(FlagCoding sourceFlagCoding, Product target) {
+        if (target.getFlagCodingGroup().contains(sourceFlagCoding.getName())) {
+            // target already has a flag coding of that name
+            return;
+        }
         FlagCoding flagCoding = new FlagCoding(sourceFlagCoding.getName());
         flagCoding.setDescription(sourceFlagCoding.getDescription());
         target.getFlagCodingGroup().add(flagCoding);
@@ -1039,6 +1042,10 @@ public class ProductUtils {
      * @param target            the target product
      */
     public static void copyIndexCoding(IndexCoding sourceIndexCoding, Product target) {
+        if (target.getIndexCodingGroup().contains(sourceIndexCoding.getName())) {
+            // target already has a index coding of that name
+            return;
+        }
         IndexCoding indexCoding = new IndexCoding(sourceIndexCoding.getName());
         indexCoding.setDescription(sourceIndexCoding.getDescription());
         target.getIndexCodingGroup().add(indexCoding);
@@ -1234,7 +1241,10 @@ public class ProductUtils {
                 String bandName = sourceBand.getName();
                 FlagCoding coding = sourceBand.getFlagCoding();
                 if (coding != null) {
-                    Band targetBand = copyBand(bandName, sourceProduct, targetProduct);
+                    Band targetBand = targetProduct.getBand(bandName);
+                    if (targetBand == null) {
+                        targetBand = copyBand(bandName, sourceProduct, targetProduct);
+                    }
                     targetBand.setSampleCoding(targetProduct.getFlagCodingGroup().get(coding.getName()));
                 }
             }
@@ -2074,13 +2084,15 @@ public class ProductUtils {
 
     /**
      * Copies the source product's preferred tile size (if any) to the target product.
+     *
      * @param sourceProduct The source product.
      * @param targetProduct The target product.
      */
     public static void copyPreferredTileSize(Product sourceProduct, Product targetProduct) {
         final Dimension preferredTileSize = sourceProduct.getPreferredTileSize();
         if (preferredTileSize != null) {
-            final Rectangle targetRect = new Rectangle(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
+            final Rectangle targetRect = new Rectangle(targetProduct.getSceneRasterWidth(),
+                                                       targetProduct.getSceneRasterHeight());
             final Rectangle tileRect = new Rectangle(preferredTileSize).intersection(targetRect);
             targetProduct.setPreferredTileSize(tileRect.width, tileRect.height);
         }

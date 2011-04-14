@@ -144,6 +144,7 @@ public final class ParserImpl implements Parser {
         return term;
     }
 
+	//NESTMOD
     private static String replaceIfThenElse(String code) {
         code = code.replace("IF", "");
         code = code.replace("if", "");

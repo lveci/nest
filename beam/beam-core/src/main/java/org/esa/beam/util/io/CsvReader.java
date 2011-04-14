@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * delimited by a single separator character which must not necessarily be a comma.
  *
  * @author Norman Fomferra
- * @version 1.0
+ 1.0
  */
 public class CsvReader extends LineNumberReader {
 
