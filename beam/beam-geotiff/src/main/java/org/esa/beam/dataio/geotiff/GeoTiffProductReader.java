@@ -137,8 +137,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
                destBuffer.getElems() instanceof float[]) {
                 final float[] dArray = new float[destSize];
                 sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
-                System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
-
+                //System.arraycopy(destBuffer.getElems(), 0, dArray, 0, dArray.length);
+                int i=0;
+                for (float val : dArray) {
+                    destBuffer.setElemFloatAt(i++, val);
+                }
             } else if(dataBufferType == DataBuffer.TYPE_INT &&
                destBuffer.getElems() instanceof int[]) {
                 final int[] dArray = new int[destSize];
