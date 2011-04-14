@@ -385,7 +385,9 @@ public class BatchGraphDialog extends ModelessDialog {
             if(o instanceof String)
                 name = (String) o;
             else
-                name = FileUtils.getFilenameWithoutExtension(f) +DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
+                name = FileUtils.getFilenameWithoutExtension(f);
+            if(!name.endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION))
+                name += DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
 
             final File targetFile = new File(productSetPanel.getTargetFolder(), name);
             targetFileMap.put(f, targetFile);

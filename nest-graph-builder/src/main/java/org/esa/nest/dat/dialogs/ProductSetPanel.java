@@ -38,21 +38,16 @@ public class ProductSetPanel extends JPanel {
 
     private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
     private final TargetFolderSelector targetProductSelector;
-
+    private final AppContext appContext;
     private String targetProductNameSuffix = "";
 
     public ProductSetPanel(final AppContext theAppContext) {
         super(new BorderLayout());
-
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.BOTH);
-        tableLayout.setTablePadding(1, 1);
-
+        this.appContext = theAppContext;
+        
         final JTable productSetTable = new JTable(fileModel);
         final JComponent productSetContent = ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
-        this.add(productSetContent, BorderLayout.NORTH);
+        this.add(productSetContent, BorderLayout.CENTER);
 
         targetProductSelector = new TargetFolderSelector();
         final String homeDirPath = SystemUtils.getUserHomeDir().getPath();
@@ -78,8 +73,8 @@ public class ProductSetPanel extends JPanel {
     }
 
     public void onApply() {
-        //final String productDir = targetProductSelector.getModel().getProductDir().getAbsolutePath();
-        //appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
+        final String productDir = targetProductSelector.getModel().getProductDir().getAbsolutePath();
+        appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
     }
 
     String getTargetProductNameSuffix() {

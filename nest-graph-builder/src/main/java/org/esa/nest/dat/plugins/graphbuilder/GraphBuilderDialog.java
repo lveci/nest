@@ -249,7 +249,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     /**
      * Validates the input and then call the GPF to execute the graph
      */
-    private void DoProcessing() {
+    public void DoProcessing() {
 
         if(ValidateAllNodes()) {
 
