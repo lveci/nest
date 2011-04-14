@@ -565,8 +565,6 @@ public class BatchGraphDialog extends ModelessDialog {
                 close();
         }
 
-
-
     }
 
     public interface BatchProcessListener {

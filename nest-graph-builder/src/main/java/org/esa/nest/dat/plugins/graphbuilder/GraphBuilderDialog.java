@@ -40,10 +40,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Observer;
+import java.util.*;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -70,6 +67,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private final GraphExecuter graphEx;
     private boolean isProcessing = false;
     private boolean allowGraphBuilding = true;
+    private final ArrayList<ProcessingListener> listenerList = new ArrayList<ProcessingListener>(1);
 
     //TabbedPanel
     private JTabbedPane tabbedPanel = null;
@@ -420,6 +418,22 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         return InitGraph();
     }
 
+    public void addListener(final ProcessingListener listener) {
+        if (!listenerList.contains(listener)) {
+            listenerList.add(listener);
+        }
+    }
+
+    public void removeListener(final ProcessingListener listener) {
+        listenerList.remove(listener);
+    }
+
+    private void notifyMSG(final ProcessingListener.MSG msg) {
+        for (final ProcessingListener listener : listenerList) {
+            listener.notifyMSG(msg, "");
+        }
+    }
+
      /**
      Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
      dependency between a Subject object and any number of Observer objects so that when the
@@ -506,6 +520,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 } else {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
+                notifyMSG(ProcessingListener.MSG.DONE);
             }
 
             if(!errorOccured) {
@@ -533,5 +548,12 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     public static File getInternalGraphFolder() {
         return ResourceUtils.getGraphFolder("internal");
+    }
+
+    public interface ProcessingListener {
+
+        public enum MSG { DONE, UPDATE }
+
+        public void notifyMSG(final MSG msg, final String text);
     }
 }
