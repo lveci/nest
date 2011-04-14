@@ -40,7 +40,7 @@ import java.io.File;
  * Ensures that all the components given by any ParamEditor have the same name as the parameters lable text.
  *
  * @author <Sabine Embacher>
- * @version 1.0
+ 1.0
  * @since <pre>02/25/2005</pre>
  */
 public class ParamEditorsTest extends TestCase {

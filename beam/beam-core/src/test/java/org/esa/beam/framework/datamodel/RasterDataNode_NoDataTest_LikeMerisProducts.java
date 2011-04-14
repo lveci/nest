@@ -22,7 +22,7 @@ import junit.framework.TestCase;
  * RasterDataNode Tester.
  *
  * @author <Authors name>
- * @version 1.0
+ 1.0
  * @since <pre>03/31/2005</pre>
  */
 
