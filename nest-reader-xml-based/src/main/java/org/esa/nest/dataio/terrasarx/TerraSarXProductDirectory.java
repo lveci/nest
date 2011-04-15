@@ -181,6 +181,10 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if(productVariantInfo.getAttributeString("projection", " ").equalsIgnoreCase("SLANTRANGE"))
             srgr = 0;
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, srgr);
+        final String mapProjection = productVariantInfo.getAttributeString("mapProjection", " ").trim();
+        if(!mapProjection.isEmpty()) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, mapProjection);    
+        }
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
