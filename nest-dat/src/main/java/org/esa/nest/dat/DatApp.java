@@ -20,7 +20,7 @@ import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
 import com.jidesoft.status.LabelStatusBarItem;
 import org.esa.beam.framework.dataio.ProductCache;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
@@ -32,6 +32,7 @@ import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -175,6 +176,22 @@ public class DatApp extends VisatApp {
             if(file.getName().startsWith("tmp_")) {
                 ResourceUtils.deleteFile(file);
             }
+        }
+    }
+
+    @Override
+    protected String getCSName(final RasterDataNode raster) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(raster.getProduct());
+        final String mapProjStr = absRoot.getAttributeString(AbstractMetadata.map_projection, "").trim();
+        if(!mapProjStr.isEmpty()) {
+            return mapProjStr;
+        }
+
+        final GeoCoding geoCoding = raster.getGeoCoding();
+        if (geoCoding instanceof MapGeoCoding || geoCoding instanceof CrsGeoCoding) {
+            return geoCoding.getMapCRS().getName().toString();
+        } else {
+            return "Satellite coordinates";
         }
     }
 

@@ -1903,6 +1903,11 @@ public class VisatApp extends BasicApp implements AppContext {
             return;
         }
         final RasterDataNode raster = sceneView.getRaster();
+
+        super.setStatusBarMessage(raster.getDisplayName() + " - " + getCSName(raster));
+    }
+
+    protected String getCSName(final RasterDataNode raster) {
         final String csName;
         final GeoCoding geoCoding = raster.getGeoCoding();
         if (geoCoding instanceof MapGeoCoding || geoCoding instanceof CrsGeoCoding) {
@@ -1910,7 +1915,7 @@ public class VisatApp extends BasicApp implements AppContext {
         } else {
             csName = "Satellite coordinates";
         }
-        super.setStatusBarMessage(raster.getDisplayName() + " - " + csName);
+        return csName;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
