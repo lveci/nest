@@ -231,6 +231,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         final String mode = globalElem.getAttributeString("Acquisition Mode", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR, mode);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, mode);
 
         if(mode.contains("HUGE") && productType.contains("SCS")) {
             throw new IOException("Complex "+mode+" products are not supported for Cosmo-Skymed");    
