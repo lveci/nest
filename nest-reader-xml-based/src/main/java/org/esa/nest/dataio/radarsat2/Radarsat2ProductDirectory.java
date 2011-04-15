@@ -211,6 +211,18 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sampledLineSpacing.getAttributeDouble("sampledLineSpacing", defInt));
 
+        final MetadataElement geographicInformation = imageAttributes.getElement("geographicInformation");
+        if(geographicInformation != null) {
+            final MetadataElement referenceEllipsoidParameters = geographicInformation.getElement("referenceEllipsoidParameters");
+            if(referenceEllipsoidParameters != null) {
+                final MetadataElement geodeticTerrainHeight = referenceEllipsoidParameters.getElement("geodeticTerrainHeight");
+                if(geodeticTerrainHeight != null) {
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.avg_scene_height,
+                        geodeticTerrainHeight.getAttributeDouble("geodeticTerrainHeight", defInt));
+                }
+            }
+        }
+
         // polarizations
         getPolarizations(absRoot, imageAttributes);
 
