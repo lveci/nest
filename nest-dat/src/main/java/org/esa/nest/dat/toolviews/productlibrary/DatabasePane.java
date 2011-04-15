@@ -31,10 +31,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -76,7 +73,6 @@ public class DatabasePane extends JPanel {
         try {
             missionJList.setFixedCellWidth(100);
             createPanel();
-            connectToDatabase();
 
             missionJList.addListSelectionListener(new ListSelectionListener() {
                 public void valueChanged(ListSelectionEvent event) {
@@ -120,13 +116,6 @@ public class DatabasePane extends JPanel {
                     queryDatabase();
                 }
             });
-
-            final String[] metadataNames = db.getMetadataNames();
-            for(String name : metadataNames) {
-                metadataNameCombo.insertItemAt(name, metadataNameCombo.getItemCount());
-            }
-
-            refresh();
         } catch(Throwable t) {
             handleException(t);
         }
@@ -245,15 +234,28 @@ public class DatabasePane extends JPanel {
         if(!connected) {
             throw new Exception("Unable to connect to database\n"+db.getLastSQLException().getMessage());
         }
+
+        refresh();
     }
 
     public ProductDB getDB() {
+        if(db == null) {
+            queryDatabase();
+        }
         return db;
     }
 
     public void refresh() {
         try {
             boolean origState = lockCombos(true);
+
+            if(metadataNameCombo.getItemCount() == 0) {
+                final String[] metadataNames = db.getMetadataNames();
+                for(String name : metadataNames) {
+                    metadataNameCombo.insertItemAt(name, metadataNameCombo.getItemCount());
+                }
+            }
+
             updateMissionCombo();
             lockCombos(origState);
         } catch(Throwable t) {
@@ -316,7 +318,8 @@ public class DatabasePane extends JPanel {
 
     public void setBaseDir(final File dir) {
         dbQuery.setBaseDir(dir);
-        queryDatabase();
+        if(db != null)
+            queryDatabase();
     }
 
     public void removeProducts(final File baseDir) {
@@ -353,6 +356,13 @@ public class DatabasePane extends JPanel {
     }
 
     private void queryDatabase() {
+        if(db == null) {
+            try {
+                connectToDatabase();
+            } catch(Throwable t) {
+                handleException(t);
+            }
+        }
         setData();
 
         if(productEntryList != null) {

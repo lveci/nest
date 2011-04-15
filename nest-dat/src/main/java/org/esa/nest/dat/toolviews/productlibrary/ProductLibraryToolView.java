@@ -92,6 +92,11 @@ public class ProductLibraryToolView extends AbstractToolView {
         openHandler = handler;
     }
 
+    @Override
+    public void componentFocusGained() {
+        dbPane.getDB();
+    }
+
     public JComponent createControl() {
 
         libConfig = new ProductLibraryConfig(VisatApp.getApp().getPreferences());
