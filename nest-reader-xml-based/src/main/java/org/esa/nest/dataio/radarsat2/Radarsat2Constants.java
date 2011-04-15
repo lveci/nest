@@ -22,9 +22,9 @@ import java.io.File;
  */
 public class Radarsat2Constants {
 
-    private final static String[] FORMAT_NAMES = new String[]{"Radarsat 2"};
+    private final static String[] FORMAT_NAMES = new String[]{"RADARSAT-2"};
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{"xml"};
-    private final static String PLUGIN_DESCRIPTION = "Radarsat2 Products";      /*I18N*/
+    private final static String PLUGIN_DESCRIPTION = "RADARSAT-2 Products";      /*I18N*/
 
     public final static String PRODUCT_HEADER_PREFIX = "PRODUCT";
 

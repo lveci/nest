@@ -274,16 +274,18 @@ public final class AbstractMetadataIO {
      * @param xmlRoot root element of xml file
      * @param metadataRoot MetadataElement to place it into
      */
-    public static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {
+    public static void AddXMLMetadata(final Element xmlRoot, final MetadataElement metadataRoot) {
 
-        if(xmlRoot.getChildren().isEmpty() && xmlRoot.getAttributes().isEmpty()) {
+        final String rootName = xmlRoot.getName();
+        final boolean rootChildrenEmpty = xmlRoot.getChildren().isEmpty();
+        if(rootChildrenEmpty && xmlRoot.getAttributes().isEmpty()) {
             if(!xmlRoot.getValue().isEmpty()) {
-                addAttribute(metadataRoot, xmlRoot.getName(), xmlRoot.getValue());
+                addAttribute(metadataRoot, rootName, xmlRoot.getValue());
             }
-        } else if(xmlRoot.getChildren().isEmpty()) {
-            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+        } else if(rootChildrenEmpty) {
+            final MetadataElement metaElem = new MetadataElement(rootName);
 
-            addAttribute(metaElem, xmlRoot.getName(), xmlRoot.getValue());
+            addAttribute(metaElem, rootName, xmlRoot.getValue());
 
             final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
             for (Attribute aChild : xmlAttribs) {
@@ -292,7 +294,7 @@ public final class AbstractMetadataIO {
 
             metadataRoot.addElement(metaElem);
         } else {
-            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+            final MetadataElement metaElem = new MetadataElement(rootName);
             xmlRoot.getAttributes();
 
             final List children = xmlRoot.getContent();
@@ -314,7 +316,7 @@ public final class AbstractMetadataIO {
         }
     }
 
-    private static void addAttribute(MetadataElement meta, String name, String value) {
+    private static void addAttribute(final MetadataElement meta, final String name, String value) {
         final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
         attribute.getData().setElems(value);
         meta.addAttribute(attribute);

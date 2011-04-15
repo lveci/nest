@@ -62,10 +62,10 @@
         <action>
             <id>importRadarsatProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>Radarsat 1 CEOS</formatName>
+            <formatName>RADARSAT-1 CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import a Radarsat 1 CEOS data product or subset.</shortDescr>
-            <description>Import a Radarsat 1 CEOS data product or subset.</description>
+            <shortDescr>Import a RADARSAT-1 CEOS data product or subset.</shortDescr>
+            <description>Import a RADARSAT-1 CEOS data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importRadarsatProduct</helpId>
             <placeAfter>importAlosPalsarProduct</placeAfter>
