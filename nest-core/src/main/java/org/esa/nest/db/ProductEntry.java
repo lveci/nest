@@ -17,15 +17,18 @@ package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.image.BufferedImage;
+import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
 
@@ -35,6 +38,7 @@ public class ProductEntry {
     public final static String FILE_SIZE = "file_size";
     public final static String LAST_MODIFIED = "last_modified";
     public final static String FILE_FORMAT = "file_format";
+    public final static String GEO_BOUNDARY = "geo_boundary";
 
     private int id;
     private File file;
@@ -57,6 +61,7 @@ public class ProductEntry {
     private final GeoPos firstFar = new GeoPos();
     private final GeoPos lastNear = new GeoPos();
     private final GeoPos lastFar = new GeoPos();
+    private  GeoPos[] geoboundary;
 
     private BufferedImage quickLookImage = null;
 
@@ -85,6 +90,8 @@ public class ProductEntry {
         }
         getCornerPoints(product);
 
+        this.geoboundary = getGeoBoundary(product);
+
         this.id = -1;
     }
 
@@ -112,6 +119,7 @@ public class ProductEntry {
                                    (float)results.getDouble(AbstractMetadata.last_near_long));
         this.lastFar.setLocation((float)results.getDouble(AbstractMetadata.last_far_lat),
                                    (float)results.getDouble(AbstractMetadata.last_far_long));
+        this.geoboundary = parseGeoBoundaryStr(results.getString(GEO_BOUNDARY));
     }
 
     public void dispose() {
@@ -137,6 +145,39 @@ public class ProductEntry {
         geoCoding.getGeoPos(new PixelPos(w,0), firstFar);
         geoCoding.getGeoPos(new PixelPos(0,h), lastNear);
         geoCoding.getGeoPos(new PixelPos(w,h), lastFar);
+    }
+
+    private static GeoPos[] getGeoBoundary(final Product product) {
+        final int step = Math.max(300, (product.getSceneRasterWidth() + product.getSceneRasterHeight()) / 20);
+        final GeoPos[] geoPoints = ProductUtils.createGeoBoundary(product, null, step, true);
+        ProductUtils.normalizeGeoPolygon(geoPoints);
+        return geoPoints;
+    }
+
+    public String formatGeoBoundayString() {
+        final StringBuilder str = new StringBuilder();
+        for(GeoPos geo : geoboundary) {
+            str.append(geo.getLat());
+            str.append(",");
+            str.append(geo.getLon());
+            str.append(",");
+        }
+
+        return str.toString();
+    }
+
+    private static GeoPos[] parseGeoBoundaryStr(final String str) {
+        final ArrayList<GeoPos> geoPos = new ArrayList<GeoPos>();
+        if(str != null && !str.isEmpty()) {
+            final StringTokenizer st = new StringTokenizer(str, ",");
+            while(st.hasMoreTokens()) {
+                final float lat = Float.parseFloat(st.nextToken());
+                final float lon = Float.parseFloat(st.nextToken());
+                geoPos.add(new GeoPos(lat, lon));
+            }
+        }
+
+        return geoPos.toArray(new GeoPos[geoPos.size()]);
     }
 
     public File getFile() {
@@ -182,6 +223,12 @@ public class ProductEntry {
     }
     public GeoPos getLastFarGeoPos() {
         return lastFar;
+    }
+    public GeoPos[] getGeoBoundary() {
+        if(geoboundary == null || geoboundary.length == 0) {
+            return getBox();
+        }
+        return geoboundary;
     }
 
     public ProductData.UTC getFirstLineTime() {
@@ -250,7 +297,7 @@ public class ProductEntry {
         return fileList;
     }
 
-    public GeoPos[] getBox() {
+    private GeoPos[] getBox() {
         final GeoPos[] geoBound = new GeoPos[4];
         geoBound[0] = getFirstNearGeoPos();
         geoBound[1] = getFirstFarGeoPos();

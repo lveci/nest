@@ -53,13 +53,9 @@ public abstract class DAO {
     }
 
     private boolean dbExists() {
-        boolean bExists = false;
         final String dbLocation = getDatabaseLocation();
         final File dbFileDir = new File(dbLocation);
-        if (dbFileDir.exists()) {
-            bExists = true;
-        }
-        return bExists;
+        return dbFileDir.exists();
     }
 
     private void setDBSystemDir() {

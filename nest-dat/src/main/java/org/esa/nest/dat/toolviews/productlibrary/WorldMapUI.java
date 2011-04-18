@@ -110,7 +110,7 @@ public class WorldMapUI {
         final GeoPos[][] geoBoundaries = new GeoPos[productEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : productEntryList) {
-            geoBoundaries[i++] = entry.getBox();
+            geoBoundaries[i++] = entry.getGeoBoundary();
         }
 
         worldMapDataModel.setAdditionalGeoBoundaries(geoBoundaries);
@@ -125,7 +125,7 @@ public class WorldMapUI {
         final GeoPos[][] geoBoundaries = new GeoPos[selectedProductEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : selectedProductEntryList) {
-            geoBoundaries[i++] = entry.getBox();
+            geoBoundaries[i++] = entry.getGeoBoundary();
         }
 
         worldMapDataModel.setSelectedGeoBoundaries(geoBoundaries);

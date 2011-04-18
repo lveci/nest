@@ -17,6 +17,7 @@ package org.esa.nest.dat.toolviews.productlibrary.model;
 
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dat.toolviews.productlibrary.model.dataprovider.DataProvider;
+import org.esa.nest.db.ProductEntry;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -36,6 +37,7 @@ public class SortingDecorator extends AbstractTableModel {
 
     private static final int DESCENDING = -1;
     private static final int NOT_SORTED = 0;
+    private static final int ASCENDING = 1;
 
     private static final Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
 
@@ -43,8 +45,12 @@ public class SortingDecorator extends AbstractTableModel {
     private final JTableHeader _tableHeader;
 
     private final List<Directive> sortingColumns = new ArrayList<Directive>();
-    private final Map columnComparators = new HashMap();
     private Row[] viewToModel = null;
+    private boolean doSortBy = false;
+
+    public enum SORT_BY { NAME, DATE, MISSON, TYPE, FILESIZE }
+    private SORT_BY sortBy;
+    private int sortedByDirection = NOT_SORTED;
 
     public SortingDecorator(final ProductEntryTableModel tableModel, final JTableHeader tableHeader) {
         Guardian.assertNotNull("tableModel", tableModel);
@@ -124,7 +130,15 @@ public class SortingDecorator extends AbstractTableModel {
     }
 
     boolean isSorting() {
-        return !sortingColumns.isEmpty();
+        return !sortingColumns.isEmpty() || doSortBy;
+    }
+
+    public void sortBy(final SORT_BY val) {
+        doSortBy = true;
+        sortedByDirection = sortBy == val ? DESCENDING : ASCENDING;
+        sortBy = val;
+        initViewToModel();
+        fireTableDataChanged();
     }
 
     private class MouseHandler extends MouseAdapter {
@@ -139,8 +153,6 @@ public class SortingDecorator extends AbstractTableModel {
                 int direction = getSortingDirection(columnIndex);
                 if (!e.isControlDown()) {
                     clearSortingDirections();
-//                    viewToModel = null;
-//                    fireTableDataChanged();
                     _tableHeader.repaint();
                 }
                 // Cycle the sorting states through {NOT_SORTED, ASCENDING, DESCENDING} or
@@ -148,7 +160,7 @@ public class SortingDecorator extends AbstractTableModel {
                 direction += (e.isShiftDown() ? -1 : 1);
                 direction = (direction + 4) % 3 - 1; // signed mod, returning {-1, 0, 1}
                 setDirectionForColumn(columnIndex, direction);
-//                viewToModel = null;
+                doSortBy = false;
                 initViewToModel();
                 fireTableDataChanged();
             }
@@ -296,6 +308,15 @@ public class SortingDecorator extends AbstractTableModel {
             final int idxRow1 = modelIndex;
             final int idxRow2 = ((Row) o).modelIndex;
 
+            if(doSortBy) {
+                final Object o1 = _tableModel.getValueAt(idxRow1, 0);
+                final Object o2 = _tableModel.getValueAt(idxRow2, 0);
+
+                final int comparison = SORTEDBY_COMPARATOR.compare(o1, o2);
+                if (comparison != 0) {
+                    return sortedByDirection == DESCENDING ? -comparison : comparison;
+                }
+            }
             for (Object sortingColumn : sortingColumns) {
                 final Directive directive = (Directive) sortingColumn;
                 final int column = directive.column;
@@ -339,6 +360,36 @@ public class SortingDecorator extends AbstractTableModel {
         }
     };
 
+    private final Comparator SORTEDBY_COMPARATOR = new Comparator() {
+        public int compare(final Object o1, final Object o2) {
+            if (o1 == null && o2 == null) {
+                return 0;
+            } else if (o1 == null) {
+                return -1;
+            } else if (o2 == null) {
+                return 1;
+            } else if(o1 instanceof ProductEntry && o2 instanceof ProductEntry) {
+                final ProductEntry e1 = (ProductEntry)o1;
+                final ProductEntry e2 = (ProductEntry)o2;
+
+                if(sortBy.equals(SORT_BY.NAME)) {
+                    return e1.getName().compareTo(e2.getName());
+                } else if(sortBy.equals(SORT_BY.TYPE)) {
+                    return e1.getProductType().compareTo(e2.getProductType());
+                } else if(sortBy.equals(SORT_BY.MISSON)) {
+                    return e1.getMission().compareTo(e2.getMission());
+                } else if(sortBy.equals(SORT_BY.DATE)) {
+                    return e1.getFirstLineTime().getAsDate().compareTo(e2.getFirstLineTime().getAsDate());
+                } else if(sortBy.equals(SORT_BY.FILESIZE)) {
+                    final Long size1 = e1.getFileSize();
+                    final Long size2 = e2.getFileSize();
+                    return size1.compareTo(size2);
+                }
+            }
+            return o1.toString().compareTo(o2.toString());
+        }
+    };
+
     private Comparator getComparator(final int column) {
         final DataProvider dataProvider = _tableModel.getDataProvider(column);
 
@@ -350,7 +401,6 @@ public class SortingDecorator extends AbstractTableModel {
             } else {
                 comparator = LEXICAL_COMPARATOR;
             }
-            columnComparators.put(columnType, comparator);
         }
         return comparator;
     }

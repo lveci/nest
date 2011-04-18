@@ -38,58 +38,84 @@ public class ProductTable implements TableInterface {
     private PreparedStatement stmtAllProductTypes;
     private PreparedStatement stmtAllAcquisitionModes;
 
-    private static final String strCreateProductTable =
-            "create table APP.PRODUCTS (" +
-            "    ID          INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
-            AbstractMetadata.PATH           +" VARCHAR(255), " +
-            AbstractMetadata.PRODUCT        +" VARCHAR(255), " +
-            AbstractMetadata.MISSION        +" VARCHAR(30), " +
-            AbstractMetadata.PRODUCT_TYPE   +" VARCHAR(30), " +
-            AbstractMetadata.ACQUISITION_MODE+" VARCHAR(30), " +
-            AbstractMetadata.PASS           +" VARCHAR(30), " +
-            AbstractMetadata.first_near_lat +" DOUBLE, " +
-            AbstractMetadata.first_near_long+" DOUBLE, " +
-            AbstractMetadata.first_far_lat  +" DOUBLE, " +
-            AbstractMetadata.first_far_long +" DOUBLE, " +
-            AbstractMetadata.last_near_lat  +" DOUBLE, " +
-            AbstractMetadata.last_near_long +" DOUBLE, " +
-            AbstractMetadata.last_far_lat   +" DOUBLE, " +
-            AbstractMetadata.last_far_long  +" DOUBLE, " +
-            AbstractMetadata.range_spacing  +" DOUBLE, " +
-            AbstractMetadata.azimuth_spacing+" DOUBLE, " +
-            AbstractMetadata.first_line_time+" DATE, " +
-            ProductEntry.FILE_SIZE          +" DOUBLE, " +
-            ProductEntry.LAST_MODIFIED      +" DOUBLE, " +
-            ProductEntry.FILE_FORMAT        +" VARCHAR(30)" +
-            ")";
+    private static String[] colNames = {
+            AbstractMetadata.PATH,
+            AbstractMetadata.PRODUCT,
+            AbstractMetadata.MISSION,
+            AbstractMetadata.PRODUCT_TYPE,
+            AbstractMetadata.ACQUISITION_MODE,
+            AbstractMetadata.PASS,
+            AbstractMetadata.first_near_lat,
+            AbstractMetadata.first_near_long,
+            AbstractMetadata.first_far_lat,
+            AbstractMetadata.first_far_long,
+            AbstractMetadata.last_near_lat,
+            AbstractMetadata.last_near_long,
+            AbstractMetadata.last_far_lat,
+            AbstractMetadata.last_far_long,
+            AbstractMetadata.range_spacing,
+            AbstractMetadata.azimuth_spacing,
+            AbstractMetadata.first_line_time,
+            ProductEntry.FILE_SIZE,
+            ProductEntry.LAST_MODIFIED,
+            ProductEntry.FILE_FORMAT,
+            ProductEntry.GEO_BOUNDARY
+    };
+
+    private static String[] colTypes = {
+            "VARCHAR(255)",
+            "VARCHAR(255)",
+            "VARCHAR(30)",
+            "VARCHAR(30)",
+            "VARCHAR(30)",
+            "VARCHAR(30)",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DOUBLE",
+            "DATE",
+            "DOUBLE",
+            "DOUBLE",
+            "VARCHAR(30)",
+            "VARCHAR(1200)"
+    };
+
+    private static final String strCreateProductTable = createTableString();
+
+    private static String createTableString() {
+        int i = 0;
+        String s = "create table APP.PRODUCTS (" +
+            "    ID          INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),";
+        for(String n : colNames) {
+            s += n +" "+ colTypes[i++]+", ";
+        }
+        return s.substring(0, s.length()-2) +")";
+    }
 
     private static final String strGetProduct =
             "SELECT * FROM APP.PRODUCTS " +
             "WHERE ID = ?";
 
-    private static final String strSaveProduct =
-            "INSERT INTO APP.PRODUCTS ( " +
-            AbstractMetadata.PATH           +", "+
-            AbstractMetadata.PRODUCT        +", "+
-            AbstractMetadata.MISSION        +", "+
-            AbstractMetadata.PRODUCT_TYPE   +", "+
-            AbstractMetadata.ACQUISITION_MODE+", "+
-            AbstractMetadata.PASS           +", "+
-            AbstractMetadata.first_near_lat +", "+
-            AbstractMetadata.first_near_long+", "+
-            AbstractMetadata.first_far_lat  +", "+
-            AbstractMetadata.first_far_long +", "+
-            AbstractMetadata.last_near_lat  +", "+
-            AbstractMetadata.last_near_long +", "+
-            AbstractMetadata.last_far_lat   +", "+
-            AbstractMetadata.last_far_long  +", "+
-            AbstractMetadata.range_spacing  +", "+
-            AbstractMetadata.azimuth_spacing+", "+
-            AbstractMetadata.first_line_time+", "+
-            ProductEntry.FILE_SIZE          +", "+
-            ProductEntry.LAST_MODIFIED      +", "+
-            ProductEntry.FILE_FORMAT        +
-            ") " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String strSaveProduct = createSaveString();
+
+    private static String createSaveString() {
+        String s = "INSERT INTO APP.PRODUCTS ( ";
+        for(String n : colNames) {
+            s += n +", ";
+        }
+        s = s.substring(0, s.length()-2) +")";
+        s += " VALUES (";
+        for(String n : colNames) {
+            s += "?, ";
+        }
+        return s.substring(0, s.length()-2) +")";
+    }
 
     private static final String strGetListEntries =
             "SELECT * FROM APP.PRODUCTS ORDER BY "+AbstractMetadata.MISSION+" ASC";
@@ -121,7 +147,23 @@ public class ProductTable implements TableInterface {
     }
 
     public void validateTable() throws SQLException {
-        // alter table if columns are missing    
+        // alter table if columns are missing
+        final Statement alterStatement = dbConnection.createStatement();
+
+        // add missing columns to the table
+        int i=0;
+        for(String n : colNames) {
+            final String testStr = "SELECT "+n+" FROM APP.PRODUCTS";
+            try {
+                alterStatement.executeQuery(testStr);
+            } catch(SQLException e) {
+                if(e.getSQLState().equals("42X04")) {
+                    final String alterStr = "ALTER TABLE APP.PRODUCTS ADD " + n +" "+ colTypes[i];
+                    alterStatement.execute(alterStr);
+                }
+            }
+            ++i;
+        }
     }
 
     public void prepareStatements() throws SQLException {
@@ -159,6 +201,10 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDouble(i++, record.getFileSize());
         stmtSaveNewRecord.setDouble(i++, record.getLastModified());
         stmtSaveNewRecord.setString(i++, record.getFileFormat());
+        final String geoStr = record.formatGeoBoundayString();
+        if(geoStr.length() > 12000)
+            throw new SQLException("geoBoundary exceeds 12000");
+        stmtSaveNewRecord.setString(i++, geoStr);
 
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();

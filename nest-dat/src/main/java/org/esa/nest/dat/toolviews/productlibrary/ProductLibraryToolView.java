@@ -72,10 +72,6 @@ public class ProductLibraryToolView extends AbstractToolView {
     private final String helpId = "ProductLibrary";
 
     private WorldMapUI worldMapUI = null;
-
-    //private RepositoryTree repositoryTree = null;
-    private DefaultMutableTreeNode rootNode = null;
-
     private DatabasePane dbPane;
 
     public ProductLibraryToolView() {
@@ -177,7 +173,40 @@ public class ProductLibraryToolView extends AbstractToolView {
         return selectedFiles;
     }
 
-    private JPopupMenu createPopup() {
+    private JPopupMenu createEntryTablePopup() {
+        final JPopupMenu popup = new JPopupMenu();
+        final JMenuItem selectAllitem = new JMenuItem("Select All");
+        selectAllitem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                productEntryTable.selectAll();
+                performSelectAction();
+            }
+        });
+        popup.add(selectAllitem);
+
+        final JMenu sortMenu = new JMenu("Sort By");
+        popup.add(sortMenu);
+
+        sortMenu.add(createSortItem("Product Name", SortingDecorator.SORT_BY.NAME));
+        sortMenu.add(createSortItem("Product Type", SortingDecorator.SORT_BY.TYPE));
+        sortMenu.add(createSortItem("Acquistion Date", SortingDecorator.SORT_BY.DATE));
+        sortMenu.add(createSortItem("Mission", SortingDecorator.SORT_BY.MISSON));
+        sortMenu.add(createSortItem("File Size", SortingDecorator.SORT_BY.FILESIZE));
+
+        return popup;
+    }
+
+    private JMenuItem createSortItem(final String name, final SortingDecorator.SORT_BY sortBy) {
+        final JMenuItem item = new JMenuItem(name);
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                sortedModel.sortBy(sortBy);
+            }
+        });
+        return item;
+    }
+
+    private JPopupMenu createGraphPopup() {
         final File graphPath = ResourceUtils.getGraphFolder("");
 
         final JPopupMenu popup = new JPopupMenu();
@@ -403,7 +432,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         setComponentName(batchProcessButton, "batchProcessButton");
         batchProcessButton.setText("Batch Process");
         batchProcessButton.setToolTipText("Right click to select a graph");
-        batchProcessButton.setComponentPopupMenu(createPopup());
+        batchProcessButton.setComponentPopupMenu(createGraphPopup());
         batchProcessButton.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
                 batchProcess(getSelectedProductEntries(), null);
@@ -446,6 +475,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         productEntryTable = new JTable();
         productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         productEntryTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        productEntryTable.setComponentPopupMenu(createEntryTablePopup());
         productEntryTable.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -488,19 +518,6 @@ public class ProductLibraryToolView extends AbstractToolView {
         productEntryTable.updateUI();
         //updateWorldMap();
     }
-
-  /*  private RepositoryTree createTree() {
-        rootNode = new DefaultMutableTreeNode("");
-        repositoryTree = new RepositoryTree(this);
-        repositoryTree.populateTree(rootNode);
-        repositoryTree.setRootVisible(false);
-        repositoryTree.setShowsRootHandles(true);
-        final DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) repositoryTree.getCellRenderer();
-        renderer.setLeafIcon(IconsFactory.getImageIcon(ProductLibraryUI.class, "/org/esa/beam/resources/images/icons/RsBandAsSwath16.gif"));
-        renderer.setClosedIcon(IconsFactory.getImageIcon(ProductLibraryUI.class, "/org/esa/beam/resources/images/icons/RsGroupClosed16.gif"));
-        renderer.setOpenIcon(IconsFactory.getImageIcon(ProductLibraryUI.class, "/org/esa/beam/resources/images/icons/RsGroupOpen16.gif"));
-        return repositoryTree;
-    }    */
 
     private JPanel createHeaderPanel() {
         final JPanel headerBar = new JPanel();

@@ -17,6 +17,7 @@ package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.Debug;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
 import org.esa.nest.util.XMLSupport;
@@ -24,6 +25,7 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
@@ -250,7 +252,7 @@ public class DBQuery {
         if(queryStr.isEmpty()) {
             return instersectMapSelection(db.getProductEntryList());
         } else {
-            System.out.println("Query="+queryStr);
+            Debug.trace("Query="+queryStr);
             return instersectMapSelection(db.queryProduct(queryStr));
         }
     }
@@ -280,13 +282,14 @@ public class DBQuery {
     private ProductEntry[] instersectMapSelection(final ProductEntry[] resultsList) {
         if(selectionRectangle != null && selectionRectangle.getWidth() != 0 && selectionRectangle.getHeight() != 0) {
             final ArrayList<ProductEntry> intersectList = new ArrayList<ProductEntry>();
+
+            //System.out.println("selBox x="+selectionRectangle.getX()+" y="+selectionRectangle.getY()+
+            //                         " w="+selectionRectangle.getWidth()+" h="+selectionRectangle.getHeight());
             for(ProductEntry entry : resultsList) {
                 final GeoPos start = entry.getFirstNearGeoPos();
                 final GeoPos end = entry.getLastFarGeoPos();
-                final float w = Math.abs(end.getLon()-start.getLon());
-                final float h = Math.abs(end.getLat()-start.getLat());
-                final Rectangle.Float entryRect = new Rectangle.Float(start.getLon(), start.getLat(), w, h);
-                if(selectionRectangle.intersects(entryRect)) {
+                if(selectionRectangle.contains(new Point2D.Float(start.getLat(), start.getLon())) &&
+                   selectionRectangle.contains(new Point2D.Float(end.getLat(), end.getLon()))) {
                     intersectList.add(entry);
                 }
             }
@@ -302,8 +305,8 @@ public class DBQuery {
         float maxY = -Float.MAX_VALUE;
 
         for (final GeoPos pos : geoPositions) {
-            final float x = pos.getLon();
-            final float y = pos.getLat();
+            final float x = pos.getLat();
+            final float y = pos.getLon();
 
             if (x < minX) {
                 minX = x;
