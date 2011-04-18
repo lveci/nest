@@ -24,7 +24,7 @@ import Jama.SingularValueDecomposition;
  * @author Norman Fomferra
 
  */
-public class Approximator {
+public final class Approximator {
 
     /**
      * Solves a linear equation system with each term having the form c * f(x). The method finds the coefficients
@@ -293,13 +293,9 @@ public class Approximator {
         final int m = b.length;
         final int n = x.length;
 
-        final SingularValueDecomposition svd;
-        final Matrix u;
-        final Matrix v;
-
-        svd = new Matrix(a, m, n).svd();
-        u = svd.getU();
-        v = svd.getV();
+        final SingularValueDecomposition svd = new Matrix(a, m, n).svd();
+        final Matrix u = svd.getU();
+        final Matrix v = svd.getV();
 
         final double[] s = svd.getSingularValues();
         final int rank = svd.rank();

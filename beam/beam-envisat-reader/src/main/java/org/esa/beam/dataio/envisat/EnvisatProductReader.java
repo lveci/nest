@@ -58,7 +58,7 @@ import java.util.logging.Logger;
 
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
-public class EnvisatProductReader extends AbstractProductReader {
+public final class EnvisatProductReader extends AbstractProductReader {
 
     /** @since BEAM 4.9 */
     private static final String SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING = "beam.envisat.usePixelGeoCoding";
@@ -489,21 +489,23 @@ public class EnvisatProductReader extends AbstractProductReader {
         return s != null ? s : "";
     }
 
-    private void addDatasetAnnotationsToProduct(Product product) throws IOException {
-        Debug.assertNotNull(productFile);
-        Debug.assertNotNull(product);
-        String[] datasetNames = productFile.getValidDatasetNames();
+    private void addDatasetAnnotationsToProduct(final Product product) throws IOException {
+        //Debug.assertNotNull(productFile);
+        //Debug.assertNotNull(product);
+        final String[] datasetNames = productFile.getValidDatasetNames();
         for (String datasetName : datasetNames) {
-            DSD dsd = productFile.getDSD(datasetName);
-            if (dsd.getDatasetType() == EnvisatConstants.DS_TYPE_ANNOTATION
-                    || dsd.getDatasetType() == EnvisatConstants.DS_TYPE_GLOBAL_ANNOTATION) {
-                RecordReader recordReader = productFile.getRecordReader(datasetName);
-                if (recordReader.getNumRecords() == 1) {
-                    MetadataElement table = createDatasetTable(datasetName, recordReader);
-                    product.getMetadataRoot().addElement(table);
-                } else if (recordReader.getNumRecords() > 1) {
-                    MetadataElement group = createMetadataTableGroup(datasetName, recordReader);
+            final DSD dsd = productFile.getDSD(datasetName);
+            final char dsdType = dsd.getDatasetType();
+            if (dsdType == EnvisatConstants.DS_TYPE_ANNOTATION
+                    || dsdType == EnvisatConstants.DS_TYPE_GLOBAL_ANNOTATION) {
+                final RecordReader recordReader = productFile.getRecordReader(datasetName);
+                final int numRecords = recordReader.getNumRecords();
+                if (numRecords > 1) {
+                    final MetadataElement group = createMetadataTableGroup(datasetName, recordReader);
                     product.getMetadataRoot().addElement(group);
+                } else if (numRecords == 1) {
+                    final MetadataElement table = createDatasetTable(datasetName, recordReader);
+                    product.getMetadataRoot().addElement(table);
                 }
             }
         }
@@ -735,23 +737,24 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
     }
 
     private MetadataElement createDatasetTable(String name, RecordReader recordReader) throws IOException {
-        Debug.assertTrue(productFile != null);
-        Debug.assertTrue(name != null);
-        Debug.assertTrue(recordReader != null);
+        //Debug.assertTrue(productFile != null);
+        //Debug.assertTrue(name != null);
+        //Debug.assertTrue(recordReader != null);
 
-        Record record = recordReader.readRecord();
+        final Record record = recordReader.readRecord();
         return createMetadataGroup(name, record);
     }
 
     private MetadataElement createMetadataTableGroup(String name, RecordReader recordReader) throws IOException {
-        Debug.assertTrue(productFile != null);
-        Debug.assertTrue(name != null);
-        Debug.assertTrue(recordReader != null);
+        //Debug.assertTrue(productFile != null);
+        //Debug.assertTrue(name != null);
+        //Debug.assertTrue(recordReader != null);
 
-        MetadataElement metadataTableGroup = new MetadataElement(name);
-        StringBuffer sb = new StringBuffer(16);
-        for (int i = 0; i < recordReader.getNumRecords(); i++) {
-            Record record = recordReader.readRecord(i);
+        final MetadataElement metadataTableGroup = new MetadataElement(name);
+        final StringBuffer sb = new StringBuffer(16);
+        final int numRecords = recordReader.getNumRecords();
+        for (int i = 0; i < numRecords; i++) {
+            final Record record = recordReader.readRecord(i);
             sb.setLength(0);
             sb.append(name);
             sb.append('.');
@@ -763,22 +766,22 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
     }
 
     static MetadataElement createMetadataGroup(String name, Record record) {
-        Debug.assertNotNullOrEmpty(name);
-        Debug.assertNotNull(record);
+        //Debug.assertNotNullOrEmpty(name);
+        //Debug.assertNotNull(record);
 
-        MetadataElement metadataGroup = new MetadataElement(name);
+        final MetadataElement metadataGroup = new MetadataElement(name);
+        final int numRecords = record.getNumFields();
+        for (int i = 0; i < numRecords; i++) {
+            final Field field = record.getFieldAt(i);
 
-        for (int i = 0; i < record.getNumFields(); i++) {
-            Field field = record.getFieldAt(i);
-
-            String description = field.getInfo().getDescription();
+            final String description = field.getInfo().getDescription();
             if (description != null) {
                 if ("Spare".equalsIgnoreCase(description)) {
                     continue;
                 }
             }
 
-            MetadataAttribute attribute = new MetadataAttribute(field.getName(), field.getData(), true);
+            final MetadataAttribute attribute = new MetadataAttribute(field.getName(), field.getData(), true);
             if (field.getInfo().getPhysicalUnit() != null) {
                 attribute.setUnit(field.getInfo().getPhysicalUnit());
             }
