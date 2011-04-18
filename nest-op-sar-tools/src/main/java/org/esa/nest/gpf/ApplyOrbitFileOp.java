@@ -19,6 +19,7 @@ import Jama.Matrix;
 import com.bc.ceres.core.NullProgressMonitor;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -29,6 +30,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.OrbitalDataRecordReader;
@@ -147,8 +149,8 @@ public final class ApplyOrbitFileOp extends Operator {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-            System.out.println("mission is "+mission);
-            System.out.println("orbitType is "+orbitType);
+            //System.out.println("mission is "+mission);
+            //System.out.println("orbitType is "+orbitType);
 
             if(orbitType == null) {
                 if(mission.equals("ENVISAT")) {
@@ -621,21 +623,12 @@ public final class ApplyOrbitFileOp extends Operator {
                 localPath.mkdirs();
 
             if(VisatApp.getApp() != null) {
-                final SwingWorker<Exception, Object> worker = new SwingWorker<Exception, Object>() {
+                final DownloadOrbitWorker worker = new DownloadOrbitWorker(VisatApp.getApp(), "Download Orbit Files",
+                        ftp, fileSizeMap, remotePath, localPath);
+                worker.executeWithBlocking();
 
-                    @Override
-                    protected Exception doInBackground() throws Exception {
-                        final ProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
-                                                            "Downloading Orbit...",
-                                                            Dialog.ModalityType.APPLICATION_MODAL);
-
-                        getRemoteFiles(remotePath, localPath, pm);
-                        return null;
-                    }
-                };
-                worker.execute();
             } else {
-                getRemoteFiles(remotePath, localPath, new NullProgressMonitor());
+                getRemoteFiles(ftp, fileSizeMap, remotePath, localPath, new NullProgressMonitor());
             }
 
         } catch(Exception e) {
@@ -643,7 +636,8 @@ public final class ApplyOrbitFileOp extends Operator {
         }
     }
 
-    private void getRemoteFiles(final String remotePath, final File localPath, final ProgressMonitor pm) {
+    private static void getRemoteFiles(final ftpUtils ftp, final Map<String, Long> fileSizeMap,
+                                       final String remotePath, final File localPath, final ProgressMonitor pm) {
         final Set<String> remoteFileNames = fileSizeMap.keySet();
         pm.beginTask("Downloading Orbit Files...", remoteFileNames.size());
         for(String fileName : remoteFileNames) {
@@ -829,21 +823,12 @@ public final class ApplyOrbitFileOp extends Operator {
                 localPath.mkdirs();
 
             if(VisatApp.getApp() != null) {
-                final SwingWorker<Exception, Object> worker = new SwingWorker<Exception, Object>() {
-
-                    @Override
-                    protected Exception doInBackground() throws Exception {
-                        final ProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
-                                                            "Downloading Orbit...",
-                                                            Dialog.ModalityType.APPLICATION_MODAL);
-
-                        getRemoteFiles(remotePath, localPath, pm);
-                        return null;
-                    }
-                };
-                worker.execute();
+                final DownloadOrbitWorker worker = new DownloadOrbitWorker(VisatApp.getApp(), "Download Orbit Files",
+                        ftp, fileSizeMap, remotePath, localPath);
+                worker.executeWithBlocking();
+             
             } else {
-                getRemoteFiles(remotePath, localPath, new NullProgressMonitor());
+                getRemoteFiles(ftp, fileSizeMap, remotePath, localPath, new NullProgressMonitor());
             }
 
         } catch(Exception e) {
@@ -893,6 +878,29 @@ public final class ApplyOrbitFileOp extends Operator {
         return null;
     }
 
+    private static class DownloadOrbitWorker extends ProgressMonitorSwingWorker {
+
+        private final String remotePath;
+        private final File localPath;
+        private final ftpUtils ftp;
+        private final Map<String, Long> fileSizeMap;
+
+        DownloadOrbitWorker(final VisatApp visatApp, final String title,
+                            final ftpUtils ftp, final Map<String, Long> fileSizeMap,
+                            final String remotePath, final File localPath) {
+            super(visatApp.getMainFrame(), title);
+            this.ftp = ftp;
+            this.fileSizeMap = fileSizeMap;
+            this.remotePath = remotePath;
+            this.localPath = localPath;
+        }
+
+        @Override
+        protected Object doInBackground(ProgressMonitor pm) throws Exception {
+            getRemoteFiles(ftp, fileSizeMap, remotePath, localPath, pm);
+            return 0;
+        }
+    }
 
     private final static class OrbitData {
         public double xPos;
