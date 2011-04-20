@@ -18,7 +18,6 @@ package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.runtime.ConfigurationElement;
-import com.bc.ceres.core.runtime.ConfigurationShemaElement;
 import com.bc.ceres.core.runtime.Extension;
 import com.bc.ceres.core.runtime.ExtensionPoint;
 import com.bc.ceres.core.runtime.Module;
@@ -93,11 +92,6 @@ public class ExtensionPointImpl implements ExtensionPoint {
 
     @Override
     public ConfigurationSchemaElement getConfigurationSchemaElement() {
-        return configurationSchemaElement;
-    }
-
-    @Override
-    public ConfigurationShemaElement getConfigurationShemaElement() {
         return configurationSchemaElement;
     }
 }

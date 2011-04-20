@@ -27,32 +27,20 @@ import com.bc.ceres.core.CoreException;
 public interface ConfigurationElement extends ConfigurationElementBase<ConfigurationElement> {
 
     /**
-     * Gets the corresponding shema element, if this is an element of an extension configuration.
+     * Gets the corresponding schema element, if this is an element of an extension configuration.
      *
-     * @return The shema element, or {@code null} if this is a shema element.
+     * @return The schema element, or {@code null} if this is a schema element.
      *
      * @see #getDeclaringExtension()
      */
     ConfigurationSchemaElement getSchemaElement();
 
-
-    /**
-     * Gets the corresponding shema element, if this is an element of an extension configuration.
-     *
-     * @return The shema element, or {@code null} if this is a shema element.
-     *
-     * @see #getDeclaringExtension()
-     * @deprecated since Ceres 0.10, use {@link #getSchemaElement()} instead
-     */
-    @Deprecated
-    ConfigurationShemaElement getShemaElement();
-
     /**
      * Gets the declaring extension, if this is an element of an extension configuration.
      *
-     * @return The declaring extension, or {@code null} if this is a shema element.
+     * @return The declaring extension, or {@code null} if this is a schema element.
      *
-     * @see #getShemaElement()
+     * @see #getSchemaElement()
      */
     Extension getDeclaringExtension();
 
@@ -63,7 +51,7 @@ public interface ConfigurationElement extends ConfigurationElementBase<Configura
      * <p/>
      * <p>The specified class is instantiated using its 0-argument public constructor.
      * If the specified class implements the {@link ConfigurableExtension} interface, its
-     * {@link ConfigurableExtension#configure configure} method is called, passing to the
+     * {@link ConfigurableExtension#configure(ConfigurationElement)}  configure} method is called, passing to the
      * object the configuration information that was used to create it.</p>
      *
      * @param extensionType the expected type of the executable extension instance
@@ -71,7 +59,7 @@ public interface ConfigurationElement extends ConfigurationElementBase<Configura
      * @return the executable instance
      *
      * @throws CoreException    if an instance of the executable extension could not be created for any reason.
-     * @throws RuntimeException if this is a shema element
+     * @throws RuntimeException if this is a schema element
      */
     <T> T createExecutableExtension(Class<T> extensionType) throws CoreException;
 }

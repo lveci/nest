@@ -20,31 +20,24 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueSet;
-import com.bc.ceres.swing.TableLayout;
 import com.bc.ceres.swing.binding.PropertyPane;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
-import com.jidesoft.action.CommandMenuBar;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductFilter;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.ui.AppContext;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,18 +49,17 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.16 $ $Date: 2011-02-22 03:53:28 $
+ * @version $Revision: 1.17 $ $Date: 2011-04-20 18:28:39 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
     private final String operatorName;
-    private final List<SourceProductSelector> sourceProductSelectorList;
-    private final Map<Field, SourceProductSelector> sourceProductSelectorMap;
     private final Map<String, Object> parameterMap;
     private final JTabbedPane form;
     private PropertyDescriptor[] rasterDataNodeTypeProperties;
     private String targetProductNameSuffix;
     private ProductChangedHandler productChangedHandler;
+    private DefaultIOParametersPanel ioParametersPanel;
 
     public static SingleTargetProductDialog createDefaultDialog(String operatorName, AppContext appContext) {
         return new DefaultSingleTargetProductDialog(operatorName, appContext, operatorName, null);
@@ -80,30 +72,10 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
-            throw new IllegalArgumentException("operatorName " + operatorName);
+            throw new IllegalArgumentException("operatorName");
         }
 
-        sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
-        sourceProductSelectorMap = new HashMap<Field, SourceProductSelector>(3);
-        // Fetch source products
-        initSourceProductSelectors(operatorSpi);
-        if (!sourceProductSelectorList.isEmpty()) {
-            setSourceProductSelectorLabels();
-            setSourceProductSelectorToolTipTexts();
-        }
-
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayout.setTablePadding(3, 3);
-
-        JPanel ioParametersPanel = new JPanel(tableLayout);
-        for (SourceProductSelector selector : sourceProductSelectorList) {
-            ioParametersPanel.add(selector.createDefaultPanel());
-        }
-        ioParametersPanel.add(getTargetProductSelector().createDefaultPanel());
-        ioParametersPanel.add(tableLayout.createVerticalSpacer());
+        ioParametersPanel = new DefaultIOParametersPanel(getAppContext(), operatorSpi, getTargetProductSelector());
 
         this.form = new JTabbedPane();
         this.form.add("I/O Parameters", ioParametersPanel);
@@ -111,10 +83,13 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         PropertyContainer propertyContainer = PropertyContainer.createMapBacked(parameterMap,
                                                                                 operatorSpi.getOperatorClass(),
                                                                                 new ParameterDescriptorFactory());
-        OperatorParametersSupport parametersSupport = new OperatorParametersSupport(this.getJDialog(),
-                                                                                    operatorSpi.getOperatorClass(),
-                                                                                    propertyContainer);
+        OperatorMenuSupport menuSupport = new OperatorMenuSupport(this.getJDialog(),
+                                                                  operatorSpi.getOperatorClass(),
+                                                                  propertyContainer,
+                                                                  helpID);
+
         propertyContainer.setDefaultValues();
+        final ArrayList<SourceProductSelector> sourceProductSelectorList = ioParametersPanel.getSourceProductSelectorList();
         if (propertyContainer.getProperties().length > 0) {
             if (!sourceProductSelectorList.isEmpty()) {
                 Property[] properties = propertyContainer.getProperties();
@@ -133,13 +108,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             parametersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
             this.form.add("Processing Parameters", new JScrollPane(parametersPanel));
 
-            // todo - use this actions in a tool- or menu-bar
-            JMenu fileMenu = new JMenu("File");
-            fileMenu.add(parametersSupport.createLoadParametersAction());
-            fileMenu.add(parametersSupport.createStoreParametersAction());
-            JMenuBar menuBar = new CommandMenuBar();
-            getJDialog().setJMenuBar(menuBar);
-            getJDialog().getJMenuBar().add(fileMenu);
+            getJDialog().setJMenuBar(menuSupport.createDefaultMenue());
         }
         if (!sourceProductSelectorList.isEmpty()) {
             productChangedHandler = new ProductChangedHandler();
@@ -147,60 +116,9 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         }
     }
 
-    private void initSourceProductSelectors(OperatorSpi operatorSpi) {
-        final Field[] fields = operatorSpi.getOperatorClass().getDeclaredFields();
-        for (Field field : fields) {
-            final SourceProduct annot = field.getAnnotation(SourceProduct.class);
-            if (annot != null) {
-                final ProductFilter productFilter = new AnnotatedSourceProductFilter(annot);
-                SourceProductSelector sourceProductSelector = new SourceProductSelector(getAppContext());
-                sourceProductSelector.setProductFilter(productFilter);
-                sourceProductSelectorList.add(sourceProductSelector);
-                sourceProductSelectorMap.put(field, sourceProductSelector);
-            }
-        }
-    }
-
-    private void setSourceProductSelectorLabels() {
-        for (Field field : sourceProductSelectorMap.keySet()) {
-            final SourceProductSelector selector = sourceProductSelectorMap.get(field);
-            String label = null;
-            final SourceProduct annot = field.getAnnotation(SourceProduct.class);
-            if (!annot.label().isEmpty()) {
-                label = annot.label();
-            }
-            if (label == null && !annot.alias().isEmpty()) {
-                label = annot.alias();
-            }
-            if (label == null) {
-                String name = field.getName();
-                if (!annot.alias().isEmpty()) {
-                    name = annot.alias();
-                }
-                label = PropertyDescriptor.createDisplayName(name);
-            }
-            if (!label.endsWith(":")) {
-                label += ":";
-            }
-            selector.getProductNameLabel().setText(label);
-        }
-    }
-
-    private void setSourceProductSelectorToolTipTexts() {
-        for (Field field : sourceProductSelectorMap.keySet()) {
-            final SourceProductSelector selector = sourceProductSelectorMap.get(field);
-
-            final SourceProduct annot = field.getAnnotation(SourceProduct.class);
-            final String description = annot.description();
-            if (!description.isEmpty()) {
-                selector.getProductNameComboBox().setToolTipText(description);
-            }
-        }
-    }
-
     @Override
     public int show() {
-        initSourceProductSelectors();
+        ioParametersPanel.initSourceProductSelectors();
         setContent(form);
         return super.show();
     }
@@ -208,40 +126,14 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
     @Override
     public void hide() {
         productChangedHandler.releaseProduct();
-        releaseSourceProductSelectors();
+        ioParametersPanel.releaseSourceProductSelectors();
         super.hide();
     }
 
     @Override
     protected Product createTargetProduct() throws Exception {
-        final HashMap<String, Product> sourceProducts = createSourceProductsMap();
+        final HashMap<String, Product> sourceProducts = ioParametersPanel.createSourceProductsMap();
         return GPF.createProduct(operatorName, parameterMap, sourceProducts);
-    }
-
-    private void initSourceProductSelectors() {
-        for (SourceProductSelector sourceProductSelector : sourceProductSelectorList) {
-            sourceProductSelector.initProducts();
-        }
-    }
-
-    private void releaseSourceProductSelectors() {
-        for (SourceProductSelector sourceProductSelector : sourceProductSelectorList) {
-            sourceProductSelector.releaseProducts();
-        }
-    }
-
-    private HashMap<String, Product> createSourceProductsMap() {
-        final HashMap<String, Product> sourceProducts = new HashMap<String, Product>(8);
-        for (Field field : sourceProductSelectorMap.keySet()) {
-            final SourceProductSelector selector = sourceProductSelectorMap.get(field);
-            String key = field.getName();
-            final SourceProduct annot = field.getAnnotation(SourceProduct.class);
-            if (!annot.alias().isEmpty()) {
-                key = annot.alias();
-            }
-            sourceProducts.put(key, selector.getSelectedProduct());
-        }
-        return sourceProducts;
     }
 
     public String getTargetProductNameSuffix() {
@@ -250,31 +142,6 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
     public void setTargetProductNameSuffix(String suffix) {
         targetProductNameSuffix = suffix;
-    }
-
-    private static class AnnotatedSourceProductFilter implements ProductFilter {
-
-        private final SourceProduct annot;
-
-        private AnnotatedSourceProductFilter(SourceProduct annot) {
-            this.annot = annot;
-        }
-
-        @Override
-        public boolean accept(Product product) {
-
-            if (!annot.type().isEmpty() && !product.getProductType().matches(annot.type())) {
-                return false;
-            }
-
-            for (String bandName : annot.bands()) {
-                if (!product.containsBand(bandName)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 
     private class ProductChangedHandler extends AbstractSelectionChangeListener implements ProductNodeListener {

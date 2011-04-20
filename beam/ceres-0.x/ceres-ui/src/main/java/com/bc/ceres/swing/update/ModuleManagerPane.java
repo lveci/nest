@@ -233,7 +233,7 @@ public class ModuleManagerPane extends JPanel {
         installedModulesTableModel = new ModuleTableModel(moduleManager.getInstalledModuleItems(),
                                                           new String[]{
                                                                   "Name",
-                                                                  "Funded By",
+                                                                  "Agency",
                                                                   "Version",
                                                                   "State",
                                                                   "Action"});
@@ -241,7 +241,7 @@ public class ModuleManagerPane extends JPanel {
         updatableModulesTableModel = new ModuleTableModel(moduleManager.getUpdatableModuleItems(),
                                                           new String[]{
                                                                   "Name",
-                                                                  "Funded By",
+                                                                  "Agency",
                                                                   "Version",
                                                                   "New Version",
                                                                   "Date",
@@ -251,7 +251,7 @@ public class ModuleManagerPane extends JPanel {
         availableModulesTableModel = new ModuleTableModel(moduleManager.getAvailableModuleItems(),
                                                           new String[]{
                                                                   "Name",
-                                                                  "Funded By",
+                                                                  "Agency",
                                                                   "Version",
                                                                   "Date",
                                                                   "Size",

@@ -20,7 +20,11 @@ import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.experimental.Output;
+import org.esa.beam.framework.gpf.internal.OperatorExecutor;
+import org.esa.beam.framework.gpf.internal.OperatorProductReader;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModelessDialog;
@@ -53,16 +57,22 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
     private AppContext appContext;
     private JLabel statusLabel;  // NESTMOD
 
-    public SingleTargetProductDialog(AppContext appContext, String title, String helpID) {
+    protected SingleTargetProductDialog(AppContext appContext, String title, String helpID) {
         this(appContext, title, ID_APPLY_CLOSE_HELP, helpID);
     }
 
-    public SingleTargetProductDialog(AppContext appContext, String title, int buttonMask, String helpID) {
+    protected SingleTargetProductDialog(AppContext appContext, String title, int buttonMask, String helpID) {
+        this(appContext, title, buttonMask, helpID, new TargetProductSelectorModel());
+    }
+
+    protected SingleTargetProductDialog(AppContext appContext, String title, int buttonMask, String helpID,
+                                        TargetProductSelectorModel model) {
         super(appContext.getApplicationWindow(), title, buttonMask, helpID);
         this.appContext = appContext;
-        targetProductSelector = new TargetProductSelector();
+        targetProductSelector = new TargetProductSelector(model);
         String homeDirPath = SystemUtils.getUserHomeDir().getPath();
-        String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
+        String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR,
+                                                                       homeDirPath);
         targetProductSelector.getModel().setProductDir(new File(saveDir));
         targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
         targetProductSelector.getModel().getValueContainer().addPropertyChangeListener(new PropertyChangeListener() {
@@ -70,7 +80,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals("saveToFileSelected") ||
-                        evt.getPropertyName().equals("openInAppSelected")) {
+                    evt.getPropertyName().equals("openInAppSelected")) {
                     updateRunButton();
                 }
             }
@@ -190,7 +200,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
             if (existingProduct != null) {
                 String message = MessageFormat.format(
                         "A product with the name ''{0}'' is already opened in {1}.\n\n" +
-                                "Do you want to continue?",
+                        "Do you want to continue?",
                         productName, appContext.getApplicationName());
                 final int answer = JOptionPane.showConfirmDialog(getJDialog(), message,
                                                                  getTitle(), JOptionPane.YES_NO_OPTION);
@@ -204,7 +214,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
             if (productFile.exists()) {
                 String message = MessageFormat.format(
                         "The specified output file\n\"{0}\"\n already exists.\n\n" +
-                                "Do you want to overwrite the existing file?",
+                        "Do you want to overwrite the existing file?",
                         productFile.getPath());
                 final int answer = JOptionPane.showConfirmDialog(getJDialog(), message,
                                                                  getTitle(), JOptionPane.YES_NO_OPTION);
@@ -220,7 +230,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         File productFile = getTargetProductSelector().getModel().getProductFile();
         final String message = MessageFormat.format(
                 "The target product has been successfully written to\n{0}\n" +
-                        "Total time spend for processing: {2}",
+                "Total time spend for processing: {2}",
                 formatFile(productFile),
                 formatDuration(saveTime));
         showSuppressibleInformationDialog(message, "saveInfo");
@@ -229,8 +239,8 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
     private void showOpenInAppInfo() {
         final String message = MessageFormat.format(
                 "The target product has successfully been created and opened in {0}.\n\n" +
-                        "Actual processing of source to target data will be performed only on demand,\n" +
-                        "for example, if the target product is saved or an image view is opened.",
+                "Actual processing of source to target data will be performed only on demand,\n" +
+                "for example, if the target product is saved or an image view is opened.",
                 appContext.getApplicationName());
         showSuppressibleInformationDialog(message, "openInAppInfo");
     }
@@ -239,9 +249,9 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         File productFile = getTargetProductSelector().getModel().getProductFile();
         final String message = MessageFormat.format(
                 "The target product has been successfully written to\n" +
-                        "{0}\n" +
-                        "and has been opened in {1}.\n" +
-                        "Total time spend for processing: {2}\n",
+                "{0}\n" +
+                "and has been opened in {1}.\n" +
+                "Total time spend for processing: {2}\n",
                 formatFile(productFile),
                 appContext.getApplicationName(),
                 formatDuration(saveTime));
@@ -279,6 +289,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
     }
 
     private class ProductWriterSwingWorker extends ProgressMonitorSwingWorker<Product, Object> {
+
         private final Product targetProduct;
         private long saveTime;
         private Date executeStartTime;
@@ -301,11 +312,20 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
 
                 executeStartTime = Calendar.getInstance().getTime();
                 long t0 = System.currentTimeMillis();
-                WriteOp writeOp = new WriteOp(targetProduct, model.getProductFile(), model.getFormatName());
-                writeOp.setDeleteOutputOnFailure(true);
-                writeOp.setWriteEntireTileRows(true);
-                writeOp.setClearCacheAfterRowWrite(false);
-                writeOp.writeProduct(SubProgressMonitor.create(pm, 95));
+                final OperatorProductReader opReader = (OperatorProductReader) targetProduct.getProductReader();
+                final Operator operator;
+                if (opReader.getOperatorContext().getOperator() instanceof Output) {
+                    operator = opReader.getOperatorContext().getOperator();
+                } else {
+                    WriteOp writeOp = new WriteOp(targetProduct, model.getProductFile(), model.getFormatName());
+                    writeOp.setDeleteOutputOnFailure(true);
+                    writeOp.setWriteEntireTileRows(true);
+                    writeOp.setClearCacheAfterRowWrite(false);
+                    operator = writeOp;
+                }
+                final OperatorExecutor executor = OperatorExecutor.create(operator);
+                executor.execute(SubProgressMonitor.create(pm, 95));
+
                 saveTime = System.currentTimeMillis() - t0;
                 if (model.isOpenInAppSelected()) {
                     product = ProductIO.readProduct(model.getProductFile());
@@ -365,6 +385,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
      * other exeption types are treated as internal errors.
      *
      * @return The target product.
+     *
      * @throws Exception if an error occurs, an {@link OperatorException} is signaling "nominal" processing errors.
      */
     protected abstract Product createTargetProduct() throws Exception;

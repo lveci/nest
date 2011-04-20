@@ -22,8 +22,8 @@ package com.bc.ceres.core.runtime;
  * <p>If {@link #getDeclaringModule() declared} in a module manifest (module.xml), an extension point has the following syntax:
  * <pre>
  *    &lt;extensionPoint id="{@link #getId() id}"&gt;
- *       {@link #getConfigurationShemaElement() configuration shema element 1}
- *       {@link #getConfigurationShemaElement() configuration shema element 2}
+ *       {@link #getConfigurationSchemaElement() configuration schema element 1}
+ *       {@link #getConfigurationSchemaElement() configuration schema element 2}
  *       ...
  *    &lt;/extensionPoint&gt;
  * </pre>
@@ -47,20 +47,11 @@ public interface ExtensionPoint {
     String getQualifiedId();
 
     /**
-     * Gets the configuration shema element of this extension point.
+     * Gets the configuration schema element of this extension point.
      *
-     * @return The configuration shema element.
+     * @return The configuration schema element.
      */
     ConfigurationSchemaElement getConfigurationSchemaElement();
-
-    /**
-     * Gets the configuration shema element of this extension point.
-     *
-     * @return The configuration shema element.
-     * @deprecated since Ceres 0.10, use {@link #getConfigurationSchemaElement()} instead
-     */
-    @Deprecated
-    ConfigurationShemaElement getConfigurationShemaElement();
 
     /**
      * Gets the module in which this extension point is declared.

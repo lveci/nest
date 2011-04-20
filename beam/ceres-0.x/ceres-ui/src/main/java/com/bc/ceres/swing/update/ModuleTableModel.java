@@ -34,7 +34,7 @@ class ModuleTableModel extends AbstractTableModel {
                 return ModuleTextFactory.getNameText(moduleItem);
             }
         });
-        defineColumn("Funded By", String.class, new ModuleValueAccessor() {
+        defineColumn("Agency", String.class, new ModuleValueAccessor() {
             public Object getValue(ModuleItem moduleItem) {
                 return ModuleTextFactory.getFundingText(moduleItem);
             }

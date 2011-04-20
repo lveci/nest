@@ -17,6 +17,8 @@
 package org.esa.beam.gpf.operators.standard;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.jexp.ParseException;
+import com.bc.jexp.Term;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
@@ -32,6 +34,9 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
+import org.esa.beam.framework.dataop.barithm.RasterDataSymbol;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -49,6 +54,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import static java.lang.Math.*;
 
@@ -64,7 +70,7 @@ public class SubsetOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    //@Parameter()
+    @Parameter()
     private Rectangle region;
     @Parameter(label = "X", defaultValue="0")
     private int regionX = 0;
@@ -76,12 +82,13 @@ public class SubsetOp extends Operator {
     private int height = 1000;
     @Parameter(defaultValue = "1")
     private int subSamplingX;
-    @Parameter(defaultValue = "false", description = "Forces the operator to extend the subset region to the full swath.")
+    @Parameter(defaultValue = "false",
+               description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
     @Parameter(converter = JtsGeometryConverter.class,
                description = "The region in geographical coordinates using WKT-format,\n" +
-                       "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
-                       "(make sure to quote the option due to spaces in <geometry>)")
+                             "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
+                             "(make sure to quote the option due to spaces in <geometry>)")
     private Geometry geoRegion;
 
     @Parameter(defaultValue = "1")
@@ -160,6 +167,15 @@ public class SubsetOp extends Operator {
         } else {
             subsetDef.addNodeNames(sourceProduct.getBandNames());
         }
+        String[] nodeNames = subsetDef.getNodeNames();
+        if (nodeNames != null) {
+            final ArrayList<String> referencedNodeNames = new ArrayList<String>();
+            for (String nodeName : nodeNames) {
+                collectReferencedRasters(nodeName, referencedNodeNames);
+            }
+            subsetDef.addNodeNames(referencedNodeNames.toArray(new String[referencedNodeNames.size()]));
+        }
+
         if (geoRegion != null) {
             region = computePixelRegion(sourceProduct, geoRegion, 0);
         }
@@ -183,6 +199,27 @@ public class SubsetOp extends Operator {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
         } catch (Throwable t) {
             throw new OperatorException(t);
+        }
+    }
+
+    private void collectReferencedRasters(String nodeName, ArrayList<String> referencedNodeNames) {
+        final String validPixelExpression = sourceProduct.getRasterDataNode(nodeName).getValidPixelExpression();
+        if (validPixelExpression == null || validPixelExpression.trim().isEmpty()) {
+            return;
+        }
+        try {
+            final Term term = sourceProduct.parseExpression(validPixelExpression);
+            final RasterDataSymbol[] refRasterDataSymbols = BandArithmetic.getRefRasterDataSymbols(term);
+            final RasterDataNode[] refRasters = BandArithmetic.getRefRasters(refRasterDataSymbols);
+            if (refRasters.length > 0) {
+                for (RasterDataNode refRaster : refRasters) {
+                    final String refNodeName = refRaster.getName();
+                    referencedNodeNames.add(refNodeName);
+                    collectReferencedRasters(refNodeName, referencedNodeNames);
+                }
+            }
+        } catch (ParseException e) {
+            getLogger().log(Level.WARNING, e.getMessage(), e);
         }
     }
 

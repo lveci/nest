@@ -19,7 +19,6 @@ package com.bc.ceres.core.runtime.internal;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.ConfigurableExtension;
 import com.bc.ceres.core.runtime.ConfigurationElement;
-import com.bc.ceres.core.runtime.ConfigurationShemaElement;
 import com.bc.ceres.core.runtime.Extension;
 import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.ConfigurationSchemaElement;
@@ -49,12 +48,6 @@ public class ConfigurationElementImpl extends ConfigurationElementBaseImpl<Confi
 
     @Override
     public ConfigurationSchemaElement getSchemaElement() {
-        return schemaElement;
-    }
-
-    @Override
-    @Deprecated
-    public ConfigurationShemaElement getShemaElement() {
         return schemaElement;
     }
 
@@ -268,7 +261,7 @@ public class ConfigurationElementImpl extends ConfigurationElementBaseImpl<Confi
             ConfigurationElementImpl child = new ConfigurationElementImpl(this, doms[i]);
             child.setDeclaringExtension(declaringExtension);
             if (schemaElement != null) {
-                child.setShemaElement((ConfigurationSchemaElementImpl) schemaElement.getChild(child.getName()));
+                child.setSchemaElement((ConfigurationSchemaElementImpl) schemaElement.getChild(child.getName()));
             }
             children[i] = child;
         }
@@ -284,7 +277,7 @@ public class ConfigurationElementImpl extends ConfigurationElementBaseImpl<Confi
         this.declaringExtension = declaringExtension;
     }
 
-    void setShemaElement(ConfigurationSchemaElementImpl schemaElement) {
+    void setSchemaElement(ConfigurationSchemaElementImpl schemaElement) {
         this.schemaElement = schemaElement;
     }
 }

@@ -16,7 +16,6 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import com.bc.ceres.core.runtime.ConfigurationShemaElement;
 import com.bc.ceres.core.runtime.ConfigurationSchemaElement;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
@@ -25,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ConfigurationSchemaElementImpl extends ConfigurationElementBaseImpl<ConfigurationSchemaElement>
-        implements ConfigurationSchemaElement, ConfigurationShemaElement {
+        implements ConfigurationSchemaElement {
 
     private ExtensionPointImpl declaringExtensionPoint;
     private XStream xStream;

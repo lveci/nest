@@ -22,7 +22,6 @@ import com.bc.ceres.swing.selection.support.ComboBoxSelectionContext;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
 import org.esa.beam.framework.datamodel.ProductManager;
@@ -31,15 +30,26 @@ import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileChooser;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -86,8 +96,6 @@ public class SourceProductSelector {
         productNameComboBox.setPrototypeDisplayValue("[1] 123456789 123456789 12345");
         productNameComboBox.setRenderer(new ProductListCellRenderer());
         productNameComboBox.addPopupMenuListener(new ProductPopupMenuListener());
-        productNameComboBox.setTransferHandler(new ComboBoxTransferHandler());
-        
         productNameComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -181,7 +189,7 @@ public class SourceProductSelector {
             productListModel.setSelectedItem(product);
         } else {
             if (productFilter.accept(product)) {
-                if (extraProduct != null && !extraProduct.getName().equals(product.getName())) {
+                if (extraProduct != null) {
                     productListModel.removeElement(extraProduct);
                     extraProduct.dispose();
                 }
@@ -395,58 +403,4 @@ public class SourceProductSelector {
             return true;
         }
     }
-
-    public static class ComboBoxTransferHandler extends TransferHandler {
-
-        public boolean canImport(TransferHandler.TransferSupport info) {
-            return info.isDataFlavorSupported(DataFlavor.stringFlavor);
-        }
-
-        public int getSourceActions(JComponent c) {
-            return TransferHandler.COPY;
-        }
-
-        /**
-         * Perform the actual import.  This demo only supports drag and drop.
-         */
-        public boolean importData(TransferHandler.TransferSupport info) {
-            if (!info.isDrop()) {
-                return false;
-            }
-
-            JComboBox comboBox = (JComboBox)info.getComponent();
-            DefaultComboBoxModel comboModel = (DefaultComboBoxModel)comboBox.getModel();
-
-            // Get the string that is being dropped.
-            Transferable t = info.getTransferable();
-            String data;
-            try {
-                data = (String)t.getTransferData(DataFlavor.stringFlavor);
-            }
-            catch (Exception e) { return false; }
-
-            // Wherever there is a newline in the incoming data,
-            // break it into a separate item in the list.
-            String[] values = data.split("\n");
-
-            // Perform the actual import.
-            for (String value : values) {
-                try {
-                    File selectedFile = new File(value);
-                    if(selectedFile.exists()) {
-                        ProductReader reader = ProductIO.getProductReaderForFile(selectedFile);
-                        if(reader != null) {
-                            Product product = reader.readProductNodes(selectedFile, null);
-                            if(product != null) 
-                                comboModel.addElement(product);
-                        }
-                    }
-                } catch(Exception e) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
 }

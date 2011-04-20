@@ -42,7 +42,7 @@ import java.beans.PropertyChangeListener;
 
 /**
  * @author Marco Peters
-
+ 
  * @since BEAM 4.7
  */
 public class CollocationCrsForm extends CrsForm {
@@ -127,13 +127,17 @@ public class CollocationCrsForm extends CrsForm {
 
         @Override
         public boolean accept(Product collocationProduct) {
-            if (getReferenceProduct() == collocationProduct ||
+            final Product referenceProduct = getReferenceProduct();
+            if (referenceProduct == collocationProduct ||
                 collocationProduct.getGeoCoding() == null) {
                 return false;
             }
+            if (referenceProduct == null) {
+                return true;
+            }
             final GeoCoding geoCoding = collocationProduct.getGeoCoding();
             if (geoCoding.canGetGeoPos() && geoCoding.canGetPixelPos() && (geoCoding instanceof CrsGeoCoding)) {
-                final GeneralPath[] sourcePath = ProductUtils.createGeoBoundaryPaths(getReferenceProduct());
+                final GeneralPath[] sourcePath = ProductUtils.createGeoBoundaryPaths(referenceProduct);
                 final GeneralPath[] collocationPath = ProductUtils.createGeoBoundaryPaths(collocationProduct);
                 for (GeneralPath path : sourcePath) {
                     Rectangle bounds = path.getBounds();
