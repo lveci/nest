@@ -12,6 +12,9 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.9<br/>
+          [BEAM-1276] Add VISAT scripting support for the Python language<br/>
+          [BEAM-1251] Allow setting start and stop time<br/>
+          [BEAM-1248] Title of transect-plot dialog is not updated if band selection changes<br/>
           [BEAM-1228] Rangefinder does not work<br/>
           [BEAM-1204] Reprojection changes product type<br/>        
           [BEAM-1203] Application returns with exit code zero in error case<br/>
@@ -21,7 +24,8 @@
           [BEAM-1183] Improve reprojection UI usability<br/>
           [BEAM-1180] Allow dragging files into VISAT<br/>
           [BEAM-1177] Index out of bounds for RGB View<br/>
-          [BEAM-1067] Histogram title doesn't update when changing band<br/>        
+          [BEAM-1067] Histogram title doesn't update when changing band<br/>
+          [BEAM-1055] No-data colour option in Colour Manipulation window has no effect<br/>
         </p>
         <p>Changes in 4.8:<br/>
           [BEAM-1169] On KDE (linux) the Java Desktop-API is not supported.<br/>        
