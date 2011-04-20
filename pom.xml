@@ -16,6 +16,8 @@
         <ceres.version>0.12-SNAPSHOT</ceres.version>
         <geotools.version>2.6.5</geotools.version>
 		<jide.version>2.9.5</jide.version>
+		<hdf.version>2.6.1</hdf.version>
+        <netcdf.version>4.2</netcdf.version>
 		<nest.version>4B-1.0</nest.version>
 		<outputdir>../output</outputdir>
     </properties>
@@ -241,7 +243,7 @@
             <dependency>
                 <groupId>ncsa.hdf</groupId>
                 <artifactId>lib-hdf</artifactId>
-                <version>2.3</version>
+                <version>${hdf.version}</version>
             </dependency>
 
             <!-- NEST Modules ############################################# -->
@@ -298,25 +300,25 @@
                 <version>${geotools.version}</version>
             </dependency>
             <dependency>
-              <groupId>org.geotools</groupId>
-              <artifactId>gt-shapefile</artifactId>
-              <version>${geotools.version}</version>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-shapefile</artifactId>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
-              <groupId>org.geotools</groupId>
-              <artifactId>gt-render</artifactId>
-              <version>${geotools.version}</version>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-render</artifactId>
+                <version>${geotools.version}</version>
             </dependency>
 			<dependency>
               <groupId>org.geotools</groupId>
               <artifactId>gt-property</artifactId>
               <version>${geotools.version}</version>
             </dependency>
-			<dependency>
-              <groupId>org.geotools</groupId>
-              <artifactId>gt-geotiff</artifactId>
-              <version>${geotools.version}</version>
-			  <exclusions>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-geotiff</artifactId>
+                <version>${geotools.version}</version>
+                <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
@@ -460,6 +462,14 @@
                 <groupId>jfree</groupId>
                 <artifactId>jcommon</artifactId>
                 <version>1.0.16</version>
+            </dependency>
+			
+			<!-- Python scripting support ######################################## -->
+
+            <dependency>
+                <groupId>org.jython</groupId>
+                <artifactId>jython</artifactId>
+                <version>2.5.2</version>
             </dependency>
 			
 			<!-- Python scripting support ######################################## -->
