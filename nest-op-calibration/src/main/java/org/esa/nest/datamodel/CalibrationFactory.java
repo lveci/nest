@@ -43,7 +43,7 @@ public class CalibrationFactory {
             return new ALOSCalibrator();
         } else if(mission.equals("RS2")) {
             return new Radarsat2Calibrator();
-        } else if(mission.equals("TSX1") || mission.equals("TDX1")) {
+        } else if(mission.contains("TSX") || mission.contains("TDX")) {
             return new TerraSARXCalibrator();
         } else if(mission.contains("CSK")) {
         	return new CosmoSkymedCalibrator();

@@ -277,7 +277,7 @@ public final class OperatorUtils {
         String dateString;
         try {
             final ProductData.UTC date = root.getAttributeUTC(AbstractMetadata.first_line_time);
-            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd.MMM.yyyy");
+            final DateFormat dateFormat = ProductData.UTC.createDateFormat("ddMMMyyyy");
             dateString = dateFormat.format(date.getAsDate());
         } catch(Exception e) {
             dateString = "";

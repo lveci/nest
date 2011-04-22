@@ -458,7 +458,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("ALOS PALSAR product is currently not supported");
         }
 
-        if ((mission.equals("TSX1") || mission.equals("TDX1")) && !sampleType.equals("COMPLEX")) {
+        if ((mission.contains("TSX") || mission.contains("TDX")) && !sampleType.equals("COMPLEX")) {
             throw new OperatorException("Only TerraSAR-X (SSC) products are currently supported");
         }
 

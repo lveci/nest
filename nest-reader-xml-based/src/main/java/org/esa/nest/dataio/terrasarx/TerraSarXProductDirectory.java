@@ -93,7 +93,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 generalHeader.getAttributeString("itemName", defStr));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "TSX1");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "TSX");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 ReaderUtils.getTime(generalHeader, "generationTime", timeFormat));
 
