@@ -146,12 +146,12 @@ public final class ParserImpl implements Parser {
 
 	//NESTMOD
     private static String replaceIfThenElse(String code) {
-        code = code.replace("IF", "");
-        code = code.replace("if", "");
-        code = code.replace("THEN", "?");
-        code = code.replace("then", "?");
-        code = code.replace("ELSE", ":");
-        code = code.replace("else", ":");
+        code = code.replace(" IF ", "");
+        code = code.replace(" if ", "");
+        code = code.replace(" THEN ", "?");
+        code = code.replace(" then ", "?");
+        code = code.replace(" ELSE ", ":");
+        code = code.replace(" else ", ":");
         return code;
     }
 
