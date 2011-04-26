@@ -34,7 +34,7 @@ public class CeosHelper {
             public boolean accept(final File dir, final String fileName) {
                 final String name = fileName.toUpperCase();
                 for(String prefix : constants.getVolumeFilePrefix()) {
-                    if(name.startsWith(prefix))
+                    if(name.startsWith(prefix) || name.endsWith("."+prefix))
                         return true;
                 }
                 return false;
@@ -68,7 +68,7 @@ public class CeosHelper {
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();
             for(String prefix : prefixList) {
-                if (name.startsWith(prefix))
+                if (name.startsWith(prefix) || name.endsWith("."+prefix))
                     return file;
             }
         }

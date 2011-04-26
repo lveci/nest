@@ -44,10 +44,9 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
-        final String fullFilename = file.toString().toUpperCase();
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
+        final String filename = file.getName().toUpperCase();
         for(String header : TerraSarXConstants.HEADER_PREFIX) {
-            if(filename.startsWith(header) && fullFilename.endsWith(TerraSarXConstants.getIndicationKey())) {
+            if(filename.startsWith(header) && filename.endsWith(TerraSarXConstants.getIndicationKey())) {
                 return DecodeQualification.INTENDED;
             }
         }

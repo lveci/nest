@@ -31,7 +31,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.32 $ $Date: 2011-04-08 18:23:59 $
+ * @version $Revision: 1.33 $ $Date: 2011-04-26 15:10:44 $
  */
 public abstract class CEOSImageFile {
 
@@ -148,7 +148,7 @@ public abstract class CEOSImageFile {
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();
             for(String prefix : prefixList) {
-                if (name.startsWith(prefix)) {
+                if (name.startsWith(prefix) || name.endsWith("."+prefix)) {
                     list.add(file.getName());
                 }
             }

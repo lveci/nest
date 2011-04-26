@@ -20,6 +20,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -265,7 +266,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addSummaryMetadata(new File(_baseDir, RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
         addSummaryMetadata(new File(_baseDir.getParentFile(), RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
-        
+
+        // try txt summary file
+        final File volFile = CeosHelper.getCEOSFile(_baseDir, constants.getVolumeFilePrefix());
+        final File txtFile = FileUtils.exchangeExtension(volFile, ".txt");
+        addSummaryMetadata(txtFile, "Scene Description", root);
+
         addAbstractedMetadataHeader(product, root);
     }
 
