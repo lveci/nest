@@ -27,6 +27,7 @@ import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.db.ProductDB;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -223,15 +224,19 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         private class FileStats {
             String data[] = new String[titles.length];
-            FileStats(File file) {
+            FileStats(final File file) {
                 data[0] = file.getName();
             }
-            FileStats(ProductEntry entry) {
+            FileStats(final ProductEntry entry) {
                 data[0] = entry.getName();
                 data[1] = entry.getProductType();
                 data[2] = entry.getFirstLineTime().format();
-                data[3] = "";//entry.track;
-                data[4] = "";//entry.orbit;
+
+                final MetadataElement meta = entry.getMetadata();
+                if(meta != null) {
+                    data[3] = String.valueOf(meta.getAttributeInt(AbstractMetadata.REL_ORBIT, 0));
+                    data[4] = String.valueOf(meta.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0));
+                }
             }
         }
 
@@ -246,23 +251,39 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             return fileList;
         }
 
+        private ProductEntry getProductEntry(final File file) {
+            try {
+                return ProductDB.instance().getProductEntry(file);
+            } catch(Exception e) {
+                if(VisatApp.getApp() != null) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+            }
+            return null;
+        }
+
         public void addFile(final File file) {
             fileList.add(file);
             clearBlankFile();
 
-            FileStats fstat = new FileStats(file);
-            dataList.add(fstat);
-            fireTableDataChanged();
+            // check if already exists in db
+            final ProductEntry existingEntry = getProductEntry(file);
+            if(existingEntry != null) {
+                dataList.add(new FileStats(existingEntry));
+            } else {
+                final FileStats fstat = new FileStats(file);
+                dataList.add(fstat);
 
-            updateProductData(fstat, file);
+                updateProductData(fstat, file);
+            }
+            fireTableDataChanged();
         }
 
         public void addFile(final ProductEntry entry) {
             fileList.add(entry.getFile());
             clearBlankFile();
 
-            FileStats fstat = new FileStats(entry);
-            dataList.add(fstat);
+            dataList.add(new FileStats(entry));
             fireTableDataChanged();
         }
 
