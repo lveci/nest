@@ -169,7 +169,7 @@ public class ProductTable implements TableInterface {
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(strSaveProduct, Statement.RETURN_GENERATED_KEYS);
         stmtUpdateExistingRecord = dbConnection.prepareStatement(strUpdateProduct);
-        stmtGetProduct = dbConnection.prepareStatement(strGetProduct);
+        //stmtGetProduct = dbConnection.prepareStatement(strGetProduct);
         stmtGetProductWithPath = dbConnection.prepareStatement(strGetProductWithPath);
         stmtDeleteProduct = dbConnection.prepareStatement(strDeleteProduct);
 
@@ -202,8 +202,8 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDouble(i++, record.getLastModified());
         stmtSaveNewRecord.setString(i++, record.getFileFormat());
         final String geoStr = record.formatGeoBoundayString();
-        if(geoStr.length() > 12000)
-            throw new SQLException("geoBoundary exceeds 12000");
+        if(geoStr.length() > 1200)
+            throw new SQLException("geoBoundary exceeds 1200");
         stmtSaveNewRecord.setString(i++, geoStr);
 
         final int rowCount = stmtSaveNewRecord.executeUpdate();

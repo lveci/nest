@@ -35,16 +35,16 @@ import java.util.*;
  */
 public class DBQuery {
 
-    public static final String ALL_MISSIONS = "All Missions";
-    public static final String ALL_PRODUCT_TYPES = "All Types";
-    public static final String ALL_PASSES = "All Passes";
-    public static final String ALL_MODES = "All Modes";
+    public static final String ALL_MISSIONS = "All_Missions";
+    public static final String ALL_PRODUCT_TYPES = "All_Types";
+    public static final String ALL_PASSES = "All_Passes";
+    public static final String ALL_MODES = "All_Modes";
     public static final String ASCENDING_PASS = "ASCENDING";
     public static final String DESCENDING_PASS = "DESCENDING";
-    public static final String ALL_FOLDERS = "All Folders";
+    public static final String ALL_FOLDERS = "All_Folders";
     public static final String ANY = "Any";
     public static final String CALIBRATED = "Calibrated";
-    public static final String NOT_CALIBRATED = "Not Calibrated";
+    public static final String NOT_CALIBRATED = "Not_Calibrated";
     public static final String ORBIT_PRELIMINARY = "Preliminary";
     public static final String ORBIT_PRECISE = "Precise";
     public static final String ORBIT_VERIFIED = "Verified";

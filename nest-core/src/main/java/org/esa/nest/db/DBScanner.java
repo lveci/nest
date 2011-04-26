@@ -15,11 +15,10 @@
  */
 package org.esa.nest.db;
 
-import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.util.TestUtils;
+import org.esa.beam.nest_mods.ProductFunctions;
 
 import javax.swing.*;
 import java.io.File;
@@ -72,9 +71,10 @@ public final class DBScanner extends SwingWorker {
             dirList.addAll(Arrays.asList(subDirs));
         }
 
+        final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter();
         final ArrayList<File> fileList = new ArrayList<File>();
         for(File file : dirList) {
-            fileList.addAll(Arrays.asList(file.listFiles()));
+            fileList.addAll(Arrays.asList(file.listFiles(fileFilter)));
         }
 
         final ArrayList<File> qlProductFiles = new ArrayList<File>();
@@ -89,43 +89,45 @@ public final class DBScanner extends SwingWorker {
                 pm.setTaskName("Scanning "+i+" of "+total);
                 pm.worked(1);
 
-                if(!file.isDirectory()) {
-                    if(pm.isCanceled())
-                        break;
-                    if(TestUtils.isNotProduct(file))
-                        continue;
+                if(pm.isCanceled())
+                    break;
 
-                    // check if already exists in db
-                    final ProductEntry existingEntry = db.getProductEntry(file);
-                    if(existingEntry != null) {
-                        // check for missing quicklook
-                        if(generateQuicklooks && !existingEntry.quickLookExists()) {
-                            qlProductFiles.add(file);
-                            qlIDs.add(existingEntry.getId());
-                        }
-                        existingEntry.dispose();
-                        continue;
+                // check if already exists in db
+                final ProductEntry existingEntry = db.getProductEntry(file);
+                if(existingEntry != null) {
+                    // check for missing quicklook
+                    if(generateQuicklooks && !existingEntry.quickLookExists()) {
+                        qlProductFiles.add(file);
+                        qlIDs.add(existingEntry.getId());
                     }
+                    existingEntry.dispose();
+                    continue;
+                }
 
-                    try {
+                try {
+                    // quick test for common readers
+                    Product sourceProduct = ProductFunctions.readCommonProductReader(file);
+                    if(sourceProduct == null) {
+                        // check all other readers
                         final ProductReader reader = ProductIO.getProductReaderForFile(file);
                         if(reader != null) {
-                            final Product sourceProduct = reader.readProductNodes(file, null);
-                            if(sourceProduct != null) {
-                                final ProductEntry entry = db.saveProduct(sourceProduct);
-                                if(!entry.quickLookExists()) {
-                                    qlProductFiles.add(file);
-                                    qlIDs.add(entry.getId());
-                                }
-                                sourceProduct.dispose();
-                                entry.dispose();
-                            }
-                        } else {
-                            System.out.println("No reader for "+file.getAbsolutePath());
+                            sourceProduct = reader.readProductNodes(file, null);
                         }
-                    } catch(Throwable e) {
-                        System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                     }
+
+                    if(sourceProduct != null) {
+                        final ProductEntry entry = db.saveProduct(sourceProduct);
+                        if(!entry.quickLookExists()) {
+                            qlProductFiles.add(file);
+                            qlIDs.add(entry.getId());
+                        }
+                        sourceProduct.dispose();
+                        entry.dispose();
+                    } else {
+                        System.out.println("No reader for "+file.getAbsolutePath());
+                    }
+                } catch(Throwable e) {
+                    System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
                 }
             }
 
@@ -168,7 +170,7 @@ public final class DBScanner extends SwingWorker {
 
     private File[] collectAllSubDirs(final File dir) {
         final ArrayList<File> dirList = new ArrayList<File>();
-        final DirectoryFileFilter dirFilter = new DirectoryFileFilter();
+        final ProductFunctions.DirectoryFileFilter dirFilter = new ProductFunctions.DirectoryFileFilter();
 
         final File[] subDirs = dir.listFiles(dirFilter);
         for (final File subDir : subDirs) {
@@ -177,30 +179,6 @@ public final class DBScanner extends SwingWorker {
             dirList.addAll(Arrays.asList(dirs));
         }
         return dirList.toArray(new File[dirList.size()]);
-    }
-
-    public static class DirectoryFileFilter implements java.io.FileFilter {
-
-        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
-
-        public boolean accept(final File file) {
-            if(!file.isDirectory()) return false;
-            final String name = file.getName().toLowerCase();
-            if(name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
-                return false;
-            for(String ext : skip) {
-                if(name.equalsIgnoreCase(ext))
-                    return false;
-            }
-            return true;
-        }
-    }
-
-    public static class ProductFileFilter implements java.io.FileFilter {
-
-        public boolean accept(final File file) {
-            return !file.isDirectory() && !TestUtils.isNotProduct(file);
-        }
     }
 
     public interface DBScannerListener {

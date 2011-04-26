@@ -54,14 +54,14 @@ public class ProductEntry {
     private long lastModified;
     private String fileFormat;
 
-    private MetadataElement absRoot;
+    private MetadataElement absRoot = null;
 
     // corner locations
     private final GeoPos firstNear = new GeoPos();
     private final GeoPos firstFar = new GeoPos();
     private final GeoPos lastNear = new GeoPos();
     private final GeoPos lastFar = new GeoPos();
-    private  GeoPos[] geoboundary;
+    private GeoPos[] geoboundary;
 
     private BufferedImage quickLookImage = null;
 
@@ -256,6 +256,13 @@ public class ProductEntry {
     }
 
     public MetadataElement getMetadata() {
+        if(absRoot == null) {
+            try {
+                absRoot = ProductDB.instance().getProductMetadata(this.getId());
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
         return absRoot;
     }
 

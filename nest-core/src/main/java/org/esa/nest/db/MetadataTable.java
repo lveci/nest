@@ -33,6 +33,7 @@ public class MetadataTable implements TableInterface {
 
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtDeleteProduct;
+    private PreparedStatement stmtGetMetadata;
 
     private final static MetadataElement emptyMetadata = AbstractMetadata.addAbstractedMetadataHeader(null);
     private static String createTableStr;
@@ -50,6 +51,10 @@ public class MetadataTable implements TableInterface {
 
     private static final String strDeleteProduct =
             "DELETE FROM APP.METADATA WHERE ID = ?";
+
+    private static final String strGetMetadata =
+            "SELECT * FROM APP.METADATA " +
+            "WHERE ID = ?";
 
     public MetadataTable(final Connection dbConnection) {
         this.dbConnection = dbConnection;
@@ -115,6 +120,7 @@ public class MetadataTable implements TableInterface {
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(saveProductStr, Statement.RETURN_GENERATED_KEYS);
         stmtDeleteProduct = dbConnection.prepareStatement(strDeleteProduct);
+        stmtGetMetadata = dbConnection.prepareStatement(strGetMetadata);
     }
 
     public ResultSet addRecord(final ProductEntry record) throws SQLException {
@@ -122,11 +128,12 @@ public class MetadataTable implements TableInterface {
         //System.out.println(record.getFile());
 
         final MetadataElement absRoot = record.getMetadata();
+        if(absRoot == null)
+            throw new SQLException("Metadata is null");
         final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
         int i=1;
         for(MetadataAttribute attrib : attribList) {
             final String name = attrib.getName();
-            //System.out.println(name);
             final int dataType = attrib.getDataType();
             if(dataType == ProductData.TYPE_FLOAT32)
                 stmtSaveNewRecord.setFloat(i, (float)absRoot.getAttributeDouble(name));
@@ -149,6 +156,41 @@ public class MetadataTable implements TableInterface {
         stmtDeleteProduct.clearParameters();
         stmtDeleteProduct.setInt(1, id);
         stmtDeleteProduct.executeUpdate();
+    }
+
+    public MetadataElement getProductMetadata(final int id) throws SQLException {
+        stmtGetMetadata.clearParameters();
+        stmtGetMetadata.setString(1, String.valueOf(id));
+        final ResultSet results = stmtGetMetadata.executeQuery();
+        if(results.next()) {
+            return createMetadataRoot(results);
+        }
+        return null;
+    }
+
+    private MetadataElement createMetadataRoot(final ResultSet results) {
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(null);
+        final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
+        for(MetadataAttribute attrib : attribList) {
+            try {
+            final int dataType = attrib.getDataType();
+            final String name = attrib.getName();
+            if(dataType == ProductData.TYPE_FLOAT32) {
+                AbstractMetadata.setAttribute(absRoot, name, results.getFloat(name));
+            } else if(dataType == ProductData.TYPE_FLOAT64) {
+                AbstractMetadata.setAttribute(absRoot, name, results.getDouble(name));
+            } else if(dataType == ProductData.TYPE_UTC) {
+                AbstractMetadata.setAttribute(absRoot, name, AbstractMetadata.parseUTC(results.getString(name)));
+            } else if(dataType < ProductData.TYPE_FLOAT32) {
+                AbstractMetadata.setAttribute(absRoot, name, results.getInt(name));
+            } else {
+                AbstractMetadata.setAttribute(absRoot, name, results.getString(name));
+            }
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        return absRoot;
     }
 
     public String[] getAllMetadataNames() {

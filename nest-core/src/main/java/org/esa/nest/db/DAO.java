@@ -111,7 +111,7 @@ public abstract class DAO {
         dbProperties.remove("create");
     }
 
-    public boolean connect() {
+    protected boolean connect() {
         if(isConnected) return isConnected;
 
         try {
@@ -130,7 +130,7 @@ public abstract class DAO {
         return isConnected;
     }
 
-    public void disconnect() {
+    protected void disconnect() {
         if(isConnected) {
             dbProperties.put("shutdown", "true");
             try {

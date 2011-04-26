@@ -37,16 +37,11 @@ public class TestDBQuery extends TestCase {
         super.setUp();
 
         db = ProductDB.instance();
-        final boolean connected = db.connect();
-        if(!connected) {
-            throw new IOException("Unable to connect to database\n"+db.getLastSQLException().getMessage());
-        }
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
 
-        db.disconnect();
         ProductDB.deleteInstance();
     }
 

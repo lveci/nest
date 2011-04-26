@@ -16,6 +16,7 @@
 package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
@@ -43,13 +44,19 @@ public class ProductDB extends DAO {
     private static final String strGetProductsWhere =
             "SELECT * FROM APP.PRODUCTS, APP.METADATA WHERE APP.PRODUCTS.ID = APP.METADATA.ID AND ";
 
-    public static ProductDB instance() throws IOException {
-        if(_instance == null)
+    public static ProductDB instance() throws Exception {
+        if(_instance == null) {
             _instance = new ProductDB();
+            final boolean connected = _instance.connect();
+            if(!connected) {
+                throw new Exception("Unable to connect to database\n"+_instance.getLastSQLException().getMessage());
+            }
+        }
         return _instance;
     }
 
     public static void deleteInstance() {
+        _instance.disconnect();
         _instance = null;
     }
 
@@ -89,6 +96,10 @@ public class ProductDB extends DAO {
 
     public ProductEntry getProductEntry(final File path) throws SQLException {
         return productTable.getProductEntry(path);
+    }
+
+    public MetadataElement getProductMetadata(final int id) throws SQLException {
+        return metadataTable.getProductMetadata(id);
     }
 
     public ProductEntry saveProduct(final Product product) throws SQLException {

@@ -230,10 +230,6 @@ public class DatabasePane extends JPanel {
 
     private void connectToDatabase() throws Exception {
         db = ProductDB.instance();
-        final boolean connected = db.connect();
-        if(!connected) {
-            throw new Exception("Unable to connect to database\n"+db.getLastSQLException().getMessage());
-        }
 
         refresh();
     }
@@ -391,10 +387,12 @@ public class DatabasePane extends JPanel {
         return dbQuery;
     }
 
-    public void setDBQuery(final DBQuery query) {
+    public void setDBQuery(final DBQuery query) throws Exception {
         if(query == null) return;
         dbQuery = query;
-        
+        if(db == null) {
+            connectToDatabase();
+        }
         boolean origState = lockCombos(true);
         try {
             missionJList.setSelectedIndices(findIndices(missionJList, dbQuery.getSelectedMissions()));

@@ -18,6 +18,7 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.nest_mods.ProductFunctions;
 import org.esa.nest.util.TestUtils;
 
 import java.io.File;
@@ -32,7 +33,8 @@ public abstract class RecursiveProcessor {
                                     final String[] productTypeExemptions,
                                     final String[] exceptionExemptions) throws Exception {
         final int maxIteration = TestUtils.getMaxIterations();
-        for(File file : folder.listFiles()) {
+        final File[] fileList = folder.listFiles(new ProductFunctions.ValidProductFileFilter(true)); 
+        for(File file : fileList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
 
@@ -42,8 +44,6 @@ public abstract class RecursiveProcessor {
                 }
             } else {
                 try {
-                    if(TestUtils.isNotProduct(file))
-                        continue;
                     final ProductReader reader = ProductIO.getProductReaderForFile(file);
                     if(reader != null) {
                         final Product sourceProduct = reader.readProductNodes(file, null);

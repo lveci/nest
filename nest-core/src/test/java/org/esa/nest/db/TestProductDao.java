@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.nest_mods.ProductFunctions;
 import org.esa.nest.util.TestUtils;
 
 import java.awt.*;
@@ -43,16 +44,11 @@ public class TestProductDao extends TestCase {
         super.setUp();
 
         db = ProductDB.instance();
-        final boolean connected = db.connect();
-        if(!connected) {
-            throw new IOException("Unable to connect to database\n"+db.getLastSQLException().getMessage());   
-        }
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
 
-        db.disconnect();
         ProductDB.deleteInstance();
     }
 
@@ -64,13 +60,12 @@ public class TestProductDao extends TestCase {
     }
 
     public static void recurseProcessFolder(final File folder, final ProductDB db) throws SQLException {
-        for(File file : folder.listFiles()) {
+        final File[] fileList = folder.listFiles(new ProductFunctions.ValidProductFileFilter(true));
+        for(File file : fileList) {
 
             if(file.isDirectory()) {
                 recurseProcessFolder(file, db);
             } else {
-                if(TestUtils.isNotProduct(file))
-                    continue;
 
                 if(db.pathExistsInDB(file))
                     continue;
