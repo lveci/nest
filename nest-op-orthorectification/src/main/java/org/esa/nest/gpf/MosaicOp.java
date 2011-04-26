@@ -77,6 +77,8 @@ public class MosaicOp extends Operator {
     private int sceneWidth = 0;
     @Parameter(defaultValue = "0", description = "Target height", label = "Scene Height (pixels)")
     private int sceneHeight = 0;
+    @Parameter(defaultValue = "5", description = "Feather amount around source image", label = "Feature (pixels)")
+    private int feather = 0;
 
     private final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
     private final Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
@@ -343,9 +345,9 @@ public class MosaicOp extends Operator {
                     index = 0;
                     for (Product srcProduct : validProducts) {
                         srcProduct.getGeoCoding().getPixelPos(geoPos, pixelPos);
-                        if (pixelPos.x >= 0.0f && pixelPos.y >= 0.0f &&
-                                pixelPos.x < srcProduct.getSceneRasterWidth() &&
-                                pixelPos.y < srcProduct.getSceneRasterHeight()) {
+                        if (pixelPos.x >= feather && pixelPos.y >= feather &&
+                                pixelPos.x < srcProduct.getSceneRasterWidth()-feather &&
+                                pixelPos.y < srcProduct.getSceneRasterHeight()-feather) {
 
                             srcPixelCoords.get(index)[coordIndex] = new PixelPos(pixelPos.x, pixelPos.y);
                         } else {
@@ -364,9 +366,9 @@ public class MosaicOp extends Operator {
             for (Product srcProduct : validProducts) {
                 final PixelPos[] pixPos = srcPixelCoords.get(index);
                 final Rectangle sourceRectangle = getBoundingBox(
-                        pixPos, 0, 0,
-                        srcProduct.getSceneRasterWidth(),
-                        srcProduct.getSceneRasterHeight());
+                        pixPos, feather, feather,
+                        srcProduct.getSceneRasterWidth()-feather,
+                        srcProduct.getSceneRasterHeight()-feather);
 
                 if (sourceRectangle != null) {
                     final Band srcBand = srcBandMap.get(srcProduct);
@@ -429,13 +431,13 @@ public class MosaicOp extends Operator {
 
                     double targetVal = 0;
                     sampleList.clear();
-                    for(SourceData srcDat : validSourceData) {
+                    for(final SourceData srcDat : validSourceData) {
                         final PixelPos sourcePixelPos = srcDat.srcPixPos[index];
                         if(sourcePixelPos == null)
                             continue;
-                        
+
                         resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                srcDat.srcRasterWidth, srcDat.srcRasterHeight, srcDat.resamplingIndex);
+                                srcDat.srcRasterWidth-feather, srcDat.srcRasterHeight-feather, srcDat.resamplingIndex);
                         sample = resampling.resample(srcDat.resamplingRaster, srcDat.resamplingIndex);
 
                         if (!Float.isNaN(sample) && sample != srcDat.nodataValue && !MathUtils.equalValues(sample, 0.0F, 1e-4F)) {

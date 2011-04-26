@@ -49,6 +49,7 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField pixelSize = new JTextField("");
     private final JTextField sceneWidth = new JTextField("");
     private final JTextField sceneHeight = new JTextField("");
+    private final JTextField feather = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
     private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalize By Mean");
 
@@ -107,6 +108,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         if(width == null) width = 0;
         Integer height = (Integer)paramMap.get("sceneHeight");
         if(height == null) height = 0;
+        Integer featherVal = (Integer)paramMap.get("feather");
+        if(featherVal == null) featherVal = 0;
 
         if(!changedByUser && sourceProducts != null) {
             try {
@@ -140,6 +143,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         pixelSize.setText(String.valueOf(pixSize));
         sceneWidth.setText(String.valueOf(width));
         sceneHeight.setText(String.valueOf(height));
+        feather.setText(String.valueOf(featherVal));
 
         average = (Boolean)paramMap.get("average");
         averageCheckBox.getModel().setPressed(average);
@@ -164,6 +168,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         paramMap.put("pixelSize", Double.parseDouble(pixelSize.getText()));
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
+        paramMap.put("feather", Integer.parseInt(feather.getText()));
 
         paramMap.put("average", average);
         paramMap.put("normalizeByMean", normalizeByMean);
@@ -192,7 +197,9 @@ public class MosaicOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Scene Width (pixels)", sceneWidth);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Scene Height (pixels)", sceneHeight);
-
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Feather (pixels)", feather);
+        
         gbc.gridy++;
         contentPane.add(averageCheckBox, gbc);
         gbc.gridy++;
