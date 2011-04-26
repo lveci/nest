@@ -3,9 +3,11 @@ package org.esa.beam.nest_mods;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -18,13 +20,13 @@ import java.util.ArrayList;
 public class ProductFunctions {
         //NESTMOD
 
-    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5",".tif"};
+    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5"};
 
     private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
                                                    "sav", "7z", "zip", "rrd", "lbl", "z", "gz", "exe", "bat", "sh", "rtf",
-                                                   "prj", "dbf", "shx", "ace", "ace2", "tar"};
+                                                   "prj", "dbf", "shx", "ace", "ace2", "tar", "tooldes"};
     private static final String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
                                                  "dfas", "dfdn", "lut",
                                                  "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
@@ -61,17 +63,27 @@ public class ProductFunctions {
         }
     }
 
-    private static class ValidProductFileFilter implements java.io.FileFilter {
+    /**
+     * any files (not folders) that could be products
+     */
+    public static class ValidProductFileFilter implements java.io.FileFilter {
+        private final boolean includeFolders;
 
-        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
+        public ValidProductFileFilter() {
+            this.includeFolders = false;
+        }
+
+        public ValidProductFileFilter(final boolean includeFolders) {
+            this.includeFolders = includeFolders;
+        }
 
         public boolean accept(final File file) {
+            if(file.isDirectory()) return includeFolders;
             final String name = file.getName().toLowerCase();
-            if(file.isDirectory() && name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
-                return false;
-            for(String ext : skip) {
-                if(name.equalsIgnoreCase(ext))
-                    return false;
+            for(String ext : validExtensions) {
+                if(name.endsWith(ext)) {
+                    return true;
+                }
             }
             for(String ext : nonValidExtensions) {
                 if(name.endsWith(ext))
@@ -83,5 +95,51 @@ public class ProductFunctions {
             }
             return true;
         }
+    }
+
+    /**
+     * collect valid folders to scan
+     */
+    public static class DirectoryFileFilter implements java.io.FileFilter {
+
+        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
+
+        public boolean accept(final File file) {
+            if(!file.isDirectory()) return false;
+            final String name = file.getName().toLowerCase();
+            if(name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
+                return false;
+            for(String ext : skip) {
+                if(name.equalsIgnoreCase(ext))
+                    return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Quickly return the product read by the right reader without testing many readers
+     * @param file input file
+     * @return the product
+     * @throws IOException if can't be read
+     */
+    public static Product readCommonProductReader(final File file) throws IOException {
+        final String filename = file.getName().toLowerCase();
+        if(filename.endsWith("n1")) {
+            return ProductIO.readProduct(file, "ENVISAT");
+        } else if(filename.endsWith("e1") || filename.endsWith("e2")) {
+            return ProductIO.readProduct(file, "ERS1/2");
+        } else if(filename.endsWith("dim")) {
+            return ProductIO.readProduct(file, "BEAM-DIMAP");
+        } else if((filename.startsWith("TSX") || filename.startsWith("TDX")) && filename.endsWith("xml")) {
+            return ProductIO.readProduct(file, "TerraSarX");
+        } else if(filename.equals("product.xml")) {
+            try {
+                return ProductIO.readProduct(file, "RADARSAT-2");
+            } catch(IOException e) {
+                return ProductIO.readProduct(file, "RADARSAT-2 NITF");
+            }
+        }
+        return null;
     }
 }

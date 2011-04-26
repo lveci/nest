@@ -30,6 +30,7 @@ import org.esa.beam.framework.gpf.ui.SourceUI;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.nest_mods.ProductFunctions;
 
 import java.awt.Rectangle;
 import java.io.File;

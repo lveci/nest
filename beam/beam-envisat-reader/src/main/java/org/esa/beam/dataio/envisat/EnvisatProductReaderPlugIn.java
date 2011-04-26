@@ -105,6 +105,12 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
             }
         } else if (input instanceof File) {
             final File inputFile = (File) input;
+            final String fileName = inputFile.getName().toUpperCase(); //NESTMOD
+            if(fileName.endsWith(".N1"))
+                return DecodeQualification.INTENDED;
+            if(!fileName.endsWith(".ZIP") && !fileName.endsWith(".GZ"))
+                return DecodeQualification.UNABLE;
+
             if (ProductFile.getProductType(inputFile) != null) {
                 return DecodeQualification.INTENDED;
             }

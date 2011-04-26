@@ -884,11 +884,21 @@ public class BasicApp {
             menu = findMenu(parent.toString());
         }
         if (menu == null) {
-            menu = findMainMenu("tools"); // @todo 3 nf/nf - "tools" = getDefaultMenuName()
+            menu = createNewMenu(parent); // @todo 3 nf/nf - "tools" = getDefaultMenuName()
         }
         if (menu != null) {
             CommandMenuUtils.insertCommandMenuItem(menu.getPopupMenu(), command, getCommandManager());
         }
+    }
+
+    protected JMenu createNewMenu(Object parent) {
+        if(parent == null)
+            return findMenu("tools");
+        final String name = parent.toString();
+        final JMenuBar menuBar = getMainFrame().getJMenuBar();
+        final JMenu newMenu = createJMenu(name, name, name.charAt(0));
+        menuBar.add(newMenu);
+        return newMenu;
     }
 
     protected final JMenu findMenu(String name, boolean deepSearch) {

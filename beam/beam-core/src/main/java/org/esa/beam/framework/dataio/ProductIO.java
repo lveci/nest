@@ -21,6 +21,7 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.nest_mods.ProductFunctions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -207,11 +208,9 @@ public class ProductIO {
     }
 
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
-		final Product cachedProduct = ProductCache.instance().getProduct(file);
-        if(cachedProduct != null) {
-            ProductCache.instance().addProduct(file, cachedProduct);
-            return cachedProduct;
-        }
+        final Product product = ProductFunctions.readCommonProductReader(file);
+        if (product != null)
+            return product;
         return readandCacheProduct(file, subsetDef);
     }
     
@@ -228,7 +227,7 @@ public class ProductIO {
         }
         final ProductReader productReader = getProductReaderForFile(file);
         if (productReader != null) {
-            System.out.println("Reading "+file.getName());
+            //System.out.println("Reading "+file.getName());
             final Product product = productReader.readProductNodes(file, subsetDef);
             ProductCache.instance().addProduct(file, product);
             return product;

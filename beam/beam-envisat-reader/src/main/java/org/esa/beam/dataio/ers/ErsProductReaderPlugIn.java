@@ -93,6 +93,20 @@ public class ErsProductReaderPlugIn extends EnvisatProductReaderPlugIn {
      */
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
+        String fileName = null;
+        if(input instanceof String) {
+            fileName = ((String) input).toUpperCase();
+        } else if(input instanceof File) {
+            fileName = ((File) input).getName().toUpperCase();
+        }
+        if(fileName != null) {
+            if(fileName.endsWith(".E1") || fileName.endsWith(".E2"))
+                return DecodeQualification.INTENDED;
+            else if(!fileName.endsWith(".ZIP") && !fileName.endsWith(".GZ"))
+                return DecodeQualification.UNABLE;
+            return super.getDecodeQualification(input);
+        }
+        /*   
         if (super.getDecodeQualification(input) == DecodeQualification.INTENDED) {
             if (input instanceof String) {
                 if(matchesExtension((String)input))
@@ -103,6 +117,7 @@ public class ErsProductReaderPlugIn extends EnvisatProductReaderPlugIn {
                     return DecodeQualification.INTENDED;
             }
         }
+        */
         return DecodeQualification.UNABLE;
     }
 
