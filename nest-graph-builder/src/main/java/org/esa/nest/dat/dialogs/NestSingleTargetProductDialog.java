@@ -191,6 +191,11 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         }
     }
 
+    public void setIcon(final ImageIcon ico) {
+        if(ico == null) return;
+        this.getJDialog().setIconImage(ico.getImage());
+    }
+
     @Override
     public int show() {
         initSourceProductSelectors();

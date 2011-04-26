@@ -39,7 +39,7 @@
             <applicationDescriptor>
                 <applicationId>DatMain</applicationId>
                 <displayName>NEST DAT</displayName>
-                <frameIcon>/org/esa/nest/dat/icons/dat.png</frameIcon>
+                <frameIcon>/org/esa/nest/icons/dat.png</frameIcon>
                 <image>/org/esa/nest/dat/icons/nest_splash.png</image>
                 <excludedActions>
                     <id>orthorectificationAction</id>
@@ -459,6 +459,8 @@
             <shortDescr>Start PolSARPro</shortDescr>
 			<separatorBefore>true</separatorBefore>
             <separatorAfter>true</separatorAfter>
+            <smallIcon>/org/esa/nest/icons/esa.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/esa.png</largeIcon>
         </action>
 
         <action>
