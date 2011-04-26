@@ -46,8 +46,10 @@ import java.util.zip.ZipFile;
  */
 public final class ResourceUtils {
 
+    public static ImageIcon nestIcon = LoadIcon("org/esa/nest/icons/dat.png");
+    public static ImageIcon rstbIcon = LoadIcon("array/rstb/icons/csa.png");
 
-    public static ImageIcon LoadIcon(String path) {
+    public static ImageIcon LoadIcon(final String path) {
         final java.net.URL imageURL = ResourceUtils.class.getClassLoader().getResource(path);
         if (imageURL == null) return null;
         return new ImageIcon(imageURL);

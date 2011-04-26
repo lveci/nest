@@ -23,11 +23,11 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.nest_mods.ProductFunctions;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.db.DBScanner;
 import org.esa.nest.gpf.RecursiveProcessor;
 
 import java.io.File;
@@ -55,19 +55,10 @@ public class TestUtils {
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString(contextID+".test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString(contextID+".test.rootPathMixProducts");
 
-    public final static int subsetX = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetX"));
-    public final static int subsetY = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetY"));
-    public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetWidth"));
-    public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
-
-    private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
-                                                   "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
-                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
-                                                   "sav", "7z", "zip", "rrd", "lbl", "z", "gz", "exe", "bat", "sh", "rtf",
-                                                   "prj", "dbf", "shx", "ace", "ace2", "tar"};
-    private static final String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
-                                                 "dfas", "dfdn", "lut",
-                                                 "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
+    private final static int subsetX = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetX"));
+    private final static int subsetY = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetY"));
+    private final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetWidth"));
+    private final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
 
@@ -275,7 +266,7 @@ public class TestUtils {
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
 
-        final File[] folderList = origFolder.listFiles(new DBScanner.DirectoryFileFilter());
+        final File[] folderList = origFolder.listFiles(new ProductFunctions.DirectoryFileFilter());
         for(File folder : folderList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
@@ -284,7 +275,7 @@ public class TestUtils {
             }
         }
 
-        final File[] fileList = origFolder.listFiles(new DBScanner.ProductFileFilter());
+        final File[] fileList = origFolder.listFiles(new ProductFunctions.ValidProductFileFilter());
         for(File file : fileList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
@@ -326,19 +317,6 @@ public class TestUtils {
             }
         }
         return iterations;
-    }
-
-    public static boolean isNotProduct(final File file) {
-        final String name = file.getName().toLowerCase();
-        for(String ext : nonValidExtensions) {
-            if(name.endsWith(ext))
-                return true;
-        }
-        for(String pre : nonValidprefixes) {
-            if(name.startsWith(pre))
-                return true;
-        }
-        return false;
     }
 
     public static boolean contains(final String value, final String[] exemptions) {
