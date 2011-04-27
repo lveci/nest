@@ -312,20 +312,11 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
 
                 executeStartTime = Calendar.getInstance().getTime();
                 long t0 = System.currentTimeMillis();
-                final OperatorProductReader opReader = (OperatorProductReader) targetProduct.getProductReader();
-                final Operator operator;
-                if (opReader.getOperatorContext().getOperator() instanceof Output) {
-                    operator = opReader.getOperatorContext().getOperator();
-                } else {
-                    WriteOp writeOp = new WriteOp(targetProduct, model.getProductFile(), model.getFormatName());
-                    writeOp.setDeleteOutputOnFailure(true);
-                    writeOp.setWriteEntireTileRows(true);
-                    writeOp.setClearCacheAfterRowWrite(false);
-                    operator = writeOp;
-                }
-                final OperatorExecutor executor = OperatorExecutor.create(operator);
-                executor.execute(SubProgressMonitor.create(pm, 95));
-
+                WriteOp writeOp = new WriteOp(targetProduct, model.getProductFile(), model.getFormatName());
+                writeOp.setDeleteOutputOnFailure(true);
+                writeOp.setWriteEntireTileRows(true);
+                writeOp.setClearCacheAfterRowWrite(false);
+                writeOp.writeProduct(SubProgressMonitor.create(pm, 95));
                 saveTime = System.currentTimeMillis() - t0;
                 if (model.isOpenInAppSelected()) {
                     product = ProductIO.readProduct(model.getProductFile());
