@@ -274,11 +274,13 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             updateTargetProductMetadata();
 
-            if(externalDEMFile == null) {
+            if(externalDEMFile == null && !useAvgSceneHeight) {
                 checkIfDEMInstalled(demName);
             }
 
-            validateDEM(demName, sourceProduct);
+            if (!useAvgSceneHeight) {
+                validateDEM(demName, sourceProduct);
+            }
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
