@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>4B</version>
+    <version>4B-0.6</version>
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
@@ -9,7 +9,7 @@
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
             <friendlyName>Envisat</friendlyName>
-            <icon>C:\build\nest\src\main\assembly\dat.ico</icon>
+            <icon>C:\build\4b\nest\nest-src\main\assembly\dat.ico</icon>
             <mimeType></mimeType>
             <progID></progID>
             <scope>user</scope>
@@ -174,7 +174,7 @@
                             <origin>target/nest-4B-bin-win64.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>../dist/jdk6/windows64/jre</origin>
+                            <origin>../dist/jdk6/win64/jre</origin>
                         </distributionDirectory>
                         <distributionFile>
                             <origin>target/nest-4B-bin-win64.dir/nest-dat64.l4j.ini</origin>
