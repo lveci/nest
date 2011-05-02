@@ -63,9 +63,9 @@
       <rmsThreshold>1.0</rmsThreshold>
       <warpPolynomialOrder>1</warpPolynomialOrder>
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
-      <pixelSpacingInMeter>24.91617973338061</pixelSpacingInMeter>
-      <pixelSpacingInDegree>2.2457882102988038E-4</pixelSpacingInDegree>
-      <projectionName>Geographic Lat/Lon</projectionName>
+      <pixelSpacingInMeter>0</pixelSpacingInMeter>
+      <pixelSpacingInDegree>0</pixelSpacingInDegree>
+      <mapProjection>WGS84(DD)</mapProjection>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
       <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>

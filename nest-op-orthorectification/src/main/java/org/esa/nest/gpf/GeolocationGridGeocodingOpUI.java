@@ -15,8 +15,6 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
@@ -25,7 +23,8 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Map;
 
 /**
@@ -34,26 +33,26 @@ import java.util.Map;
 public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox projectionName = new JComboBox();
     private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
+    private final JButton crsButton = new JButton();
+    private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
 
-        final String[] projectionsValueSet = getProjectionsValueSet();
-        Arrays.sort(projectionsValueSet);
-        for(String name : projectionsValueSet) {
-            if (!name.contains("UTM Automatic")) {
-                projectionName.addItem(name);
-            }
-        }
-
         final JComponent panel = createPanel();
         initParameters();
+
+        crsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mapProjHandler.promptForFeatureCrs(sourceProducts);
+                crsButton.setText(mapProjHandler.getCRSName());
+            }
+        });
 
         return new JScrollPane(panel);
     }
@@ -63,7 +62,9 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.initBandList(bandList, getBandNames());
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
-        projectionName.setSelectedItem(paramMap.get("projectionName"));
+        final String mapProjection = (String)paramMap.get("mapProjection");
+        mapProjHandler.initParameters(mapProjection, sourceProducts);
+        crsButton.setText(mapProjHandler.getCRSName());
     }
 
     @Override
@@ -77,7 +78,9 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
-        paramMap.put("projectionName", projectionName.getSelectedItem());
+        if(mapProjHandler.getCRS() != null) {
+            paramMap.put("mapProjection", mapProjHandler.getCRS().toWKT());
+        }
     }
 
     private JComponent createPanel() {
@@ -94,18 +97,9 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
         DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
-    }
-
-    private static String[] getProjectionsValueSet() {
-        final MapProjection[] projections = MapProjectionRegistry.getProjections();
-        final String[] projectionsValueSet = new String[projections.length];
-        for (int i = 0; i < projectionsValueSet.length; i++) {
-            projectionsValueSet[i] = projections[i].getName();
-        }
-        return projectionsValueSet;
     }
 }

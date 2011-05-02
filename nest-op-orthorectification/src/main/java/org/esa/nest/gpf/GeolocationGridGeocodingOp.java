@@ -16,11 +16,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -30,15 +26,18 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.MathUtils;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
-import java.io.IOException;
+import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 
 /**
@@ -80,16 +79,15 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             rasterDataNodeType = Band.class, label="Source Bands")
-    private
-    String[] sourceBandNames = null;
+    private String[] sourceBandNames = null;
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
     private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
-    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
-    private String projectionName = IdentityTransformDescriptor.NAME;
+    @Parameter(description = "The coordinate reference system in well known text format")
+    private String mapProjection;
     
     private Band sourceBand = null;
     private Band sourceBand2 = null;
@@ -107,6 +105,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double rangeSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
+
+    private CoordinateReferenceSystem targetCRS;
     private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
@@ -184,18 +184,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     }
 
     /**
-     * Compute DEM traversal step sizes (in degree) in latitude and longitude.
-     */
-    private void computeDEMTraversalSampleInterval() {
-
-        double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
-        double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
-
-        delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
-        delLon = delLat;
-    }
-
-    /**
      * Get source image width and height.
      */
     private void getSourceImageDimension() {
@@ -203,36 +191,73 @@ public final class GeolocationGridGeocodingOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
+    private CoordinateReferenceSystem getCRS() throws Exception {
+        try {
+            if(mapProjection == null || mapProjection.isEmpty())
+                mapProjection = "WGS84(DD)";
+            return CRS.parseWKT(mapProjection);
+        } catch (Exception e) {
+            return CRS.decode(mapProjection, true);
+        }
+    }
+
     /**
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException, IOException {
+    private void createTargetProduct() throws OperatorException {
 
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
-                                                sourceProduct,
-                                                MapProjectionRegistry.getProjection(projectionName),
-                                                0.0,
-                                                sourceProduct.getBandAt(0).getNoDataValue());
+        try {
+            targetCRS = getCRS();
 
-        delLat = mapInfo.getPixelSizeX();
-        delLon = mapInfo.getPixelSizeY();
+            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+            final double pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
+                                                        RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
+            final double pixelSpacingInDegree = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixelSpacingInMeter);
+            delLat = pixelSpacingInDegree;
+            delLon = pixelSpacingInDegree;
+            double pixelSizeX;
+            double pixelSizeY;
+            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
+                pixelSizeX = pixelSpacingInDegree;
+                pixelSizeY = pixelSpacingInDegree;
+            } else {
+                pixelSizeX = pixelSpacingInMeter;
+                pixelSizeY = pixelSpacingInMeter;
+            }
 
-        targetProduct = ProductProjectionBuilder.createProductProjection(sourceProduct, false, false, mapInfo,
-                                                                  sourceProduct.getName() + PRODUCT_SUFFIX, "");
+            final Rectangle2D bounds = new Rectangle2D.Double();
+            bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
+            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+            final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
+            final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                    width,
+                    height,
+                    targetEnvelope.getMinimum(0),
+                    targetEnvelope.getMaximum(1),
+                    pixelSizeX, pixelSizeY);
 
-        targetImageWidth = targetProduct.getSceneRasterWidth();
-        targetImageHeight = targetProduct.getSceneRasterHeight();
+            targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
+                    sourceProduct.getProductType(), width, height);
+            targetProduct.setGeoCoding(geoCoding);
 
-        for (Band band : targetProduct.getBands()) {
-            targetProduct.removeBand(band);
+            targetImageWidth = targetProduct.getSceneRasterWidth();
+            targetImageHeight = targetProduct.getSceneRasterHeight();
+
+            for (Band band : targetProduct.getBands()) {
+                targetProduct.removeBand(band);
+            }
+
+            addSelectedBands();
+
+            targetGeoCoding = targetProduct.getGeoCoding();
+
+            updateTargetProductMetadata();
+        } catch (Exception e) {
+            throw new OperatorException(e);
         }
-
-        addSelectedBands();
-
-        targetGeoCoding = targetProduct.getGeoCoding();
-
-        updateTargetProductMetadata();
     }
 
     /**
@@ -255,7 +280,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
             String targetUnit = "";
 
             if (unit.contains(Unit.PHASE)) {
-
                 continue;
 
             } else if (unit.contains(Unit.IMAGINARY)) {
@@ -317,7 +341,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, projectionName);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, targetCRS.getName().getCode());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
 

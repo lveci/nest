@@ -16,12 +16,10 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -31,7 +29,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -41,9 +38,13 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.*;
 
@@ -115,8 +116,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Parameter(description = "The pixel spacing in degrees", defaultValue = "0", label="Pixel Spacing (deg)")
     private double pixelSpacingInDegree = 0;
 
-    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
-    private String projectionName = IdentityTransformDescriptor.NAME;
+    @Parameter(description = "The coordinate reference system in well known text format")
+    private String mapProjection;
 
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
@@ -181,6 +182,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private float demNoDataValue = 0.0f; // no data value for DEM
+
+    private CoordinateReferenceSystem targetCRS;
     private final ImageGeoBoundary imageGeoBoundary = new ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
@@ -202,7 +205,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private TiePointGrid longitude = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
-    private static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
     enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
@@ -287,7 +289,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     @Override
-    public void dispose() {
+    public void dispose() throws OperatorException {
         if (dem != null) {
             dem.dispose();
         }
@@ -299,7 +301,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
-                VisatApp.getApp().showErrorDialog(errMsg);
+                VisatApp.getApp().setStatusBarMessage(errMsg);
             }
         }
     }
@@ -486,32 +488,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         return Constants.lightSpeed / radarFreq;
     }
 
-    /**
+   /**
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
      * @param sourceProduct The input source product.
-     * @param projectionName The projection name.
      * @param geoBoundary The object to pass back the max/min lat/lon.
      */
     public static void computeImageGeoBoundary(final Product sourceProduct,
-                                               final String projectionName,
                                                final ImageGeoBoundary geoBoundary) {
-
-        final int sourceW = sourceProduct.getSceneRasterWidth();
-        final int sourceH = sourceProduct.getSceneRasterHeight();
-        final MapProjection mapProjection = MapProjectionRegistry.getProjection(projectionName);
-        final MapTransform mapTransform = mapProjection.getMapTransform();
-        final Point2D[] envelope =
-                ProductUtils.createMapEnvelope(sourceProduct, new Rectangle(sourceW, sourceH), mapTransform);
-        final Point2D pMin = envelope[0];
-        final Point2D pMax = envelope[1];
-
-        geoBoundary.latMax = pMax.getY();
-        geoBoundary.latMin = pMin.getY();
-        geoBoundary.lonMax = pMax.getX();
-        geoBoundary.lonMin = pMin.getX();
-        
-        /*
         final GeoCoding geoCoding = sourceProduct.getGeoCoding();
         if(geoCoding == null) {
             throw new OperatorException("Product does not contain a geocoding");
@@ -546,46 +530,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                 geoBoundary.lonMax = lon;
             }
         }
-        */
-    }
-
-    /**
-     * Compute DEM traversal step sizes (in degree) in latitude and longitude.
-     */
-    private void computeDEMTraversalSampleInterval() {
-
-        /*
-        double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
-        double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
-
-        delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
-        delLon = delLat;
-        */
-
-        /*
-        double spacing = 0.0;
-        if (pixelSpacingInMeter > 0.0) {
-            spacing = pixelSpacingInMeter;
-        } else {
-            if (srgrFlag) {
-                spacing = Math.min(rangeSpacing, azimuthSpacing);
-            } else {
-                spacing = Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(sourceProduct)), azimuthSpacing);
-            }
-        }
-        */
-        double spacing = pixelSpacingInMeter;
-        double minAbsLat;
-        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
-            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
-                    Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        } else {
-            minAbsLat = 0.0;
-        }
-        delLat = spacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = spacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-        delLat = Math.min(delLat, delLon);
-        delLon = delLat;
     }
 
     /**
@@ -605,14 +549,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("incidence_angle tie point grid not found in product");
         }
         return incidenceAngle.getPixelFloat((float)x, (float)y)*org.esa.beam.util.math.MathUtils.DTOR;
-    }
-
-    /**
-     * Compute target image dimension.
-     */
-    private void computedTargetImageDimension() {
-        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
-        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
     }
 
     /**
@@ -677,65 +613,67 @@ public class RangeDopplerGeocodingOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
-    /**
-     * Create target product.
-     * @throws Exception The exception.
-     */
-    void createTargetProduct() throws Exception {
+    private CoordinateReferenceSystem getCRS() throws Exception {
+        try {
+            if(mapProjection == null || mapProjection.isEmpty())
+                mapProjection = "WGS84(DD)";
+            return CRS.parseWKT(mapProjection);
+        } catch (Exception e) {
+            return CRS.decode(mapProjection, true);
+        }
+    }
 
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
-                                                sourceProduct,
-                                                MapProjectionRegistry.getProjection(projectionName),
-                                                0.0,
-                                                sourceProduct.getBandAt(0).getNoDataValue());
+    private void createTargetProduct() {
+        try {
+            targetCRS = getCRS();
 
-        if (pixelSpacingInMeter > 0.0) {
-            computeImageGeoBoundary(sourceProduct, projectionName, imageGeoBoundary);
+            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+            if (pixelSpacingInMeter <= 0.0) {
+                pixelSpacingInMeter = Math.max(getAzimuthPixelSpacing(sourceProduct), getRangePixelSpacing(sourceProduct));
+                pixelSpacingInDegree = getPixelSpacingInDegree(pixelSpacingInMeter);
+            }
             delLat = pixelSpacingInDegree;
             delLon = pixelSpacingInDegree;
             double pixelSizeX;
             double pixelSizeY;
-            if (projectionName.equals("Geographic Lat/Lon")) {
+            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
                 pixelSizeX = pixelSpacingInDegree;
                 pixelSizeY = pixelSpacingInDegree;
             } else {
                 pixelSizeX = pixelSpacingInMeter;
                 pixelSizeY = pixelSpacingInMeter;
             }
-            mapInfo.setPixelSizeX((float)pixelSizeX);
-            mapInfo.setPixelSizeY((float)pixelSizeY);
 
-            final Dimension outputRasterSize = ProductUtils.getOutputRasterSize(
-                    sourceProduct, null, mapInfo.getMapProjection().getMapTransform(), pixelSizeX, pixelSizeY);
-            mapInfo.setSceneWidth(outputRasterSize.width);
-            mapInfo.setSceneHeight(outputRasterSize.height);
-            mapInfo.setPixelX(0.5f*outputRasterSize.width);
-            mapInfo.setPixelY(0.5f*outputRasterSize.height);
-            mapInfo.setSceneSizeFitted(true);
+            final Rectangle2D bounds = new Rectangle2D.Double();
+            bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
+            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+            final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
+            final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                                                            width,
+                                                            height,
+                                                            targetEnvelope.getMinimum(0),
+                                                            targetEnvelope.getMaximum(1),
+                                                            pixelSizeX, pixelSizeY);
 
-        } else {
-            delLat = mapInfo.getPixelSizeX();
-            delLon = mapInfo.getPixelSizeY();
+            targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
+                    sourceProduct.getProductType(), width, height);
+            targetProduct.setGeoCoding(geoCoding);
+
+            targetImageWidth = targetProduct.getSceneRasterWidth();
+            targetImageHeight = targetProduct.getSceneRasterHeight();
+
+            for (final Band band : targetProduct.getBands()) {
+                targetProduct.removeBand(band);
+            }
+
+            addSelectedBands();
+
+            targetGeoCoding = targetProduct.getGeoCoding();
+        } catch (Exception e) {
+            throw new OperatorException(e);
         }
-
-        targetProduct = ProductProjectionBuilder.createProductProjection(
-                                                sourceProduct,
-                                                false,
-                                                false,
-                                                mapInfo,
-                                                sourceProduct.getName() + PRODUCT_SUFFIX,
-                                                "");
-
-        targetImageWidth = targetProduct.getSceneRasterWidth();
-        targetImageHeight = targetProduct.getSceneRasterHeight();
-
-        for (Band band : targetProduct.getBands()) {
-            targetProduct.removeBand(band);
-        }
-        
-        addSelectedBands();
-
-        targetGeoCoding = targetProduct.getGeoCoding();
     }
 
     /**
@@ -887,50 +825,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Add geocoding to the target product.
-     */
-    protected void addGeoCoding() {
-
-        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
-                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
-        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
-                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
-
-        final int gridWidth = latitude.getRasterWidth();
-        final int gridHeight = latitude.getRasterHeight();
-
-        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
-
-        float subSamplingX = (float)targetImageWidth / (gridWidth - 1);
-        float subSamplingY = (float)targetImageHeight / (gridHeight - 1);
-
-        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLatTiePoints);
-        latGrid.setUnit(Unit.DEGREES);
-
-        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
-        for (float lon : fineLonTiePoints) {
-            if (lon >= 180) {
-                lon -= 360;
-            }
-        }
-        
-        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
-              subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
-        lonGrid.setUnit(Unit.DEGREES);
-
-        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        targetProduct.addTiePointGrid(latGrid);
-        targetProduct.addTiePointGrid(lonGrid);
-        targetProduct.setGeoCoding(tpGeoCoding);
-
-        final Band[] srcBands = targetBandNameToSourceBand.get(targetProduct.getBandAt(0).getName());
-    }
-
-    /**
      * Update metadata in the target product.
      * @throws OperatorException The exception.
      */
@@ -955,7 +849,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, geoPosLastNear.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, projectionName);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, targetCRS.getName().getCode());
         if (!useAvgSceneHeight) {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
             if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
@@ -1167,7 +1061,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     double slantRange = computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
 
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
 

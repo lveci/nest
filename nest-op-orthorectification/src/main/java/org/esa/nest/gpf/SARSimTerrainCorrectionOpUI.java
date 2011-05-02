@@ -20,8 +20,6 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Map;
@@ -75,8 +73,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
     @Override
     protected JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
+        final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         gbc.gridx = 1;
@@ -95,40 +92,11 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (deg):", pixelSpacingInDegree);
 
-        pixelSpacingInMeter.addFocusListener(new FocusListener() {
-
-            public void focusGained(final FocusEvent e) {
-            }
-            public void focusLost(final FocusEvent e) {
-                Double pixM, pixD;
-                try {
-                    pixM = Double.parseDouble(pixelSpacingInMeter.getText());
-                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
-                } catch (Exception ec) {
-                    pixD = 0.0;
-                }
-                pixelSpacingInDegree.setText(String.valueOf(pixD));
-            }
-        });
-
-        pixelSpacingInDegree.addFocusListener(new FocusListener() {
-
-            public void focusGained(final FocusEvent e) {
-            }
-            public void focusLost(final FocusEvent e) {
-                Double pixM, pixD;
-                try {
-                    pixD = Double.parseDouble(pixelSpacingInDegree.getText());
-                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
-                } catch (Exception ec) {
-                    pixM = 0.0;
-                }
-                pixelSpacingInMeter.setText(String.valueOf(pixM));
-            }
-        });
+        pixelSpacingInMeter.addFocusListener(new PixelSpacingMeterListener());
+        pixelSpacingInDegree.addFocusListener(new PixelSpacingDegreeListener());
         
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
 
         gbc.gridx = 0;
         gbc.gridy++;
@@ -167,23 +135,11 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
         gbc.gridx = 2;
         contentPane.add(externalAuxFileBrowseButton, gbc);
-        /*
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.insets.left = 20;
-        contentPane.add(externalAuxFileLabel, gbc);
-        gbc.gridx = 1;
-        gbc.insets.left = 1;
-        contentPane.add(externalAuxFile, gbc);
-        DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, true);
-        gbc.gridx = 2;
-        contentPane.add(externalAuxFileBrowseButton, gbc);
-        */
+
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.insets.left = 1;
         contentPane.add(openShiftsFileCheckBox, gbc);
-        //DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }

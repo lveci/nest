@@ -143,7 +143,6 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
-    private static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
     private static String SIMULATED_BAND_NAME = "Simulated_Intensity";
 
     /**
@@ -429,7 +428,7 @@ public final class SARSimulationOp extends Operator {
         double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                 zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
+        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
 
         final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
 
@@ -522,7 +521,7 @@ public final class SARSimulationOp extends Operator {
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
 
                     final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
 

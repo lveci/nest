@@ -18,8 +18,6 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
@@ -32,7 +30,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -42,7 +39,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
     private final JComboBox demName = new JComboBox();
-    final JComboBox projectionName = new JComboBox();
+
     private static final String externalDEMStr = "External DEM";
 
     private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
@@ -66,17 +63,17 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private final JButton externalDEMBrowseButton = new JButton("...");
     private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
     private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
-    JLabel sourcePixelSpacingsLabelPart1 = new JLabel("Source GR Pixel Spacings (az x rg):");
-    JLabel sourcePixelSpacingsLabelPart2 = new JLabel("0.0(m) x 0.0(m)");
+    final JLabel sourcePixelSpacingsLabelPart1 = new JLabel("Source GR Pixel Spacings (az x rg):");
+    final JLabel sourcePixelSpacingsLabelPart2 = new JLabel("0.0(m) x 0.0(m)");
 
-    final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
-    final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
-    final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
+    final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM band");
+    final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle band");
+    final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle band");
     final JCheckBox saveSelectedSourceBandCheckBox = new JCheckBox("Save selected source band");
     final JCheckBox applyRadiometricNormalizationCheckBox = new JCheckBox("Apply radiometric normalization");
-    final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
-    final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
-    final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
+    final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 band");
+    final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 band");
+    final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 band");
 
     final JLabel auxFileLabel = new JLabel("Auxiliary File:");
     final JLabel externalAuxFileLabel = new JLabel("External Aux File:");
@@ -95,7 +92,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private Double azimuthPixelSpacing = 0.0;
     private Double rangePixelSpacing = 0.0;
 
-    String savedProductName = null;
+    private String savedProductName = null;
+
+    protected final JButton crsButton = new JButton();
+    private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -109,14 +109,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         demName.addItem(externalDEMStr);
 
         initializeOperatorUI(operatorName, parameterMap);
-
-        final String[] projectionsValueSet = getProjectionsValueSet();
-        Arrays.sort(projectionsValueSet);
-        for(String name : projectionsValueSet) {
-            if (!name.contains("UTM Automatic")) {
-                projectionName.addItem(name);
-            }
-        }
 
         final JComponent panel = createPanel();
         initParameters();
@@ -285,6 +277,13 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
 
+        crsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mapProjHandler.promptForFeatureCrs(sourceProducts);
+                crsButton.setText(mapProjHandler.getCRSName());
+            }
+        });
+
         return new JScrollPane(panel);
     }
 
@@ -293,48 +292,57 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         demName.setSelectedItem(paramMap.get("demName"));
-        projectionName.setSelectedItem(paramMap.get("projectionName"));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
 
-        String productName = null;
-        if (sourceProducts != null) {
-            productName = sourceProducts[0].getName();
-        }
+        final String mapProjection = (String)paramMap.get("mapProjection");
+        mapProjHandler.initParameters(mapProjection, sourceProducts);
+        crsButton.setText(mapProjHandler.getCRSName());
+
+        final Double pixelSpacingInMeterVal = (Double)paramMap.get("pixelSpacingInMeter");
+        if(pixelSpacingInMeterVal != null && pixelSpacingInMeterVal != 0.0)
+            pixelSpacingInMeter.setText(String.valueOf(pixelSpacingInMeterVal));
+
+        final Double pixelSpacingInDegreeVal = (Double)paramMap.get("pixelSpacingInDegree");
+        if(pixelSpacingInDegreeVal != null && pixelSpacingInDegreeVal != 0.0)
+            pixelSpacingInDegree.setText(String.valueOf(pixelSpacingInDegreeVal));
 
         Boolean productChanged = false;
-        if (sourceProducts != null && !productName.equals(savedProductName)) {
-            productChanged = true;
-            savedProductName = productName;
-        }
-
-        if (sourceProducts != null && (azimuthPixelSpacing == 0.0 || rangePixelSpacing == 0.0 || productChanged)) {
-            try {
-                azimuthPixelSpacing = RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProducts[0]);
-                rangePixelSpacing = RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProducts[0]);
-                azimuthPixelSpacing = (double)((int)(azimuthPixelSpacing*100 + 0.5))/100.0;
-                rangePixelSpacing = (double)((int)(rangePixelSpacing*100 + 0.5))/100.0;
-            } catch (Exception e) {
-                azimuthPixelSpacing = 0.0;
-                rangePixelSpacing = 0.0;
+        if (sourceProducts != null) {
+            final String productName = sourceProducts[0].getName();
+            if(!productName.equals(savedProductName)) {
+                productChanged = true;
+                savedProductName = productName;
             }
-            String text = Double.toString(azimuthPixelSpacing) + "(m) x " + Double.toString(rangePixelSpacing) + "(m)";
-            sourcePixelSpacingsLabelPart2.setText(text);
-        }
 
-        if(sourceProducts != null && (pixelSpacingInMeter.getText().isEmpty() || productChanged)) {
-            Double pixM, pixD;
-            try {
-                pixM = Math.max(azimuthPixelSpacing, rangePixelSpacing);
-                pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
-            } catch (Exception e) {
-                pixM = 0.0;
-                pixD = 0.0;
+            if (azimuthPixelSpacing == 0.0 || rangePixelSpacing == 0.0 || productChanged) {
+                try {
+                    azimuthPixelSpacing = RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProducts[0]);
+                    rangePixelSpacing = RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProducts[0]);
+                    azimuthPixelSpacing = (double)((int)(azimuthPixelSpacing*100 + 0.5))/100.0;
+                    rangePixelSpacing = (double)((int)(rangePixelSpacing*100 + 0.5))/100.0;
+                } catch (Exception e) {
+                    azimuthPixelSpacing = 0.0;
+                    rangePixelSpacing = 0.0;
+                }
+                final String text = Double.toString(azimuthPixelSpacing) + "(m) x " + Double.toString(rangePixelSpacing) + "(m)";
+                sourcePixelSpacingsLabelPart2.setText(text);
             }
-            pixelSpacingInMeter.setText(String.valueOf(pixM));
-            pixelSpacingInDegree.setText(String.valueOf(pixD));
+
+            if(pixelSpacingInMeter.getText().isEmpty() || (productChanged && pixelSpacingInMeterVal == null)) {
+                Double pixM, pixD;
+                try {
+                    pixM = Math.max(azimuthPixelSpacing, rangePixelSpacing);
+                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                } catch (Exception e) {
+                    pixM = 0.0;
+                    pixD = 0.0;
+                }
+                pixelSpacingInMeter.setText(String.valueOf(pixM));
+                pixelSpacingInDegree.setText(String.valueOf(pixD));
+            }
         }
 
         final File extDEMFile = (File)paramMap.get("externalDEMFile");
@@ -465,7 +473,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
         paramMap.put("demName", demName.getSelectedItem());
-        paramMap.put("projectionName", projectionName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("incidenceAngleForGamma0", incidenceAngleForGamma0.getSelectedItem());
@@ -488,6 +495,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
         }
 
+        if(mapProjHandler.getCRS() != null) {
+            paramMap.put("mapProjection", mapProjHandler.getCRS().toWKT());
+        }
+
         paramMap.put("saveDEM", saveDEM);
         paramMap.put("saveLocalIncidenceAngle", saveLocalIncidenceAngle);
         paramMap.put("saveProjectedLocalIncidenceAngle", saveProjectedLocalIncidenceAngle);
@@ -506,8 +517,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
+        final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         contentPane.add(new JLabel("Source Bands:"), gbc);
@@ -536,50 +546,23 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (deg):", pixelSpacingInDegree);
 
-        pixelSpacingInMeter.addFocusListener(new FocusListener() {
+        pixelSpacingInMeter.addFocusListener(new PixelSpacingMeterListener());
+        pixelSpacingInDegree.addFocusListener(new PixelSpacingDegreeListener());
 
-            public void focusGained(final FocusEvent e) {
-            }
-            public void focusLost(final FocusEvent e) {
-                Double pixM, pixD;
-                try {
-                    pixM = Double.parseDouble(pixelSpacingInMeter.getText());
-                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
-                } catch (Exception ec) {
-                    pixD = 0.0;
-                }
-                pixelSpacingInDegree.setText(String.valueOf(pixD));
-            }
-        });
-
-        pixelSpacingInDegree.addFocusListener(new FocusListener() {
-
-            public void focusGained(final FocusEvent e) {
-            }
-            public void focusLost(final FocusEvent e) {
-                Double pixM, pixD;
-                try {
-                    pixD = Double.parseDouble(pixelSpacingInDegree.getText());
-                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
-                } catch (Exception ec) {
-                    pixM = 0.0;
-                }
-                pixelSpacingInMeter.setText(String.valueOf(pixM));
-            }
-        });
-
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
-        
         gbc.gridx = 0;
         gbc.gridy++;
-        contentPane.add(saveDEMCheckBox, gbc);
-        gbc.gridy++;
-        contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
-        gbc.gridy++;
-        contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
+        gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveSelectedSourceBandCheckBox, gbc);
+        gbc.gridx = 1;
+        contentPane.add(saveDEMCheckBox, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
+        gbc.gridx = 1;
+        contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
+        gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
         gbc.gridy++;
@@ -618,17 +601,40 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         externalDEMBrowseButton.setVisible(flag);
     }
 
-    private static String[] getProjectionsValueSet() {
-        final MapProjection[] projections = MapProjectionRegistry.getProjections();
-        final String[] projectionsValueSet = new String[projections.length];
-        for (int i = 0; i < projectionsValueSet.length; i++) {
-            projectionsValueSet[i] = projections[i].getName();
-        }
-        return projectionsValueSet;
-    }
-
     private void enableExternalAuxFile(boolean flag) {
         DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, flag);
         externalAuxFileBrowseButton.setVisible(flag);
+    }
+
+    protected class PixelSpacingMeterListener implements FocusListener {
+
+        public void focusGained(final FocusEvent e) {
+        }
+        public void focusLost(final FocusEvent e) {
+            Double pixM, pixD;
+            try {
+                pixM = Double.parseDouble(pixelSpacingInMeter.getText());
+                pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+            } catch (Exception ec) {
+                pixD = 0.0;
+            }
+            pixelSpacingInDegree.setText(String.valueOf(pixD));
+        }
+    }
+
+    protected class PixelSpacingDegreeListener implements FocusListener {
+
+        public void focusGained(final FocusEvent e) {
+        }
+        public void focusLost(final FocusEvent e) {
+            Double pixM, pixD;
+            try {
+                pixD = Double.parseDouble(pixelSpacingInDegree.getText());
+                pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+            } catch (Exception ec) {
+                pixM = 0.0;
+            }
+            pixelSpacingInMeter.setText(String.valueOf(pixM));
+        }
     }
 }

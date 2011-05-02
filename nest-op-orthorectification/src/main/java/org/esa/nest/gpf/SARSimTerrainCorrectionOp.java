@@ -16,15 +16,10 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -34,7 +29,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -45,8 +39,13 @@ import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -106,8 +105,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "The pixel spacing in degrees", defaultValue = "0", label="Pixel Spacing (deg)")
     private double pixelSpacingInDegree = 0;
 
-    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
-    private String projectionName = IdentityTransformDescriptor.NAME;
+    @Parameter(description = "The coordinate reference system in well known text format")
+    private String mapProjection;
 
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
@@ -158,7 +157,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
-    private boolean useExternalDEMFile = false;
     private boolean saveLayoverShadowMask = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
     private boolean isElevationModelAvailable = false;
@@ -207,6 +205,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
     private RangeDopplerGeocodingOp.ResampleMethod imgResampling = null;
+    private CoordinateReferenceSystem targetCRS;
 
     private boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
@@ -298,7 +297,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
-                VisatApp.getApp().showErrorDialog(errMsg);
+                VisatApp.getApp().setStatusBarMessage(errMsg);
             }
         }
     }
@@ -423,7 +422,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             fileElevationModel = new FileElevationModel(externalDemFile, 
 		    ResamplingFactory.createResampling(demResamplingMethod), demNoDataValue);
             demName = externalDemFile.getName();
-            useExternalDEMFile = true;
         }
         isElevationModelAvailable = true;
     }
@@ -448,54 +446,58 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
+    private CoordinateReferenceSystem getCRS() throws Exception {
+        try {
+            if(mapProjection == null || mapProjection.isEmpty())
+                mapProjection = "WGS84(DD)";
+            return CRS.parseWKT(mapProjection);
+        } catch (Exception e) {
+            return CRS.decode(mapProjection, true);
+        }
+    }
+
     /**
      * Create target product.
      * @throws OperatorException The exception.
      */
     private void createTargetProduct() throws Exception {
 
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
-                                                sourceProduct,
-                                                MapProjectionRegistry.getProjection(projectionName),
-                                                0.0,
-                                                sourceProduct.getBandAt(0).getNoDataValue());
+        targetCRS = getCRS();
 
-        if (pixelSpacingInMeter > 0.0) {
-            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, projectionName, imageGeoBoundary);
-            delLat = pixelSpacingInDegree;
-            delLon = pixelSpacingInDegree;
-            double pixelSizeX;
-            double pixelSizeY;
-            if (projectionName.equals("Geographic Lat/Lon")) {
-                pixelSizeX = pixelSpacingInDegree;
-                pixelSizeY = pixelSpacingInDegree;
-            } else {
-                pixelSizeX = pixelSpacingInMeter;
-                pixelSizeY = pixelSpacingInMeter;
-            }
-            mapInfo.setPixelSizeX((float)pixelSizeX);
-            mapInfo.setPixelSizeY((float)pixelSizeY);
-
-            final Dimension outputRasterSize = ProductUtils.getOutputRasterSize(
-                    sourceProduct, null, mapInfo.getMapProjection().getMapTransform(), pixelSizeX, pixelSizeY);
-            mapInfo.setSceneWidth(outputRasterSize.width);
-            mapInfo.setSceneHeight(outputRasterSize.height);
-            mapInfo.setPixelX(0.5f*outputRasterSize.width);
-            mapInfo.setPixelY(0.5f*outputRasterSize.height);
-            mapInfo.setSceneSizeFitted(true);
-
+        RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+        if (pixelSpacingInMeter <= 0.0) {
+            pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
+                                           RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
+            pixelSpacingInDegree = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixelSpacingInMeter);
+        }
+        delLat = pixelSpacingInDegree;
+        delLon = pixelSpacingInDegree;
+        double pixelSizeX;
+        double pixelSizeY;
+        if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
+            pixelSizeX = pixelSpacingInDegree;
+            pixelSizeY = pixelSpacingInDegree;
         } else {
-            delLat = mapInfo.getPixelSizeX();
-            delLon = mapInfo.getPixelSizeY();
+            pixelSizeX = pixelSpacingInMeter;
+            pixelSizeY = pixelSpacingInMeter;
         }
 
-        targetProduct = ProductProjectionBuilder.createProductProjection(
-                                                sourceProduct,
-                                                false,
-                                                false,
-                                                mapInfo,
-                                                sourceProduct.getName() + PRODUCT_SUFFIX,
-                                                "");
+        final Rectangle2D bounds = new Rectangle2D.Double();
+        bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
+        final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+        final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+        final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
+        final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
+        final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                width,
+                height,
+                targetEnvelope.getMinimum(0),
+                targetEnvelope.getMaximum(1),
+                pixelSizeX, pixelSizeY);
+
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
+                sourceProduct.getProductType(), width, height);
+        targetProduct.setGeoCoding(geoCoding);
 
         targetImageWidth = targetProduct.getSceneRasterWidth();
         targetImageHeight = targetProduct.getSceneRasterHeight();
@@ -678,7 +680,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, geoPosLastNear.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, projectionName);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, targetCRS.getName().getCode());
         if (!useAvgSceneHeight) {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);

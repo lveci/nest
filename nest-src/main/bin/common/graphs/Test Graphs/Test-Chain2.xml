@@ -59,7 +59,7 @@
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
       <pixelSpacingInMeter>0.0</pixelSpacingInMeter>
       <pixelSpacingInDegree>0.0</pixelSpacingInDegree>
-      <projectionName>Geographic Lat/Lon</projectionName>
+      <mapProjection>WGS84(DD)</mapProjection>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
       <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>

@@ -56,9 +56,9 @@
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
       <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
-      <pixelSpacingInMeter>500.0</pixelSpacingInMeter>
-      <pixelSpacingInDegree>0.004491576420597608</pixelSpacingInDegree>
-      <projectionName>Geographic Lat/Lon</projectionName>
+      <pixelSpacingInMeter>0</pixelSpacingInMeter>
+      <pixelSpacingInDegree>0</pixelSpacingInDegree>
+      <mapProjection>WGS84(DD)</mapProjection>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
       <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>

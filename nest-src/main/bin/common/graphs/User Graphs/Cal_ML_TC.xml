@@ -12,46 +12,68 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <formatName>BEAM-DIMAP</formatName>
-      <file>target.dim</file>
+      <file>I:\out\target.dim</file>
     </parameters>
   </node>
-  <node id="3-Apply-Orbit-File">
-    <operator>Apply-Orbit-File</operator>
+  <node id="3-Calibration">
+    <operator>Calibration</operator>
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
-      <orbitType>DORIS_VOR</orbitType>
-    </parameters>
-  </node>
-  <node id="4-Calibration">
-    <operator>Calibration</operator>
-    <sources>
-      <sourceProduct refid="3-Apply-Orbit-File"/>
-    </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <sourceBands/>
+      <auxFile>Latest Auxiliary File</auxFile>
       <externalAuxFile/>
       <outputImageScaleInDb>false</outputImageScaleInDb>
       <createGammaBand>false</createGammaBand>
       <createBetaBand>false</createBetaBand>
     </parameters>
   </node>
-  <node id="5-Terrain-Correction">
-    <operator>Terrain-Correction</operator>
+  <node id="4-Multilook">
+    <operator>Multilook</operator>
     <sources>
-      <sourceProduct refid="4-Calibration"/>
+      <sourceProduct refid="3-Calibration"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <sourceBands/>
-      <demName>SRTM 3Sec GeoTiff</demName>
+      <nRgLooks>2</nRgLooks>
+      <nAzLooks>1</nAzLooks>
+      <outputIntensity>true</outputIntensity>
+      <note>Currently, detection for complex data is performed without any resampling</note>
+    </parameters>
+  </node>
+  <node id="5-Terrain-Correction">
+    <operator>Terrain-Correction</operator>
+    <sources>
+      <sourceProduct refid="4-Multilook"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+      <sourceBands/>
+      <demName>ACE2_5Min</demName>
       <externalDEMFile/>
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
       <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
       <pixelSpacingInMeter>0.0</pixelSpacingInMeter>
       <pixelSpacingInDegree>0.0</pixelSpacingInDegree>
-      <mapProjection>WGS84(DD)</mapProjection>
+      <mapProjection>PROJCS[&quot;Polar_Stereographic / World Geodetic System 1984&quot;, &#xd;
+  GEOGCS[&quot;World Geodetic System 1984&quot;, &#xd;
+    DATUM[&quot;World Geodetic System 1984&quot;, &#xd;
+      SPHEROID[&quot;WGS 84&quot;, 6378137.0, 298.257223563, AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]], &#xd;
+      AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]], &#xd;
+    PRIMEM[&quot;Greenwich&quot;, 0.0, AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]], &#xd;
+    UNIT[&quot;degree&quot;, 0.017453292519943295], &#xd;
+    AXIS[&quot;Geodetic longitude&quot;, EAST], &#xd;
+    AXIS[&quot;Geodetic latitude&quot;, NORTH]], &#xd;
+  PROJECTION[&quot;Polar_Stereographic&quot;], &#xd;
+  PARAMETER[&quot;central_meridian&quot;, 0.0], &#xd;
+  PARAMETER[&quot;latitude_of_origin&quot;, 90.0], &#xd;
+  PARAMETER[&quot;scale_factor&quot;, 1.0], &#xd;
+  PARAMETER[&quot;false_easting&quot;, 0.0], &#xd;
+  PARAMETER[&quot;false_northing&quot;, 0.0], &#xd;
+  UNIT[&quot;m&quot;, 1.0], &#xd;
+  AXIS[&quot;Easting&quot;, EAST], &#xd;
+  AXIS[&quot;Northing&quot;, NORTH]]</mapProjection>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
       <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>
@@ -62,7 +84,7 @@
       <saveBetaNought>false</saveBetaNought>
       <incidenceAngleForSigma0>Use projected local incidence angle from DEM</incidenceAngleForSigma0>
       <incidenceAngleForGamma0>Use projected local incidence angle from DEM</incidenceAngleForGamma0>
-	  <auxFile>Latest Auxiliary File</auxFile>
+      <auxFile>Latest Auxiliary File</auxFile>
       <externalAuxFile/>
     </parameters>
   </node>
@@ -72,16 +94,16 @@
       <displayPosition y="134.0" x="37.0"/>
     </node>
     <node id="2-Write">
-      <displayPosition y="133.0" x="455.0"/>
+      <displayPosition y="196.0" x="346.0"/>
     </node>
-    <node id="3-Apply-Orbit-File">
-      <displayPosition y="133.0" x="123.0"/>
+    <node id="3-Calibration">
+      <displayPosition y="136.0" x="127.0"/>
     </node>
-    <node id="4-Calibration">
-      <displayPosition y="133.0" x="234.0"/>
+    <node id="4-Multilook">
+      <displayPosition y="137.0" x="226.0"/>
     </node>
     <node id="5-Terrain-Correction">
-      <displayPosition y="133.0" x="324.0"/>
+      <displayPosition y="136.0" x="324.0"/>
     </node>
   </applicationData>
 </graph>
