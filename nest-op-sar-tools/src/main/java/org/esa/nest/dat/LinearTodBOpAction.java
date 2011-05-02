@@ -38,16 +38,9 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         if(node instanceof Band) {
             final Product product = visatApp.getSelectedProduct();
             final Band band = (Band) node;
-            String bandName = band.getName();
             final String unit = band.getUnit();
 
             if(!unit.contains(Unit.DB)) {
-                bandName += dBStr;
-                if(product.getBand(bandName) != null) {
-                    visatApp.showWarningDialog(product.getName() + " already contains a dB "
-                        + bandName + " band");
-                    return;
-                }
 
                 if(visatApp.showQuestionDialog("Convert to dB", "Would you like to convert band "
                         + band.getName() + " into dB in a new virtual band?", true, null) == 0) {
@@ -55,12 +48,6 @@ public class LinearTodBOpAction extends AbstractVisatAction {
                 }
             } else {
 
-                bandName = bandName.substring(0, bandName.indexOf(dBStr));
-                if(product.getBand(bandName) != null) {
-                    visatApp.showWarningDialog(product.getName() + " already contains a linear "
-                        + bandName + " band");
-                    return;
-                }
                 if(visatApp.showQuestionDialog("Convert to linear", "Would you like to convert band "
                         + band.getName() + " into linear in a new virtual band?", true, null) == 0) {
                     convert(product, band, false);
@@ -83,22 +70,33 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         event.getCommand().setEnabled(false);
     }
 
-    static void convert(Product product, Band band, boolean todB) {
+    static void convert(final Product product, final Band band, final boolean todB) {
         String bandName = band.getName();
         String unit = band.getUnit();
 
         String expression;
+        String newBandName;
+
         if(todB) {
             expression = bandName + "==0 ? 0 : 10 * log10(abs("+bandName+"))";
             bandName += dBStr;
             unit += dBStr;
         } else {
             expression = "pow(10," + bandName + "/10.0)";
-            bandName = bandName.substring(0, bandName.indexOf(dBStr));
-            unit = unit.substring(0, unit.indexOf(dBStr));
+            if(bandName.contains(dBStr))
+                bandName = bandName.substring(0, bandName.indexOf(dBStr));
+            if(unit.contains(dBStr))
+                unit = unit.substring(0, unit.indexOf(dBStr));
         }
 
-        final VirtualBand virtBand = new VirtualBand(bandName,
+        newBandName = bandName;
+        int i = 2;
+        while(product.getBand(newBandName) != null) {
+            newBandName = bandName + i;
+            ++i;
+        }
+
+        final VirtualBand virtBand = new VirtualBand(newBandName,
                 ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
