@@ -157,11 +157,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         removeButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                final int selRow = table.getSelectedRow();
-                if(selRow >= 0) {
-                    fileModel.removeFile(selRow);
-                    countLabel.setText(fileModel.getRowCount()+" Products");
+                final int[] selRows = table.getSelectedRows();
+                final ArrayList<File> filesToRemove = new ArrayList<File>(selRows.length);
+                for(int row : selRows) {
+                    filesToRemove.add(fileModel.getFileAt(row));
                 }
+                for(File file : filesToRemove) {
+                    int index = fileModel.getIndexOf(file);
+                    fileModel.removeFile(index);
+                }
+                countLabel.setText(fileModel.getRowCount()+" Products");
             }
 
         });
@@ -295,6 +300,10 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             fireTableDataChanged();
         }
 
+        public int getIndexOf(final File file) {
+            return fileList.indexOf(file);
+        }
+
         /**
          * Needed for drag and drop
          */
@@ -339,6 +348,10 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         public Object getValueAt(int r, int c) {
             return dataList.get(r).data[c];
+        }
+
+        public File getFileAt(int index) {
+            return fileList.get(index);
         }
 
         void setColumnWidths(TableColumnModel columnModel) {

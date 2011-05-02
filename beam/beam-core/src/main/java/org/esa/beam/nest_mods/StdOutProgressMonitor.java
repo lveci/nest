@@ -3,7 +3,7 @@ package org.esa.beam.nest_mods;
 /**
  * command line Progress monitor
  */
-public class StdOutProgressMonitor {
+public final class StdOutProgressMonitor {
     private final int minorStep = 2;
     private final int majorStep = 10;
     private int lastMinPercentComplete = minorStep;

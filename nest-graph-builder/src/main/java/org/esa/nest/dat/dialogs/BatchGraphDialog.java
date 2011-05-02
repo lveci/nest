@@ -25,6 +25,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.nest_mods.ProcessTimeMonitor;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
@@ -57,6 +58,7 @@ public class BatchGraphDialog extends ModelessDialog {
     private final JPanel mainPanel;
     private final JTabbedPane tabbedPane;
     private final JLabel statusLabel;
+    private final JLabel bottomStatusLabel;
     private final JPanel progressPanel;
     private final JProgressBar progressBar;
     private ProgressBarProgressMonitor progBarMonitor = null;
@@ -90,6 +92,9 @@ public class BatchGraphDialog extends ModelessDialog {
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));
         mainPanel.add(statusLabel, BorderLayout.NORTH);
+
+        bottomStatusLabel = new JLabel("");
+        getButtonPanel().add(bottomStatusLabel, 0);
 
         // progress Bar
         progressBar = new JProgressBar();
@@ -149,6 +154,7 @@ public class BatchGraphDialog extends ModelessDialog {
             DoProcessing();
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
+            bottomStatusLabel.setText("");
         }
     }
 
@@ -230,6 +236,7 @@ public class BatchGraphDialog extends ModelessDialog {
             createGraphs();
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
+            bottomStatusLabel.setText("");
         }
     }
 
@@ -300,6 +307,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
         } catch(GraphException e) {
             statusLabel.setText(e.getMessage());
+            bottomStatusLabel.setText("");
             result = false;
         }
         return result;
@@ -483,8 +491,9 @@ public class BatchGraphDialog extends ModelessDialog {
     private class ProcessThread extends SwingWorker<Boolean, Object> {
 
         private final ProgressMonitor pm;
-        private Date executeStartTime = null;
+        private ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
         private boolean errorOccured = false;
+        final ArrayList<String> errMsgs = new ArrayList<String>();
 
         public ProcessThread(final ProgressMonitor pm) {
             this.pm = pm;
@@ -495,7 +504,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
             pm.beginTask("Processing Graph...", 100*graphExecuterList.size());
             try {
-                executeStartTime = Calendar.getInstance().getTime();
+                timeMonitor.start();
                 isProcessing = true;
 
                 final File[] fileList = productSetPanel.getFileList();
@@ -516,14 +525,27 @@ public class BatchGraphDialog extends ModelessDialog {
 
                         graphEx.executeGraph(new SubProgressMonitor(pm, 100));
 
+                        graphEx.disposeGraphContext();
                     } catch(Exception e) {
                         System.out.print(e.getMessage());
+                        String filename = fileList[graphIndex].getName();
+                        errMsgs.add(filename +" -> "+e.getMessage());
                     }
-                    graphEx.disposeGraphContext();
+
                     graphEx = null;
                     ++graphIndex;
+
+                    // calculate time remaining
+                    final long duration = timeMonitor.getCurrentDuration();
+                    final double timePerGraph = duration / (double)graphIndex;
+                    final long timeLeft = (long)(timePerGraph * (fileList.length - graphIndex));
+                    if(timeLeft > 0) {
+                        String remainingStr = "Estimated "+ ProcessTimeMonitor.formatDuration(timeLeft)+" remaining";
+                        if(!errMsgs.isEmpty())
+                            remainingStr += " (Errors occurred)";
+                        bottomStatusLabel.setText(remainingStr);
+                    }
                 }
-                graphExecuterList.clear();
 
                 JAI.getDefaultInstance().getTileCache().flush();
                 System.gc();
@@ -545,19 +567,21 @@ public class BatchGraphDialog extends ModelessDialog {
         @Override
         public void done() {
             if(!errorOccured) {
-                final Date now = Calendar.getInstance().getTime();
-                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-                if(diff > 120) {
-                    final float minutes = diff / 60f;
-                    statusLabel.setText("Processing completed in " + minutes + " minutes");
-                } else {
-                    statusLabel.setText("Processing completed in " + diff + " seconds");
-                }
+                final long duration = timeMonitor.stop();
+                statusLabel.setText("Processing completed in " + ProcessTimeMonitor.formatDuration(duration));
+                bottomStatusLabel.setText("");
 
                 //if(productSetPanel.isOpenInAppSelected()) {
                 //    final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
                 //    openTargetProducts(graphEx.getProductsToOpenInDAT());
                 //}
+            }
+            if(!errMsgs.isEmpty()) {
+                String msg = "The following errors occurred:\n";
+                for(String errStr : errMsgs) {
+                    msg += errStr +"\n";    
+                }
+                showErrorDialog(msg);
             }
             cleanUpTempFiles();
             notifyMSG(BatchProcessListener.BatchMSG.DONE);
