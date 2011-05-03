@@ -32,7 +32,7 @@ import javax.imageio.stream.FileImageOutputStream;
  * @author Daniele Romagnoli, GeoSolutions
  * @author Simone Giannecchini, GeoSolutions
  */
-public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
+public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
         implements FileImageOutputStreamExt {
 
     protected EnhancedRandomAccessFile eraf;
@@ -48,7 +48,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     /**
      * A constructor which accepts a File as input.
      * 
-     * @param eraf
+     * @param file eraf
      * 
      * @throws FileNotFoundException
      * @throws IOException
@@ -66,7 +66,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     /**
      * A constructor which accepts a File as input.
      * 
-     * @param eraf
+     * @param file eraf
      * @param bufSize
      * 
      * @throws FileNotFoundException
@@ -146,7 +146,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     public void seek(long pos) throws IOException {
         checkClosed();
         if (pos < flushedPos) {
-            throw new IndexOutOfBoundsException("pos < flushedPos!");
+            throw new IndexOutOfBoundsException("IndexOutOfBounds pos < flushedPos!");
         }
         bitOffset = 0;
         streamPos = eraf.seek(pos);
