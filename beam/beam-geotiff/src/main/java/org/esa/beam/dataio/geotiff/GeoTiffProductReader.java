@@ -115,6 +115,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                                                        int destWidth, int destHeight,
                                                        ProductData destBuffer, ProgressMonitor pm) throws IOException {
         final int destSize = destWidth * destHeight;
+        try {
 
             final TIFFImageReadParam readParam = (TIFFImageReadParam) imageReader.getDefaultReadParam();
             readParam.setSourceSubsampling(sourceStepX, sourceStepY,
@@ -171,6 +172,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     }
                 }
             }
+        } catch(Throwable e) {
+            for (int i=0; i<destSize; ++i) {
+                destBuffer.setElemDoubleAt(i, 0);
+            }
+        }
     }
 
     @Override
