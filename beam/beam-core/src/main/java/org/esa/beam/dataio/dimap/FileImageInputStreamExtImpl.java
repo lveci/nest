@@ -19,12 +19,10 @@ package org.esa.beam.dataio.dimap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.BufferedInputStream;
 import java.nio.ByteOrder;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageInputStreamImpl;
-import javax.imageio.stream.FileImageInputStream;
 
 /**
  * An implementation of {@link ImageInputStream} that gets its input from a
@@ -34,7 +32,7 @@ import javax.imageio.stream.FileImageInputStream;
  * @author Simone Giannecchini, GeoSolutions
  */
 public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
-        implements FileImageInputStreamExt {
+        implements ImageInputStream {
 
     /** the associated {@link File}*/
     protected File file;
@@ -223,8 +221,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      * @exception IOException
      *                    if an I/O error occurs.
      */
-    public FileImageInputStreamExtImpl(File f, int bufferSize)
-            throws FileNotFoundException, IOException {
+    public FileImageInputStreamExtImpl(File f, int bufferSize) throws IOException {
         // //
         //
         // Check that the input file is a valid file
@@ -257,7 +254,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      */
     @Override
     public int read() throws IOException {
-        checkClosed();
+        //checkClosed();
         bitOffset = 0;
         int val = eraf.read();
         if (val != -1) {
@@ -281,7 +278,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        checkClosed();
+        //checkClosed();
         bitOffset = 0;
         int nbytes = eraf.readBytes(b, off, len);
         if (nbytes != -1) {
@@ -299,7 +296,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
     @Override
     public long length() {
         try {
-            checkClosed();
+            //checkClosed();
             return eraf.length();
         } catch (IOException e) {
             return -1L;

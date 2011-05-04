@@ -70,7 +70,7 @@ import java.nio.channels.FileChannel;
  * @author Russ Rew
  * @author john caron
  * 
- * @version $Id: EnhancedRandomAccessFile.java,v 1.3 2009-07-22 20:30:52 lveci Exp $
+ * @version $Id: EnhancedRandomAccessFile.java,v 1.4 2011-05-03 20:21:22 lveci Exp $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile
@@ -628,7 +628,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public int skipBytes(int n) throws IOException {
-		seek(getFilePointer() + n);
+		seek(filePosition + n);
 		return n;
 	}
 
@@ -647,7 +647,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public long skipBytes(long n) throws IOException {
-		seek(getFilePointer() + n);
+		seek(filePosition + n);
 		return n;
 	}
 

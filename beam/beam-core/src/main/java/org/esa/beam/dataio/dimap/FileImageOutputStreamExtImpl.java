@@ -23,7 +23,6 @@ import java.nio.ByteOrder;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.ImageOutputStreamImpl;
-import javax.imageio.stream.FileImageOutputStream;
 
 /**
  * An implementation of {@link ImageOutputStream} that take its output on a
@@ -33,7 +32,7 @@ import javax.imageio.stream.FileImageOutputStream;
  * @author Simone Giannecchini, GeoSolutions
  */
 public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
-        implements FileImageOutputStreamExt {
+        implements ImageOutputStream {
 
     protected EnhancedRandomAccessFile eraf;
 
@@ -84,7 +83,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
 
     @Override
     public int read() throws IOException {
-        checkClosed();
+        //checkClosed();
         bitOffset = 0;
         int val = eraf.read();
         if (val != -1) {
@@ -95,7 +94,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        checkClosed();
+        //checkClosed();
         bitOffset = 0;
         int nbytes = eraf.read(b, off, len);
         if (nbytes != -1) {
@@ -106,7 +105,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
 
     @Override
     public void write(int b) throws IOException {
-        checkClosed();
+        //checkClosed();
         flushBits();
         eraf.write(b);
         ++streamPos;
@@ -114,7 +113,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        checkClosed();
+        //checkClosed();
         flushBits();
         eraf.writeBytes(b, off, len);
         streamPos += len;
@@ -123,7 +122,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     @Override
     public long length() {
         try {
-            checkClosed();
+            //checkClosed();
             return eraf.length();
         } catch (IOException e) {
             return -1L;
@@ -144,7 +143,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      */
     @Override
     public void seek(long pos) throws IOException {
-        checkClosed();
+        //checkClosed();
         if (pos < flushedPos) {
             throw new IndexOutOfBoundsException("IndexOutOfBounds pos < flushedPos!");
         }
