@@ -33,7 +33,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.esa.beam.dataio.dimap;
+package org.esa.nest.dataio;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -70,7 +70,7 @@ import java.nio.channels.FileChannel;
  * @author Russ Rew
  * @author john caron
  * 
- * @version $Id: EnhancedRandomAccessFile.java,v 1.4 2011-05-03 20:21:22 lveci Exp $
+ * @version $Id: EnhancedRandomAccessFile.java,v 1.1 2011-05-04 19:24:49 lveci Exp $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile

@@ -23,7 +23,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.beam.nest_mods.StdOutProgressMonitor;
+import org.esa.nest.util.StdOutProgressMonitor;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;

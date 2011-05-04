@@ -16,6 +16,7 @@ import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.FileImageOutputStreamExtImpl;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;

@@ -1,4 +1,4 @@
-package org.esa.beam.nest_mods;
+package org.esa.nest.util;
 
 /**
  * command line Progress monitor

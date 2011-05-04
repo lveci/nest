@@ -23,7 +23,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.beam.nest_mods.StdOutProgressMonitor;
+import org.esa.nest.util.StdOutProgressMonitor;
 
 import java.awt.Dimension;
 import java.awt.Point;

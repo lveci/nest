@@ -16,7 +16,7 @@
 package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;

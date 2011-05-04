@@ -1,4 +1,4 @@
-package org.esa.beam.nest_mods;
+package org.esa.nest.util;
 
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -11,14 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Apr 14, 2011
- * Time: 1:18:27 PM
- * To change this template use File | Settings | File Templates.
+
  */
 public class ProductFunctions {
-        //NESTMOD
 
     private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5"};
 

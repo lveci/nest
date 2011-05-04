@@ -1,4 +1,4 @@
-package org.esa.beam.nest_mods;
+package org.esa.nest.util;
 
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import org.esa.beam.util.VersionChecker;

@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.esa.beam.dataio.dimap;
+package org.esa.nest.dataio;
 
 import java.io.File;
 import java.io.FileNotFoundException;

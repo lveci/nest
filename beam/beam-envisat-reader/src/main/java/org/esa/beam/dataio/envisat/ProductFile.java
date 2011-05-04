@@ -22,7 +22,7 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;

@@ -18,7 +18,7 @@ package org.esa.nest.db;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.nest_mods.ProductFunctions;
+import org.esa.nest.util.ProductFunctions;
 
 import javax.swing.*;
 import java.io.File;

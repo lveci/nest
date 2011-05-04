@@ -21,7 +21,7 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.nest_mods.ProductFunctions;
+import org.esa.nest.util.ProductFunctions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
