@@ -60,8 +60,8 @@ public class SystemUtils {
     public static final String BEAM_HOME_PAGE = "http://envisat.esa.int/beam/";
 
     public static final String BEAM_HOME_PROPERTY_NAME = getApplicationContextId()+".home";//"beam.home";
-    public static final String BEAM_PLUGIN_PATH_PROPERTY_NAME = "beam.plugin.path";
-    public static final String BEAM_PARALLELISM_PROPERTY_NAME = "beam.parallelism";
+    public static final String BEAM_PLUGIN_PATH_PROPERTY_NAME = getApplicationContextId()+".plugin.path";
+    public static final String BEAM_PARALLELISM_PROPERTY_NAME = getApplicationContextId()+".parallelism";
     public static final String LAX_INSTALL_DIR_PROPERTY_NAME = "lax.root.install.dir";
 
     /**

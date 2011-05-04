@@ -26,8 +26,10 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.9:<br/>
-        [BEAM-1246] Layer-Manager does not reflect changes of mask names in Mask-Manager
-        [BEAM-1241] For certain AATSR-products, TiePointGeoCoding.getPixelPos(GeoPos, PixelPos) yields wrong results
+        [BEAM-1281] Orthorectification can not be used if tie-points are selected as elevation model<br/>
+        [BEAM-1280] Configure image tile size for all readers<br/>
+        [BEAM-1246] Layer-Manager does not reflect changes of mask names in Mask-Manager<br/>
+        [BEAM-1241] For certain AATSR-products, TiePointGeoCoding.getPixelPos(GeoPos, PixelPos) yields wrong results<br/>
         [BEAM-1239] For MERIS bands the solar flux has the wrong unit<br/>
         [BEAM-1221] Need an option to configure multi-threading<br/>
         [BEAM-1212] RasterDataNode.isPixelValid(x,y) is not thread safe<br/>
