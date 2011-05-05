@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,7 +36,6 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ArrayUtils;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -44,10 +43,8 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Vector;
-import java.util.logging.Logger;
 
 /**
  * The <code>EnvisatProductReader</code> class is an implementation of the <code>ProductReader</code> interface
@@ -60,15 +57,10 @@ import java.util.logging.Logger;
  */
 public final class EnvisatProductReader extends AbstractProductReader {
 
-    /** @since BEAM 4.9 */
+    /**
+     * @since BEAM 4.9
+     */
     private static final String SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING = "beam.envisat.usePixelGeoCoding";
-    /** @since BEAM 4.9 */
-    private static final String SYSPROP_ENVISAT_TILE_WIDTH = "beam.envisat.tileWidth";
-    /** @since BEAM 4.9 */
-    private static final String SYSPROP_ENVISAT_TILE_HEIGHT = "beam.envisat.tileHeight";
-
-    @Deprecated
-    private static final String ENVISAT_AMORGOS_USE_PIXEL_GEO_CODING = "beam.envisat.amorgos.usePixelGeoCoding";
 
     /**
      * Represents the product's file.
@@ -254,7 +246,6 @@ public final class EnvisatProductReader extends AbstractProductReader {
         }
         addDefaultBitmaskDefsToProduct(product);
         addDefaultBitmaskDefsToBands(product);
-        setPreferredTileSize(product);
         productFile.addCustomMetadata(product);
 
         return product;
@@ -271,7 +262,7 @@ public final class EnvisatProductReader extends AbstractProductReader {
             }
             if (!(bandLineReader instanceof BandLineReader.Virtual)) {
                 if (bandLineReader.getPixelDataReader().getDSD().getDatasetSize() == 0 ||
-                        bandLineReader.getPixelDataReader().getDSD().getNumRecords() == 0) {
+                    bandLineReader.getPixelDataReader().getDSD().getNumRecords() == 0) {
                     continue;
                 }
             }
@@ -417,7 +408,13 @@ public final class EnvisatProductReader extends AbstractProductReader {
                 lonBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME);
             }
             if (latBand != null && lonBand != null) {
-                final PixelGeoCoding pixelGeoCoding = new PixelGeoCoding(latBand, lonBand, "NOT l1_flags.INVALID", 6);
+                String validMask = "";
+                if (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches()) {
+                    validMask = "NOT l1_flags.INVALID";
+                } else {
+                    validMask = "l2_flags.LAND or l2_flags.CLOUD or l2_flags.WATER";
+                }
+                final PixelGeoCoding pixelGeoCoding = new PixelGeoCoding(latBand, lonBand, validMask, 6);
                 product.setGeoCoding(pixelGeoCoding);
             }
         }
@@ -511,22 +508,7 @@ public final class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
-    private void setPreferredTileSize(Product product) {
-        Integer tileWidth = Integer.getInteger(SYSPROP_ENVISAT_TILE_WIDTH);
-        Integer tileHeight = Integer.getInteger(SYSPROP_ENVISAT_TILE_HEIGHT);
-        if (tileWidth != null || tileHeight != null) {
-            Dimension tileSize = product.getPreferredTileSize();
-            Logger logger = BeamLogManager.getSystemLogger();
-            logger.info(MessageFormat.format("Adjusting tile size for Envisat product {0}", product.getName()));
-            if (tileSize != null) {
-                logger.warning(MessageFormat.format("Overwriting tile size {0} x {1}", tileSize.width, tileSize.height));
-            }
-            tileWidth = tileWidth != null ? tileWidth : sceneRasterWidth;
-            tileHeight = tileHeight != null ? tileHeight : sceneRasterHeight;
-            product.setPreferredTileSize(tileWidth, tileHeight);
-            logger.info(MessageFormat.format("Tile size set to {0} x {1}", tileWidth, tileHeight));
-        }
-    }
+
 
 private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
                                             final BandLineReader samplesReader) throws IOException {
@@ -803,18 +785,19 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
      * {@link org.esa.beam.framework.datamodel.TiePointGrid#DISCONT_NONE} otherwise.
      *
      * @param name the grid name
+     *
      * @return the discontinuity mode, always one of {@link org.esa.beam.framework.datamodel.TiePointGrid#DISCONT_NONE}, {@link org.esa.beam.framework.datamodel.TiePointGrid#DISCONT_AT_180} and {@link org.esa.beam.framework.datamodel.TiePointGrid#DISCONT_AT_360}.
      */
     @Override
     protected int getGridDiscontinutity(String name) {
         if (name.equalsIgnoreCase(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME)) {
+            name.equalsIgnoreCase(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME)) {
             return TiePointGrid.DISCONT_AT_360;
         } else if (name.equalsIgnoreCase(EnvisatConstants.LON_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_NADIR_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_NADIR_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_FWARD_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_FWARD_DS_NAME)) {
+                   name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_NADIR_DS_NAME) ||
+                   name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_NADIR_DS_NAME) ||
+                   name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_FWARD_DS_NAME) ||
+                   name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_FWARD_DS_NAME)) {
             return TiePointGrid.DISCONT_AT_180;
         } else {
             return TiePointGrid.DISCONT_NONE;

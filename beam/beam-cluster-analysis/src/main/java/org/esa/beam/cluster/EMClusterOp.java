@@ -192,7 +192,7 @@ public class EMClusterOp extends Operator {
 
             final Tile[] sourceTiles = new Tile[sourceBands.length];
             for (int i = 0; i < sourceTiles.length; i++) {
-                sourceTiles[i] = getSourceTile(sourceBands[i], targetRectangle, ProgressMonitor.NULL);
+                sourceTiles[i] = getSourceTile(sourceBands[i], targetRectangle);
             }
 
             final Tile clusterMapTile = targetTileMap.get(clusterMapBand);
@@ -207,7 +207,7 @@ public class EMClusterOp extends Operator {
             final double[] posteriors = new double[clusterCount];
 
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-                checkForCancellation(pm);
+                checkForCancellation();
 
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     if (roi == null || roi.contains(x, y)) {
@@ -264,7 +264,7 @@ public class EMClusterOp extends Operator {
             final EMClusterer clusterer = createClusterer(SubProgressMonitor.create(pm, 100));
 
             for (int i = 0; i < iterationCount; ++i) {
-                checkForCancellation(pm);
+                checkForCancellation();
                 clusterer.iterate();
                 pm.worked(1);
             }
@@ -331,10 +331,9 @@ public class EMClusterOp extends Operator {
             for (int i = 0; i < sourceBands.length; i++) {
                 int index = 0;
                 for (int y = 0; y < sceneHeight; y++) {
-                    checkForCancellation(pm);
+                    checkForCancellation();
 
-                    final Tile sourceTile =
-                            getSourceTile(sourceBands[i], new Rectangle(0, y, sceneWidth, 1), ProgressMonitor.NULL);
+                    final Tile sourceTile = getSourceTile(sourceBands[i], new Rectangle(0, y, sceneWidth, 1));
                     for (int x = 0; x < sceneWidth; x++) {
                         if (roi == null || roi.contains(x, y)) {
                             final double sample = sourceTile.getSampleDouble(x, y);

@@ -144,7 +144,7 @@ public class KMeansClusterOp extends Operator {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final Tile[] sourceTiles = new Tile[sourceBands.length];
             for (int i = 0; i < sourceTiles.length; i++) {
-                sourceTiles[i] = getSourceTile(sourceBands[i], targetRectangle, ProgressMonitor.NULL);
+                sourceTiles[i] = getSourceTile(sourceBands[i], targetRectangle);
             }
 
             double[] point = new double[sourceTiles.length];
@@ -185,7 +185,7 @@ public class KMeansClusterOp extends Operator {
                 for (int i = 0; (i < iterationCount && !endIteration); ++i) {
                     clusterer.startIteration();
                     for (Rectangle rectangle : tileRectangles) {
-                        checkForCancellation(pm);
+                        checkForCancellation();
                         PixelIter pixelIterr = createPixelIter(rectangle, SubProgressMonitor.create(pm, 1));
                         clusterer.iterateTile(pixelIterr);
                         pm.worked(1);
@@ -245,7 +245,7 @@ public class KMeansClusterOp extends Operator {
         try {
             pm.beginTask("Extracting data points...", sourceBands.length);
             for (int i = 0; i < sourceBands.length; i++) {
-                sourceTiles[i] = getSourceTile(sourceBands[i], rectangle, SubProgressMonitor.create(pm, 1));
+                sourceTiles[i] = getSourceTile(sourceBands[i], rectangle);
                 pm.worked(1);
             }
         } finally {

@@ -22,7 +22,6 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.jai.ImageManager;
 
 import javax.media.jai.ImageLayout;
-import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.Rectangle;
@@ -30,13 +29,8 @@ import java.awt.image.WritableRaster;
 
 public class OperatorImage extends SourcelessOpImage {
 
-    private static final String DISABLE_TILE_CACHING_PROPERTY = "beam.gpf.disableOperatorTileCaching";
-
     private final OperatorContext operatorContext;
     private Band targetBand;
-    private final int numXTiles;
-    private final int numYTiles;
-    private TileComputationStatistic[] tileComputationStatistics;
 
     public OperatorImage(Band targetBand, OperatorContext operatorContext) {
         this(targetBand, operatorContext, ImageManager.createSingleBandedImageLayout(targetBand));
@@ -52,22 +46,14 @@ public class OperatorImage extends SourcelessOpImage {
               imageLayout.getHeight(null));
         this.targetBand = targetBand;
         this.operatorContext = operatorContext;
-        final boolean disableTileCaching = Boolean.getBoolean(DISABLE_TILE_CACHING_PROPERTY);
-        if (disableTileCaching) {
-            setTileCache(null);
-        } else if (getTileCache() == null) {
-            setTileCache(JAI.getDefaultInstance().getTileCache());
-        }
-        numXTiles = getNumXTiles();
-        numYTiles = getNumYTiles();
-        tileComputationStatistics = new TileComputationStatistic[numYTiles * numXTiles];
+        OperatorContext.setTileCache(this);
     }
 
-    protected OperatorContext getOperatorContext() {
+    public OperatorContext getOperatorContext() {
         return operatorContext;
     }
 
-    protected Band getTargetBand() {
+    public Band getTargetBand() {
         return targetBand;
     }
 

@@ -28,6 +28,8 @@ import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
+import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -46,12 +48,16 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProperty;
 import org.esa.beam.framework.gpf.graph.GraphOp;
 import org.esa.beam.framework.gpf.internal.OperatorConfiguration.Reference;
+import org.esa.beam.framework.gpf.monitor.TileComputationEvent;
+import org.esa.beam.framework.gpf.monitor.TileComputationObserver;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.JAI;
+import javax.media.jai.OpImage;
+import javax.media.jai.TileCache;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -79,8 +85,8 @@ import java.util.regex.Pattern;
  */
 public class OperatorContext {
 
-    private static final String SYS_PROP_NAME_TILE_COMPUTATION_HANDLER = "beam.gpf.tileComputationHandler";
-    private static TileComputationHandler tileComputationHandler;
+    private static TileCache tileCache;
+    private static TileComputationObserver tileComputationObserver;
 
     private final Operator operator;
     private final List<Product> sourceProductList;
@@ -118,6 +124,28 @@ public class OperatorContext {
         this.renderingHints = new RenderingHints(JAI.KEY_TILE_CACHE_METRIC, this);
 
         startTileComputationObservation();
+    }
+
+    public static void setTileCache(OpImage image) {
+        boolean disableTileCache = Boolean.parseBoolean(System.getProperty(GPF.DISABLE_TILE_CACHE_PROPERTY, "false"));
+        if (disableTileCache) {
+            image.setTileCache(null);
+        } else if (image.getTileCache() == null) {
+            if (tileCache == null) {
+                boolean useFileTileCache = Boolean.parseBoolean(System.getProperty(GPF.USE_FILE_TILE_CACHE_PROPERTY, "false"));
+                if (useFileTileCache) {
+                    tileCache = new SwappingTileCache(JAI.getDefaultInstance().getTileCache().getMemoryCapacity(),
+                                                      new DefaultSwapSpace(SwappingTileCache.DEFAULT_SWAP_DIR,
+                                                                           BeamLogManager.getSystemLogger()));
+                }else {
+                    tileCache = JAI.getDefaultInstance().getTileCache();
+                }
+                BeamLogManager.getSystemLogger().info(String.format("All GPF operators will share an instance of a %s with a capacity of %dM", tileCache.getClass(), tileCache.getMemoryCapacity() / (1024 * 1024)));
+            }
+            // Make sure that we use a tile cache,
+            // because in GPF we usually don't use the javax.media.jai.JAI class for OpImage instantiation.
+            image.setTileCache(tileCache);
+        }
     }
 
     public String getId() {
@@ -312,6 +340,9 @@ public class OperatorContext {
         this.computeTileStackMethodUsable = computeTileStackMethodUsable;
     }
 
+    /**
+     * @deprecated since BEAM 4.9, use {@link #getSourceTile(RasterDataNode, Rectangle)} instead
+     */
     @Deprecated
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region, ProgressMonitor pm) {
         return getSourceTile(rasterDataNode, region);
@@ -321,6 +352,9 @@ public class OperatorContext {
         return getSourceTile(rasterDataNode, region, (BorderExtender) null);
     }
 
+    /**
+     * @deprecated since BEAM 4.9, use {@link #getSourceTile(RasterDataNode, Rectangle, BorderExtender)} instead
+     */
     @Deprecated
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region, BorderExtender borderExtender,
                               ProgressMonitor pm) {
@@ -1008,33 +1042,33 @@ public class OperatorContext {
     }
 
     private void startTileComputationObservation() {
-        if (tileComputationHandler == null) {
-            String tchClass = System.getProperty(SYS_PROP_NAME_TILE_COMPUTATION_HANDLER);
+        if (tileComputationObserver == null) {
+            String tchClass = System.getProperty(GPF.TILE_COMPUTATION_OBSERVER_PROPERTY);
             if (tchClass != null) {
                 try {
-                    tileComputationHandler = (TileComputationHandler) Class.forName(tchClass).newInstance();
-                    tileComputationHandler.setLogger(logger);
-                    tileComputationHandler.start();
+                    tileComputationObserver = (TileComputationObserver) Class.forName(tchClass).newInstance();
+                    tileComputationObserver.setLogger(logger);
+                    tileComputationObserver.start();
                 } catch (Throwable t) {
-                    getLogger().warning("Failed to instantiate tile computation handler: " + t.getMessage());
+                    getLogger().warning("Failed to instantiate tile computation observer: " + t.getMessage());
                 }
             }
         }
     }
 
     public void stopTileComputationObservation() {
-        if (tileComputationHandler != null) {
-            tileComputationHandler.stop();
-            tileComputationHandler = null;
+        if (tileComputationObserver != null) {
+            tileComputationObserver.stop();
+            tileComputationObserver = null;
         }
     }
 
     public void fireTileComputed(OperatorImage operatorImage, Rectangle destRect, long startNanos) {
-         if (tileComputationHandler != null) {
+         if (tileComputationObserver != null) {
              long endNanos = System.nanoTime();
              int tileX = operatorImage.XToTileX(destRect.x);
              int tileY = operatorImage.YToTileY(destRect.y);
-             tileComputationHandler.tileComputed(new TileComputationEvent(operatorImage, tileX, tileY, startNanos, endNanos));
+             tileComputationObserver.tileComputed(new TileComputationEvent(operatorImage, tileX, tileY, startNanos, endNanos));
          }
      }
 

@@ -21,6 +21,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.internal.OperatorSpiRegistryImpl;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.SystemUtils;
 
 import java.awt.Dimension;
 import java.awt.RenderingHints;
@@ -44,6 +45,10 @@ import java.util.TreeMap;
  * @since 4.1
  */
 public class GPF {
+
+    public static final String DISABLE_TILE_CACHE_PROPERTY = SystemUtils.getApplicationContextId()+".gpf.disableTileCache";
+    public static final String USE_FILE_TILE_CACHE_PROPERTY = SystemUtils.getApplicationContextId()+".gpf.useFileTileCache";
+    public static final String TILE_COMPUTATION_OBSERVER_PROPERTY = SystemUtils.getApplicationContextId()+".gpf.tileComputationObserver";
 
     public static final String SOURCE_PRODUCT_FIELD_NAME = "sourceProduct";
     public static final String TARGET_PRODUCT_FIELD_NAME = "targetProduct";
