@@ -1,3 +1,19 @@
+<!--
+  ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-visat-rcp</symbolicName>
@@ -12,6 +28,10 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.9<br/>
+          [BEAM-1288] Add plausibility check for reprojection and orthorectification<br/>
+          [BEAM-1251] Allow setting start and stop time<br/>
+          [BEAM-1248] Title of transect-plot dialog is not updated if band selection changes<br/>
+          [BEAM-1228] Rangefinder does not work<br/>
           [BEAM-1192] Title in histogram does not adjust to current band<br/>
           [BEAM-1194] Open RGB in image view leads to "Unknown band:" error<br/>
           [BEAM-1184] Reprojection dialog does not remember values<br/>
@@ -745,10 +765,11 @@
             <parent>export</parent>
             <id>exportImageFile</id>
             <class>org.esa.beam.visat.actions.ExportImageAction</class>
-            <text>Export Displayed Image (bmp, jpg, png)...</text>
+            <text>Export View (bmp, jpg, png)...</text>
             <mnemonic>I</mnemonic>
             <shortDescr>Export the current view as an image.</shortDescr>
             <description>Export the current view as an image.</description>
+            <context>image</context>
             <helpId>exportImageFile</helpId>
         </action>
 
@@ -760,6 +781,7 @@
             <mnemonic>K</mnemonic>
             <shortDescr>Export the current view as Google Earth KMZ file.</shortDescr>
             <description>Export the current view as Google Earth KMZ file.</description>
+            <context>image</context>
             <helpId>exportKmzFile</helpId>
         </action>
 
@@ -780,6 +802,7 @@
             <mnemonic>C</mnemonic>
             <shortDescr>Export the colour legend as an image.</shortDescr>
             <description>Export the colour legend of the current view as an image.</description>
+            <context>image</context>
             <helpId>exportLegendImageFile</helpId>
         </action>
 
@@ -791,6 +814,7 @@
             <mnemonic>a</mnemonic>
             <shortDescr>Export the colour palette to plain text.</shortDescr>
             <description>Export the colour palette of the current view to a plain text file.</description>
+            <context>image</context>
             <helpId>exportColorPalette</helpId>
         </action>
 
@@ -802,7 +826,7 @@
             <mnemonic>R</mnemonic>
             <shortDescr>Export the pixels of a Mask.</shortDescr>
             <description>Export the pixels of a mask as tab-separated text.</description>
-            <accelerator>shift control P</accelerator>
+            <context>image</context>
             <helpId>exportMaskPixels</helpId>
         </action>
 
@@ -814,6 +838,7 @@
             <mnemonic>T</mnemonic>
             <shortDescr>Export transect pixels.</shortDescr>
             <description>Export transect pixels as tab-separated text.</description>
+            <context>image</context>
             <helpId>exportTransectPixels</helpId>
         </action>
 
@@ -1681,26 +1706,8 @@
             <shortDescr>Reset to initial layout.</shortDescr>
         </action>
 
-        <!--
-                <action>
-                    <id>projection</id>
-                    <class>org.esa.beam.visat.actions.ProjectionAction</class>
-                    <parent>tools</parent>
-                    <placeAfter>bandArithmetic</placeAfter>
-                    <text>Map Projection...</text>
-                    <shortDescr>Apply Map Projection</shortDescr>
-                    <helpId>projectionDialog</helpId>
-                </action>
 
-                <action>
-                    <id>orthorectification</id>
-                    <class>org.esa.beam.visat.actions.OrthorectificationAction</class>
-                    <parent>tools</parent>
-                    <placeAfter>projection</placeAfter>
-                    <text>Orthorectification...</text>
-                    <shortDescr>Apply Orthorectification</shortDescr>
-                    <helpId>orthorectification</helpId>
-                </action>
+        <!--
                 <action>
                     <id>createXYDisplacementBandsAction</id>
                     <class>org.esa.beam.visat.actions.CreateXYDisplacementBandsAction</class>

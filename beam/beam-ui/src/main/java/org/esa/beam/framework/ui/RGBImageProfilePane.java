@@ -171,6 +171,7 @@ public class RGBImageProfilePane extends JPanel {
 
         setRgbaExpressionsFromSelectedProfile();
 
+	//NESTMOD
         if(_rgbaExprBoxes[0].getSelectedIndex() < 0) {
             // default
             if(bandNames.length == 2) {

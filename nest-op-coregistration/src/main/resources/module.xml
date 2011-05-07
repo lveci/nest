@@ -39,6 +39,15 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>CreateStack</id>
+            <class>org.esa.nest.dat.CreateStackAction</class>
+            <text>Create Stack</text>
+            <shortDescr>Stacks together several products without coregistering</shortDescr>
+            <parent>sartools</parent>
+            <helpId>CreateStack</helpId>
+        </action>
+
+        <action>
             <id>CoregistrationGraph</id>
             <class>org.esa.nest.dat.CoregistrationGraphAction</class>
             <text>Automatic Coregistration</text>

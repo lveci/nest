@@ -87,7 +87,6 @@ public class WorldMapPainter {
                 return false;
             }
 
-
             @Override
             public CoordinateReferenceSystem getImageCRS() {
                 return null;

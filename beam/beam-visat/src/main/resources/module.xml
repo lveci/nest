@@ -9,6 +9,20 @@
         analyse and manipulate data products of a number of EO sensors.
     </description>
 
+    <extension point="beam-ui:applicationDescriptors">
+        <applicationDescriptor>
+            <applicationId>VisatMain</applicationId>
+            <displayName>VISAT</displayName>
+            <version>4.9-SNAPSHOT</version>
+            <buildId>${beam.build.id}</buildId>
+            <buildDate>${beam.build.date}</buildDate>
+            <excludedToolViews>
+                <!-- place tool view IDs here you wish to exclude from your application -->
+                <!-- e.g. <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id> -->
+            </excludedToolViews>
+        </applicationDescriptor>
+    </extension>
+
     <changelog>
         <![CDATA[
         <p>Changes in 4.9<br/>
@@ -26,6 +40,7 @@
           [BEAM-1177] Index out of bounds for RGB View<br/>
           [BEAM-1067] Histogram title doesn't update when changing band<br/>
           [BEAM-1055] No-data colour option in Colour Manipulation window has no effect<br/>
+          [BEAM-0009] Define subsets with geographical co-ordinates<br/>
         </p>
         <p>Changes in 4.8:<br/>
           [BEAM-1169] On KDE (linux) the Java Desktop-API is not supported.<br/>        
@@ -168,7 +183,7 @@
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(c) Copyright 2002-2010 by Brockmann Consult and contributors. All rights reserved.</copyright>
+    <copyright>(c) Copyright 2002-2011 by Brockmann Consult and contributors.&lt;br/&gt;All rights reserved.</copyright>
     <url>http://envisat.esa.int/beam</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
@@ -184,18 +199,6 @@
 
     <extension point="ceres-core:applications">
         <application id="VisatMain" class="org.esa.beam.visat.VisatMain"/>
-    </extension>
-
-    <extension point="beam-ui:applicationDescriptors">
-        <applicationDescriptor>
-            <applicationId>VisatMain</applicationId>
-            <displayName>VISAT</displayName>
-            <version>${beam.build.id}</version>
-            <excludedToolViews>
-                <!-- place tool view IDs here you wish to exclude from your application -->
-                <!-- e.g. <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id> -->
-            </excludedToolViews>
-        </applicationDescriptor>
     </extension>
 
 </module>
