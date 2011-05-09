@@ -175,14 +175,31 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private JPopupMenu createEntryTablePopup() {
         final JPopupMenu popup = new JPopupMenu();
-        final JMenuItem selectAllitem = new JMenuItem("Select All");
-        selectAllitem.addActionListener(new ActionListener() {
+        final JMenuItem selectAllItem = new JMenuItem("Select All");
+        selectAllItem.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
                 productEntryTable.selectAll();
                 performSelectAction();
             }
         });
-        popup.add(selectAllitem);
+        popup.add(selectAllItem);
+
+        final JMenuItem exploreItem = new JMenuItem("Browse Folder");
+        exploreItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                final int row = productEntryTable.rowAtPoint(productEntryTable.getMousePosition());
+                final Object entry = productEntryTable.getValueAt(row, 0);
+                if(entry instanceof ProductEntry) {
+                    final ProductEntry prodEntry = (ProductEntry)entry;
+                    try {
+                        Desktop.getDesktop().open(prodEntry.getFile().getParentFile());
+                    } catch(Exception ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
+            }
+        });
+        popup.add(exploreItem);
 
         final JMenu sortMenu = new JMenu("Sort By");
         popup.add(sortMenu);

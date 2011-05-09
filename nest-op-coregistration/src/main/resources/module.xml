@@ -43,7 +43,7 @@
             <class>org.esa.nest.dat.CreateStackAction</class>
             <text>Create Stack</text>
             <shortDescr>Stacks together several products without coregistering</shortDescr>
-            <parent>sartools</parent>
+            <parent>tools</parent>
             <helpId>CreateStack</helpId>
         </action>
 
@@ -53,6 +53,7 @@
             <text>Automatic Coregistration</text>
             <shortDescr>Perform Coregistration in a single graph</shortDescr>
             <parent>sartools</parent>
+            <separatorBefore>true</separatorBefore>
             <helpId>Coregistration</helpId>
         </action>
         

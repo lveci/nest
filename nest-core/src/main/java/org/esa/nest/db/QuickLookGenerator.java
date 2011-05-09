@@ -19,10 +19,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.ResourceUtils;
@@ -111,18 +108,29 @@ public class QuickLookGenerator {
         productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
-        final String expression = quicklookBandName + "==0 ? 0 : 10 * log10(abs("+quicklookBandName+"))";
-        final VirtualBand virtBand = new VirtualBand("QuickLook",
-                ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
-                expression);
-        virtBand.setSynthetic(true);
-        product.addBand(virtBand);
+        final Band srcBand = product.getBand(quicklookBandName);
+        String srcBandName = quicklookBandName;
+        // if not db make db using a virtual band
+        if(!srcBand.getUnit().contains("db")) {
+            final String expression = quicklookBandName + "==0 ? 0 : 10 * log10(abs("+quicklookBandName+"))";
+            final VirtualBand virtBand = new VirtualBand("QuickLook",
+                    ProductData.TYPE_FLOAT32,
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(),
+                    expression);
+            virtBand.setSynthetic(true);
+            product.addBand(virtBand);
+            srcBandName = virtBand.getName();
+        } else {
+            // if not virtual set as single band in subset
+            if(!(srcBand instanceof VirtualBand)) {
+                productSubsetDef.setNodeNames(new String[] {quicklookBandName});    
+            }
+        }
 
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
-        final BufferedImage image = ProductUtils.createColorIndexedImage(productSubset.getBand(virtBand.getName()),
+        final BufferedImage image = ProductUtils.createColorIndexedImage(productSubset.getBand(srcBandName),
                                                                          ProgressMonitor.NULL);
         productSubset.dispose();
        
