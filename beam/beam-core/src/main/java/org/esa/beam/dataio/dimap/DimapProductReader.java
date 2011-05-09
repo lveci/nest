@@ -35,6 +35,7 @@ import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.nest.util.ProductFunctions;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -149,6 +150,8 @@ public class DimapProductReader extends AbstractProductReader {
             readVectorData();
             DimapProductHelpers.addMaskUsages(dom, this.product);
         }
+        ProductFunctions.discardUnusedMetadata(this.product);
+
         this.product.setProductReader(this);
         this.product.setFileLocation(inputFile);
         this.product.setModified(false);

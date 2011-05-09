@@ -4,6 +4,7 @@ import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 
 import java.io.File;
@@ -136,5 +137,32 @@ public class ProductFunctions {
             }
         }
         return null;
+    }
+
+    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "lutSigma" };
+
+    public static void discardUnusedMetadata(final Product product) {
+        final boolean dicardUnusedMetadata = Config.getConfigPropertyMap().getPropertyBool("discard.unused.metadata");
+        if(dicardUnusedMetadata) {
+            removeUnusedMetadata(product.getMetadataRoot());
+        }
+    }
+
+    private static void removeUnusedMetadata(final MetadataElement root) {
+        final MetadataElement[] elems = root.getElements();
+        for(MetadataElement elem : elems) {
+            final String name = elem.getName();
+            boolean keep = false;
+            for(String toKeep : elemsToKeep) {
+                if(name.equals(toKeep)) {
+                    keep = true;
+                    break;
+                }
+            }
+            if(!keep) {
+                root.removeElement(elem);
+                elem.dispose();
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.Debug;
+import org.esa.nest.util.ProductFunctions;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
@@ -920,6 +921,7 @@ public class AsarProductFile extends ProductFile {
         final AsarAbstractMetadata absMetadata = new AsarAbstractMetadata(getProductType(),
                 getVersionSuffix(getProductType(), getIODDVersion()), getFile());
         absMetadata.addAbstractedMetadataHeader(product, root);
-    }
 
+        ProductFunctions.discardUnusedMetadata(product);
+    }
 }
