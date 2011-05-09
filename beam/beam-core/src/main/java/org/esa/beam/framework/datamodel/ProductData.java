@@ -256,53 +256,53 @@ public abstract class ProductData implements Cloneable {
     }
 
     public static ProductData createInstance(byte[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.Byte(elems);
     }
 
     public static ProductData createUnsignedInstance(byte[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.UByte(elems);
     }
 
     public static ProductData createInstance(short[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.Short(elems);
     }
 
     public static ProductData createUnsignedInstance(short[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.UShort(elems);
     }
 
     public static ProductData createInstance(int[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.Int(elems);
     }
 
     public static ProductData createUnsignedInstance(int[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.UInt(elems);
     }
 
     @Deprecated
     public static ProductData createInstance(long[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.UInt(elems);
     }
 
     public static ProductData createInstance(String strData) {
-        Guardian.assertNotNull("strData", strData);
+        //Guardian.assertNotNull("strData", strData);
         return new ProductData.ASCII(strData);
     }
 
     public static ProductData createInstance(float[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.Float(elems);
     }
 
     public static ProductData createInstance(double[] elems) {
-        Guardian.assertNotNull("elems", elems);
+        //Guardian.assertNotNull("elems", elems);
         return new ProductData.Double(elems);
     }
 
@@ -2517,6 +2517,9 @@ public abstract class ProductData implements Cloneable {
          */
         public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
+        private final static int millsPerSecond = 1000;
+        private final static int millisPerDay = 24 * 60 * 60 * millsPerSecond;
+
         /**
          * The default pattern used to format date strings.
          */
@@ -2591,8 +2594,6 @@ public abstract class ProductData implements Cloneable {
             final Calendar calendar = createCalendar();
             final long offset = calendar.getTimeInMillis();
             calendar.setTime(date);
-            final int millsPerSecond = 1000;
-            final int millisPerDay = 24 * 60 * 60 * millsPerSecond;
             calendar.add(Calendar.DATE, -(int) (offset / millisPerDay));
             calendar.add(Calendar.MILLISECOND, -(int) (offset % millisPerDay));
             final long mjd2000Millis = calendar.getTimeInMillis();
@@ -2666,8 +2667,8 @@ public abstract class ProductData implements Cloneable {
          * @see #createDateFormat
          */
         public static UTC parse(String text, String pattern) throws ParseException {
-            Guardian.assertNotNullOrEmpty("text", text);
-            Guardian.assertNotNullOrEmpty("pattern", pattern);
+            //Guardian.assertNotNullOrEmpty("text", text);
+            //Guardian.assertNotNullOrEmpty("pattern", pattern);
 
             final int dotPos = text.lastIndexOf(".");
             String noFractionString = text;

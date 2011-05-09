@@ -372,9 +372,7 @@ public class StringUtils {
         Guardian.assertNotNull("toAdd", toAdd);
 
         String[] newArray = new String[array.length + 1];
-        for (int i = 0; i < array.length; i++) {
-            newArray[i] = array[i];
-        }
+        System.arraycopy(array, 0, newArray, 0, array.length);
         newArray[array.length] = toAdd;
         return newArray;
     }
@@ -424,8 +422,8 @@ public class StringUtils {
         }
 
         String[] newArray = array;
-        for (int i = 0; i < toRemove.length; i++) {
-            newArray = removeFromArray(newArray, toRemove[i]);
+        for (String aToRemove : toRemove) {
+            newArray = removeFromArray(newArray, aToRemove);
         }
         return newArray;
     }
@@ -444,12 +442,8 @@ public class StringUtils {
         int length1 = arr1.length;
         int length2 = arr2.length;
         String[] newArray = new String[length1 + length2];
-        for (int i = 0; i < length1; i++) {
-            newArray[i] = arr1[i];
-        }
-        for (int i = 0; i < length2; i++) {
-            newArray[i + length1] = arr2[i];
-        }
+        System.arraycopy(arr1, 0, newArray, 0, length1);
+        System.arraycopy(arr2, 0, newArray, length1, length2);
         return newArray;
     }
 
@@ -635,17 +629,13 @@ public class StringUtils {
      * @throws IllegalArgumentException if the given csvString is <code>null</code> or <code>empty</code>.
      */
     public static String[] csvToArray(String csvString) {
-        Guardian.assertNotNullOrEmpty("csvString", csvString);
-        StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
-        List strList = new ArrayList();
+        //Guardian.assertNotNullOrEmpty("csvString", csvString);
+        final StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
+        final List<String> strList = new ArrayList<String>();
         while (tokenizer.hasMoreTokens()) {
             strList.add(tokenizer.nextToken());
         }
-        final String[] strings = new String[strList.size()];
-        for (int i = 0; i < strings.length; i++) {
-            strings[i] = (String) strList.get(i);
-        }
-        return strings;
+        return strList.toArray(new String[strList.size()]);
     }
 
 //    /**

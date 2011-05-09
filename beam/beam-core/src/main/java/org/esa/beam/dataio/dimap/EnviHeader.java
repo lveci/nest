@@ -38,7 +38,7 @@ import org.esa.beam.framework.dataop.maptransf.UTMProjection;
  * @author Tom Block
 
  */
-class EnviHeader {
+public class EnviHeader {
 
     /**
      * The extension used for ENVI header files.

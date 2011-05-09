@@ -70,9 +70,9 @@ public abstract class ProductNode {
      */
     protected ProductNode(String name, String description) {
         //Guardian.assertNotNull("name", name);
-        name = name.trim();
+        //name = name.trim();
         //Guardian.assertNotNullOrEmpty("name", name);
-        this.name = name;
+        this.name = name.trim();
         this.description = description;
     }
 
