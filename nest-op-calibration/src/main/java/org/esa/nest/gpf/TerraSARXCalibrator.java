@@ -118,17 +118,7 @@ public class TerraSARXCalibrator implements Calibrator {
             getCalibrationFactor();
 
             getTiePointGridData();
-            /*
-            getFirstLineTime();
 
-            getLineTimeInterval();
-
-            getSourceImageDimension();
-
-            getNoiseRecords();
-
-            computeNoiseForRangeLines();
-            */
             if (mustUpdateMetadata) {
                 updateTargetProductMetadata();
             }
@@ -167,30 +157,6 @@ public class TerraSARXCalibrator implements Calibrator {
         if(sampleType.equals("COMPLEX")) {
             isComplex = true;
         }
-    }
-
-    /**
-     * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getFirstLineTime() {
-        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
-    }
-
-    /**
-     * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getLineTimeInterval() {
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
-    }
-
-    /**
-     * Get source image width and height.
-     */
-    private void getSourceImageDimension() {
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
     /**

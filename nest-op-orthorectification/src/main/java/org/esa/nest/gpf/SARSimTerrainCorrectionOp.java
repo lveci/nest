@@ -919,7 +919,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
+                    if (!RangeDopplerGeocodingOp.isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
+                            srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles =
@@ -1051,39 +1052,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
         return valid;
-    }
-
-    private boolean isValidCell(final double rangeIndex, final double azimuthIndex, final double lat, final double lon,
-                                final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
-
-        if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
-            return  false;
-        }
-
-        GeoPos sensorGeoPos = new GeoPos();
-        GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
-        double delLatMax = Math.abs(lat - sensorGeoPos.lat);
-        double delLonMax;
-        if (lon < 0 && sensorGeoPos.lon > 0) {
-            delLonMax = Math.min(Math.abs(360 + lon - sensorGeoPos.lon), sensorGeoPos.lon - lon);
-        } else if (lon > 0 && sensorGeoPos.lon < 0) {
-            delLonMax = Math.min(Math.abs(360 + sensorGeoPos.lon - lon), lon - sensorGeoPos.lon);
-        } else {
-            delLonMax = Math.abs(lon - sensorGeoPos.lon);
-        }
-
-        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
-        double delLon;
-        if (lon < 0 && srcLon > 0) {
-            delLon = Math.min(Math.abs(360 + lon - srcLon), srcLon - lon);
-        } else if (lon > 0 && srcLon < 0) {
-            delLon = Math.min(Math.abs(360 + srcLon - lon), lon - srcLon);
-        } else {
-            delLon = Math.abs(lon - srcLon);
-        }
-
-        return (delLat + delLon <= delLatMax + delLonMax);
     }
 
     /**

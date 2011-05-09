@@ -23,7 +23,6 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.gpf.operators.standard.WriteOp;
-import org.esa.nest.util.ProductFunctions;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
@@ -41,7 +40,7 @@ import java.util.Arrays;
  */
 public class TestUtils {
 
-    private static final PropertyMap testPreferences = createTestPreferences();
+    private static final PropertyMap testPreferences = Config.getConfigPropertyMap();
 
     private final static String contextID = ResourceUtils.getContextID();
     public final static String rootPathExpectedProducts = testPreferences.getPropertyString(contextID+".test.rootPathExpectedProducts");
@@ -62,16 +61,6 @@ public class TestUtils {
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
 
-    private static PropertyMap createTestPreferences() {
-        final PropertyMap prefs = new PropertyMap();
-        try {
-            prefs.load(ResourceUtils.findConfigFile(ResourceUtils.getContextID()+".config"));
-        } catch(IOException e) {
-            System.out.println("Unable to load test preferences "+e.getMessage());
-        }
-        return prefs;
-    }
-
     public static int getMaxIterations() {
         return maxIteration;
     }
@@ -87,7 +76,7 @@ public class TestUtils {
     }
 
     public static Product createProduct(final String type, final int w, final int h) {
-        Product product = new Product("name", type, w, h);
+        final Product product = new Product("name", type, w, h);
 
         product.setStartTime(AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
         product.setEndTime(AbstractMetadata.parseUTC("10-MAY-2008 20:35:46.890683"));
@@ -102,14 +91,14 @@ public class TestUtils {
 
     private static void addGeoCoding(final Product product) {
 
-        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                       new float[]{10.0f, 10.0f, 5.0f, 5.0f});
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                       new float[]{10.0f, 10.0f, 5.0f, 5.0f},
                       TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
@@ -123,7 +112,7 @@ public class TestUtils {
 
     public static void attributeEquals(final MetadataElement elem, final String name,
                                        final double trueValue) throws Exception {
-        double val = elem.getAttributeDouble(name, 0);
+        final double val = elem.getAttributeDouble(name, 0);
         if(Double.compare(val, trueValue) != 0) {
             if(Float.compare((float)val, (float)trueValue) != 0)
                 throwErr(name + " is " + val + ", expecting " + trueValue);
@@ -132,7 +121,7 @@ public class TestUtils {
 
     public static void attributeEquals(final MetadataElement elem, String name,
                                        final String trueValue) throws Exception {
-        String val = elem.getAttributeString(name, "");
+        final String val = elem.getAttributeString(name, "");
         if(!val.equals(trueValue))
             throwErr(name + " is " + val + ", expecting " + trueValue);
     }

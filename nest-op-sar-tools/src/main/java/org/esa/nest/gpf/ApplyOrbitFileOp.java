@@ -37,6 +37,7 @@ import org.esa.nest.dataio.OrbitalDataRecordReader;
 import org.esa.nest.dataio.PrareOrbitReader;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
@@ -285,7 +286,7 @@ public final class ApplyOrbitFileOp extends Operator {
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
             
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
-            final OrbitData data = getOrbitData(curLineUTC);
+            final Orbits.OrbitData data = getOrbitData(curLineUTC);
 
             for (int c = 0; c < targetTiePointGridWidth; c++) {
 
@@ -360,9 +361,9 @@ public final class ApplyOrbitFileOp extends Operator {
      * @return The orbit information.
      * @throws Exception The exceptions.
      */
-    private OrbitData getOrbitData(double utc) throws Exception {
+    private Orbits.OrbitData getOrbitData(double utc) throws Exception {
 
-        final OrbitData orbitData = new OrbitData();
+        final Orbits.OrbitData orbitData = new Orbits.OrbitData();
 
         if (orbitType.contains("DORIS")) {
 
@@ -406,7 +407,7 @@ public final class ApplyOrbitFileOp extends Operator {
      * @param data The orbit data.
      * @return The geo position of the target.
      */
-    private GeoPos computeLatLon(int x, int y, double slrgTime, OrbitData data) {
+    private GeoPos computeLatLon(int x, int y, double slrgTime, Orbits.OrbitData data) {
 
         final double[] xyz = new double[3];
         final float lat = latitude.getPixelFloat((float)x, (float)y);
@@ -417,72 +418,12 @@ public final class ApplyOrbitFileOp extends Operator {
         GeoUtils.geo2xyz(geoPos, xyz);
 
         // compute accurate (x,y,z) coordinate using Newton's method
-        computeAccurateXYZ(data, xyz, slrgTime);
+        GeoUtils.computeAccurateXYZ(data, xyz, slrgTime);
 
         // compute (lat, lon, alt) from accurate (x,y,z) coordinate
         GeoUtils.xyz2geo(xyz, geoPos);
 
         return geoPos;
-    }
-
-    /**
-     * Compute accurate target position for given orbit information using Newton's method.
-     * @param data The orbit data.
-     * @param xyz The xyz coordinate for the target.
-     * @param time The slant range time in seconds.
-     */
-    private static void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
-
-        final double a = Constants.semiMajorAxis;
-        final double b = Constants.semiMinorAxis;
-        final double a2 = a*a;
-        final double b2 = b*b;
-        final double del = 0.001;
-        final int maxIter = 10;
-
-        Matrix X = new Matrix(3, 1);
-        final Matrix F = new Matrix(3, 1);
-        final Matrix J = new Matrix(3, 3);
-
-        X.set(0, 0, xyz[0]);
-        X.set(1, 0, xyz[1]);
-        X.set(2, 0, xyz[2]);
-
-        J.set(0, 0, data.xVel);
-        J.set(0, 1, data.yVel);
-        J.set(0, 2, data.zVel);
-
-        for (int i = 0; i < maxIter; i++) {
-
-            final double x = X.get(0,0);
-            final double y = X.get(1,0);
-            final double z = X.get(2,0);
-
-            final double dx = x - data.xPos;
-            final double dy = y - data.yPos;
-            final double dz = z - data.zPos;
-
-            F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
-            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
-            F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
-
-            J.set(1, 0, 2.0*dx);
-            J.set(1, 1, 2.0*dy);
-            J.set(1, 2, 2.0*dz);
-            J.set(2, 0, 2.0*x/a2);
-            J.set(2, 1, 2.0*y/a2);
-            J.set(2, 2, 2.0*z/b2);
-
-            X = X.minus(J.inverse().times(F));
-
-            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
-                break;
-            }
-        }
-
-        xyz[0] = X.get(0,0);
-        xyz[1] = X.get(1,0);
-        xyz[2] = X.get(2,0);
     }
 
     /**
@@ -498,7 +439,7 @@ public final class ApplyOrbitFileOp extends Operator {
         // compute new orbit state vectors
         for (AbstractMetadata.OrbitStateVector orbitStateVector : orbitStateVectors) {
             final double time = orbitStateVector.time_mjd;
-            final OrbitData orbitData = getOrbitData(time);
+            final Orbits.OrbitData orbitData = getOrbitData(time);
             orbitStateVector.x_pos = orbitData.xPos; // m
             orbitStateVector.y_pos = orbitData.yPos; // m
             orbitStateVector.z_pos = orbitData.zPos; // m
@@ -900,15 +841,6 @@ public final class ApplyOrbitFileOp extends Operator {
             getRemoteFiles(ftp, fileSizeMap, remotePath, localPath, pm);
             return 0;
         }
-    }
-
-    private final static class OrbitData {
-        public double xPos;
-        public double yPos;
-        public double zPos;
-        public double xVel;
-        public double yVel;
-        public double zVel;
     }
 
     private final static class ENVISATTiePointRecord {

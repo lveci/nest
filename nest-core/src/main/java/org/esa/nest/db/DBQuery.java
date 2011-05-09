@@ -403,28 +403,24 @@ public class DBQuery {
             baseDir = new File(baseDirStr);
         final Element startDateElem = dbQueryElem.getChild("startDate");
         if(startDateElem != null) {
-            final Attribute y = startDateElem.getAttribute("year");
-            final Attribute m = startDateElem.getAttribute("month");
-            final Attribute d = startDateElem.getAttribute("day");
-            if(y != null && m != null && d != null) {
-                startDate = new GregorianCalendar(Integer.parseInt(y.getValue()),
-                                                  Integer.parseInt(m.getValue()),
-                                                  Integer.parseInt(d.getValue()));
-            }
+            startDate = getCalendarDate(startDateElem);
         }
         final Element endDateElem = dbQueryElem.getChild("endDate");
         if(endDateElem != null) {
-            final Attribute y = endDateElem.getAttribute("year");
-            final Attribute m = endDateElem.getAttribute("month");
-            final Attribute d = endDateElem.getAttribute("day");
-            if(y != null && m != null && d != null) {
-                endDate = new GregorianCalendar(Integer.parseInt(y.getValue()),
-                                                Integer.parseInt(m.getValue()),
-                                                Integer.parseInt(d.getValue()));
-            }
+            endDate = getCalendarDate(endDateElem);
         }
         freeQuery = XMLSupport.getAttrib(dbQueryElem, "freeQuery");
     }
 
-
+    private static GregorianCalendar getCalendarDate(final Element elem) {
+        final Attribute y = elem.getAttribute("year");
+        final Attribute m = elem.getAttribute("month");
+        final Attribute d = elem.getAttribute("day");
+        if(y != null && m != null && d != null) {
+            return new GregorianCalendar(Integer.parseInt(y.getValue()),
+                    Integer.parseInt(m.getValue()),
+                    Integer.parseInt(d.getValue()));
+        }
+        return null;
+    }
 }

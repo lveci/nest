@@ -29,6 +29,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
@@ -709,7 +710,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
 
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
-            final OrbitData data = getOrbitData(curLineUTC, timeArray, xPosArray, yPosArray, zPosArray,
+            final Orbits.OrbitData data = getOrbitData(curLineUTC, timeArray, xPosArray, yPosArray, zPosArray,
                                                 xVelArray, yVelArray, zVelArray);
 
             for (int c = 0; c < gridWidth; c++) {
@@ -749,7 +750,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
      * @param data The orbit data.
      * @return The geo position of the target.
      */
-    private static GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, OrbitData data) {
+    private static GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, Orbits.OrbitData data) {
 
         final double[] xyz = new double[3];
         final GeoPos geoPos = new GeoPos((float)latMid, (float)lonMid);
@@ -758,72 +759,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         GeoUtils.geo2xyz(geoPos, xyz);
 
         // compute accurate (x,y,z) coordinate using Newton's method
-        computeAccurateXYZ(data, xyz, slrgTime);
+        GeoUtils.computeAccurateXYZ(data, xyz, slrgTime);
 
         // compute (lat, lon, alt) from accurate (x,y,z) coordinate
         GeoUtils.xyz2geo(xyz, geoPos);
 
         return geoPos;
-    }
-
-    /**
-     * Compute accurate target position for given orbit information using Newton's method.
-     * @param data The orbit data.
-     * @param xyz The xyz coordinate for the target.
-     * @param time The slant range time in seconds.
-     */
-    private static void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
-
-        final double a = Constants.semiMajorAxis;
-        final double b = Constants.semiMinorAxis;
-        final double a2 = a*a;
-        final double b2 = b*b;
-        final double del = 1e-8;//0.002;
-        final int maxIter = 200;
-
-        Matrix X = new Matrix(3, 1);
-        final Matrix F = new Matrix(3, 1);
-        final Matrix J = new Matrix(3, 3);
-
-        X.set(0, 0, xyz[0]);
-        X.set(1, 0, xyz[1]);
-        X.set(2, 0, xyz[2]);
-
-        J.set(0, 0, data.xVel);
-        J.set(0, 1, data.yVel);
-        J.set(0, 2, data.zVel);
-
-        for (int i = 0; i < maxIter; i++) {
-
-            final double x = X.get(0,0);
-            final double y = X.get(1,0);
-            final double z = X.get(2,0);
-
-            final double dx = x - data.xPos;
-            final double dy = y - data.yPos;
-            final double dz = z - data.zPos;
-
-            F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
-            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
-            F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
-
-            J.set(1, 0, 2.0*dx);
-            J.set(1, 1, 2.0*dy);
-            J.set(1, 2, 2.0*dz);
-            J.set(2, 0, 2.0*x/a2);
-            J.set(2, 1, 2.0*y/a2);
-            J.set(2, 2, 2.0*z/b2);
-
-            X = X.minus(J.inverse().times(F));
-
-            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
-                break;
-            }
-        }
-
-        xyz[0] = X.get(0,0);
-        xyz[1] = X.get(1,0);
-        xyz[2] = X.get(2,0);
     }
 
     private static boolean checkStateVectorValidity(AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
@@ -856,12 +797,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
      * @param zVelArray Array holding z velocities for sensor positions in all state vectors.
      * @return The orbit information.
      */
-    private static OrbitData getOrbitData(final double utc, final double[] timeArray,
+    private static Orbits.OrbitData getOrbitData(final double utc, final double[] timeArray,
                                          final double[] xPosArray, final double[] yPosArray, final double[] zPosArray,
                                          final double[] xVelArray, final double[] yVelArray, final double[] zVelArray) {
 
         // Lagrange polynomial interpolation
-        final OrbitData orbitData = new OrbitData();
+        final Orbits.OrbitData orbitData = new Orbits.OrbitData();
         orbitData.xPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
         orbitData.yPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
         orbitData.zPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
@@ -870,15 +811,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         orbitData.zVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, utc);
 
         return orbitData;
-    }
-
-    private final static class OrbitData {
-        public double xPos;
-        public double yPos;
-        public double zPos;
-        public double xVel;
-        public double yVel;
-        public double zVel;
     }
     
 }

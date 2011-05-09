@@ -1076,7 +1076,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
+                            srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
@@ -1194,8 +1195,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         return valid;
     }
 
-    private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
+    public static boolean isValidCell(final double rangeIndex, final double azimuthIndex,
                                 final double lat, final double lon,
+                                final TiePointGrid latitude, final TiePointGrid longitude,
                                 final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
         if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
