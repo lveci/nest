@@ -147,11 +147,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product, _leaderFile.getFacilityRecord(), _leaderFile.getSceneRecord());
         addMetaData(product);
-        
-        if(productType.contains("GEC") || productType.contains("IMG")) {
-            ReaderUtils.createMapGeocoding(product, TransverseMercatorDescriptor.NAME,
-                product.getBandAt(0).getNoDataValue());
-        }
 
         return product;
     }
@@ -175,27 +170,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
         if(isSLC()) {
             dataType = ProductData.TYPE_INT16;
         }
-        final Band band = new Band(name, dataType,
-                                   _sceneWidth, _sceneHeight);
+        final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
         band.setDescription(name);
         band.setUnit(unit);
         product.addBand(band);
         bandImageFileMap.put(name, imageFile);
 
-      /*
-        final int bandIndex = index;
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
-        final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
-        band.setScalingFactor(scalingFactor);
-        band.setScalingOffset(scalingOffset);
-        band.setNoDataValueUsed(false);
-        final int[] histogramBins = _trailerFile.getHistogramBinsForBand(bandIndex);
-        final float scaledMinSample = (float) (getMinSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
-        band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + ImageFile.getBandIndex());
-        */
         return band;
     }
 

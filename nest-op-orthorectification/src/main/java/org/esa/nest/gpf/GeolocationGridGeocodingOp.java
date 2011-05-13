@@ -39,6 +39,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -91,13 +92,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
     
     private Band sourceBand = null;
     private Band sourceBand2 = null;
-    private MetadataElement absRoot = null;
     private boolean srgrFlag = false;
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
-    private int targetImageWidth = 0;
-    private int targetImageHeight = 0;
 
     private TiePointGrid slantRangeTime = null;
     private GeoCoding targetGeoCoding = null;
@@ -112,7 +110,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double delLon = 0.0;
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
+    private final Map<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
@@ -166,7 +164,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @throws Exception if metadata not found
      */
     private void getMetadata() throws Exception {
-        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
         RangeDopplerGeocodingOp.getMissionType(absRoot);
 
@@ -243,93 +241,17 @@ public final class GeolocationGridGeocodingOp extends Operator {
                     sourceProduct.getProductType(), width, height);
             targetProduct.setGeoCoding(geoCoding);
 
-            targetImageWidth = targetProduct.getSceneRasterWidth();
-            targetImageHeight = targetProduct.getSceneRasterHeight();
-
             for (Band band : targetProduct.getBands()) {
                 targetProduct.removeBand(band);
             }
 
-            addSelectedBands();
+            OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
 
             targetGeoCoding = targetProduct.getGeoCoding();
 
             updateTargetProductMetadata();
         } catch (Exception e) {
             throw new OperatorException(e);
-        }
-    }
-
-    /**
-     * Add the user selected bands to target product.
-     * @throws OperatorException The exceptions.
-     */
-    private void addSelectedBands() throws OperatorException {
-
-        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
-
-        String targetBandName;
-        for (int i = 0; i < sourceBands.length; i++) {
-
-            final Band srcBand = sourceBands[i];
-            final String unit = srcBand.getUnit();
-            if(unit == null) {
-                throw new OperatorException("band " + srcBand.getName() + " requires a unit");
-            }
-
-            String targetUnit = "";
-
-            if (unit.contains(Unit.PHASE)) {
-                continue;
-
-            } else if (unit.contains(Unit.IMAGINARY)) {
-
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit.contains(Unit.REAL)) {
-
-                if (i == sourceBands.length - 1) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty()) {
-                    targetBandName = "Intensity_" + pol.toUpperCase();
-                } else {
-                    targetBandName = "Intensity";
-                }
-                ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.INTENSITY;
-                }
-
-            } else {
-
-                final String[] srcBandNames = {srcBand.getName()};
-                targetBandName = srcBand.getName();
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
-            }
-
-            if(targetProduct.getBand(targetBandName) == null) {
-
-                final Band targetBand = new Band(targetBandName,
-                                                 ProductData.TYPE_FLOAT32,
-                                                 targetImageWidth,
-                                                 targetImageHeight);
-
-                targetBand.setUnit(targetUnit);
-                targetProduct.addBand(targetBand);
-            }
         }
     }
 
@@ -342,13 +264,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, targetCRS.getName().getCode());
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetProduct.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetProduct.getSceneRasterWidth());
 
         final GeoPos geoPosFirstNear = targetGeoCoding.getGeoPos(new PixelPos(0,0), null);
-        final GeoPos geoPosFirstFar = targetGeoCoding.getGeoPos(new PixelPos(targetImageWidth-1, 0), null);
-        final GeoPos geoPosLastNear = targetGeoCoding.getGeoPos(new PixelPos(0,targetImageHeight-1), null);
-        final GeoPos geoPosLastFar = targetGeoCoding.getGeoPos(new PixelPos(targetImageWidth-1, targetImageHeight-1), null);
+        final GeoPos geoPosFirstFar = targetGeoCoding.getGeoPos(new PixelPos(targetProduct.getSceneRasterWidth()-1, 0), null);
+        final GeoPos geoPosLastNear = targetGeoCoding.getGeoPos(new PixelPos(0,targetProduct.getSceneRasterHeight()-1), null);
+        final GeoPos geoPosLastFar = targetGeoCoding.getGeoPos(new PixelPos(targetProduct.getSceneRasterWidth()-1,
+                                                                            targetProduct.getSceneRasterHeight()-1), null);
 
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, geoPosFirstNear.getLat());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, geoPosFirstFar.getLat());

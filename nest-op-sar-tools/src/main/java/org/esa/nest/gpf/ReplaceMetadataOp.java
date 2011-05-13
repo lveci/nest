@@ -87,14 +87,7 @@ public class ReplaceMetadataOp extends Operator {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             }
 
-            // copy or create product nodes for metadata, tiepoint grids, geocoding, start/end times, etc.
-            ProductUtils.copyMetadata(slaveProduct, targetProduct);
-            ProductUtils.copyTiePointGrids(slaveProduct, targetProduct);
-            ProductUtils.copyFlagCodings(slaveProduct, targetProduct);
-            ProductUtils.copyGeoCoding(slaveProduct, targetProduct);
-            targetProduct.setStartTime(slaveProduct.getStartTime());
-            targetProduct.setEndTime(slaveProduct.getEndTime());
-            targetProduct.setDescription(slaveProduct.getDescription());
+            OperatorUtils.copyProductNodes(slaveProduct, targetProduct);
 
             final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(masterProduct);
             final int isPolsar = absRootMst.getAttributeInt(AbstractMetadata.polsarData, 0);

@@ -155,8 +155,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         if(isSLC()) {
             dataType = ProductData.TYPE_INT16;
         }
-        final Band band = new Band(name, dataType,
-                                   _sceneWidth, _sceneHeight);
+        final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
         band.setDescription(name);
         band.setUnit(unit);
         product.addBand(band);

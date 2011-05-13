@@ -32,6 +32,7 @@ import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Applies Multitemporal Speckle Filtering to multitemporal images.
@@ -168,6 +169,15 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
      */
     private void addSelectedBands() {
 
+        if(sourceBandNames == null || sourceBandNames.length == 0 && OperatorUtils.isComplex(sourceProduct)) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                if(band.getUnit().contains("intensity"))
+                    bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
         final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
         if (sourceBands.length <= 1) {

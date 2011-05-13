@@ -488,7 +488,7 @@ public class UndersamplingOp extends Operator {
                                     targetImageWidth,
                                     targetImageHeight);
 
-        addSelectedBands();
+        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -500,80 +500,6 @@ public class UndersamplingOp extends Operator {
         addGeoCoding();
 
         updateTargetProductMetadata();
-    }
-
-    /**
-     * Add user selected bands to the target product.
-     */
-    private void addSelectedBands() {
-
-        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
-
-        String targetBandName;
-        for (int i = 0; i < sourceBands.length; i++) {
-
-            final Band srcBand = sourceBands[i];
-            String unit = srcBand.getUnit();
-            if(unit == null) {
-                unit = Unit.AMPLITUDE;  // assume amplitude
-            }
-
-            String targetUnit = "";
-
-            if (unit.contains(Unit.PHASE)) {
-
-                continue;
-
-            } else if (unit.contains(Unit.IMAGINARY)) {
-
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit.contains(Unit.REAL)) {
-
-                if (i == sourceBands.length - 1) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty()) {
-                    targetBandName = "Intensity_" + pol.toUpperCase();
-                } else {
-                    targetBandName = "Intensity";
-                }
-                ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.INTENSITY;
-                }
-
-            } else {
-
-                final String[] srcBandNames = {srcBand.getName()};
-                targetBandName = srcBand.getName();
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
-            }
-
-            if(targetProduct.getBand(targetBandName) == null) {
-
-                final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT32,//srcBand.getDataType(),
-                                           targetImageWidth,
-                                           targetImageHeight);
-
-                targetBand.setUnit(targetUnit);
-                targetProduct.addBand(targetBand);
-            }
-        }
-
     }
 
     private void addGeoCoding() {

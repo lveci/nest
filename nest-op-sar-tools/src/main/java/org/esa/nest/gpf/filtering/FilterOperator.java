@@ -132,13 +132,7 @@ public class FilterOperator extends Operator {
                 sourceProduct.addBand(filterBand);
             }
 
-            // copy meta data from source to target
-            ProductUtils.copyMetadata(sourceProduct, targetProduct);
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-            targetProduct.setStartTime(sourceProduct.getStartTime());
-            targetProduct.setEndTime(sourceProduct.getEndTime());
+            OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
             targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
         } catch(Throwable e) {

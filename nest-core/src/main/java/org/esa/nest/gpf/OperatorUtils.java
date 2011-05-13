@@ -101,7 +101,7 @@ public final class OperatorUtils {
     }
 
     public static String getBandPolarization(final String bandName, final MetadataElement absRoot) {
-        final String pol = OperatorUtils.getPolarizationFromBandName(bandName);
+        final String pol = getPolarizationFromBandName(bandName);
         if (pol != null) {
             return pol;
         } else {
@@ -190,7 +190,7 @@ public final class OperatorUtils {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         if(absRoot != null) {
             //final String mission = "_"+absRoot.getAttributeString(AbstractMetadata.MISSION, "");
-            String dateString = OperatorUtils.getAcquisitionDate(absRoot);
+            String dateString = getAcquisitionDate(absRoot);
             if(!dateString.isEmpty())
                 dateString = '_' + dateString;
             return StringUtils.createValidName(dateString, new char[]{'_', '.'}, '_');
@@ -225,16 +225,26 @@ public final class OperatorUtils {
         product.addBand(virtBand);
     }
 
-    public static boolean isDIMAP(Product prod) {
+    public static boolean isDIMAP(final Product prod) {
         return StringUtils.contains(prod.getProductReader().getReaderPlugIn().getFormatNames(),
                                     DimapProductConstants.DIMAP_FORMAT_NAME);
     }
 
-    public static boolean isMapProjected(Product product) {
+    public static boolean isMapProjected(final Product product) {
         if(product.getGeoCoding() instanceof MapGeoCoding || product.getGeoCoding() instanceof CrsGeoCoding)
             return true;
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         return absRoot != null && !absRoot.getAttributeString(AbstractMetadata.map_projection, "").trim().isEmpty();
+    }
+
+    public static boolean isComplex(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
+            if(sampleType.equalsIgnoreCase("complex"))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -264,7 +274,7 @@ public final class OperatorUtils {
                                         sourceProducts[0].getSceneRasterWidth(),
                                         sourceProducts[0].getSceneRasterHeight());
 
-        OperatorUtils.copyProductNodes(sourceProducts[0], targetProduct);
+        copyProductNodes(sourceProducts[0], targetProduct);
         for(Product prod : sourceProducts) {
             for(Band band : prod.getBands()) {
                 ProductUtils.copyBand(band.getName(), prod, band.getName(), targetProduct);
@@ -273,7 +283,7 @@ public final class OperatorUtils {
         return targetProduct;
     }
 
-    public static String getAcquisitionDate(MetadataElement root) {
+    public static String getAcquisitionDate(final MetadataElement root) {
         String dateString;
         try {
             final ProductData.UTC date = root.getAttributeUTC(AbstractMetadata.first_line_time);
@@ -286,13 +296,10 @@ public final class OperatorUtils {
     }
 
     public static void createNewTiePointGridsAndGeoCoding(
-            Product sourceProduct,
-            Product targetProduct,
-            int gridWidth,
-            int gridHeight,
-            float subSamplingX,
-            float subSamplingY,
-            PixelPos[] newTiePointPos) {
+            final Product sourceProduct, final Product targetProduct,
+            final int gridWidth, final int gridHeight,
+            final float subSamplingX, final float subSamplingY,
+            final PixelPos[] newTiePointPos) {
 
         TiePointGrid latGrid = null;
         TiePointGrid lonGrid = null;
@@ -363,7 +370,7 @@ public final class OperatorUtils {
         return sourceBands;
     }
 
-    public static void catchOperatorException(String opName, Throwable e) throws OperatorException {
+    public static void catchOperatorException(String opName, final Throwable e) throws OperatorException {
         if(opName.contains("$"))
             opName = opName.substring(0, opName.indexOf('$'));
         String message = opName + ": ";
@@ -446,7 +453,7 @@ public final class OperatorUtils {
      * @param targetProduct the destination product
      * @param scnProp the scene properties
      */
-    public static void addGeoCoding(final Product targetProduct, final OperatorUtils.SceneProperties scnProp) {
+    public static void addGeoCoding(final Product targetProduct, final SceneProperties scnProp) {
 
         final float[] latTiePoints = {(float) scnProp.latMax, (float) scnProp.latMax,
                 (float) scnProp.latMin, (float) scnProp.latMin};
@@ -480,16 +487,6 @@ public final class OperatorUtils {
         targetProduct.setGeoCoding(tpGeoCoding);
     }
 
-    public static boolean isComplex(final Product product) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        if(absRoot != null) {
-            final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
-            if(sampleType.equalsIgnoreCase("complex"))
-                return true;
-        }
-        return false;
-    }
-
     public static String[] getMasterBandNames(final Product sourceProduct) {
         final ArrayList<String> masterBandNames = new ArrayList<String>();
         final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
@@ -518,6 +515,96 @@ public final class OperatorUtils {
 
         public final Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
         public final Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
+    }
+
+    /**
+     * Add the user selected bands to target product.
+     * @throws OperatorException The exceptions.
+     */
+    public static void addSelectedBands(final Product sourceProduct, final String[] sourceBandNames,
+                                  final Product targetProduct,
+                                  final Map<String, String[]> targetBandNameToSourceBandName) throws OperatorException {
+
+        final Band[] sourceBands = getSourceBands(sourceProduct, sourceBandNames);
+
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        final boolean isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
+
+        String targetBandName;
+        for (int i = 0; i < sourceBands.length; i++) {
+
+            final Band srcBand = sourceBands[i];
+            String unit = srcBand.getUnit();
+            if(unit == null) {
+                unit = Unit.AMPLITUDE;  // assume amplitude
+            }
+
+            String targetUnit = "";
+
+            if (unit.contains(Unit.PHASE)) {
+                continue;
+
+            } else if (unit.contains(Unit.IMAGINARY)) {
+
+                throw new OperatorException("Real and imaginary bands should be selected in pairs");
+
+            } else if (unit.contains(Unit.REAL)) {
+
+                if (i == sourceBands.length - 1) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                final String nextUnit = sourceBands[i+1].getUnit();
+                if (nextUnit == null || !((unit.equals(Unit.REAL) && nextUnit.equals(Unit.IMAGINARY)) ||
+                                          (unit.equals(Unit.IMAGINARY) && nextUnit.equals(Unit.REAL)))) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                final String[] srcBandNames = new String[2];
+                srcBandNames[0] = srcBand.getName();
+                srcBandNames[1] = sourceBands[i+1].getName();
+                targetBandName = "Intensity";
+                final String suff = getSuffixFromBandName(srcBandNames[0]);
+                if (suff != null) {
+                    targetBandName += "_" + suff;
+                }
+                final String pol = getBandPolarization(srcBandNames[0], absRoot);
+                if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
+                    targetBandName += "_" + pol.toUpperCase();
+                }
+                if(isPolsar) {
+                    final String pre = getprefixFromBandName(srcBandNames[0]);
+                    targetBandName = "Intensity_" + pre;
+                }
+                ++i;
+                if(targetProduct.getBand(targetBandName) == null) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = Unit.INTENSITY;
+                }
+
+            } else {
+
+                final String[] srcBandNames = {srcBand.getName()};
+                targetBandName = srcBand.getName();
+                final String pol = getBandPolarization(targetBandName, absRoot);
+                if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
+                    targetBandName += "_" + pol.toUpperCase();
+                }
+                if(targetProduct.getBand(targetBandName) == null) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = unit;
+                }
+            }
+
+            if(targetProduct.getBand(targetBandName) == null) {
+
+                final Band targetBand = new Band(targetBandName,
+                                                 ProductData.TYPE_FLOAT32,
+                                                 targetProduct.getSceneRasterWidth(),
+                                                 targetProduct.getSceneRasterHeight());
+
+                targetBand.setUnit(targetUnit);
+                targetProduct.addBand(targetBand);
+            }
+        }
     }
 
 }

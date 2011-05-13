@@ -228,7 +228,7 @@ public final class MultilookOp extends Operator {
                                     targetImageWidth,
                                     targetImageHeight);
 
-        addSelectedBands();
+        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -306,83 +306,6 @@ public final class MultilookOp extends Operator {
         double oldFirstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         double newFirstLineUTC = oldFirstLineUTC + oldLineTimeInterval*((nAzLooks - 1)/2.0) / 86400.0;
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time, new ProductData.UTC(newFirstLineUTC));
-    }
-
-    private void addSelectedBands() throws OperatorException {
-
-        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
-
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-        final boolean isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
-
-        String targetBandName;
-        for (int i = 0; i < sourceBands.length; i++) {
-
-            final Band srcBand = sourceBands[i];
-            String unit = srcBand.getUnit();
-            if(unit == null) {
-                unit = Unit.AMPLITUDE;  // assume amplitude
-            }
-
-            String targetUnit = "";
-
-            if (outputIntensity && (unit.equals(Unit.REAL) || unit.equals(Unit.IMAGINARY))) {
-
-                if (i == sourceBands.length - 1) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !((unit.equals(Unit.REAL) && nextUnit.equals(Unit.IMAGINARY)) ||
-                                          (unit.equals(Unit.IMAGINARY) && nextUnit.equals(Unit.REAL)))) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                targetBandName = "Intensity";
-                final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);
-                if (suff != null) {
-                    targetBandName += "_" + suff;
-                }
-                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
-                }
-                if(isPolsar) {
-                    final String pre = OperatorUtils.getprefixFromBandName(srcBandNames[0]);
-                    targetBandName = "Intensity_" + pre;
-                }
-                ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.INTENSITY;
-                }
-
-            } else {
-
-                final String[] srcBandNames = {srcBand.getName()};
-                targetBandName = srcBand.getName();
-                final String pol = OperatorUtils.getBandPolarization(targetBandName, absRoot);
-                if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
-                }
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
-            }
-
-            if(targetProduct.getBand(targetBandName) == null) {
-
-                final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT32,
-                                           targetImageWidth,
-                                           targetImageHeight);
-
-                targetBand.setUnit(targetUnit);
-                targetProduct.addBand(targetBand);
-            }
-        }
     }
 
     /**

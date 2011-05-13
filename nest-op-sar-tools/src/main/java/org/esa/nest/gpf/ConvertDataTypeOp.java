@@ -97,12 +97,7 @@ public class ConvertDataTypeOp extends Operator {
                                         sourceProduct.getSceneRasterWidth(),
                                         sourceProduct.getSceneRasterHeight());
 
-            ProductUtils.copyMetadata(sourceProduct, targetProduct);
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-            targetProduct.setStartTime(sourceProduct.getStartTime());
-            targetProduct.setEndTime(sourceProduct.getEndTime());
+            OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
             dataType = ProductData.getType(targetDataType);
             targetScaling = getScaling(targetScalingStr);

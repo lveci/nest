@@ -33,6 +33,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Applies a Speckle Filter to the data
@@ -86,7 +87,7 @@ public class SpeckleFilterOp extends Operator {
     static final String LEE_SPECKLE_FILTER = "Lee";
     static final String LEE_REFINED_FILTER = "Refined Lee";
 
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
+    private final Map<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private int halfSizeX;
     private int halfSizeY;
     private int sourceImageWidth;
@@ -169,84 +170,7 @@ public class SpeckleFilterOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        addSelectedBands();
-    }
-
-    private void addSelectedBands() throws OperatorException {
-
-        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
-
-        String targetBandName;
-        for (int i = 0; i < sourceBands.length; i++) {
-
-            final Band srcBand = sourceBands[i];
-            String unit = srcBand.getUnit();
-            if(unit == null) {
-                unit = Unit.AMPLITUDE;  // assume amplitude
-            }
-
-            String targetUnit = "";
-
-            if (unit.equals(Unit.PHASE)) {
-
-                continue;
-
-            } else if (unit.equals(Unit.IMAGINARY)) {
-
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit.equals(Unit.REAL)) {
-
-                if (i == sourceBands.length - 1) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.equals(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                targetBandName = "Intensity";
-                final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);
-                if (suff != null) {
-                    targetBandName += "_" + suff;
-                }
-                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
-                }
-                ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = "intensity";
-                }
-
-            } else {
-
-                final String[] srcBandNames = {srcBand.getName()};
-                targetBandName = srcBand.getName();
-                final String pol = OperatorUtils.getBandPolarization(targetBandName, absRoot);
-                if (pol != null && !pol.isEmpty() && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
-                }
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
-            }
-
-            if(targetProduct.getBand(targetBandName) == null) {
-
-                final Band targetBand = new Band(targetBandName,
-                                                 ProductData.TYPE_FLOAT32,
-                                                 sourceImageWidth,
-                                                 sourceImageHeight);
-
-                targetBand.setUnit(targetUnit);
-                targetProduct.addBand(targetBand);
-            }
-        }
+        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
     }
 
     /**
