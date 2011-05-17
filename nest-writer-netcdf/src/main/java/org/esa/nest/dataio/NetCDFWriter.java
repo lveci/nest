@@ -35,7 +35,7 @@ import java.util.Map;
 
 public class NetCDFWriter extends AbstractProductWriter {
 
-    private File _outputFile = null;
+    private File outputFile = null;
     private NetcdfFileWriteable netCDFWriteable = null;
 
     /**
@@ -50,15 +50,17 @@ public class NetCDFWriter extends AbstractProductWriter {
     private static float[] getLonData(final Product product, final String lonGridName) {
         final int size = product.getSceneRasterWidth();
         final TiePointGrid lonGrid = product.getTiePointGrid(lonGridName);
-
-        return lonGrid.getPixels(0, 0, size, 1, (float[])null);
+        if(lonGrid != null)
+            return lonGrid.getPixels(0, 0, size, 1, (float[])null);
+        return null;
     }
 
     private static float[] getLatData(final Product product, final String latGridName) {
         final int size = product.getSceneRasterHeight();
         final TiePointGrid latGrid = product.getTiePointGrid(latGridName);
-
-        return latGrid.getPixels(0, 0, 1, size, (float[])null);
+        if(latGrid != null)
+            return latGrid.getPixels(0, 0, 1, size, (float[])null);
+        return null;
     }
 
     private static float[][] getTiePointGridData(final TiePointGrid tpg) {
@@ -82,7 +84,7 @@ public class NetCDFWriter extends AbstractProductWriter {
      */
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        _outputFile = null;
+        outputFile = null;
 
         final File file;
         if (getOutput() instanceof String) {
@@ -91,12 +93,12 @@ public class NetCDFWriter extends AbstractProductWriter {
             file = (File) getOutput();
         }
 
-        _outputFile = FileUtils.ensureExtension(file, NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS[0]);
+        outputFile = FileUtils.ensureExtension(file, NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS[0]);
         deleteOutput();
 
         final Product product = getSourceProduct();
 
-        netCDFWriteable = NetcdfFileWriteable.createNew(_outputFile.getAbsolutePath(), true);
+        netCDFWriteable = NetcdfFileWriteable.createNew(outputFile.getAbsolutePath(), true);
 
 
         netCDFWriteable.addDimension(NetcdfConstants.LON_VAR_NAMES[0], product.getSceneRasterWidth());
@@ -147,20 +149,24 @@ public class NetCDFWriter extends AbstractProductWriter {
             lonGridName = geoCoding.getLonGrid().getName();
         }
 
-        final Array latNcArray = Array.factory(getLatData(product, latGridName));
-        final Array lonNcArray = Array.factory(getLonData(product, lonGridName));
+        final float[] latData = getLatData(product, latGridName);
+        final float[] lonData = getLonData(product, lonGridName);
+        if(latData != null && lonData != null) {
+            final Array latNcArray = Array.factory(latData);
+            final Array lonNcArray = Array.factory(lonData);
 
-        try {
-            netCDFWriteable.write(NetcdfConstants.LAT_VAR_NAMES[0], latNcArray);
-            netCDFWriteable.write(NetcdfConstants.LON_VAR_NAMES[0], lonNcArray);
+            try {
+                netCDFWriteable.write(NetcdfConstants.LAT_VAR_NAMES[0], latNcArray);
+                netCDFWriteable.write(NetcdfConstants.LON_VAR_NAMES[0], lonNcArray);
 
-            for(TiePointGrid tpg : product.getTiePointGrids()) {
-                final Array tpgArray = Array.factory(getTiePointGridData(tpg));
-                netCDFWriteable.write(tpg.getName(), tpgArray);
+                for(TiePointGrid tpg : product.getTiePointGrids()) {
+                    final Array tpgArray = Array.factory(getTiePointGridData(tpg));
+                    netCDFWriteable.write(tpg.getName(), tpgArray);
+                }
+            } catch (InvalidRangeException rangeE) {
+                rangeE.printStackTrace();
+                throw new RuntimeException(rangeE);
             }
-        } catch (InvalidRangeException rangeE) {
-            rangeE.printStackTrace();
-            throw new RuntimeException(rangeE);
         }
     }
 
@@ -177,17 +183,8 @@ public class NetCDFWriter extends AbstractProductWriter {
 
         final int[] origin = new int[2];
         origin[1] = regionX;
-        //origin[0] = (sourceBand.getRasterHeight() - 1) - regionY;
         origin[0] = regionY;
         try {
-
-     /*       final double[][] data = new double[1][regionWidth];
-            for(int x=0; x < regionWidth; ++x) {
-                data[0][x] = regionData.getElemDoubleAt(x);
-            }
-
-            netCDFWriteable.write(sourceBand.getName(), origin, Array.factory(data));
-            */
 
             final ArrayDouble dataTemp = new ArrayDouble.D2(regionHeight, regionWidth);
             final Index index = dataTemp.getIndex();
@@ -214,8 +211,8 @@ public class NetCDFWriter extends AbstractProductWriter {
      * Deletes the physically representation of the given product from the hard disk.
      */
     public void deleteOutput() {
-        if (_outputFile != null && _outputFile.isFile()) {
-            _outputFile.delete();
+        if (outputFile != null && outputFile.isFile()) {
+            outputFile.delete();
         }
     }
 
@@ -329,6 +326,8 @@ public class NetCDFWriter extends AbstractProductWriter {
             final int dataType = attrib.getDataType();
             if(dataType == ProductData.TYPE_FLOAT32 || dataType == ProductData.TYPE_FLOAT64) {
                 newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeDouble(attrib.getName(), 0)));
+            } else if(dataType == ProductData.TYPE_UTC || attrib.getData() instanceof ProductData.UTC) {
+                newGroup.addAttribute(new Attribute(attrib.getName(), NetcdfConstants.UTC_TYPE+elem.getAttributeString(attrib.getName(), " ")));
             } else if(dataType > ProductData.TYPE_INT8 && dataType < ProductData.TYPE_FLOAT32) {
                 newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeInt(attrib.getName(), 0)));
             } else {

@@ -402,7 +402,10 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     private void writeMetadata() throws IOException {
         final MetadataElement root = getSourceProduct().getMetadataRoot();
         if (root != null) {
-            writeMetadataElement(_fileID, root);
+            for (int i = 0; i < root.getNumElements(); i++) {
+                MetadataElement subElement = root.getElementAt(i);
+                writeMetadataElement(_fileID, subElement);
+            }
         }
     }
 
@@ -428,11 +431,14 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
     private void writeMetadataAttribute(int locationID, MetadataAttribute attribute) throws IOException {
         int productDataType = attribute.getDataType();
-        if (attribute.getData() instanceof ProductData.ASCII
-            || attribute.getData() instanceof ProductData.UTC) {
+        if (attribute.getData() instanceof ProductData.ASCII) {
             createScalarAttribute(locationID,
                                   attribute.getName(),
                                   attribute.getData().getElemString());
+        } else if (attribute.getData() instanceof ProductData.UTC) {
+            createScalarAttribute(locationID,
+                                  attribute.getName(),
+                                  "utc:"+attribute.getData().getElemString());
         } else if (attribute.getData().isScalar()) {
             createScalarAttribute(locationID,
                                   attribute.getName(),
@@ -566,7 +572,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             attributeID = H5.H5Acreate(locationID, name, attrTypeID, attrSpaceID, HDF5Constants.H5P_DEFAULT);
             H5.H5Awrite(attributeID, attrTypeID, value);
         } catch (HDF5Exception e) {
-            throw new ProductIOException(createErrorMessage(e));
+            //throw new ProductIOException(createErrorMessage(e));
         } finally {
             closeH5A(attributeID);
             closeH5S(attrSpaceID);

@@ -31,28 +31,28 @@ import java.util.Set;
  */
 public class NcVariableMap {
 
-    private final Map<String, Variable> _map;
+    private final Map<String, Variable> map;
 
-    private NcVariableMap(int initialCapacity) {
-        _map = new HashMap<String, Variable>(initialCapacity);
+    private NcVariableMap(final int initialCapacity) {
+        map = new HashMap<String, Variable>(initialCapacity);
     }
 
-    public NcVariableMap(Variable[] variables) {
+    public NcVariableMap(final Variable[] variables) {
         this((3 * variables.length) / 2 + 1);
         for (Variable variable : variables) {
             put(variable);
         }
     }
 
-    private NcVariableMap(List<Variable> variables) {
+    private NcVariableMap(final List<Variable> variables) {
         this(variables.toArray(new Variable[variables.size()]));
     }
 
-    public static NcVariableMap create(NetcdfFile file) {
+    public static NcVariableMap create(final NetcdfFile file) {
         return new NcVariableMap(file.getVariables());
     }
 
-    public static NcVariableMap create(Group group) {
+    public static NcVariableMap create(final Group group) {
         return new NcVariableMap(group.getVariables());
     }
 
@@ -63,8 +63,8 @@ public class NcVariableMap {
      *
      * @return The variable or null.
      */
-    public Variable get(String name) {
-        return _map.get(name);
+    public Variable get(final String name) {
+        return map.get(name);
     }
 
     /**
@@ -72,15 +72,15 @@ public class NcVariableMap {
      *
      * @param variable The variable.
      */
-    void put(Variable variable) {
-        _map.put(variable.getName(), variable);
+    void put(final Variable variable) {
+        map.put(variable.getName(), variable);
     }
 
     /**
      * Removes all variables from this map.
      */
     public void clear() {
-        _map.clear();
+        map.clear();
     }
 
     /**
@@ -88,15 +88,15 @@ public class NcVariableMap {
      * @return true if empty
      */
     public boolean isEmpty() {
-        return _map.isEmpty();
+        return map.isEmpty();
     }
 
     public Variable[] getAll() {
-        final Set<String> keySet = _map.keySet();
+        final Set<String> keySet = map.keySet();
         final Variable[] variables = new Variable[keySet.size()];
         int i = 0;
         for(String key : keySet) {
-            variables[i++] = _map.get(key);
+            variables[i++] = map.get(key);
         }
         return variables;
     }
@@ -106,7 +106,7 @@ public class NcVariableMap {
      * @param variable the entry to get the name from
      * @return The absolute path name.
      */
-    public static String getAbsoluteName(Variable variable) {
+    public static String getAbsoluteName(final Variable variable) {
         final StringBuilder sb = new StringBuilder(variable.getName());
         Group group = variable.getParentGroup();
         while (group != null) {

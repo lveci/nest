@@ -41,11 +41,11 @@ import java.util.Map;
  */
 public class NetCDFReader extends AbstractProductReader {
 
-    private NetcdfFile _netcdfFile = null;
-    private Product _product = null;
-    private NcVariableMap _variableMap = null;
-    private boolean _yFlipped = false;
-    private final ProductReaderPlugIn _readerPlugIn;
+    private NetcdfFile netcdfFile = null;
+    private Product product = null;
+    private NcVariableMap variableMap = null;
+    private boolean yFlipped = false;
+    private final ProductReaderPlugIn readerPlugIn;
 
     /**
      * Constructs a new abstract product reader.
@@ -55,13 +55,13 @@ public class NetCDFReader extends AbstractProductReader {
      */
     public NetCDFReader(final ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
-        this._readerPlugIn = readerPlugIn;
+        this.readerPlugIn = readerPlugIn;
     }
 
     private void initReader() {
-        _product = null;
-        _netcdfFile = null;
-        _variableMap = null;
+        product = null;
+        netcdfFile = null;
+        variableMap = null;
     }
 
     /**
@@ -77,7 +77,7 @@ public class NetCDFReader extends AbstractProductReader {
         final File inputFile = ReaderUtils.getFileFromInput(getInput());
         initReader();
 
-        final NetcdfFile netcdfFile = NetcdfFile.open(inputFile.getPath());
+        netcdfFile = NetcdfFile.open(inputFile.getPath());
         if (netcdfFile == null) {
             close();
             throw new IllegalFileFormatException(inputFile.getName() +
@@ -94,49 +94,56 @@ public class NetCDFReader extends AbstractProductReader {
         final Variable[] rasterVariables = NetCDFUtils.getRasterVariables(variableListMap, rasterDim);
         final Variable[] tiePointGridVariables = NetCDFUtils.getTiePointGridVariables(variableListMap, rasterVariables);
 
-        _netcdfFile = netcdfFile;
-        _variableMap = new NcVariableMap(rasterVariables);
-        _yFlipped = false;
+        variableMap = new NcVariableMap(rasterVariables);
+        yFlipped = false;
 
-        final NcAttributeMap globalAttributes = NcAttributeMap.create(_netcdfFile);
+        final NcAttributeMap globalAttributes = NcAttributeMap.create(netcdfFile);
 
-        _product = new Product(inputFile.getName(),
-                               NetCDFUtils.getProductType(globalAttributes, _readerPlugIn.getFormatNames()[0]),
+        product = new Product(inputFile.getName(),
+                               NetCDFUtils.getProductType(globalAttributes, readerPlugIn.getFormatNames()[0]),
                                rasterDim.getDimX().getLength(),
                                rasterDim.getDimY().getLength(),
                                this);
-        _product.setFileLocation(inputFile);
-        _product.setDescription(NetCDFUtils.getProductDescription(globalAttributes));
-        _product.setStartTime(NetCDFUtils.getSceneRasterStartTime(globalAttributes));
-        _product.setEndTime(NetCDFUtils.getSceneRasterStopTime(globalAttributes));
+        product.setFileLocation(inputFile);
+        product.setDescription(NetCDFUtils.getProductDescription(globalAttributes));
+        product.setStartTime(NetCDFUtils.getSceneRasterStartTime(globalAttributes));
+        product.setEndTime(NetCDFUtils.getSceneRasterStopTime(globalAttributes));
 
         addMetadataToProduct();
         addBandsToProduct(rasterVariables);
         addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
-        _product.setModified(false);
+        product.setModified(false);
 
-        return _product;
+        // update product type
+        if(product.getProductType().equalsIgnoreCase(readerPlugIn.getFormatNames()[0])) {
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+            final String type = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+            if(!type.isEmpty())
+                product.setProductType(type);
+        }
+
+        return product;
     }
 
     @Override
     public void close() throws IOException {
-        if (_product != null) {
-            _product = null;
-            _variableMap.clear();
-            _variableMap = null;
-            _netcdfFile.close();
-            _netcdfFile = null;
+        if (product != null) {
+            product = null;
+            variableMap.clear();
+            variableMap = null;
+            netcdfFile.close();
+            netcdfFile = null;
         }
         super.close();
     }
 
     private void addMetadataToProduct() {
 
-        final Group rootGroup = _netcdfFile.getRootGroup();
-        NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
+        final Group rootGroup = netcdfFile.getRootGroup();
+        NetCDFUtils.addGroups(product.getMetadataRoot(), rootGroup);
 
-        AbstractMetadata.addAbstractedMetadataHeader(_product.getMetadataRoot());
+        AbstractMetadata.getAbstractedMetadata(product);
     }
 
     private void addBandsToProduct(final Variable[] variables) {
@@ -146,7 +153,7 @@ public class NetCDFReader extends AbstractProductReader {
             final int height = variable.getDimension(rank - 2).getLength();
             final Band band = NetCDFUtils.createBand(variable, width, height);
 
-            _product.addBand(band);
+            product.addBand(band);
         }
     }
 
@@ -158,19 +165,19 @@ public class NetCDFReader extends AbstractProductReader {
             if(rank >= 3 && gridHeight <= 1)
                 gridHeight = variable.getDimension(rank - 3).getLength();
             final TiePointGrid tpg = NetCDFUtils.createTiePointGrid(variable, gridWidth, gridHeight,
-                        _product.getSceneRasterWidth(), _product.getSceneRasterHeight());
+                        product.getSceneRasterWidth(), product.getSceneRasterHeight());
 
-            _product.addTiePointGrid(tpg);
+            product.addTiePointGrid(tpg);
         }
     }
 
     private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
-        setTiePointGeoCoding(_product);
-        if (_product.getGeoCoding() == null) {
-            setPixelGeoCoding(_product);
+        setTiePointGeoCoding(product);
+        if (product.getGeoCoding() == null) {
+            setPixelGeoCoding(product);
         }
-        if (_product.getGeoCoding() == null) {
-            _yFlipped = setMapGeoCoding(rasterDim, _product, _netcdfFile, _yFlipped);
+        if (product.getGeoCoding() == null) {
+            yFlipped = setMapGeoCoding(rasterDim, product, netcdfFile, yFlipped);
         }
     }
 
@@ -255,10 +262,21 @@ public class NetCDFReader extends AbstractProductReader {
         Guardian.assertTrue("sourceWidth == destWidth", sourceWidth == destWidth);
         Guardian.assertTrue("sourceHeight == destHeight", sourceHeight == destHeight);
 
-        final int sceneHeight = _product.getSceneRasterHeight();
-        final int y0 = _yFlipped ? (sceneHeight - 1) - sourceOffsetY : sourceOffsetY;
+        final int sceneHeight = product.getSceneRasterHeight();
+        final int y0 = yFlipped ? (sceneHeight - 1) - sourceOffsetY : sourceOffsetY;
 
-        final Variable variable = _variableMap.get(destBand.getName());
+        final Variable[] variables = variableMap.getAll();
+        Variable variable = null;
+        for(Variable var : variables) {
+            if(destBand.getName().equalsIgnoreCase(var.getName()) ||
+               destBand.getName().equalsIgnoreCase(var.getShortName())) {
+                variable = var;
+                break;
+            }
+        }
+        if(variable == null) {
+            throw new IOException("Band "+destBand.getName()+" not found");
+        }
         final int rank = variable.getRank();
         final int[] origin = new int[rank];
         final int[] shape = new int[rank];
@@ -273,9 +291,9 @@ public class NetCDFReader extends AbstractProductReader {
         pm.beginTask("Reading data from band " + destBand.getName(), destHeight);
         try {
             for (int y = 0; y < destHeight; y++) {
-                origin[rank - 2] = _yFlipped ? y0 - y : y0 + y;
+                origin[rank - 2] = yFlipped ? y0 - y : y0 + y;
                 final Array array;
-                synchronized (_netcdfFile) {
+                synchronized (netcdfFile) {
                     array = variable.read(origin, shape);
                 }
                 System.arraycopy(array.getStorage(), 0, destBuffer.getElems(), y * destWidth, destWidth);

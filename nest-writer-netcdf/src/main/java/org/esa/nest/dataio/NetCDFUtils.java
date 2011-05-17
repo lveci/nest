@@ -18,6 +18,7 @@ package org.esa.nest.dataio;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.nest.datamodel.AbstractMetadata;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -41,8 +42,8 @@ public class NetCDFUtils {
                                    getRasterDataType(variable),
                                    rasterWidth,
                                    rasterHeight);
-        band.setDescription(variable.getDescription());
-        band.setUnit(variable.getUnitsString());
+        band.setDescription(getDescription(variable, attMap));
+        band.setUnit(getUnit(variable, attMap));
         band.setScalingFactor(getScalingFactor(attMap));
         band.setScalingOffset(getAddOffset(attMap));
 
@@ -70,8 +71,8 @@ public class NetCDFUtils {
         final TiePointGrid tpg = new TiePointGrid(variable.getShortName(), gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, dataArray);
 
-        tpg.setDescription(variable.getDescription());
-        tpg.setUnit(variable.getUnitsString());
+        tpg.setDescription(getDescription(variable, attMap));
+        tpg.setUnit(getUnit(variable, attMap));
         tpg.setScalingFactor(getScalingFactor(attMap));
         tpg.setScalingOffset(getAddOffset(attMap));
 
@@ -81,6 +82,22 @@ public class NetCDFUtils {
             tpg.setNoDataValueUsed(true);
         }
         return tpg;
+    }
+
+    private static String getDescription(final Variable variable, final NcAttributeMap attMap) {
+        String desc = variable.getDescription();
+        if(desc == null || desc.isEmpty()) {
+            desc = attMap.getStringValue(NetcdfConstants.DESCRIPTION);
+        }
+        return desc;
+    }
+
+    private static String getUnit(final Variable variable, final NcAttributeMap attMap) {
+        String unit = variable.getUnitsString();
+        if(unit == null || unit.isEmpty()) {
+            unit = attMap.getStringValue(NetcdfConstants.UNIT);
+        }
+        return unit;
     }
 
     private static double getScalingFactor(final NcAttributeMap attMap) {
@@ -222,7 +239,7 @@ public class NetCDFUtils {
     public static void addGroups(final MetadataElement parentElem, final Group parentGroup) {
         final List<Group> groupList = parentGroup.getGroups();
         for(Group grp : groupList) {
-            final MetadataElement newElem = new MetadataElement(grp.getName());
+            final MetadataElement newElem = new MetadataElement(grp.getShortName());
             parentElem.addElement(newElem);
             // recurse
             addGroups(newElem, grp);
@@ -266,7 +283,13 @@ public class NetCDFUtils {
             if (productDataType != -1) {
                 ProductData productData;
                 if (attribute.isString()) {
-                    productData = ProductData.createInstance(attribute.getStringValue());
+                    String strValue = attribute.getStringValue();
+                    if(strValue.startsWith(NetcdfConstants.UTC_TYPE)) {
+                        strValue = strValue.substring(NetcdfConstants.UTC_TYPE.length(), strValue.length());
+                        productData = AbstractMetadata.parseUTC(strValue);
+                    } else {
+                        productData = ProductData.createInstance(strValue);
+                    }
                 } else if (attribute.isArray()) {
                     productData = ProductData.createInstance(productDataType, attribute.getLength());
                     productData.setElems(attribute.getValues().getStorage());

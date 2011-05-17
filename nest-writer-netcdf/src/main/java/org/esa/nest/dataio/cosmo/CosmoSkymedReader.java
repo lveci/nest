@@ -569,8 +569,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final float firstRangeTime = (float)bandElem.getAttributeDouble("Zero Doppler Range First Time", 0) * 1000000000.0f;
         final float lastRangeTime = (float)bandElem.getAttributeDouble("Zero Doppler Range Last Time", 0) * 1000000000.0f;
 
-        float[] incidenceCorners = new float[] { nearRangeAngle, farRangeAngle, nearRangeAngle, farRangeAngle };
-        float[] slantRange = new float[] { firstRangeTime, lastRangeTime, firstRangeTime, lastRangeTime };
+        final float[] incidenceCorners = new float[] { nearRangeAngle, farRangeAngle, nearRangeAngle, farRangeAngle };
+        final float[] slantRange = new float[] { firstRangeTime, lastRangeTime, firstRangeTime, lastRangeTime };
 
         final float[] fineAngles = new float[gridWidth*gridHeight];
         final float[] fineTimes = new float[gridWidth*gridHeight];

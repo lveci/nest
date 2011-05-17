@@ -139,7 +139,7 @@ public class ProductFunctions {
         return null;
     }
 
-    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "lutSigma" };
+    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
 
     public static void discardUnusedMetadata(final Product product) {
         final boolean dicardUnusedMetadata = Config.getConfigPropertyMap().getPropertyBool("discard.unused.metadata");
