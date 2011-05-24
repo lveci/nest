@@ -368,17 +368,14 @@ public final class MultilookOp extends Operator {
         final int xEnd = xStart + nRgLooks;
         final int yEnd = yStart + nAzLooks;
 
-        final int tileOffset = sourceRaster1.getScanlineOffset();
-        final int tileStride = sourceRaster1.getScanlineStride();
-        final int tileMinX = sourceRaster1.getMinX();
-        final int tileMinY = sourceRaster1.getMinY();
+        final TileIndex srcIndex = new TileIndex(sourceRaster1);
 
         double meanValue = 0.0;
         if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             for (int y = yStart; y < yEnd; y++) {
-                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
+                srcIndex.calculateStride(y);
                 for (int x = xStart; x < xEnd; x++) {
-                    meanValue += Math.pow(10, srcData1.getElemDoubleAt((x - tileMinX) + stride) / 10.0); // dB to linear
+                    meanValue += Math.pow(10, srcData1.getElemDoubleAt(srcIndex.getIndex(x)) / 10.0); // dB to linear
                 }
             }
 
@@ -388,9 +385,9 @@ public final class MultilookOp extends Operator {
             double i, q;
             int index;
             for (int y = yStart; y < yEnd; y++) {
-                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
+                srcIndex.calculateStride(y);
                 for (int x = xStart; x < xEnd; x++) {
-                    index = (x - tileMinX) + stride;
+                    index = srcIndex.getIndex(x);
                     i = srcData1.getElemDoubleAt(index);
                     q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
@@ -398,9 +395,9 @@ public final class MultilookOp extends Operator {
             }
         } else {
             for (int y = yStart; y < yEnd; y++) {
-                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
+                srcIndex.calculateStride(y);
                 for (int x = xStart; x < xEnd; x++) {
-                    meanValue += srcData1.getElemDoubleAt((x - tileMinX) + stride);
+                    meanValue += srcData1.getElemDoubleAt(srcIndex.getIndex(x));
                 }
             }
         }
@@ -441,7 +438,7 @@ public final class MultilookOp extends Operator {
     /**
      * Get incidence angle at centre range pixel (in degree).
      * @param srcProduct The source product.
-     * @throws OperatorException
+     * @throws OperatorException if incidenceAngle is null
      * @return The incidence angle.
      */
     private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) throws OperatorException {
