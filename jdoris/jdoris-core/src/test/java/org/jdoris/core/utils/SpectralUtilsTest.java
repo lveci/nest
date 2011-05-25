@@ -8,14 +8,15 @@ import org.junit.Test;
 
 public class SpectralUtilsTest {
 
-    private static DoubleMatrix realMatrix_EXPECTED;
     private static ComplexDoubleMatrix complexMatrix_EXPECTED;
+    private static ComplexDoubleMatrix complexMatrix_EXPECTED_2;
 
-    private static ComplexDoubleMatrix fftVector_EXPECTED;
+//    private static ComplexDoubleMatrix fftVector_EXPECTED;
 
     private static ComplexDoubleMatrix fftMatrix_dim1_EXPECTED;
     private static ComplexDoubleMatrix fftMatrix_dim2_EXPECTED;
     private static ComplexDoubleMatrix fftMatrix_2D_EXPECTED;
+    private static ComplexDoubleMatrix fftMatrix_2D_EXPECTED_2;
 
     private static double[] vector_EXPECTED;
     private static double[] shiftVector_EXPECTED;
@@ -24,8 +25,11 @@ public class SpectralUtilsTest {
     @BeforeClass
     public static void setUpTestData() {
 
-        realMatrix_EXPECTED = new DoubleMatrix(new double[][]{{2, 4, 8, 16}, {4, 4, 8, 16}, {8, 8, 8, 16}, {16, 16, 16, 16}});
+        DoubleMatrix realMatrix_EXPECTED = new DoubleMatrix(new double[][]{{2, 4, 8, 16}, {4, 4, 8, 16}, {8, 8, 8, 16}, {16, 16, 16, 16}});
         complexMatrix_EXPECTED = new ComplexDoubleMatrix(realMatrix_EXPECTED, realMatrix_EXPECTED);
+
+        DoubleMatrix realMatrix_EXPECTED_2 = new DoubleMatrix(new double[][]{{2, 4}, {4, 4}, {8, 8}, {16, 16}});
+        complexMatrix_EXPECTED_2 = new ComplexDoubleMatrix(realMatrix_EXPECTED_2, realMatrix_EXPECTED_2);
 
         fftMatrix_dim1_EXPECTED = new ComplexDoubleMatrix(
                 new DoubleMatrix(new double[][]{{30, 32, 40, 64}, {-18, -16, -8, 0}, {-10, -8, -8, 0}, {6, 8, 8, 0}}),
@@ -38,6 +42,10 @@ public class SpectralUtilsTest {
         fftMatrix_2D_EXPECTED = new ComplexDoubleMatrix(
                 new DoubleMatrix(new double[][]{{166, -42, -26, 22}, {-42, -2, -10, -18}, {-26, -10, -10, 6}, {22, -18, 6, 14}}),
                 new DoubleMatrix(new double[][]{{166, 22, -26, -42}, {22, 14, 6, -18}, {-26, 6, -10, -10}, {-42, -18, -10, -2}}));
+
+        fftMatrix_2D_EXPECTED_2 = new ComplexDoubleMatrix(
+                new DoubleMatrix(new double[][]{{62, -2}, {-34, -2}, {-18, -2}, {14, -2}}),
+                new DoubleMatrix(new double[][]{{62, -2}, {14, -2}, {-18, -2}, {-34, -2}}));
 
         vector_EXPECTED = new double[]{0, 1, 2, 3, 4};
         shiftVector_EXPECTED = new double[]{3, 4, 0, 1, 2};
@@ -238,26 +246,35 @@ public class SpectralUtilsTest {
 
     @Test
     public void testFft2D() throws Exception {
-
         ComplexDoubleMatrix fftMatrix_2D_ACTUAL = SpectralUtils.fft2D(complexMatrix_EXPECTED);
         Assert.assertEquals(fftMatrix_2D_EXPECTED, fftMatrix_2D_ACTUAL);
 
+        // Not Square matrix! row vs column order!
+        ComplexDoubleMatrix fftMatrix_2D_ACTUAL_2 = SpectralUtils.fft2D(complexMatrix_EXPECTED_2);
+        Assert.assertEquals(fftMatrix_2D_EXPECTED_2, fftMatrix_2D_ACTUAL_2);
     }
 
     @Test
     public void testFft2D_inplace() throws Exception {
-
         ComplexDoubleMatrix fftMatrix_2D_ACTUAL = complexMatrix_EXPECTED.dup();
         SpectralUtils.fft2D_inplace(fftMatrix_2D_ACTUAL);
         Assert.assertEquals(fftMatrix_2D_EXPECTED, fftMatrix_2D_ACTUAL);
+
+        // Not Square matrix!
+        ComplexDoubleMatrix fftMatrix_2D_ACTUAL_2 = complexMatrix_EXPECTED_2.dup();
+        SpectralUtils.fft2D_inplace(fftMatrix_2D_ACTUAL_2);
+        Assert.assertEquals(fftMatrix_2D_EXPECTED_2, fftMatrix_2D_ACTUAL_2);
 
     }
 
     @Test
     public void testInvfft2D() throws Exception {
-
         ComplexDoubleMatrix complexMatrix_ACTUAL = SpectralUtils.invfft2d(fftMatrix_2D_EXPECTED);
         Assert.assertEquals(complexMatrix_EXPECTED, complexMatrix_ACTUAL);
+
+        // Not Square matrix!
+        ComplexDoubleMatrix complexMatrix_ACTUAL_2 = SpectralUtils.invfft2d(fftMatrix_2D_EXPECTED_2);
+        Assert.assertEquals(complexMatrix_EXPECTED_2, complexMatrix_ACTUAL_2);
 
     }
 
@@ -268,7 +285,11 @@ public class SpectralUtilsTest {
         SpectralUtils.invfft2D_inplace(complexMatrix_ACTUAL);
         Assert.assertEquals(complexMatrix_EXPECTED, complexMatrix_ACTUAL);
 
-    }
+        // Not Square matrix!
+        ComplexDoubleMatrix complexMatrix_ACTUAL_2 = fftMatrix_2D_EXPECTED_2.dup();
+        SpectralUtils.invfft2D_inplace(complexMatrix_ACTUAL_2);
+        Assert.assertEquals(complexMatrix_EXPECTED_2, complexMatrix_ACTUAL_2);
 
+    }
 
 }

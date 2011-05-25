@@ -6,7 +6,7 @@ import java.nio.ByteOrder;
 
 public final class FlatBinaryLong extends FlatBinary {
 
-    long[][] data;
+    private long[][] data;
     private int lines;
     private int pixels;
 
@@ -18,6 +18,14 @@ public final class FlatBinaryLong extends FlatBinary {
         this.data = data;
     }
 
+    public long[][] getData() {
+        return data;
+    }
+
+    private void setLinesPixels() {
+        lines = (int) dataWindow.lines();
+        pixels = (int) dataWindow.pixels();
+    }
 
     @Override
     public void readFromStream() throws FileNotFoundException {
@@ -67,9 +75,5 @@ public final class FlatBinaryLong extends FlatBinary {
         }
     }
 
-    private void setLinesPixels() {
-        lines = (int) dataWindow.lines();
-        pixels = (int) dataWindow.pixels();
-    }
 
 }

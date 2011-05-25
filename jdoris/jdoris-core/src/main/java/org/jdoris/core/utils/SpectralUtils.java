@@ -99,7 +99,10 @@ public class SpectralUtils {
 
     public static void fft2D_inplace(ComplexDoubleMatrix A) {
         DoubleFFT_2D fft2d = new DoubleFFT_2D(A.rows, A.columns);
-        fft2d.complexForward(A.data);
+//        fft2d.complexForward(A.data);
+        ComplexDoubleMatrix aTemp = A.transpose();
+        fft2d.complexForward(aTemp.data);
+        A.data = aTemp.transpose().data;
     }
 
     public static ComplexDoubleMatrix fft2D(ComplexDoubleMatrix inMatrix) {
@@ -108,7 +111,6 @@ public class SpectralUtils {
         return outMatrix;
     }
 
-    // TODO: check declaration of FFT for Real 2D input and realForwardFull
     public static void fft2D_inplace(DoubleMatrix A) {
         DoubleFFT_2D fft2d = new DoubleFFT_2D(A.rows, A.columns);
         fft2d.realForwardFull(A.data);
@@ -116,7 +118,10 @@ public class SpectralUtils {
 
     public static void invfft2D_inplace(ComplexDoubleMatrix A) {
         DoubleFFT_2D fft2d = new DoubleFFT_2D(A.rows, A.columns);
-        fft2d.complexInverse(A.data, true);
+//        fft2d.complexInverse(A.data, true);
+        ComplexDoubleMatrix aTemp = A.transpose();
+        fft2d.complexInverse(aTemp.data, true);
+        A.data = aTemp.transpose().data;
     }
 
     public static ComplexDoubleMatrix invfft2d(ComplexDoubleMatrix inMatrix) {

@@ -6,8 +6,7 @@ import java.nio.ByteOrder;
 
 public final class FlatBinaryDouble extends FlatBinary {
 
-    public double [][] data;
-
+    private double [][] data;
     private int lines;
     private int pixels;
 
@@ -17,6 +16,15 @@ public final class FlatBinaryDouble extends FlatBinary {
 
     public void setData(double[][] data) {
         this.data = data;
+    }
+
+    public double[][] getData() {
+        return data;
+    }
+
+    private void setLinesPixels() {
+        lines = (int) dataWindow.lines();
+        pixels = (int) dataWindow.pixels();
     }
 
     @Override
@@ -67,8 +75,4 @@ public final class FlatBinaryDouble extends FlatBinary {
 
     }
 
-    private void setLinesPixels() {
-        lines = (int) dataWindow.lines();
-        pixels = (int) dataWindow.pixels();
-    }
 }

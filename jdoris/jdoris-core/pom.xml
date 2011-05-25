@@ -49,8 +49,8 @@
         </dependency>
         <dependency>
             <groupId>hirondelle</groupId>
-			<artifactId>date4j</artifactId>
-			<version>1.0.0</version>
+	    <artifactId>date4j</artifactId>
+	    <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

@@ -101,7 +101,7 @@ public class SarUtils {
 
         } else {
 
-            // define extra windows for 2d unwrapping
+            // define extra windows for 2d oversampling
             Window winA3;
             Window winA4;
             Window winR3;
@@ -153,7 +153,7 @@ public class SarUtils {
         return sqrt(intensity(inputMatrix));
     }
 
-    public static DoubleMatrix coherence(final ComplexDoubleMatrix inputMatrix, final ComplexDoubleMatrix norms, final int winL, final int winP) {
+    public static DoubleMatrix coherence(final ComplexDoubleMatrix inputMatrix, final ComplexDoubleMatrix normsMatrix, final int winL, final int winP) {
 
         logger.trace("coherence ver #2");
         if (!(winL >= winP)) {
@@ -161,7 +161,7 @@ public class SarUtils {
 //            throw new IllegalArgumentException("coherence: estimator window size L<P not very efficiently programmed.");
         }
 
-        if (inputMatrix.rows != norms.rows || inputMatrix.rows != inputMatrix.rows) {
+        if (inputMatrix.rows != normsMatrix.rows || inputMatrix.rows != inputMatrix.rows) {
             logger.debug("coherence: not same dimensions.");
             throw new IllegalArgumentException("coherence: not the same dimensions.");
         }
@@ -173,36 +173,40 @@ public class SarUtils {
         int i, j, k, l;
         ComplexDouble sum;
         ComplexDouble power;
-        double product;
         int leadingZeros = (winP - 1) / 2;  // number of pixels=0 floor...
         int trailingZeros = (winP) / 2;     // floor...
 
         for (j = leadingZeros; j < outputMatrix.columns - trailingZeros; j++) {
 
-            sum = new ComplexDouble(0.);
-            power = new ComplexDouble(0.);
+            sum = new ComplexDouble(0);
+            power = new ComplexDouble(0);
 
             //// Compute sum over first data block ////
             for (k = 0; k < winL; k++) {
                 for (l = j - leadingZeros; l < j - leadingZeros + winP; l++) {
-                    sum.add(inputMatrix.get(k, l));
-                    power.add(norms.get(k, l));
+                    sum.addi(inputMatrix.get(k, l));
+                    power.addi(normsMatrix.get(k, l));
                 }
             }
-            product = power.real() * power.imag();
-            outputMatrix.put(0, j, (product > 0.0) ? Math.sqrt((sum.abs() / product)) : 0.0);
+//            outputMatrix.put(0, j, (product > 0.0) ? Math.sqrt((sum.abs() / product)) : 0.0);
+            outputMatrix.put(0, j, coherenceProduct(sum, power));
 
             //// Compute (relatively) sum over rest of data blocks ////
             for (i = 0; i < outputMatrix.rows - 1; i++) {
                 for (l = j - leadingZeros; l < j - leadingZeros + winP; l++) {
-                    sum.add(inputMatrix.get(i + winL, l).sub(inputMatrix.get(i, l)));
-                    power.add(norms.get(i + winL, l).sub(norms.get(i, l)));
+                    sum.addi(inputMatrix.get(i + winL, l).sub(inputMatrix.get(i, l)));
+                    power.addi(normsMatrix.get(i + winL, l).sub(normsMatrix.get(i, l)));
                 }
-                product = power.real() * power.imag();
-                outputMatrix.put(i + 1, j, (product > 0.0) ? Math.sqrt((sum.abs() / product)) : 0.0);
+                outputMatrix.put(i + 1, j, coherenceProduct(sum, power));
             }
         }
         return outputMatrix;
+    }
+
+    static double coherenceProduct(final ComplexDouble sum, final ComplexDouble power) {
+        final double product = power.real() * power.imag();
+//        return (product > 0.0) ? Math.sqrt(Math.pow(sum.abs(),2) / product) : 0.0;
+        return (product > 0.0) ? sum.abs() / Math.sqrt(product) : 0.0;
     }
 
     public static ComplexDoubleMatrix multilook(final ComplexDoubleMatrix inputMatrix, final int factorRow, final int factorColumn) {
@@ -220,7 +224,6 @@ public class SarUtils {
         }
 
         ComplexDouble sum;
-//        final ComplexDouble factorLP = new ComplexDouble(factorRow, factorColumn);
         final ComplexDouble factorLP = new ComplexDouble(factorRow * factorColumn);
         ComplexDoubleMatrix outputMatrix = new ComplexDoubleMatrix(inputMatrix.rows / factorRow, inputMatrix.columns / factorColumn);
         for (int i = 0; i < outputMatrix.rows; i++) {

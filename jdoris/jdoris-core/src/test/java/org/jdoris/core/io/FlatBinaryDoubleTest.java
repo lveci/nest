@@ -82,7 +82,9 @@ public class FlatBinaryDoubleTest {
         flatBinaryDoubleRead.setInStream();
         flatBinaryDoubleRead.readFromStream();
 
-        Assert.assertArrayEquals(testData, flatBinaryDoubleRead.data);
+        double[][] testData_ACTUAL = flatBinaryDoubleRead.getData();
+
+        Assert.assertArrayEquals(testData, testData_ACTUAL);
 
     }
 
@@ -100,7 +102,8 @@ public class FlatBinaryDoubleTest {
         flatBinaryDoubleLittleRead.setInStream();
         flatBinaryDoubleLittleRead.readFromStream();
 
-        Assert.assertArrayEquals(testData, flatBinaryDoubleLittleRead.data);
+        double[][] testData_ACTUAL = flatBinaryDoubleLittleRead.getData();
+        Assert.assertArrayEquals(testData, testData_ACTUAL);
 
     }
 
