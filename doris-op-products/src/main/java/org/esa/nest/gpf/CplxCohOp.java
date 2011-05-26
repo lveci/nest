@@ -1,7 +1,6 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -14,16 +13,19 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-//import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-// import org.esa.nest.doris.datamodel.AbstractDorisMetadata; // repackage this
+import org.jblas.ComplexDoubleMatrix;
+import org.jblas.DoubleMatrix;
+import org.jdoris.core.Baseline;
+import org.jdoris.core.Orbit;
+import org.jdoris.core.SLCImage;
+import org.jdoris.core.utils.SarUtils;
 
 import java.awt.*;
+import java.awt.image.RenderedImage;
 import java.util.HashMap;
-//import java.util.Iterator;
-
 import java.util.Map;
-
 
 @OperatorMetadata(alias = "CplxCoh",
         category = "InSAR Products",
@@ -57,16 +59,20 @@ public class CplxCohOp extends Operator {
 
     private Band masterBand0 = null;
     private Band masterBand1 = null;
-//    private int sourceImageWidth;
-//    private int sourceImageHeight;
 
     private String[] masterBandNames;
     private String[] slaveBandNames;
 
-    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private MetadataElement masterRoot;
+    private MetadataElement slaveRoot;
+    private SLCImage masterMetadata;
+    private SLCImage slaveMetadata;
+    private Orbit masterOrbit;
+    private Orbit slaveOrbit;
+    private Baseline baseline = new Baseline();
+
     private final Map<Band, Band> complexSrcMapI = new HashMap<Band, Band>(10);
     private final Map<Band, Band> complexSrcMapQ = new HashMap<Band, Band>(10);
-    //private final Map<Band, Band> complexIfgMap = new HashMap<Band, Band>(10);
 
     /**
      * Default constructor. The graph processing framework
@@ -92,28 +98,39 @@ public class CplxCohOp extends Operator {
     public void initialize() throws OperatorException {
         try {
 
-            // TODO: throw in exception here!
             masterBand0 = sourceProduct.getBandAt(0);
             masterBand1 = sourceProduct.getBandAt(1);
 
             createTargetProduct();
+            defineMetadata();
+            defineOrbits();
+            estimateBaseline();
+
+            System.out.println("Perpendicular baseline at pixel [100,100]: " + baseline.getBperp(100,100));
+            System.out.println("Parallel baseline at pixel [200,200]: " + baseline.getBpar(100,100));
 
         } catch (Exception e) {
             throw new OperatorException(e);
         }
     }
 
-    /**
-     * Thread safe counter
-     */
-    class Counter {
-        private int count = 0;
-        public synchronized void increment() {
-            int n = count;
-            count = n + 1;
-        }
+    private void defineMetadata() {
+
+        masterRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        masterMetadata = new SLCImage(masterRoot);
+
+        MetadataElement slaveRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT).getElementAt(0);
+        slaveMetadata = new SLCImage(slaveRoot);
     }
 
+    private void defineOrbits() throws Exception {
+        masterOrbit = new Orbit(masterRoot, 3);
+        slaveOrbit = new Orbit(slaveRoot, 3);
+    }
+
+    private void estimateBaseline() throws Exception {
+        baseline.model(masterMetadata, slaveMetadata, masterOrbit, slaveOrbit);
+    }
 
 
     /**
@@ -126,13 +143,12 @@ public class CplxCohOp extends Operator {
                 sourceProduct.getSceneRasterWidth(),
                 sourceProduct.getSceneRasterHeight());
 
-        // TODO: this doesnt work for multichannel data
         final int numSrcBands = sourceProduct.getNumBands();
 
         masterBandNames = new String[numSrcBands];
         slaveBandNames = new String[numSrcBands];
-        String iBandName = "null";
-        String qBandName = "null";
+        String iBandName;
+        String qBandName;
 
         // counters
         int cnt = 1;
@@ -146,7 +162,6 @@ public class CplxCohOp extends Operator {
             final Band srcBandI = sourceProduct.getBandAt(i);
             final Band srcBandQ = sourceProduct.getBandAt(i + 1);
 
-            // TODO: beautify names of ifg bands
             if (srcBandI.getUnit().equals(Unit.REAL) && srcBandQ.getUnit().equals(Unit.IMAGINARY)) {
 
                 if (srcBandI == masterBand0) {
@@ -176,12 +191,8 @@ public class CplxCohOp extends Operator {
             }
 
         }
-
-//        coherenceSlaveMap.put(coherenceBandName, iqBandNames);
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
         targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
-
-
     }
 
     private void addTargetBand(String bandName, int dataType, String bandUnit) {
@@ -216,22 +227,7 @@ public class CplxCohOp extends Operator {
             final int y0 = targetTileRectangle.y;
             final int w = targetTileRectangle.width;
             final int h = targetTileRectangle.height;
-
-            // try to work out an overlap between tiles?
-            final int y0_overlap = y0;
-//            final int w_overlap = w;
-            int h_overlap = h + coherenceWindowSizeAzimuth; // fnc of coherence window
-            if (y0_overlap + h_overlap > sourceProduct.getSceneRasterHeight()) {
-                h_overlap = h;
-            }
-
-            final int x0_overlap = x0;
-            int w_overlap = w + coherenceWindowSizeRange; // fnc of coherence window
-            if (x0_overlap + w_overlap > sourceProduct.getSceneRasterWidth()) {
-                w_overlap = w;
-            }
-
-            final Rectangle targetTileRectangleOverlap = new Rectangle(x0_overlap, y0_overlap, w_overlap, h_overlap);
+            // System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             // loop through pairs of slaveBandNames
             if (targetBand.getUnit().contains("coherence")) {
@@ -241,76 +237,34 @@ public class CplxCohOp extends Operator {
 
                     if (slaveBandNames[slaveBandNameIndex] != null && slaveBandNames[slaveBandNameIndex + 1] != null) {
 
-                        final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangleOverlap, pm);
-                        final ProductData masterDataI = masterRasterI.getDataBuffer();
+                        DoubleMatrix masterDataI = getDoubleMatrix(targetTileRectangle, masterBand0);
+                        DoubleMatrix masterDataQ = getDoubleMatrix(targetTileRectangle, masterBand1);
 
-                        final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangleOverlap, pm);
-                        final ProductData masterDataQ = masterRasterQ.getDataBuffer();
+                        DoubleMatrix slaveDataI = getDoubleMatrix(targetTileRectangle, sourceProduct.getBand(slaveBandNames[0]));
+                        DoubleMatrix slaveDataQ = getDoubleMatrix(targetTileRectangle, sourceProduct.getBand(slaveBandNames[1]));
 
-                        final Tile slaveRasterI = getSourceTile(sourceProduct.getBand(slaveBandNames[0]), targetTileRectangleOverlap, pm);
-                        final ProductData slaveDataI = slaveRasterI.getDataBuffer();
+                        DoubleMatrix coherence = SarUtils.coherence(new ComplexDoubleMatrix(masterDataI, masterDataQ),
+                                new ComplexDoubleMatrix(slaveDataI, slaveDataQ), coherenceWindowSizeAzimuth, coherenceWindowSizeRange);
 
-                        final Tile slaveRasterQ = getSourceTile(sourceProduct.getBand(slaveBandNames[1]), targetTileRectangleOverlap, pm);
-                        final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
+                        targetTile.setRawSamples(ProductData.createInstance(coherence.toArray()));
 
-                        final ProductData targetData = targetTile.getDataBuffer();
-
-                        // separate estimation along the edges
-                        for (int y = y0; y < y0 + h; y++) {
-                            for (int x = x0; x < x0 + w; x++) {
-
-                                final int index = slaveRasterQ.getDataBufferIndex(x, y);
-
-                                double sum1 = 0.0;
-                                double sum2 = 0.0;
-                                double sum3 = 0.0;
-                                double sum4 = 0.0;
-
-                                // check only on last row of tiles
-                                int coherenceWindowHeight = y + coherenceWindowSizeAzimuth;
-                                if (h == h_overlap && coherenceWindowHeight > y0 + h) {
-                                    coherenceWindowHeight = y0 + h; // - (y + coherenceWindowSize);
-                                }
-
-                                // check only on last column of tiles
-                                int coherenceWindowLength = x + coherenceWindowSizeRange;
-                                if (w == w_overlap && coherenceWindowLength > x0 + w) {
-                                    coherenceWindowLength = x0 + w; // - (x + coherenceWindowSize);
-                                }
-
-
-                                int line;
-                                int pix;
-                                for (line = y; line < coherenceWindowHeight; line++) {
-                                    for (pix = x; pix < coherenceWindowLength; pix++) {
-
-                                        final int indexCohWind = slaveRasterQ.getDataBufferIndex(pix, line);
-
-                                        final float mr = masterDataI.getElemFloatAt(indexCohWind);
-                                        final float mi = masterDataQ.getElemFloatAt(indexCohWind);
-                                        final float sr = slaveDataI.getElemFloatAt(indexCohWind);
-                                        final float si = slaveDataQ.getElemFloatAt(indexCohWind);
-
-                                        sum1 += mr * sr + mi * si;
-                                        sum2 += mi * sr - mr * si;
-                                        sum3 += mr * mr + mi * mi;
-                                        sum4 += sr * sr + si * si;
-
-                                    }
-
-                                }
-
-                                float cohValue = (float) (Math.sqrt(sum1 * sum1 + sum2 * sum2) / Math.sqrt(sum3 * sum4));
-                                targetData.setElemFloatAt(index, cohValue);
-                            }
-                        }
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new OperatorException(e);
         }
+    }
+
+    private DoubleMatrix getDoubleMatrix(Rectangle targetTileRectangleOverlap, Band masterBand0) {
+
+        final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangleOverlap);
+        RenderedImage srcImage = masterRasterI.getRasterDataNode().getSourceImage();
+        double[] dataArray = srcImage.getData(targetTileRectangleOverlap).
+                getSamples(targetTileRectangleOverlap.x, targetTileRectangleOverlap.y,
+                        targetTileRectangleOverlap.width, targetTileRectangleOverlap.height, 0, (double[]) null);
+        return new DoubleMatrix(masterRasterI.getHeight(), masterRasterI.getWidth(), dataArray);
+
     }
 
     /**
