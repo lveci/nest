@@ -16,13 +16,11 @@
 
 package com.bc.ceres.swing.figure;
 
+import com.bc.ceres.core.Assert;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
 import com.bc.ceres.swing.figure.support.VertexHandle;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -36,6 +34,14 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * A figure that is based on a Java AWT shape geometry.
+ * <p/>
+ * Sub-classes have to provide the actual shape (lines or areas) in model coordinates.
+ *
+ * @author Norman Fomferra
+ * @since Ceres 0.10
+ */
 public abstract class AbstractShapeFigure extends AbstractFigure implements ShapeFigure {
 
     private Rank rank;
@@ -43,14 +49,22 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
     private FigureStyle selectedStyle;
 
     protected AbstractShapeFigure() {
-        this(true, new DefaultFigureStyle());
     }
 
-    protected AbstractShapeFigure(boolean area, FigureStyle normalStyle) {
-        this.rank = area ? Rank.AREA : Rank.LINE;
+    /**
+     * Constructor.
+     *
+     * @param rank          The rank, must be either {@link Rank#AREA} or {@link Rank#LINE}.
+     * @param normalStyle   The style used for the "normal" state of the figure.
+     * @param selectedStyle The style used for the "selected" state of the figure.
+     */
+    protected AbstractShapeFigure(Rank rank, FigureStyle normalStyle, FigureStyle selectedStyle) {
+        Assert.notNull(rank, "rank");
+        Assert.notNull(normalStyle, "normalStyle");
+        Assert.notNull(selectedStyle, "selectedStyle");
+        this.rank = rank;
         this.normalStyle = normalStyle;
-        this.selectedStyle = DefaultFigureStyle.createLineStyle(new Color(255, 255, 0, 180),
-                                                                new BasicStroke(4.0f));
+        this.selectedStyle = selectedStyle;
         setSelectable(true);
     }
 
@@ -64,15 +78,16 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
         return rank;
     }
 
-    protected void setRank(Rank rank) {
-        this.rank = rank;
-    }
+   protected void setRank(Rank rank) {
+       this.rank = rank;
+   }
 
     public FigureStyle getNormalStyle() {
         return normalStyle;
     }
 
     public void setNormalStyle(FigureStyle normalStyle) {
+        Assert.notNull(normalStyle, "normalStyle");
         this.normalStyle = normalStyle;
         fireFigureChanged();
     }
@@ -82,6 +97,7 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
     }
 
     public void setSelectedStyle(FigureStyle selectedStyle) {
+        Assert.notNull(selectedStyle, "selectedStyle");
         this.selectedStyle = selectedStyle;
         fireFigureChanged();
     }
@@ -109,35 +125,49 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
         AffineTransform oldTransform = g.getTransform();
         try {
             g.transform(vp.getModelToViewTransform());
-
-            if (rank == Rank.AREA) {
-                Paint fillPaint = getNormalStyle().getFillPaint();
-                if (fillPaint != null) {
-                    g.setPaint(fillPaint);
-                    g.fill(shape);
-                }
-            }
-
-            Paint strokePaint = getNormalStyle().getStrokePaint();
-            if (strokePaint != null) {
-                Stroke normalStroke = getNormalStyle().getStroke(1.0 / vp.getZoomFactor());
-                g.setPaint(strokePaint);
-                g.setStroke(normalStroke);
-                g.draw(shape);
-            }
-
-            if (isSelected()) {
-                Paint selectedStrokePaint = getSelectedStyle().getStrokePaint();
-                if (selectedStrokePaint != null) {
-                    Stroke selectedStroke = getSelectedStyle().getStroke(1.0 / vp.getZoomFactor());
-                    g.setStroke(selectedStroke);
-                    g.setPaint(selectedStrokePaint);
-                    g.draw(shape);
-                }
-            }
-
+            drawShape(rendering);
         } finally {
             g.setTransform(oldTransform);
+        }
+    }
+
+    /**
+     * Draws the {@link #getShape() shape} and other items that are used to graphically
+     * represent the figure, for example labels.
+     * For convenience, the rendering's drawing context is pre-transformed,
+     * so that drawing of the shape can be performed in model coordinates.
+     *
+     * @param rendering The rendering.
+     *
+     */
+    protected void drawShape(Rendering rendering) {
+        final Viewport vp = rendering.getViewport();
+        final Graphics2D g = rendering.getGraphics();
+        final Shape shape = getShape();
+        if (rank == Rank.AREA) {
+            Paint fillPaint = getNormalStyle().getFillPaint();
+            if (fillPaint != null) {
+                g.setPaint(fillPaint);
+                g.fill(shape);
+            }
+        }
+
+        Paint strokePaint = getNormalStyle().getStrokePaint();
+        if (strokePaint != null) {
+            Stroke normalStroke = getNormalStyle().getStroke(1.0 / vp.getZoomFactor());
+            g.setPaint(strokePaint);
+            g.setStroke(normalStroke);
+            g.draw(shape);
+        }
+
+        if (isSelected()) {
+            Paint selectedStrokePaint = getSelectedStyle().getStrokePaint();
+            if (selectedStrokePaint != null) {
+                Stroke selectedStroke = getSelectedStyle().getStroke(1.0 / vp.getZoomFactor());
+                g.setStroke(selectedStroke);
+                g.setPaint(selectedStrokePaint);
+                g.draw(shape);
+            }
         }
     }
 
@@ -408,10 +438,8 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
 
     @Override
     public Handle[] createHandles(int selectionStage) {
-        if (selectionStage == 1) {
-            // No handles at level 1, only high-lighting, see draw() & isSelected()
-            return new Handle[0];
-        } else if (selectionStage == 2) {
+        // No handles at level 1, only high-lighting, see draw() & isSelected()
+        if (selectionStage == 2) {
             return createVertexHandles();
         } else if (selectionStage == 3) {
             return createScaleHandles(0.0);
@@ -423,7 +451,7 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
             handles.addAll(Arrays.asList(scaleHandles));
             return handles.toArray(new Handle[handles.size()]);
         }
-        return new Handle[0];
+        return NO_HANDLES;
     }
 
     private Handle[] createVertexHandles() {

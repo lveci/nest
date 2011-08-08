@@ -20,20 +20,38 @@ import java.awt.geom.Point2D;
 
 
 /**
- * A figure represents a graphical object.
- * Figures are graphically modified by their {@link Handle}s.
+ * A point figure.
+ * <p/>
+ * Clients should not implement this interface directly, because it may change in the future.
+ * Instead they should derive their {@code Figure} implementation from {@link AbstractPointFigure}.
  *
  * @author Norman Fomferra
  * @author Marco Peters
  * @since Ceres 0.10
  */
 public interface PointFigure extends Figure {
-
+    /**
+     * @return The X-coordinate of the current location in model coordinates.
+     */
     double getX();
 
+    /**
+     * @return The Y-coordinate of the current location in model coordinates.
+     */
     double getY();
 
+    /**
+     * @return The current location in model coordinates.
+     */
     Point2D getLocation();
 
+    /**
+     * @param location The current location in model coordinates.
+     */
     void setLocation(Point2D location);
+
+    /**
+     * @return The symbol that is used to represent the figure.
+     */
+    Symbol getSymbol();
 }

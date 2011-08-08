@@ -17,8 +17,11 @@
 package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.CoreException;
+import com.bc.ceres.core.ExtensionFactory;
+import com.bc.ceres.core.ExtensionManager;
 import com.bc.ceres.core.ServiceRegistry;
 import com.bc.ceres.core.ServiceRegistryManager;
+import com.bc.ceres.core.SingleTypeExtensionFactory;
 import com.bc.ceres.core.runtime.Activator;
 import com.bc.ceres.core.runtime.ConfigurationElement;
 import com.bc.ceres.core.runtime.Extension;
@@ -34,6 +37,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +76,7 @@ public final class RuntimeActivator implements Activator {
         this.moduleContext = moduleContext;
         initApplications();
         initServiceProviders();
+        initAdapters();
     }
 
     @Override
@@ -134,13 +139,15 @@ public final class RuntimeActivator implements Activator {
     }
 
     private void registerProviderImpl(ServiceRegistration serviceRegistration, Class<?> providerImplClass) {
-        final Class<?> providerClass = serviceRegistration.serviceRegistry.getServiceType();
+        Class<?> providerClass = serviceRegistration.serviceRegistry.getServiceType();
         if (providerClass.isAssignableFrom(providerImplClass)) {
-            final Object providerImpl = getProviderImpl(providerImplClass);
+            Object providerImpl = getProviderImpl(providerImplClass);
             if (providerImpl != null) {
                 serviceRegistration.serviceRegistry.addService(providerImpl);
                 serviceRegistration.providerImpl = providerImpl;
-                moduleContext.getLogger().info("Service " + providerImplClass + " registered");
+                moduleContext.getLogger().info(String.format("Module [%s]: Service [%s] registered",
+                                                             serviceRegistration.module.getSymbolicName(),
+                                                             serviceRegistration.providerImpl.getClass()));
                 serviceRegistrations.add(serviceRegistration);
             }
         } else {
@@ -151,14 +158,15 @@ public final class RuntimeActivator implements Activator {
     }
 
     private Object getProviderImpl(Class<?> providerImplClass) {
+        Object providerImpl = null;
         try {
-            return providerImplClass.newInstance();
+            providerImpl = providerImplClass.newInstance();
         } catch (Throwable t) {
             moduleContext.getLogger().log(Level.SEVERE,
                                           String.format("Failed to instantiate service of type [%s]",
                                                         providerImplClass.toString()), t);
         }
-        return null;
+        return providerImpl;
     }
 
     private Class<?> getProviderImplClass(ServiceRegistration serviceRegistration, String providerImplClassName) {
@@ -234,7 +242,7 @@ public final class RuntimeActivator implements Activator {
         }
         return module;
     }
-    
+
     private Module getModule(String urlAsString) {
         for (Module module : moduleContext.getModules()) {
             if (urlAsString.startsWith(module.getLocation().toExternalForm())) {
@@ -284,7 +292,9 @@ public final class RuntimeActivator implements Activator {
             ServiceRegistry serviceRegistry = serviceRegistration.serviceRegistry;
             Object providerImpl = serviceRegistration.providerImpl;
             serviceRegistry.removeService(providerImpl);
-            moduleContext.getLogger().info("Service " + serviceRegistration.providerImpl.getClass() + " unregistered");
+            moduleContext.getLogger().info(String.format("Module [%s]: Service [%s] unregistered",
+                                                         serviceRegistration.module.getSymbolicName(),
+                                                         serviceRegistration.providerImpl.getClass()));
         }
         serviceRegistrations.clear();
     }
@@ -300,7 +310,7 @@ public final class RuntimeActivator implements Activator {
             ConfigurationElement[] children = extension.getConfigurationElement().getChildren("application");
             for (ConfigurationElement child : children) {
                 String appId = child.getAttribute("id");
-                if (appId == null || appId.length() == 0) {
+                if (isNullOrEmpty(appId)) {
                     moduleContext.getLogger().severe(
                             "Missing identifier for extension " + i + " of extension point [applications].");
                     continue;
@@ -321,8 +331,8 @@ public final class RuntimeActivator implements Activator {
                 if (application != null) {
                     applications.put(appId, application);
                     Module declaringModule = extension.getDeclaringModule();
-                    String msg = String.format("Application [%s] registered (declared by module [%s]).", appId,
-                                               declaringModule.getSymbolicName());
+                    String msg = String.format("Module [%s]: Application [%s] registered using instance of [%s].",
+                                               declaringModule.getSymbolicName(), appId, application.getClass());
                     moduleContext.getLogger().info(msg);
                 }
             }
@@ -332,6 +342,73 @@ public final class RuntimeActivator implements Activator {
     private void disposeApplications() {
         applications.clear();
         applications = null;
+    }
+
+    private void initAdapters() {
+        ExtensionPoint extensionPoint = moduleContext.getModule().getExtensionPoint("adapters");
+        Extension[] extensions = extensionPoint.getExtensions();
+        for (int i = 0; i < extensions.length; i++) {
+            Extension extension = extensions[i];
+            ConfigurationElement[] children = extension.getConfigurationElement().getChildren("adapter");
+            for (ConfigurationElement child : children) {
+                try {
+                    registerAdapter(extension, child);
+                } catch (Exception e) {
+                    moduleContext.getLogger().log(Level.SEVERE,
+                                                  String.format("Module [%s]: Failed to register an [adapter] extension of point [adapters].",
+                                                                extension.getDeclaringModule().getSymbolicName()), e);
+                }
+            }
+        }
+    }
+
+    private void registerAdapter(Extension extension, ConfigurationElement child) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Module declaringModule = extension.getDeclaringModule();
+        String extensibleTypeName = getChildValue(child, "extensibleType");
+        String extensionFactoryName = getChildValue(child, "extensionFactory");
+        String extensionTypeName = getChildValue(child, "extensionType");
+        String extensionSubTypeName = getChildValue(child, "extensionSubType");
+        if (!isNullOrEmpty(extensibleTypeName)) {
+            if (!isNullOrEmpty(extensionFactoryName)) {
+                Class<?> extensibleType = declaringModule.loadClass(extensibleTypeName);
+                ExtensionFactory extensionFactory = (ExtensionFactory) declaringModule.loadClass(extensionFactoryName).newInstance();
+                registerAdapter(declaringModule, extensibleType, extensionFactory);
+            } else if (!isNullOrEmpty(extensionTypeName)) {
+                if (!isNullOrEmpty(extensionSubTypeName)) {
+                    Class<?> extensibleType = declaringModule.loadClass(extensibleTypeName);
+                    Class<?> extensionType = declaringModule.loadClass(extensionTypeName);
+                    Class<?> extensionSubType = declaringModule.loadClass(extensionSubTypeName);
+                    registerAdapter(declaringModule, extensibleType, new SingleTypeExtensionFactory(extensionType, extensionSubType));
+                } else {
+                    Class<?> extensibleType = declaringModule.loadClass(extensibleTypeName);
+                    Class<?> extensionType = declaringModule.loadClass(extensionTypeName);
+                    registerAdapter(declaringModule, extensibleType, new SingleTypeExtensionFactory(extensionType));
+                }
+            } else {
+                moduleContext.getLogger().severe(
+                        String.format("Module [%s]: Missing either element 'extensionFactory' or 'extensionType' in an extension of point [adapters].", declaringModule.getSymbolicName()));
+            }
+        } else {
+            moduleContext.getLogger().severe(
+                    String.format("Module [%s]: Missing element 'extensibleType' in an extension of point [adapters].", declaringModule.getSymbolicName()));
+        }
+    }
+
+    private void registerAdapter(Module declaringModule, Class<?> extensibleType, ExtensionFactory extensionFactory) {
+        ExtensionManager.getInstance().register(extensibleType, extensionFactory);
+        moduleContext.getLogger().info(String.format("Module [%s]: Adapter registered: A [%s] can now be extended to %s",
+                                                     declaringModule.getSymbolicName(),
+                                                     extensibleType,
+                                                     Arrays.toString(extensionFactory.getExtensionTypes())));
+    }
+
+    private String getChildValue(ConfigurationElement child, String elementName) {
+        ConfigurationElement element = child.getChild(elementName);
+        return element != null ? element.getValue() : null;
+    }
+
+    private boolean isNullOrEmpty(String extendibleTypeName) {
+        return extendibleTypeName == null || extendibleTypeName.trim().length() == 0;
     }
 
     public static String[] parseSpiConfiguration(URL resource) throws IOException {

@@ -2,12 +2,15 @@
     <manifestVersion>1.0.0</manifestVersion>
 
     <symbolicName>ceres-core</symbolicName>
-    <version>0.12</version>
+    <version>0.13</version>
     <name>Ceres Runtime Library</name>
     <activator>com.bc.ceres.core.runtime.internal.RuntimeActivator</activator>
 
     <changelog>
         <![CDATA[
+        Changes in 0.13<br/>
+        [CERES-055] Core API: Add extension point "adapters" in order to have declarative extension types<br/>
+        [CERES-054] Core API: ExtensionManager should query all possible extension factories<br/>
         Changes in 0.12<br/>
         [CERES-053] Native modules cannot discriminate between 32 and 64-bit VMs<br/>
         [CERES-050] Launcher returns with exit code zero in error case<br/>
@@ -49,15 +52,92 @@
     <categories>System,Library</categories>
 
     <!--
-       todo - describe
+       applications: Extension point that provides the executable code for applications.
+       Applications will be invoked using the Ceres launcher. The configuration parameter is
+           ${ceres.context}.app = ${application.id}
+       where ${ceres.context} is given by the configuration parameter 'ceres.context'.
     -->
-    <extensionPoint id="applications"/>
+    <extensionPoint id="applications">
+
+        <!--
+            The application id is given by the 'id' attribute,
+            the application class by the 'class' attribute, e.g.
+
+            <extension point="ceres-core:applications">
+                <application id="MyApp" class="com.acme.MyApp" />
+            </extension>
+
+        -->
+        <application type="com.bc.ceres.core.runtime.RuntimeRunnable" />
+
+    </extensionPoint>
 
     <!--
-       todo - describe
+       serviceProviders: Extension point that provides dynamic service registration ("Service Plugin Pattern").
+       Since Ceres creates private class loaders for modules, they will not be able to dynamically load
+       services registered via the standard JAR method using META-INF/services.
+       Using this extension point, your module can declare itself as a host module for that service, which means
+       it will provide (or knows) a registry for the specified service type.
     -->
     <extensionPoint id="serviceProviders">
-        <serviceProvider></serviceProvider>
+
+        <!--
+            The class name of the service provider interface (SPI).
+            Dependent modules will expose the services they provide in the "usual" JAR way, namely by providing
+            a resource file META-INF/services/${serviceProvider} containing a list of names of classes that
+            implement ${serviceProvider}.
+         -->
+        <serviceProvider type="java.lang.Class"/>
+
+    </extensionPoint>
+
+    <!--
+       adapters: Extension point that provides dynamic object extension ("Adaptable Pattern").
+       Ceres allows for further extensions to existing interfaces at runtime.
+       New functionality can be added to existing interfaces without having to modify every derivative
+       type in and outside of your software.
+    -->
+    <extensionPoint id="adapters">
+
+        <adapter>
+
+            <!--
+                This is the name of an interface or class which will be extended at runtime.
+                Either 'extensionFactory' or 'extensionType' must be given in addition.
+                Usually, but not necessarily, 'extensionType' implements 'com.bc.ceres.core.Extensible'
+                or extends 'com.bc.ceres.core.ExtensibleObject'.
+             -->
+            <extensibleType type="java.lang.Class"/>
+
+            <!--
+                The factory that will be used to create the extension instances for a given instance
+                of type 'extensibleType'.
+                If 'extensionFactory' is not given, then 'extensionType' must be given.
+                See Ceres API documentation on 'com.bc.ceres.core.ExtensionFactory'
+                for more information.
+             -->
+            <extensionFactory type="com.bc.ceres.core.ExtensionFactory"/>
+
+            <!--
+                Can be provided instead of 'extensionFactory'.
+                If 'extensionSubType' is not given, 'extensionType' must have a public no-arg constructor
+                or a public 1-arg constructor that takes an instance of 'extensibleType'.
+                See Ceres API documentation on 'com.bc.ceres.core.SingleTypeExtensionFactory'
+                for more information.
+             -->
+            <extensionType type="java.lang.Class"/>
+
+            <!--
+                If given in addition to 'extensionType', it will be used to create the actual extension instances.
+                Must therefore be a sub-type of 'extensionType' and must have a public no-arg constructor
+                or a public 1-arg constructor that takes an instance of 'extensibleType'.
+                See Ceres API documentation on 'com.bc.ceres.core.SingleTypeExtensionFactory'
+                for more information.
+             -->
+            <extensionSubType type="java.lang.Class"/>
+
+        </adapter>
+
     </extensionPoint>
 
 </module>

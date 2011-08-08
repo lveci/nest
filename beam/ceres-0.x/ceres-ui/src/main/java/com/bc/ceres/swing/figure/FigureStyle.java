@@ -22,6 +22,12 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
 
+/**
+ * A {@link PropertySet} that provides style information for figures.
+ *
+ * @author Norman Fomferra
+ * @since Ceres 0.10
+ */
 public interface FigureStyle extends PropertySet {
 
     String getName();
@@ -68,6 +74,21 @@ public interface FigureStyle extends PropertySet {
     Color getFillColor();
 
     double getFillOpacity();
+
+    /**
+     * Gets the effective point symbol used for drawing of points figures.
+     *
+     * @return The effective point symbol used for drawing.
+     */
+    Symbol getSymbol();
+
+    String getSymbolName();
+
+    String getSymbolImagePath();
+
+    double getSymbolRefX();
+
+    double getSymbolRefY();
 
     String toCssString();
 

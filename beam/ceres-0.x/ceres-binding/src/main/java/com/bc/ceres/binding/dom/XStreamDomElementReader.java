@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
  * todo - add API doc
  *
  * @author Marco Peters
- 
+
  * @since BEAM 4.6
  */
 public class XStreamDomElementReader extends AbstractDocumentReader {

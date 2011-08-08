@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.XStream;
  * todo - add API doc
  *
  * @author Marco Peters
- 
+
  * @since BEAM 4.6
  */
 public class XStreamDomConverter implements DomConverter {

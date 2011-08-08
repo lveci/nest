@@ -16,16 +16,74 @@
 
 package com.bc.ceres.swing.figure;
 
+import com.bc.ceres.core.Assert;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.swing.figure.support.NamedSymbol;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
+/**
+ * Base class for all {@link PointFigure} implementations.
+ * <p/>
+ * Sub-classes have to provide the location and radius of the point in model coordinates.
+ *
+ * @author Norman Fomferra
+ * @since Ceres 0.10
+ */
 public abstract class AbstractPointFigure extends AbstractFigure implements PointFigure {
+    private FigureStyle normalStyle;
+    private FigureStyle selectedStyle;
 
-    protected AbstractPointFigure() {
+    /**
+     * Constructor. The rank will always be {@link Rank#POINT}.
+     *
+     * @param normalStyle   The style used for the "normal" state of the figure.
+     * @param selectedStyle The style used for the "selected" state of the figure.
+     */
+    protected AbstractPointFigure(FigureStyle normalStyle, FigureStyle selectedStyle) {
+        Assert.notNull(normalStyle, "normalStyle");
+        Assert.notNull(selectedStyle, "selectedStyle");
+        this.normalStyle = normalStyle;
+        this.selectedStyle = selectedStyle;
+    }
+
+    /**
+     * @return The style used for the "normal" state of the figure.
+     */
+    public FigureStyle getNormalStyle() {
+        return normalStyle;
+    }
+
+    /**
+     * @return The style used for the "selected" state of the figure.
+     */
+    public FigureStyle getSelectedStyle() {
+        return selectedStyle;
+    }
+
+    /**
+     * @return The effective style used for the current state of the figure.
+     */
+    public FigureStyle getEffectiveStyle() {
+        return isSelected() ? getSelectedStyle() : getNormalStyle();
+    }
+
+    /**
+     * Gets the symbol used for the current state of the figure.
+     *
+     * @return The symbol used to display the point.
+     */
+    @Override
+    public Symbol getSymbol() {
+        final Symbol symbol = getEffectiveStyle().getSymbol();
+        if (symbol != null) {
+            return symbol;
+        }
+        return NamedSymbol.CROSS;
     }
 
     @Override
@@ -44,6 +102,11 @@ public abstract class AbstractPointFigure extends AbstractFigure implements Poin
     }
 
     public abstract void setLocation(double x, double y);
+
+    /**
+     * @return The point radius in model coordinates.
+     */
+    public abstract double getRadius();
 
     @Override
     public final Rank getRank() {
@@ -72,21 +135,56 @@ public abstract class AbstractPointFigure extends AbstractFigure implements Poin
     }
 
     @Override
+    public Rectangle2D getBounds() {
+        final double r = getRadius();
+        return new Rectangle2D.Double(getX() - r, getY() - r, 2 * r, 2 * r);
+    }
+
+    @Override
+    public boolean isCloseTo(Point2D point, AffineTransform m2v) {
+        final double dx = point.getX() - getX();
+        final double dy = point.getY() - getY();
+
+        final double r = getRadius();
+        if (dx * dx + dy * dy < r * r) {
+            return true;
+        }
+
+        final Symbol symbol = getSymbol();
+        if (symbol == null) {
+            return false;
+        }
+
+        final Point2D locationInView = m2v.transform(getLocation(), null);
+        final Point2D pointInView = m2v.transform(point, null);
+        return symbol.isHitBy(pointInView.getX() - locationInView.getX(),
+                              pointInView.getY() - locationInView.getY());
+    }
+
+    @Override
     public final void draw(Rendering rendering) {
-        final Graphics2D g = rendering.getGraphics();
         final Viewport vp = rendering.getViewport();
-        final AffineTransform oldTransform = g.getTransform();
-
+        final AffineTransform m2v = vp.getModelToViewTransform();
+        final Point2D locationInView = m2v.transform(getLocation(), null);
+        final Graphics2D g = rendering.getGraphics();
         try {
-            AffineTransform m2v = vp.getModelToViewTransform();
-            Point2D viewLocation = m2v.transform(getLocation(), null);
-            g.translate(viewLocation.getX(), viewLocation.getY());
-
-            drawPointSymbol(rendering);
+            g.translate(locationInView.getX(), locationInView.getY());
+            drawPoint(rendering);
         } finally {
-            g.setTransform(oldTransform);
+            g.translate(-locationInView.getX(), -locationInView.getY());
         }
     }
 
-    protected abstract void drawPointSymbol(Rendering rendering);
+    /**
+     * Draws the {@link #getSymbol() symbol} and other items that are used to graphically represent
+     * the figure, for example labels.
+     * For convenience, the rendering's drawing context is translated
+     * by the point's location, so that drawing of items can be performed in symbol
+     * coordinates using view units.
+     *
+     * @param rendering The rendering.
+     */
+    protected void drawPoint(Rendering rendering) {
+        getSymbol().draw(rendering, getEffectiveStyle());
+    }
 }
