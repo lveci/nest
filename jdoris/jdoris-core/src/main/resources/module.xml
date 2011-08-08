@@ -1,0 +1,25 @@
+<module>
+
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>jdoris-core</symbolicName>
+    <version>4B-1.0</version>
+    <name>jDoris Core Libs</name>
+    <description>jDoris Core Libs</description>
+
+    <vendor>PPO.labs</vendor>
+    <contactAddress>XXXX</contactAddress>
+    <copyright>XXXX</copyright>
+    <url>XXXX</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+	<dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+
+</module>

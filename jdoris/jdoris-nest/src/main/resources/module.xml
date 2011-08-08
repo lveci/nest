@@ -1,0 +1,156 @@
+<module>
+
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>doris-operators</symbolicName>
+    <version>4B-1.0</version>
+    <name>NEST-DORIS Operators</name>
+    <description>NEST-DORIS InSAR operators</description>
+
+    <vendor>PPO.labs</vendor>
+    <contactAddress>XXXX</contactAddress>
+    <copyright>XXXX</copyright>
+    <url>XXXX</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+	<dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
+        <module>nest-dat</module>
+    </dependency>
+	<dependency>
+        <module>nest-reader-dem</module>
+    </dependency>
+    <dependency>
+        <module>nest-graph-builder</module>
+    </dependency>
+	<dependency>
+        <module>jdoris-core</module>
+    </dependency>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <id>products</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Products</text>
+            <parent>insar</parent>
+        </action>
+
+        <action>
+            <id>filtering</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Filtering</text>
+            <placeAfter>products</placeAfter>
+            <parent>insar</parent>
+        </action>
+
+        <action>
+            <id>unwrapping</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>Unwrapping (coming soon)</text>
+            <placeAfter>filtering</placeAfter>
+            <separatorAfter>true</separatorAfter>
+            <parent>insar</parent>
+        </action>
+
+        <action>
+            <id>sarTools</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>SAR Tools</text>
+            <placeAfter>unwrapping</placeAfter>
+            <parent>insar</parent>
+        </action>
+
+        <action>
+            <id>geoTools</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>GEO Tools</text>
+            <placeAfter>sarTools</placeAfter>
+            <separatorAfter>true</separatorAfter>
+            <parent>insar</parent>
+        </action>
+
+        <action>
+            <id>graphs</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>Processing Graphs</text>
+            <placeAfter>tools</placeAfter>
+            <parent>insar</parent>
+        </action>
+
+        <!--/// PRODUCTS ///-->
+
+        <action>
+            <id>ComplexgIfgOp</id>
+            <class>org.jdoris.nest.dat.ComplexIfgAction</class>
+            <text>Interferogram Formation...</text>
+            <shortDescr>Interferograms from stack with optional subtraction of 'flat earth' phase</shortDescr>
+            <placeBefore>ComplexSRDOp</placeBefore>
+            <parent>products</parent>
+        </action>
+
+        <action>
+            <id>ComplexgSRDOp</id>
+            <class>org.jdoris.nest.dat.ComplexSRDAction</class>
+            <text>Topo Phase Removal...</text>
+            <shortDescr>Compute and subtract topographic phase</shortDescr>
+            <placeBefore>CplxCohOp</placeBefore>
+            <parent>products</parent>
+        </action>
+
+        <action>
+            <id>CplxCohOp</id>
+            <class>org.jdoris.nest.dat.CplxCohAction</class>
+            <text>Coherence Estimation...</text>
+            <shortDescr>Estimate coherence of stack of images</shortDescr>
+            <parent>products</parent>
+        </action>
+
+        <!--/// FILTERING ///-->
+
+        <action>
+            <id>RangeFilterOp</id>
+            <class>org.jdoris.nest.dat.RangeFilterAction</class>
+            <text>Range Filtering (in development)</text>
+            <shortDescr>AzimuthFilterOp</shortDescr>
+            <placeBefore>org.jdoris.nest.dat.AzimuthFilterAction</placeBefore>
+            <parent>filtering</parent>
+        </action>
+
+        <action>
+            <id>AzimuthFilterOp</id>
+            <class>org.jdoris.nest.dat.AzimuthFilterAction</class>
+            <text>Azimuth Filtering...</text>
+            <shortDescr>Filter stack of SAR images in AZIMUTH direction</shortDescr>
+            <parent>filtering</parent>
+        </action>
+
+        <action>
+            <id>PhaseFilterOp</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>Phase Filtering...</text>
+            <shortDescr>Phase filtering of stack of interferograms</shortDescr>
+            <parent>filtering</parent>
+        </action>
+
+    </extension>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <id>dorisproductsHelp</id>
+            <path>doc/help/doris-products.hs</path>
+        </helpSet>
+    </extension>
+</module>

@@ -1,0 +1,2 @@
+org.esa.nest.dataio.generic.GenericWriterPlugIn
+org.esa.nest.dataio.netcdf.NetCDFWriterPlugIn

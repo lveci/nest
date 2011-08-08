@@ -1,0 +1,5 @@
+org.jdoris.nest.gpf.ComplexIfgOp$Spi
+org.jdoris.nest.gpf.CplxCohOp$Spi
+org.jdoris.nest.gpf.RangeFilterOp$Spi
+org.jdoris.nest.gpf.AzimuthFilterOp$Spi
+org.jdoris.nest.gpf.ComplexSRDOp$Spi
