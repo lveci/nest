@@ -68,11 +68,36 @@ public class CreateStackOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(mstBandList, bandNames);
         OperatorUIUtils.initBandList(slvBandList, bandNames);
 
-        OperatorUIUtils.setSelectedListIndices(mstBandList, defaultMasterBandIndices);
-        OperatorUIUtils.setSelectedListIndices(slvBandList, defaultSlaveBandIndices);
+        OperatorUIUtils.setSelectedListIndices(mstBandList, getSelectedIndices(bandNames,
+                                                                (String[])paramMap.get("masterBandNames"),
+                                                                defaultMasterBandIndices));
+        OperatorUIUtils.setSelectedListIndices(slvBandList, getSelectedIndices(bandNames,
+                                                                (String[])paramMap.get("slaveBandNames"),
+                                                                defaultSlaveBandIndices));
 
         resamplingType.setSelectedItem(paramMap.get("resamplingType"));
         extent.setSelectedItem(paramMap.get("extent"));
+    }
+
+    private static ArrayList<Integer> getSelectedIndices(final String[] allBandNames,
+                                                         final String[] selBandNames,
+                                                         final ArrayList<Integer> defaultIndices) {
+        final ArrayList<Integer> bandIndices = new ArrayList<Integer>(2);
+        if(selBandNames != null && selBandNames.length > 0) {
+            int i=0;
+            for(String bandName : allBandNames) {
+                for(String selName : selBandNames) {
+                    if(bandName.equals(selName)) {
+                        bandIndices.add(i);
+                    }
+                }
+                ++i;
+            }
+        }
+
+        if(bandIndices.isEmpty())
+            return defaultIndices;
+        return bandIndices;
     }
 
     @Override

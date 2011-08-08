@@ -32,6 +32,7 @@
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <sourceBands/>
       <externalAuxFile/>
+	  <outputImageInComplex>false</outputImageInComplex>
       <outputImageScaleInDb>false</outputImageScaleInDb>
       <createGammaBand>false</createGammaBand>
       <createBetaBand>false</createBetaBand>

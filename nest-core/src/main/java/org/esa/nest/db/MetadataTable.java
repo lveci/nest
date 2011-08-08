@@ -19,9 +19,11 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.SQLUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -68,19 +70,33 @@ public class MetadataTable implements TableInterface {
     public void validateTable() throws SQLException {
 
         final Statement alterStatement = dbConnection.createStatement();
+        alterStatement.setMaxRows(2);
 
-        // add missing columns to the table
+        final String selectStr = "SELECT * FROM APP.METADATA";
+        final ResultSet results = alterStatement.executeQuery(selectStr);
+
+        final ResultSetMetaData meta = results.getMetaData();
+        final int colCnt = meta.getColumnCount();
+
+        final String[] colNames = new String[colCnt+1];
+        for(int i=1; i<= colCnt; ++i) {
+            colNames[i] = meta.getColumnName(i);
+        }
         final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
         for(MetadataAttribute attrib : attribList) {
             final String name = attrib.getName();
-            final String testStr = "SELECT "+name+" FROM APP.METADATA";
-            try {
-                alterStatement.executeQuery(testStr);
-            } catch(SQLException e) {
-                if(e.getSQLState().equals("42X04")) {
-                    final String alterStr = "ALTER TABLE APP.METADATA ADD " + name +" "+ getDataType(attrib.getDataType());
-                    alterStatement.execute(alterStr);
+            boolean found = false;
+            for(String col : colNames) {
+                if(name.equalsIgnoreCase(col)) {
+                    found = true;
+                    break;
                 }
+            }
+            if(!found) {
+                final int dataType = attrib.getDataType();
+                    final String alterStr = "ALTER TABLE APP.METADATA ADD COLUMN "+ name +" "+ getDataType(dataType)+
+                        " DEFAULT "+ getDefault(dataType)+" NOT NULL";
+                    alterStatement.execute(alterStr);
             }
         }
     }
@@ -116,6 +132,19 @@ public class MetadataTable implements TableInterface {
             return "INTEGER";
         return "VARCHAR(555)";
     }
+
+    private static String getDefault(final int dataType) {
+        if(dataType == ProductData.TYPE_FLOAT32)
+            return "99999";
+        else if(dataType == ProductData.TYPE_FLOAT64)
+            return "99999";
+        else if(dataType == ProductData.TYPE_UTC)
+            return " "; //"TIMESTAMP";
+        else if(dataType < ProductData.TYPE_FLOAT32)
+            return "99999";
+        return " ";
+    }
+
 
     public void prepareStatements() throws SQLException {
         stmtSaveNewRecord = dbConnection.prepareStatement(saveProductStr, Statement.RETURN_GENERATED_KEYS);

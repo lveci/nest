@@ -254,7 +254,8 @@ public class CreateStackOp extends Operator {
             // copy GCPs if found to master band
             final ProductNodeGroup<Placemark> masterGCPgroup = masterProduct.getGcpGroup();
             if (masterGCPgroup.getNodeCount() > 0) {
-                OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+                OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)),
+                                               targetProduct.getGeoCoding());
             }
 
             if (!resamplingType.contains("NONE")) {
@@ -555,7 +556,7 @@ public class CreateStackOp extends Operator {
         final int targImageWidth = targetProduct.getSceneRasterWidth();
         final int targImageHeight = targetProduct.getSceneRasterHeight();
 
-        Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
+        final Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
 
         for (final Product slvProd : sourceProduct) {
             if(slvProd == masterProduct)
@@ -565,7 +566,7 @@ public class CreateStackOp extends Operator {
             final int slvImageWidth = slvProd.getSceneRasterWidth();
             final int slvImageHeight = slvProd.getSceneRasterHeight();
 
-            PixelPos slvPixelPos = new PixelPos();
+            final PixelPos slvPixelPos = new PixelPos();
             boolean foundOverlapPoint = false;
             for(Coordinate c : mstGeometry.getCoordinates()) {
                 getPixelPos((float)c.y, (float)c.x, slvGeoCoding, slvPixelPos);
@@ -573,12 +574,12 @@ public class CreateStackOp extends Operator {
                 if (slvPixelPos.isValid() && slvPixelPos.x >= 0 && slvPixelPos.x < slvImageWidth &&
                     slvPixelPos.y >= 0 && slvPixelPos.y < slvImageHeight) {
 
-                    PixelPos mstPixelPos = new PixelPos();
+                    final PixelPos mstPixelPos = new PixelPos();
                     getPixelPos((float)c.y, (float)c.x, targGeoCoding, mstPixelPos);
                     if (mstPixelPos.isValid() && mstPixelPos.x >= 0 && mstPixelPos.x < targImageWidth &&
                         mstPixelPos.y >= 0 && mstPixelPos.y < targImageHeight) {
 
-                        int[] offset = new int[2];
+                        final int[] offset = new int[2];
                         offset[0] = (int)slvPixelPos.x - (int)mstPixelPos.x;
                         offset[1] = (int)slvPixelPos.y - (int)mstPixelPos.y;
                         slaveOffsettMap.put(slvProd, offset);
@@ -606,18 +607,16 @@ public class CreateStackOp extends Operator {
                throw new OperatorException("Product " + slvProd.getName() + " has no overlap with master product.");
             }
         }
-
-
     }
 
-    private void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, PixelPos pixelPos) {
+    private void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, final PixelPos pixelPos) {
         final GeoPos geoPos = new GeoPos(lat, lon);
         srcGeoCoding.getPixelPos(geoPos, pixelPos);
     }
 
 
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTile(final Band targetBand, final Tile targetTile, final ProgressMonitor pm) throws OperatorException {
         try {
             final Band sourceRaster = sourceRasterMap.get(targetBand);
             final Product srcProduct = sourceRaster.getProduct();
@@ -636,7 +635,7 @@ public class CreateStackOp extends Operator {
                 final int maxX = tx0 + tw;
                 final int maxY = ty0 + th;
 
-                int[] offset = slaveOffsettMap.get(srcProduct);
+                final int[] offset = slaveOffsettMap.get(srcProduct);
                 final int sx0 = Math.min(Math.max(0, tx0 + offset[0]), srcImageWidth - 1);
                 final int sy0 = Math.min(Math.max(0, ty0 + offset[1]), srcImageHeight - 1);
                 final int sw = Math.min(sx0 + tw - 1, srcImageWidth - 1) - sx0 + 1;
@@ -673,7 +672,6 @@ public class CreateStackOp extends Operator {
                                 trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
                         }
                     }
-                    pm.worked(1);
                 }
 
             } else { // with resampling
@@ -690,79 +688,74 @@ public class CreateStackOp extends Operator {
                         srcProduct.getSceneRasterWidth(),
                         srcProduct.getSceneRasterHeight());
 
-                collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+                collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile);
             }
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
-    private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,
-                                     Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        pm.beginTask(MessageFormat.format("collocating band {0}", sourceBand.getName()), targetTile.getHeight());
-        try {
-            final RasterDataNode targetBand = targetTile.getRasterDataNode();
-            final Rectangle targetRectangle = targetTile.getRectangle();
-            final ProductData trgBuffer = targetTile.getDataBuffer();
+    private void collocateSourceBand(final RasterDataNode sourceBand, final Rectangle sourceRectangle,
+                                     final PixelPos[] sourcePixelPositions,
+                                     final Tile targetTile) throws OperatorException {
 
-            final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
-            final int maxX = targetRectangle.x + targetRectangle.width;
-            final int maxY = targetRectangle.y + targetRectangle.height;
+        final RasterDataNode targetBand = targetTile.getRasterDataNode();
+        final Rectangle targetRectangle = targetTile.getRectangle();
+        final ProductData trgBuffer = targetTile.getDataBuffer();
 
-            if (sourceRectangle != null) {
-                final Product srcProduct = sourceBand.getProduct();
-                final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
-                final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
+        final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
+        final int maxX = targetRectangle.x + targetRectangle.width;
+        final int maxY = targetRectangle.y + targetRectangle.height;
 
-                final Resampling resampling;
-                if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
-                    resampling = Resampling.NEAREST_NEIGHBOUR;
-                } else {
-                    resampling = selectedResampling;
-                }
-                final Resampling.Index resamplingIndex = resampling.createIndex();
+        if (sourceRectangle != null) {
+            final Product srcProduct = sourceBand.getProduct();
+            final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
+            final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
 
-                final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle);
-                final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
-
-                for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                        final PixelPos sourcePixelPos = sourcePixelPositions[index];
-
-                        final int trgIndex = targetTile.getDataBufferIndex(x, y);
-                        if (sourcePixelPos != null) {
-                            resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
-                            try {
-                                float sample = resampling.resample(resamplingRaster, resamplingIndex);
-                                if (Float.isNaN(sample)) {
-                                    sample = noDataValue;
-                                }
-                                trgBuffer.setElemDoubleAt(trgIndex, sample);
-                            } catch (Exception e) {
-                                throw new OperatorException(e.getMessage());
-                            }
-                        } else {
-                            trgBuffer.setElemDoubleAt(trgIndex, noDataValue);
-                        }
-                    }
-                    pm.worked(1);
-                }
-                sourceTile.getDataBuffer().dispose();
+            final Resampling resampling;
+            if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
+                resampling = Resampling.NEAREST_NEIGHBOUR;
             } else {
-                for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                    for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                        trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
+                resampling = selectedResampling;
+            }
+            final Resampling.Index resamplingIndex = resampling.createIndex();
+
+            final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle);
+            final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
+
+            for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
+                    final PixelPos sourcePixelPos = sourcePixelPositions[index];
+
+                    final int trgIndex = targetTile.getDataBufferIndex(x, y);
+                    if (sourcePixelPos != null) {
+                        resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
+                                sourceRasterWidth, sourceRasterHeight, resamplingIndex);
+                        try {
+                            float sample = resampling.resample(resamplingRaster, resamplingIndex);
+                            if (Float.isNaN(sample)) {
+                                sample = noDataValue;
+                            }
+                            trgBuffer.setElemDoubleAt(trgIndex, sample);
+                        } catch (Exception e) {
+                            throw new OperatorException(e.getMessage());
+                        }
+                    } else {
+                        trgBuffer.setElemDoubleAt(trgIndex, noDataValue);
                     }
-                    pm.worked(1);
                 }
             }
-        } finally {
-            pm.done();
+            sourceTile.getDataBuffer().dispose();
+        } else {
+            for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
+                    trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
+                }
+            }
         }
     }
 
-    private static Rectangle getBoundingBox(PixelPos[] pixelPositions, int maxWidth, int maxHeight) {
+    private static Rectangle getBoundingBox(final PixelPos[] pixelPositions, final int maxWidth, final int maxHeight) {
         int minX = Integer.MAX_VALUE;
         int maxX = -Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;

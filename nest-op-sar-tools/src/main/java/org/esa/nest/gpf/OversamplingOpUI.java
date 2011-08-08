@@ -56,11 +56,20 @@ public class OversamplingOpUI extends BaseOperatorUI {
     private final JLabel azimuthSpacingLabel = new JLabel("Azimuth Spacing (m):");
     private final JLabel outputImageByLabel = new JLabel("Output Image By:     ");
 
+    private final JCheckBox usePRFTileSizeCheckBox = new JCheckBox("Use PRF Tile Size");
+    private Boolean usePRFTileSize = true;
+
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
+
+        usePRFTileSizeCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    usePRFTileSize = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
 
         return panel;
     }
@@ -76,6 +85,12 @@ public class OversamplingOpUI extends BaseOperatorUI {
         heightRatio.setText(String.valueOf(paramMap.get("heightRatio")));
         rangeSpacing.setText(String.valueOf(paramMap.get("rangeSpacing")));
         azimuthSpacing.setText(String.valueOf(paramMap.get("azimuthSpacing")));
+
+        usePRFTileSize = (Boolean)paramMap.get("usePRFTileSize");
+        if(usePRFTileSize != null) {
+            usePRFTileSizeCheckBox.setSelected(usePRFTileSize);
+            usePRFTileSizeCheckBox.getModel().setPressed(usePRFTileSize);
+        }
     }
 
     public UIValidation validateParameters() {
@@ -94,6 +109,7 @@ public class OversamplingOpUI extends BaseOperatorUI {
         paramMap.put("heightRatio", Float.parseFloat(heightRatio.getText()));
         paramMap.put("rangeSpacing", Float.parseFloat(rangeSpacing.getText()));
         paramMap.put("azimuthSpacing", Float.parseFloat(azimuthSpacing.getText()));
+        paramMap.put("usePRFTileSize", usePRFTileSize);
     }
 
     private JComponent createPanel() {
@@ -125,6 +141,9 @@ public class OversamplingOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, rangeSpacingLabel, rangeSpacing);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, azimuthSpacingLabel, azimuthSpacing);
+
+        gbc.gridy++;
+        contentPane.add(usePRFTileSizeCheckBox, gbc);
 
         updateOutputImageBy(true);
         DialogUtils.fillPanel(contentPane, gbc);

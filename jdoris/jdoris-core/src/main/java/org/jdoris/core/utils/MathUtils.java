@@ -4,6 +4,8 @@ import org.jblas.DoubleMatrix;
 import org.jdoris.core.Constants;
 import org.jdoris.core.Window;
 
+import java.util.Random;
+
 public class MathUtils {
 
     //    static Logger logger = Logger.getLogger(MathUtils.class.getName());
@@ -103,6 +105,10 @@ public class MathUtils {
         return new DoubleMatrix(inMatrix.toArray()).transpose();
     }
 
+    public static int randomIntInRange(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt(max - min + 1) + min;
+    }
 
     /// only for legacy support ///
     @Deprecated

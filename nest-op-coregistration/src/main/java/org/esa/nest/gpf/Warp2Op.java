@@ -102,6 +102,7 @@ public class Warp2Op extends Operator {
     private Band masterBand = null;
     private Band masterBand2 = null;
     private boolean complexCoregistration = false;
+    private boolean warpDataAvailable = false;
 
     public static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
     public static final String BILINEAR = "Bilinear interpolation";
@@ -207,7 +208,8 @@ public class Warp2Op extends Operator {
 
             // copy master GCPs
             OperatorUtils.copyGCPsToTarget(masterGCPGroup,
-                    targetProduct.getGcpGroup(targetProduct.getBand(masterBand.getName())));
+                    targetProduct.getGcpGroup(targetProduct.getBand(masterBand.getName())),
+                    targetProduct.getGeoCoding());
 
         } catch (Throwable e) {
             openResidualsFile = true;
@@ -227,17 +229,19 @@ public class Warp2Op extends Operator {
 
     private void addSlaveGCPs(final WarpData warpData, final String bandName) {
 
+        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetProduct.getBand(bandName));
         targetGCPGroup.removeAll();
 
         for (int i = 0; i < warpData.slaveGCPList.size(); ++i) {
             final Placemark sPin = warpData.slaveGCPList.get(i);
-            final Placemark tPin = new Placemark(sPin.getName(),
+            final Placemark tPin = Placemark.createPointPlacemark(GcpDescriptor.getInstance(),
+                    sPin.getName(),
                     sPin.getLabel(),
                     sPin.getDescription(),
                     sPin.getPixelPos(),
                     sPin.getGeoPos(),
-                    sPin.getSymbol());
+                    targetGeoCoding);
 
             targetGCPGroup.add(tPin);
         }
@@ -303,8 +307,23 @@ public class Warp2Op extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.coregistered_stack, 1);
     }
 
-    private synchronized void getWarpData(final ProgressMonitor pm) throws OperatorException {
-        if (!warpDataMap.isEmpty()) return;
+    private synchronized void getWarpData(
+            final Set<Band> keySet, final Rectangle targetRectangle, final ProgressMonitor pm) throws OperatorException {
+
+        if (warpDataAvailable) {
+            return;
+        }
+
+        // find first real slave band
+        for(Band targetBand : keySet) {
+            if(targetBand.getName().equals(processedSlaveBand)) {
+                final Band srcBand = sourceRasterMap.get(targetBand);
+                if(srcBand != null) {
+                    final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle);
+                    break;
+                }
+            }
+        }
 
         // for all slave bands or band pairs compute a warp
         final int numSrcBands = sourceProduct.getNumBands();
@@ -360,6 +379,7 @@ public class Warp2Op extends Operator {
         }
 
         announceGCPWarning(pm);
+        warpDataAvailable = true;
     }
 
     /**
@@ -384,18 +404,8 @@ public class Warp2Op extends Operator {
         try {
             final Set<Band> keySet = targetTileMap.keySet();
 
-            if(warpDataMap.isEmpty()) {
-                // find first real slave band
-                for(Band targetBand : keySet) {
-                    if(targetBand.getName().equals(processedSlaveBand)) {
-                        final Band srcBand = sourceRasterMap.get(targetBand);
-                        if(srcBand != null) {
-                            final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle);
-                            getWarpData(pm);
-                            break;
-                        }
-                    }
-                }
+            if(!warpDataAvailable) {
+                getWarpData(keySet, targetRectangle, pm);
 
                 if (openResidualsFile) {
                     final File residualsFile = getResidualsFile(sourceProduct);
@@ -421,7 +431,7 @@ public class Warp2Op extends Operator {
 
                 // create source image
                 final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
-                getWarpData(pm);
+                //getWarpData(pm);
 
                 if(pm.isCanceled())
                     return;

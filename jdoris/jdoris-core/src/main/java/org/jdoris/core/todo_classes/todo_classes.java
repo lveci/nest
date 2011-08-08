@@ -105,7 +105,7 @@ public class todo_classes {
         int finumlines;             // number of lines input
         // ______ method goldstein ______
         double alpha;                  // weighting
-        long blocksize;              // blocksize filtered blocks
+        long blocksize;              // blockSize filtered blocks
         long overlap;                // half overlap
         // ______ method goldstein, spatial conv. and spectral ______
         //        matrix<real4> kernel;                 // e.g. [1 1 1]
@@ -115,14 +115,48 @@ public class todo_classes {
     }
 
     public class input_filtazi {
-        int method;                 // method selector
-        long fftlength;              // length per buffer
-        long overlap;                // 0.5overlap each buffer
-        double hammingalpha;           // alpha for hamming, 1 is no
-        File foname;        // output filename passed to routine
-        File fomaster;      // output filename
-        File foslave;       // output filename
-        long oformatflag;            // output format [cr4] ci16
+        String method;                 // method selector
+        long fftLength;                // length per buffer
+        long overlap;                  // 0.5overlap each buffer
+        double hammingAlpha;           // alpha for hamming, 1 is no
+
+        public String getMethod() {
+            return method;
+        }
+
+        public void setMethod(String method) {
+            this.method = method;
+        }
+
+        public long getFftLength() {
+            return fftLength;
+        }
+
+        public void setFftLength(long fftLength) {
+            this.fftLength = fftLength;
+        }
+
+        public long getOverlap() {
+            return overlap;
+        }
+
+        public void setOverlap(long overlap) {
+            this.overlap = overlap;
+        }
+
+        public double getHammingAlpha() {
+            return hammingAlpha;
+        }
+
+        public void setHammingAlpha(double hammingAlpha) {
+            this.hammingAlpha = hammingAlpha;
+        }
+
+
+        //        File foname;        // output filename passed to routine
+//        File fomaster;      // output filename
+//        File foslave;       // output filename
+//        long oformatflag;            // output format [cr4] ci16
     }
 
     public class input_filtrange {
@@ -131,7 +165,7 @@ public class todo_classes {
         boolean doweightcorrel;     // weighting of correlation values
         long nlmean;                // number of lines to take mean of
         long fftlength;             // length for adaptive
-        long overlap;               // half overlap between blocks of fftlength
+        long overlap;               // half overlap between blocks of fftLength
         double hammingalpha;        // alpha for hamming
         double SNRthreshold;        // spectral peak estimation
         double terrainslope;        // [rad] porbits method only
@@ -205,18 +239,18 @@ public class todo_classes {
         //  int16       method;                 // method selector
           char          firefdem[4*ONE27];      // input filename reference dem
           int16         iformatflag;            // input format [signed short]
-          uint          demrows;                // number of
-          uint          demcols;                // number of
-          real8         demdeltalat;            // radians
-          real8         demdeltalon;            // radians
-          real8         demlatleftupper;        // radians
-          real8         demlonleftupper;        // radians
-          real8         demnodata;              // identifier/flag
+          uint          demRows;                // number of
+          uint          demCols;                // number of
+          real8         demDeltaLat;            // radians
+          real8         demDeltaLon;            // radians
+          real8         demLatLeftUpper;        // radians
+          real8         demLonLeftUpper;        // radians
+          real8         demNodata;              // identifier/flag
         //  real8               extradense;             // extra interpolation factor (4)
           char          forefdem[4*ONE27];      // output filename reference phase
           char          foh2ph[4*ONE27];                // output perp. baseline, added by FvL
           char          forefdemhei[4*ONE27];   // output filename DEM in radarcoord.
-          bool          includerefpha;          // flag to include_flatearth correction
+          bool          includeRefPha;          // flag to include_flatearth correction
           char          fodem[4*ONE27];         // flag+name output of cropped dem
           char          fodemi[4*ONE27];                // flag+name output of interpolated dem
         */

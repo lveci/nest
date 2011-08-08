@@ -2,6 +2,7 @@ package org.jdoris.core.io;
 
 import org.apache.log4j.Logger;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.jdoris.core.utils.DateUtils;
 
 import java.io.*;
 import java.text.ParseException;
@@ -214,8 +215,14 @@ public final class ResFile {
         return Double.parseDouble(parseStringValue(key));
     }
 
-    public ProductData.UTC parseTimeValue(String key) throws ParseException {
+    public ProductData.UTC parseDatTimeValue(String key) throws ParseException {
         return ProductData.UTC.parse(parseStringValue(key));
+    }
+
+    public double parseTimeValue(final String key) throws ParseException {
+        // assume format:  02-AUG-1995 21:16:42.210
+        final String dateTime = parseStringValue(key);
+        return DateUtils.dateTimeToSecOfDay(dateTime);
     }
 
     public double[][] parseOrbit() throws Exception {

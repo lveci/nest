@@ -39,6 +39,7 @@ public class Radarsat2Calibrator implements Calibrator {
     private Product sourceProduct;
     private Product targetProduct;
 
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
     private boolean isComplex = false;
     private TiePointGrid incidenceAngle = null;
@@ -62,6 +63,13 @@ public class Radarsat2Calibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public Radarsat2Calibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**
@@ -274,16 +282,25 @@ public class Radarsat2Calibrator implements Calibrator {
                 } else if (bandUnit == Unit.UnitType.INTENSITY) {
                     sigma = srcData1.getElemDoubleAt(index);
                 } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-                    i = srcData1.getElemDoubleAt(index);
-                    q = srcData2.getElemDoubleAt(index);
-                    sigma = i * i + q * q;
+                    if (outputImageInComplex) {
+                        // the sigma below is actually i or q, we still call it sigma just for convenient
+                        sigma = srcData1.getElemDoubleAt(index);
+                    } else {
+                        i = srcData1.getElemDoubleAt(index);
+                        q = srcData2.getElemDoubleAt(index);
+                        sigma = i * i + q * q;
+                    }
                 } else {
                     throw new OperatorException("Calibration: unhandled unit");
                 }
 
                 if(isComplex) {
                     if(gains != null) {
-                        sigma /= (gains[x + subsetOffsetX] * gains[x + subsetOffsetX]);
+                        if (outputImageInComplex) {
+                            sigma /= gains[x + subsetOffsetX];
+                        } else {
+                            sigma /= (gains[x + subsetOffsetX] * gains[x + subsetOffsetX]);
+                        }
                     }
                 } else {
                     sigma += offset;

@@ -124,8 +124,7 @@ public class CreateLandMaskOpUI extends BaseOperatorUI {
 
     private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
+        final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         contentPane.add(new JLabel("Source Bands:"), gbc);

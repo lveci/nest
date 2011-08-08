@@ -18,6 +18,9 @@ package org.esa.nest.util;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.ResultSetMetaData;
 import java.util.Calendar;
 
 /**
@@ -64,5 +67,18 @@ public class SQLUtils {
             query = query.replaceAll(tok, tableName+'.'+tok);
         }
         return query;
+    }
+
+    public static void printResults(final ResultSet results) throws SQLException {
+        while(results.next()) {
+            final ResultSetMetaData meta = results.getMetaData();
+            final int colCnt = meta.getColumnCount();
+
+            for(int i=1; i<= colCnt; ++i) {
+                final String str = results.getString(i);
+                System.out.print(meta.getColumnName(i)+":"+str+" ");
+            }
+            System.out.println();
+        }
     }
 }

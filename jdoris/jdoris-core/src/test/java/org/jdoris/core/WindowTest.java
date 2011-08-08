@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.awt.*;
+
 /**
  * User: pmar@ppolabs.com
  * Date: 2/18/11
@@ -12,6 +14,7 @@ import org.junit.Test;
 public class WindowTest {
 
     private final static Window win_EXPECTED = new Window(11, 21, 103, 114);
+    private final static Rectangle rect = new Rectangle(103, 11, 11, 10);
     private static Window win_ACTUAL;
 
 
@@ -31,6 +34,12 @@ public class WindowTest {
         Assert.assertEquals(win_EXPECTED.pixlo, win_ACTUAL.pixlo);
         Assert.assertEquals(win_EXPECTED.pixhi, win_ACTUAL.pixhi);
 
+    }
+
+    @Test
+    public void testConstructorRectangle() throws Exception {
+        Window win_rectangle_EXPECTED = new Window(rect);
+        Assert.assertEquals(win_EXPECTED, win_rectangle_EXPECTED);
     }
 
     @Test

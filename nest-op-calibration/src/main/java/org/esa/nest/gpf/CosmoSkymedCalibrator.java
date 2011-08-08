@@ -38,6 +38,7 @@ public class CosmoSkymedCalibrator implements Calibrator {
     private Product sourceProduct;
     private Product targetProduct;
 
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
 
     private MetadataElement absRoot = null;
@@ -65,6 +66,13 @@ public class CosmoSkymedCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public CosmoSkymedCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**

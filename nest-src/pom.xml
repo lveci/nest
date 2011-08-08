@@ -18,6 +18,61 @@
     <description>Adds the resources for the runtime environment.</description>
     <version>${nest.version}</version>
 
+	<profiles>
+	  <profile>
+	    <id>windows32</id> 
+		<activation>
+		  <os>
+			<family>windows</family>
+			<arch>x86</arch>
+		  </os>
+		</activation>
+		<properties>
+			<windows32>true</windows32>
+			<osFolder>main/bin/win/</osFolder>
+		</properties>
+	  </profile>
+	  <profile>
+	    <id>windows64</id> 
+		<activation>
+		  <os>
+			<family>windows</family>
+			<arch>AMD64</arch> 
+		  </os>
+		</activation>
+		<properties>
+			<windows64>true</windows64>
+			<osFolder>main/bin/win64/</osFolder>
+		</properties>
+	  </profile>
+	  <profile>
+	    <id>linux32</id> 
+		<activation>
+		  <os>
+			<family>unix</family>
+			<arch>i386</arch>
+		  </os>
+		</activation>
+		<properties>
+			<linux32>true</linux32>
+			<osFolder>main/bin/linux/</osFolder>
+		</properties>
+	  </profile>
+	  <profile>
+	    <id>linux64</id> 
+		<activation>
+		  <os>
+			<family>unix</family>
+			<arch>AMD64</arch>
+		  </os>
+		</activation>
+		<properties>
+			<linux64>true</linux64>
+			<osFolder>main/bin/linux64/</osFolder>
+		</properties>
+	  </profile>
+	</profiles>
+	
 	<build>
         <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
 		<pluginManagement>
@@ -40,10 +95,7 @@
 							  <filtering>false</filtering>
 							</resource>
 							<resource>
-							  <directory>main/bin/win/</directory>
-							</resource>
-							<resource>
-							  <directory>main/bin/linux/</directory>
+							  <directory>${osFolder}</directory>
 							</resource>
 						  </resources>              
 						</configuration>            
@@ -58,14 +110,9 @@
 						  <outputDirectory>${outputdir}/lib</outputDirectory>
 						  <resources>          
 							<resource>
-							  <directory>main/bin/win/</directory>
+							  <directory>${osFolder}</directory>
 							  <includes>
 								<include>**/*.dll</include>
-							  </includes>
-							</resource>
-							<resource>
-							  <directory>main/bin/linux/</directory>
-							  <includes>
 								<include>**/*.so</include>
 							  </includes>
 							</resource>

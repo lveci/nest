@@ -28,6 +28,7 @@
       </sourceBands>
       <auxFile>Latest Auxiliary File</auxFile>
       <externalAuxFile/>
+	  <outputImageInComplex>false</outputImageInComplex>
       <outputImageScaleInDb>false</outputImageScaleInDb>
       <createGammaBand>false</createGammaBand>
       <createBetaBand>false</createBetaBand>

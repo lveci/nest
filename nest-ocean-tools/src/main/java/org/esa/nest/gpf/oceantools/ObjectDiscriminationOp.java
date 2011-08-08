@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.TileIndex;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Document;
@@ -221,60 +222,66 @@ public class ObjectDiscriminationOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int tx0 = targetTileRectangle.x;
+            final int ty0 = targetTileRectangle.y;
+            final int tw  = targetTileRectangle.width;
+            final int th  = targetTileRectangle.height;
+            final ProductData trgData = targetTile.getDataBuffer();
+            //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int tx0 = targetTileRectangle.x;
-        final int ty0 = targetTileRectangle.y;
-        final int tw  = targetTileRectangle.width;
-        final int th  = targetTileRectangle.height;
-        final ProductData trgData = targetTile.getDataBuffer();
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+            final int x0 = Math.max(tx0 - 10, 0);
+            final int y0 = Math.max(ty0 - 10, 0);
+            final int w  = Math.min(tw + 20, sourceImageWidth);
+            final int h  = Math.min(th + 20, sourceImageHeight);
+            final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final int x0 = Math.max(tx0 - 10, 0);
-        final int y0 = Math.max(ty0 - 10, 0);
-        final int w  = Math.min(tw + 20, sourceImageWidth);
-        final int h  = Math.min(th + 20, sourceImageHeight);
-        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
+            final ProductData srcData = sourceTile.getDataBuffer();
+            final int[][] pixelsScanned = new int[h][w];
+            final List<ShipRecord> clusterList = bandClusterLists.get(targetBand.getName());
 
-        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
-        final ProductData srcData = sourceTile.getDataBuffer();
-        final int[][] pixelsScanned = new int[h][w];
-        final List<ShipRecord> clusterList = bandClusterLists.get(targetBand.getName());
+            final Band bitMaskBand = bandMap.get(sourceBand);
+            final Tile bitMaskTile = getSourceTile(bitMaskBand, sourceTileRectangle);
+            final ProductData bitMaskData = bitMaskTile.getDataBuffer();
 
-        final Band bitMaskBand = bandMap.get(sourceBand);
-        final Tile bitMaskTile = getSourceTile(bitMaskBand, sourceTileRectangle);
-        final ProductData bitMaskData = bitMaskTile.getDataBuffer();
+            final TileIndex trgIndex = new TileIndex(targetTile);
+            final TileIndex srcIndex = new TileIndex(sourceTile);    // src and trg tile are different size
 
-        final int maxy = ty0 + th;
-        final int maxx = tx0 + tw;
-        for (int ty = ty0; ty < maxy; ty++) {
-            for (int tx = tx0; tx < maxx; tx++) {
+            final int maxy = ty0 + th;
+            final int maxx = tx0 + tw;
+            for (int ty = ty0; ty < maxy; ty++) {
+                trgIndex.calculateStride(ty);
+                srcIndex.calculateStride(ty);
+                for (int tx = tx0; tx < maxx; tx++) {
 
-                final int srcIndex = sourceTile.getDataBufferIndex(tx, ty);
-                final int tgtIndex = targetTile.getDataBufferIndex(tx, ty);
+                    final int srcIdx = srcIndex.getIndex(tx);
 
-                if (pixelsScanned[ty - y0][tx - x0] == 0 &&
-                    bitMaskData.getElemIntAt(srcIndex) == 1) {
+                    if (pixelsScanned[ty - y0][tx - x0] == 0 &&
+                        bitMaskData.getElemIntAt(srcIdx) == 1) {
 
-                    final List<PixelPos> clusterPixels = new ArrayList<PixelPos>();
-                    clustering(tx, ty, x0, y0, w, h, bitMaskData, bitMaskTile, pixelsScanned, clusterPixels);
+                        final List<PixelPos> clusterPixels = new ArrayList<PixelPos>();
+                        clustering(tx, ty, x0, y0, w, h, bitMaskData, bitMaskTile, pixelsScanned, clusterPixels);
 
-                    final ShipRecord record = generateRecord(x0, y0, w, h, clusterPixels);
+                        final ShipRecord record = generateRecord(x0, y0, w, h, clusterPixels);
 
-                    final double size = Math.sqrt(record.length*record.length + record.width*record.width);
-                    if (size >= minTargetSizeInMeter && size <= maxTargetSizeInMeter) {
-                        getClusterIntensity(clusterPixels, srcData, sourceTile, record);
-                        clusterList.add(record);
+                        final double size = Math.sqrt(record.length*record.length + record.width*record.width);
+                        if (size >= minTargetSizeInMeter && size <= maxTargetSizeInMeter) {
+                            getClusterIntensity(clusterPixels, srcData, sourceTile, record);
+                            clusterList.add(record);
+                        }
                     }
+                    trgData.setElemDoubleAt(trgIndex.getIndex(tx), srcData.getElemDoubleAt(srcIdx));
                 }
-
-                trgData.setElemDoubleAt(tgtIndex, srcData.getElemDoubleAt(srcIndex));
             }
-        }
 
-        clusteringPerformed = true;
+            clusteringPerformed = true;
+       } catch (Throwable e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+       }
     }
 
     /**

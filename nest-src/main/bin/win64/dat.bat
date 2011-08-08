@@ -8,10 +8,12 @@ IF [%NEST_HOME:~-1%]==[/] set NEST_HOME=%NEST_HOME:~0,-1%
 IF [%NEST_HOME:~-1%]==[\] set NEST_HOME=%NEST_HOME:~0,-1%
 
 "%NEST_HOME%\jre\bin\java.exe" ^
-    -server -Xms512M -Xmx4096M -XX:CompileThreshold=100 -Xverify:none ^
+    -server -Xms512M -Xmx3096M -XX:CompileThreshold=100 -Xverify:none ^
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio ^
     -Dceres.context=nest ^
     -Dnest.debug=false ^
+    -Dnest.consoleLog=true ^
+    -Dnest.logLevel=INFO ^
     "-Dnest.home=%NEST_HOME%" ^
     -jar "%NEST_HOME%\bin\ceres-launcher.jar" -d %*
 

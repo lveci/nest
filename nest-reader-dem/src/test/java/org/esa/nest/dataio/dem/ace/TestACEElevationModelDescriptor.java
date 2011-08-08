@@ -22,7 +22,7 @@ public class TestACEElevationModelDescriptor extends TestCase {
     final ACEElevationModelDescriptor _descriptor = new ACEElevationModelDescriptor();
 
     public void testConstantProperties() {
-        assertEquals("ACE", _descriptor.getName());
+        assertEquals("ACE30", _descriptor.getName());
     }
 
     public void testFilenameCreation() {

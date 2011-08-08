@@ -148,6 +148,9 @@ public class ProductEntry {
     }
 
     private static GeoPos[] getGeoBoundary(final Product product) {
+        final GeoCoding gc = product.getGeoCoding();
+        if (gc == null)
+            return new GeoPos[0];
         final int step = Math.max(300, (product.getSceneRasterWidth() + product.getSceneRasterHeight()) / 20);
         final GeoPos[] geoPoints = ProductUtils.createGeoBoundary(product, null, step, true);
         ProductUtils.normalizeGeoPolygon(geoPoints);

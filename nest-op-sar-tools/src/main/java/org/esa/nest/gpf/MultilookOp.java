@@ -228,7 +228,8 @@ public final class MultilookOp extends Operator {
                                     targetImageWidth,
                                     targetImageHeight);
 
-        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
+        OperatorUtils.addSelectedBands(
+                sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, outputIntensity);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -338,7 +339,8 @@ public final class MultilookOp extends Operator {
         for (int ty = ty0; ty < maxy; ty++) {
             trgIndex.calculateStride(ty);
             for (int tx = tx0; tx < maxx; tx++) {
-                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit, outputIntensity);
+                meanValue = getMeanValue(
+                        tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit, outputIntensity);
                 trgData.setElemDoubleAt(trgIndex.getIndex(tx), meanValue);
             }
         }

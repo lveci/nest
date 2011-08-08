@@ -188,8 +188,9 @@ public class TestUtils {
 
         final float[] expectedValues = new float[10000];
         expectedBand.readPixels(100, 101, 100, 99, expectedValues, ProgressMonitor.NULL);
-        if(!Arrays.equals(floatValues, expectedValues))
-                throwErr("Pixels are different");
+        if(!Arrays.equals(floatValues, expectedValues)) {
+                throwErr("Pixels are different in file "+expectedPath);
+        }
 
         // compare updated metadata
         compareMetadata(targetProduct, expectedProduct, excemptionList);
@@ -373,7 +374,7 @@ public class TestUtils {
             } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
-                    System.out.println("Reading "+ file.toString());
+                    //System.out.println("Reading "+ file.toString());
 
                     final Product product = reader.readProductNodes(file, null);
                     if(contains(product.getProductType(), productTypeExemptions))

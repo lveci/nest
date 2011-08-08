@@ -14,6 +14,7 @@
 		<gtopo30DEMDataPath value="${demPath}\GTOPO30\dem"/>
 		<srtm3GeoTiffDEMDataPath value="${demPath}\SRTM_DEM\tiff"/>
 		<AsterDEMDataPath value="${demPath}\ASTER"/>
+		<Getasse30DEMDataPath value="${demPath}\GETASSE30"/>
 		
 		<srtm3GeoTiffDEM_FTP value="xftp.jrc.it"/>
 		<srtm3GeoTiffDEM_remotePath value="/pub/srtmV4/tiff/"/>

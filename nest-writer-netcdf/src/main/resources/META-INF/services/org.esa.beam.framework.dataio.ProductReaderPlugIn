@@ -1,4 +1,0 @@
-org.esa.nest.dataio.NetCDFReaderPlugIn
-org.esa.nest.dataio.hdf.HDFReaderPlugIn
-org.esa.nest.dataio.cosmo.CosmoSkymedReaderPlugIn
-org.esa.nest.dataio.gtopo30.GTOPO30ReaderPlugIn

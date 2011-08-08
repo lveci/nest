@@ -488,7 +488,8 @@ public class UndersamplingOp extends Operator {
                                     targetImageWidth,
                                     targetImageHeight);
 
-        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
+        OperatorUtils.addSelectedBands(
+                sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);

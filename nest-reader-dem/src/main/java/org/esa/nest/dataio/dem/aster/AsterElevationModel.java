@@ -19,6 +19,7 @@ import com.bc.io.FileUnpacker;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
@@ -38,6 +39,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     private static final int NUM_Y_TILES = AsterElevationModelDescriptor.NUM_Y_TILES;
     private static final int DEGREE_RES = AsterElevationModelDescriptor.DEGREE_RES;
     private static final int NUM_PIXELS_PER_TILE = AsterElevationModelDescriptor.PIXEL_RES;
+    private static final int NO_DATA_VALUE = AsterElevationModelDescriptor.NO_DATA_VALUE;
     private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
     private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
@@ -48,7 +50,6 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     private final Resampling resampling;
     private final Resampling.Index resamplingIndex;
     private final Resampling.Raster resamplingRaster;
-    private final float noDataValue;
 
     private final List<AsterElevationTile> elevationTileCache;
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
@@ -60,7 +61,6 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
         resamplingIndex = resampling.createIndex();
         resamplingRaster = this;
         elevationFiles = createElevationFiles();
-        noDataValue = this.descriptor.getNoDataValue();
         this.elevationTileCache = new ArrayList<AsterElevationTile>();
         unpackTileBundles();
     }
@@ -80,7 +80,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     public synchronized float getElevation(GeoPos geoPos) throws Exception {
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 83.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
         if(pixelY < 0)
-            return noDataValue;
+            return NO_DATA_VALUE;
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
 
         resampling.computeIndex(pixelX, pixelY,
@@ -90,9 +90,23 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
         final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
         if (Float.isNaN(elevation)) {
-            return noDataValue;
+            return NO_DATA_VALUE;
         }
         return elevation;
+    }
+
+    @Override
+    public synchronized PixelPos getIndex(GeoPos geoPos) throws Exception {
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 83.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
+        return new PixelPos(pixelX, pixelY);
+    }
+
+    @Override
+    public synchronized GeoPos getGeoPos(PixelPos pixelPos) throws Exception {
+        float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 83.0f;
+        float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+        return new GeoPos(pixelLat, pixelLon);
     }
 
     public void dispose() {
@@ -115,7 +129,8 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
         return RASTER_HEIGHT;
     }
 
-    public float getSample(int pixelX, int pixelY) throws IOException {
+    @Override
+    public synchronized float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
         final AsterElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
@@ -125,7 +140,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
         final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
         final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);
-        if (sample == noDataValue) {
+        if (sample == NO_DATA_VALUE) {
             return Float.NaN;
         }
         return sample;

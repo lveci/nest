@@ -71,7 +71,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.20 $ $Date: 2011-04-08 18:23:59 $
+ * @version $Revision: 1.21 $ $Date: 2011-06-21 20:59:57 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -251,7 +251,7 @@ public class NestWWToolView extends AbstractToolView {
                 mainPane.add(tabbedPane, BorderLayout.EAST);
             }
         } catch(Throwable e) {
-            System.out.println("Can't load openGL");   
+            System.out.println("Can't load openGL "+e.getMessage());   
         }
     }
 

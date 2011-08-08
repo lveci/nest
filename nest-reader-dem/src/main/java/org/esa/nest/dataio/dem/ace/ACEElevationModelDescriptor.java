@@ -15,6 +15,7 @@
  */
 package org.esa.nest.dataio.dem.ace;
 
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -29,7 +30,7 @@ import java.net.URL;
 
 public class ACEElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    private static final String NAME = "ACE";
+    private static final String NAME = "ACE30";
     private static final String DB_FILE_SUFFIX = ".ACE";
     private static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
     public static final int NUM_X_TILES = 24;
@@ -37,6 +38,8 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
     public static final int DEGREE_RES = 15;
     public static final int PIXEL_RES = 1800;
     public static final int NO_DATA_VALUE = -500;
+
+    public static final GeoPos RASTER_ORIGIN = new GeoPos(60, 180);
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     private static final Datum DATUM = Datum.WGS_84;
@@ -56,6 +59,28 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
 
     public float getNoDataValue() {
         return NO_DATA_VALUE;
+    }
+
+    public int getRasterWidth() {
+        return RASTER_WIDTH;
+    }
+
+    public int getRasterHeight() {
+        return RASTER_HEIGHT;
+    }
+
+    public GeoPos getRasterOrigin() {
+        return RASTER_ORIGIN;
+    }
+
+    @Override
+    public int getDegreeRes() {
+        return DEGREE_RES;
+    }
+
+    @Override
+    public int getPixelRes() {
+        return PIXEL_RES;
     }
 
     @Override

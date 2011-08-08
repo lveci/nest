@@ -18,6 +18,7 @@ package org.esa.nest.dataio.dem.ace2_5min;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
@@ -82,6 +83,22 @@ public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raste
         }
         return elevation;
     }
+
+    @Override
+    public PixelPos getIndex(GeoPos geoPos) throws Exception {
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        return new PixelPos(pixelX, pixelY);
+    }
+
+
+    @Override
+    public synchronized GeoPos getGeoPos(PixelPos pixelPos) throws Exception {
+        float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0f;
+        float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+        return new GeoPos(pixelLat, pixelLon);
+    }
+
 
     public void dispose() {
         _elevationTileCache.clear();

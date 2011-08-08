@@ -1,29 +1,22 @@
-About NEST Version 4A
+About NEST Version 4B
 
-The Next ESA SAR Toolbox (NEST) will be used for reading, post-processing, analyzing and visualizing the large archive of data from present and planned ESA SAR missions including Sentinel-1, as well as third party SAR-data from JERS SAR, ALOS PALSAR, TerraSAR-X and Radarsat-2. NEST will help the remote sensing community by handling ESA SAR products and complimenting existing commercial packages.
+The Next ESA SAR Toolbox (NEST) is a user friendly open source toolbox for reading, post-processing, analysing and visualising the large archive of data (from Level 1) from ESA SAR missions including ERS-1 & 2, ENVISAT and in the future Sentinel-1. In addition, NEST supports handling of products from third party missions including JERS-1, ALOS PALSAR, TerraSAR-X, Radarsat-2 and Cosmo-Skymed.
 
-NEST will include the functionality of the Basic Envisat SAR Toolbox (BEST) and will reuse and strive
-to be compatible with the Basic ERS & Envisat (A)ATSR and MERIS (BEAM) Toolbox.
+NEST helps the remote sensing community by supporting the handling of various SAR products and complimenting existing software packages. NEST has been built using the BEAM Earth Observation Toolbox and Development Platform and it covers the functionality of the older Basic Envisat SAR Toolbox BEST. NEST is currently undergoing development with periodic new releases. The major new functionality in NEST over BEST is an integrated viewer and orthorectification and mosaicking of SAR images.
 
-NEST is extensible with an API that allows users to easily create their own plugin Readers, Processors and Writers.
-Developer workshops and tutorials will be planned to actively encourage contributions by the SAR community.
-If you are interested in developing a reader or writer for a product please contact us.
+NEST is extensible with an API that allows users to easily create their own plugin Readers, Processors and Writers. NEST is open source under the GNU General Public License (GNU GPL). If you are interested in contributing by developing a reader or writer for a product please contact us.
 
+NEST is being developed by Array Systems Computing Inc. of Toronto Canada under ESA Contract number 20698/07/I-LG.  InSAR functionalities are being developed by a joint effort of PPO.labs, Delft University of Technology and Array.
 
 
 Installation
-* Install J2SE 1.6 JRE 
-* Install Java Advanced Imaging JRE 
 * Download the latest NEST build (www.array.ca/nest/), unzip the binaries files and run the DAT application 
-
 
 Building NEST from the source
 
 1. Download and install the required build tools
 * Install J2SE 1.6 JDK and set JAVA_HOME accordingly. 
 * Install Maven and set MAVEN_HOME accordingly. 
-* Install Java Advanced Imaging JDK & JRE 
-* Install JAI Image I/O JDK & JRE 
 2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin to your PATH.
 
 3. Download the NEST source code and unpack into $MY_PROJECTS/nest.
@@ -49,15 +42,13 @@ Building NEST from the source
     * Select Root Directory $MY_PROJECTS/nest
     * Click Finish
 
-
 9. Use the following configuration to run DAT:
 
     * Main class: com.bc.ceres.launcher.Launcher
     * VM parameters: -Xmx1024M -Dceres.context=nest
     * Program parameters: none
     * Working directory: $MY_PROJECTS/nest/output
-    * Use classpath of module (project in Eclipse): nest-bootstrap
+    * Use classpath of module: nest-bootstrap
 
 
 Enjoy!
-

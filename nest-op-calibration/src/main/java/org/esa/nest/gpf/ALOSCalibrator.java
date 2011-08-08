@@ -39,6 +39,7 @@ public class ALOSCalibrator implements Calibrator {
     private Product sourceProduct;
     private Product targetProduct;
 
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
     private MetadataElement abstractedMetadata = null;
     private String sampleType = null;
@@ -54,6 +55,13 @@ public class ALOSCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public ALOSCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**

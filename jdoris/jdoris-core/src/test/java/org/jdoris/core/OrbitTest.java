@@ -2,19 +2,24 @@ package org.jdoris.core;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 
 public class OrbitTest {
 
+    // TODO: check between lp2ell and lph2ell if height == 0
+
     //    private static final File resFile = new File("/d2/delft_cr_asar.res");
-    private static final File resFile = new File("/d2/test_cr.res");
+    private static final File resFile = new File("test/test_cr.res");
 
     private static Orbit orbit_ACTUAL;
 
     public static Logger initLog() {
-        String filePathToLog4JProperties = "/d3/checkouts/jdoris/log4j.properties";
+        String filePathToLog4JProperties = "log4j.properties";
         Logger logger = Logger.getLogger(Orbit.class);
         PropertyConfigurator.configure(filePathToLog4JProperties);
         return logger;
@@ -201,6 +206,52 @@ public class OrbitTest {
         Assert.assertArrayEquals(pixelXYZ_EXPECTED.toArray(), xyz_ACTUAL.toArray(), eps_03);
     }
 
+    @Test
+    public void testPointByReference_lp2xyz() throws Exception{
+        Point t1 = orbit_ACTUAL.lp2xyz(1, 1, slcimage);
+        Point t2 = orbit_ACTUAL.lp2xyz(2, 2, slcimage);
+        Assert.assertFalse(t1 == t2);
+
+        Point t3 = orbit_ACTUAL.lp2xyz(new Point(1, 1), slcimage);
+        Point t4 = orbit_ACTUAL.lp2xyz(new Point(2, 2), slcimage);
+        Assert.assertFalse(t3 == t4);
+    }
+
+    @Test
+    public void testPointByReference_lph2xyz() throws Exception{
+        Point t1 = orbit_ACTUAL.lph2xyz(1, 1, 0, slcimage);
+        Point t2 = orbit_ACTUAL.lph2xyz(1, 1, 1, slcimage);
+        Assert.assertFalse(t1 == t2);
+    }
+
+    @Test
+    public void testPointByReference_getXYZ() throws Exception{
+        Point t1 = orbit_ACTUAL.getXYZ(1);
+        Point t2 = orbit_ACTUAL.getXYZ(2);
+        Assert.assertFalse(t1 == t2);
+    }
+
+    @Test
+    public void testPointByReference_getXYZDot() throws Exception{
+        Point t1 = orbit_ACTUAL.getXYZDot(1);
+        Point t2 = orbit_ACTUAL.getXYZDot(2);
+        Assert.assertFalse(t1 == t2);
+    }
+
+    @Test
+    public void testPointByReference_getXYZDotDot() throws Exception{
+        Point t1 = orbit_ACTUAL.getXYZDotDot(1);
+        Point t2 = orbit_ACTUAL.getXYZDotDot(2);
+        Assert.assertFalse(t1 == t2);
+    }
+
+    @Test
+    public void testPointByReference_xyz2t() throws Exception {
+        Point t1 = orbit_ACTUAL.xyz2t(crXYZ_EXPECTED, slcimage);
+        Point t2 = orbit_ACTUAL.xyz2t(new Point(crXYZ_EXPECTED.x - 1, crXYZ_EXPECTED.y - 1, crXYZ_EXPECTED.z), slcimage);
+        Assert.assertFalse(t1 == t2);
+    }
+
 
 //    @Before
 //    public void setUpCrTestData() throws Exception {
@@ -213,27 +264,35 @@ public class OrbitTest {
     @Test
     public void crLoop_Run1() throws Exception {
 
-        Point xyz_ACTUAL = Ellipsoid.ell2xyz(Math.toRadians(crGEO_EXPECTED[0]), Math.toRadians(crGEO_EXPECTED[1]), crGEO_EXPECTED[2]);
-        Point time_ACTUAL = orbit_ACTUAL.xyz2t(xyz_ACTUAL, slcimage);
-        double line_ACTUAL = slcimage.ta2line(time_ACTUAL.y);
-        double pixel_ACTUAL = slcimage.tr2pix(time_ACTUAL.x);
-        Point xyz_ACTUAL_2 = orbit_ACTUAL.lph2xyz(line_ACTUAL, pixel_ACTUAL, crGEO_EXPECTED[2], slcimage);
-//        Point xyz_ACTUAL_2 = orbit_ACTUAL.lph2xyz(line_ACTUAL, pixel_ACTUAL, 0, slcimage);
+        final double[] crGEO_EXPECTED_RADIANS = {crGEO_EXPECTED[0] * Constants.DTOR, crGEO_EXPECTED[1] * Constants.DTOR, crGEO_EXPECTED[2]};
+//        final Point xyz_ACTUAL = Ellipsoid.ell2xyz(Math.toRadians(crGEO_EXPECTED[0]), Math.toRadians(crGEO_EXPECTED[1]), crGEO_EXPECTED[2]);
+        final Point xyz_ACTUAL = Ellipsoid.ell2xyz(crGEO_EXPECTED_RADIANS);
+        final Point time_ACTUAL = orbit_ACTUAL.xyz2t(xyz_ACTUAL, slcimage);
+        final double line_ACTUAL = slcimage.ta2line(time_ACTUAL.y);
+        final double pixel_ACTUAL = slcimage.tr2pix(time_ACTUAL.x);
+        final Point xyz_ACTUAL_2 = orbit_ACTUAL.lph2xyz(line_ACTUAL, pixel_ACTUAL, crGEO_EXPECTED[2], slcimage);
 
         Assert.assertArrayEquals(xyz_ACTUAL.toArray(), xyz_ACTUAL_2.toArray(), eps_03);
 
+        double[] philamheight_ACTUAL = orbit_ACTUAL.lph2ell(line_ACTUAL, pixel_ACTUAL, crGEO_EXPECTED[2], slcimage);
+        Assert.assertEquals(philamheight_ACTUAL[0], crGEO_EXPECTED_RADIANS[0], eps_06);
+        Assert.assertEquals(philamheight_ACTUAL[1], crGEO_EXPECTED_RADIANS[1], eps_06);
+        Assert.assertEquals(philamheight_ACTUAL[2], crGEO_EXPECTED_RADIANS[2], eps_03);
+
+
     }
 
-//    @Test
-//    public void testEll2lp() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testLp2ell() throws Exception {
-//
-//    }
-//
+    @Test
+    public void testEll2lp() throws Exception {
+
+
+    }
+
+    @Test
+    public void testLp2ell() throws Exception {
+
+    }
+
 
 
 }

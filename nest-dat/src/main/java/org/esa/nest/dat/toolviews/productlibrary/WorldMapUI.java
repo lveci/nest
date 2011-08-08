@@ -106,7 +106,7 @@ public class WorldMapUI {
     }
 
     public void setProductEntryList(final ProductEntry[] productEntryList) {
-
+        if(productEntryList == null) return;
         final GeoPos[][] geoBoundaries = new GeoPos[productEntryList.length][4];
         int i = 0;
         for(ProductEntry entry : productEntryList) {

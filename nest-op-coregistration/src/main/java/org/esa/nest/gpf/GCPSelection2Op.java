@@ -32,6 +32,7 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.ProcessTimeMonitor;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -205,10 +206,12 @@ public class GCPSelection2Op extends Operator {
 
             masterGcpGroup = sourceProduct.getGcpGroup(masterBand1);
             if (masterGcpGroup.getNodeCount() <= 0) {
-                addGCPGrid(sourceImageWidth, sourceImageHeight, numGCPtoGenerate, masterGcpGroup);
+                addGCPGrid(sourceImageWidth, sourceImageHeight, numGCPtoGenerate, masterGcpGroup,
+                        targetProduct.getGeoCoding());
             }
 
-            OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+            OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)),
+                                           targetProduct.getGeoCoding());
 
             if (complexCoregistration && applyFineRegistration) {
                 fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
@@ -219,40 +222,35 @@ public class GCPSelection2Op extends Operator {
         }
     }
 
-    private static void addGCPGrid(
-            final int width, final int height, final int numPins, final ProductNodeGroup<Placemark> group) {
+    private static void addGCPGrid(final int width, final int height, final int numPins,
+                                   final ProductNodeGroup<Placemark> group,
+                                   final GeoCoding targetGeoCoding) {
 
         final float ratio = width / (float)height;
         final float n = (float)Math.sqrt(numPins / ratio);
         final float m = ratio * n;
         final float spacingX = width / m;
         final float spacingY = height / n;
+        final GcpDescriptor gcpDescriptor = GcpDescriptor.getInstance();
 
         group.removeAll();
+        int pinNumber = group.getNodeCount() + 1;
 
         for(float y=spacingY/2f; y < height; y+= spacingY) {
 
             for(float x=spacingX/2f; x < width; x+= spacingX) {
 
-                final String[] uniquePinNameAndLabel = createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
-                final Placemark newPin = new Placemark(uniquePinNameAndLabel[0],
-                             uniquePinNameAndLabel[1], "",
+                final String name = PlacemarkNameFactory.createName(gcpDescriptor, pinNumber);
+                final String label = PlacemarkNameFactory.createLabel(gcpDescriptor, pinNumber, true);
+
+                final Placemark newPin = Placemark.createPointPlacemark(gcpDescriptor,
+                             name, label, "",
                              new PixelPos((int)x, (int)y), null,
-                             GcpDescriptor.INSTANCE.createDefaultSymbol());
+                             targetGeoCoding);
                 group.add(newPin);
+                ++pinNumber;
             }
         }
-    }
-
-    private static String[] createUniqueNameAndLabel(PlacemarkDescriptor placemarkDescriptor,
-                                                     ProductNodeGroup<Placemark> placemarkGroup) {
-        int pinNumber = placemarkGroup.getNodeCount() + 1;
-        String name = PlacemarkNameFactory.createName(placemarkDescriptor, pinNumber);
-        while (placemarkGroup.get(name) != null) {
-            name = PlacemarkNameFactory.createName(placemarkDescriptor, ++pinNumber);
-        }
-        final String label = PlacemarkNameFactory.createLabel(placemarkDescriptor, pinNumber, true);
-        return new String[]{name, label};
     }
 
     private void getCollocatedStackFlag() {
@@ -416,11 +414,14 @@ public class GCPSelection2Op extends Operator {
         final ArrayList<Thread> threadList = new ArrayList<Thread>();
         final int numCPU = Runtime.getRuntime().availableProcessors();
 
+        //final ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
+        //timeMonitor.start();
+
         int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
-        //final StopWatch stopWatch = new StopWatch();
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
             checkForCancellation();
+
             final Placemark mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 
@@ -437,7 +438,7 @@ public class GCPSelection2Op extends Operator {
 
                     @Override
                     public void run() {
-
+                        //System.out.println("Running "+mPin.getName());
                         boolean getSlaveGCP = getCoarseSlaveGCPPosition(slaveBand, slaveBand2, mGCPPixelPos, sGCPPixelPos);
 
                         if (getSlaveGCP && complexCoregistration && applyFineRegistration) {
@@ -446,12 +447,13 @@ public class GCPSelection2Op extends Operator {
 
                         if (getSlaveGCP) {
 
-                            final Placemark sPin = new Placemark(mPin.getName(),
+                            final Placemark sPin = Placemark.createPointPlacemark(
+                                    GcpDescriptor.getInstance(),
+                                    mPin.getName(),
                                     mPin.getLabel(),
                                     mPin.getDescription(),
                                     sGCPPixelPos,
                                     mGCPGeoPos,
-                                    mPin.getSymbol(),
                                     tgtGeoCoding);
 
                             addPlacemark(sPin);
@@ -476,8 +478,6 @@ public class GCPSelection2Op extends Operator {
                         t.join();
                     }
                     threadList.clear();
-                    //JAI.getDefaultInstance().getTileCache().flush();
-                    //System.gc();
                 }
             }
 
@@ -498,7 +498,6 @@ public class GCPSelection2Op extends Operator {
                     lastPct = pct;
                 }    
             }
-            pm.worked(1);
         }
 
         if(!threadList.isEmpty()) {
@@ -508,9 +507,10 @@ public class GCPSelection2Op extends Operator {
         }
 
         gcpsComputedMap.put(slaveBand, true);
-        //stopWatch.stopAndTrace("XCorr "+bandCountStr);
          
-        //System.gc();
+        //final long duration = timeMonitor.stop();
+        //System.out.println("XCorr completed in "+ ProcessTimeMonitor.formatDuration(duration));
+
      } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
@@ -671,33 +671,46 @@ public class GCPSelection2Op extends Operator {
                 slaveData2 = slaveImagetteRaster2.getDataBuffer();
             }
 
-            final int tileOffset = slaveImagetteRaster1.getScanlineOffset();
-            final int tileStride = slaveImagetteRaster1.getScanlineStride();
-            final int tileMinX = slaveImagetteRaster1.getMinX();
-            final int tileMinY = slaveImagetteRaster1.getMinY();
+            final TileIndex index0 = new TileIndex(slaveImagetteRaster1);
+            final TileIndex index1 = new TileIndex(slaveImagetteRaster1);
 
             for (int j = 0; j < cWindowHeight; j++) {
                 final float y = yy - cHalfWindowHeight + j + 1;
                 final int y0 = (int)y;
                 final int y1 = y0 + 1;
-                final int stride0 = ((y0 - tileMinY) * tileStride) + tileOffset;
-                final int stride1 = ((y1 - tileMinY) * tileStride) + tileOffset;
+                index0.calculateStride(y0);
+                index1.calculateStride(y1);
                 final double wy = (double)(y - y0);
                 for (int i = 0; i < cWindowWidth; i++) {
                     final float x = xx - cHalfWindowWidth + i + 1;
                     final int x0 = (int)x;
                     final int x1 = x0 + 1;
                     final double wx = (double)(x - x0);
-                    
+
+                    final int x00 = index0.getIndex(x0);
+                    final int x01 = index1.getIndex(x0);
+                    final int x10 = index0.getIndex(x1);
+                    final int x11 = index1.getIndex(x1);
+
                     if (complexCoregistration) {
-                        final double v1 = getInterpolatedSampleValue(slaveData1, x0, x1, wx, wy,
-                                                            stride0, stride1, tileMinX);
-                        final double v2 = getInterpolatedSampleValue(slaveData2, x0, x1, wx, wy,
-                                                            stride0, stride1, tileMinX);
+
+                        final double v1 = MathUtils.interpolate2D(wy, wx, slaveData1.getElemDoubleAt(x00),
+                                                                  slaveData1.getElemDoubleAt(x01),
+                                                                  slaveData1.getElemDoubleAt(x10),
+                                                                  slaveData1.getElemDoubleAt(x11));
+
+                        final double v2 = MathUtils.interpolate2D(wy, wx, slaveData2.getElemDoubleAt(x00),
+                                                                  slaveData2.getElemDoubleAt(x01),
+                                                                  slaveData2.getElemDoubleAt(x10),
+                                                                  slaveData2.getElemDoubleAt(x11));
+
                         sI[k++] = v1*v1 + v2*v2;
                     } else {
-                        sI[k++] = getInterpolatedSampleValue(slaveData1, x0, x1, wx, wy,
-                                                            stride0, stride1, tileMinX);
+
+                        sI[k++] = MathUtils.interpolate2D(wy, wx, slaveData1.getElemDoubleAt(x00),
+                                                                  slaveData1.getElemDoubleAt(x01),
+                                                                  slaveData1.getElemDoubleAt(x10),
+                                                                  slaveData1.getElemDoubleAt(x11));
                     }
                 }
             }
@@ -708,23 +721,6 @@ public class GCPSelection2Op extends Operator {
 
         } catch (Exception e){
             System.out.println("Error in getSlaveImagette");
-            throw new OperatorException(e);
-        }
-    }
-
-    private static double getInterpolatedSampleValue(final ProductData slaveData,
-                                                     final int x0, final int x1, final double wx, final double wy,
-                                                     final int stride0, final int stride1, final int tileMinX) {
-
-        try {
-            final double v00 = slaveData.getElemDoubleAt((x0 - tileMinX) + stride0);//x0, y0));
-            final double v01 = slaveData.getElemDoubleAt((x0 - tileMinX) + stride1);//x0, y1));
-            final double v10 = slaveData.getElemDoubleAt((x1 - tileMinX) + stride0);//x1, y0));
-            final double v11 = slaveData.getElemDoubleAt((x1 - tileMinX) + stride1);//x1, y1));
-
-            return MathUtils.interpolate2D(wy, wx, v00, v01, v10, v11);
-        } catch (Exception e){
-            System.out.println("Error in getInterpolatedSampleValue");
             throw new OperatorException(e);
         }
     }
@@ -1090,14 +1086,16 @@ public class GCPSelection2Op extends Operator {
         final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
         final ProductData masterData2 = masterImagetteRaster2.getDataBuffer();
 
+        final TileIndex index = new TileIndex(masterImagetteRaster1);
+
         final double[][] mIIdata = compleData.mII;
         final double[][] mIQdata = compleData.mIQ;
         for (int j = 0; j < compleData.fWindowHeight; j++) {
-            final int yy = yul + j;
+            index.calculateStride(yul +j);
             for (int i = 0; i < compleData.fWindowWidth; i++) {
-                final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yy);
-                mIIdata[j][i] = masterData1.getElemDoubleAt(index);
-                mIQdata[j][i] = masterData2.getElemDoubleAt(index);
+                final int idx = index.getIndex(xul +i);
+                mIIdata[j][i] = masterData1.getElemDoubleAt(idx);
+                mIQdata[j][i] = masterData2.getElemDoubleAt(idx);
             }
         }
         masterData1.dispose();
@@ -1126,15 +1124,16 @@ public class GCPSelection2Op extends Operator {
 
         final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
         final ProductData slaveData2 = slaveImagetteRaster2.getDataBuffer();
+        final TileIndex index = new TileIndex(slaveImagetteRaster1);
 
         final double[][] sII0data = compleData.sII0;
         final double[][] sIQ0data = compleData.sIQ0;
         for (int j = 0; j < compleData.fWindowHeight; j++) {
-            final int yy = yul + j;
+            index.calculateStride(yul +j);
             for (int i = 0; i < compleData.fWindowWidth; i++) {
-                final int index = slaveImagetteRaster1.getDataBufferIndex(xul + i, yy);
-                sII0data[j][i] = slaveData1.getElemDoubleAt(index);
-                sIQ0data[j][i] = slaveData2.getElemDoubleAt(index);
+                final int idx = index.getIndex(xul+i);
+                sII0data[j][i] = slaveData1.getElemDoubleAt(idx);
+                sIQ0data[j][i] = slaveData2.getElemDoubleAt(idx);
             }
         }
         slaveData1.dispose();

@@ -46,6 +46,7 @@ public class ASARCalibrator implements Calibrator {
     private Product targetProduct;
 
     private File externalAuxFile = null;
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
 
     private MetadataElement absRoot = null;
@@ -105,6 +106,13 @@ public class ASARCalibrator implements Calibrator {
     private String incidenceAngleSelection = null;
 
     public ASARCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**

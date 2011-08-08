@@ -71,6 +71,10 @@ public class OversamplingOp extends Operator {
     @Parameter(description = "The azimuth pixel spacing", defaultValue = "12.5", label="Azimuth Spacing")
     private float azimuthSpacing = 12.5f;
 
+    @Parameter(description = "use PRF as azimuth tile size and range line as range tile size", defaultValue = "true",
+                label="Use PRF Tile Size")
+    private boolean usePRFTileSize = true;
+
     private MetadataElement abs; // root of the abstracted metadata
     private String productFormat;
 
@@ -368,7 +372,9 @@ public class OversamplingOp extends Operator {
         final int targetImageTileWidth = (int)(sourceImageTileWidth * widthRatio + 0.5f);
         final int targetImageTileHeight = (int)(sourceImageTileHeight * heightRatio + 0.5f);
 
-        targetProduct.setPreferredTileSize(targetImageTileWidth, targetImageTileHeight);
+        if (usePRFTileSize) {
+            targetProduct.setPreferredTileSize(targetImageTileWidth, targetImageTileHeight);
+        }
     }
 
     private void addSelectedBands() {
@@ -467,6 +473,7 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
+                System.out.println(i);
 
                 if (targetBands[i].getUnit().equals(Unit.REAL)) {
 
@@ -485,6 +492,7 @@ public class OversamplingOp extends Operator {
                     computeOverSampledTileForRealImage(targetBands[i].getName(),
                                                        targetTileMap.get(targetBands[i]));
                 }
+
             }
 
         } catch(Throwable e) {

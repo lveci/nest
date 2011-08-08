@@ -29,6 +29,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -59,6 +60,9 @@ public class CalibrationOp extends Operator {
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
     private File externalAuxFile = null;
 
+    @Parameter(description = "Output image in complex", defaultValue = "false", label="Save in complex")
+    private boolean outputImageInComplex = false;
+                     
     @Parameter(description = "Output image scale", defaultValue = "false", label="Scale in dB")
     private boolean outputImageScaleInDb = false;
 
@@ -109,6 +113,7 @@ public class CalibrationOp extends Operator {
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
             calibrator.setAuxFileFlag(auxFile);
             calibrator.setExternalAuxFile(externalAuxFile);
+            calibrator.setOutputImageInComplex(outputImageInComplex);
             calibrator.setOutputImageIndB(outputImageScaleInDb);
             calibrator.initialize(this, sourceProduct, targetProduct, false, true);
 
@@ -144,6 +149,59 @@ public class CalibrationOp extends Operator {
      * Add the user selected bands to the target product.
      */
     private void addSelectedBands() {
+
+        if (outputImageInComplex) {
+            outputInComplex();
+        } else {
+            outputInIntensity();
+        }
+    }
+
+    private void outputInComplex() {
+
+        final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
+
+        for (int i = 0; i < sourceBands.length; i += 2) {
+
+            final Band srcBandI = sourceBands[i];
+            final String unit = srcBandI.getUnit();
+            String nextUnit = null;
+            if(unit == null) {
+                throw new OperatorException("band "+srcBandI.getName()+" requires a unit");
+            } else if(unit.contains(Unit.DB)) {
+                throw new OperatorException("Calibration of bands in dB is not supported");
+            } else if (unit.contains(Unit.IMAGINARY)) {
+                throw new OperatorException("I and Q bands should be selected in pairs");
+            } else if (unit.contains(Unit.REAL)) {
+                if(i+1 >= sourceBands.length) {
+                    throw new OperatorException("I and Q bands should be selected in pairs");
+                }
+                nextUnit = sourceBands[i+1].getUnit();
+                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
+                    throw new OperatorException("I and Q bands should be selected in pairs");
+                }
+            } else {
+                throw new OperatorException("Please select I and Q bands in pairs only");
+            }
+
+            final String[] srcBandINames = {srcBandI.getName()};
+            targetBandNameToSourceBandName.put(srcBandINames[0], srcBandINames);
+            final Band targetBandI = targetProduct.addBand(srcBandINames[0], ProductData.TYPE_FLOAT32);
+            targetBandI.setUnit(unit);
+
+            final Band srcBandQ = sourceBands[i+1];
+            final String[] srcBandQNames = {srcBandQ.getName()};
+            targetBandNameToSourceBandName.put(srcBandQNames[0], srcBandQNames);
+            final Band targetBandQ = targetProduct.addBand(srcBandQNames[0], ProductData.TYPE_FLOAT32);
+            targetBandQ.setUnit(nextUnit);
+
+            final String suffix = "_"+OperatorUtils.getSuffixFromBandName(srcBandI.getName());
+            ReaderUtils.createVirtualIntensityBand(targetProduct, targetBandI, targetBandQ, suffix);
+            ReaderUtils.createVirtualPhaseBand(targetProduct, targetBandI, targetBandQ, suffix);
+        }
+    }
+
+    private void outputInIntensity() {
 
         final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 

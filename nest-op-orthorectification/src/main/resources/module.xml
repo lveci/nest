@@ -34,6 +34,9 @@
     <dependency>
       <module>nest-op-coregistration</module>
     </dependency>
+	<dependency>
+      <module>nest-reader-dem</module>
+    </dependency>
 
     <categories>Processing</categories>
 
@@ -104,7 +107,7 @@
 
         <action>
             <id>nestCreateElevationBand</id>
-            <class>org.esa.beam.visat.actions.CreateElevationBandAction</class>
+            <class>org.esa.beam.visat.actions.CreateDemRelatedBandsAction</class>
             <text>Create Elevation Band</text>
             <shortDescr>Creates an elevation band from a selected DEM</shortDescr>
             <description>Creates an elevation band from a selected Digital Elevation Model (DEM)</description>

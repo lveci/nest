@@ -19,6 +19,7 @@ import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
@@ -87,6 +88,21 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         return elevation;
     }
 
+    @Override
+    public PixelPos getIndex(GeoPos geoPos) throws Exception {
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
+        return new PixelPos(pixelX, pixelY);
+    }
+
+    @Override
+    public synchronized GeoPos getGeoPos(PixelPos pixelPos) throws Exception {
+        float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0f;
+        float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+        return new GeoPos(pixelLat, pixelLon);
+    }
+
+
     public void dispose() {
         elevationTileCache.clear();
         for (ACEElevationTile[] _elevationTile : elevationTiles) {
@@ -115,9 +131,8 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
         final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);
-        if (sample == NO_DATA_VALUE) {
+        if (sample == NO_DATA_VALUE)
             return Float.NaN;
-        }
         return sample;
     }
 

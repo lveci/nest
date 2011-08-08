@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -131,14 +132,7 @@ public class OilSpillClusteringOp extends Operator {
                 targetBand.setSourceImage(srcBand.getSourceImage());
 
             } else {
-
-                final Band targetBand = new Band(srcBandName,
-                                                 srcBand.getDataType(),
-                                                 sourceImageWidth,
-                                                 sourceImageHeight);
-
-                targetBand.setUnit(srcBand.getUnit());
-                targetProduct.addBand(targetBand);
+                ProductUtils.copyBand(srcBandName, sourceProduct, targetProduct);
             }
         }
     }
@@ -155,51 +149,56 @@ public class OilSpillClusteringOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int tx0 = targetTileRectangle.x;
+            final int ty0 = targetTileRectangle.y;
+            final int tw  = targetTileRectangle.width;
+            final int th  = targetTileRectangle.height;
+            final ProductData trgData = targetTile.getDataBuffer();
+            //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int tx0 = targetTileRectangle.x;
-        final int ty0 = targetTileRectangle.y;
-        final int tw  = targetTileRectangle.width;
-        final int th  = targetTileRectangle.height;
-        final ProductData trgData = targetTile.getDataBuffer();
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+            final int x0 = Math.max(tx0 - minClusterSizeInPixels, 0);
+            final int y0 = Math.max(ty0 - minClusterSizeInPixels, 0);
+            final int w  = Math.min(tw + 2*minClusterSizeInPixels, sourceImageWidth);
+            final int h  = Math.min(th + 2*minClusterSizeInPixels, sourceImageHeight);
+            final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final int x0 = Math.max(tx0 - minClusterSizeInPixels, 0);
-        final int y0 = Math.max(ty0 - minClusterSizeInPixels, 0);
-        final int w  = Math.min(tw + 2*minClusterSizeInPixels, sourceImageWidth);
-        final int h  = Math.min(th + 2*minClusterSizeInPixels, sourceImageHeight);
-        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
+            final ProductData srcData = sourceTile.getDataBuffer();
+            final int[][] pixelsScaned = new int[h][w];
 
-        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
-        final ProductData srcData = sourceTile.getDataBuffer();
-        final int[][] pixelsScaned = new int[h][w];
+            final TileIndex srcIndex = new TileIndex(sourceTile);
 
-        final int maxy = ty0 + th;
-        final int maxx = tx0 + tw;
-        for (int ty = ty0; ty < maxy; ty++) {
-            for (int tx = tx0; tx < maxx; tx++) {
+            final int maxy = ty0 + th;
+            final int maxx = tx0 + tw;
+            for (int ty = ty0; ty < maxy; ty++) {
 
-                final int srcIndex = sourceTile.getDataBufferIndex(tx, ty);
+                srcIndex.calculateStride(ty);
+                for (int tx = tx0; tx < maxx; tx++) {
 
-                if (pixelsScaned[ty - y0][tx - x0] == 0 && srcData.getElemIntAt(srcIndex) == 1) {
+                    if (pixelsScaned[ty - y0][tx - x0] == 0 && srcData.getElemIntAt(srcIndex.getIndex(tx)) == 1) {
 
-                    final List<PixelPos> clusterPixels = new ArrayList<PixelPos>();
+                        final List<PixelPos> clusterPixels = new ArrayList<PixelPos>();
 
-                    clustering(tx, ty, x0, y0, w, h, srcData, sourceTile, pixelsScaned, clusterPixels);
+                        clustering(tx, ty, x0, y0, w, h, srcData, sourceTile, pixelsScaned, clusterPixels);
 
-                    if (clusterPixels.size() >= minClusterSizeInPixels) {
-                        for (PixelPos pixel : clusterPixels) {
-                            final int x = (int)pixel.x;
-                            final int y = (int)pixel.y;
-                            if (x >= tx0 && x < tx0 + tw && y >= ty0 && y < ty0 + th) {
-                                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), 1);
+                        if (clusterPixels.size() >= minClusterSizeInPixels) {
+                            for (PixelPos pixel : clusterPixels) {
+                                final int x = (int)pixel.x;
+                                final int y = (int)pixel.y;
+                                if (x >= tx0 && x < tx0 + tw && y >= ty0 && y < ty0 + th) {
+                                    trgData.setElemIntAt(targetTile.getDataBufferIndex(x, y), 1);
+                                }
                             }
                         }
                     }
                 }
             }
+        } catch (Throwable e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 

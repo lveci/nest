@@ -21,13 +21,9 @@ import org.esa.nest.dat.dialogs.SettingsDialog;
 
 public class OpenSettingsDialogAction extends ExecCommand {
 
-    private SettingsDialog dlg = null;
-
     @Override
     public void actionPerformed(final CommandEvent event) {
-        //if(dlg == null) {
-            dlg = new SettingsDialog("Settings");
-        //}
+        final SettingsDialog dlg = new SettingsDialog("Settings");
         dlg.show();
     }
 

@@ -233,6 +233,10 @@ public final class ResourceUtils {
         return new File(getHomeUrl(), File.separator + "graphs" + File.separator + subFolder);
     }
 
+    public static File getResFolder() {
+        return new File(ResourceUtils.getHomeUrl(), "res");
+    }
+
     public static File findUserAppFile(String filename)
     {
         // check userhome/.nest first

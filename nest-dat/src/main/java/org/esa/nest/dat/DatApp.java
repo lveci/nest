@@ -18,11 +18,14 @@ package org.esa.nest.dat;
 import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
+import com.jidesoft.action.DockableBarContext;
 import com.jidesoft.status.LabelStatusBarItem;
 import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.beam.framework.ui.command.CommandManager;
+import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
@@ -41,11 +44,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 
 public class DatApp extends VisatApp {
+
+    public static final String LABELS_TOOL_BAR_ID = "labelsToolBar";
+
     public DatApp(ApplicationDescriptor applicationDescriptor) {
         super(applicationDescriptor);
 
@@ -59,7 +64,6 @@ public class DatApp extends VisatApp {
     @Override
     protected String getMainFrameTitle() {
         final String ver = System.getProperty(ResourceUtils.getContextID()+".version");
-        //return getAppName() + " " + getAppVersion();
         return getAppName() + " "+ver;
     }
 
@@ -74,6 +78,12 @@ public class DatApp extends VisatApp {
     @Override
     protected void initClientUI(ProgressMonitor pm) {
         super.initClientUI(pm);
+
+        final CommandBar toolBar = createLabelToolBar();
+
+        toolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
+        toolBar.getContext().setInitIndex(1);
+        getMainFrame().getDockableBarManager().addDockableBar(toolBar);
 
         updateGraphMenu();
     }
@@ -348,19 +358,51 @@ public class DatApp extends VisatApp {
         return toolBar;
     }
 
+    protected CommandBar createLabelToolBar() {
+        final CommandBar toolBar = createToolBar(LABELS_TOOL_BAR_ID, "Labels and GeoTags");
+        final LinkedList<String> cmdList = new LinkedList<String>();
+        final Map<String, String> placeAfterMap = new HashMap<String, String>();
+
+        cmdList.add("pinTool");
+        cmdList.add("gcpTool");
+        
+        final CommandManager cmdMan = getCommandManager();
+        final int numCmds = cmdMan.getNumCommands();
+        for(int i=0; i < numCmds; ++i) {
+            final Command cmd = cmdMan.getCommandAt(i);
+            final String parent = cmd.getParent();
+            if(parent.equals(LABELS_TOOL_BAR_ID)) {
+                placeAfterMap.put(cmd.getCommandID(), cmd.getPlaceAfter());
+                cmdList.add(cmd.getCommandID());
+            }
+        }
+
+        // order
+        final Set<String> placeAfterSet = placeAfterMap.keySet();
+        for(String id : placeAfterSet) {
+            final String placeAfter = placeAfterMap.get(id);
+            int index = cmdList.indexOf(placeAfter);
+            if(index != -1) {
+                cmdList.remove(id);
+                index = cmdList.indexOf(placeAfter);
+                cmdList.add(index+1, id);
+            }
+        }
+
+        addCommandsToToolBar(toolBar, cmdList.toArray(new String[cmdList.size()]));
+
+        return toolBar;
+    }
+
     @Override
     protected CommandBar createInteractionsToolBar() {
         final CommandBar toolBar = createToolBar(INTERACTIONS_TOOL_BAR_ID, "Interactions");
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
                 "selectTool",
-                //"crossHairTool",
                 "rangeFinder",
                 "zoomTool",
                 "pannerTool",
-                null,
-                "pinTool",
-                "gcpTool",
                 null,
                 "drawLineTool",
                 "drawPolylineTool",
@@ -369,7 +411,6 @@ public class DatApp extends VisatApp {
                 "drawPolygonTool",
                 //"magicStickTool",
                 "createVectorDataNode",
-                null,
         });
 
         return toolBar;

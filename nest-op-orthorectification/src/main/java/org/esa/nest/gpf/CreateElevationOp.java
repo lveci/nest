@@ -31,6 +31,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.dem.FileElevationModel;
 
 import java.awt.*;
 import java.io.File;
@@ -52,9 +53,9 @@ public final class CreateElevationOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"},
-            description = "The digital elevation model.", defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
-    private String demName = "SRTM 3Sec GeoTiff";
+    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec", "ASTER 1sec GDEM"},
+            description = "The digital elevation model.", defaultValue="SRTM 3Sec", label="Digital Elevation Model")
+    private String demName = "SRTM 3Sec";
 
     @Parameter(description = "The elevation band name.", defaultValue="elevation", label="Elevation Band Name")
     private String elevationBandName = "elevation";

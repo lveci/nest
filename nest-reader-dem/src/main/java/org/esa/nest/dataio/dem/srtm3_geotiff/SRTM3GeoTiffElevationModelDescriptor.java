@@ -15,6 +15,7 @@
  */
 package org.esa.nest.dataio.dem.srtm3_geotiff;
 
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -23,13 +24,12 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.nest.util.Settings;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "SRTM 3Sec GeoTiff";
+    public static final String NAME = "SRTM 3Sec";
     public static final String DB_FILE_SUFFIX = ".TIF";
     public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
     public static final int NUM_X_TILES = 72;
@@ -37,8 +37,11 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     public static final int DEGREE_RES = 5;
     public static final int PIXEL_RES = 6000;
     public static final int NO_DATA_VALUE = -32768;
+
+    public static final GeoPos RASTER_ORIGIN = new GeoPos(60, 180);
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
+
     public static final Datum DATUM = Datum.WGS_84;
 
     private File demInstallDir = null;
@@ -56,6 +59,26 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
 
     public float getNoDataValue() {
         return NO_DATA_VALUE;
+    }
+
+    public int getRasterWidth() {
+        return RASTER_WIDTH;
+    }
+
+    public int getRasterHeight() {
+        return RASTER_HEIGHT;
+    }
+
+    public GeoPos getRasterOrigin() {
+        return RASTER_ORIGIN;
+    }
+
+    public int getDegreeRes() {
+        return DEGREE_RES;
+    }
+
+    public int getPixelRes() {
+        return PIXEL_RES;
     }
 
     @Override
@@ -109,7 +132,7 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
             name += "0" + tileY;
         else
             name += tileY;
-        return name + ".zip";
+        return name + ".tif";
     }
 
 }

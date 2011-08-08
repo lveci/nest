@@ -61,6 +61,11 @@ public class Baseline {
     private DoubleMatrix thetaIncCoeffs;      // incidence angle to satellite
     //double avg_height_ambiguity;  //center height ambiguity
 
+    // constants for baseline modeling
+    final private static int N_POINTS_AZI = 10; // approx every 10km in azimuth
+    final private static int N_POINTS_RNG = 10; // approx every 10km ground range
+    final private static int N_HEIGHTS = 4;     // one more level than required for poly
+
     public Baseline() {
 
         logger.trace("Baseline class");
@@ -138,18 +143,16 @@ public class Baseline {
 
         logger.trace("IncidenceAngle method");
         final Point r1 = master.min(point);// points from P to M
-        final double inc = point.angle(r1);// incidence angle (assume P on ellips)
-
-        return inc;
+        return point.angle(r1);
 
     }
 
-    public void model(final SLCImage master, final SLCImage slave, Orbit masterorbit, Orbit slaveorbit) throws Exception {
+    public void model(final SLCImage master, final SLCImage slave, Orbit masterOrbit, Orbit slaveOrbit) throws Exception {
 
-        if (!masterorbit.isInterpolated()) {
+        if (!masterOrbit.isInterpolated()) {
             logger.debug("Baseline cannot be computed, master orbit not initialized.");
             throw new Exception("Baseline.model_parameters: master orbit not initialized");
-        } else if (!slaveorbit.isInterpolated()) {
+        } else if (!slaveOrbit.isInterpolated()) {
             logger.debug("Baseline cannot be computed, slave orbit not initialized.");
             throw new Exception("Baseline.model_parameters: slave orbit not initialized");
         }
@@ -159,7 +162,6 @@ public class Baseline {
             return;
         }
 
-        isInitialized = true;
         masterWavelength = master.getRadarWavelength();
 
         // Model r = nearRange + drange_dp*p -- p starts at 1
@@ -177,72 +179,68 @@ public class Baseline {
 
         // Loop counters and sampling
         int cnt = 0; // matrix index
-        final int nPointsAzi = 10; // approx every 10km in azimuth
-        final int nPointsRng = 10; // approx every 10km ground range
-        final int nHeights = 4;  // one more level than required for poly
-        final double deltaPixels = master.currentWindow.pixels() / nPointsRng;
-        final double deltaLines = master.currentWindow.lines() / nPointsAzi;
-        final double deltaHeight = (hMax - hMin) / nHeights;
+        final double deltaPixels = master.currentWindow.pixels() / N_POINTS_RNG;
+        final double deltaLines = master.currentWindow.lines() / N_POINTS_AZI;
+        final double deltaHeight = (hMax - hMin) / N_HEIGHTS;
 
         // Declare matrices for modeling Bperp
         // Note: for stability of normalmatrix, fill aMatrix with normalized line, etc.
 
         // perpendicular baseline
-        DoubleMatrix bPerpMatrix = new DoubleMatrix(nPointsAzi * nPointsRng * nHeights, 1);
+        DoubleMatrix bPerpMatrix = new DoubleMatrix(N_POINTS_AZI * N_POINTS_RNG * N_HEIGHTS, 1);
 
         // parallel baseline
-        DoubleMatrix bParMatrix = new DoubleMatrix(nPointsAzi * nPointsRng * nHeights, 1);
+        DoubleMatrix bParMatrix = new DoubleMatrix(N_POINTS_AZI * N_POINTS_RNG * N_HEIGHTS, 1);
 
         // viewing angle
-        DoubleMatrix thetaMatrix = new DoubleMatrix(nPointsAzi * nPointsRng * nHeights, 1);
+        DoubleMatrix thetaMatrix = new DoubleMatrix(N_POINTS_AZI * N_POINTS_RNG * N_HEIGHTS, 1);
 
         // incidence angle
-        DoubleMatrix thetaIncMatrix = new DoubleMatrix(nPointsAzi * nPointsRng * nHeights, 1);
+        DoubleMatrix thetaIncMatrix = new DoubleMatrix(N_POINTS_AZI * N_POINTS_RNG * N_HEIGHTS, 1);
 
         // design matrix
-        DoubleMatrix aMatrix = new DoubleMatrix(nPointsAzi * nPointsRng * nHeights, numCoeffs);
+        DoubleMatrix aMatrix = new DoubleMatrix(N_POINTS_AZI * N_POINTS_RNG * N_HEIGHTS, numCoeffs);
 
 
         // Loop over heights(k), lines(i), pixels(j) to estimate baseline
         // height levels
-        for (long k = 0; k < nHeights; ++k) {
+        for (long k = 0; k < N_HEIGHTS; ++k) {
 
             final double height = hMin + k * deltaHeight;
 
             // azimuth direction
-            for (long i = 0; i < nPointsAzi; ++i) {
+            for (long i = 0; i < N_POINTS_AZI; ++i) {
 
                 final double line = master.currentWindow.linelo + i * deltaLines;
                 Point pointOnEllips;           // point, returned by lp2xyz
-                double sTazi;
-                double sTrange;
+                double sTazi, sTrange;
 
                 // Azimuth time for this line
                 final double mTazi = master.line2ta(line);
 
                 // xyz for master satellite from time
-                final Point pointOnMasterOrb = masterorbit.getXYZ(mTazi);
+                final Point pointOnMasterOrb = masterOrbit.getXYZ(mTazi);
 
                 // Continue looping in range direction
-                for (long j = 0; j < nPointsRng; ++j) {
+                for (long j = 0; j < N_POINTS_RNG; ++j) {
 
                     final double pixel = master.currentWindow.pixlo + j * deltaPixels;
 
                     // ______ Range time for this pixel ______
                     //final double m_trange = master.pix2tr(pixel);
-                    pointOnEllips = masterorbit.lph2xyz(line, pixel, height, master);
+                    pointOnEllips = masterOrbit.lph2xyz(line, pixel, height, master);
 
                     // Compute xyz for slave satellite from pointOnEllips
-                    Point pointTime = slaveorbit.xyz2t(pointOnEllips, slave);
+                    Point pointTime = slaveOrbit.xyz2t(pointOnEllips, slave);
                     sTazi = pointTime.y;
                     sTrange = pointTime.x;
 
                     // Slave position
-                    final Point pointOnSlaveOrb = slaveorbit.getXYZ(sTazi);
+                    final Point pointOnSlaveOrb = slaveOrbit.getXYZ(sTazi);
 
                     // Compute angle between near parallel orbits
-                    final Point velOnMasterOrb = masterorbit.getXYZDot(mTazi);
-                    final Point velOnSlaveOrb = slaveorbit.getXYZDot(sTazi);
+                    final Point velOnMasterOrb = masterOrbit.getXYZDot(mTazi);
+                    final Point velOnSlaveOrb = slaveOrbit.getXYZDot(sTazi);
                     final double angleOrbits = velOnMasterOrb.angle(velOnSlaveOrb);
 
                     logger.debug("Angle between orbits master-slave (at l,p= " + line + "," + pixel + ") = " +
@@ -260,12 +258,11 @@ public class Baseline {
                     // construct helper class
                     BaselineComponents baselineComponents = new BaselineComponents().invoke();
                     compute_B_Bpar_Bperp_Theta(baselineComponents, pointOnEllips, pointOnMasterOrb, pointOnSlaveOrb);
-//                    BBparBperpTheta(b, bPar, bPerp, theta, pointOnMasterOrb, pointOnEllips, pointOnSlaveOrb);
-                    double b = baselineComponents.getB();
-                    double bPar = baselineComponents.getBpar();
-                    double bPerp = baselineComponents.getBperp();
-                    double theta = baselineComponents.getTheta();
 
+                    final double b = baselineComponents.getB();
+                    final double bPar = baselineComponents.getBpar();
+                    final double bPerp = baselineComponents.getBperp();
+                    final double theta = baselineComponents.getTheta();
                     final double thetaInc = computeIncAngle(pointOnMasterOrb, pointOnEllips); // [rad]!!!
 
                     // Modelling of bPerp(l,p) = a00 + a10*l + a01*p
@@ -407,6 +404,8 @@ public class Baseline {
         final double drange = (range5000 - range1) / 5000.0;
         logger.debug("range = " + (range1 - drange) + " + " + drange + "*p");
 
+        // orbit initialized
+        isInitialized = true;
     }
 
 

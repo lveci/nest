@@ -178,7 +178,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
             this.wwd = new WorldWindowGLCanvas();
             this.wwd.setPreferredSize(canvasSize);
 
-            // Create the default model as described in the current worldwind properties.
+            // Create the default model as described in the current worldwind properties.            
             final Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
             this.wwd.setModel(m);
             m.setGlobe(new EarthFlat());

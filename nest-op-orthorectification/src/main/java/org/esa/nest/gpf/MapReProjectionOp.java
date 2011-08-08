@@ -116,9 +116,9 @@ public final class MapReProjectionOp extends ReprojectionOp {
             * Placemarks & masks
             */
             copyPlacemarks(sourceProduct.getPinGroup(), targetProduct.getPinGroup(),
-                    PinDescriptor.INSTANCE);
+                    PinDescriptor.getInstance());
             copyPlacemarks(sourceProduct.getGcpGroup(), targetProduct.getGcpGroup(),
-                    GcpDescriptor.INSTANCE);
+                    GcpDescriptor.getInstance());
             ProductUtils.copyVectorData(sourceProduct, targetProduct);
             ProductUtils.copyMasks(sourceProduct, targetProduct);
             ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);

@@ -16,10 +16,7 @@
 package org.esa.nest.gpf.oceantools;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -31,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -114,19 +112,21 @@ public class OilSpillDetectionOp extends Operator {
         for(Band band : product.getBands()) {
             if(band.getName().contains(OILSPILLMASK_NAME)) {
                 final String expression = band.getName() + " > 0";
-                final BitmaskDef mask = new BitmaskDef(band.getName()+"_detection",
-                    "Oil Spill Detection", expression, Color.RED, 0.5f);
-                product.addBitmaskDef(mask);
+              //  final BitmaskDef mask = new BitmaskDef(band.getName()+"_detection",
+              //      "Oil Spill Detection", expression, Color.RED, 0.5f);
+              //  product.addBitmaskDef(mask);
 
-                /*final Mask mask = new Mask(band.getName()+"_detection",
+                final Mask mask = new Mask(band.getName()+"_detection",
                              product.getSceneRasterWidth(),
                              product.getSceneRasterHeight(),
-                             new Mask.BandMathType());
+                             Mask.BandMathsType.INSTANCE);
                 mask.setDescription("Oil Spill Detection");
                 mask.getImageConfig().setValue("color", Color.RED);
-                mask.getImageConfig().setValue("transparency", 0.5f);
+                mask.getImageConfig().setValue("transparency", 0.5);
                 mask.getImageConfig().setValue("expression", expression);
-                product.getMaskGroup().add(mask);    */
+                mask.setNoDataValue(0);
+                mask.setNoDataValueUsed(true);
+                product.getMaskGroup().add(mask);
             }
         }
     }
@@ -194,7 +194,8 @@ public class OilSpillDetectionOp extends Operator {
                     ProductData.TYPE_INT8,
                     sourceImageWidth,
                     sourceImageHeight);
-
+            targetBandMask.setNoDataValue(0);
+            targetBandMask.setNoDataValueUsed(true);
             targetBandMask.setUnit(Unit.AMPLITUDE);
             targetProduct.addBand(targetBandMask);
         }
@@ -213,45 +214,54 @@ public class OilSpillDetectionOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int tx0 = targetTileRectangle.x;
-        final int ty0 = targetTileRectangle.y;
-        final int tw  = targetTileRectangle.width;
-        final int th  = targetTileRectangle.height;
-        final ProductData trgData = targetTile.getDataBuffer();
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int tx0 = targetTileRectangle.x;
+            final int ty0 = targetTileRectangle.y;
+            final int tw  = targetTileRectangle.width;
+            final int th  = targetTileRectangle.height;
+            final ProductData trgData = targetTile.getDataBuffer();
+            //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        final int x0 = Math.max(tx0 - halfBackgroundWindowSize, 0);
-        final int y0 = Math.max(ty0 - halfBackgroundWindowSize, 0);
-        final int w  = Math.min(tx0 + tw - 1 + halfBackgroundWindowSize, sourceImageWidth - 1) - x0 + 1;
-        final int h  = Math.min(ty0 + th - 1 + halfBackgroundWindowSize, sourceImageHeight - 1) - y0 + 1;
-        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            final int x0 = Math.max(tx0 - halfBackgroundWindowSize, 0);
+            final int y0 = Math.max(ty0 - halfBackgroundWindowSize, 0);
+            final int w  = Math.min(tx0 + tw - 1 + halfBackgroundWindowSize, sourceImageWidth - 1) - x0 + 1;
+            final int h  = Math.min(ty0 + th - 1 + halfBackgroundWindowSize, sourceImageHeight - 1) - y0 + 1;
+            final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName());
-        final Band sourceBand = sourceProduct.getBand(srcBandName);
-        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
-        final ProductData srcBuffer = sourceTile.getDataBuffer();
-        final double noDataValue = sourceBand.getNoDataValue();
+            final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName());
+            final Band sourceBand = sourceProduct.getBand(srcBandName);
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
+            final ProductData srcBuffer = sourceTile.getDataBuffer();
+            final double noDataValue = sourceBand.getNoDataValue();
 
-        final int maxy = ty0 + th;
-        final int maxx = tx0 + tw;
-        for (int ty = ty0; ty < maxy; ty++) {
-            for (int tx = tx0; tx < maxx; tx++) {
-                final double v = srcBuffer.getElemDoubleAt(sourceTile.getDataBufferIndex(tx, ty));
-                if (v == noDataValue) {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 0);
-                    continue;
-                }
+            final TileIndex trgIndex = new TileIndex(targetTile);
+            final TileIndex srcIndex = new TileIndex(sourceTile);    // src and trg tile are different size
 
-                final double backgroundMean = computeBackgroundMean(tx, ty, sourceTile, noDataValue);
-                final double threshold = backgroundMean / kInLinearScale;
-                if (v < threshold) {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 1);
-                } else {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 0);
+            final int maxy = ty0 + th;
+            final int maxx = tx0 + tw;
+            for (int ty = ty0; ty < maxy; ty++) {
+                trgIndex.calculateStride(ty);
+                srcIndex.calculateStride(ty);
+                for (int tx = tx0; tx < maxx; tx++) {
+                    final double v = srcBuffer.getElemDoubleAt(srcIndex.getIndex(tx));
+                    if (v == noDataValue) {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 0);
+                        continue;
+                    }
+
+                    final double backgroundMean = computeBackgroundMean(tx, ty, sourceTile, noDataValue);
+                    final double threshold = backgroundMean / kInLinearScale;
+                    if (v < threshold) {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 1);
+                    } else {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 0);
+                    }
                 }
             }
+        } catch (Throwable e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -270,14 +280,16 @@ public class OilSpillDetectionOp extends Operator {
         final int w  = Math.min(tx + halfBackgroundWindowSize, sourceImageWidth - 1) - x0 + 1;
         final int h  = Math.min(ty + halfBackgroundWindowSize, sourceImageHeight - 1) - y0 + 1;
         final ProductData srcData = sourceTile.getDataBuffer();
+        final TileIndex tileIndex = new TileIndex(sourceTile);
 
         double mean = 0.0;
         int numPixels = 0;
         final int maxy = y0 + h;
         final int maxx = x0 + w;
         for (int y = y0; y < maxy; y++) {
+            tileIndex.calculateStride(y);
             for (int x = x0; x < maxx; x++) {
-                final double v = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x, y));
+                final double v = srcData.getElemDoubleAt(tileIndex.getIndex(x));
                 if (v != noDataValue) {
                     mean += v;
                     numPixels++;

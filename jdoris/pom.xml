@@ -3,27 +3,43 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-	
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jdoris.version>0.0</jdoris.version>
+        <nest.version>4B-1.0</nest.version>
+        <beam.version>4.10-SNAPSHOT</beam.version>
+        <jblas.version>1.2.0</jblas.version>
+        <junit.version>4.8.2</junit.version>
+        <outputdir>../../output</outputdir>
+    </properties>
+
     <name>jDoris</name>
     <groupId>org.jdoris</groupId>
     <artifactId>jdoris</artifactId>
-    <version>0.0</version>
+    <version>${jdoris.version}</version>
 
-	<modules>
-        <!--<module>legacy</module>-->
+    <packaging>pom</packaging>
+
+    <organization>
+        <name>PPO.labs</name>
+        <url>http://www.ppolabs.com/jdoris</url>
+    </organization>
+    <inceptionYear>2011</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL)</name>
+            <url>http://www.gnu.org/licenses/gpl.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <modules>
         <module>jdoris-core</module>
+        <module>jdoris-nest</module>
     </modules>
-	
-	<properties>
-		<beam.version>4.9-SNAPSHOT</beam.version>
-        <ceres.version>0.12-SNAPSHOT</ceres.version>
-        <geotools.version>2.6.5</geotools.version>
-		<jide.version>2.9.5</jide.version>
-		<nest.version>4B-1.0</nest.version>
-		<outputdir>../../output</outputdir>
-    </properties>
-	
+
     <repositories>
         <repository>
             <id>array-mvn-repo</id>
@@ -36,17 +52,17 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!--repository>
+        <repository>
             <id>ppolabs-mvn-repo</id>
             <name>Public Maven Repository of PPO.labs hosted on github.com</name>
-            <url>http://10.0.0.21/mvn</url>
+            <url>http://94.209.52.167/mvn</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository-->
+        </repository>
         <repository>
             <id>maven2-repository.dev.java.net</id>
             <name>Java.net repository</name>
@@ -59,7 +75,44 @@
         </repository>
     </repositories>
 
-	<build>
-        <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
-	</build>
+    <build>
+        <outputDirectory>${outputdir}/modules/${project.artifactId}-${jdoris.version}</outputDirectory>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <debug>true</debug>
+                    <optimize>true</optimize>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <!--<parallel>methods</parallel>-->
+                    <!--<threadCount>4</threadCount>-->
+                    <!--<skip>false</skip>-->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>2.1.2</version>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

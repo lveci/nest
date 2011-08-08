@@ -204,12 +204,11 @@ public class Project extends Observable {
 
         refreshProjectTree();
 
-        ProjectSubFolder newFolder = processedFolder.addSubFolder("Calibrated Products");
-        newFolder.setCreatedByUser(true);
-        newFolder = processedFolder.addSubFolder("Coregistered Products");
-        newFolder.setCreatedByUser(true);
-        //newFolder = processedFolder.addSubFolder("Orthorectified Products");
-        //newFolder.setCreatedByUser(true);
+        final String[] defaultFolders = getDefaultProjectFolders();
+        for(String folderName : defaultFolders) {
+            final ProjectSubFolder newFolder = processedFolder.addSubFolder(folderName);
+            newFolder.setCreatedByUser(true);
+        }
 
         if(VisatApp.getApp() != null) {
             VisatApp.getApp().getPreferences().setPropertyString(
@@ -219,6 +218,21 @@ public class Project extends Observable {
 
         // start refresh timer for any outside changes to project folder
         startUpdateTimer();
+    }
+
+    private String[] getDefaultProjectFolders() {
+        String defaultProjectFolders = System.getProperty("defaultProjectFolders");
+        if(defaultProjectFolders == null) {
+            defaultProjectFolders = "Calibrated Products, Coregistered Products, Orthorectified Products";
+        }
+
+        final ArrayList<String> folderNames = new ArrayList<String>(5);
+        final StringTokenizer st = new StringTokenizer(defaultProjectFolders, ",");
+        int length = st.countTokens();
+        for (int i = 0; i < length; i++) {
+            folderNames.add(st.nextToken().trim());
+        }
+        return folderNames.toArray(new String[folderNames.size()]);
     }
 
     private void startUpdateTimer() {

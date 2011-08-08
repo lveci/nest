@@ -43,6 +43,7 @@ public class TerraSARXCalibrator implements Calibrator {
     private Product targetProduct;
 
     private MetadataElement absRoot = null;
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
     private boolean isComplex = false;
     private double firstLineUTC = 0.0; // in days
@@ -67,6 +68,13 @@ public class TerraSARXCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public TerraSARXCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**

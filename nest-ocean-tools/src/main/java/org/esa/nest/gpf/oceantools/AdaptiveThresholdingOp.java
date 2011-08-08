@@ -29,6 +29,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -205,45 +206,53 @@ public class AdaptiveThresholdingOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int tx0 = targetTileRectangle.x;
+            final int ty0 = targetTileRectangle.y;
+            final int tw  = targetTileRectangle.width;
+            final int th  = targetTileRectangle.height;
+            final ProductData trgData = targetTile.getDataBuffer();
+            //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int tx0 = targetTileRectangle.x;
-        final int ty0 = targetTileRectangle.y;
-        final int tw  = targetTileRectangle.width;
-        final int th  = targetTileRectangle.height;
-        final ProductData trgData = targetTile.getDataBuffer();
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+            final int x0 = Math.max(tx0 - halfBackgroundWindowSize, 0);
+            final int y0 = Math.max(ty0 - halfBackgroundWindowSize, 0);
+            final int w  = Math.min(tx0 + tw - 1 + halfBackgroundWindowSize, sourceImageWidth - 1) - x0 + 1;
+            final int h  = Math.min(ty0 + th - 1 + halfBackgroundWindowSize, sourceImageHeight - 1) - y0 + 1;
+            final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final int x0 = Math.max(tx0 - halfBackgroundWindowSize, 0);
-        final int y0 = Math.max(ty0 - halfBackgroundWindowSize, 0);
-        final int w  = Math.min(tx0 + tw - 1 + halfBackgroundWindowSize, sourceImageWidth - 1) - x0 + 1;
-        final int h  = Math.min(ty0 + th - 1 + halfBackgroundWindowSize, sourceImageHeight - 1) - y0 + 1;
-        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName());
+            final Band sourceBand = sourceProduct.getBand(srcBandName);
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
+            final double noDataValue = sourceBand.getNoDataValue();
 
-        final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName());
-        final Band sourceBand = sourceProduct.getBand(srcBandName);
-        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle);
-        final double noDataValue = sourceBand.getNoDataValue();
+            final TileIndex trgIndex = new TileIndex(targetTile);
+            final TileIndex srcIndex = new TileIndex(sourceTile);    // src and trg tile are different size
 
-        final int maxy = ty0 + th;
-        final int maxx = tx0 + tw;
-        for (int ty = ty0; ty < maxy; ty++) {
-            for (int tx = tx0; tx < maxx; tx++) {
+            final int maxy = ty0 + th;
+            final int maxx = tx0 + tw;
+            for (int ty = ty0; ty < maxy; ty++) {
+                trgIndex.calculateStride(ty);
+                srcIndex.calculateStride(ty);
+                for (int tx = tx0; tx < maxx; tx++) {
 
-                final double targetMean = computeTargetMean(tx, ty, sourceTile, noDataValue);
-                if (targetMean == noDataValue) {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 0);
-                    continue;
-                }
+                    final double targetMean = computeTargetMean(tx, ty, sourceTile, noDataValue);
+                    if (targetMean == noDataValue) {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 0);
+                        continue;
+                    }
 
-                final double backgroundThreshold = computeBackgroundThreshold(tx, ty, sourceTile, noDataValue);
-                if (targetMean > backgroundThreshold) {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 1);
-                } else {
-                    trgData.setElemIntAt(targetTile.getDataBufferIndex(tx, ty), 0);
+                    final double backgroundThreshold = computeBackgroundThreshold(tx, ty, sourceTile, noDataValue);
+                    if (targetMean > backgroundThreshold) {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 1);
+                    } else {
+                        trgData.setElemIntAt(trgIndex.getIndex(tx), 0);
+                    }
                 }
             }
+        } catch (Throwable e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 

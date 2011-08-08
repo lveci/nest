@@ -18,6 +18,7 @@ package org.esa.nest.dat.dialogs;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,32 +31,26 @@ import java.awt.*;
  */
 public class ProductSelectorDialog extends ModalDialog {
 
-    private final JList list;
+    private final JComboBox list;
     private boolean ok = false;
 
-    public ProductSelectorDialog(String title, String[] productNames) {
+    public ProductSelectorDialog(final String title, final String[] productNames) {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
 
-        final JPanel content = GridBagUtils.createPanel();
-        final GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets.right = 4;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
+        final JPanel content = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        gbc.insets.top = 2;
-        list = new JList(productNames);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        content.add(list);
+        list = new JComboBox(productNames);
+        list.setMinimumSize(new Dimension(50, 4));
+        content.add(list, gbc);
 
-        getJDialog().setMinimumSize(new Dimension(400, 100));
+        getJDialog().setMinimumSize(new Dimension(200, 100));
 
         setContent(content);
     }
 
     public String getSelectedProductName() {
-        Object selection = list.getSelectedValue();
+        Object selection = list.getSelectedItem();
         if(selection == null) {
             if(list.getModel().getSize() > 0) {
                 selection = list.getModel().getElementAt(0);

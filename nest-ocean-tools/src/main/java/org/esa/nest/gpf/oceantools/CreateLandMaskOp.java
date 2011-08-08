@@ -31,6 +31,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -163,18 +164,17 @@ public class CreateLandMaskOp extends Operator {
             final int maxY = targetRectangle.y + targetRectangle.height - 1;
             boolean valid;
 
-            final Tile firstTgtTile = trgTiles[0].targetTile;
-            final Tile firstSrcTile = trgTiles[0].srcTile;
-
+            final TileIndex tileIndex = new TileIndex(trgTiles[0].srcTile);        
             final float demNoDataValue = dem.getDescriptor().getNoDataValue();
 
             for (int y = targetRectangle.y; y <= maxY; ++y) {
                 pixelPos.y = y + 0.5f;
+                tileIndex.calculateStride(y);
                 for (int x = targetRectangle.x; x <= maxX; ++x) {
                     pixelPos.x = x + 0.5f;                    
                     targetGeoCoding.getGeoPos(pixelPos, geoPos);
 
-                    final int tgtIndex = firstTgtTile.getDataBufferIndex(x, y);
+                    final int index = tileIndex.getIndex(x);
                     
                     if(landMask) {
                         if(useSRTM)
@@ -189,14 +189,13 @@ public class CreateLandMaskOp extends Operator {
                     }
 
                     if(valid) {
-                        final int srcIndex = firstSrcTile.getDataBufferIndex(x, y);
                         for(TileData tileData : trgTiles) {
-                            tileData.tileDataBuffer.setElemDoubleAt(tgtIndex,
-                                    tileData.srcDataBuffer.getElemDoubleAt(srcIndex));
+                            tileData.tileDataBuffer.setElemDoubleAt(index,
+                                    tileData.srcDataBuffer.getElemDoubleAt(index));
                         }
                     } else {
                         for(TileData tileData : trgTiles) {
-                            tileData.tileDataBuffer.setElemDoubleAt(tgtIndex, tileData.noDataValue);
+                            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
                         }
                     }
                 }
@@ -204,8 +203,6 @@ public class CreateLandMaskOp extends Operator {
 
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
-        } finally {
-            pm.done();
         }
     }
 
@@ -215,7 +212,7 @@ public class CreateLandMaskOp extends Operator {
         final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
         ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor("ACE2_5Min");
         if(useSRTM) {
-            demDescriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec GeoTiff");
+            demDescriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec");
         }
         if (demDescriptor.isInstallingDem()) {
               throw new OperatorException("The DEM is currently being installed.");

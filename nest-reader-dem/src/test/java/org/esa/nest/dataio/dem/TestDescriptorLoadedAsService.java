@@ -25,7 +25,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 public class TestDescriptorLoadedAsService extends TestCase {
 
     public void testACEDescriptorIsLoaded() {
-        testDescriptorIsLoaded("ACE");
+        testDescriptorIsLoaded("ACE30");
     }
 
     public void testSRTM30DescriptorIsLoaded() {

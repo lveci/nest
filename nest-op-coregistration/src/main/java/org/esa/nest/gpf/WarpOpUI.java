@@ -100,7 +100,7 @@ public class WarpOpUI extends BaseOperatorUI {
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "RMS Threshold:", rmsThreshold);
+        DialogUtils.addComponent(contentPane, gbc, "RMS Threshold (pixel accuracy):", rmsThreshold);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Warp Polynomial Order:", warpPolynomialOrder);
         gbc.gridy++;

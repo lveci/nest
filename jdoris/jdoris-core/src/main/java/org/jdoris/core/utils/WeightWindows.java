@@ -47,7 +47,7 @@ public class WeightWindows {
 
         if (br > fs) {
             System.err.println("myhamming: RBW>RSR.");
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Hamming weighting: RBW>RSR");
         }
 
         double[] hamWin = new double[fr.length];
@@ -64,11 +64,36 @@ public class WeightWindows {
             System.err.println("myhamming: only lying vectors.");
             throw new IllegalArgumentException();
         }
-
         return new DoubleMatrix(hamming(fr.toArray(), br, fs, alpha));
-
     }
 
+    public static double[] inverseHamming(final double[] hamming) {
+
+        double[] invertHamming = new double[hamming.length];
+
+        for (int i = 0; i < hamming.length; i++) {
+            if (hamming[i] != 0) {
+                invertHamming[i] = 1. / hamming[i];
+            }
+        }
+        return invertHamming;
+    }
+
+
+    public static double[] inverseHamming(final double[] fr, final double br, final double fs, final double alpha) throws IllegalArgumentException {
+        final double[] hamming = hamming(fr, br, fs, alpha);
+        return inverseHamming(hamming);
+    }
+
+
+    public static DoubleMatrix inverseHamming(final DoubleMatrix fr, final double br, final double fs, final double alpha) throws IllegalArgumentException {
+        if (!fr.isVector()) {
+            System.err.println("myhamming: only lying vectors.");
+            throw new IllegalArgumentException();
+        }
+//        return new DoubleMatrix(inverseHamming(fr.toArray(), br, fs, alpha));
+        return new DoubleMatrix(inverseHamming(fr.data, br, fs, alpha));
+    }
 
 
 }

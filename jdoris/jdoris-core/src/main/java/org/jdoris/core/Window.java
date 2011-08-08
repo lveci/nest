@@ -1,5 +1,6 @@
 package org.jdoris.core;
 
+import java.awt.*;
 import java.io.Serializable;
 
 public class Window implements Comparable, Cloneable, Serializable {
@@ -54,6 +55,19 @@ public class Window implements Comparable, Cloneable, Serializable {
      */
     public Window(final Window w) {
         this(w.linelo, w.linehi, w.pixlo, w.pixhi);
+    }
+
+    /**
+     * Constructs a <code>Window</code> having the (x,y,width,height) values as
+     * <code>other</code> Rectangle.
+     *
+     * @param r the <code>Rectangle</code> to copy.
+     */
+    public Window(final Rectangle r) {
+        this.linelo = r.y;
+        this.linehi = r.y + r.height;
+        this.pixlo = r.x;
+        this.pixhi = r.x + r.width;
     }
 
 

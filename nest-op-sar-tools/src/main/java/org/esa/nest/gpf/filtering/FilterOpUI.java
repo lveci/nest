@@ -85,7 +85,7 @@ public class FilterOpUI extends BaseOperatorUI {
     }
 
     public UIValidation validateParameters() {
-        if(getSelectedFilter(tree) == null)
+        if(getSelectedFilter(tree) == null && kernelFile.getText().equals(""))
             return new UIValidation(UIValidation.State.ERROR, "Filter not selected");
         return new UIValidation(UIValidation.State.OK, "");
     }

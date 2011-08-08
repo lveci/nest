@@ -1,1 +1,0 @@
-// Implementation: Summary for the Azimuth Filter Operator

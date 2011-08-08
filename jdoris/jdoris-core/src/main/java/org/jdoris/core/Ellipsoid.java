@@ -24,9 +24,9 @@ public class Ellipsoid {
     }
 
 
-    public Ellipsoid(final double semimajor, final double semiminor) {
-        a = semimajor;
-        b = semiminor;
+    public Ellipsoid(final double semiMajor, final double semiMinor) {
+        a = semiMajor;
+        b = semiMinor;
         set_ecc1st_sqr();// compute e2 (not required for zero-doppler iter.)
         set_ecc2nd_sqr();// compute e2b (not required for zero-doppler iter.)
         //set_name("unknown");
@@ -48,31 +48,31 @@ public class Ellipsoid {
         logger.info("ELLIPSOID: e2' = " + e2b);
     }
 
-    /*
+    /**
     *  Convert xyz cartesian coordinates to
     *  Geodetic ellipsoid coordinates latlonh
-    *    xyz2ell                                                   *
-    *                                                              *
-    * Converts geocentric cartesian coordinates in the XXXX        *
-    *  reference frame to geodetic coordinates.                    *
-    *  method of bowring see globale en locale geodetische systemen*
-    * input:                                                       *
-    *  - ellipsinfo, xyz, (phi,lam,hei)                            *
-    * output:                                                      *
-    *  - void (returned double[] lam<-pi,pi>, phi<-pi,pi>, hei)    *
-    *                                                              *
-    ****************************************************************/
-    public static double[] xyz2ell(final Point xyz) {
+    *    xyz2ell
+    *
+    * Converts geocentric cartesian coordinates in the XXXX
+    *  reference frame to geodetic coordinates.
+    *  method of bowring see globale en locale geodetische systemen
+    * input:
+    *  - ellipsinfo, xyz, (phi,lam,hei)
+    * output:
+    *  - void (returned double[] lam<-pi,pi>, phi<-pi,pi>, hei)
+    *
+    */
+    public synchronized static double[] xyz2ell(final Point xyz) {
 
 //        double[] phi_lambda_height = new double[3];
-        double r = Math.sqrt(Math.pow(xyz.x, 2) + Math.pow(xyz.y, 2));
-        double nu = Math.atan2((xyz.z * a), (r * b));
-        double sin3 = Math.pow(Math.sin(nu), 3);
-        double cos3 = Math.pow(Math.cos(nu), 3);
-        double phi = Math.atan2((xyz.z + e2b * b * sin3), (r - e2 * a * cos3));
-        double lambda = Math.atan2(xyz.y, xyz.x);
-        double N = computeEllipsoidNormal(phi);
-        double height = (r / Math.cos(phi)) - N;
+        final double r = Math.sqrt(Math.pow(xyz.x, 2) + Math.pow(xyz.y, 2));
+        final double nu = Math.atan2((xyz.z * a), (r * b));
+        final double sin3 = Math.pow(Math.sin(nu), 3);
+        final double cos3 = Math.pow(Math.cos(nu), 3);
+        final double phi = Math.atan2((xyz.z + e2b * b * sin3), (r - e2 * a * cos3));
+        final double lambda = Math.atan2(xyz.y, xyz.x);
+        final double N = computeEllipsoidNormal(phi);
+        final double height = (r / Math.cos(phi)) - N;
 
         return new double[]{phi, lambda, height};
 
@@ -90,40 +90,17 @@ public class Ellipsoid {
 
 
     /**
-     * *************************************************************
-     * ell2xyz                                                   *
-     * *
-     * Converts wgs84 ellipsoid cn to geocentric cartesian coord.   *
-     * input:                                                       *
-     * - phi,lam,hei (geodetic co-latitude, longitude, [rad] h [m] *
-     * output:                                                      *
-     * - cn XYZ                                                    *
-     * *
-     * Bert Kampes, 05-Jan-1999                                  *
-     * ***************************************************************
+     * ell2xyz
+     * Converts wgs84 ellipsoid cn to geocentric cartesian coord.
+     * input:
+     * - phi,lam,hei (geodetic co-latitude, longitude, [rad] h [m]
+     * output:
+     * - cn XYZ
      */
-    public static Point ell2xyz(final double phi, final double lambda, final double height) throws Exception {
+    public static Point ell2xyz(final double phi, final double lambda, final double height) throws IllegalArgumentException {
 
         if (phi > Math.PI || phi < -Math.PI || lambda > Math.PI || lambda < -Math.PI) {
-            throw new Exception("Ellipsoid.ell2xyz : input values for phi/lambda have to be in radians!");
-        }
-
-        double N = computeEllipsoidNormal(phi);
-        double Nph = N + height;
-        return new Point(
-                Nph * Math.cos(phi) * Math.cos(lambda),
-                Nph * Math.cos(phi) * Math.sin(lambda),
-                (Nph - e2 * N) * Math.sin(phi));
-    }
-
-    public static Point ell2xyz(final double[] phi_lambda_height) throws Exception {
-
-        final double phi = phi_lambda_height[0];
-        final double lambda = phi_lambda_height[1];
-        final double height = phi_lambda_height[2];
-
-        if (phi > Math.PI || phi < -Math.PI || lambda > Math.PI || lambda < -Math.PI) {
-            throw new Exception("Ellipsoid.ell2xyz(): phi/lambda values has to be in radians!");
+            throw new IllegalArgumentException("Ellipsoid.ell2xyz : input values for phi/lambda have to be in radians!");
         }
 
         final double N = computeEllipsoidNormal(phi);
@@ -134,11 +111,29 @@ public class Ellipsoid {
                 (Nph - e2 * N) * Math.sin(phi));
     }
 
-    private static double computeEllipsoidNormal(double phi) {
+    public static Point ell2xyz(final double[] phiLambdaHeight) throws IllegalArgumentException {
+
+        final double phi = phiLambdaHeight[0];
+        final double lambda = phiLambdaHeight[1];
+        final double height = phiLambdaHeight[2];
+
+        if (phi > Math.PI || phi < -Math.PI || lambda > Math.PI || lambda < -Math.PI) {
+            throw new IllegalArgumentException("Ellipsoid.ell2xyz(): phi/lambda values has to be in radians!");
+        }
+
+        final double N = computeEllipsoidNormal(phi);
+        final double Nph = N + height;
+        return new Point(
+                Nph * Math.cos(phi) * Math.cos(lambda),
+                Nph * Math.cos(phi) * Math.sin(lambda),
+                (Nph - e2 * N) * Math.sin(phi));
+    }
+
+    private static double computeEllipsoidNormal(final double phi) {
         return a / Math.sqrt(1.0 - e2 * Math.pow(Math.sin(phi), 2));
     }
 
-    private double computeCurvatureRadiusInMeridianPlane(double phi) {
+    private double computeCurvatureRadiusInMeridianPlane(final double phi) {
         return a * (1 - e2) / Math.pow((1 - e2 * Math.pow(Math.sin(phi), 2)), 3 / 2);
 
     }

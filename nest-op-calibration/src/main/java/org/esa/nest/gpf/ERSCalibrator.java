@@ -27,6 +27,7 @@ import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
+import org.esa.nest.util.Constants;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.JAI;
@@ -67,6 +68,7 @@ public final class ERSCalibrator implements Calibrator {
     private Product sourceProduct;
     private Product targetProduct;
 
+    private boolean outputImageInComplex = false;
     private boolean outputImageScaleInDb = false;
 
     private MetadataElement absRoot = null;
@@ -141,11 +143,9 @@ public final class ERSCalibrator implements Calibrator {
     private static final double relativeLookAngle = 20.355; //  degree
     private static final double aGEM6 = 6378144; // GEM6: equatorial Earth radius in m (for VMP CEOS)
     private static final double bGEM6 = 6356759; // GEM6: polar Earth radius in m (for VMP CEOS)
-    private static final double aWGS84 = 6378137; // WGS 84: equatorial Earth radius in m (for PGS CEOS)
-    private static final double bWGS84 = 6356752.314245 ; // WGS 84: polar Earth radius in m (for PGS CEOS)
+    private static final double aWGS84 = Constants.semiMajorAxis; // WGS 84: equatorial Earth radius in m (for PGS CEOS)
+    private static final double bWGS84 = Constants.semiMinorAxis; // WGS 84: polar Earth radius in m (for PGS CEOS)
     private static final double referenceSlantRange = 847000; //  m
-    private static final double lightSpeed = 299792458; //  m / s
-    private static final double halfLightSpeed = lightSpeed / 2;
     private static final double underFlowFloat = 1.0e-30;
     private static final double windowDimInRange = 15000.0; //  m
     private static final double windowDimInAzimuth = 5000.0; //  m
@@ -166,6 +166,13 @@ public final class ERSCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public ERSCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in complex.
+     */
+    public void setOutputImageInComplex(boolean flag) {
+        outputImageInComplex = flag;
     }
 
     /**
@@ -1120,7 +1127,7 @@ public final class ERSCalibrator implements Calibrator {
         final double rt = a*Math.sqrt((cos2 + e2*e2*sin2)/(cos2 + e2*sin2));
         final double rt2 = rt*rt;
         final double deltaPsi = rangeSpacing/rt; // in radian
-        final double r1 = halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
+        final double r1 = Constants.halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
 
         double psi = 0.0;
         double alpha = 0.0;
@@ -2294,7 +2301,7 @@ public final class ERSCalibrator implements Calibrator {
 
             final double alpha = incidenceAngleTiePointGrid.getPixelFloat(x + 0.5f, y + 0.5f) * MathUtils.DTOR; // in radian
             final double time = slantRangeTimeTiePointGrid.getPixelFloat(x + 0.5f, y + 0.5f) / 1000000000.0; //convert ns to s
-            final double r = time * halfLightSpeed; // in m
+            final double r = time * Constants.halfLightSpeed; // in m
             final double theta = alpha - Math.asin(Math.sin(alpha) * r / rSat); // in radian
 
             incidenceAngles[x] = alpha;

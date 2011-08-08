@@ -12,7 +12,7 @@ public final class TileIndex {
     private final int tileMinX;
     private final int tileMinY;
 
-    private int stride = 0;
+    private int offset = 0;
 
     public TileIndex(final Tile tile) {
         tileOffset = tile.getScanlineOffset();
@@ -22,10 +22,10 @@ public final class TileIndex {
     }
 
     public void calculateStride(final int ty) {
-        stride = ((ty - tileMinY) * tileStride) + tileOffset;
+        offset = tileMinX - (((ty - tileMinY) * tileStride) + tileOffset);
     }
 
     public int getIndex(final int tx) {
-        return (tx - tileMinX) + stride;
+        return tx - offset;
     }
 }

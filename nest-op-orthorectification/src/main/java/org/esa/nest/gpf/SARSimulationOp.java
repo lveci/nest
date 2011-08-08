@@ -34,6 +34,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.dataio.dem.FileElevationModel;
 
 import java.awt.*;
 import java.io.File;
@@ -70,7 +71,7 @@ import java.util.Map;
  * (3.3) Compute SAR sensor position S(X, Y, Z) at time t;
  * (3.4) Compute slant range r = |S - P|;
  * (3.5) Compute bias-corrected zero Doppler time tc = t + r*2/c, where c is the light speed;
- * (3.6) Update satellite position S(tc) and slant range r(tc) = |S(tc) – P| for the bias-corrected zero Doppler time tc;
+ * (3.6) Update satellite position S(tc) and slant range r(tc) = |S(tc) ï¿½ P| for the bias-corrected zero Doppler time tc;
  * (3.7) Compute azimuth index Ia in the source image using zero Doppler time tc;
  * (3.8) Compute range index Ir in the source image using slant range r(tc);
  * (3.9) Compute local incidence angle;
@@ -91,9 +92,9 @@ public final class SARSimulationOp extends Operator {
             rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
-    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
-               defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
-    private String demName = "SRTM 3Sec GeoTiff";
+    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec", "ASTER 1sec GDEM"}, description = "The digital elevation model.",
+               defaultValue="SRTM 3Sec", label="Digital Elevation Model")
+    private String demName = "SRTM 3Sec";
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
@@ -144,6 +145,8 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
     private static String SIMULATED_BAND_NAME = "Simulated_Intensity";
+
+    private boolean nearRangeOnLeft = true;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -222,6 +225,12 @@ public final class SARSimulationOp extends Operator {
             srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
         } else {
             nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
+        }
+
+        final String mission = RangeDopplerGeocodingOp.getMissionType(absRoot);
+        final String pass = absRoot.getAttributeString("PASS");
+        if (mission.equals("RS2") && pass.contains("DESCENDING")) {
+            nearRangeOnLeft = false;
         }
     }
 
@@ -355,8 +364,10 @@ public final class SARSimulationOp extends Operator {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
-                if(!(band instanceof VirtualBand))
+                if(band.getUnit().contains(Unit.AMPLITUDE) || band.getUnit().contains(Unit.INTENSITY)) {
                     bandNameList.add(band.getName());
+                    break;
+                }
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
             bandSlected = false;
@@ -534,6 +545,10 @@ public final class SARSimulationOp extends Operator {
 
                     if (rangeIndex <= 0.0) {
                         continue;
+                    }
+
+                    if (!nearRangeOnLeft) {
+                        rangeIndex = sourceImageWidth - 1 - rangeIndex;
                     }
 
                     rangeIndex = (int)(rangeIndex + 0.5);

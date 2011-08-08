@@ -19,10 +19,7 @@
         <module>beam-envisat-reader</module>
     </dependency>
     <dependency>
-        <module>nest-reader-ers-ceos</module>
-    </dependency>
-    <dependency>
-        <module>nest-reader-xml-based</module>
+        <module>nest-io</module>
     </dependency>
 
     <categories>VISAT,Processing</categories>

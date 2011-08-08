@@ -22,15 +22,15 @@ public class LinearAlgebraUtils {
      * output:
      * - matrix<real8> result 2x1 unknown dx,dy,dz
      */
-    public static double[] solve22(double[][] A, double[] y) throws Exception {
+    public static double[] solve22(double[][] A, double[] y) throws IllegalArgumentException {
 
         double[] result = new double[2];
 
         if (A[0].length != 2 || A.length != 2) {
-            throw new Exception("solve22: input: size of A not 22.");
+            throw new IllegalArgumentException("solve22: input: size of A not 22.");
         }
         if (y.length != 2) {
-            throw new Exception("solve22: input: size y not 2x1.");
+            throw new IllegalArgumentException("solve22: input: size y not 2x1.");
         }
 
         // Direct Solution
@@ -52,15 +52,15 @@ public class LinearAlgebraUtils {
         output/return:
          - matrix result 3x1 unknown
     */
-    public static double[] solve33(double[][] A, double[] rhs) throws Exception {
+    public static double[] solve33(double[][] A, double[] rhs) throws IllegalArgumentException {
 
         double[] result = new double[3];
 
         if (A[0].length != 3 || A.length != 3) {
-            throw new Exception("solve33: input: size of A not 33.");
+            throw new IllegalArgumentException("solve33: input: size of A not 33.");
         }
         if (rhs.length != 3) {
-            throw new Exception("solve33: input: size rhs not 3x1.");
+            throw new IllegalArgumentException("solve33: input: size rhs not 3x1.");
         }
 
         // real8 L10, L20, L21: used lower matrix elements
@@ -180,11 +180,11 @@ public class LinearAlgebraUtils {
     }
 
     public static ComplexDoubleMatrix dotmult(ComplexDoubleMatrix A, ComplexDoubleMatrix B) {
-        return A.mmul(B);
+        return A.mul(B);
     }
 
     public static void dotmult_inplace(ComplexDoubleMatrix A, ComplexDoubleMatrix B) {
-        A.mmuli(B);
+        A.muli(B);
     }
 
 
@@ -197,12 +197,18 @@ public class LinearAlgebraUtils {
         final int nRows = A.rows;
         final int nCols = A.columns;
 
-        if (nRows == 1) {
+        if (nRows == 1 || nCols == 1) {
             double tmp;
-            for (int i = 0; i < (nCols / 2); ++i) {
-                tmp = A.get(1, i);
-                A.put(1, i, A.get(1, nRows - i));
-                A.put(1, nRows - 1, tmp);
+//            for (int i = 0; i < (nCols / 2); ++i) {
+//                tmp = A.get(0, i);
+//                A.put(0, i, A.get(0, nRows - i));
+//                A.put(0, nRows - 1, tmp);
+//            }
+            final int length = A.length;
+            for (int i = 0; i < (length / 2); i++) {
+                tmp = A.data[i];
+                A.data[i] = A.data[length - i - 1];
+                A.data[length - i - 1] = tmp;
             }
         } else {
             for (int i = 0; i < (nCols / 2); ++i)     // floor
@@ -230,7 +236,7 @@ public class LinearAlgebraUtils {
      * implementation: WSHIFT(inVector,n) == WSHIFT(inVector,n-sizeA);
      * inVector is changed itself!
      */
-    public static void wshift_inplace(DoubleMatrix inVector, int n) throws Exception {
+    public static void wshift_inplace(DoubleMatrix inVector, int n) throws IllegalArgumentException {
 
         if (n >= inVector.length) {
             System.err.println("wshift: shift larger than matrix not implemented.");
@@ -256,7 +262,7 @@ public class LinearAlgebraUtils {
 
     }
 
-    public static DoubleMatrix wshift(DoubleMatrix inMatrix, int n) throws Exception {
+    public static DoubleMatrix wshift(DoubleMatrix inMatrix, int n) {
         DoubleMatrix outMatrix = inMatrix.dup();
         wshift_inplace(outMatrix, n);
         return outMatrix;

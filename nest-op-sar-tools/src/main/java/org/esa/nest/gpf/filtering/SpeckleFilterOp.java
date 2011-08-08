@@ -170,7 +170,8 @@ public class SpeckleFilterOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
+        OperatorUtils.addSelectedBands(
+                sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true);
     }
 
     /**

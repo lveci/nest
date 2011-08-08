@@ -65,7 +65,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         final ElevationModelDescriptor[] demDesciptors = elevationModelRegistry.getAllDescriptors();
         for(ElevationModelDescriptor dem : demDesciptors) {
-            demName.addItem(dem.getName());
+            demName.addItem(RangeDopplerGeocodingOpUI.appendAutoDEM(dem.getName()));
         }
         demName.addItem(externalDEMStr);
 
@@ -76,7 +76,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         demName.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                final String item = (String)demName.getSelectedItem();
+                final String item = ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, "");
                 if(item.equals(externalDEMStr)) {
                     enableExternalDEM(true);
                 } else {
@@ -86,7 +86,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(30);
-        demName.setSelectedItem(parameterMap.get("demName"));
+        String demNameParam = (String)parameterMap.get("demName");
+        if(demNameParam != null)
+            demName.setSelectedItem(RangeDopplerGeocodingOpUI.appendAutoDEM(demNameParam));
         enableExternalDEM(false);
 
         externalDEMBrowseButton.addActionListener(new ActionListener() {
@@ -115,7 +117,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
-        demName.setSelectedItem(paramMap.get("demName"));
+        String demNameParam = (String)paramMap.get("demName");
+        if(demNameParam != null)
+            demName.setSelectedItem(RangeDopplerGeocodingOpUI.appendAutoDEM(demNameParam));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
 
         final File extFile = (File)paramMap.get("externalDEMFile");
@@ -143,7 +147,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
-        paramMap.put("demName", demName.getSelectedItem());
+        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, ""));
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
 
         final String extFileStr = externalDEMFile.getText();

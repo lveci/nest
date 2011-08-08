@@ -17,6 +17,7 @@
         <band>Intensity</band>
       </sourceBands>
       <externalAuxFile/>
+	  <outputImageInComplex>false</outputImageInComplex>
       <outputImageScaleInDb>false</outputImageScaleInDb>
       <createGammaBand>false</createGammaBand>
       <createBetaBand>false</createBetaBand>
@@ -44,6 +45,7 @@
       </sourceBands>
       <nRgLooks>1</nRgLooks>
 	  <nAzLooks>1</nAzLooks>
+	  <outputIntensity>true</outputIntensity>
       <note>Currently, detection for complex data is done without any resampling</note>
     </parameters>
   </node>

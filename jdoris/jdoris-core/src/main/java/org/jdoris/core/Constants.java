@@ -1,11 +1,8 @@
 package org.jdoris.core;
 
-/**
- * User: pmar@ppolabs.com
- * Date: 4/11/11
- * Time: 11:31 AM
- */
 public class Constants {
+
+    public static final double EPS = 1e-13;
 
     public static final double WGS84_A = 6378137.000;    // WGS84 semi-major axis
     public static final double WGS84_B = 6356752.314245; // WGS84 semi-minor axis
@@ -18,5 +15,8 @@ public class Constants {
 
     public static final double DTOR = Math.PI / 180.0;
     public static final double RTOD = 180.0 / Math.PI;
+
+    public static final long MEGA = 1000000; // Math.pow(10,6)
+
 
 }

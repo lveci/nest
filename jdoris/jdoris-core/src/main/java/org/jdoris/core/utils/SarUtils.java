@@ -153,16 +153,16 @@ public class SarUtils {
         return sqrt(intensity(inputMatrix));
     }
 
+    @Deprecated
     public static DoubleMatrix coherence(final ComplexDoubleMatrix inputMatrix, final ComplexDoubleMatrix normsMatrix, final int winL, final int winP) {
 
         logger.trace("coherence ver #2");
         if (!(winL >= winP)) {
-            logger.debug("coherence: estimator window size L<P not very efficiently programmed.");
-//            throw new IllegalArgumentException("coherence: estimator window size L<P not very efficiently programmed.");
+            logger.warn("coherence: estimator window size L<P not very efficiently programmed.");
         }
 
         if (inputMatrix.rows != normsMatrix.rows || inputMatrix.rows != inputMatrix.rows) {
-            logger.debug("coherence: not same dimensions.");
+            logger.error("coherence: not same dimensions.");
             throw new IllegalArgumentException("coherence: not the same dimensions.");
         }
 
@@ -188,7 +188,6 @@ public class SarUtils {
                     power.addi(normsMatrix.get(k, l));
                 }
             }
-//            outputMatrix.put(0, j, (product > 0.0) ? Math.sqrt((sum.abs() / product)) : 0.0);
             outputMatrix.put(0, j, coherenceProduct(sum, power));
 
             //// Compute (relatively) sum over rest of data blocks ////
@@ -201,6 +200,56 @@ public class SarUtils {
             }
         }
         return outputMatrix;
+    }
+
+    public static DoubleMatrix coherence2(final ComplexDoubleMatrix input, final ComplexDoubleMatrix norms, final int winL, final int winP) {
+
+        logger.trace("coherence ver #2");
+        if (!(winL >= winP)) {
+            logger.warn("coherence: estimator window size L<P not very efficiently programmed.");
+        }
+
+        if (input.rows != norms.rows || input.rows != input.rows) {
+            logger.error("coherence: not same dimensions.");
+            throw new IllegalArgumentException("coherence: not the same dimensions.");
+        }
+
+        // allocate output :: account for window overlap
+        final int extent_RG = input.columns;
+        final int extent_AZ = input.rows - winL + 1;
+        DoubleMatrix result = new DoubleMatrix(input.rows - winL + 1, input.columns - winP + 1);
+
+        // temp variables
+        int i, j, k, l;
+        ComplexDouble sum;
+        ComplexDouble power;
+        int leadingZeros = (winP - 1) / 2;  // number of pixels=0 floor...
+        int trailingZeros = (winP) / 2;     // floor...
+
+        for (j = leadingZeros; j < extent_RG - trailingZeros; j++) {
+
+            sum = new ComplexDouble(0);
+            power = new ComplexDouble(0);
+
+            //// Compute sum over first data block ////
+            for (k = 0; k < winL; k++) {
+                for (l = j - leadingZeros; l < j - leadingZeros + winP; l++) {
+                    sum.addi(input.get(k, l));
+                    power.addi(norms.get(k, l));
+                }
+            }
+            result.put(0, j - leadingZeros, coherenceProduct(sum, power));
+
+            //// Compute (relatively) sum over rest of data blocks ////
+            for (i = 0; i < extent_AZ - 1; i++) {
+                for (l = j - leadingZeros; l < j - leadingZeros + winP; l++) {
+                    sum.addi(input.get(i + winL, l).sub(input.get(i, l)));
+                    power.addi(norms.get(i + winL, l).sub(norms.get(i, l)));
+                }
+                result.put(i + 1, j - leadingZeros, coherenceProduct(sum, power));
+            }
+        }
+        return result;
     }
 
     static double coherenceProduct(final ComplexDouble sum, final ComplexDouble power) {
@@ -240,4 +289,21 @@ public class SarUtils {
         return outputMatrix;
     }
 
+    public static ComplexDoubleMatrix computeIfg(final ComplexDoubleMatrix masterData, final ComplexDoubleMatrix slaveData) throws Exception {
+        return LinearAlgebraUtils.dotmult(masterData, slaveData.conj());
+    }
+
+    public static void computeIfg_inplace(final ComplexDoubleMatrix masterData, final ComplexDoubleMatrix slaveData) throws Exception {
+        LinearAlgebraUtils.dotmult_inplace(masterData, slaveData);
+    }
+
+    public static ComplexDoubleMatrix computeIfg(final ComplexDoubleMatrix masterData, final ComplexDoubleMatrix slaveData,
+                                                 final int ovsFactorAz, final int ovsFactorRg) throws Exception {
+        if (ovsFactorAz == 1 && ovsFactorRg == 1) {
+            return computeIfg(masterData, slaveData);
+        }   else {
+            return computeIfg(oversample(masterData, ovsFactorAz, ovsFactorRg), oversample(slaveData, ovsFactorAz, ovsFactorRg));
+        }
+
+    }
 }

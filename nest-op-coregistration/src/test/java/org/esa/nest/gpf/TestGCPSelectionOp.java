@@ -69,8 +69,8 @@ public class TestGCPSelectionOp extends TestCase {
 
         final Placemark pin = targetGcpGroup.get(0);
         final PixelPos pixelPos = pin.getPixelPos();
-        assertTrue(Float.compare(pixelPos.x, 19.0f) == 0);
-        assertTrue(Float.compare(pixelPos.y, 19.5f) == 0);
+        assertTrue(Float.compare(pixelPos.x, 16.0f) == 0);
+        assertTrue(Float.compare(pixelPos.y, 21.0f) == 0);
     }
 
     private static Product createTestMasterProduct(int w, int h) {
@@ -114,12 +114,14 @@ public class TestGCPSelectionOp extends TestCase {
 
         // create GCP
         final ProductNodeGroup<Placemark> masterGcpGroup = product.getGcpGroup(band);
-        final Placemark pin1 = new Placemark("gcp_1",
+        final Placemark pin1 = Placemark.createPointPlacemark(
+                           GcpDescriptor.getInstance(),
+                           "gcp_1",
                            "GCP 1",
                            "",
                            new PixelPos(19.0f, 19.0f),
                            new GeoPos(lat[w*h/2], lon[w*h/2]),
-                           PlacemarkSymbol.createDefaultGcpSymbol());
+                           product.getGeoCoding());
 
         masterGcpGroup.add(pin1);
 

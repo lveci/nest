@@ -55,7 +55,7 @@ public final class AbstractMetadata {
     public static final String SWATH = "SWATH";
     public static final String PROC_TIME = "PROC_TIME";
     public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
-    public static final String CYCLE = "CYCLE";
+    public static final String CYCLE = "orbit_cycle";
     public static final String REL_ORBIT = "REL_ORBIT";
     public static final String ABS_ORBIT = "ABS_ORBIT";
     public static final String STATE_VECTOR_TIME = "STATE_VECTOR_TIME";
@@ -158,6 +158,10 @@ public final class AbstractMetadata {
     public static final String lon_pixel_res = "lon_pixel_res";
     public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
 
+    // bandwidths for insar
+    public static final String range_bandwidth = "range_bandwidth";
+    public static final String azimuth_bandwidth = "azimuth_bandwidth";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -256,6 +260,10 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, rescaling_factor, ProductData.TYPE_FLOAT64, "", "Rescaling factor");
          
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
+
+        // range and azimuth bandwidths for InSAR
+        addAbstractedAttribute(absRoot, range_bandwidth, ProductData.TYPE_FLOAT64, "MHz", "Bandwidth total in range");
+        addAbstractedAttribute(absRoot, azimuth_bandwidth, ProductData.TYPE_FLOAT64, "Hz", "Bandwidth total in azimuth");
 
         // Multilook
         addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");

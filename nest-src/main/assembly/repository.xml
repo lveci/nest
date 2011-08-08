@@ -15,14 +15,6 @@
 				<exclude>org.esa.nest.maven:maven-nest-gpf-archetype</exclude>
 				
                 <exclude>com.bc.ceres:ceres-launcher</exclude>
-                <exclude>com.bc.ceres:ceres-deploy</exclude>
-                <exclude>com.bc.ceres:ceres-site</exclude>				
-				<!--exclude>com.bc.ceres:ceres-binding</exclude>
-				<exclude>com.bc.ceres:ceres-core</exclude>
-				<exclude>com.bc.ceres:ceres-glayer</exclude>
-				<exclude>com.bc.ceres:ceres-ui</exclude>
-				<exclude>com.bc.ceres:ceres-binio</exclude>
-				<exclude>com.bc.ceres:ceres-jai</exclude-->
             </excludes>
 			<sources>
 		        <includeModuleDirectory>false</includeModuleDirectory>

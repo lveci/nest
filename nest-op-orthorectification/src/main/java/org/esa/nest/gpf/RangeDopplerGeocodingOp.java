@@ -29,8 +29,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
@@ -90,9 +92,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     private
     String[] sourceBandNames = null;
 
-    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
-               defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
-    private String demName = "SRTM 3Sec GeoTiff";
+    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec", "ASTER 1sec GDEM"}, description = "The digital elevation model.",
+               defaultValue="SRTM 3Sec", label="Digital Elevation Model")
+    private String demName = "SRTM 3Sec";
 
     @Parameter(label="External DEM")
     private File externalDEMFile = null;
@@ -118,6 +120,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     @Parameter(description = "The coordinate reference system in well known text format")
     private String mapProjection;
+
+    @Parameter(defaultValue="true", label="Mask out areas with no elevation", description = "Mask the sea with no data value (faster)")
+    private boolean nodataValueAtSea = true;
 
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
@@ -217,6 +222,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean isPolsar = false;
 
     private boolean flipIndex = false; // temp fix for descending Radarsat2
+    private String mission = null;
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
@@ -320,7 +326,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     static void validateDEM(final String demName, final Product srcProduct) {
         // check if outside dem area
-        if(demName.equals("SRTM 3Sec GeoTiff")) {
+        if(demName.equals("SRTM 3Sec")) {
             final GeoCoding geocoding = srcProduct.getGeoCoding();
             final int w = srcProduct.getSceneRasterWidth();
             final int h = srcProduct.getSceneRasterHeight();
@@ -383,7 +389,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private void getMetadata() throws Exception {
         absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-        final String mission = getMissionType(absRoot);
+        mission = getMissionType(absRoot);
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -671,6 +677,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             addSelectedBands();
 
             targetGeoCoding = targetProduct.getGeoCoding();
+
+            ProductUtils.copyMetadata(sourceProduct, targetProduct);
         } catch (Exception e) {
             throw new OperatorException(e);
         }
@@ -690,9 +698,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             final Band srcBand = sourceBands[i];
             final String unit = srcBand.getUnit();
 
-            if (unit != null && unit.contains(Unit.PHASE)) {
-                continue;
-            } else if (unit != null && !isPolsar &&
+            if (unit != null && !isPolsar &&
                     (unit.equals(Unit.REAL)||unit.equals(Unit.IMAGINARY))) {
 
                 if (i == sourceBands.length - 1) {
@@ -707,10 +713,15 @@ public class RangeDopplerGeocodingOp extends Operator {
                 srcBands[0] = srcBand;
                 srcBands[1] = sourceBands[i+1];
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
+                final String suffix = OperatorUtils.getSuffixFromBandName(srcBand.getName());
 
                 if (saveSigmaNought) {
-                    if (pol != null && !pol.isEmpty() && !isPolsar) {
-                        targetBandName = "Sigma0_" + pol.toUpperCase();
+                    if (suffix != null && !suffix.isEmpty() && !isPolsar) {
+                        if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
+                            targetBandName = "Sigma0_" + suffix + "_" + pol.toUpperCase();
+                        } else {
+                            targetBandName = "Sigma0_" + suffix;
+                        }
                     } else {
                         targetBandName = "Sigma0";
                     }
@@ -726,8 +737,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    if (pol != null && !pol.isEmpty() && !isPolsar) {
-                        targetBandName = "Intensity_" + pol.toUpperCase();
+                    if (suffix != null && !suffix.isEmpty() && !isPolsar) {
+                        if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
+                            targetBandName = "Intensity_" + suffix + "_" + pol.toUpperCase();
+                        } else {
+                            targetBandName = "Intensity_" + suffix;
+                        }
                     } else {
                         targetBandName = "Intensity";
                     }
@@ -743,10 +758,15 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 final Band[] srcBands = {srcBand};
                 final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
+                final String suffix = OperatorUtils.getSuffixFromBandName(srcBand.getName());
                 if (saveSigmaNought) {
                     targetBandName = "Sigma0";
-                    if (pol != null && !pol.isEmpty() && !isPolsar) {
-                        targetBandName += "_" + pol.toUpperCase();
+                    if (suffix != null && !suffix.isEmpty() && !isPolsar) {
+                        if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
+                            targetBandName += "_" + suffix + "_" + pol.toUpperCase();
+                        } else {
+                            targetBandName += "_" + suffix;
+                        }
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
@@ -970,7 +990,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         try {
             float[][] localDEM = new float[h+2][w+2];
             final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
-            if(!valid && !useAvgSceneHeight)
+            if(!valid && !useAvgSceneHeight && nodataValueAtSea)
                 return;
 
             final GeoPos geoPos = new GeoPos();
@@ -1030,15 +1050,19 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
-                    final double alt = (double)localDEM[yy][x-x0+1];
+                    double alt = (double)localDEM[yy][x-x0+1];
 
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
                     }
 
-                    if (!useAvgSceneHeight && alt == demNoDataValue) {
-                        saveNoDataValueToTarget(index, trgTiles);
-                        continue;
+                    if(alt == demNoDataValue && !useAvgSceneHeight) {
+                        if (nodataValueAtSea) {
+                            saveNoDataValueToTarget(index, trgTiles);
+                            continue;
+                        } else {
+                            alt = 0;
+                        }
                     }
 
                     targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
@@ -1061,15 +1085,27 @@ public class RangeDopplerGeocodingOp extends Operator {
                     double slantRange = computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
+                    double azimuthIndex = 0.0;
+                    double rangeIndex = 0.0;
+                    if (mission.contains("CSKS") || mission.contains("TSX") || mission.equals("RS2")) {
 
-                    final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+                        // skip bistatic correction for COSMO, TerraSAR-X and RadarSAT-2
+                        azimuthIndex = (zeroDopplerTime - firstLineUTC) / lineTimeInterval;
+                        rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                                rangeSpacing, zeroDopplerTime, slantRange, nearEdgeSlantRange, srgrConvParams);
 
-                    slantRange = computeSlantRange(
-                            zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+                    } else {
 
-                    double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
-                            rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+                        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
+
+                        azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+
+                        slantRange = computeSlantRange(
+                                zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
+                        rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                                rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+                    }
 
                     // temp fix for descending Radarsat2
                     if (flipIndex) {

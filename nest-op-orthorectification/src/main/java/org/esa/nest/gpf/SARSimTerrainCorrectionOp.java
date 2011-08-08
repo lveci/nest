@@ -29,8 +29,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
@@ -161,6 +163,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean saveIncidenceAngleFromEllipsoid = false;
     private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
+    private boolean warpDataAvailable = false;
 
     private String demName = null;
 
@@ -510,6 +513,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         targetGeoCoding = targetProduct.getGeoCoding();
 
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+
         addLayoverShadowBitmasks(targetProduct);
     }
 
@@ -697,8 +702,22 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private synchronized void getWarpData() {
-        if (!warpDataMap.isEmpty()) return;
+    private synchronized void getWarpData(final Set<Band> keySet, final Rectangle targetRectangle) {
+        if (warpDataAvailable) {
+            return;
+        }
+
+        // find first real slave band
+        for(Band targetBand : keySet) {
+            if(targetBand.getName().equals(processedSlaveBand)) {
+                final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+                final Band srcBand = sourceProduct.getBand(srcBandNames[0]);
+                if(srcBand != null) {
+                    final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
+                    break;
+                }
+            }
+        }
 
         // for all slave bands or band pairs compute a warp
         final Band masterBand = sourceProduct.getBandAt(0);
@@ -738,6 +757,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 appendFlag = true;
             }
         }
+        warpDataAvailable = true;
     }
 
     /**
@@ -792,19 +812,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final Set<Band> keySet = targetTiles.keySet();
 
-        if(warpDataMap.isEmpty()) {
-            // find first real slave band
-            for(Band targetBand : keySet) {
-                if(targetBand.getName().equals(processedSlaveBand)) {
-                    final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
-                    final Band srcBand = sourceProduct.getBand(srcBandNames[0]);
-                    if(srcBand != null) {
-                        final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
-                        getWarpData();
-                        break;
-                    }
-                }
-            }
+        if(!warpDataAvailable) {
+            getWarpData(keySet, targetRectangle);
+
             if(openShiftsFile) {
                 final File shiftsFile = getShiftsFile(sourceProduct);
                 if(Desktop.isDesktopSupported() && shiftsFile.exists()) {

@@ -17,192 +17,44 @@ package org.esa.nest.dataio.dem.srtm3_geotiff;
 
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.dataio.dem.ElevationFile;
+import org.esa.nest.dataio.dem.ElevationTile;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.ftpUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketException;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Holds information about a dem file.
  */
-public final class SRTM3GeoTiffFile {
+public final class SRTM3GeoTiffFile extends ElevationFile {
 
     private final SRTM3GeoTiffElevationModel demModel;
-    private final File localFile;
-    private final ProductReader productReader;
-    private boolean localFileExists = false;
-    private boolean remoteFileExists = true;
-    private boolean errorInLocalFile = false;
-    private SRTM3GeoTiffElevationTile tile = null;
-    private ftpUtils ftp = null;
-    private Map<String, Long> fileSizeMap = null;
-    private boolean unrecoverableError = false;
 
     private static final String remoteFTP = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
     private static final String remotePath = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
 
     public SRTM3GeoTiffFile(SRTM3GeoTiffElevationModel model, File localFile, ProductReader reader) {
+        super(localFile,  reader);
         this.demModel = model;
-        this.localFile = localFile;
-        this.productReader = reader;
     }
 
-    public void dispose() {
-        try {
-            if(ftp != null)
-                ftp.disconnect();
-            ftp = null;
-            tile.dispose();
-            tile = null;
-        } catch(Exception e) {
-            //
-        }
+    protected String getRemoteFTP() {
+        return remoteFTP;
     }
 
-    public String getFileName() {
-        return localFile.getName();
+    protected String getRemotePath() {
+        return remotePath;
     }
 
-    public SRTM3GeoTiffElevationTile getTile() throws IOException {
-        if(tile == null) {
-            getFile();
-        }
+    protected ElevationTile createTile(final Product product) {
+        final SRTM3GeoTiffElevationTile tile = new SRTM3GeoTiffElevationTile(demModel, product);
+        demModel.updateCache(tile);
         return tile;
     }
 
-    private synchronized void getFile() throws IOException {
-        try {
-            if(tile != null) return;
-            if(!localFileExists && !errorInLocalFile) {
-                if (localFile.exists() && localFile.isFile()) {
-                    localFileExists = true;
-                }
-            }
-            if(localFileExists) {
-                final File dataFile = getFileFromZip(localFile);
-                if(dataFile != null) {
-                    final Product product = productReader.readProductNodes(dataFile, null);
-                    if(product != null) {
-                        tile = new SRTM3GeoTiffElevationTile(demModel, product);
-                    }
-                }
-            } else if(remoteFileExists && getRemoteFile()) {
-                final File dataFile = getFileFromZip(localFile);
-                if(dataFile != null) {
-                    final Product product = productReader.readProductNodes(dataFile, null);
-                    if(product != null) {
-                        tile = new SRTM3GeoTiffElevationTile(demModel, product);
-                    }
-                }
-            }
-            if(tile != null) {
-                demModel.updateCache(tile);
-                errorInLocalFile = false;
-            } else {
-                if(!remoteFileExists && localFileExists) {
-                    System.out.println("SRTM unable to reader product "+localFile.getAbsolutePath());
-                }
-                localFileExists = false;
-                errorInLocalFile = true;
-            }
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-            tile = null;
-            localFileExists = false;
-            errorInLocalFile = true;
-            if(unrecoverableError) {
-                throw new IOException(e);
-            }
-        }
-    }
-
-    private boolean getRemoteFile() throws IOException {
-        try {
-            if(ftp == null) {
-                ftp = new ftpUtils(remoteFTP);
-                fileSizeMap = ftpUtils.readRemoteFileList(ftp, remoteFTP, remotePath);
-            }
-
-            final String remoteFileName = localFile.getName();
-            final Long fileSize = fileSizeMap.get(remoteFileName);
-            
-            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
-            if(result == ftpUtils.FTPError.OK) {
-                return true;
-            } else {
-                if(result == ftpUtils.FTPError.FILE_NOT_FOUND) {
-                    remoteFileExists = false;
-                } else {
-                    dispose();   
-                }
-                localFile.delete();
-            }
-            return false;
-        } catch(SocketException e) {
-            unrecoverableError = true;
-            throw e;
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-            if(ftp == null) {
-                unrecoverableError = false;      // allow to continue
-                remoteFileExists = false;
-                throw new IOException("Failed to connect to FTP "+ remoteFTP+
-                                      "\n"+e.getMessage());
-            }
-            dispose();
-        }
-        return false;
-    }
-
-    private File getFileFromZip(final File dataFile) throws IOException {
-        final String ext = FileUtils.getExtension(dataFile.getName());
-        if (ext.equalsIgnoreCase(".zip")) {
-            final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".tif";
-            final File newFile = new File(ResourceUtils.getApplicationUserTempDataDir(), baseName);
-            if(newFile.exists())
-                return newFile;
-
-            ZipFile zipFile = null;
-            FileOutputStream fileoutputstream = null;
-            try {
-                zipFile = new ZipFile(dataFile);
-                fileoutputstream = new FileOutputStream(newFile);
-
-                final ZipEntry zipEntry = zipFile.getEntry(baseName);
-                if (zipEntry == null) {
-                    localFileExists = false;
-                    throw new IOException("Entry '" + baseName + "' not found in zip file.");
-                }
-
-                final int size = 8192;
-                final byte[] buf = new byte[size];
-                InputStream zipinputstream = zipFile.getInputStream(zipEntry);
-
-                int n;
-                while ((n = zipinputstream.read(buf, 0, size)) > -1)
-                    fileoutputstream.write(buf, 0, n);
-
-                return newFile;
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
-                dataFile.delete();
-                return null;
-            } finally {
-                if(zipFile != null)
-                    zipFile.close();
-                if(fileoutputstream != null)
-                    fileoutputstream.close();
-            }
-        }
-        return dataFile;
+    protected boolean getRemoteFile() throws IOException{
+        return getRemoteFTPFile();
     }
 }

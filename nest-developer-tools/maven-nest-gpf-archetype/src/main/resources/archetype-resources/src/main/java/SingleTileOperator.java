@@ -45,7 +45,7 @@ public class SingleTileOperator extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
+            rasterDataNodeType = Band.class, label="Source Bands")
     String[] sourceBandNames;
 
     private final HashMap<Band, Band> targetBandToSourceBandMap = new HashMap<Band, Band>();

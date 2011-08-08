@@ -35,7 +35,7 @@ public class LoadTabbedLayoutAction extends AbstractVisatAction {
     public static void loadTabbedLayout() {
         final LayoutPersistence layoutPersistence = VisatApp.getApp().getMainFrame().getLayoutPersistence();
 
-        String layoutPath = ResourceUtils.getHomeUrl() + File.separator + "res" + File.separator + "tabbed.layout";
-        layoutPersistence.loadLayoutDataFromFile(layoutPath);
+        final File layoutPath = new File(ResourceUtils.getResFolder(), "tabbed.layout");
+        layoutPersistence.loadLayoutDataFromFile(layoutPath.getAbsolutePath());
     }
 }

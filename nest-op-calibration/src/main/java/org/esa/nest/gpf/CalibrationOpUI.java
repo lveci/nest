@@ -46,10 +46,12 @@ public class CalibrationOpUI extends BaseOperatorUI {
     final JTextField externalAuxFile = new JTextField("");
     final JButton externalAuxFileBrowseButton = new JButton("...");
 
+    final JCheckBox saveInComplexCheckBox = new JCheckBox("Save in complex");
     final JCheckBox saveInDbCheckBox = new JCheckBox("Save in dB");
     final JCheckBox createGamma0VirtualBandCheckBox = new JCheckBox("Create gamma0 virtual band");
     final JCheckBox createBeta0VirtualBandCheckBox = new JCheckBox("Create beta0 virtual band");
 
+    private boolean saveInComplex = false;
     private boolean saveInDb = false;
     private boolean createGamma0VirtualBand = false;
     private boolean createBeta0VirtualBand = false;
@@ -83,16 +85,38 @@ public class CalibrationOpUI extends BaseOperatorUI {
             }
         });
 
+        saveInComplexCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+
+                    saveInComplex = (e.getStateChange() == ItemEvent.SELECTED);
+
+                    if (saveInComplex) {
+                        saveInDbCheckBox.setEnabled(false);
+                        createGamma0VirtualBandCheckBox.setEnabled(false);
+                        createBeta0VirtualBandCheckBox.setEnabled(false);
+                        saveInDbCheckBox.setSelected(false);
+                        createGamma0VirtualBandCheckBox.setSelected(false);
+                        createBeta0VirtualBandCheckBox.setSelected(false);
+                    } else {
+                        saveInDbCheckBox.setEnabled(true);
+                        createGamma0VirtualBandCheckBox.setEnabled(true);
+                        createBeta0VirtualBandCheckBox.setEnabled(true);
+                    }
+                }
+        });
+
         saveInDbCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     saveInDb = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
+
         createGamma0VirtualBandCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     createGamma0VirtualBand = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
+
         createBeta0VirtualBandCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     createBeta0VirtualBand = (e.getStateChange() == ItemEvent.SELECTED);
@@ -109,11 +133,37 @@ public class CalibrationOpUI extends BaseOperatorUI {
         if(sourceProducts != null) {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
             if (absRoot != null) {
+
                 final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
                 if (sampleType.equals("COMPLEX")) {
                     auxFile.removeItem(CalibrationOp.PRODUCT_AUX);
                 } else if (auxFile.getItemCount() == 2) {
                     auxFile.addItem(CalibrationOp.PRODUCT_AUX);
+                }
+
+                final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+//                if (mission.equals("RS2") || mission.contains("TSX") || mission.contains("ALOS")) {
+                if (mission.equals("RS2") && sampleType.equals("COMPLEX")) {
+
+                    saveInComplexCheckBox.setEnabled(true);
+                    saveInComplexCheckBox.setSelected(false);
+
+                    if (saveInComplex) {
+                        saveInDbCheckBox.setEnabled(false);
+                        createGamma0VirtualBandCheckBox.setEnabled(false);
+                        createBeta0VirtualBandCheckBox.setEnabled(false);
+                        saveInDbCheckBox.setSelected(false);
+                        createGamma0VirtualBandCheckBox.setSelected(false);
+                        createBeta0VirtualBandCheckBox.setSelected(false);
+                    } else {
+                        saveInDbCheckBox.setEnabled(true);
+                        createGamma0VirtualBandCheckBox.setEnabled(true);
+                        createBeta0VirtualBandCheckBox.setEnabled(true);
+                    }
+
+                } else {
+                    saveInComplexCheckBox.setEnabled(false);
+                    saveInComplexCheckBox.setSelected(false);
                 }
             }
         }
@@ -124,6 +174,9 @@ public class CalibrationOpUI extends BaseOperatorUI {
         if(extFile != null) {
             externalAuxFile.setText(extFile.getAbsolutePath());
         }
+
+        saveInComplex = (Boolean)paramMap.get("outputImageInComplex");
+        saveInComplexCheckBox.getModel().setPressed(saveInComplex);
 
         saveInDb = (Boolean)paramMap.get("outputImageScaleInDb");
         saveInDbCheckBox.getModel().setPressed(saveInDb);
@@ -152,6 +205,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
             paramMap.put("externalAuxFile", new File(extFileStr));
         }
 
+        paramMap.put("outputImageInComplex", saveInComplex);
         paramMap.put("outputImageScaleInDb", saveInDb);
         paramMap.put("createGammaBand", createGamma0VirtualBand);
         paramMap.put("createBetaBand", createBeta0VirtualBand);
@@ -176,6 +230,8 @@ public class CalibrationOpUI extends BaseOperatorUI {
         contentPane.add(externalAuxFileBrowseButton, gbc);
 
         gbc.gridx = 0;
+        gbc.gridy++;
+        contentPane.add(saveInComplexCheckBox, gbc);
         gbc.gridy++;
         contentPane.add(saveInDbCheckBox, gbc);
         gbc.gridy++;

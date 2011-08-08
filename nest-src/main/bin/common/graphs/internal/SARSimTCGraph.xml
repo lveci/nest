@@ -26,7 +26,7 @@
       <sourceBands>
         <band>Amplitude</band>
       </sourceBands>
-      <demName>SRTM 3Sec GeoTiff</demName>
+      <demName>SRTM 3Sec</demName>
       <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
       <externalDEMFile/>
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>

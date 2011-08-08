@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -90,8 +91,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     @Parameter(description = "The coordinate reference system in well known text format")
     private String mapProjection;
     
-    private Band sourceBand = null;
-    private Band sourceBand2 = null;
     private boolean srgrFlag = false;
 
     private int sourceImageWidth = 0;
@@ -114,6 +113,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
+
+    private String mission = null;
+    private boolean nearRangeOnLeft = true;
+
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -166,7 +169,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private void getMetadata() throws Exception {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-        RangeDopplerGeocodingOp.getMissionType(absRoot);
+        mission = RangeDopplerGeocodingOp.getMissionType(absRoot);
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -178,6 +181,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         if (srgrFlag) {
             srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+        }
+
+        final String pass = absRoot.getAttributeString("PASS");
+        if (mission.equals("RS2") && pass.contains("DESCENDING")) {
+            nearRangeOnLeft = false;
         }
     }
 
@@ -245,9 +253,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 targetProduct.removeBand(band);
             }
 
-            OperatorUtils.addSelectedBands(sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName);
+            OperatorUtils.addSelectedBands(
+                    sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true);
 
             targetGeoCoding = targetProduct.getGeoCoding();
+
+            ProductUtils.copyMetadata(sourceProduct, targetProduct);
 
             updateTargetProductMetadata();
         } catch (Exception e) {
@@ -313,12 +324,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         /*
          * (7.1) Get local latitude lat(i,j) and longitude lon(i,j) for current point;
-         * (7.2) Determine the 4 cells in the source image that are immidiately adjacent and enclose the point;
-         * (7.3) Compute slant range r(i,j) for the point using biquadratic interpolation;
-         * (7.4) Compute azimuth time t(i,j) for the point using biquadratic interpolation;
+         * (7.2) Determine the 4 cells in the source image that are immediately adjacent and enclose the point;
+         * (7.3) Compute slant range r(i,j) for the point using bi-quadratic interpolation;
+         * (7.4) Compute azimuth time t(i,j) for the point using bi-quadratic interpolation;
          * (7.5) Compute bias-corrected zero Doppler time tc(i,j) = t(i,j) + r(i,j)*2/c, where c is the light speed;
          * (7.6) Compute azimuth image index Ia using zero Doppler time tc(i,j);
-         * (7.8) Compute range image index Ir using slant range r(i,j) or groung range;
+         * (7.8) Compute range image index Ir using slant range r(i,j) or ground range;
          * (7.9) Compute pixel value x(Ia,Ir) using interpolation and save it for current sample.
          */
         final Rectangle targetTileRectangle = targetTile.getRectangle();
@@ -329,13 +340,15 @@ public final class GeolocationGridGeocodingOp extends Operator {
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+        Band sourceBand1 = null;
+        Band sourceBand2 = null;
         if (srcBandNames.length == 1) {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
         } else {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
         }
-        final double srcBandNoDataValue = sourceBand.getNoDataValue();
+        final double srcBandNoDataValue = sourceBand1.getNoDataValue();
 
         try {
             final ProductData trgData = targetTile.getDataBuffer();
@@ -352,22 +365,31 @@ public final class GeolocationGridGeocodingOp extends Operator {
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
-                    final PixelPos pixPos = computePixelPosition(lat, lon);
-                    if (Float.isNaN(pixPos.x) || Float.isNaN(pixPos.y)) {
+                    final PixelPos pixPos = computePixelPosition(lat, lon, sourceBand1);
+                    if (Float.isNaN(pixPos.x) || Float.isNaN(pixPos.y) ||
+                        pixPos.x < 0.0 || pixPos.x >= srcMaxRange || pixPos.y < 0.0 || pixPos.y >= srcMaxAzimuth) {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
                         continue;
                     }
 
                     final double slantRange = computeSlantRange(pixPos);
                     final double zeroDopplerTime = computeZeroDopplerTime(pixPos);
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
-                    final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
-                    final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
+                    double azimuthIndex = 0.0;
+                    double rangeIndex = 0.0;
+                    if (mission.contains("CSKS") || mission.contains("TSX") || mission.equals("RS2")) {
+                        azimuthIndex = (zeroDopplerTime - firstLineUTC) / lineTimeInterval;
+                        rangeIndex = computeRangeIndex(zeroDopplerTime, slantRange);
+                    } else {
+                        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
+                        azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+                        rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
+                    }
+
                     if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
                         azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
                             trgData.setElemDoubleAt(index, srcBandNoDataValue);
                     } else {
-                        trgData.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex));
+                        trgData.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex, sourceBand1, sourceBand2));
                     }
                 }
             }
@@ -382,9 +404,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Compute pixel position in source image for given latitude and longitude.
      * @param lat The latitude in degrees.
      * @param lon The longitude in degrees.
+     * @param sourceBand The source band.
      * @return The pixel position.
      */
-    private PixelPos computePixelPosition(double lat, double lon) {
+    private PixelPos computePixelPosition(final double lat, final double lon, final Band sourceBand) {
         // todo the following method is not accurate, should use point-in-polygon test
         final GeoPos geoPos = new GeoPos((float)lat, (float)lon);
         return sourceBand.getGeoCoding().getPixelPos(geoPos, null);
@@ -396,7 +419,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The slant range in meters.
      */
     private double computeSlantRange(PixelPos pixPos) {
-        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.InterpMode.BIQUADRATIC) /
+//        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.InterpMode.BIQUADRATIC) /
+        return slantRangeTime.getPixelFloat(pixPos.x, pixPos.y) /
                 1000000000.0 * Constants.halfLightSpeed;
     }
 
@@ -442,8 +466,17 @@ public final class GeolocationGridGeocodingOp extends Operator {
         } else { // slant range image
 
             final int azimuthIndex = (int)((zeroDopplerTime - firstLineUTC) / lineTimeInterval);
-            final double r0 = slantRangeTime.getPixelDouble(0, azimuthIndex) / 1000000000.0 * Constants.halfLightSpeed;
+            double r0;
+            if (nearRangeOnLeft) {
+                r0 = slantRangeTime.getPixelDouble(0, azimuthIndex) / 1000000000.0*Constants.halfLightSpeed;
+            } else {
+                r0 = slantRangeTime.getPixelDouble(sourceImageWidth-1, azimuthIndex)/1000000000.0*Constants.halfLightSpeed;
+            }
             rangeIndex = (slantRange - r0) / rangeSpacing;
+
+            if (!nearRangeOnLeft) {
+                rangeIndex = sourceImageWidth - 1 - rangeIndex;
+            }
         }
 
         return rangeIndex;
@@ -456,26 +489,27 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The pixel value.
      */
 
-    private double getPixelValue(final double azimuthIndex, final double rangeIndex) {
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex,
+                                 final Band sourceBand1, final Band sourceBand2) {
 
-        Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);
+        Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
 
-            final Tile sourceTile = getSrcTile(sourceBand, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, bandUnit, sourceTile, sourceTile2);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
 
-            final Tile sourceTile = getSrcTile(sourceBand, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
 
-            final Tile sourceTile = getSrcTile(sourceBand, Math.max(0, (int)rangeIndex - 1),
+            final Tile sourceTile = getSrcTile(sourceBand1, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);
             final Tile sourceTile2 = getSrcTile(sourceBand2, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);

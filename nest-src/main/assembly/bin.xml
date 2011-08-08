@@ -94,7 +94,7 @@
         </fileSet>
 		
 		<fileSet>
-            <directory>../dist/jdk6/win32/jre</directory>
+            <directory>../dist/jdk7/win/jre</directory>
             <outputDirectory>jre</outputDirectory>
         </fileSet>
     </fileSets>
@@ -106,19 +106,9 @@
             <excludes>
 				<exclude>org.esa.nest:nest-bootstrap</exclude>
 				<exclude>org.esa.nest:nest-src</exclude>
-                <exclude>com.bc.ceres:ceres-launcher</exclude>
-                <exclude>com.bc.ceres:ceres-deploy</exclude>
-                <exclude>com.bc.ceres:ceres-site</exclude>				
-				<exclude>com.bc.ceres:ceres-binding</exclude>
-				<exclude>com.bc.ceres:ceres-core</exclude>
-				<exclude>com.bc.ceres:ceres-glayer</exclude>
-				<exclude>com.bc.ceres:ceres-ui</exclude>
-				<exclude>com.bc.ceres:ceres-binio</exclude>
-				<exclude>com.bc.ceres:ceres-jai</exclude>
-				<exclude>ncsa.hdf:lib-hdf</exclude>
-				<exclude>ucar.netcdf:lib-netcdf</exclude>
-				<exclude>org.esa.nest.doris:doris-core-prototypes</exclude>
-				<exclude>org.esa.nest:doris-op-prototypes</exclude>
+				<exclude>org.esa.nest.maven:maven-nest-dataio-archetype</exclude>
+				<exclude>org.esa.nest.maven:maven-nest-gpf-archetype</exclude>
+                <exclude>com.bc.ceres:ceres-*</exclude>
             </excludes>
 
             <binaries>
@@ -139,18 +129,15 @@
 						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
                         <excludes>
 							<exclude>jdom:jdom</exclude>
+							<exclude>ncsa.hdf:lib-hdf</exclude>
 							<exclude>org.esa.nest:nest-core</exclude>
 							<exclude>org.esa.nest:nest-graph-builder</exclude>
-							<exclude>org.esa.nest:nest-reader-generic</exclude>
 							<exclude>org.esa.nest:nest-op-calibration</exclude>
 							<exclude>org.esa.nest:nest-op-coregistration</exclude>
 							<exclude>org.esa.nest:nest-reader-dem</exclude>
-							<exclude>org.esa.nest:nest-reader-ers-ceos</exclude>
-							<exclude>org.esa.nest:nest-reader-xml-based</exclude>
-							<exclude>org.esa.nest:nest-writer-netcdf</exclude>
+							<exclude>org.esa.nest:nest-io</exclude>
 							<exclude>org.esa.nest:nest-dat</exclude>
-							<exclude>org.esa.nest.doris:doris-core-prototypes</exclude>
-							<exclude>org.esa.nest:doris-op-prototypes</exclude>
+							<exclude>org.jdoris:jdoris-core</exclude>
                             <exclude>org.esa.beam:beam-*</exclude>
                         </excludes>
                     </dependencySet>

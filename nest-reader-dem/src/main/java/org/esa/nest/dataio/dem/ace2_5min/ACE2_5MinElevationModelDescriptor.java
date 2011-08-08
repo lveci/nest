@@ -18,6 +18,7 @@ package org.esa.nest.dataio.dem.ace2_5min;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import com.bc.io.FileDownloader;
 import com.bc.io.FileUnpacker;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -40,6 +41,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
     public static final int DEGREE_RES = 15;
     public static final int PIXEL_RES = 180;
     public static final int NO_DATA_VALUE = -500;
+    public static final GeoPos RASTER_ORIGIN = new GeoPos(90.0f, 180.0f);
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     private static final Datum DATUM = Datum.WGS_84;
@@ -59,6 +61,31 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
 
     public float getNoDataValue() {
         return NO_DATA_VALUE;
+    }
+
+    @Override
+    public int getRasterWidth() {
+        return RASTER_WIDTH;
+    }
+
+    @Override
+    public int getRasterHeight() {
+        return RASTER_HEIGHT;
+    }
+
+    @Override
+    public GeoPos getRasterOrigin() {
+        return RASTER_ORIGIN;
+    }
+
+    @Override
+    public int getDegreeRes() {
+        return DEGREE_RES;
+    }
+
+    @Override
+    public int getPixelRes() {
+        return PIXEL_RES;
     }
 
     @Override

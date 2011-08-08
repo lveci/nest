@@ -49,6 +49,8 @@ public interface Calibrator {
                             final HashMap<String, String[]> targetBandNameToSourceBandName,
                             final com.bc.ceres.core.ProgressMonitor pm) throws OperatorException;
 
+    public void setOutputImageInComplex(final boolean flag);
+
     public void setOutputImageIndB(final boolean flag);
 
     public void setIncidenceAngleForSigma0(final String incidenceAngleForSigma0);

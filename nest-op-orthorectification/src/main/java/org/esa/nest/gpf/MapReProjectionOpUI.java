@@ -16,6 +16,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.swing.TableLayout;
 import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -122,11 +123,11 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
             final String projection = name.substring(0, name.indexOf("/")-1).replace("_", " ");
             final String datum = name.substring(name.indexOf("/")+2, name.length());
 
-            int cnt = customCRS.operationComboBox.getItemCount();
+            int cnt = customCRS.projectionComboBox.getItemCount();
             for(int i = 0; i < cnt; ++i) {
-                AbstractCrsProvider provider = (AbstractCrsProvider)customCRS.operationComboBox.getItemAt(i);
+                AbstractCrsProvider provider = (AbstractCrsProvider)customCRS.projectionComboBox.getItemAt(i);
                 if(provider.getName().equalsIgnoreCase(projection)) {
-                    customCRS.operationComboBox.setSelectedItem(provider);
+                    customCRS.projectionComboBox.setSelectedItem(provider);
                     break;
                 }
             }
@@ -147,7 +148,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         }
 
         if (outputGeometryModel != null) {
-            final PropertyContainer container = outputGeometryModel.getPropertyContainer();
+            final PropertySet container = outputGeometryModel.getPropertySet();
             if(paramMap.get("referencePixelX") != null)
                 container.setValue("referencePixelX", paramMap.get("referencePixelX"));
             if(paramMap.get("referencePixelY") != null)
@@ -192,7 +193,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         }
         
         if (!reprojectionModel.preserveResolution && outputGeometryModel != null) {
-            final PropertyContainer container = outputGeometryModel.getPropertyContainer();
+            final PropertySet container = outputGeometryModel.getPropertySet();
             paramMap.put("referencePixelX", container.getValue("referencePixelX"));
             paramMap.put("referencePixelY", container.getValue("referencePixelY"));
             paramMap.put("easting", container.getValue("easting"));
@@ -302,7 +303,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
         final Product sourceProduct = sourceProducts[0];
         if (sourceProduct != null && crs != null) {
             if (!reprojectionModel.preserveResolution && outputGeometryModel != null) {
-                PropertyContainer container = outputGeometryModel.getPropertyContainer();
+                PropertySet container = outputGeometryModel.getPropertySet();
                 width = (Integer) container.getValue("width");
                 height = (Integer) container.getValue("height");
             } else {

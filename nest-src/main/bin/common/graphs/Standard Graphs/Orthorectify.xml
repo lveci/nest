@@ -22,7 +22,7 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <sourceBands/>
-      <demName>SRTM 3Sec GeoTiff</demName>
+      <demName>SRTM 3Sec</demName>
       <externalDEMFile/>
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
       <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
@@ -30,6 +30,7 @@
       <pixelSpacingInMeter>0.0</pixelSpacingInMeter>
       <pixelSpacingInDegree>0.0</pixelSpacingInDegree>
       <mapProjection>WGS84(DD)</mapProjection>
+	  <nodataValueAtSea>true</nodataValueAtSea>
       <saveDEM>false</saveDEM>
       <saveLocalIncidenceAngle>false</saveLocalIncidenceAngle>
       <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>

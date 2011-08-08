@@ -2,13 +2,16 @@ package org.jdoris.core;
 
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.jdoris.core.io.ResFile;
+import org.jdoris.core.utils.DateUtils;
 
 import java.io.File;
+
+import static org.jdoris.core.Constants.EPS;
+import static org.jdoris.core.Constants.MEGA;
 
 public final class SLCImage {
 
@@ -35,6 +38,7 @@ public final class SLCImage {
     private double PRF;
     private double azimuthBandwidth;
     private double tAzi1;
+    private double tAzi_original;
     private String azimuthWeightingWindow;
 
     // range annotations
@@ -42,12 +46,6 @@ public final class SLCImage {
     private double rangeBandwidth;
     private double tRange1;
     private String rangeWeightingWindow;
-
-    // doppler
-    // private static double[] f_DC; // TODO
-    private double f_DC_a0;                // constant term Hz
-    private double f_DC_a1;                // linear term Hz/s
-    private double f_DC_a2;                // quadratic term Hz/s/s
 
     // ______ offset = X(l,p) - X(L,P) ______
     // ______ Where l,p are in the local slave coordinate system and ______
@@ -61,6 +59,10 @@ public final class SLCImage {
     // oversampling factors
     private int ovsAz;                 // oversampling of SLC
     private int ovsRg;                 // oversampling of SLC
+
+    // multilooking factors
+    private int mlAz;                 // multilooking of SLC
+    private int mlRg;                 // multilooking of SLC
 
     // relative to master geometry, or
     // absolute timing error of master
@@ -77,49 +79,47 @@ public final class SLCImage {
 
     // true if it is
     //    private static Rectangle originalWindow;       // position and size of the full scene
-    Window originalWindow = new Window();       // position and size of the full scene
-    Window currentWindow = new Window();        // position and size of the subset
-    Window slaveMasterOffsets = new Window();   // overlapping slave window in master coordinates
+    Window originalWindow;       // position and size of the full scene
+    Window currentWindow;        // position and size of the subset
+    Window slaveMasterOffsets;   // overlapping slave window in master coordinates
+    public Doppler doppler;
 
     public SLCImage() {
 
-        sensor = "SLC_ERS";                    // default (vs. SLC_ASAR, JERS, RSAT)
-        sarProcessor = "SARPR_VMP";            // (VMP (esa paf) or ATLANTIS or TUDELFT) // TODO PGS update?
-        formatFlag = 0;                        // format of file on disk
+        this.sensor = "SLC_ERS";                    // default (vs. SLC_ASAR, JERS, RSAT)
+        this.sarProcessor = "SARPR_VMP";            // (VMP (esa paf) or ATLANTIS or TUDELFT) // TODO PGS update?
+        this.formatFlag = 0;                        // format of file on disk
 
-        approxXYZCentreOriginal.x = 0.0;
-        approxXYZCentreOriginal.y = 0.0;
-        approxXYZCentreOriginal.z = 0.0;
+        this.approxXYZCentreOriginal.x = 0.0;
+        this.approxXYZCentreOriginal.y = 0.0;
+        this.approxXYZCentreOriginal.z = 0.0;
 
-        radar_wavelength = 0.0565646;          // [m] default ERS2
-        tAzi1 = 0.0;                           // [s] sec of day
-        tRange1 = 5.5458330 / 2.0e3;           // [s] one way, default ERS2
-        rangeWeightingWindow = "HAMMING";
-        rangeBandwidth = 15.55e6;              // [Hz] default ERS2
+        this.radar_wavelength = 0.0565646;          // [m] default ERS2
+        this.tAzi1 = 0.0;                           // [s] sec of day
+        this.tRange1 = 5.5458330 / 2.0e3;           // [s] one way, default ERS2
+        this.rangeWeightingWindow = "HAMMING";
+        this.rangeBandwidth = 15.55e6;              // [Hz] default ERS2
 
-        PRF = 1679.902;                        // [Hz] default ERS2
-        azimuthBandwidth = 1378.0;             // [Hz] default ERS2
-        azimuthWeightingWindow = "HAMMING";
+        this.PRF = 1679.902;                        // [Hz] default ERS2
+        this.azimuthBandwidth = 1378.0;             // [Hz] default ERS2
+        this.azimuthWeightingWindow = "HAMMING";
 
-        f_DC_a0 = 0.0;                         // [Hz] default ERS2
-        f_DC_a1 = 0.0;
-        f_DC_a2 = 0.0;
-        rsr2x = 18.9624680 * 2.0e6;            // [Hz] default ERS2
+        this.rsr2x = 18.9624680 * 2.0e6;            // [Hz] default ERS2
 
-        coarseOffsetL = 0;                     // by default
-        coarseOffsetP = 0;                     // by default
-        coarseOrbitOffsetL = 0;                // by default
-        coarseOrbitOffsetP = 0;                // by default
+        this.coarseOffsetL = 0;                     // by default
+        this.coarseOffsetP = 0;                     // by default
+        this.coarseOrbitOffsetL = 0;                // by default
+        this.coarseOrbitOffsetP = 0;                // by default
 
-        ovsRg = 1;                             // by default
-        ovsAz = 1;                             // by default
+        this.ovsRg = 1;                             // by default
+        this.ovsAz = 1;                             // by default
 
-        absTimingErrorFlag = false;
-        azTimingError = 0;                     // by default, unit lines
-        rgTimingError = 0;                     // by default, unit pixels
+        this.absTimingErrorFlag = false;
+        this.azTimingError = 0;                     // by default, unit lines
+        this.rgTimingError = 0;                     // by default, unit pixels
 
-        currentWindow  = new Window(1, 25000, 1, 5000);
-        originalWindow = new Window(1, 25000, 1, 5000);
+        this.currentWindow = new Window(1, 25000, 1, 5000);
+        this.originalWindow = new Window(1, 25000, 1, 5000);
 //        slavemasteroffsets.l00  = 0;               // window in master coordinates
 //        slavemasteroffsets.p00  = 0;
 //        slavemasteroffsets.l0N  = 0;
@@ -128,63 +128,87 @@ public final class SLCImage {
 //        slavemasteroffsets.pN0  = 0;
 //        slavemasteroffsets.lNN  = 0;
 //        slavemasteroffsets.pNN  = 0;
+
+        this.doppler = new Doppler();
+        this.doppler.f_DC_a0 = 0.0;
+        this.doppler.f_DC_a1 = 0.0;
+        this.doppler.f_DC_a2 = 0.0;
+//        f_DC_const = (actualDopplerChange() < maximumDopplerChange());
+
     }
 
     public SLCImage(MetadataElement element) {
 
+        this();
+
         // units [meters]
-        radar_wavelength = (Constants.lightSpeed / Math.pow(10, 6)) / element.getAttributeDouble(AbstractMetadata.radar_frequency);
+        this.radar_wavelength = (Constants.lightSpeed / MEGA) / element.getAttributeDouble(AbstractMetadata.radar_frequency);
 
         // units [Hz]
-        PRF = element.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
+        this.PRF = element.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
 
-        // work with seconds of the day!
-        ProductData.UTC t_azi1_UTC = element.getAttributeUTC(AbstractMetadata.first_line_time);
-        tAzi1 = (t_azi1_UTC.getMJD() - (int) t_azi1_UTC.getMJD()) * 24 * 3600;
+        // zero doppler time to 1st pix of subset
+        final String t_azi1_UTC = element.getAttributeUTC(AbstractMetadata.first_line_time).toString();
+//        this.tAzi1 = (t_azi1_UTC.getMJD() - (int) t_azi1_UTC.getMJD()) * 24 * 3600;
+        this.tAzi1 = DateUtils.dateTimeToSecOfDay(t_azi1_UTC);
+
+        this.rangeBandwidth = element.getAttributeDouble(AbstractMetadata.range_bandwidth);
+        this.azimuthBandwidth = element.getAttributeDouble(AbstractMetadata.azimuth_bandwidth);
 
         // 2 times range sampling rate [HZ]
-        rsr2x = (element.getAttributeDouble(AbstractMetadata.range_sampling_rate) * Math.pow(10, 6) * 2);
+        this.rsr2x = (element.getAttributeDouble(AbstractMetadata.range_sampling_rate) * MEGA * 2);
 
         // one way (!!!) time to first range pixels [sec]
-        tRange1 = element.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel) / Constants.lightSpeed;
+        this.tRange1 = element.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel) / Constants.lightSpeed;
 
-        approxRadarCentreOriginal.x = element.getAttributeDouble(AbstractMetadata.num_samples_per_line) / 2.0d;  // x direction is range!
-        approxRadarCentreOriginal.y = element.getAttributeDouble(AbstractMetadata.num_output_lines) / 2.0d;  // y direction is azimuth
+        this.approxRadarCentreOriginal.x = element.getAttributeDouble(AbstractMetadata.num_samples_per_line) / 2.0d;  // x direction is range!
+        this.approxRadarCentreOriginal.y = element.getAttributeDouble(AbstractMetadata.num_output_lines) / 2.0d;  // y direction is azimuth
 
         // TODO: replace computation of the centre using getGeoPos()
         // simple averaging of the corners : as approximation accurate enough
-        approxGeoCentreOriginal.lat = (float) ((element.getAttributeDouble(AbstractMetadata.first_near_lat) +
+        this.approxGeoCentreOriginal.lat = (float) ((element.getAttributeDouble(AbstractMetadata.first_near_lat) +
                 element.getAttributeDouble(AbstractMetadata.first_far_lat) +
                 element.getAttributeDouble(AbstractMetadata.last_near_lat) +
                 element.getAttributeDouble(AbstractMetadata.last_far_lat)) / 4);
 
-        approxGeoCentreOriginal.lon = (float) ((element.getAttributeDouble(AbstractMetadata.first_near_long) +
+        this.approxGeoCentreOriginal.lon = (float) ((element.getAttributeDouble(AbstractMetadata.first_near_long) +
                 element.getAttributeDouble(AbstractMetadata.first_far_long) +
                 element.getAttributeDouble(AbstractMetadata.last_near_long) +
                 element.getAttributeDouble(AbstractMetadata.last_far_long)) / 4);
 
-        double[] xyz = new double[3];
+        final double[] xyz = new double[3];
         GeoUtils.geo2xyz(getApproxGeoCentreOriginal(), xyz);
 
-        approxXYZCentreOriginal.x = xyz[0];
-        approxXYZCentreOriginal.y = xyz[1];
-        approxXYZCentreOriginal.z = xyz[2];
+        this.approxXYZCentreOriginal.x = xyz[0];
+        this.approxXYZCentreOriginal.y = xyz[1];
+        this.approxXYZCentreOriginal.z = xyz[2];
 
-        // set dopplers
+        // data windows: stored in windows structure
+        final int pix0 = element.getAttributeInt(AbstractMetadata.subset_offset_x);
+        final int pixN = pix0 + element.getAttributeInt(AbstractMetadata.num_samples_per_line);
+        final int lin0 = element.getAttributeInt(AbstractMetadata.subset_offset_y);
+        final int linN = lin0 + element.getAttributeInt(AbstractMetadata.num_output_lines);
+        this.currentWindow = new Window(lin0, linN, pix0, pixN);
+
+        // first set dopplers and get "original" 1st pixel time
         final AbstractMetadata.DopplerCentroidCoefficientList[] dopplersArray = AbstractMetadata.getDopplerCentroidCoefficients(element);
 
-        // TODO: check correctness of this!!
-        f_DC_a0 = dopplersArray[1].coefficients[0];
-        f_DC_a1 = dopplersArray[1].coefficients[1];
-        f_DC_a2 = dopplersArray[1].coefficients[2];
+        // original zero doppler time to 1st pix of (original) SLC
+        final String t_azi_original = dopplersArray[0].time.toString();
+        this.tAzi_original = DateUtils.dateTimeToSecOfDay(t_azi_original);
+
+        this.doppler.f_DC_a0 = dopplersArray[0].coefficients[0];
+        this.doppler.f_DC_a1 = dopplersArray[0].coefficients[1];
+        this.doppler.f_DC_a2 = dopplersArray[0].coefficients[2];
+        this.doppler.checkConstant();
 
     }
 
     public void parseResFile(File resFileName) throws Exception {
 
-        ResFile resFile = new ResFile(resFileName);
+        final ResFile resFile = new ResFile(resFileName);
 
-        resFile.setSubBuffer("_Start_readfiles","End_readfiles");
+        resFile.setSubBuffer("_Start_readfiles", "End_readfiles");
 
         this.sensor = resFile.parseStringValue("Sensor platform mission identifer");
         this.sarProcessor = resFile.parseStringValue("SAR_PROCESSOR");
@@ -200,27 +224,38 @@ public final class SLCImage {
         // azimuth annotations
         this.PRF = resFile.parseDoubleValue("Pulse_Repetition_Frequency \\(computed, Hz\\)");
         this.azimuthBandwidth = resFile.parseDoubleValue("Total_azimuth_band_width \\(Hz\\)");
-        ProductData.UTC tAzi1_UTC = resFile.parseTimeValue("First_pixel_azimuth_time \\(UTC\\)");
-        this.tAzi1 = (tAzi1_UTC.getMJD() - tAzi1_UTC.getDaysFraction()) * 24 * 3600;
+//        ProductData.UTC tAzi1_UTC = resFile.parseDatTimeValue("First_pixel_azimuth_time \\(UTC\\)");
+//        this.tAzi1 = (tAzi1_UTC.getMJD() - tAzi1_UTC.getDaysFraction()) * 24 * 3600;
+        this.tAzi1 = resFile.parseTimeValue("First_pixel_azimuth_time \\(UTC\\)");
         this.azimuthWeightingWindow = resFile.parseStringValue("Weighting_azimuth");
 
         // range annotations
-        this.rsr2x = resFile.parseDoubleValue("Range_sampling_rate \\(computed, MHz\\)")*2*Math.pow(10,6);
-        this.rangeBandwidth = resFile.parseDoubleValue("Total_range_band_width \\(MHz\\)");
-        this.tRange1 = resFile.parseDoubleValue("Range_time_to_first_pixel \\(2way\\) \\(ms\\)")/2/1000;
+        this.rsr2x = resFile.parseDoubleValue("Range_sampling_rate \\(computed, MHz\\)") * 2 * MEGA;
+        this.rangeBandwidth = resFile.parseDoubleValue("Total_range_band_width \\(MHz\\)"); // put it already in Hz!
+        this.tRange1 = resFile.parseDoubleValue("Range_time_to_first_pixel \\(2way\\) \\(ms\\)") / 2 / 1000;
         this.rangeWeightingWindow = resFile.parseStringValue("Weighting_range");
 
-        // doppler
-        this.f_DC_a0 = resFile.parseDoubleValue("Xtrack_f_DC_constant \\(Hz, early edge\\)");
-        this.f_DC_a1 = resFile.parseDoubleValue("Xtrack_f_DC_linear \\(Hz/s, early edge\\)");
-        this.f_DC_a2 = resFile.parseDoubleValue("Xtrack_f_DC_quadratic \\(Hz/s/s, early edge\\)");
-
         // data windows
-        int numberOfLinesTEMP = resFile.parseIntegerValue("Number_of_lines_original");
-        int numberOfPixelsTEMP = resFile.parseIntegerValue("Number_of_pixels_original");
-
+        final int numberOfLinesTEMP = resFile.parseIntegerValue("Number_of_lines_original");
+        final int numberOfPixelsTEMP = resFile.parseIntegerValue("Number_of_pixels_original");
         this.originalWindow = new Window(1, numberOfLinesTEMP, 1, numberOfPixelsTEMP);
-        this.currentWindow = (Window) originalWindow.clone();
+
+        resFile.resetSubBuffer();
+        resFile.setSubBuffer("_Start_crop", "End_crop");
+
+        // current window
+        this.currentWindow.linelo = resFile.parseIntegerValue("First_line \\(w.r.t. original_image\\)");
+        this.currentWindow.linehi = resFile.parseIntegerValue("Last_line \\(w.r.t. original_image\\)");
+        this.currentWindow.pixlo = resFile.parseIntegerValue("First_pixel \\(w.r.t. original_image\\)");
+        this.currentWindow.pixhi = resFile.parseIntegerValue("Last_pixel \\(w.r.t. original_image\\)");
+
+        resFile.resetSubBuffer();
+        resFile.setSubBuffer("_Start_readfiles", "End_readfiles");
+        // doppler
+        this.doppler.f_DC_a0 = resFile.parseDoubleValue("Xtrack_f_DC_constant \\(Hz, early edge\\)");
+        this.doppler.f_DC_a1 = resFile.parseDoubleValue("Xtrack_f_DC_linear \\(Hz/s, early edge\\)");
+        this.doppler.f_DC_a2 = resFile.parseDoubleValue("Xtrack_f_DC_quadratic \\(Hz/s/s, early edge\\)");
+        this.doppler.checkConstant();
 
     }
 
@@ -241,13 +276,7 @@ public final class SLCImage {
         return 1.0 + (rsr2x * (rangeTime - tRange1));
     }
 
-    // Convert range pixel to fDC (1 is first pixel, can be ovs)
-    public double pix2fdc(double pixel) {
-        double tau = (pixel - 1.0) / (rsr2x / 2.0);// two-way time
-        return f_DC_a0 + (f_DC_a1 * tau) + (f_DC_a2 * Math.pow(tau, 2));
-    }
-
-    /*---  AZIMUTH CONVERSIONS ----*/
+    /*---  AZIMUTH CONVERSIONS ---*/
 
     // Convert line number to azimuth time (1 is first line)
     public double line2ta(double line) {
@@ -259,9 +288,7 @@ public final class SLCImage {
         return 1.0 + PRF * (azitime - tAzi1);
     }
 
-
-    /* Getters and setters for Encapsulation */
-
+    /*--- Getters and setters for Encapsulation ----*/
     public double getRadarWavelength() {
         return radar_wavelength;
     }
@@ -290,18 +317,6 @@ public final class SLCImage {
         return azimuthBandwidth;
     }
 
-    public double getF_DC_a0() {
-        return f_DC_a0;
-    }
-
-    public double getF_DC_a1() {
-        return f_DC_a1;
-    }
-
-    public double getF_DC_a2() {
-        return f_DC_a2;
-    }
-
     public int getCoarseOffsetP() {
         return coarseOffsetP;
     }
@@ -328,6 +343,116 @@ public final class SLCImage {
 
     public void setRsr2x(double rsr2x) {
         this.rsr2x = rsr2x;
+    }
+
+    public void setCoarseOffsetP(int offsetP) {
+        this.coarseOffsetP = offsetP;
+    }
+
+    public void setCoarseOffsetL(int offsetL) {
+        this.coarseOffsetL = offsetL;
+    }
+
+    public int getMlAz() {
+        return mlAz;
+    }
+
+    public void setMlAz(int mlAz) {
+        this.mlAz = mlAz;
+    }
+
+    public int getMlRg() {
+        return mlRg;
+    }
+
+    public void setMlRg(int mlRg) {
+        this.mlRg = mlRg;
+    }
+
+
+    public class Doppler {
+
+        // doppler
+        // private static double[] f_DC; // TODO
+        boolean f_DC_const_bool;
+        double f_DC_a0;                // constant term Hz
+        double f_DC_a1;                // linear term Hz/s
+        double f_DC_a2;                // quadratic term Hz/s/s
+        double f_DC_const;
+
+        Doppler() {
+            f_DC_const_bool = false;
+            f_DC_a0 = 0;
+            f_DC_a1 = 0;
+            f_DC_a2 = 0;
+            f_DC_const = 0;
+        }
+
+        public double getF_DC_a0() {
+            return f_DC_a0;
+        }
+
+        public double getF_DC_a1() {
+            return f_DC_a1;
+        }
+
+        public double getF_DC_a2() {
+            return f_DC_a2;
+        }
+
+        public boolean isF_DC_const() {
+            return f_DC_const_bool;
+        }
+
+        public double getF_DC_const() {
+            return f_DC_const;
+        }
+
+//        public void setF_DC_const(boolean f_DC_const) {
+//            this.f_DC_const_bool = f_DC_const;
+//        }
+
+        /*--- DOPPLER HELPER FUNCTIONS ---*/
+
+        // critical value!
+        private double maximumDopplerChange() {
+            final double percent = 0.30; // 30% ~ 100 Hz or so for ERS
+            return percent * Math.abs(PRF - azimuthBandwidth);
+        }
+
+        // actual doppler change
+        private double actualDopplerChange() {
+            final double slcFdc_p0 = pix2fdc(currentWindow.pixlo);
+            final double slcFdc_p05 = computFdc_const();
+            final double slcFdc_pN = pix2fdc(currentWindow.pixhi);
+
+            return Math.max(Math.abs(slcFdc_p0 - slcFdc_p05), Math.abs(slcFdc_p0 - slcFdc_pN));
+        }
+
+        private double computFdc_const() {
+            return pix2fdc((currentWindow.pixhi - currentWindow.pixlo) / 2);
+        }
+
+        private void checkConstant() {
+
+            if (doppler.actualDopplerChange() < doppler.maximumDopplerChange()) {
+                this.f_DC_const_bool = true;
+            } else if (this.f_DC_a1 < EPS && this.f_DC_a2 < EPS) {
+                this.f_DC_const_bool = true;
+            }
+
+            if (f_DC_const_bool) {
+                f_DC_const = computFdc_const();
+            }
+
+        }
+
+        // Convert range pixel to fDC (1 is first pixel, can be ovs)
+        public double pix2fdc(double pixel) {
+            final double tau = (pixel - 1.0) / (rsr2x / 2.0);// two-way time
+            return f_DC_a0 + (f_DC_a1 * tau) + (f_DC_a2 * Math.pow(tau, 2));
+        }
+
     }
 
 }

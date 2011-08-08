@@ -153,12 +153,12 @@ public class ProductTable implements TableInterface {
         // add missing columns to the table
         int i=0;
         for(String n : colNames) {
-            final String testStr = "SELECT "+n+" FROM APP.PRODUCTS";
+            final String testStr = "SELECT '"+n+"' FROM APP.PRODUCTS";
             try {
                 alterStatement.executeQuery(testStr);
             } catch(SQLException e) {
                 if(e.getSQLState().equals("42X04")) {
-                    final String alterStr = "ALTER TABLE APP.PRODUCTS ADD " + n +" "+ colTypes[i];
+                    final String alterStr = "ALTER TABLE APP.PRODUCTS ADD '"+ n +"' "+ colTypes[i];
                     alterStatement.execute(alterStr);
                 }
             }

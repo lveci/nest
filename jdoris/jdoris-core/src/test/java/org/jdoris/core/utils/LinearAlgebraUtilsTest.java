@@ -6,7 +6,6 @@ import org.jblas.DoubleMatrix;
 import org.jdoris.core.Window;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class LinearAlgebraUtilsTest {
@@ -73,10 +72,14 @@ public class LinearAlgebraUtilsTest {
         // define complex PASCAL_22 matrix
         A_PASCAL_22_CPLX = new ComplexDoubleMatrix(A_PASCAL_22, A_PASCAL_22);
 
-        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 0, new ComplexDouble(0, 4));
-        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 1, new ComplexDouble(0, 6));
-        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 0, new ComplexDouble(0, 6));
-        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 1, new ComplexDouble(0, 10));
+//        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 0, new ComplexDouble(0, 4));
+//        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 1, new ComplexDouble(0, 6));
+//        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 0, new ComplexDouble(0, 6));
+//        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 1, new ComplexDouble(0, 10));
+        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 0, new ComplexDouble(0, 2));
+        A_PASCAL_22_CPLX_times2_EXPECTED.put(0, 1, new ComplexDouble(0, 2));
+        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 0, new ComplexDouble(0, 2));
+        A_PASCAL_22_CPLX_times2_EXPECTED.put(1, 1, new ComplexDouble(0, 8));
 
         // A_33
         A_33.put(0, 0, 1);

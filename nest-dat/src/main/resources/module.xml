@@ -50,8 +50,6 @@
                     <id>selectionTool</id>
                     <id>showHomePage</id>
                     <id>about</id>
-                    <id>projection</id>
-                    <id>mapProjAction</id>
                     <id>attachPixelGeoCoding</id>
                     <id>detachPixelGeoCoding</id>
                     <id>exportLegendImageFile</id>
@@ -568,6 +566,21 @@
             <shortDescr>Toggle visibility of the layers tool bar.</shortDescr>
             <description>Toggle visibility of the layers tool bar.</description>
             <helpId>showLayersToolBar</helpId>
+        </action>
+
+        <action>
+            <id>showImageViewHSV</id>
+            <class>org.esa.nest.dat.actions.ShowImageViewHSVAction</class>
+            <parent>view</parent>
+            <placeAfter>showImageViewRGB</placeAfter>
+            <text>Open HSV Image View...</text>
+            <mnemonic>H</mnemonic>
+            <shortDescr>Open HSV image view.</shortDescr>
+            <description>Open an HSV image view for the selected product.</description>
+            <context>product</context>
+            <smallIcon>icons/ImageView16.gif</smallIcon>
+            <largeIcon>icons/ImageView24.gif</largeIcon>
+            <helpId>hsvImageProfile</helpId>
         </action>
 
         <action>

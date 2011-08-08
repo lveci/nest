@@ -88,14 +88,14 @@ public class TestRangeDopplerOp extends TestCase {
 
     public void testGetLocalDEM() throws Exception {
 
-        final File inputFile = new File("P:\\nest\\nest\\ESA Data\\NestBox\\GEOCODED_DATA\\ASA_IMS_1PNDPA20050405_00115_16201_8523\\ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.N1");
+        final File inputFile = new File("P:\\nest\\nest\\ESA Data\\RADAR\\ASAR\\Image Mode Medium Resolution\\ASA_IMM_1PNIPA20080507_220932_000000502068_00230_32348_0581.N1");
         if(!inputFile.exists()) return;
 
         final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
         final Product sourceProduct = reader.readProductNodes(inputFile, null);
 
         final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-        final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec GeoTiff");
+        final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor("SRTM 3Sec");
         final ElevationModel dem = demDescriptor.createDem(ResamplingFactory.createResampling(ResamplingFactory.BILINEAR_INTERPOLATION_NAME));
         final GeoCoding targetGeoCoding = sourceProduct.getGeoCoding();
 

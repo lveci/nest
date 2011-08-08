@@ -251,19 +251,23 @@ public final class OperatorUtils {
      * Copy master GCPs to target product.
      * @param group input master GCP group
      * @param targetGCPGroup output master GCP group
+     * @param targetGeoCoding the geocoding of the target product
      */
-    public static void copyGCPsToTarget(final ProductNodeGroup<Placemark> group, final ProductNodeGroup<Placemark> targetGCPGroup) {
+    public static void copyGCPsToTarget(final ProductNodeGroup<Placemark> group,
+                                        final ProductNodeGroup<Placemark> targetGCPGroup,
+                                        final GeoCoding targetGeoCoding) {
         targetGCPGroup.removeAll();
 
         for(int i = 0; i < group.getNodeCount(); ++i) {
             final Placemark sPin = group.get(i);
-            final Placemark tPin = new Placemark(sPin.getName(),
+            final Placemark tPin = Placemark.createPointPlacemark(GcpDescriptor.getInstance(),
+                               sPin.getName(),
                                sPin.getLabel(),
                                sPin.getDescription(),
                                sPin.getPixelPos(),
                                sPin.getGeoPos(),
-                               sPin.getSymbol());
-
+                               targetGeoCoding);
+                                            
             targetGCPGroup.add(tPin);
         }
     }
@@ -523,7 +527,8 @@ public final class OperatorUtils {
      */
     public static void addSelectedBands(final Product sourceProduct, final String[] sourceBandNames,
                                   final Product targetProduct,
-                                  final Map<String, String[]> targetBandNameToSourceBandName) throws OperatorException {
+                                  final Map<String, String[]> targetBandNameToSourceBandName,
+                                  final boolean outputIntensity) throws OperatorException {
 
         final Band[] sourceBands = getSourceBands(sourceProduct, sourceBandNames);
 
@@ -541,14 +546,14 @@ public final class OperatorUtils {
 
             String targetUnit = "";
 
-            if (unit.contains(Unit.PHASE)) {
+            if (unit.contains(Unit.PHASE) && outputIntensity) {
                 continue;
 
-            } else if (unit.contains(Unit.IMAGINARY)) {
+            } else if (unit.contains(Unit.IMAGINARY) && outputIntensity) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains(Unit.REAL)) {
+            } else if (unit.contains(Unit.REAL) && outputIntensity) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");

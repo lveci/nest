@@ -33,8 +33,8 @@ public class LoadSideBySideLayoutAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
         final LayoutPersistence layoutPersistence = VisatApp.getApp().getMainFrame().getLayoutPersistence();
 
-        String layoutPath = ResourceUtils.getHomeUrl() + File.separator + "res" + File.separator + "sidebyside.layout";
-        layoutPersistence.loadLayoutDataFromFile(layoutPath);
+        final File layoutPath = new File(ResourceUtils.getResFolder(), "sidebyside.layout");
+        layoutPersistence.loadLayoutDataFromFile(layoutPath.getAbsolutePath());
     }
 
 }

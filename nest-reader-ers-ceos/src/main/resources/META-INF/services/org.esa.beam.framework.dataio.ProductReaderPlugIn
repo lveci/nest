@@ -1,4 +1,0 @@
-org.esa.nest.dataio.ceos.ers.ERSProductReaderPlugIn
-org.esa.nest.dataio.ceos.jers.JERSProductReaderPlugIn
-org.esa.nest.dataio.ceos.radarsat.RadarsatProductReaderPlugIn
-org.esa.nest.dataio.ceos.alos.AlosPalsarProductReaderPlugIn

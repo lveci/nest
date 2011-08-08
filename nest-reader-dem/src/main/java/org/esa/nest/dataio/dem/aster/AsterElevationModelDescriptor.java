@@ -15,6 +15,7 @@
  */
 package org.esa.nest.dataio.dem.aster;
 
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -23,7 +24,6 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.nest.util.Settings;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -37,6 +37,7 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
     public static final int DEGREE_RES = 1;
     public static final int PIXEL_RES = 3600;
     public static final int NO_DATA_VALUE = -9999;
+    public static final GeoPos RASTER_ORIGIN = new GeoPos(83, 180);
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     public static final Datum DATUM = Datum.WGS_84;
@@ -56,6 +57,31 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
 
     public float getNoDataValue() {
         return NO_DATA_VALUE;
+    }
+
+    @Override
+    public int getRasterWidth() {
+        return RASTER_WIDTH;
+    }
+
+    @Override
+    public int getRasterHeight() {
+        return RASTER_HEIGHT;
+    }
+
+    @Override
+    public GeoPos getRasterOrigin() {
+        return RASTER_ORIGIN;
+    }
+
+    @Override
+    public int getDegreeRes() {
+        return DEGREE_RES;
+    }
+
+    @Override
+    public int getPixelRes() {
+        return PIXEL_RES;
     }
 
     @Override
