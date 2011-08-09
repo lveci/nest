@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="false" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://C:/build/4B/RSTB/nest/output/modules/jdoris-core-0.0" />
+    <output url="file://C:/build/4B/nest/output/modules/jdoris-core-0.0" />
     <exclude-output />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -9,22 +9,14 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
-      <excludeFolder url="file://C:/build/4B/RSTB/nest/output/modules/jdoris-core-0.0" />
+      <excludeFolder url="file://C:/build/4B/nest/output/modules/jdoris-core-0.0" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="nest-core" />
+    <orderEntry type="module" module-name="beam-gpf" />
     <orderEntry type="module" module-name="beam-core" />
     <orderEntry type="module" module-name="ceres-core" />
     <orderEntry type="module" module-name="ceres-launcher" />
-    <orderEntry type="module" module-name="ceres-glayer" />
-    <orderEntry type="module" module-name="ceres-binding" />
-    <orderEntry type="module" module-name="ceres-jai" />
-    <orderEntry type="module" module-name="beam-gpf" />
-    <orderEntry type="module" module-name="beam-ui" />
-    <orderEntry type="module" module-name="ceres-ui" />
-    <orderEntry type="module" module-name="beam-visat-rcp" />
-    <orderEntry type="module" module-name="beam-envisat-reader" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -52,6 +44,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="ceres-glayer" />
+    <orderEntry type="module" module-name="ceres-binding" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -88,6 +82,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="ceres-jai" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -313,6 +308,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="beam-ui" />
+    <orderEntry type="module" module-name="ceres-ui" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -430,6 +427,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="nest-core" />
+    <orderEntry type="module" module-name="beam-visat-rcp" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -475,6 +474,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="beam-envisat-reader" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

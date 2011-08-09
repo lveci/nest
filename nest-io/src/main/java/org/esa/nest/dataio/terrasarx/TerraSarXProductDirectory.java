@@ -16,6 +16,7 @@
 package org.esa.nest.dataio.terrasarx;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
@@ -30,10 +31,7 @@ import org.jdom.Element;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -215,6 +213,34 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         addOrbitStateVectors(absRoot, orbit);
         addSRGRCoefficients(absRoot, productSpecific);
+
+        final MetadataElement dopplerElem = processing.getElement("doppler");
+        addDopplerCentroidCoefficients(absRoot, dopplerElem);
+
+        // handle ATI products by copying abs metadata to slv metadata
+        final String antennaReceiveConfiguration = acquisitionInfo.getAttributeString("antennaReceiveConfiguration");
+        if(antennaReceiveConfiguration.equals("DRA")) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 1);
+
+            MetadataElement targetSlaveMetadataRoot = root.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+            if(targetSlaveMetadataRoot == null) {
+                targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+                root.addElement(targetSlaveMetadataRoot);
+            }
+
+            // copy Abstracted Metadata
+            for(File cosFile : cosarFileList) {
+                final String fileName = cosFile.getName().toUpperCase();
+                if(fileName.contains("_SRA_"))
+                    continue;
+                final MetadataElement targetSlaveMetadata = new MetadataElement(fileName);
+                targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
+                ProductUtils.copyMetadata(absRoot, targetSlaveMetadata);
+            }
+
+            // modify abstracted metadata
+            
+        }
     }
 
     private static String  getAcquisitionMode(final String mode) {
@@ -527,6 +553,49 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                     ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
             AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
         }
+    }
+
+    private static void addDopplerCentroidCoefficients(
+            final MetadataElement absRoot, final MetadataElement dopplerElem) {
+
+        final MetadataElement[] dopplerElems = dopplerElem.getElements();
+        
+
+    /*    final MetadataElement dopplerCentroidCoefficientsElem = absRoot.getElement(AbstractMetadata.dop_coefficients);
+
+        int listCnt = 1;
+        for(MetadataElement elem : imageGenerationParameters.getElements()) {
+            if(elem.getName().equalsIgnoreCase("dopplerCentroid")) {
+                final MetadataElement dopplerListElem = new MetadataElement(AbstractMetadata.dop_coef_list+'.'+listCnt);
+                dopplerCentroidCoefficientsElem.addElement(dopplerListElem);
+                ++listCnt;
+
+                final ProductData.UTC utcTime = ReaderUtils.getTime(elem, "timeOfDopplerCentroidEstimate", timeFormat);
+                dopplerListElem.setAttributeUTC(AbstractMetadata.dop_coef_time, utcTime);
+
+                final double refTime = elem.getElement("dopplerCentroidReferenceTime").
+                        getAttributeDouble("dopplerCentroidReferenceTime", 0)*1e9; // s to ns
+                AbstractMetadata.addAbstractedAttribute(dopplerListElem, AbstractMetadata.slant_range_time,
+                        ProductData.TYPE_FLOAT64, "ns", "Slant Range Time");
+                AbstractMetadata.setAttribute(dopplerListElem, AbstractMetadata.slant_range_time, refTime);
+
+                final String coeffStr = elem.getAttributeString("dopplerCentroidCoefficients", "");
+                if(!coeffStr.isEmpty()) {
+                    final StringTokenizer st = new StringTokenizer(coeffStr);
+                    int cnt = 1;
+                    while(st.hasMoreTokens()) {
+                        final double coefValue = Double.parseDouble(st.nextToken());
+
+                        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
+                        dopplerListElem.addElement(coefElem);
+                        ++cnt;
+                        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.dop_coef,
+                                ProductData.TYPE_FLOAT64, "", "Doppler Centroid Coefficient");
+                        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.dop_coef, coefValue);
+                    }
+                }
+            }
+        }       */
     }
 
     ImageInputStream getCosarImageInputStream(final Band band) {

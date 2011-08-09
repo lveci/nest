@@ -295,7 +295,6 @@ public final class AbstractMetadataIO {
             metadataRoot.addElement(metaElem);
         } else {
             final MetadataElement metaElem = new MetadataElement(rootName);
-            xmlRoot.getAttributes();
 
             final List children = xmlRoot.getContent();
             for (Object aChild : children) {

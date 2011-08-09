@@ -42,10 +42,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
     private final ArrayList<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
     private final ArrayList<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
 
-    private final JComboBox resamplingType = new JComboBox(new String[] { "NONE",
-                                                                           ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME });
+    private final JComboBox resamplingType = new JComboBox(ResamplingFactory.resamplingNames);
 
     private final JComboBox extent = new JComboBox(new String[] {   CreateStackOp.MASTER_EXTENT,
                                                                     CreateStackOp.MIN_EXTENT,
@@ -56,6 +53,8 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
+        resamplingType.addItem("NONE");
+
         initParameters();
 
         return new JScrollPane(panel);

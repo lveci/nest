@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="false" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://C:/build/4B/nest/output/modules/nest-graph-builder-4B-1.0" />
+    <output url="file://C:/build/4B/nest/nest-developer-tools/output/modules/maven-nest-dataio-archetype-4B-1.0" />
     <exclude-output />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
-      <excludeFolder url="file://C:/build/4B/nest/output/modules/nest-graph-builder-4B-1.0" />
+      <excludeFolder url="file://C:/build/4B/nest/nest-developer-tools/output/modules/maven-nest-dataio-archetype-4B-1.0" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="beam-gpf" />
-    <orderEntry type="module" module-name="beam-core" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/junit/junit/4.5/junit-4.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/junit/junit/4.5/junit-4.5-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="module" module-name="ceres-core" />
     <orderEntry type="module" module-name="ceres-launcher" />
     <orderEntry type="module-library">
@@ -52,6 +59,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="beam-core" />
     <orderEntry type="module" module-name="ceres-glayer" />
     <orderEntry type="module" module-name="ceres-binding" />
     <orderEntry type="module-library">
@@ -142,19 +150,6 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/junit/junit/4.8.2/junit-4.8.2-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/junit/junit/4.8.2/junit-4.8.2-sources.jar!/" />
-        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -363,219 +358,6 @@
       <library>
         <CLASSES>
           <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/hsqldb/hsqldb/1.8.0.7/hsqldb-1.8.0.7.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module" module-name="beam-ui" />
-    <orderEntry type="module" module-name="ceres-ui" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/javax/help/javahelp/2.0.02/javahelp-2.0.02.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/javax/help/javahelp/2.0.02/javahelp-2.0.02-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/com/jidesoft/jide-dock/2.9.5/jide-dock-2.9.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/com/jidesoft/jide-action/2.9.5/jide-action-2.9.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/com/jidesoft/jide-grids/2.9.5/jide-grids-2.9.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/com/jidesoft/jide-components/2.9.5/jide-components-2.9.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/com/jidesoft/jide-common/2.9.5/jide-common-2.9.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/jfree/jfreechart/1.0.13/jfreechart-1.0.13.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/jfree/jfreechart/1.0.13/jfreechart-1.0.13-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/jfree/jcommon/1.0.16/jcommon-1.0.16.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/velocity/velocity/1.5/velocity-1.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-collections/commons-collections/3.1/commons-collections-3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-collections/commons-collections/3.1/commons-collections-3.1-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-collections/commons-collections/3.1/commons-collections-3.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-lang/commons-lang/2.1/commons-lang-2.1.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-lang/commons-lang/2.1/commons-lang-2.1-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-lang/commons-lang/2.1/commons-lang-2.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/oro/oro/2.0.8/oro-2.0.8-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module" module-name="nest-core" />
-    <orderEntry type="module" module-name="beam-visat-rcp" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-wms/2.6.5/gt-wms-2.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-wms/2.6.5/gt-wms-2.6.5-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-xml/2.6.5/gt-xml-2.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-xml/2.6.5/gt-xml-2.6.5-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-render/2.6.5/gt-render-2.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-render/2.6.5/gt-render-2.6.5-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-cql/2.6.5/gt-cql-2.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-cql/2.6.5/gt-cql-2.6.5-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-shapefile/2.6.5/gt-shapefile-2.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/geotools/gt-shapefile/2.6.5/gt-shapefile-2.6.5-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module" module-name="beam-envisat-reader" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/org/apache/derby/derby/10.8.1.2/derby-10.8.1.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-net/commons-net/3.0.1/commons-net-3.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-net/commons-net/3.0.1/commons-net-3.0.1-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://C:/Documents and Settings/lveci.ENGINEERING/.m2/repository/commons-net/commons-net/3.0.1/commons-net-3.0.1-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.6.0_26/jre/../lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -94,12 +94,6 @@ public class CreateStackOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        // Temporary code to disable Max/Min extends in case of NONE resampling. A UI should be created later to
-        // properly disable Max/Min extends in this case.
-        if (resamplingType.contains("NONE")) {
-            extent = MASTER_EXTENT;
-        }
-
         try {
             if(sourceProduct == null)
                 return;
@@ -150,11 +144,7 @@ public class CreateStackOp extends Operator {
                 extent = MASTER_EXTENT;
             }
 
-            if(extent.equals(MIN_EXTENT)) {
-                determinMinimumExtents();
-            } else if(extent.equals(MAX_EXTENT)) {
-                determinMaximumExtents();
-            } else {
+            if(extent.equals(MASTER_EXTENT)) {
 
                 targetProduct = new Product(masterProduct.getName(),
                         masterProduct.getProductType(),
@@ -162,6 +152,8 @@ public class CreateStackOp extends Operator {
                         masterProduct.getSceneRasterHeight());
 
                 OperatorUtils.copyProductNodes(masterProduct, targetProduct);
+            } else {
+                determinMaxMinExtents();
             }
 
             if(appendToMaster) {
@@ -454,7 +446,7 @@ public class CreateStackOp extends Operator {
     /**
      * Minimum extents consists of the overlapping area
      */
-    private void determinMinimumExtents() {
+    private void determinMaxMinExtents() {
 
         Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
 
@@ -463,7 +455,11 @@ public class CreateStackOp extends Operator {
 
             final Geometry slvGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(slvProd);
 
-            mstGeometry = mstGeometry.intersection(slvGeometry);
+            if(extent.equals(MAX_EXTENT)) {
+                mstGeometry = mstGeometry.union(slvGeometry);
+            } else if(extent.equals(MIN_EXTENT)) {
+                mstGeometry = mstGeometry.intersection(slvGeometry);
+            }
         }
 
         final GeoCoding mstGeoCoding = masterProduct.getGeoCoding();
@@ -515,105 +511,94 @@ public class CreateStackOp extends Operator {
         }
     }
 
-    /**
-     * Maximum extents consists of overall area
-     */
-    private void determinMaximumExtents() throws Exception {
-        final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
-        OperatorUtils.computeImageGeoBoundary(sourceProduct, scnProp);
-
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
-        if(absRoot == null) {
-            throw new OperatorException("Abstract Metadata missing");
-        }
-        final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-        final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-        final double pixelSize = Math.min(rangeSpacing, azimuthSpacing);
-
-        OperatorUtils.getSceneDimensions(pixelSize, scnProp);
-
-        int sceneWidth = scnProp.sceneWidth;
-        int sceneHeight = scnProp.sceneHeight;
-        final double ratio = sceneWidth / (double)sceneHeight;
-        long dim = (long) sceneWidth * (long) sceneHeight;
-        while (sceneWidth > 0 && sceneHeight > 0 && dim > Integer.MAX_VALUE) {
-            sceneWidth -= 1000;
-            sceneHeight = (int)(sceneWidth / ratio);
-            dim = (long) sceneWidth * (long) sceneHeight;
-        }
-
-        targetProduct = new Product(masterProduct.getName(),
-                                    masterProduct.getProductType(),
-                                    sceneWidth, sceneHeight);
-
-        OperatorUtils.addGeoCoding(targetProduct, scnProp);
-    }
-
-
     private void computeTargetSlaveCoordinateOffsets() {
 
         final GeoCoding targGeoCoding = targetProduct.getGeoCoding();
         final int targImageWidth = targetProduct.getSceneRasterWidth();
         final int targImageHeight = targetProduct.getSceneRasterHeight();
 
-        final Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
+        final Geometry tgtGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(targetProduct);
+
+        final PixelPos slvPixelPos = new PixelPos();
+        final PixelPos tgtPixelPos = new PixelPos();
+        final GeoPos slvGeoPos = new GeoPos();
 
         for (final Product slvProd : sourceProduct) {
-            if(slvProd == masterProduct)
+            if(slvProd == masterProduct && extent.equals(MASTER_EXTENT)) {
+                slaveOffsettMap.put(slvProd, new int[] {0,0});
                 continue;
+            }
 
             final GeoCoding slvGeoCoding = slvProd.getGeoCoding();
             final int slvImageWidth = slvProd.getSceneRasterWidth();
             final int slvImageHeight = slvProd.getSceneRasterHeight();
 
-            final PixelPos slvPixelPos = new PixelPos();
             boolean foundOverlapPoint = false;
-            for(Coordinate c : mstGeometry.getCoordinates()) {
-                getPixelPos((float)c.y, (float)c.x, slvGeoCoding, slvPixelPos);
 
-                if (slvPixelPos.isValid() && slvPixelPos.x >= 0 && slvPixelPos.x < slvImageWidth &&
-                    slvPixelPos.y >= 0 && slvPixelPos.y < slvImageHeight) {
+            // test corners
+            slvGeoCoding.getGeoPos(new PixelPos(0, 0), slvGeoPos);
+            if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
-                    final PixelPos mstPixelPos = new PixelPos();
-                    getPixelPos((float)c.y, (float)c.x, targGeoCoding, mstPixelPos);
-                    if (mstPixelPos.isValid() && mstPixelPos.x >= 0 && mstPixelPos.x < targImageWidth &&
-                        mstPixelPos.y >= 0 && mstPixelPos.y < targImageHeight) {
+                addOffset(slvProd, 0 - (int)tgtPixelPos.x, 0 - (int)tgtPixelPos.y);
+                foundOverlapPoint = true;
+            }
+            if (!foundOverlapPoint) {
+                slvGeoCoding.getGeoPos(new PixelPos(slvImageWidth, slvImageHeight), slvGeoPos);
+                if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
-                        final int[] offset = new int[2];
-                        offset[0] = (int)slvPixelPos.x - (int)mstPixelPos.x;
-                        offset[1] = (int)slvPixelPos.y - (int)mstPixelPos.y;
-                        slaveOffsettMap.put(slvProd, offset);
-                        foundOverlapPoint = true;
-                        break;
+                    addOffset(slvProd, 0 - slvImageWidth - (int)tgtPixelPos.x, slvImageHeight - (int)tgtPixelPos.y);
+                    foundOverlapPoint = true;
+                }
+            }
+
+            if (!foundOverlapPoint) {
+                final Geometry slvGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(slvProd);
+                final Geometry intersect = tgtGeometry.intersection(slvGeometry);
+
+                for(Coordinate c : intersect.getCoordinates()) {
+                    getPixelPos((float)c.y, (float)c.x, slvGeoCoding, slvPixelPos);
+
+                    if (slvPixelPos.isValid() && slvPixelPos.x >= 0 && slvPixelPos.x < slvImageWidth &&
+                        slvPixelPos.y >= 0 && slvPixelPos.y < slvImageHeight) {
+
+                        getPixelPos((float)c.y, (float)c.x, targGeoCoding, tgtPixelPos);
+                        if (tgtPixelPos.isValid() && tgtPixelPos.x >= 0 && tgtPixelPos.x < targImageWidth &&
+                            tgtPixelPos.y >= 0 && tgtPixelPos.y < targImageHeight) {
+
+                            addOffset(slvProd, (int)slvPixelPos.x - (int)tgtPixelPos.x, (int)slvPixelPos.y - (int)tgtPixelPos.y);
+                            foundOverlapPoint = true;
+                            break;
+                        }
                     }
                 }
             }
 
-            if (foundOverlapPoint) {
-                continue;
-            }
+            //if(foundOverlapPoint) {
+            //    final int[] offset = slaveOffsettMap.get(slvProd);
+            //    System.out.println("offset x="+offset[0]+" y="+offset[1]);
+            //}
 
-            final GeoPos srcGeoPosFirstNear = slvGeoCoding.getGeoPos(new PixelPos(0, 0), null);
-            PixelPos mstPixelPos = new PixelPos();
-            getPixelPos(srcGeoPosFirstNear.lat, srcGeoPosFirstNear.lon, targGeoCoding, mstPixelPos);
-            if (mstPixelPos.isValid() && mstPixelPos.x >= 0 && mstPixelPos.x < targImageWidth &&
-                mstPixelPos.y >= 0 && mstPixelPos.y < targImageHeight) {
-
-                int[] offset = new int[2];
-                offset[0] = 0 - (int)mstPixelPos.x;
-                offset[1] = 0 - (int)mstPixelPos.y;
-                slaveOffsettMap.put(slvProd, offset);
-            } else {
+            if (!foundOverlapPoint)  {
                throw new OperatorException("Product " + slvProd.getName() + " has no overlap with master product.");
             }
         }
     }
 
-    private void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, final PixelPos pixelPos) {
+    private static boolean pixelPosValid(final GeoCoding geoCoding, final GeoPos geoPos, final PixelPos pixelPos,
+                                         final int width, final int height) {
+        geoCoding.getPixelPos(geoPos, pixelPos);
+        return (pixelPos.isValid() && pixelPos.x >= 0 && pixelPos.x < width &&
+                    pixelPos.y >= 0 && pixelPos.y < height);
+    }
+
+    private static void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, final PixelPos pixelPos) {
         final GeoPos geoPos = new GeoPos(lat, lon);
         srcGeoCoding.getPixelPos(geoPos, pixelPos);
     }
 
+    private void addOffset(final Product slvProd, final int offsetX, final int offsetY) {
+        slaveOffsettMap.put(slvProd, new int[] {offsetX, offsetY});
+    }
 
     @Override
     public void computeTile(final Band targetBand, final Tile targetTile, final ProgressMonitor pm) throws OperatorException {
@@ -697,7 +682,7 @@ public class CreateStackOp extends Operator {
 
     private void collocateSourceBand(final RasterDataNode sourceBand, final Rectangle sourceRectangle,
                                      final PixelPos[] sourcePixelPositions,
-                                     final Tile targetTile) throws OperatorException {
+                                     final Tile targetTile) throws Exception {
 
         final RasterDataNode targetBand = targetTile.getRasterDataNode();
         final Rectangle targetRectangle = targetTile.getRectangle();
@@ -731,15 +716,11 @@ public class CreateStackOp extends Operator {
                     if (sourcePixelPos != null) {
                         resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
                                 sourceRasterWidth, sourceRasterHeight, resamplingIndex);
-                        try {
-                            float sample = resampling.resample(resamplingRaster, resamplingIndex);
-                            if (Float.isNaN(sample)) {
-                                sample = noDataValue;
-                            }
-                            trgBuffer.setElemDoubleAt(trgIndex, sample);
-                        } catch (Exception e) {
-                            throw new OperatorException(e.getMessage());
+                        float sample = resampling.resample(resamplingRaster, resamplingIndex);
+                        if (Float.isNaN(sample)) {
+                            sample = noDataValue;
                         }
+                        trgBuffer.setElemDoubleAt(trgIndex, sample);
                     } else {
                         trgBuffer.setElemDoubleAt(trgIndex, noDataValue);
                     }
@@ -747,9 +728,11 @@ public class CreateStackOp extends Operator {
             }
             sourceTile.getDataBuffer().dispose();
         } else {
+            final TileIndex trgIndex = new TileIndex(targetTile);
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                trgIndex.calculateStride(y);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                    trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
+                    trgBuffer.setElemDoubleAt(trgIndex.getIndex(x), noDataValue);
                 }
             }
         }
@@ -784,10 +767,10 @@ public class CreateStackOp extends Operator {
             return null;
         }
 
-        minX = Math.max(minX - 2, 0);
-        maxX = Math.min(maxX + 2, maxWidth - 1);
-        minY = Math.max(minY - 2, 0);
-        maxY = Math.min(maxY + 2, maxHeight - 1);
+        minX = Math.max(minX - 4, 0);
+        maxX = Math.min(maxX + 4, maxWidth - 1);
+        minY = Math.max(minY - 4, 0);
+        maxY = Math.min(maxY + 4, maxHeight - 1);
 
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
@@ -831,13 +814,9 @@ public class CreateStackOp extends Operator {
         public final float getSample(final int x, final int y) throws Exception {
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
 
-            if (usesNoData) {
-                if(scalingApplied && geophysicalNoDataValue == sample)
-                    return Float.NaN;
-                else if(noDataValue == sample)
-                    return Float.NaN;
+            if (usesNoData && (noDataValue == sample || (scalingApplied && geophysicalNoDataValue == sample))) {
+                return Float.NaN;
             }
-
             return (float) sample;
         }
     }

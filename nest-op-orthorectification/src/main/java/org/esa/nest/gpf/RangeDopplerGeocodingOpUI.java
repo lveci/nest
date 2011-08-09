@@ -44,14 +44,20 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                                                                           ResamplingFactory.BISINC_INTERPOLATION_NAME});
+
     final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                                                                           ResamplingFactory.BISINC_INTERPOLATION_NAME});
+
     final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+
     final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+
     final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.LATEST_AUX,
                                                           CalibrationOp.PRODUCT_AUX,
                                                           CalibrationOp.EXTERNAL_AUX});

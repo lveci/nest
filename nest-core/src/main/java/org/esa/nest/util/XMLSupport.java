@@ -63,14 +63,10 @@ public final class XMLSupport {
 
         final DOMParser parser = new DOMParser();
         try {
-            parser.setFeature("http://xml.org/sax/features/validation", false);
-            parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-
             // handle spaces in the path
             final String path = filePath.replaceAll(" ", "%20");
             parser.parse(path);
-            final org.w3c.dom.Document domDoc = parser.getDocument();
-            return builder.build(domDoc);
+            return builder.build(parser.getDocument());
         } catch (IOException e) {
             System.out.println("Path to xml is not valid: " + e.getMessage());
             throw e;

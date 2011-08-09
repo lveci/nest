@@ -122,12 +122,6 @@ public class Warp2Op extends Operator {
 
     private String processedSlaveBand;
 
-    // fields fof InSAR interpolation kernels: elements of InterpolationTable of jai
-    private int numberOfKernelPoints;
-    private int padding;
-    private int subsampleBits;
-    private int precisionBits;
-
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
@@ -151,6 +145,10 @@ public class Warp2Op extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
+            // Disable JAI media library only for coregistration
+            // reenable it in the dispose
+            System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+
             // clear any old residual file
             final File residualsFile = getResidualsFile(sourceProduct);
             if (residualsFile.exists()) {
@@ -168,24 +166,19 @@ public class Warp2Op extends Operator {
             if (complexCoregistration) {
 
                 if (interpolationMethod.equals(CC4P)) {
-                    numberOfKernelPoints = 4;
-                    createInSARInterpTable();
+                    createInSARInterpTable(4);
 
                 } else if (interpolationMethod.equals(CC6P)) {
-                    numberOfKernelPoints = 6;
-                    createInSARInterpTable();
+                    createInSARInterpTable(6);
 
                 } else if (interpolationMethod.equals(TS6P)) {
-                    numberOfKernelPoints = 6;
-                    createInSARInterpTable();
+                    createInSARInterpTable(6);
 
                 } else if (interpolationMethod.equals(TS8P)) {
-                    numberOfKernelPoints = 8;
-                    createInSARInterpTable();
+                    createInSARInterpTable(8);
 
                 } else if (interpolationMethod.equals(TS16P)) {
-                    numberOfKernelPoints = 16;
-                    createInSARInterpTable();
+                    createInSARInterpTable(16);
 
                 } else {
                     interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
@@ -217,14 +210,23 @@ public class Warp2Op extends Operator {
         } 
     }
 
-    private void createInSARInterpTable() {
+    public void dispose() {
+        System.setProperty("com.sun.media.jai.disableMediaLib", "false");
+    }
+
+    private void createInSARInterpTable(final int numberOfKernelPoints) {
         final InSARInterpolationKernels intrpInsar = new InSARInterpolationKernels();
-        subsampleBits = 7;
-        precisionBits = 32;
-        padding = numberOfKernelPoints/2 - 1;
+        final int subsampleBits = 7;
+        final int precisionBits = 32;
+        final int padding = numberOfKernelPoints/2 - 1;
         final double[] kernelAxis = intrpInsar.defineXAxis(numberOfKernelPoints);
         final double[] lutInsar = intrpInsar.constructKernel(kernelAxis, interpolationMethod);
-        interpTable = new InterpolationTable(padding, numberOfKernelPoints, subsampleBits, precisionBits, lutInsar);
+        final float data[] = new float[lutInsar.length];
+        int i = 0;
+        for(double lut : lutInsar) {
+            data[i++] = (float)lut;
+        }
+        interpTable = new InterpolationTable(padding, numberOfKernelPoints, subsampleBits, precisionBits, data);
     }
 
     private void addSlaveGCPs(final WarpData warpData, final String bandName) {

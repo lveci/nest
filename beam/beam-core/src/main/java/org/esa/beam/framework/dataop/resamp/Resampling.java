@@ -37,6 +37,10 @@ public interface Resampling {
      * The cubic convolution resampling method.
      */
     Resampling CUBIC_CONVOLUTION = new CubicConvolutionResampling();
+    /**
+     * The bisinc interpolation resampling method.
+     */
+    Resampling BISINC_INTERPOLATION = new BiSincInterpolationResampling();
 
     /**
      * Gets a unique identifier for this resampling method, e.g. "BILINEAR_INTERPOLATION".

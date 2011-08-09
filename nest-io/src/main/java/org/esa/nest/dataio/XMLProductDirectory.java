@@ -99,7 +99,6 @@ public class XMLProductDirectory {
                                             getProductType(),
                                             _sceneWidth, _sceneHeight);
 
-        product.getMetadataRoot();
         addMetaData(product);
         addGeoCoding(product);
         addTiePointGrids(product);
