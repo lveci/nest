@@ -682,7 +682,7 @@ public class CreateStackOp extends Operator {
 
     private void collocateSourceBand(final RasterDataNode sourceBand, final Rectangle sourceRectangle,
                                      final PixelPos[] sourcePixelPositions,
-                                     final Tile targetTile) throws Exception {
+                                     final Tile targetTile) throws OperatorException {
 
         final RasterDataNode targetBand = targetTile.getRasterDataNode();
         final Rectangle targetRectangle = targetTile.getRectangle();
@@ -716,11 +716,15 @@ public class CreateStackOp extends Operator {
                     if (sourcePixelPos != null) {
                         resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
                                 sourceRasterWidth, sourceRasterHeight, resamplingIndex);
-                        float sample = resampling.resample(resamplingRaster, resamplingIndex);
-                        if (Float.isNaN(sample)) {
-                            sample = noDataValue;
+                        try {
+                            float sample = resampling.resample(resamplingRaster, resamplingIndex);
+                            if (Float.isNaN(sample)) {
+                                sample = noDataValue;
+                            }
+                            trgBuffer.setElemDoubleAt(trgIndex, sample);
+                        } catch (Exception e) {
+                            throw new OperatorException(e.getMessage());
                         }
-                        trgBuffer.setElemDoubleAt(trgIndex, sample);
                     } else {
                         trgBuffer.setElemDoubleAt(trgIndex, noDataValue);
                     }
@@ -728,11 +732,9 @@ public class CreateStackOp extends Operator {
             }
             sourceTile.getDataBuffer().dispose();
         } else {
-            final TileIndex trgIndex = new TileIndex(targetTile);
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
-                trgIndex.calculateStride(y);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                    trgBuffer.setElemDoubleAt(trgIndex.getIndex(x), noDataValue);
+                    trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
                 }
             }
         }
@@ -814,9 +816,13 @@ public class CreateStackOp extends Operator {
         public final float getSample(final int x, final int y) throws Exception {
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
 
-            if (usesNoData && (noDataValue == sample || (scalingApplied && geophysicalNoDataValue == sample))) {
-                return Float.NaN;
+            if (usesNoData) {
+                if(scalingApplied && geophysicalNoDataValue == sample)
+                    return Float.NaN;
+                else if(noDataValue == sample)
+                    return Float.NaN;
             }
+
             return (float) sample;
         }
     }

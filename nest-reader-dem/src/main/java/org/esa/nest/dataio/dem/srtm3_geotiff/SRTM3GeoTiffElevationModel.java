@@ -50,7 +50,6 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
 
     private final List<SRTM3GeoTiffElevationTile> elevationTileCache;
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
-    private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         _descriptor = descriptor;
@@ -169,9 +168,5 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     private static ProductReaderPlugIn getReaderPlugIn() {
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns("GeoTIFF");
         return (ProductReaderPlugIn) readerPlugIns.next();
-    }
-
-    public EarthGravitationalModel96 getEarthGravitationalModel96() {
-        return egm;
     }
 }

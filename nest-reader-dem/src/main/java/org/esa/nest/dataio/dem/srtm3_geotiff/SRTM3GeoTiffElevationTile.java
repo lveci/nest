@@ -25,14 +25,12 @@ import java.io.IOException;
 
 public final class SRTM3GeoTiffElevationTile implements ElevationTile {
 
-    private final EarthGravitationalModel96 egm;
     private CachingObjectArray linesCache;
     private Product product;
     private final float noDataValue;
     private float[][] egmArray = null;
 
     public SRTM3GeoTiffElevationTile(final SRTM3GeoTiffElevationModel dem, final Product product) {
-        egm = dem.getEarthGravitationalModel96();
         this.product = product;
         noDataValue = dem.getDescriptor().getNoDataValue();
         linesCache = new CachingObjectArray(getLineFactory());
@@ -107,6 +105,7 @@ public final class SRTM3GeoTiffElevationTile implements ElevationTile {
         final double lat0  = geoPosFirstNear.getLat() + 0.125; // + half of 15 min
         final double lon0  = geoPosFirstNear.getLon() + 0.125; // + half of 15 min
 
+        final EarthGravitationalModel96 egm = EarthGravitationalModel96.instance();
         final double delLat = 0.25; // 15 min
         final double delLon = 0.25; // 15 min
         for (int r = 0; r < numEGMSamplesInCol; r++) {

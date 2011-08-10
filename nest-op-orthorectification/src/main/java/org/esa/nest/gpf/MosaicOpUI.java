@@ -40,7 +40,9 @@ public class MosaicOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
 
-    private final JComboBox resamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
+    private final JComboBox resamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
     //private final JComboBox projectionName = new JComboBox();
 

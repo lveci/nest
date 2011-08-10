@@ -24,7 +24,6 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 
 import java.awt.*;
 import java.io.File;
@@ -53,7 +52,6 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
 
     private final List<AsterElevationTile> elevationTileCache;
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
-    static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         this.descriptor = descriptor;

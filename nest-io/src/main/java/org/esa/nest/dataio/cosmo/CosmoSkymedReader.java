@@ -216,7 +216,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 AbstractMetadataIO.AddXMLMetadata(rootElement, product.getMetadataRoot());
             }
         } catch(IOException e) {
-            ReaderUtils.showErrorMsg("Unable to read Delivery Note for "+product.getName());
+            System.out.println("Unable to read Delivery Note for "+product.getName());
         }
     }
 

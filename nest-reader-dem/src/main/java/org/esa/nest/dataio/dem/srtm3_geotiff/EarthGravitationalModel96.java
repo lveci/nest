@@ -60,8 +60,16 @@ public class EarthGravitationalModel96 {
     private static final int NUM_OF_BLOCKS_PER_LAT = 9;
 
     private final float[][] egm = new float[NUM_LATS][NUM_LONS];
+    private static EarthGravitationalModel96 theInstance = null;
 
-    public EarthGravitationalModel96() {
+    public static EarthGravitationalModel96 instance() {
+        if(theInstance == null) {
+            theInstance = new EarthGravitationalModel96();
+        }
+        return theInstance;
+    }
+
+    private EarthGravitationalModel96() {
 
         // get absolute file path
         final String filePath = Settings.instance().get("AuxData/egm96AuxDataPath");

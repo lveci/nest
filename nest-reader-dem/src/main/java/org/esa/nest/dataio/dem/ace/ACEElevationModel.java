@@ -46,11 +46,10 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
 
     private final ACEElevationModelDescriptor descriptor;
     private final ACEElevationTile[][] elevationTiles;
-    private final List elevationTileCache;
+    private final List<ACEElevationTile> elevationTileCache = new ArrayList<ACEElevationTile>();
     private final Resampling resampling;
     private final Resampling.Index resamplingIndex;
     private final Resampling.Raster resamplingRaster;
-    private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         this.descriptor = descriptor;
@@ -58,7 +57,6 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         resamplingIndex = resampling.createIndex();
         resamplingRaster = this;
         elevationTiles = createEleveationTiles();
-        elevationTileCache = new ArrayList();
     }
 
     /**
@@ -163,7 +161,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         elevationTileCache.add(0, tile);
         while (elevationTileCache.size() > 60) {
             final int index = elevationTileCache.size() - 1;
-            ACEElevationTile lastTile = (ACEElevationTile) elevationTileCache.get(index);
+            final ACEElevationTile lastTile = elevationTileCache.get(index);
             lastTile.clearCache();
             elevationTileCache.remove(index);
         }
@@ -173,9 +171,5 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(
                 ACEReaderPlugIn.FORMAT_NAME);
         return (ACEReaderPlugIn) readerPlugIns.next();
-    }
-
-    public EarthGravitationalModel96 getEarthGravitationalModel96() {
-        return egm;
     }
 }

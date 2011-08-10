@@ -25,7 +25,6 @@ import java.io.IOException;
 
 public class ACEElevationTile {
 
-    private final EarthGravitationalModel96 egm;
     private ACEElevationModel dem;
     private CachingObjectArray linesCache;
     private Product product;
@@ -33,7 +32,6 @@ public class ACEElevationTile {
     private float[][] egmArray = null;
 
     public ACEElevationTile(final ACEElevationModel dem, final Product product) {
-        egm = dem.getEarthGravitationalModel96();
         this.dem = dem;
         this.product = product;
         noDataValue = dem.getDescriptor().getNoDataValue();
@@ -112,6 +110,7 @@ public class ACEElevationTile {
         final double lat0  = geoPosFirstNear.getLat() + 0.125; // + half of 15 min
         final double lon0  = geoPosFirstNear.getLon() + 0.125; // + half of 15 min
 
+        final EarthGravitationalModel96 egm = EarthGravitationalModel96.instance();
         final double delLat = 0.25; // 15 min
         final double delLon = 0.25; // 15 min
         for (int r = 0; r < numEGMSamplesInCol; r++) {

@@ -33,6 +33,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.dem.FileElevationModel;
+import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
@@ -1060,8 +1061,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                         if (nodataValueAtSea) {
                             saveNoDataValueToTarget(index, trgTiles);
                             continue;
-                        } else {
-                            alt = 0;
                         }
                     }
 
@@ -1070,6 +1069,11 @@ public class RangeDopplerGeocodingOp extends Operator {
                     double lon = geoPos.lon;
                     if (lon >= 180.0) {
                         lon -= 360.0;
+                    }
+
+                    if(alt == demNoDataValue && !nodataValueAtSea) {
+                        // get corrected elevation for 0
+                        alt = EarthGravitationalModel96.instance().getEGM(lat, lon);
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);

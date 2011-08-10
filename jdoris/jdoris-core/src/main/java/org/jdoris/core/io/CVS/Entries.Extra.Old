@@ -1,0 +1,10 @@
+/ByteSwapper.java////*///
+/DataReadersWriters.java////*///
+/FlatBinary.java////*///
+/FlatBinaryDouble.java////*///
+/FlatBinaryFloat.java////*///
+/FlatBinaryInt.java////*///
+/FlatBinaryLong.java////*///
+/LittleEndianDataInputStream.java////*///
+/DataReader.java////*///
+/ResFile.java////*///
