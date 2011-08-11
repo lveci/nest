@@ -2,7 +2,6 @@
 *.ipr
 *.iws
 .idea/
-config/
 modules/
 target/
 CVS/
