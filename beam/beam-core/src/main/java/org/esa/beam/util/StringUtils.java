@@ -36,7 +36,7 @@ import com.bc.jexp.impl.Tokenizer;
  * @author Sabine Embacher
 
  */
-public class StringUtils {
+public final class StringUtils {
 
     /**
      * Splits the given text into a list of tokens by using the supplied separators. Empty tokens are created for

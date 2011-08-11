@@ -27,25 +27,17 @@ import com.bc.ceres.jai.operator.ReinterpretDescriptor;
 import com.bc.ceres.jai.operator.ScalingType;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.jai.ImageManager;
-import org.esa.beam.util.BitRaster;
-import org.esa.beam.util.Debug;
-import org.esa.beam.util.ObjectUtils;
-import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.*;
 import org.esa.beam.util.jai.SingleBandedSampleModel;
-import org.esa.beam.util.math.DoubleList;
-import org.esa.beam.util.math.Histogram;
-import org.esa.beam.util.math.IndexValidator;
-import org.esa.beam.util.math.MathUtils;
-import org.esa.beam.util.math.Quantizer;
-import org.esa.beam.util.math.Range;
+import org.esa.beam.util.math.*;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.ROI;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.IOException;
@@ -93,6 +85,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     /**
      * Text returned by the <code>{@link #getPixelString(int, int)}</code> method if pixel data was not loaded.
      */
+    @Deprecated
     public static final String NOT_LOADED_TEXT = "Not loaded"; /*I18N*/
     /**
      * Text returned by the <code>{@link #getPixelString(int, int)}</code> method if an I/O error occured while pixel data was
@@ -880,6 +873,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * Checks whether or not the pixel located at (x,y) is valid.
      * A pixel is assumed to be valid either if  {@link #getValidMaskImage() validMaskImage} is null or
      * or if the bit corresponding to (x,y) is set within the returned mask image.
+     * <p/>
+     * <i>Note: Implementation changed by Norman (2011-08-09) in order to increase performance since
+     * a synchronised block was used due to problem with the JAI ROI class that has been used in
+     * the former implementation.</i>
      *
      * @param x the X co-ordinate of the pixel location
      * @param y the Y co-ordinate of the pixel location
@@ -890,18 +887,54 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @see #setNoDataValue(double)
      * @see #setValidPixelExpression(String)
      */
-    public boolean isPixelValid(int x, int y) {
-        // method is synchronized because as consequence of calling ROI.contains(x, y)
-        // com.sun.media.jai.iterator.RandomIterFallback.getSample(x, y, b) is called
-        // which is not thread safe
-        // An issue has been created in the JAI issue tracker:
-        // https://jai-core.dev.java.net/issues/show_bug.cgi?id=143
-        if (isValidMaskUsed()) {
-            synchronized (getClass()) { // synchronizing on the class object
-                return getValidMaskROI().contains(x, y);
-            }
+    public final boolean isPixelValid(int x, int y) {
+        if (!isValidMaskUsed()) {
+            return true;
+        }
+        final PlanarImage image = getValidMaskImage();
+        if (image != null) {
+            final int tx = image.XToTileX(x);
+            final int ty = image.YToTileY(y);
+            final Raster tile = image.getTile(tx, ty);
+            return tile.getSample(x, y, 0) != 0;
         }
         return true;
+    }
+
+    /**
+     * Gets a geo-physical sample value at the given pixel coordinate as {@code int} value.
+     * <p/>
+     * <i>Note: This method does not belong to the public API.
+     * It has been added by Norman (2011-08-09) in order to perform performance tests.</i>
+     *
+     * @param x pixel X coordinate
+     * @param y pixel Y coordinate
+     * @return The geo-physical sample value.
+     */
+    public int getSampleInt(int x, int y) {
+        final PlanarImage image = getGeophysicalImage();
+        int tx = image.XToTileX(x);
+        int ty = image.YToTileY(y);
+        Raster tile = image.getTile(tx, ty);
+        return tile.getSample(x, y, 0);
+    }
+
+    /**
+     * Gets a geo-physical sample value at the given pixel coordinate as {@code float} value.
+     * <p/>
+     * <i>Note: This method does not belong to the public API.
+     * It has been added by Norman (2011-08-09) in order to perform performance tests.</i>
+     *
+     * @param x pixel X coordinate
+     * @param y pixel Y coordinate
+     * @return The geo-physical sample value.
+     */
+    public float getSampleFloat(int x, int y) {
+        final PlanarImage image = getGeophysicalImage();
+        int tx = image.XToTileX(x);
+        int ty = image.YToTileY(y);
+        Raster tile = image.getTile(tx, ty);
+        return tile.getSampleFloat(x, y, 0);
     }
 
     /**
@@ -1856,11 +1889,11 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * Returns whether the source image is set on this {@code RasterDataNode}.
      *
      * @return whether the source image is set.
-     * @since BEAM 4.5
      * @see #getSourceImage()
      * @see #setSourceImage(java.awt.image.RenderedImage)
      * @see #setSourceImage(com.bc.ceres.glevel.MultiLevelImage)
      * @see #createSourceImage()
+     * @since BEAM 4.5
      */
     public boolean isSourceImageSet() {
         return sourceImage != null;
@@ -1871,9 +1904,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      *
      * @return The source image. Never {@code null}. In the case that {@link #isSourceImageSet()} returns {@code false},
      *         the method {@link #createSourceImage()} will be called in order to set and return a valid source image.
-     * @since BEAM 4.2
      * @see #createSourceImage()
      * @see #isSourceImageSet()
+     * @since BEAM 4.2
      */
     public MultiLevelImage getSourceImage() {
         if (!isSourceImageSet()) {

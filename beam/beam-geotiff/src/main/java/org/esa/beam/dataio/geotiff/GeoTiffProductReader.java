@@ -121,7 +121,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             readParam.setSourceSubsampling(sourceStepX, sourceStepY,
                                            sourceOffsetX % sourceStepX,
                                            sourceOffsetY % sourceStepY);
-            TIFFRenderedImage subsampledImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE,
+            final TIFFRenderedImage subsampledImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE,
                                                                                                     readParam);
 
             final Raster data = subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY,
@@ -137,22 +137,22 @@ public class GeoTiffProductReader extends AbstractProductReader {
             if(dataBufferType == DataBuffer.TYPE_FLOAT &&
                destBuffer.getElems() instanceof float[]) {
                 final float[] dArray = new float[destSize];
-                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
                 System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else if(dataBufferType == DataBuffer.TYPE_INT &&
                destBuffer.getElems() instanceof int[]) {
                 final int[] dArray = new int[destSize];
-                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
                 System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
              } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
                 destBuffer.getElems() instanceof int[]) {
                 final int[] dArray = new int[destSize];
-                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
                 System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else {
 
                 final double[] dArray = new double[destSize];
-                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
 
                 final int length = dArray.length;
                 if(destBuffer.getElems() instanceof double[]) {

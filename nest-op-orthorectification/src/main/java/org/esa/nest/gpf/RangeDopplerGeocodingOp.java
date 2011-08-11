@@ -149,13 +149,15 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Parameter(defaultValue="false", label="Save Beta0 as a band")
     private boolean saveBetaNought = false;
 
-    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_INCIDENCE_ANGLE_FROM_DEM},
-            defaultValue = USE_INCIDENCE_ANGLE_FROM_DEM, label="")
-    private String incidenceAngleForSigma0 = USE_INCIDENCE_ANGLE_FROM_DEM;
+    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+            USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForSigma0 = USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
 
-    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_INCIDENCE_ANGLE_FROM_DEM},
-            defaultValue = USE_INCIDENCE_ANGLE_FROM_DEM, label="")
-    private String incidenceAngleForGamma0 = USE_INCIDENCE_ANGLE_FROM_DEM;
+    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+            USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForGamma0 = USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
 
     @Parameter(valueSet = {CalibrationOp.LATEST_AUX, CalibrationOp.PRODUCT_AUX, CalibrationOp.EXTERNAL_AUX},
             description = "The auxiliary file", defaultValue=CalibrationOp.LATEST_AUX, label="Auxiliary File")
@@ -225,7 +227,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean flipIndex = false; // temp fix for descending Radarsat2
     private String mission = null;
 
-    public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
+    public static final String USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
+    public static final String USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM = "Use local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
     public static final double NonValidIncidenceAngle = -99999.0;
 
@@ -355,8 +358,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             saveBetaNought = false;
         }
 
-        if (saveBetaNought || saveGammaNought ||
-            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
+        if ( saveBetaNought || saveGammaNought ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) ) {
             saveSigmaNought = true;
             saveProjectedLocalIncidenceAngle = true;
         }
@@ -364,6 +368,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         if ((saveGammaNought && incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) ||
             (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
             saveIncidenceAngleFromEllipsoid = true;
+        }
+
+        if ((saveGammaNought && incidenceAngleForGamma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM))) {
+            saveLocalIncidenceAngle = true;
         }
 
         if (saveIncidenceAngleFromEllipsoid) {
@@ -810,7 +819,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             addTargetBand("incidenceAngleFromEllipsoid", Unit.DEGREES, null);
         }
 
-        if (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+        if (saveSigmaNought && !incidenceAngleForSigma0.contains(USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
             createSigmaNoughtVirtualBand(targetProduct, incidenceAngleForSigma0);
         }
 
@@ -2076,7 +2085,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     */
     public static void createSigmaNoughtVirtualBand(Product targetProduct, String incidenceAngleForSigma0) {
 
-        if (!incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+        if (incidenceAngleForSigma0.contains(USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
             return;
         }
 
@@ -2088,12 +2097,32 @@ public class RangeDopplerGeocodingOp extends Operator {
                 continue;
             }
 
-            final String expression = trgBandName +
-                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
-                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
-                         " * sin(incidenceAngleFromEllipsoid * PI/180)";
+            String expression = null;
+            String sigmaNoughtVirtualBandName = null;
+            String description = null;
 
-            String sigmaNoughtVirtualBandName = trgBandName + "_use_inci_angle_from_ellipsoid";
+            if (incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+
+                expression = trgBandName +
+                             "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                             ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                             " * sin(incidenceAngleFromEllipsoid * PI/180)";
+
+                sigmaNoughtVirtualBandName = trgBandName + "_use_inci_angle_from_ellipsoid";
+
+                description = "Sigma0 image created using inci angle from ellipsoid";
+
+            } else if (incidenceAngleForSigma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) {
+
+                expression = trgBandName +
+                             "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                             ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                             " * sin(incidenceAngle * PI/180)";
+
+                sigmaNoughtVirtualBandName = trgBandName + "_use_local_inci_angle_from_dem";
+
+                description = "Sigma0 image created using local inci angle from DEM";
+            }
 
             final VirtualBand band = new VirtualBand(sigmaNoughtVirtualBandName,
                                                      ProductData.TYPE_FLOAT32,
@@ -2102,7 +2131,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                                                      expression);
             band.setSynthetic(true);
             band.setUnit(trgBand.getUnit());
-            band.setDescription("Sigma0 image created using inci angle from ellipsoid");
+            band.setDescription(description);
             targetProduct.addBand(band);
         }
     }
@@ -2124,7 +2153,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             final String incidenceAngle;
             if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
                 incidenceAngle = "incidenceAngleFromEllipsoid";
-            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+            } else { // USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM
                 incidenceAngle = "projectedIncidenceAngle";
             }
 
@@ -2138,7 +2167,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
                 gammaNoughtVirtualBandName = "_use_inci_angle_from_ellipsoid";
                 description = "Gamma0 image created using inci angle from ellipsoid";
-            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+            } else { // USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM
                 gammaNoughtVirtualBandName = "_use_projected_local_inci_angle_from_dem";
                 description = "Gamma0 image created using projected local inci angle from dem";
             }
@@ -2180,7 +2209,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             final String incidenceAngle;
             if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
                 incidenceAngle = "incidenceAngleFromEllipsoid";
-            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+            } else if (incidenceAngleForGamma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) {
+                incidenceAngle = "incidenceAngle";
+            } else { // USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM
                 incidenceAngle = "projectedIncidenceAngle";
             }
 
@@ -2194,7 +2225,10 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
                 gammaNoughtVirtualBandName = "_use_inci_angle_from_ellipsoid";
                 description = "Gamma0 image created using inci angle from ellipsoid";
-            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+            } else if (incidenceAngleForGamma0.contains(USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) {
+                gammaNoughtVirtualBandName = "_use_local_inci_angle_from_dem";
+                description = "Gamma0 image created using local inci angle from DEM";
+            } else { // USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM
                 gammaNoughtVirtualBandName = "_use_projected_local_inci_angle_from_dem";
                 description = "Gamma0 image created using projected local inci angle from dem";
             }

@@ -33,7 +33,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 
-public class ProductTreeModel implements TreeModel {
+public final class ProductTreeModel implements TreeModel {
 
     private final ProductManagerTN rootTN;
     private ProductNodeListener productNodeListener;

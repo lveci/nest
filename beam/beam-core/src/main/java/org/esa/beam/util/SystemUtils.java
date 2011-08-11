@@ -518,28 +518,38 @@ public class SystemUtils {
     }
 
     public static Class<?> loadHdf4Lib(Class<?> callerClass) {
-        try {
-            return Class.forName(_H4_CLASS_NAME, true, callerClass.getClassLoader());
-        } catch (Throwable error) {
-            BeamLogManager.getSystemLogger().warning(MessageFormat.format("{0}: HDF-4 library not available: {1}: {2}", callerClass, error.getClass(), error.getMessage()));
+        return loadClassWithNativeDependencies(callerClass,
+                                               _H4_CLASS_NAME,
+                                               "{0}: HDF-4 library not available: {1}: {2}");
+    }
+
+    public static Class<?> loadHdf5Lib(Class<?> callerClass) {
+        return loadClassWithNativeDependencies(callerClass,
+                                               _H5_CLASS_NAME,
+                                               "{0}: HDF-5 library not available: {1}: {2}");
+    }
+
+    private static Class<?> loadClassWithNativeDependencies(Class<?> callerClass, String className, String warningPattern) {
+        ClassLoader classLoader = callerClass.getClassLoader();
+        String classResourceName = "/" + className.replace('.', '/') + ".class";
+        if (classLoader.getResource(classResourceName) != null) {
+            try {
+                return Class.forName(className, true, classLoader);
+            } catch (Throwable error) {
+                BeamLogManager.getSystemLogger().warning(MessageFormat.format(warningPattern, callerClass, error.getClass(), error.getMessage()));
+                return null;
+            }
+        } else {
             return null;
         }
     }
 
-    public static Class<?> loadHdf5Lib(Class<?> callerClass) {
-        try {
-            return Class.forName(_H5_CLASS_NAME, true, callerClass.getClassLoader());
-        } catch (Throwable error) {
-            BeamLogManager.getSystemLogger().warning(MessageFormat.format("{0}: HDF-5 library not available: {1}: {2}", callerClass, error.getClass(), error.getMessage()));
-            return null;
-        }
-    }
-    
     /**
      * Initialize third party libraries of BEAM.
+     *
      * @param cl The most useful class loader.
      * @since BEAM 4.8
-      */
+     */
     public static void init3rdPartyLibs(ClassLoader cl) {
         initJAI(cl);
         initGeoTools();

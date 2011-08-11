@@ -35,6 +35,7 @@ import org.esa.beam.util.FeatureCollectionClipper;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.text.MessageFormat;
@@ -152,8 +153,10 @@ public class CreateStackOp extends Operator {
                         masterProduct.getSceneRasterHeight());
 
                 OperatorUtils.copyProductNodes(masterProduct, targetProduct);
+            } else if(extent.equals(MIN_EXTENT)) {
+                determinMinExtents();
             } else {
-                determinMaxMinExtents();
+                determinMaxExtents();
             }
 
             if(appendToMaster) {
@@ -446,20 +449,15 @@ public class CreateStackOp extends Operator {
     /**
      * Minimum extents consists of the overlapping area
      */
-    private void determinMaxMinExtents() {
+    private void determinMinExtents() {
 
-        Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
+        Geometry tgtGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
 
         for(final Product slvProd : sourceProduct) {
             if(slvProd == masterProduct) continue;
 
             final Geometry slvGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(slvProd);
-
-            if(extent.equals(MAX_EXTENT)) {
-                mstGeometry = mstGeometry.union(slvGeometry);
-            } else if(extent.equals(MIN_EXTENT)) {
-                mstGeometry = mstGeometry.intersection(slvGeometry);
-            }
+            tgtGeometry = tgtGeometry.intersection(slvGeometry);
         }
 
         final GeoCoding mstGeoCoding = masterProduct.getGeoCoding();
@@ -471,7 +469,7 @@ public class CreateStackOp extends Operator {
         float maxX=0, maxY=0;
         float minX = mstWidth;
         float minY = mstHeight;
-        for(Coordinate c : mstGeometry.getCoordinates()) {
+        for(Coordinate c : tgtGeometry.getCoordinates()) {
             //System.out.println("geo "+c.x +", "+ c.y);
             geoPos.setLocation((float)c.y, (float)c.x);
             mstGeoCoding.getPixelPos(geoPos, pixPos);
@@ -511,6 +509,39 @@ public class CreateStackOp extends Operator {
         }
     }
 
+    /**
+     * Maximum extents consists of the overall area
+     */
+    private void determinMaxExtents() throws Exception {
+        final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
+        OperatorUtils.computeImageGeoBoundary(sourceProduct, scnProp);
+
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(masterProduct);
+        double pixelSize = 1;
+        if(absRoot != null) {
+            final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+            final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+            pixelSize = Math.min(rangeSpacing, azimuthSpacing);
+        }
+        OperatorUtils.getSceneDimensions(pixelSize, scnProp);
+
+        int sceneWidth = scnProp.sceneWidth;
+        int sceneHeight = scnProp.sceneHeight;
+        final double ratio = sceneWidth / (double)sceneHeight;
+        long dim = (long) sceneWidth * (long) sceneHeight;
+        while (sceneWidth > 0 && sceneHeight > 0 && dim > Integer.MAX_VALUE) {
+            sceneWidth -= 1000;
+            sceneHeight = (int)(sceneWidth / ratio);
+            dim = (long) sceneWidth * (long) sceneHeight;
+        }
+
+        targetProduct = new Product(masterProduct.getName(),
+                                    masterProduct.getProductType(),
+                                    sceneWidth, sceneHeight);
+
+        OperatorUtils.addGeoCoding(targetProduct, scnProp);
+    }
+
     private void computeTargetSlaveCoordinateOffsets() {
 
         final GeoCoding targGeoCoding = targetProduct.getGeoCoding();
@@ -536,14 +567,14 @@ public class CreateStackOp extends Operator {
             boolean foundOverlapPoint = false;
 
             // test corners
-            slvGeoCoding.getGeoPos(new PixelPos(0, 0), slvGeoPos);
+            slvGeoCoding.getGeoPos(new PixelPos(10, 10), slvGeoPos);
             if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
                 addOffset(slvProd, 0 - (int)tgtPixelPos.x, 0 - (int)tgtPixelPos.y);
                 foundOverlapPoint = true;
             }
             if (!foundOverlapPoint) {
-                slvGeoCoding.getGeoPos(new PixelPos(slvImageWidth, slvImageHeight), slvGeoPos);
+                slvGeoCoding.getGeoPos(new PixelPos(slvImageWidth-10, slvImageHeight-10), slvGeoPos);
                 if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
                     addOffset(slvProd, 0 - slvImageWidth - (int)tgtPixelPos.x, slvImageHeight - (int)tgtPixelPos.y);
@@ -732,9 +763,11 @@ public class CreateStackOp extends Operator {
             }
             sourceTile.getDataBuffer().dispose();
         } else {
+            final TileIndex trgIndex = new TileIndex(targetTile);
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                trgIndex.calculateStride(y);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                    trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
+                    trgBuffer.setElemDoubleAt(trgIndex.getIndex(x), noDataValue);
                 }
             }
         }
@@ -822,7 +855,6 @@ public class CreateStackOp extends Operator {
                 else if(noDataValue == sample)
                     return Float.NaN;
             }
-
             return (float) sample;
         }
     }

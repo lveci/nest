@@ -48,15 +48,17 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                                                                            ResamplingFactory.BISINC_INTERPOLATION_NAME});
 
     final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
-                                                                           ResamplingFactory.BISINC_INTERPOLATION_NAME});
+                                                                      ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                                                                      ResamplingFactory.BISINC_INTERPOLATION_NAME});
 
-    final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
-                                                                           RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+    final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+                                                                          RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+                                                                          RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
-    final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
-                                                                           RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+    final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+                                                                          RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+                                                                          RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
     final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.LATEST_AUX,
                                                           CalibrationOp.PRODUCT_AUX,
@@ -277,7 +279,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 public void itemStateChanged(ItemEvent e) {
                     saveSigmaNought = (e.getStateChange() == ItemEvent.SELECTED);
                     if (saveSigmaNought) {
-                        if (incidenceAngleForSigma0.getSelectedItem().equals(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM)) {
+                        if (incidenceAngleForSigma0.getSelectedItem().equals(RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
                             saveProjectedLocalIncidenceAngleCheckBox.setSelected(false);
                         } else {
                             saveProjectedLocalIncidenceAngleCheckBox.setSelected(true);

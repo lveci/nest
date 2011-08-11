@@ -171,6 +171,44 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         });
 
+        final JButton moveUpButton = DialogUtils.CreateButton("moveUpButton", "Move Up", null, panel);
+        moveUpButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                final int[] selRows = table.getSelectedRows();
+                final ArrayList<File> filesToMove = new ArrayList<File>(selRows.length);
+                for(int row : selRows) {
+                    filesToMove.add(fileModel.getFileAt(row));
+                }
+                for(File file : filesToMove) {
+                    int index = fileModel.getIndexOf(file);
+                    if(index > 0) {
+                        fileModel.move(index, index-1);
+                    }
+                }
+            }
+
+        });
+
+        final JButton moveDownButton = DialogUtils.CreateButton("moveDownButton", "Move Down", null, panel);
+        moveDownButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                final int[] selRows = table.getSelectedRows();
+                final ArrayList<File> filesToMove = new ArrayList<File>(selRows.length);
+                for(int row : selRows) {
+                    filesToMove.add(fileModel.getFileAt(row));
+                }
+                for(File file : filesToMove) {
+                    int index = fileModel.getIndexOf(file);
+                    if(index < fileModel.getRowCount()) {
+                        fileModel.move(index, index+1);
+                    }
+                }
+            }
+
+        });
+
         final JButton clearButton = DialogUtils.CreateButton("clearButton", "Clear", null, panel);
         clearButton.addActionListener(new ActionListener() {
 
@@ -182,6 +220,8 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         panel.add(addButton);
         panel.add(addAllOpenButton);
+        panel.add(moveUpButton);
+        panel.add(moveDownButton);
         panel.add(removeButton);
         panel.add(clearButton);
         panel.add(countLabel);
@@ -296,6 +336,21 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             fileList.remove(index);
             dataList.get(index).data = null;
             dataList.remove(index);
+
+            fireTableDataChanged();
+        }
+
+        public void move(final int oldIndex, final int newIndex) {
+            if((oldIndex < 1 && oldIndex > newIndex) || oldIndex > fileList.size() ||
+               newIndex < 0 || newIndex >= fileList.size())
+                return;
+            final File file = fileList.get(oldIndex);
+            final FileStats fstat = dataList.get(oldIndex);
+
+            fileList.remove(oldIndex);
+            dataList.remove(oldIndex);
+            fileList.add(newIndex, file);
+            dataList.add(newIndex, fstat);
 
             fireTableDataChanged();
         }

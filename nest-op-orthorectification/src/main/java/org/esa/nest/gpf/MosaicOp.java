@@ -297,10 +297,10 @@ public class MosaicOp extends Operator {
             return null;
         }
 
-        minX = Math.max(minX - 2, minOffsetX);
-        maxX = Math.min(maxX + 2, maxWidth - 1);
-        minY = Math.max(minY - 2, minOffsetY);
-        maxY = Math.min(maxY + 2, maxHeight - 1);
+        minX = Math.max(minX - 4, minOffsetX);
+        maxX = Math.min(maxX + 4, maxWidth - 1);
+        minY = Math.max(minY - 4, minOffsetY);
+        maxY = Math.min(maxY + 4, maxHeight - 1);
 
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
@@ -394,7 +394,7 @@ public class MosaicOp extends Operator {
             }
 
             if(!validSourceData.isEmpty()) {
-                collocateSourceBand(validSourceData, resampling, targetTile, pm);
+                collocateSourceBand(validSourceData, resampling, targetTile);
             }
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -404,7 +404,7 @@ public class MosaicOp extends Operator {
     }
 
     private void collocateSourceBand(final ArrayList<SourceData> validSourceData, final Resampling resampling,
-                                     final Tile targetTile, final ProgressMonitor pm) throws OperatorException {
+                                     final Tile targetTile) throws OperatorException {
         try {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final ProductData trgBuffer = targetTile.getDataBuffer();
@@ -428,7 +428,7 @@ public class MosaicOp extends Operator {
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                     final int trgIndex = targetTile.getDataBufferIndex(x, y);
-
+                    
                     double targetVal = 0;
                     sampleList.clear();
                     for(final SourceData srcDat : validSourceData) {
@@ -481,7 +481,6 @@ public class MosaicOp extends Operator {
                         trgBuffer.setElemDoubleAt(trgIndex, targetVal);
                     }
                 }
-                pm.worked(1);
             }
 
         } catch (Throwable e) {
@@ -517,6 +516,9 @@ public class MosaicOp extends Operator {
         }
 
         public final float getSample(final int x, final int y) throws Exception {
+            if(x < tile.getMinX() || y < tile.getMinY() || x > tile.getMaxX() || y > tile.getMaxY())
+                return Float.NaN;
+            
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
 
             if (usesNoData) {

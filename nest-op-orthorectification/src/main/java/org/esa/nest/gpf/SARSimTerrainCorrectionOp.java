@@ -134,13 +134,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(defaultValue="false", label="Save Beta0 as a band")
     private boolean saveBetaNought = false;
 
-    @Parameter(valueSet = {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM},
-            defaultValue = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM, label="")
-    private String incidenceAngleForSigma0 = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM;
+    @Parameter(valueSet = {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID,
+                           RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+                           RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForSigma0 = RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
 
-    @Parameter(valueSet = {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM},
-            defaultValue = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM, label="")
-    private String incidenceAngleForGamma0 = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM;
+    @Parameter(valueSet = {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID,
+                           RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+                           RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForGamma0 = RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
 
     @Parameter(valueSet = {CalibrationOp.LATEST_AUX, CalibrationOp.PRODUCT_AUX, CalibrationOp.EXTERNAL_AUX},
             description = "The auxiliary file", defaultValue=CalibrationOp.LATEST_AUX, label="Auxiliary File")
@@ -326,6 +330,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if ((saveGammaNought && incidenceAngleForGamma0.contains(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) ||
             (saveSigmaNought && incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
             saveIncidenceAngleFromEllipsoid = true;
+        }
+
+        if ((saveGammaNought && incidenceAngleForGamma0.contains(RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM)) ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM))) {
+            saveLocalIncidenceAngle = true;
         }
 
         if (saveIncidenceAngleFromEllipsoid) {
@@ -625,7 +634,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             addTargetBand("incidenceAngleFromEllipsoid", Unit.DEGREES, null);
         }
 
-        if (saveSigmaNought && incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+        if (saveSigmaNought && !incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
             RangeDopplerGeocodingOp.createSigmaNoughtVirtualBand(targetProduct, incidenceAngleForSigma0);
         }
 
