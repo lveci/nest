@@ -718,7 +718,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         // find first real slave band
         for(Band targetBand : keySet) {
-            if(targetBand.getName().equals(processedSlaveBand)) {
+            if(targetBand.getName().equals(processedSlaveBand) || targetBand.getName().contains("Sigma0")) {
                 final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
                 final Band srcBand = sourceProduct.getBand(srcBandNames[0]);
                 if(srcBand != null) {

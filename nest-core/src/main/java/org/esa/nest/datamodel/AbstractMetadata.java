@@ -604,7 +604,7 @@ public final class AbstractMetadata {
             final DopplerCentroidCoefficientList dopList = new DopplerCentroidCoefficientList();
             dopList.time  = listElem.getAttributeUTC(srgr_coef_time);
             dopList.timeMJD = dopList.time.getMJD();
-            dopList.slant_range_time = listElem.getAttributeDouble(slant_range_time);
+            dopList.slant_range_time = listElem.getAttributeDouble(slant_range_time, 0.0);
 
             final int numSubElems = listElem.getNumElements();
             dopList.coefficients = new double[numSubElems];

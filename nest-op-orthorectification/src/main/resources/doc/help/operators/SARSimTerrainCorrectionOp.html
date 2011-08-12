@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>Help - Orthorectification</title>
 
-<link rel="stylesheet" href="../style.css"></head>
-<body>
+
+<link rel="stylesheet" href="../style.css"></head><body>
 <table class="header">
 <tbody>
 <tr class="header">
@@ -157,12 +157,12 @@ band as a layer.</p><h4>Parameters Used</h4>&nbsp; &nbsp;The following parameter
 <li>WARP Polynomial Order: The degree of the WARP polynomial. The valid values are
 1, 2 and 3. (see Help for <a href="WarpOp.html">Warp Operator</a> for detail)</li>
 <li>DEM Resampling Method: Interpolation method for obtaining elevation values
-from the original DEM file. Three interpolation methods are available:
-nearest neighbour, bi-linear and cubic interpolations.
+from the original DEM file. The following interpolation methods are available:
+nearest neighbour, bi-linear, cubic and bi-sinc interpolations.
 </li>
 <li>Image Resampling Method: Interpolation methods for obtaining pixel values
 from the source image. Three interpolation methods are available:
-nearest neighbour, bi-linear and cubic interpolations.
+nearest neighbour, bi-linear, cubic and bi-sinc interpolations.
 </li>
 <li>Pixel Spacing (m): User can specify pixel spacing&nbsp;in meters for orthorectified image. If
 no pixel spacing is specified,&nbsp;then default&nbsp;pixel spacing
@@ -182,11 +182,11 @@ projected local incidence angle will be save as a band in the target product.
 images of user selected bands will be saved without applying
 radiometric normalization.</li><li>Apply radiometric normalization: Checkbox indicating that radiometric normalization will be applied to the orthorectified image.</li><li>Save Sigma0 as a band: Checkbox indicating that sigma0 will be
 saved as a band in the target product. The Sigma0 can be generated
-using projected local incidence angle or using incidence angle from
+using projected local incidence angle, local incidence angle or incidence angle from
 ellipsoid.</li><li>Save
 Gamma0 as a band: Checkbox indicating that Gamma0 will be saved as a
 band in the target product. The Gamma0 can be generated using projected
-local incidence angle or using incidence angle from ellipsoid.</li><li>Save Beta0 as a band: Checkbox indicating that Beta0 will be saved as a band in the target product.</li><li>Auxiliary
+local incidence angle, local incidence angle or incidence angle from ellipsoid.</li><li>Save Beta0 as a band: Checkbox indicating that Beta0 will be saved as a band in the target product.</li><li>Auxiliary
 File:&nbsp;available only for ASAR. User selected ASAR XCA file for radiometric normalization. The
 following options are available: <span style="font-weight: bold;">Latest Auxiliary File</span>, <span style="font-weight: bold;">Product
 Auxiliary
@@ -198,7 +198,7 @@ shifts (in m) for all valid GCPs will be displayed. The row and column
 shifts of each slave GCP away from its initial position are output to a
 text file.</li>
 </ol>
-<br><p><img style="width: 638px; height: 634px;" alt="" src="images/sar_sim_terrain_corr_dlg.jpg"><br></p>
+<br><p><img style="width: 600px; height: 560px;" alt="" src="images/sar_sim_terrain_corr_dlg.jpg"><br></p>
 
 <p>&nbsp;Figure 1. SAR Sim Terrain Correction dialog box</p><h4>Detailed&nbsp;Algorithm for Layover-Shadow Mask Generation</h4><ol><li>First&nbsp;a DEM image is created by the SAR Simulation operator using the geocoding of the original SAR image. The DEM
 image has the same dimension as the original SAR image with each pixel value of the DEM image is the

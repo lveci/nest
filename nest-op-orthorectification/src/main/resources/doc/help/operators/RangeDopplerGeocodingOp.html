@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>Help - Range Doppler Terrain Correction</title>
 
-<link rel="stylesheet" href="../style.css"></head>
-<body>
+
+<link rel="stylesheet" href="../style.css"></head><body>
 <table class="header">
 <tbody>
 <tr class="header">
@@ -148,12 +148,12 @@ default all bands are used.
 <li>External DEM: User specified external DEM file. Currently only DEM in Geotiff format with geographic coordinates (P<sub>lat</sub>, P<sub>lon</sub>, P<sub>h</sub>) referred to global geodetic ellipsoid reference WGS84 (and height in meters)&nbsp;is accepted.
 </li>
 <li>DEM Resampling Method: Interpolation method for obtaining elevation values
-from the original DEM file. Three interpolation methods are available:
-nearest neighbour, bi-linear and cubic interpolations.
+from the original DEM file. The following interpolation methods are available:
+nearest neighbour, bi-linear, cubic and bi-sinc interpolations.
 </li>
 <li>Image Resampling Method: Interpolation methods for obtaining pixel values
-from the source image. Three interpolation methods are available:
-nearest neighbour, bi-linear and cubic interpolations.</li>
+from the source image. The following interpolation methods are available:
+nearest neighbour, bi-linear, cubic and bi-sinc interpolations.</li>
 <li>Pixel Spacing (m): User can specify pixel spacing&nbsp;in meters for orthorectified
 image. If no pixel spacing is specified, then default&nbsp;pixel spacing
 computed from the source SAR image is used. For details, the reader is referred to <span style="font-weight: bold;">Pixel Spacing</span> section above. </li><li>Pixel Spacing (deg): User
@@ -175,11 +175,11 @@ projected local incidence angle will be saved as a band in the target product.
 images of user selected bands will be saved without applying
 radiometric normalization.</li><li>Apply radiometric normalization: Checkbox indicating that radiometric normalization will be applied to the orthorectified image.</li><li>Save Sigma0 as a band: Checkbox indicating that sigma0 will be
 saved as a band in the target product. The Sigma0 can be generated
-using projected local incidence angle or using incidence angle from
+using projected local incidence angle, local incidence angle or incidence angle from
 ellipsoid.</li><li>Save
 Gamma0 as a band: Checkbox indicating that Gamma0 will be saved as a
 band in the target product. The Gamma0 can be generated using projected
-local incidence angle or using incidence angle from ellipsoid.</li><li>Save Beta0 as a band: Checkbox indicating that Beta0 will be saved as a band in the target product.</li><li>Auxiliary
+local incidence angle, local incidence angle or incidence angle from ellipsoid.</li><li>Save Beta0 as a band: Checkbox indicating that Beta0 will be saved as a band in the target product.</li><li>Auxiliary
 File: available only for ASAR. User selected ASAR XCA file for radiometric normalization. The
 following options are available: <span style="font-weight: bold;">Latest Auxiliary File</span>, <span style="font-weight: bold;">Product
 Auxiliary
@@ -187,7 +187,7 @@ File</span> (for detected product only) and <span style="font-weight: bold;">Ext
 default,&nbsp;the Latest Auxiliary
 File&nbsp;is used. Details about the corrections applied according to the XCA selection are provided in <span style="font-weight: bold;">Radiometric Normalisation</span> &#8211; Envisat ASAR section above.</li>
 </ol><i ,j="">
-<br></i><p><i ,j=""><img style="width: 624px; height: 669px;" alt="" src="images/range_doppler_dlg.JPG"><br></i></p><p><i ,j="">
+<br></i><p><i ,j=""><img style="width: 500px; height: 607px;" alt="" src="images/range_doppler_dlg.JPG"><br></i></p><p><i ,j="">
 </i></p><p style="font-weight: bold;"><i ,j=""> Reference:</i></p><p> [1] Small D., Schubert A.,&nbsp;Guide to ASAR Geocoding, RSL-ASAR-GC-AD, Issue 1.0, March 2008</p><p>[2]&nbsp;Schreier G., SAR Geocoding: Data and Systems, Wichmann 1993</p>
 
 

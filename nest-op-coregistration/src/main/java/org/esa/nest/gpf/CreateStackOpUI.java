@@ -170,11 +170,12 @@ public class CreateStackOpUI extends BaseOperatorUI {
                                     if(i+1 < bands.length) {
                                         if(bands[i+1].getUnit() != null && bands[i+1].getUnit().equals(Unit.IMAGINARY)) {
                                             defaultMasterBandIndices.add(index+1);
+                                            ++i;
                                         }
                                     }
                                 }
                                 masterBandsSelected = true;
-                            } else if(index > defaultMasterBandIndices.size()) {
+                            } else { //if(index > defaultMasterBandIndices.size()) {
                                 defaultSlaveBandIndices.add(index);
                             }
                         }
