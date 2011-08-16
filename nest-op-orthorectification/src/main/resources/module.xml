@@ -106,6 +106,14 @@
         </action>
 
         <action>
+            <id>DEMTools</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>DEM Tools</text>
+            <parent>geometry</parent>
+            <placeAfter>EllipsoidCorrection</placeAfter>
+        </action>
+
+        <action>
             <id>nestCreateElevationBand</id>
             <class>org.esa.beam.visat.actions.CreateDemRelatedBandsAction</class>
             <text>Create Elevation Band</text>
@@ -113,7 +121,7 @@
             <description>Creates an elevation band from a selected Digital Elevation Model (DEM)</description>
             <context>createElevationBand</context>
             <helpId>createElevationBand</helpId>
-            <parent>geometry</parent>
+            <parent>DEMTools</parent>
         </action>
 
         <action>

@@ -44,7 +44,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
     private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                                                                           ResamplingFactory.BISINC_INTERPOLATION_NAME,
+                                                                           ResamplingFactory.BICUBIC_INTERPOLATION_NAME});
 
     private final JTextField externalDEMFile = new JTextField("");
     private final JTextField externalDEMNoDataValue = new JTextField("");

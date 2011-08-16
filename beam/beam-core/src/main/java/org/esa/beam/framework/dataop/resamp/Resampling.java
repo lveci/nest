@@ -41,6 +41,10 @@ public interface Resampling {
      * The bisinc interpolation resampling method.
      */
     Resampling BISINC_INTERPOLATION = new BiSincInterpolationResampling();
+    /**
+     * The bicubic spline interpolation resampling method.
+     */
+    Resampling BICUBIC_INTERPOLATION = new BiCubicInterpolationResampling();
 
     /**
      * Gets a unique identifier for this resampling method, e.g. "BILINEAR_INTERPOLATION".

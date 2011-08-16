@@ -39,6 +39,7 @@
             <text>Slant Range to Ground Range</text>
             <shortDescr>Converts a product to/from slant range to/from ground range</shortDescr>
             <parent>geometry</parent>
+            <placeAfter>DEMTools</placeAfter>
             <helpId>SRGROp</helpId>
         </action>
 
@@ -91,6 +92,7 @@
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Dataset Conversion</text>
             <parent>tools</parent>
+            <placeAfter>createSubsetFromView</placeAfter>
         </action>
 
         <action>
@@ -175,7 +177,7 @@
             <shortDescr>Apply Orbit File to Product</shortDescr>
             <description>Update product metadata with orbit file</description>
             <helpId>ApplyOrbitFileOp</helpId>
-            <parent>sartools</parent>
+            <parent>tools</parent>
             <placeBefore>Calibration</placeBefore>
             <separatorAfter>true</separatorAfter>
         </action>
@@ -221,7 +223,7 @@
             <class>org.esa.nest.dat.FillHoleOpAction</class>
             <text>Fill DEM Hole</text>
             <shortDescr>Fill holes in DEM product</shortDescr>
-            <parent>tools</parent>
+            <parent>DEMTools</parent>
             <helpId>FillHoleOp</helpId>
         </action>
 

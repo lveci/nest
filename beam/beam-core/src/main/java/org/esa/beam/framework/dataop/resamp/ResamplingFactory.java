@@ -27,11 +27,13 @@ public final class ResamplingFactory {
     public static final String BILINEAR_INTERPOLATION_NAME = "BILINEAR_INTERPOLATION";
     public static final String CUBIC_CONVOLUTION_NAME = "CUBIC_CONVOLUTION";
     public static final String BISINC_INTERPOLATION_NAME = "BISINC_INTERPOLATION";
+    public static final String BICUBIC_INTERPOLATION_NAME = "BICUBIC_INTERPOLATION";
 
     public static final String[] resamplingNames = new String[] {NEAREST_NEIGHBOUR_NAME,
                                                                  BILINEAR_INTERPOLATION_NAME,
                                                                  CUBIC_CONVOLUTION_NAME,
-                                                                 BISINC_INTERPOLATION_NAME};
+                                                                 BISINC_INTERPOLATION_NAME,
+                                                                 BICUBIC_INTERPOLATION_NAME};
 
     /**
      * Creates an instance of {@link Resampling} by using the given name.
@@ -54,6 +56,8 @@ public final class ResamplingFactory {
             return Resampling.CUBIC_CONVOLUTION;
         } else if (resamplingName.equals(BISINC_INTERPOLATION_NAME)) {
             return Resampling.BISINC_INTERPOLATION;
+        } else if (resamplingName.equals(BICUBIC_INTERPOLATION_NAME)) {
+            return Resampling.BICUBIC_INTERPOLATION;
         } else {
             return null;
         }

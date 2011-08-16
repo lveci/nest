@@ -151,40 +151,44 @@ public class CreateStackOpUI extends BaseOperatorUI {
     @Override
     protected String[] getBandNames() {
         final ArrayList<String> bandNames = new ArrayList<String>(5);
-        if(sourceProducts != null) {
-            boolean masterBandsSelected = false;
-            for(Product prod : sourceProducts) {
-                if(sourceProducts.length > 1) {
+        if(sourceProducts == null) {
+            return bandNames.toArray(new String[bandNames.size()]);
+        }
+        boolean masterBandsSelected = false;
+        for(Product prod : sourceProducts) {
+            if(sourceProducts.length > 1) {
 
-                    final Band[] bands = prod.getBands();
-                    for(int i=0; i < bands.length; ++i) {
-                        final Band band = bands[i];
-                        bandNames.add(band.getName()+"::"+prod.getName());
-                        final int index = bandNames.size()-1;
+                final Band[] bands = prod.getBands();
+                for(int i=0; i < bands.length; ++i) {
+                    final Band band = bands[i];
+                    bandNames.add(band.getName()+"::"+prod.getName());
+                    final int index = bandNames.size()-1;
 
-                        if(!(band instanceof VirtualBand)) {
+                    if(!(band instanceof VirtualBand)) {
 
-                            if(!masterBandsSelected) {
-                                defaultMasterBandIndices.add(index);
-                                if(band.getUnit() != null && band.getUnit().equals(Unit.REAL)) {
-                                    if(i+1 < bands.length) {
-                                        if(bands[i+1].getUnit() != null && bands[i+1].getUnit().equals(Unit.IMAGINARY)) {
-                                            defaultMasterBandIndices.add(index+1);
-                                            ++i;
-                                        }
+                        if(!masterBandsSelected) {
+                            defaultMasterBandIndices.add(index);
+                            if(band.getUnit() != null && band.getUnit().equals(Unit.REAL)) {
+                                if(i+1 < bands.length) {
+                                    final Band qBand = bands[i+1];
+                                    if(qBand.getUnit() != null && qBand.getUnit().equals(Unit.IMAGINARY)) {
+                                        defaultMasterBandIndices.add(index+1);
+                                        bandNames.add(qBand.getName()+"::"+prod.getName());
+                                        ++i;
                                     }
                                 }
-                                masterBandsSelected = true;
-                            } else { //if(index > defaultMasterBandIndices.size()) {
-                                defaultSlaveBandIndices.add(index);
                             }
+                            masterBandsSelected = true;
+                        } else { //if(index > defaultMasterBandIndices.size()) {
+                            defaultSlaveBandIndices.add(index);
                         }
                     }
-                } else {
-                    bandNames.addAll(Arrays.asList(prod.getBandNames()));
                 }
+            } else {
+                bandNames.addAll(Arrays.asList(prod.getBandNames()));
             }
         }
+
         return bandNames.toArray(new String[bandNames.size()]);
     }
 

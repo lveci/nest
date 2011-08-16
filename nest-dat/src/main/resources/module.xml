@@ -50,9 +50,6 @@
                     <id>selectionTool</id>
                     <id>showHomePage</id>
                     <id>about</id>
-                    <id>attachPixelGeoCoding</id>
-                    <id>detachPixelGeoCoding</id>
-                    <id>exportLegendImageFile</id>
                     <id>createXYDisplacementBandsAction</id>
                     <id>createElevationBand</id>
                     <id>productGrabber</id>
@@ -459,32 +456,6 @@
             <separatorAfter>true</separatorAfter>
             <smallIcon>/org/esa/nest/icons/esa.png</smallIcon>
             <largeIcon>/org/esa/nest/icons/esa.png</largeIcon>
-        </action>
-
-        <action>
-            <id>attachNestPixelGeoCoding</id>
-            <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
-            <text>Attach Pixel Geo-Coding...</text>
-            <shortDescr>Attaches a pixel based geo-coding</shortDescr>
-            <description>Attaches a pixel based geo-coding to the selected product</description>
-            <context>attachPixelGeoCoding</context>
-            <helpId>attachPixelGeoCoding</helpId>
-            <parent>geometry</parent>
-            <placeAfter>nestProjection</placeAfter>
-            <separatorBefore>true</separatorBefore>
-        </action>
-
-        <action>
-            <id>detachNestPixelGeoCoding</id>
-            <class>org.esa.beam.visat.actions.DetachPixelGeoCodingAction</class>
-            <text>Detach Pixel Geo-Coding...</text>
-            <shortDescr>Detaches a pixel based geo-coding</shortDescr>
-            <description>Detaches a pixel based geo-coding from the selected product</description>
-            <context>detachPixelGeoCoding</context>
-            <helpId>detachPixelGeoCoding</helpId>
-            <placeAfter>attachNestPixelGeoCoding</placeAfter>
-            <parent>geometry</parent>
-            <separatorAfter>true</separatorAfter>
         </action>
 
         <action>

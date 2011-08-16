@@ -1244,12 +1244,12 @@
             <id>bandArithmetic</id>
             <parent>tools</parent>
             <class>org.esa.beam.visat.actions.BandMathsAction</class>
-            <text>Create Band by Band Maths...</text>
+            <text>Band Maths...</text>
             <shortDescr>Create a new band using an arbitrary mathematical expression</shortDescr>
             <context>image,band,tiePointGrid</context>
             <smallIcon>icons/BAritmethic16.gif</smallIcon>
             <largeIcon>icons/BAritmethic24.gif</largeIcon>
-            <placeBefore>createElevationBand</placeBefore>
+            <placeAfter>applyOrbitFile</placeAfter>
             <helpId>bandArithmetic</helpId>
         </action>
 
@@ -1263,8 +1263,6 @@
             <context>product</context>
             <helpId>createElevationBand</helpId>
             <parent>tools</parent>
-            <placeAfter>bandArithmetic</placeAfter>
-            <placeBefore>createAsarNrcsBands</placeBefore>
         </action>
         <action>
             <id>createAsarNrcsBands</id>
@@ -1301,22 +1299,29 @@
             <largeIcon>icons/NewVectorDataNode24.gif</largeIcon>
             <helpId>createVectorDataNode</helpId>
             <context>product</context>
-            <parent>tools</parent>
+            <parent>edit</parent>
             <placeAfter>createFilteredBand</placeAfter>
             <placeBefore>attachPixelGeoCoding</placeBefore>
             <separatorAfter>true</separatorAfter>
         </action>
 
         <action>
+            <id>PixelGeoreferencing</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Pixel Georeferencing</text>
+            <parent>tools</parent>
+            <placeAfter>MetadataTools</placeAfter>
+        </action>
+
+        <action>
             <id>attachPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
-            <text>Attach Pixel Geo-Coding...</text>
-            <shortDescr>Attaches a pixel based geo-coding</shortDescr>
-            <description>Attaches a pixel based geo-coding to the selected product</description>
+            <text>Attach Pixel Geo-referencing...</text>
+            <shortDescr>Attaches a pixel based geo-referencing</shortDescr>
+            <description>Attaches a pixel based geo-referencing to the selected product</description>
             <context>attachPixelGeoCoding</context>
             <helpId>attachPixelGeoCoding</helpId>
-            <parent>tools</parent>
-            <placeAfter>createVectorDataNode</placeAfter>
+            <parent>PixelGeoreferencing</parent>
             <placeBefore>detachPixelGeoCoding</placeBefore>
             <separatorBefore>true</separatorBefore>
         </action>
@@ -1324,12 +1329,12 @@
         <action>
             <id>detachPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.DetachPixelGeoCodingAction</class>
-            <text>Detach Pixel Geo-Coding...</text>
-            <shortDescr>Detaches a pixel based geo-coding</shortDescr>
-            <description>Detaches a pixel based geo-coding from the selected product</description>
+            <text>Detach Pixel Geo-referencing...</text>
+            <shortDescr>Detaches a pixel based geo-referencing</shortDescr>
+            <description>Detaches a pixel based geo-referencing from the selected product</description>
             <context>detachPixelGeoCoding</context>
             <helpId>detachPixelGeoCoding</helpId>
-            <parent>tools</parent>
+            <parent>PixelGeoreferencing</parent>
             <placeAfter>attachPixelGeoCoding</placeAfter>
             <separatorAfter>true</separatorAfter>
         </action>
@@ -1344,16 +1349,15 @@
             <context>image</context>
             <helpId>subsetFromView</helpId>
             <parent>tools</parent>
-            <placeAfter>detachPixelGeoCoding</placeAfter>
-            <placeBefore>flipping</placeBefore>
+            <placeAfter>bandArithmetic</placeAfter>
+            <separatorAfter>true</separatorAfter>
         </action>
 
         <action>
             <id>flipping</id>
             <class>org.esa.beam.visat.actions.FlippingAction</class>
             <parent>tools</parent>
-            <placeAfter>createSubsetFromView</placeAfter>
-            <placeBefore>reprojectionAction</placeBefore>
+            <placeAfter>PixelGeoreferencing</placeAfter>
             <text>Data Flip...</text>
             <shortDescr>Apply Data Flip</shortDescr>
             <helpId>flipDialog</helpId>
@@ -1363,13 +1367,11 @@
             <id>reprojectionAction</id>
             <class>org.esa.beam.gpf.operators.reproject.ReprojectionAction</class>
             <parent>geometry</parent>
-            <placeAfter>flipping</placeAfter>
-            <placeBefore>orthorectificationAction</placeBefore>
             <text>Reprojection...</text>
             <shortDescr>Apply a reprojection.</shortDescr>
             <helpId>reprojectionAction</helpId>
         </action>
-        <action>
+        <!--action>
             <id>orthorectificationAction</id>
             <class>org.esa.beam.gpf.operators.reproject.OrthorectificationAction</class>
             <parent>tools</parent>
@@ -1378,7 +1380,7 @@
             <text>Orthorectification...</text>
             <shortDescr>Apply an orthorectification.</shortDescr>
             <helpId>orthorectificationAction</helpId>
-        </action>
+        </action-->
         <action>
             <id>mosaicAction</id>
             <class>org.esa.beam.gpf.operators.mosaic.MosaicAction</class>
