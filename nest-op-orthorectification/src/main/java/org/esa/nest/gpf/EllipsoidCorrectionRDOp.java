@@ -28,7 +28,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
  */
 
 @OperatorMetadata(alias="Ellipsoid-Correction-RD",
-        category = "Geometry",
+        category = "Geometry\\Ellipsoid Correction",
         description="Ellipsoid correction with RD method and average scene height")
 public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
 

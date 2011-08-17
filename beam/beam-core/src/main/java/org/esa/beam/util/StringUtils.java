@@ -57,19 +57,19 @@ public final class StringUtils {
      */
     public static List split(String text, char[] separators, boolean trimTokens, List tokens) {
 
-        Guardian.assertNotNull("text", text);
+        //Guardian.assertNotNull("text", text);
 
-        if (separators == null || separators.length == 0) {
-            throw new IllegalArgumentException(UtilConstants.MSG_NULL_OR_EMPTY_SEPARATOR);
-        }
+        //if (separators == null || separators.length == 0) {
+        //    throw new IllegalArgumentException(UtilConstants.MSG_NULL_OR_EMPTY_SEPARATOR);
+        //}
 
         if (tokens == null) {
             tokens = new Vector();
         }
 
-        String sepsStr = new String(separators);
-        StringTokenizer st = new StringTokenizer(text, sepsStr, true);
-        String token = null;
+        final String sepsStr = new String(separators);
+        final StringTokenizer st = new StringTokenizer(text, sepsStr, true);
+        String token;
         String lastToken = null;
         while (st.hasMoreTokens()) {
             try {
@@ -77,10 +77,10 @@ public final class StringUtils {
             } catch (Exception e) {
                 break;
             }
-            if (isSeparatorToken(token, sepsStr)) {
+            if (token.length() == 1 && sepsStr.indexOf(token) >= 0) {
                 // If text starts with a separator or two succesive separators
                 // have been seen, add empty string
-                if (lastToken == null || isSeparatorToken(lastToken, sepsStr)) {
+                if (lastToken == null || (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
                     tokens.add("");
                 }
             } else {
@@ -92,7 +92,7 @@ public final class StringUtils {
             lastToken = token;
         }
         // If text ends with a separator, add empty string
-        if (lastToken != null && isSeparatorToken(lastToken, sepsStr)) {
+        if (lastToken != null && (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
             tokens.add("");
         }
 
@@ -144,7 +144,7 @@ public final class StringUtils {
             throw new IllegalArgumentException(UtilConstants.MSG_NULL_SEPARATOR);
         }
 
-        StringBuffer sb = new StringBuffer(tokens.length * 16);
+        StringBuilder sb = new StringBuilder(tokens.length * 16);
         for (int i = 0; i < tokens.length; i++) {
             if (i > 0) {
                 sb.append(separator);
@@ -232,8 +232,9 @@ public final class StringUtils {
         }
         final String[] tokens = split(text, delim.toCharArray(), true);
         final int[] numbers = new int[tokens.length];
-        for (int i = 0; i < numbers.length; i++) {
-            numbers[i] = Integer.parseInt(tokens[i]);
+        int i=0;
+        for (String token : tokens) {
+            numbers[i++] = Integer.parseInt(token);
         }
         return numbers;
     }
@@ -254,14 +255,15 @@ public final class StringUtils {
      *                                  type
      */
     public static float[] toFloatArray(String text, String delim) {
-        Guardian.assertNotNull("text", text);
+        //Guardian.assertNotNull("text", text);
         if (delim == null || delim.length() == 0) {
             delim = ",";
         }
         final String[] tokens = split(text, delim.toCharArray(), true);
         final float[] numbers = new float[tokens.length];
-        for (int i = 0; i < numbers.length; i++) {
-            numbers[i] = Float.parseFloat(tokens[i]);
+        int i=0;
+        for (String token : tokens) {
+            numbers[i++] = Float.parseFloat(token);
         }
         return numbers;
     }
@@ -282,14 +284,15 @@ public final class StringUtils {
      *                                  type
      */
     public static double[] toDoubleArray(String text, String delim) {
-        Guardian.assertNotNull("text", text);
+        //Guardian.assertNotNull("text", text);
         if (delim == null || delim.length() == 0) {
             delim = ",";
         }
         final String[] tokens = split(text, delim.toCharArray(), true);
         final double[] numbers = new double[tokens.length];
-        for (int i = 0; i < numbers.length; i++) {
-            numbers[i] = Double.parseDouble(tokens[i]);
+        int i=0;
+        for (String token : tokens) {
+            numbers[i++] = Double.parseDouble(token);
         }
         return numbers;
     }
@@ -631,7 +634,7 @@ public final class StringUtils {
     public static String[] csvToArray(String csvString) {
         //Guardian.assertNotNullOrEmpty("csvString", csvString);
         final StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
-        final List<String> strList = new ArrayList<String>();
+        final List<String> strList = new ArrayList<String>(tokenizer.countTokens());
         while (tokenizer.hasMoreTokens()) {
             strList.add(tokenizer.nextToken());
         }
@@ -734,11 +737,11 @@ public final class StringUtils {
      */
     public static String createValidName(String name, char[] validChars, char replaceChar) {
         Guardian.assertNotNull("name", name);
-        char[] sortedValidChars = null;
+        char[] sortedValidChars;
         if (validChars == null) {
             sortedValidChars = new char[0];
         } else {
-            sortedValidChars = (char[]) validChars.clone();
+            sortedValidChars = validChars.clone();
         }
         Arrays.sort(sortedValidChars);
         StringBuilder validName = new StringBuilder(name.length());

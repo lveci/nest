@@ -187,7 +187,7 @@ class MoreFuncs {
                 }
                 if (propertyValue != null) {
                     final String propertyName = MoreFuncs.convertMethodNameToPropertyName(methodName);
-                    final String symbolName = band.getName() + "." + propertyName;
+                    final String symbolName = band.getName() + '.' + propertyName;
                     MoreFuncs.registerConstant(namespace, symbolName, propertyValue);
                 }
             }
@@ -217,8 +217,8 @@ class MoreFuncs {
         } else if (s.startsWith("get")) {
             skipCount = 3;
         }
-        StringBuilder sb = new StringBuilder();
         final int n = s.length();
+        final StringBuilder sb = new StringBuilder(n);
         for (int i = 0; i < n; i++) {
             if (i >= skipCount) {
                 if (i < n - 1) {

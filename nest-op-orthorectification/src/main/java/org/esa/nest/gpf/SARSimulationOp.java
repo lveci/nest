@@ -79,7 +79,7 @@ import java.util.Map;
  */
 
 @OperatorMetadata(alias="SAR-Simulation",
-        category = "Geometry",
+        category = "Geometry\\Terrain Correction",
         description="Rigorous SAR Simulation")
 public final class SARSimulationOp extends Operator {
 

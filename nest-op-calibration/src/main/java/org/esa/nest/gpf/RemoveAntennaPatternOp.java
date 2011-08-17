@@ -38,7 +38,8 @@ import java.util.ArrayList;
 /**
  * RemoveAntennaPattern for ASAR & ERS products.
  */
-@OperatorMetadata(alias = "RemoveAntennaPattern", category = "SAR Tools", description = "Remove Antenna Pattern")
+@OperatorMetadata(alias = "RemoveAntennaPattern",
+        category = "SAR Tools\\Radiometric Correction", description = "Remove Antenna Pattern")
 public class RemoveAntennaPatternOp extends Operator {
 
     @SourceProduct(alias="source")

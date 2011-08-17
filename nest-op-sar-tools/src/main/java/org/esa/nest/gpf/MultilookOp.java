@@ -149,7 +149,7 @@ public final class MultilookOp extends Operator {
         final int h  = th * nAzLooks;
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
 
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+        //System.out.println(targetBand.getName()+ " tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         try {

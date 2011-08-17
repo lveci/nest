@@ -198,7 +198,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     @Override
     public String toString() {
 
-        return new StringBuffer("FileImageOutputStreamExtImpl which points to ")
+        return new StringBuilder("FileImageOutputStreamExtImpl which points to ")
                 .append(this.file.toString()).toString();
     }
 }

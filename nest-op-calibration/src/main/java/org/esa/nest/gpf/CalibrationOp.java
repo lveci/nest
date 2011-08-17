@@ -40,7 +40,7 @@ import java.util.HashMap;
  * @todo automatically search aux file in local repository using time period
  */
 @OperatorMetadata(alias = "Calibration",
-        category = "SAR Tools",
+        category = "SAR Tools\\Radiometric Correction",
         description = "Calibration of products")
 public class CalibrationOp extends Operator {
 

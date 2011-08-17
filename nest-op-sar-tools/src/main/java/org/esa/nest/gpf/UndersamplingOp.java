@@ -78,7 +78,7 @@ import java.util.StringTokenizer;
  */
 
 @OperatorMetadata(alias="Undersample",
-        category = "Utilities",
+        category = "Utilities\\Resampling",
         description="Undersample the datset")
 public class UndersamplingOp extends Operator {
 

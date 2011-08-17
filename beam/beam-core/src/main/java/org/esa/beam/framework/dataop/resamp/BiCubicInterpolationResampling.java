@@ -21,6 +21,24 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 
 final class BiCubicInterpolationResampling implements Resampling {
 
+    private final static float[][] invA = {
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {-3, 3, 0, 0, -2, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {2, -2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, -3, 3, 0, 0, -2, -1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 2, -2, 0, 0, 1, 1, 0, 0},
+                {-3, 0, 3, 0, 0, 0, 0, 0, -2, 0, -1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, -3, 0, 3, 0, 0, 0, 0, 0, -2, 0, -1, 0},
+                {9, -9, -9, 9, 6, 3, -6, -3, 6, -6, 3, -3, 4, 2, 2, 1},
+                {-6, 6, 6, -6, -3, -3, 3, 3, -4, 4, -2, 2, -2, -2, -1, -1},
+                {2, 0, -2, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 2, 0, -2, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {-6, 6, 6, -6, -4, -2, 4, 2, -3, 3, -3, 3, -2, -1, -2, -1},
+                {4, -4, -4, 4, 2, 2, -2, -2, 2, -2, 2, -2, 1, 1, 1, 1}};
+
     public String getName() {
         return "BICUBIC_INTERPOLATION";
     }
@@ -110,10 +128,11 @@ final class BiCubicInterpolationResampling implements Resampling {
         return bcuint(z, z1, z2, z12, index.ki[0], index.kj[0]);
     }
 
-	private float bcuint(float z[], float z1[], float z2[], float z12[], float t, float u) {
+	private static float bcuint(final float z[], final float z1[], final float z2[],
+                         final float z12[], final float t, final float u) {
 
         // alpha = [a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33]
-		float[][] a = new float[4][4];
+		final float[][] a = new float[4][4];
 		bcucof(z, z1, z2, z12, a);
 
 		float ansy = 0.0f;
@@ -121,6 +140,8 @@ final class BiCubicInterpolationResampling implements Resampling {
 			ansy = t*ansy + ((a[i][3]*u + a[i][2])*u + a[i][1])*u + a[i][0];
 		}
 
+        // todo v is not used?? check with Jun
+        /*
         float t2 = t*t;
         float t3 = t2*t;
         float u2 = u*u;
@@ -130,35 +151,18 @@ final class BiCubicInterpolationResampling implements Resampling {
                   a[1][0]*t + a[1][1]*t*u + a[1][2]*t*u2 + a[1][3]*t*u3 +
                   a[2][0]*t2 + a[2][1]*t2*u + a[2][2]*t2*u2 + a[2][3]*t2*u3 +
                   a[3][0]*t3 + a[3][1]*t3*u + a[3][2]*t3*u2 + a[3][3]*t3*u3;
-
+        */
 		return ansy;
 	}
 
-	private void bcucof(float z[], float z1[], float z2[], float z12[], float[][] a) {
-
-        float[][] invA = {
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {-3, 3, 0, 0, -2, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {2, -2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, -3, 3, 0, 0, -2, -1, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 2, -2, 0, 0, 1, 1, 0, 0},
-                {-3, 0, 3, 0, 0, 0, 0, 0, -2, 0, -1, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, -3, 0, 3, 0, 0, 0, 0, 0, -2, 0, -1, 0},
-                {9, -9, -9, 9, 6, 3, -6, -3, 6, -6, 3, -3, 4, 2, 2, 1},
-                {-6, 6, 6, -6, -3, -3, 3, 3, -4, 4, -2, 2, -2, -2, -1, -1},
-                {2, 0, -2, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 2, 0, -2, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {-6, 6, 6, -6, -4, -2, 4, 2, -3, 3, -3, 3, -2, -1, -2, -1},
-                {4, -4, -4, 4, 2, 2, -2, -2, 2, -2, 2, -2, 1, 1, 1, 1}};
+	private static void bcucof(final float z[], final float z1[], final float z2[], final float z12[],
+                               final float[][] a) {
 
         // x = [f(0,0) f(1,0) f(0,1) f(1,1) fx(0,0) fx(1,0) fx(0,1) fx(1,1) fy(0,0) fy(1,0) fy(0,1) fy(1,1) fxy(0,0) fxy(1,0) fxy(0,1) fxy(1,1)]
         // alpha = [a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33]
         // alpha = invA*x
 
-        float[] x = new float[16];
+        final float[] x = new float[16];
         for (int i = 0; i < 4; i++) {
             x[i] = z[i];
             x[i+4] = z1[i];
@@ -166,7 +170,7 @@ final class BiCubicInterpolationResampling implements Resampling {
             x[i+12] = z12[i];
         }
 
-		float[] cl = new float[16];
+		final float[] cl = new float[16];
 		for (int i = 0; i < 16; i++) {
 			float xx = 0.0f;
 			for (int k = 0; k < 16; k++) {

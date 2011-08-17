@@ -70,7 +70,7 @@ import java.nio.channels.FileChannel;
  * @author Russ Rew
  * @author john caron
  * 
- * @version $Id: EnhancedRandomAccessFile.java,v 1.1 2011-05-04 19:24:49 lveci Exp $
+ * @version $Id: EnhancedRandomAccessFile.java,v 1.2 2011-08-17 19:18:57 lveci Exp $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile
@@ -1271,7 +1271,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @task we can optimize this
 	 */
 	public String readLine() throws IOException {
-		final StringBuffer input = new StringBuffer();
+		final StringBuilder input = new StringBuilder();
 		int c;
 
 		while (((c = read()) != -1) && (c != '\n')) {

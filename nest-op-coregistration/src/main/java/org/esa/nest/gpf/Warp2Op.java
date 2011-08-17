@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dat.dialogs.AutoCloseOptionPane;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -72,7 +73,7 @@ import java.util.Set;
  */
 
 @OperatorMetadata(alias = "Warp2",
-        category = "SAR Tools",
+        category = "SAR Tools\\Coregistration",
         description = "Create Warp Function And Get Co-registrated Images")
 public class Warp2Op extends Operator {
 
@@ -380,7 +381,7 @@ public class Warp2Op extends Operator {
             addSlaveGCPs(warpData, srcBand.getName());
         }
 
-        announceGCPWarning(pm);
+        announceGCPWarning();
         warpDataAvailable = true;
     }
 
@@ -870,7 +871,7 @@ public class Warp2Op extends Operator {
         }
     }
 
-    private void announceGCPWarning(final ProgressMonitor pm) {
+    private void announceGCPWarning() {
         String msg = "";
         for(Band srcBand : sourceProduct.getBands()) {
             final WarpData warpData = warpDataMap.get(srcBand);
@@ -881,7 +882,7 @@ public class Warp2Op extends Operator {
         if(!msg.isEmpty()) {
             System.out.println(msg);
             if(VisatApp.getApp() != null) {
-                VisatApp.getApp().showWarningDialog(msg);
+                AutoCloseOptionPane.showWarningDialog("Some bands did not coregister", msg);
             }
         }
     }

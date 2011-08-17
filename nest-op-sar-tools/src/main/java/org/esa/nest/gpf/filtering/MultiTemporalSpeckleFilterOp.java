@@ -69,7 +69,7 @@ import java.util.ArrayList;
  */
 
 @OperatorMetadata(alias="Multi-Temporal-Speckle-Filter",
-                  category = "SAR Tools",
+                  category = "SAR Tools\\Speckle Filtering",
                   description = "Speckle Reduction using Multitemporal Filtering")
 public class MultiTemporalSpeckleFilterOp extends Operator {
 

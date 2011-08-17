@@ -39,7 +39,7 @@ import java.util.Map;
  * Applies a Speckle Filter to the data
  */
 @OperatorMetadata(alias="Speckle-Filter",
-        category = "SAR Tools",
+        category = "SAR Tools\\Speckle Filtering",
         description = "Speckle Reduction")
 public class SpeckleFilterOp extends Operator {
 

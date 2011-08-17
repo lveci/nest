@@ -80,7 +80,7 @@ import java.util.Set;
  */
 
 @OperatorMetadata(alias="Apply-Orbit-File",
-        category = "SAR Tools",
+        category = "Utilities",
         description="Apply orbit file")
 public final class ApplyOrbitFileOp extends Operator {
 

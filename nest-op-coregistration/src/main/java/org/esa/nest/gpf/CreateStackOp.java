@@ -48,7 +48,7 @@ import java.util.Map;
  *
  */
 @OperatorMetadata(alias = "CreateStack",
-                  category = "Utilities",
+                  category = "SAR Tools\\Coregistration",
                   description = "Collocates two or more products based on their geo-codings.")
 public class CreateStackOp extends Operator {
 

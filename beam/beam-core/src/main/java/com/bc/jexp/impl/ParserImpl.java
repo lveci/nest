@@ -931,7 +931,7 @@ public final class ParserImpl implements Parser {
     }
 
     private static String getFunctionCallString(final String name, final Term[] args) {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append('(');
         for (int i = 0; i < args.length; i++) {

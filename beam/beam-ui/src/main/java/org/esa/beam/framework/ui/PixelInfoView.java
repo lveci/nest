@@ -28,6 +28,7 @@ import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.jcp.xml.dsig.internal.MacOutputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -344,6 +345,8 @@ public class PixelInfoView extends JPanel {
     }
 
     void clearSelectionInRasterTables() {
+        if(modelUpdater == null || modelUpdater.getCurrentRaster() == null)
+            return;
         final String rasterName = modelUpdater.getCurrentRaster().getName();
         final JTable bandTable = getTable(bandPixelInfoPane);
         final JTable tiePointGridTable = getTable(tiePointGridPixelInfoPane);

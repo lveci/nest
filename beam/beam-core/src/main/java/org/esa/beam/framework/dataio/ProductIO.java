@@ -208,9 +208,6 @@ public class ProductIO {
     }
 
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
-        final Product product = ProductFunctions.readCommonProductReader(file);
-        if (product != null)
-            return product;
         return readandCacheProduct(file, subsetDef);
     }
     
@@ -225,14 +222,18 @@ public class ProductIO {
         if (!file.exists()) {
             throw new FileNotFoundException("File not found: " + file.getPath());
         }
-        final ProductReader productReader = getProductReaderForFile(file);
-        if (productReader != null) {
-            //System.out.println("Reading "+file.getName());
-            final Product product = productReader.readProductNodes(file, subsetDef);
-            ProductCache.instance().addProduct(file, product);
-            return product;
+        //System.out.println("Reading "+file.getName());
+        Product product = ProductFunctions.readCommonProductReader(file);
+        if (product == null) {
+            final ProductReader productReader = getProductReaderForFile(file);
+            if (productReader != null) {
+                product = productReader.readProductNodes(file, subsetDef);
+            }
         }
-        return null;
+        if (product != null) {
+            ProductCache.instance().addProduct(file, product);
+        }
+        return product;
     }
 
     /**

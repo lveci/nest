@@ -44,7 +44,7 @@ import java.util.Set;
  */
 
 @OperatorMetadata(alias="CreateElevation",
-        category = "Geometry",
+        category = "Geometry\\DEM Tools",
         description="Creates a DEM band")
 public final class CreateElevationOp extends Operator {
 

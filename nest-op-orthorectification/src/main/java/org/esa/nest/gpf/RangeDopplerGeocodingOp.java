@@ -78,7 +78,7 @@ import java.util.*;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Terrain-Correction", category = "Geometry", description="RD method for orthorectification")
+@OperatorMetadata(alias="Terrain-Correction", category = "Geometry\\Terrain Correction", description="RD method for orthorectification")
 public class RangeDopplerGeocodingOp extends Operator {
 
     public static final String PRODUCT_SUFFIX = "_TC";

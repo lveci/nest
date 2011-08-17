@@ -68,7 +68,7 @@ import java.util.Map;
  */
 
 @OperatorMetadata(alias="Ellipsoid-Correction-GG",
-        category = "Geometry",
+        category = "Geometry\\Ellipsoid Correction",
         description="GG method for orthorectification")
 public final class GeolocationGridGeocodingOp extends Operator {
 

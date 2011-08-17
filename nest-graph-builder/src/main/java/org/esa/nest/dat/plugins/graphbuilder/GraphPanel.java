@@ -16,6 +16,7 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import org.esa.beam.framework.gpf.graph.NodeSource;
+import org.esa.beam.util.StringUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
@@ -46,6 +47,8 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     private static final Color opColor = new Color(200, 200, 255, 128);
     private static final Color selColor = new Color(200, 255, 200, 150);
     private static final Color helpColor = new Color(250, 255, 250, 150);
+    private static final char[] folderDelim = new char[] { '\\' };
+
     private GraphNode selectedNode = null;
     private boolean showHeadHotSpot = false;
     private boolean showTailHotSpot = false;
@@ -74,27 +77,44 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
         // get operator list from graph executor
         final Set<String> gpfOperatorSet = graphEx.GetOperatorList();
-        final String[] aliasList = new String[gpfOperatorSet.size()];
-        gpfOperatorSet.toArray(aliasList);
-        Arrays.sort(aliasList);
+        final String[] gpfOperatorList = new String[gpfOperatorSet.size()];
+        gpfOperatorSet.toArray(gpfOperatorList);
+        Arrays.sort(gpfOperatorList);
 
-        final ArrayList<JMenu> subMenuList = new ArrayList<JMenu>(5);
+        final ArrayList<String> aliasList = new ArrayList<String>(gpfOperatorList.length);
+        // place categories with folders first
+        for(String alias : gpfOperatorList) {
+            final String category = graphEx.getOperatorCategory(alias);
+            if(category.contains("\\")) {
+                aliasList.add(alias);
+            }
+        }
+        // add remaining non empty categories
+        for(String alias : gpfOperatorList) {
+            if(!aliasList.contains(alias)) {
+                final String category = graphEx.getOperatorCategory(alias);
+                if(!category.isEmpty()) {
+                    aliasList.add(alias);
+                }
+            }
+        }
+        // add the rest
+        for(String alias : gpfOperatorList) {
+            if(!aliasList.contains(alias)) {
+                aliasList.add(alias);
+            }
+        }
+
+        final ArrayList<JMenu> subMenuList = new ArrayList<JMenu>(20);
         // add operators
         for (String anAlias : aliasList) {
             if(!graphEx.isOperatorInternal(anAlias)) {
                 final String category = graphEx.getOperatorCategory(anAlias);
                 JMenu menu = addMenu;
                 if(!category.isEmpty()) {
-                    for(JMenu sub : subMenuList) {
-                        if(sub.getText().equals(category)) {
-                            menu = sub;
-                            break;
-                        }
-                    }
-                    if(menu == addMenu) {
-                        menu = new JMenu(category);
-                        subMenuList.add(menu);
-                        addMenu.add(menu);
+                    final String[] categoryPath = StringUtils.split(category, folderDelim, true);
+                    for(String folder : categoryPath) {
+                        menu = getMenuFolder(subMenuList, folder, menu);
                     }
                 }
 
@@ -104,6 +124,25 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
                 menu.add(item);
             }
         }
+    }
+
+    private static JMenu getMenuFolder(final ArrayList<JMenu> subMenuList, final String folderName,
+                                       JMenu currentMenu) {
+        boolean menuExists = false;
+        for(JMenu sub : subMenuList) {
+            if(sub.getText().equals(folderName)) {
+                currentMenu = sub;
+                menuExists = true;
+                break;
+            }
+        }
+        if(!menuExists) {
+            final JMenu newMenu = new JMenu(folderName);
+            subMenuList.add(newMenu);
+            currentMenu.add(newMenu);
+            currentMenu = newMenu;
+        }
+        return currentMenu;
     }
 
     void AddOperatorAction(String name)
