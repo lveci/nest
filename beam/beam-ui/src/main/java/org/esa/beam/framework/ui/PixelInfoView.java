@@ -28,7 +28,6 @@ import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.jcp.xml.dsig.internal.MacOutputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
