@@ -124,13 +124,7 @@ public final class CreateElevationOp extends Operator {
                 noDataValue = dem.getDescriptor().getNoDataValue();
             }
             
-            createTargetProduct();
-
-            elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
-            elevationBand.setSynthetic(true);
-            elevationBand.setNoDataValue(noDataValue);
-            elevationBand.setUnit(Unit.METERS);
-            elevationBand.setDescription(demDescriptor.getName());
+            createTargetProduct(demDescriptor);
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -140,7 +134,7 @@ public final class CreateElevationOp extends Operator {
     /**
      * Create target product.
      */
-    void createTargetProduct() {
+    void createTargetProduct(final ElevationModelDescriptor demDescriptor) {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -163,71 +157,69 @@ public final class CreateElevationOp extends Operator {
                 sourceRasterMap.put(targetBand, band);
             } else {
                 final Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+                targetBand.setSourceImage(band.getSourceImage());
                 sourceRasterMap.put(targetBand, band);
             }
         }
+
+        elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
+        elevationBand.setSynthetic(true);
+        elevationBand.setNoDataValue(noDataValue);
+        elevationBand.setUnit(Unit.METERS);
+        elevationBand.setDescription(demDescriptor.getName());
     }
 
-    /**
-     * Called by the framework in order to compute the stack of tiles for the given target bands.
+     /**
+     * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetTiles The current tiles to be computed for each target band.
-     * @param pm          A progress monitor which should be used to determine computation cancelation requests.
+     * @param targetBand The target band.
+     * @param targetTile The current tile associated with the target band to be computed.
+     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
      * @throws org.esa.beam.framework.gpf.OperatorException
-     *          if an error occurs during computation of the target rasters.
+     *          If an error occurs during computation of the target raster.
      */
     @Override
-    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
         try {
+            final Rectangle targetRectangle = targetTile.getRectangle();
             final int x0 = targetRectangle.x;
             final int y0 = targetRectangle.y;
             final int w = targetRectangle.width;
             final int h = targetRectangle.height;
 
-            final GeoCoding geoCoding = targetProduct.getGeoCoding();
+            if(targetBand == elevationBand) {
+                final GeoCoding geoCoding = targetProduct.getGeoCoding();
+                final ProductData trgData = targetTile.getDataBuffer();
 
-            final Set<Band> keys = targetTiles.keySet();
-            for(Band targetBand : keys) {
-                final Tile targetTile = targetTiles.get(targetBand);
+                pm.beginTask("Computing elevations from " + demName + "...", h);
+                try {
+                    final GeoPos geoPos = new GeoPos();
+                    final PixelPos pixelPos = new PixelPos();
+                    float elevation;
 
-                if(targetBand == elevationBand) {
-                    final ProductData trgData = targetTile.getDataBuffer();
+                    for (int y = y0; y < y0 + h; ++y) {
+                        for (int x = x0; x < x0 + w; ++x) {
 
-                    pm.beginTask("Computing elevations from " + demName + "...", h);
-                    try {
-                        final GeoPos geoPos = new GeoPos();
-                        final PixelPos pixelPos = new PixelPos();
-                        float elevation;
-
-                        for (int y = y0; y < y0 + h; ++y) {
-                            for (int x = x0; x < x0 + w; ++x) {
-
-                                pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                                geoCoding.getGeoPos(pixelPos, geoPos);
-                                try {
-                                    if(fileElevationModel != null) {
-                                        elevation = fileElevationModel.getElevation(geoPos);
-                                    } else {
-                                        elevation = dem.getElevation(geoPos);
-                                    }
-                                } catch (Exception e) {
-                                    elevation = noDataValue;
+                            pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                            geoCoding.getGeoPos(pixelPos, geoPos);
+                            try {
+                                if(fileElevationModel != null) {
+                                    elevation = fileElevationModel.getElevation(geoPos);
+                                } else {
+                                    elevation = dem.getElevation(geoPos);
                                 }
-
-                                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                            } catch (Exception e) {
+                                elevation = noDataValue;
                             }
-                            pm.worked(1);
+
+                            trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
                         }
-                    } finally {
-                        pm.done();
+                        pm.worked(1);
                     }
-                } else if(targetBand instanceof VirtualBand) {
-                    //System.out.println("skipping virtual band");
-                } else {
-                    final Band sourceBand = sourceRasterMap.get(targetBand);
-                    targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle).getRawSamples());
+                } finally {
+                    pm.done();
                 }
             }
         } catch(Throwable e) {

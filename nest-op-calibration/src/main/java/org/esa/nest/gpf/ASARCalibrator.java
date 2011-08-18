@@ -907,6 +907,8 @@ public class ASARCalibrator implements Calibrator {
         }
 
         final ProductData trgData = targetTile.getDataBuffer();
+        final TileIndex srcIndex = new TileIndex(sourceRaster1);
+        final TileIndex trgIndex = new TileIndex(targetTile);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
@@ -934,11 +936,13 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        double sigma, dn=0, i, q, time;
+        double sigma, dn=0, i, q;
         final double theCalibrationFactor = newCalibrationConstant[prodBand];
 
         int index;
         for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
+            trgIndex.calculateStride(y);
+            srcIndex.calculateStride(y);
 
             incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.InterpMode.QUADRATIC);
 
@@ -947,7 +951,7 @@ public class ASARCalibrator implements Calibrator {
             }
 
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
-                index = sourceRaster1.getDataBufferIndex(x, y);
+                index = srcIndex.getIndex(x);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
                     dn = srcData1.getElemDoubleAt(index);
@@ -989,7 +993,7 @@ public class ASARCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
+                trgData.setElemDoubleAt(trgIndex.getIndex(x), sigma);
             }
         }
     }

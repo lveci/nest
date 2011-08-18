@@ -21,8 +21,8 @@
       <extent>Master</extent>
     </parameters>
   </node>
-  <node id="3-GCP-Selection2">
-    <operator>GCP-Selection2</operator>
+  <node id="3-GCP-Selection">
+    <operator>GCP-Selection</operator>
     <sources>
       <sourceProduct refid="2-CreateStack"/>
     </sources>
@@ -42,10 +42,10 @@
       <useSlidingWindow>false</useSlidingWindow>
     </parameters>
   </node>
-  <node id="4-Warp2">
-    <operator>Warp2</operator>
+  <node id="4-Warp">
+    <operator>Warp</operator>
     <sources>
-      <sourceProduct refid="3-GCP-Selection2"/>
+      <sourceProduct refid="3-GCP-Selection"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <rmsThreshold>1.0</rmsThreshold>
@@ -57,7 +57,7 @@
   <node id="5-Write">
     <operator>Write</operator>
     <sources>
-      <sourceProduct refid="4-Warp2"/>
+      <sourceProduct refid="4-Warp"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <formatName>BEAM-DIMAP</formatName>
@@ -72,10 +72,10 @@
     <node id="2-CreateStack">
       <displayPosition y="101.0" x="154.0"/>
     </node>
-    <node id="3-GCP-Selection2">
+    <node id="3-GCP-Selection">
       <displayPosition y="100.0" x="248.0"/>
     </node>
-    <node id="4-Warp2">
+    <node id="4-Warp">
       <displayPosition y="100.0" x="356.0"/>
     </node>
     <node id="5-Write">

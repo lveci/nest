@@ -42,14 +42,15 @@ public class CalibrationOpUI extends BaseOperatorUI {
                                                                   CalibrationOp.PRODUCT_AUX,
                                                                   CalibrationOp.EXTERNAL_AUX});
 
-    final JLabel externalAuxFileLabel = new JLabel("External Auxiliary File:");
-    final JTextField externalAuxFile = new JTextField("");
-    final JButton externalAuxFileBrowseButton = new JButton("...");
+    private final JLabel auxFileLabel = new JLabel("ENVISAT Auxiliary File:");
+    private final JLabel externalAuxFileLabel = new JLabel("External Auxiliary File:");
+    private final JTextField externalAuxFile = new JTextField("");
+    private final JButton externalAuxFileBrowseButton = new JButton("...");
 
-    final JCheckBox saveInComplexCheckBox = new JCheckBox("Save in complex");
-    final JCheckBox saveInDbCheckBox = new JCheckBox("Save in dB");
-    final JCheckBox createGamma0VirtualBandCheckBox = new JCheckBox("Create gamma0 virtual band");
-    final JCheckBox createBeta0VirtualBandCheckBox = new JCheckBox("Create beta0 virtual band");
+    private final JCheckBox saveInComplexCheckBox = new JCheckBox("Save in complex");
+    private final JCheckBox saveInDbCheckBox = new JCheckBox("Save in dB");
+    private final JCheckBox createGamma0VirtualBandCheckBox = new JCheckBox("Create gamma0 virtual band");
+    private final JCheckBox createBeta0VirtualBandCheckBox = new JCheckBox("Create beta0 virtual band");
 
     private boolean saveInComplex = false;
     private boolean saveInDb = false;
@@ -142,6 +143,10 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 }
 
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+                if(!mission.equals("ENVISAT")) {
+                    auxFile.setEnabled(false);
+                    auxFileLabel.setEnabled(false);
+                }
 //                if (mission.equals("RS2") || mission.contains("TSX") || mission.contains("ALOS")) {
                 if (mission.equals("RS2") && sampleType.equals("COMPLEX")) {
 
@@ -223,7 +228,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Auxiliary File:", auxFile);
+        DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
         gbc.gridx = 2;

@@ -201,7 +201,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
-    private final Map<Band, Warp2Op.WarpData> warpDataMap = new HashMap<Band, Warp2Op.WarpData>(10);
+    private final Map<Band, WarpOp.WarpData> warpDataMap = new HashMap<Band, WarpOp.WarpData>(10);
     private String processedSlaveBand;
 
     private TiePointGrid incidenceAngle = null;
@@ -746,21 +746,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         " GCPs survived. Try using more GCPs or a larger window");
             }
 
-            final Warp2Op.WarpData warpData = new Warp2Op.WarpData(slaveGCPGroup);
+            final WarpOp.WarpData warpData = new WarpOp.WarpData(slaveGCPGroup);
             warpDataMap.put(srcBand, warpData);
 
-            Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
+            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
 
-            if (warpData.rmsMean > rmsThreshold && Warp2Op.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
+            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
+                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
             }
 
-            if (warpData.rmsMean > rmsThreshold && Warp2Op.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
+            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
+                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
             }
 
-            Warp2Op.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
-            Warp2Op.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
+            WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
+            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
             outputCoRegistrationInfo(warpData, srcBand.getName(), appendFlag);
             if (!appendFlag) {
                 appendFlag = true;
@@ -985,8 +985,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             final String[] srcBandName = targetBandNameToSourceBandName.get(tileData.bandName);
                             final Band srcBand = sourceProduct.getBand(srcBandName[0]);
                             final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
-                            Warp2Op.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
-                                                  (float)rangeIndex, (float)azimuthIndex, pixelPos);
+                            WarpOp.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
+                                    (float) rangeIndex, (float) azimuthIndex, pixelPos);
                             if (pixelPos.x < 0.0 || pixelPos.x >= srcMaxRange || pixelPos.y < 0.0 || pixelPos.y >= srcMaxAzimuth) {
                                 tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
                                 continue;
@@ -1456,7 +1456,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     private void outputCoRegistrationInfo(
-            final Warp2Op.WarpData warpData, final String bandName, boolean appendFlag)
+            final WarpOp.WarpData warpData, final String bandName, boolean appendFlag)
             throws OperatorException {
 
         final File residualFile = getShiftsFile(sourceProduct);

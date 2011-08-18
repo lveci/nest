@@ -54,7 +54,8 @@ import java.util.HashMap;
  */
 @OperatorMetadata(alias="Data-Analysis",
         category = "Analysis",
-        description="Computes statistics")
+        description="Computes statistics",
+        internal=true)
 public class DataAnalysisOp extends Operator {
 
     @SourceProduct

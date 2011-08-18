@@ -18,10 +18,7 @@ package org.esa.nest.dat.actions;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.RGBImageProfile;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Stx;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.RGBImageProfilePane;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
@@ -171,27 +168,35 @@ public class ShowImageViewHSVAction extends ExecCommand {
         // normalize
         //range = max - min;
         //normvalue = min(max(((v- min)/range),0), 1);
+        boolean modified = product.isModified();
 
-        final String[] bandNames = product.getBandNames();
-        for(int i=0; i < hsvExpressions.length; ++i) {
-            for(String bandName : bandNames) {
-                final String exp = hsvExpressions[i];
-                if(exp.contains(bandName)) {
-                    // rule out bands that only start with bandName
-                    int idx = exp.indexOf(bandName)+bandName.length();
-                    if(idx > exp.length() || (idx < exp.length() && exp.charAt(idx) == '_'))
-                        continue;
+        int i=0;
+        for(String exp : hsvExpressions) {
+            if(exp.isEmpty()) continue;
+            final Band virtBand = createVirtualBand(product, exp, "tmpVirtBand"+i);
 
-                    final Stx stx = product.getBand(bandName).getStx(false, ProgressMonitor.NULL);
-                    if(stx != null) {
-                        final double min = stx.getMin();
-                        final double range = stx.getMax() - min;
-                        hsvExpressions[i] = "min(max(((("+exp+")- "+min+")/"+range+"), 0), 1)";
-                        break;
-                    }
-                }
+            final Stx stx = virtBand.getStx(false, ProgressMonitor.NULL);
+            if(stx != null) {
+                final double min = stx.getMin();
+                final double range = stx.getMax() - min;
+                hsvExpressions[i] = "min(max(((("+exp+")- "+min+")/"+range+"), 0), 1)";
             }
+            product.removeBand(virtBand);
+            ++i;
         }
+        product.setModified(modified);
+    }
+
+    public static Band createVirtualBand(final Product product, final String expression, final String name) {
+
+        final VirtualBand virtBand = new VirtualBand(name,
+                ProductData.TYPE_FLOAT64,
+                product.getSceneRasterWidth(),
+                product.getSceneRasterHeight(),
+                expression);
+        virtBand.setSynthetic(true);
+        product.addBand(virtBand);
+        return virtBand;
     }
 
     private static String[] convertHSVToRGBExpressions(final String[] hsvExpressions) {

@@ -33,8 +33,8 @@
       <saveLayoverShadowMask>false</saveLayoverShadowMask>
     </parameters>
   </node>
-  <node id="4-GCP-Selection2">
-    <operator>GCP-Selection2</operator>
+  <node id="4-GCP-Selection">
+    <operator>GCP-Selection</operator>
     <sources>
       <sourceProduct refid="3-SAR-Simulation"/>
     </sources>
@@ -57,7 +57,7 @@
   <node id="5-SARSim-Terrain-Correction">
     <operator>SARSim-Terrain-Correction</operator>
     <sources>
-      <sourceProduct refid="4-GCP-Selection2"/>
+      <sourceProduct refid="4-GCP-Selection"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
       <rmsThreshold>1.0</rmsThreshold>
@@ -92,7 +92,7 @@
     <node id="3-SAR-Simulation">
       <displayPosition y="134.0" x="144.0"/>
     </node>
-    <node id="4-GCP-Selection2">
+    <node id="4-GCP-Selection">
       <displayPosition y="134.0" x="286.0"/>
     </node>
     <node id="5-SARSim-Terrain-Correction">

@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "ComplexSRD",
-        category = "InSAR Products",
+        category = "InSAR\\Products",
         description = "Compute and subtract TOPO phase", internal = false)
 public final class ComplexSRDOp extends Operator {
 

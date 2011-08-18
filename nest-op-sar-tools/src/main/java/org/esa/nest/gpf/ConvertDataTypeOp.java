@@ -37,7 +37,7 @@ import org.esa.beam.util.math.Range;
  */
 
 @OperatorMetadata(alias="Convert-Datatype",
-        category = "Utilities",
+        category = "Utilities\\Data Conversion",
         description="Convert product data type")
 public class ConvertDataTypeOp extends Operator {
 

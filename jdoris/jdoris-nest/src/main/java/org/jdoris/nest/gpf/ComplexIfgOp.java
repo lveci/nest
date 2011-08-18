@@ -28,7 +28,7 @@ import java.util.Map;
 
 
 @OperatorMetadata(alias = "ComplexIfg",
-        category = "InSAR Products",
+        category = "InSAR\\Products",
         description = "Compute interferograms from stack of coregistered images : JBLAS implementation", internal = false)
 public class ComplexIfgOp extends Operator {
     @SourceProduct

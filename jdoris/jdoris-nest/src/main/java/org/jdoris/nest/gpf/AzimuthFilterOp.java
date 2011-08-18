@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "AzimuthFilter",
-        category = "InSAR Products",
+        category = "InSAR\\Filtering",
         description = "Azimuth Filter", internal = false)
 public class AzimuthFilterOp extends Operator {
 

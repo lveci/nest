@@ -120,8 +120,12 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
             infoForm.setCrsInfoText(crs.getName().getCode(), crs.toString());
             final CustomCrsPanel customCRS = (CustomCrsPanel)customCrsUI.getCrsUI();
             final String name = crs.getName().getCode();
-            final String projection = name.substring(0, name.indexOf("/")-1).replace("_", " ");
-            final String datum = name.substring(name.indexOf("/")+2, name.length());
+            String projection = name;
+            String datum = "";
+            if(name.contains("/")) {
+                projection = name.substring(0, name.indexOf("/")-1).replace("_", " ");
+                datum = name.substring(name.indexOf("/")+2, name.length());
+            }
 
             int cnt = customCRS.projectionComboBox.getItemCount();
             for(int i = 0; i < cnt; ++i) {
@@ -285,6 +289,7 @@ public class MapReProjectionOpUI extends BaseOperatorUI {
                 crs = null;
             }
             if (outputGeometryModel != null) {
+                outputGeometryModel.setSourceProduct(sourceProduct);
                 outputGeometryModel.setTargetCrs(crs);
             }
         }

@@ -25,15 +25,12 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  */
 public class CalibrationOpAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog = null;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Calibration", getAppContext(), "Calibration", getHelpId());
-            dialog.setTargetProductNameSuffix("_Calib");
-        }
+        final NestSingleTargetProductDialog dialog = new NestSingleTargetProductDialog("Calibration",
+                                                    getAppContext(), "Calibration", getHelpId());
+        dialog.setTargetProductNameSuffix("_Calib");
         dialog.show();
     }
 }

@@ -32,7 +32,6 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.ProcessTimeMonitor;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -63,10 +62,10 @@ import java.util.Map;
  * accurate enough.
  */
 
-@OperatorMetadata(alias="GCP-Selection2",
+@OperatorMetadata(alias="GCP-Selection",
                   category = "SAR Tools\\Coregistration",
                   description = "Automatic Selection of Ground Control Points")
-public class GCPSelection2Op extends Operator {
+public class GCPSelectionOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -157,7 +156,7 @@ public class GCPSelection2Op extends Operator {
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
-    public GCPSelection2Op() {
+    public GCPSelectionOp() {
     }
 
     /**
@@ -1751,7 +1750,7 @@ public class GCPSelection2Op extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(GCPSelection2Op.class);
+            super(GCPSelectionOp.class);
             super.setOperatorUI(GCPSelectionOpUI.class);
         }
     }

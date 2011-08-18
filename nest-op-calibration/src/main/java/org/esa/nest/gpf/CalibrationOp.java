@@ -300,7 +300,7 @@ public class CalibrationOp extends Operator {
      *          If an error occurs during computation of the target raster.
      */
     @Override
-    public synchronized void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
             calibrator.computeTile(targetBand, targetTile, targetBandNameToSourceBandName, pm);
         } catch(Throwable e) {

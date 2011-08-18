@@ -72,10 +72,10 @@ import java.util.Set;
  * 4. Bicubic2 interpolation
  */
 
-@OperatorMetadata(alias = "Warp2",
+@OperatorMetadata(alias = "Warp",
         category = "SAR Tools\\Coregistration",
         description = "Create Warp Function And Get Co-registrated Images")
-public class Warp2Op extends Operator {
+public class WarpOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -127,7 +127,7 @@ public class Warp2Op extends Operator {
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
-    public Warp2Op() {
+    public WarpOp() {
     }
 
     /**
@@ -898,7 +898,7 @@ public class Warp2Op extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(Warp2Op.class);
+            super(WarpOp.class);
             super.setOperatorUI(WarpOpUI.class);
         }
     }

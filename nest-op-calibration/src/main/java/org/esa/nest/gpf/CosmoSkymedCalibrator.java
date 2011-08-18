@@ -322,6 +322,8 @@ public class CosmoSkymedCalibrator implements Calibrator {
         }
 
         final ProductData trgData = targetTile.getDataBuffer();
+        final TileIndex srcIndex = new TileIndex(sourceRaster1);
+        final TileIndex trgIndex = new TileIndex(targetTile);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
@@ -333,9 +335,11 @@ public class CosmoSkymedCalibrator implements Calibrator {
         final double rescaleCalFactor = rescalingFactor*rescalingFactor*Ks;
 
         for (int y = y0; y < maxY; ++y) {
+            trgIndex.calculateStride(y);
+            srcIndex.calculateStride(y);
             for (int x = x0; x < maxX; ++x) {
 
-                index = sourceRaster1.getDataBufferIndex(x, y);
+                index = srcIndex.getIndex(x);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
                     dn = srcData1.getElemDoubleAt(index);
@@ -368,7 +372,7 @@ public class CosmoSkymedCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
+                trgData.setElemDoubleAt(trgIndex.getIndex(x), sigma);
             }
         }
 	}
