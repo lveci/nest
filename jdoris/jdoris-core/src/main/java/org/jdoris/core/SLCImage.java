@@ -423,13 +423,13 @@ public final class SLCImage {
         // actual doppler change
         private double actualDopplerChange() {
             final double slcFdc_p0 = pix2fdc(currentWindow.pixlo);
-            final double slcFdc_p05 = computFdc_const();
+            final double slcFdc_p05 = computeFdc_const();
             final double slcFdc_pN = pix2fdc(currentWindow.pixhi);
 
             return Math.max(Math.abs(slcFdc_p0 - slcFdc_p05), Math.abs(slcFdc_p0 - slcFdc_pN));
         }
 
-        private double computFdc_const() {
+        private double computeFdc_const() {
             return pix2fdc((currentWindow.pixhi - currentWindow.pixlo) / 2);
         }
 
@@ -442,7 +442,7 @@ public final class SLCImage {
             }
 
             if (f_DC_const_bool) {
-                f_DC_const = computFdc_const();
+                f_DC_const = computeFdc_const();
             }
 
         }

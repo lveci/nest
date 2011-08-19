@@ -7,8 +7,8 @@
       <file>input</file>
     </parameters>
   </node>
-  <node id="2-CplxCoh">
-    <operator>CplxCoh</operator>
+  <node id="2-Coherence">
+    <operator>Coherence</operator>
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
@@ -18,7 +18,7 @@
   <node id="3-Write">
     <operator>Write</operator>
     <sources>
-      <sourceProduct refid="2-CplxCoh"/>
+      <sourceProduct refid="2-Coherence"/>
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
@@ -30,7 +30,7 @@
     <node id="1-Read">
       <displayPosition y="104.0" x="96.0"/>
     </node>
-    <node id="2-CplxCoh">
+    <node id="2-Coherence">
       <displayPosition y="105.0" x="203.0"/>
     </node>
     <node id="3-Write">

@@ -322,20 +322,13 @@ public class AzimuthFilterOp extends Operator {
             throws OperatorException {
         try {
 
-            int w = targetRectangle.width;
+//            int w = targetRectangle.width;
 //            int x0 = targetRectangle.x;
 //            int y0 = targetRectangle.y;
 //            int h = targetRectangle.height;
 //            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             int extraRange = 0;
-
-//            if (!MathUtils.isPower2(w)) {
-//
-//                double nextPow2 = Math.ceil(Math.log(w) / Math.log(2));
-//                int value = (int) Math.pow(2, nextPow2);
-//                extraRange = value - w;
-//            }
 
             // target
             Band targetBand;
@@ -347,41 +340,51 @@ public class AzimuthFilterOp extends Operator {
             rect.height += TILE_OVERLAP_Y;
 //            System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
 
-            // loop over ifg(product)Container
+            // loop over ifg(product)Container : both master and slave defined in container
             for (String ifgTag : targetMap.keySet()) {
 
                 // get ifgContainer from pool
                 final ProductContainer product = targetMap.get(ifgTag);
 
-                final AzimuthFilter azimuthMaster = new AzimuthFilter();
-
-                azimuthMaster.setHammingAlpha(alphaHamming);
-                azimuthMaster.setMetadata(product.sourceMaster.metaData);
-                azimuthMaster.setMetadata1(product.sourceSlave.metaData);
-
                 // check out from source
                 Tile tileRealMaster = getSourceTile(product.sourceMaster.realBand, rect, border);
                 Tile tileImagMaster = getSourceTile(product.sourceMaster.imagBand, rect, border);
-                final ComplexDoubleMatrix data = TileUtilsDoris.pullComplexDoubleMatrix(tileRealMaster, tileImagMaster);
+                final ComplexDoubleMatrix dataMaster = TileUtilsDoris.pullComplexDoubleMatrix(tileRealMaster, tileImagMaster);
 
-                azimuthMaster.setData(data);
+                // construct azimuthfilter
+                final AzimuthFilter azimuthMaster = new AzimuthFilter();
+
+                // set filtering parameters
+                azimuthMaster.setHammingAlpha(alphaHamming);
+                azimuthMaster.setMetadata(product.sourceMaster.metaData);
+                azimuthMaster.setMetadata1(product.sourceSlave.metaData);
+                // TODO: variable constant hard-coded, further testing needed
+                azimuthMaster.setVariableFilter(false); // hardcoded to const filtering!
                 azimuthMaster.setTile(new org.jdoris.core.Window(rect));
+
+                // set data for filtering
+                azimuthMaster.setData(dataMaster);
+
+                // define parameters and filter
                 azimuthMaster.defineParameters();
                 azimuthMaster.defineFilter();
                 azimuthMaster.applyFilter();
 
-                final ComplexDoubleMatrix filteredMaster = azimuthMaster.getData();
+                // get data from filter
+//                final ComplexDoubleMatrix filteredMaster = azimuthMaster.getData();
 //                final ComplexDoubleMatrix filteredMaster = azimuthFilterMaster.filterBlock(data, product.sourceMaster.metaData, product.sourceSlave.metaData, alphaHamming);
 
                 // commit real() to target
                 targetBand = targetProduct.getBand(product.targetBandName_I);
                 tileRealMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredMaster.real(), tileRealMaster, targetRectangle);
+//                TileUtilsDoris.pushFloatMatrix(filteredMaster.real(), tileRealMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().real(), tileRealMaster, targetRectangle);
 
                 // commit imag() to target
                 targetBand = targetProduct.getBand(product.targetBandName_Q);
                 tileImagMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredMaster.imag(), tileImagMaster, targetRectangle);
+//                TileUtilsDoris.pushFloatMatrix(filteredMaster.imag(), tileImagMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().imag(), tileImagMaster, targetRectangle);
 
             }
         } catch (Throwable e) {

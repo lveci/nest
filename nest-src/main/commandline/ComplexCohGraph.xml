@@ -4,7 +4,7 @@
     <operator>Read</operator>
     <sources/>
     <parameters>
-      <file>input</file>
+      <file>$file</file>
     </parameters>
   </node>
   <node id="2-Coherence">
@@ -22,7 +22,7 @@
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
-      <file>coherence</file>
+      <file>$target</file>
     </parameters>
   </node>
   <applicationData id="Presentation">

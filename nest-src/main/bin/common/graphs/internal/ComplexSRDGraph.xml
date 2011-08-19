@@ -7,8 +7,8 @@
       <file>input</file>
     </parameters>
   </node>
-  <node id="2-ComplexSRD">
-    <operator>ComplexSRD</operator>
+  <node id="2-SubtRefDem">
+    <operator>SubtRefDem</operator>
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
@@ -18,7 +18,7 @@
   <node id="3-Write">
     <operator>Write</operator>
     <sources>
-      <sourceProduct refid="2-ComplexSRD"/>
+      <sourceProduct refid="2-SubtRefDem"/>
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
@@ -30,7 +30,7 @@
     <node id="1-Read">
       <displayPosition y="104.0" x="96.0"/>
     </node>
-    <node id="2-ComplexSRD">
+    <node id="2-SubtRefDem">
       <displayPosition y="105.0" x="203.0"/>
     </node>
     <node id="3-Write">

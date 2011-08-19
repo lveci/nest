@@ -106,14 +106,10 @@ public class AzimuthFilter extends SlcDataFilter {
     @Override
     public void defineFilter() {
 
-        if (metadata.doppler.isF_DC_const() && metadata1.doppler.isF_DC_const() && !variableFilter) {
-
+        if ((metadata.doppler.isF_DC_const() && metadata1.doppler.isF_DC_const()) || !variableFilter) {
             defineConstFilter();
-
         } else {
-
             defineVariableFilter();
-
         }
     }
 

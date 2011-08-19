@@ -40,78 +40,69 @@
 
     <extension point="beam-ui:actions">
 
+        <!-- action>
+            <id>coregistration</id>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>Coregistration (coming soon)</text>
+            <placeBefore>products</placeBefore>
+            <parent>insar</parent>
+        </action -->
+
         <action>
             <id>products</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Products</text>
+            <placeBefore>insar_tools</placeBefore>
             <parent>insar</parent>
         </action>
 
         <action>
-            <id>filtering</id>
+            <id>insar_tools</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>Filtering</text>
-            <placeAfter>products</placeAfter>
-            <parent>insar</parent>
-        </action>
-
-        <action>
-            <id>unwrapping</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>Unwrapping (coming soon)</text>
-            <placeAfter>filtering</placeAfter>
+            <text>Tools</text>
+             <placeAfter>Products</placeAfter>
             <separatorAfter>true</separatorAfter>
             <parent>insar</parent>
         </action>
 
         <action>
-            <id>sarTools</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>SAR Tools</text>
-            <placeAfter>unwrapping</placeAfter>
-            <parent>insar</parent>
-        </action>
-
-        <action>
-            <id>geoTools</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>GEO Tools</text>
-            <placeAfter>sarTools</placeAfter>
-            <separatorAfter>true</separatorAfter>
-            <parent>insar</parent>
+            <id>spectral_filtering</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Spectral Filtering</text>
+            <parent>insar_tools</parent>
         </action>
 
         <action>
             <id>graphs</id>
             <class>org.esa.nest.dat.actions.ComingSoonAction</class>
             <text>Processing Graphs</text>
-            <placeAfter>tools</placeAfter>
             <parent>insar</parent>
         </action>
+
 
         <!--/// PRODUCTS ///-->
 
         <action>
-            <id>ComplexgIfgOp</id>
-            <class>org.jdoris.nest.dat.ComplexIfgAction</class>
+            <id>InterferogramOp</id>
+            <class>org.jdoris.nest.dat.InterferogramAction</class>
             <text>Interferogram Formation...</text>
             <shortDescr>Interferograms from stack with optional subtraction of 'flat earth' phase</shortDescr>
-            <placeBefore>ComplexSRDOp</placeBefore>
+            <placeBefore>SubtRefDemOp</placeBefore>
             <parent>products</parent>
         </action>
 
         <action>
-            <id>ComplexgSRDOp</id>
-            <class>org.jdoris.nest.dat.ComplexSRDAction</class>
+            <id>SubtRefDemOp</id>
+            <class>org.jdoris.nest.dat.SubtRefDemAction</class>
             <text>Topo Phase Removal...</text>
             <shortDescr>Compute and subtract topographic phase</shortDescr>
-            <placeBefore>CplxCohOp</placeBefore>
+            <placeBefore>CoherenceOp</placeBefore>
             <parent>products</parent>
         </action>
 
         <action>
-            <id>CplxCohOp</id>
-            <class>org.jdoris.nest.dat.CplxCohAction</class>
+            <id>CoherenceOp</id>
+            <class>org.jdoris.nest.dat.CoherenceAction</class>
             <text>Coherence Estimation...</text>
             <shortDescr>Estimate coherence of stack of images</shortDescr>
             <parent>products</parent>
@@ -125,7 +116,7 @@
             <text>Range Filtering (in development)</text>
             <shortDescr>AzimuthFilterOp</shortDescr>
             <placeBefore>org.jdoris.nest.dat.AzimuthFilterAction</placeBefore>
-            <parent>filtering</parent>
+            <parent>spectral_filtering</parent>
         </action>
 
         <action>
@@ -133,15 +124,15 @@
             <class>org.jdoris.nest.dat.AzimuthFilterAction</class>
             <text>Azimuth Filtering...</text>
             <shortDescr>Filter stack of SAR images in AZIMUTH direction</shortDescr>
-            <parent>filtering</parent>
+            <parent>spectral_filtering</parent>
         </action>
 
         <action>
             <id>PhaseFilterOp</id>
             <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>Phase Filtering...</text>
+            <text>Phase Filtering (coming soon)</text>
             <shortDescr>Phase filtering of stack of interferograms</shortDescr>
-            <parent>filtering</parent>
+            <parent>insar_tools</parent>
         </action>
 
     </extension>
@@ -153,4 +144,33 @@
             <path>doc/help/doris-products.hs</path>
         </helpSet>
     </extension>
+
+    <!-- LEFTOVERS -->
+
+    <!--<action>-->
+        <!--<id>unwrapping</id>-->
+        <!--<class>org.esa.nest.dat.actions.ComingSoonAction</class>-->
+        <!--<text>Unwrapping (coming soon)</text>-->
+        <!--<placeAfter>filtering</placeAfter>-->
+        <!--<separatorAfter>true</separatorAfter>-->
+        <!--<parent>insar</parent>-->
+    <!--</action>-->
+
+    <!--<action>-->
+        <!--<id>sarTools</id>-->
+        <!--<class>org.esa.nest.dat.actions.ComingSoonAction</class>-->
+        <!--<text>SAR Tools</text>-->
+        <!--<placeAfter>unwrapping</placeAfter>-->
+        <!--<parent>insar</parent>-->
+    <!--</action>-->
+
+    <!--<action>-->
+        <!--<id>geoTools</id>-->
+        <!--<class>org.esa.nest.dat.actions.ComingSoonAction</class>-->
+        <!--<text>GEO Tools</text>-->
+        <!--<placeAfter>sarTools</placeAfter>-->
+        <!--<separatorAfter>true</separatorAfter>-->
+        <!--<parent>insar</parent>-->
+    <!--</action>-->
+
 </module>

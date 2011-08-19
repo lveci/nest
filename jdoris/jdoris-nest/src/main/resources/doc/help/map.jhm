@@ -7,7 +7,10 @@
 
     <!--InSAR-->
 	<mapID target="InSAR" url="operators/InSAR.html"/>
-    <mapID target="ComplexIfgOp" url="operators/ComplexIfgOp.html"/>
-    <mapID target="CplxCohOp" url="operators/CplxCohOp.html"/>
+    <mapID target="InterferogramOp" url="operators/InterferogramOp.html"/>
+    <mapID target="SubtRefDemOp" url="operators/SubtRefDemOp.html"/>
+    <mapID target="CoherenceOp" url="operators/CoherenceOp.html"/>
+    <mapID target="AzimuthFilterOp" url="operators/AzimuthFilterOp.html"/>
+    <mapID target="RangeFilterOp" url="operators/RangeFilterOp.html"/>
 
 </map>
