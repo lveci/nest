@@ -74,7 +74,7 @@ public class ShowImageViewHSVAction extends ExecCommand {
         final String[] hsvExpressions = profilePane.getRgbaExpressions();
         nomalizeHSVExpressions(product, hsvExpressions);
         if (profilePane.getStoreProfileInProduct()) {
-            RGBImageProfile.storeRgbaExpressions(product, hsvExpressions);
+            RGBImageProfile.storeRgbaExpressions(product, hsvExpressions, HSVImageProfilePane.HSV_COMP_NAMES);
         }
 
         final String sceneName = createSceneName(product, profilePane.getSelectedProfile());

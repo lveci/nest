@@ -144,7 +144,7 @@ public abstract class ElevationFile {
             if(visatApp != null)
                 visatApp.setStatusBarMessage("Downloading "+localZipFile.getName());
 
-            downloadFile(new URL(remotePath), localZipFile.getParentFile());
+            downloadFile(new URL(remotePath), localZipFile);
 
             if(visatApp != null)
                     visatApp.setStatusBarMessage("");
@@ -160,12 +160,12 @@ public abstract class ElevationFile {
      * Downloads a file from the specified URL to the specified local target directory.
      * The method uses a Swing progress monitor to visualize the download process.
      * @param fileUrl the URL of the file to be downloaded
-     * @param targetDir  the target directory
+     * @param localZipFile the target file
      * @throws IOException if an I/O error occurs
      * @return File the downloaded file
      */
-    private static File downloadFile(final URL fileUrl, final File targetDir) throws IOException {
-        final File outputFile = new File(targetDir, new File(fileUrl.getFile()).getName());
+    private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
+        final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
         final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength);
@@ -178,10 +178,42 @@ public abstract class ElevationFile {
         }
 
         try {
-            IOUtils.copyBytesAndClose(is, os);
+            final VisatApp visatApp = VisatApp.getApp();
+            final int size = 32768;
+            final byte[] buf = new byte[size];
+            int n;
+            int total = 0, lastPct = 0;
+            while ((n = is.read(buf, 0, size)) > -1)  {
+                os.write(buf, 0, n);
+                if(visatApp != null) {
+                    total += n;
+                    final int pct = (int)((total/(float)contentLength) * 100);
+                    if(pct >= lastPct + 1) {
+                        visatApp.setStatusBarMessage("Downloading "+localZipFile.getName()+"... "+pct+"%");
+                        lastPct = pct;
+                    }
+                }
+            }
+            if(visatApp != null)
+                visatApp.setStatusBarMessage("");
+
+
+            while (true) {
+                final int b = is.read();
+                if (b == -1) {
+                    break;
+                }
+                os.write(b);
+            }
         } catch (IOException e) {
             outputFile.delete();
             throw e;
+        } finally {
+            try {
+                os.close();
+            } finally {
+                is.close();
+            }
         }
         return outputFile;
     }

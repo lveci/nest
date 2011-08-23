@@ -21,41 +21,7 @@
 arc second resolution. This elevation model has been provided by Marc
 Bouvet (marc.bouvet@esa.int) of ESA/ESRIN. This documentation is also
 by courtesy of Marc Bouvet.
-</p><p>Because of its size, the installer will not automatically install the GETASSE30 DEM files. But at first use
-    DAT will offer to download the DEM for you, alternatively the GETASSE30 dataset can be manually downloaded
-    from the BEAM home page at <a href="http://ENVISAT.esa.int/services/beam/">http://ENVISAT.esa.int/services/beam/</a>.
-    The size is about 300 MB zipped and 2.3 GB unzipped. Due to the file size, we recommend this only if your internet
-    connection is fast enough. If you like to install by yourself, please follow the instructions given here:
-    </p><ol>
-        <li>Download <code>GETASSE30.zip</code> from the BEAM home page.</li>
-        <li>Create directory <code>.nest/auxdata/dem/GETASSE30</code></li>
-        <li>The simplest way is to unzip the <code>GETASSE30.zip</code> and copy the files into
-            <p>.nest<code></code><code></code><code>/auxdata/dem/GETASSE30/</code>.</p>
-            The DEM is now installed.</li>
-    </ol>
-
-    <p>
-        If you would like to share the DEM along multiple installations in your network
-        or if simply don't want to install in the auxdata folder, then:
-    </p>
-    <ol start="4">
-        <li>Copy the unzipped GETASSE30 dataset to a location accessible
-            by your installation(s). This directory we call <code>${SHARED_GETASSE30}</code> from now on.</li>
-        <li>Create a file named "dem.properties" in&nbsp;<code></code><code>.nest/auxdata/dem/GETASSE30/</code> and open the
-            new
-            file in a text editor. <br>
-            Add the following line <p><code>dem.installDir = ${SHARED_GETASSE30}</code></p> to it and don't forget to
-            replace
-            <code> ${SHARED_GETASSE30}</code> by your actual, shared DEM installation path. The properties file format
-            requires to escape the backspace and colon characters using a backslash. Hence, on windows systems you'll
-            have
-            to escape the drive colon and file separator, e.g., <p><code>dem.installDir =
-            P\:\\Data\\DEMs\\GETASSE30</code>.</p>
-            The DEM is now installed.</li>
-    </ol>
-<p></p>
-
-<h4>The GETASSE30 Data Set</h4>
+</p><p>The DEM tiles will be downloaded automatically by the software as needed.</p><h4>The GETASSE30 Data Set</h4>
 
 <p>
     GETASSE30 is a composite of four other DEM datasets. It&nbsp;uses the SRTM30 dataset, ACE dataset, Mean Sea Surface

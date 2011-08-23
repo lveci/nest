@@ -9,7 +9,7 @@ import org.esa.beam.util.PropertyMap;
  */
 public class HSVImageProfilePane extends RGBImageProfilePane {
 
-    private final static String[] HSV_COMP_NAMES = new String[]{
+    public final static String[] HSV_COMP_NAMES = new String[]{
             "Hue", /*I18N*/
             "Saturation", /*I18N*/
             "Value" /*I18N*/
