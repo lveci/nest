@@ -310,8 +310,7 @@ public class WarpOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.coregistered_stack, 1);
     }
 
-    private synchronized void getWarpData(
-            final Set<Band> keySet, final Rectangle targetRectangle, final ProgressMonitor pm) throws OperatorException {
+    private synchronized void getWarpData(final Set<Band> keySet, final Rectangle targetRectangle) throws OperatorException {
 
         if (warpDataAvailable) {
             return;
@@ -382,6 +381,19 @@ public class WarpOp extends Operator {
         }
 
         announceGCPWarning();
+
+        if (openResidualsFile) {
+            final File residualsFile = getResidualsFile(sourceProduct);
+            if (Desktop.isDesktopSupported() && residualsFile.exists()) {
+                try {
+                    Desktop.getDesktop().open(residualsFile);
+                } catch (Exception e) {
+                    System.out.println("Error opening residuals file "+e.getMessage());
+                    // do nothing
+                }
+            }
+        }
+
         warpDataAvailable = true;
     }
 
@@ -408,19 +420,7 @@ public class WarpOp extends Operator {
             final Set<Band> keySet = targetTileMap.keySet();
 
             if(!warpDataAvailable) {
-                getWarpData(keySet, targetRectangle, pm);
-
-                if (openResidualsFile) {
-                    final File residualsFile = getResidualsFile(sourceProduct);
-                    if (Desktop.isDesktopSupported() && residualsFile.exists()) {
-                        try {
-                            Desktop.getDesktop().open(residualsFile);
-                        } catch (Exception e) {
-                            System.out.println("Error opening residuals file "+e.getMessage());
-                            // do nothing
-                        }
-                    }
-                }
+                getWarpData(keySet, targetRectangle);
             }
 
             for (Band targetBand : keySet) {
@@ -434,7 +434,6 @@ public class WarpOp extends Operator {
 
                 // create source image
                 final Tile sourceRaster = getSourceTile(srcBand, targetRectangle);
-                //getWarpData(pm);
 
                 if(pm.isCanceled())
                     return;

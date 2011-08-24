@@ -49,11 +49,11 @@ public class RangeFilterOp extends Operator {
             label = "FFT Window Length")
     private int fftLength = 64;
 
-    @Parameter(valueSet = {"5", "10", "15", "20", "25", "30", "35", "40"},
-            description = "Overlap between tiles in range direction [pixels]",
-            defaultValue = "10",
-            label = "Range Filter Overlap")
-    private int rangeTileOverlap = 10;
+//    @Parameter(valueSet = {"5", "10", "15", "20", "25", "30", "35", "40"},
+//            description = "Overlap between tiles in range direction [pixels]",
+//            defaultValue = "10",
+//            label = "Range Filter Overlap")
+//    private int rangeTileOverlap = 10;
 
     @Parameter(valueSet = {"0.5", "0.75", "0.8", "0.9", "1"},
             description = "Weight for Hamming filter (1 is rectangular window)",
@@ -306,15 +306,6 @@ public class RangeFilterOp extends Operator {
             throw new OperatorException("Input should be a coregistered SLC stack");
         }
     }
-
-    private void updateTargetProductMetadata() {
-        // update metadata of target product for the estimated polynomial
-    }
-
-    private void updateTargetProductGeocoding() {
-        // update metadata of target product for the estimated polynomial
-    }
-
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
