@@ -113,8 +113,8 @@
         <action>
             <id>RangeFilterOp</id>
             <class>org.jdoris.nest.dat.RangeFilterAction</class>
-            <text>Range Filtering (in development)</text>
-            <shortDescr>AzimuthFilterOp</shortDescr>
+            <text>Range Filtering...</text>
+            <shortDescr>Filter stack of SAR images in RANGE direction</shortDescr>
             <placeBefore>org.jdoris.nest.dat.AzimuthFilterAction</placeBefore>
             <parent>spectral_filtering</parent>
         </action>

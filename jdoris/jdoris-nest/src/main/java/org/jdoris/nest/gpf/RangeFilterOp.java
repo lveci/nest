@@ -49,11 +49,11 @@ public class RangeFilterOp extends Operator {
             label = "FFT Window Length")
     private int fftLength = 64;
 
-    @Parameter(valueSet = {"5", "10", "15", "20", "25", "30", "35", "40"},
-            description = "Overlap between tiles in range direction [pixels]",
-            defaultValue = "10",
-            label = "Range Filter Overlap")
-    private int rangeTileOverlap = 10;
+//    @Parameter(valueSet = {"5", "10", "15", "20", "25", "30", "35", "40"},
+//            description = "Overlap between tiles in range direction [pixels]",
+//            defaultValue = "10",
+//            label = "Range Filter Overlap")
+//    private int rangeTileOverlap = 10;
 
     @Parameter(valueSet = {"0.5", "0.75", "0.8", "0.9", "1"},
             description = "Weight for Hamming filter (1 is rectangular window)",
@@ -307,15 +307,6 @@ public class RangeFilterOp extends Operator {
         }
     }
 
-    private void updateTargetProductMetadata() {
-        // update metadata of target product for the estimated polynomial
-    }
-
-    private void updateTargetProductGeocoding() {
-        // update metadata of target product for the estimated polynomial
-    }
-
-
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
@@ -355,7 +346,7 @@ public class RangeFilterOp extends Operator {
             final Rectangle rect = new Rectangle(targetRectangle);
             rect.width += (TILE_OVERLAP_X + extraRange);
             rect.height += TILE_OVERLAP_Y;
-            //System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
+            System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
 
             boolean doFilterMaster = true;
             if (masterMap.keySet().toArray().length > 1) {
