@@ -568,12 +568,12 @@ public class CreateStackOp extends Operator {
 
             // test corners
             slvGeoCoding.getGeoPos(new PixelPos(10, 10), slvGeoPos);
-            if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
+            if(false) {// (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
                 addOffset(slvProd, 0 - (int)tgtPixelPos.x, 0 - (int)tgtPixelPos.y);
                 foundOverlapPoint = true;
             }
-            if (!foundOverlapPoint) {
+            if (false) {//!foundOverlapPoint) {
                 slvGeoCoding.getGeoPos(new PixelPos(slvImageWidth-10, slvImageHeight-10), slvGeoPos);
                 if (pixelPosValid(targGeoCoding, slvGeoPos, tgtPixelPos, targImageWidth, targImageHeight)) {
 
