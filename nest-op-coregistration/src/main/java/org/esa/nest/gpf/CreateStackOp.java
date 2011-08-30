@@ -141,6 +141,10 @@ public class CreateStackOp extends Operator {
                 return;
             }
 
+            if (resamplingType.contains("NONE") && !extent.equals(MASTER_EXTENT)) {
+                throw new OperatorException("Please select only Master extents when resampling type is None");
+            }
+
             if(appendToMaster) {
                 extent = MASTER_EXTENT;
             }

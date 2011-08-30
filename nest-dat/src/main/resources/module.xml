@@ -390,12 +390,22 @@
         </action>
 
         <action>
+            <id>showNestForum</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowForumPageAction</class>
+            <text>User Help Forum</text>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>Opens the NEST forum.</shortDescr>
+            <description>Opens the NEST forum page with the default web browser.</description>
+            <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
             <id>showNestHomePage</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowHomePageAction</class>
             <text>NEST Home Page</text>
             <mnemonic>B</mnemonic>
-            <separatorAfter>true</separatorAfter>
             <shortDescr>Opens the NEST home page.</shortDescr>
             <description>Opens the NEST home page with the default web browser.</description>
             <placeAfter>helpTopics</placeAfter>
@@ -407,7 +417,7 @@
             <class>org.esa.nest.dat.actions.TestConnectivityAction</class>
             <text>Test Connectivity</text>
             <shortDescr>Test FTP connection for automatic downloads of DEMs</shortDescr>
-            <placeAfter>helpTopics</placeAfter>
+            <placeAfter>checkForUpdate</placeAfter>
         </action>
 
         <action>

@@ -24,21 +24,21 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- * This action launches the default browser to display the NEST web page.
+ * This action launches the default browser to display the NEST forum
  *
  */
-public class ShowHomePageAction extends ExecCommand {
-    private static final String HOME_PAGE_URL_DEFAULT = "http://www.array.ca/nest/";
+public class ShowForumPageAction extends ExecCommand {
+    private static final String FORUM_URL_DEFAULT = "http://nest.array.ca/web/nest/forum";
 
     /**
-     * Launches the default browser to display the NEST web site.
+     * Launches the default browser to display the NEST forum.
      * Invoked when a command action is performed.
      *
      * @param event the command event.
      */
     @Override
     public void actionPerformed(CommandEvent event) {
-        final String homePageUrl = System.getProperty(ResourceUtils.getContextID()+".homePageUrl", HOME_PAGE_URL_DEFAULT);
+        final String homePageUrl = System.getProperty(ResourceUtils.getContextID()+".forumUrl", FORUM_URL_DEFAULT);
         final Desktop desktop = Desktop.getDesktop();
 
         try {

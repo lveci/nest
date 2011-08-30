@@ -22,7 +22,7 @@
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
-      <file>Azimuth_filtered_stack.dim</file>
+      <file>azimuth_filtered_stack.dim</file>
     </parameters>
   </node>
   <applicationData id="Presentation">

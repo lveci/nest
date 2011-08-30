@@ -15,6 +15,7 @@
  */
 package org.esa.nest.db;
 
+import org.apache.commons.io.FileDeleteStrategy;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -47,9 +48,21 @@ public class ProductDB extends DAO {
     public static ProductDB instance() throws Exception {
         if(_instance == null) {
             _instance = new ProductDB();
-            final boolean connected = _instance.connect();
+            boolean connected = _instance.connect();
             if(!connected) {
-                throw new Exception("Unable to connect to database\n"+_instance.getLastSQLException().getMessage());
+                final String dbLocation = _instance.getDatabaseLocation();
+                deleteInstance();
+
+                final File dbFolder = new File(dbLocation);
+                final File qlFolder = new File(dbFolder.getParentFile(), "QuickLooks");
+                boolean deleted = FileDeleteStrategy.FORCE.deleteQuietly(dbFolder);
+                deleted = FileDeleteStrategy.FORCE.deleteQuietly(qlFolder);
+
+                _instance = new ProductDB();
+                connected = _instance.connect();
+                if(!connected) {
+                    throw new Exception("Unable to connect to database\n"+_instance.getLastSQLException().getMessage());
+                }
             }
         }
         return _instance;

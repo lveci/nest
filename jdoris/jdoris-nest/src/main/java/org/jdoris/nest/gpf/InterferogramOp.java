@@ -50,7 +50,7 @@ public class InterferogramOp extends Operator {
     private int srpNumberPoints = 501;
 
 
-    @Parameter(valueSet = {"1", "2", "3", "4", "5"},
+    @Parameter(valueSet = {"0", "1", "2", "3", "4", "5"},
             description = "Degree of orbit (polynomial) interpolator",
             defaultValue = "3",
             label = "Orbit interpolation degree")

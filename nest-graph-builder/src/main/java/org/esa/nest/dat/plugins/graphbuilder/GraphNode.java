@@ -388,7 +388,7 @@ public class GraphNode {
         final double t1 = Math.abs(headY - tailY);
         final double t2 = Math.abs(headX - tailX);
         double theta = Math.atan(t1 / t2);
-        if (headX > tailX) {
+        if (headX >= tailX) {
             if (headY > tailY)
                 theta = Math.PI + theta;
             else

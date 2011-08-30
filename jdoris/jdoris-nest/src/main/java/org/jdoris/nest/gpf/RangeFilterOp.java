@@ -70,19 +70,19 @@ public class RangeFilterOp extends Operator {
     @Parameter(valueSet = {"3", "4", "5", "6", "7"},
             description = "Threshold on SNR for peak estimation",
             defaultValue = "5",
-            label = "SNR Threshold") //has to be odd!
+            label = "SNR Threshold")
     private float snrThresh = 5;
 
     @Parameter(valueSet = {"1", "2", "4"},
             description = "Oversampling factor (in range only).",
             defaultValue = "1",
-            label = "Oversampling factor") //has to be odd!
+            label = "Oversampling factor")
     private int ovsmpFactor = 1;
 
-    @Parameter(valueSet = {"on", "off"},
+    @Parameter(valueSet = {"true", "false"},
             description = "Use weight values to bias higher frequencies",
-            defaultValue = "2",
-            label = "De-weighting flag") //has to be odd!
+            defaultValue = "off",
+            label = "De-weighting")
     private boolean doWeightCorrel = false;
 
     // source
@@ -359,10 +359,11 @@ public class RangeFilterOp extends Operator {
                 final RangeFilter rangeFilter = new RangeFilter();
 
                 rangeFilter.setAlphaHamming(alphaHamming);
-                rangeFilter.setDoWeightCorrelFlag(doFilterMaster);
+                rangeFilter.setDoWeightCorrelFlag(doWeightCorrel);
                 rangeFilter.setOvsFactor(ovsmpFactor);
                 rangeFilter.setFftLength(fftLength);
                 rangeFilter.setNlMean(nlMean);
+                rangeFilter.setSNRthreshold(snrThresh);
 
                 // get ifgContainer from pool
                 final ProductContainer ifg = targetMap.get(ifgTag);
