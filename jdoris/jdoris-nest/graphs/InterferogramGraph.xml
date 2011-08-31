@@ -22,7 +22,7 @@
     </sources>
     <parameters>
       <formatName>BEAM-DIMAP</formatName>
-      <file>cplx_ifg.dim</file>
+      <file>interferogram_srp_stack.dim</file>
     </parameters>
   </node>
   <applicationData id="Presentation">

@@ -17,11 +17,7 @@
 package org.esa.beam.gpf.operators.standard;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ImageInfo;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -40,17 +36,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 @OperatorMetadata(alias = "WriteRGB",
                   description = "Creates an RGB image from three source bands.",
                   internal = false)
 public class WriteRGBOp extends Operator {
 
-    @Parameter(description = "The zero-based index of the red band.")
+    @Parameter(description = "The zero-based index of the red band.", defaultValue = "0")
     private int red;
-    @Parameter(description = "The zero-based index of the green band.")
+    @Parameter(description = "The zero-based index of the green band.", defaultValue = "1")
     private int green;
-    @Parameter(description = "The zero-based index of the blue band.")
+    @Parameter(description = "The zero-based index of the blue band.", defaultValue = "2")
     private int blue;
     @Parameter(defaultValue = "png")
     private String formatName;
@@ -66,6 +63,8 @@ public class WriteRGBOp extends Operator {
     private transient Map<Band, Band> bandMap;
     private transient Map<Band, ProductData> dataMap;
 
+    private boolean processed = false;
+
     @Override
     public void initialize() throws OperatorException {
         bandMap = new HashMap<Band, Band>(3);
@@ -79,6 +78,36 @@ public class WriteRGBOp extends Operator {
         prepareTargetBand(0, sourceProduct.getBandAt(red), "red", width, height);
         prepareTargetBand(1, sourceProduct.getBandAt(green), "green", width, height);
         prepareTargetBand(2, sourceProduct.getBandAt(blue), "blue", width, height);
+    }
+
+    /** get the selected bands
+     * @param sourceProduct the input product
+     * @param sourceBandNames the select band names
+     * @return band list
+     * @throws OperatorException if source band not found
+     */
+    private static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames) throws OperatorException {
+
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                if(!(band instanceof VirtualBand))
+                    bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+        return sourceBands;
     }
 
     private void prepareTargetBand(int rgbIndex, Band sourceBand, String bandName, int width, int height) {
@@ -102,12 +131,14 @@ public class WriteRGBOp extends Operator {
 
         ProductData rgbData = dataMap.get(band);
         System.arraycopy(sourceTile.getRawSamples().getElems(), 0, rgbData.getElems(), rectangle.x + rectangle.y * rectangle.width, rectangle.width * rectangle.height);
+        processed = true;
     }
 
     @Override
     public void dispose() {
         try {
-            writeImage();
+            if(processed)
+                writeImage();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -119,7 +150,7 @@ public class WriteRGBOp extends Operator {
         BufferedImage outputImage = ProductUtils.createRgbImage(rgbChannelNodes, imageInfo, ProgressMonitor.NULL);
         ParameterBlock storeParams = new ParameterBlock();
         storeParams.addSource(outputImage);
-        storeParams.add(file);
+        storeParams.add(file.getAbsolutePath());
         storeParams.add(formatName);
         JAI.create("filestore", storeParams);
     }

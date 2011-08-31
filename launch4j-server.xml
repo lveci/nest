@@ -1,8 +1,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\build\4A\nest\target\nest-4A-bin.dir\bin\ceres-launcher.jar</jar>
-  <outfile>C:\build\4A\nest\target\nest-4A-bin.dir\nest-dat.exe</outfile>
+  <jar>C:\build\4B\nest\target\nest-4B-1.0-bin.dir\bin\ceres-launcher.jar</jar>
+  <outfile>C:\build\4B\nest\target\nest-4B-1.0-bin.dir\nest-dat.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>
@@ -12,7 +12,7 @@
   <customProcName>true</customProcName>
   <stayAlive>false</stayAlive>
   <manifest></manifest>
-  <icon>C:\build\4A\nest\src\main\assembly\dat.ico</icon>
+  <icon>C:\build\4B\nest\nest-src\main\assembly\dat.ico</icon>
   <jre>
     <path>jre</path>
     <minVersion>1.5.0</minVersion>
@@ -20,8 +20,9 @@
     <jdkPreference>jdkOnly</jdkPreference>
     <initialHeapSize>128</initialHeapSize>
     <maxHeapSize>1024</maxHeapSize>
-    <opt>-server -Dceres.context=nest</opt>
-    <opt>-Xverify:none -XX:CompileThreshold=100</opt>
-    <opt>-XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio</opt>
+    <opt>-server -Xms128M -Xmx1200M -XX:PermSize=512m -XX:MaxPermSize=512m -Xverify:none</opt>
+    <opt>-XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000</opt>
+    <opt>-XX:+UseParallelGC -XX:+UseNUMA -XX:-UseLoopPredicate -XX:+UseStringCache -XX:+UseCompressedStrings</opt>
+    <opt>-Dceres.context=nest</opt>
   </jre>
 </launch4jConfig>

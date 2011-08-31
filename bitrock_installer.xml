@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>4B-0.10</version>
+    <version>4B-1.0</version>
     <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
@@ -67,7 +67,22 @@
                 </substitution>
             </substitutionList>
         </substitute>
+        <deleteFile>
+            <abortOnError>0</abortOnError>
+            <path>"%USERPROFILE%\.nest"</path>
+            <show>0</show>
+            <showMessageOnError>0</showMessageOnError>
+        </deleteFile>
     </postInstallationActionList>
+    <postUninstallationActionList>
+        <runConsoleProgram>
+            <abortOnError>0</abortOnError>
+            <program>${installdir}/post-uninstall.bat</program>
+            <programArguments></programArguments>
+            <show>0</show>
+            <showMessageOnError>0</showMessageOnError>
+        </runConsoleProgram>
+    </postUninstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
     <enableTimestamp>1</enableTimestamp>

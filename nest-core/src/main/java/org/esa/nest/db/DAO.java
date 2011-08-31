@@ -20,8 +20,10 @@ import org.esa.nest.util.ResourceUtils;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -135,12 +137,19 @@ public abstract class DAO {
             dbProperties.put("shutdown", "true");
             try {
                 DriverManager.getConnection(getDatabaseUrl(), dbProperties);
+
             } catch (SQLException ex) {
                 lastSQLException = ex;
             }
             isConnected = false;
             dbProperties.remove("shutdown");
         }
+      /*  try {
+            final Driver drv = DriverManager.getDriver(getDatabaseUrl());
+            DriverManager.deregisterDriver(drv);
+        } catch (SQLException ex) {
+                lastSQLException = ex;
+        }   */
     }
 
     public Connection getConnection() {

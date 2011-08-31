@@ -20,6 +20,7 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
+import sun.awt.shell.Win32ShellFolderManager2;
 
 import java.io.*;
 
@@ -30,6 +31,8 @@ import java.io.*;
 public class LaunchPolsarProAction extends ExecCommand {
 
     private final static String PolsarProPathStr = "external.polsarpro.path";
+    private final static String TCLPathStr = "external.TCL.path";
+
     /**
      * Launches PolSARPro
      * Invoked when a command action is performed.
@@ -39,8 +42,18 @@ public class LaunchPolsarProAction extends ExecCommand {
     @Override
     public void actionPerformed(CommandEvent event) {
         final PropertyMap pref = VisatApp.getApp().getPreferences();
-        final String path = pref.getPropertyString(PolsarProPathStr);
-        File polsarProFile = new File(path);
+
+        // find tcl wish
+        File tclFile = new File(pref.getPropertyString(TCLPathStr));
+
+        if(!tclFile.exists()) {
+            tclFile = findTCLWish();
+            if(tclFile.exists())
+                pref.setPropertyString(TCLPathStr, tclFile.getAbsolutePath());
+        }
+
+        // find polsar pro
+        File polsarProFile = new File(pref.getPropertyString(PolsarProPathStr));
         
         if(!polsarProFile.exists()) {
             polsarProFile = findPolsarPro();
@@ -50,7 +63,7 @@ public class LaunchPolsarProAction extends ExecCommand {
             polsarProFile = ResourceUtils.GetFilePath("PolSARPro Location", "tcl", "tcl", null, "PolSARPro File", false);
         }
         if(polsarProFile.exists()) {
-            externalExecute(polsarProFile);
+            externalExecute(polsarProFile, tclFile);
 
             // save location
             pref.setPropertyString(PolsarProPathStr, polsarProFile.getAbsolutePath());
@@ -58,11 +71,15 @@ public class LaunchPolsarProAction extends ExecCommand {
         }
     }
 
-    private void externalExecute(File prog) {
+    private void externalExecute(final File prog, final File tclWishFile) {
         final File homeFolder = ResourceUtils.findHomeFolder();
         final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
 
-        final String args = "\""+prog.getParent()+"\" "+"wish"+" "+prog.getName();
+        String wish = "wish";
+        if(tclWishFile.exists())
+            wish = tclWishFile.getAbsolutePath();
+
+        final String args = "\""+prog.getParent()+"\" "+wish+" "+prog.getName();
 
         System.out.println("Launching PolSARPro "+args);
 
@@ -82,6 +99,24 @@ public class LaunchPolsarProAction extends ExecCommand {
             }
         };
         worker.start();   
+    }
+
+    private static File findTCLWish() {
+        File progFiles = new File("C:\\Program Files (x86)\\TCL\\bin");
+        if(!progFiles.exists())
+            progFiles = new File("C:\\Program Files\\TCL\\bin");
+        if(!progFiles.exists())
+            progFiles = new File("C:\\TCL\\bin");
+        if(progFiles.exists()) {
+            final File[] files = progFiles.listFiles();
+            for(File file : files) {
+                final String name = file.getName().toLowerCase();
+                if(name.equals("wish.exe")) {
+                    return file;
+                }
+            }
+        }
+        return new File("");
     }
 
     private static File findPolsarPro() {

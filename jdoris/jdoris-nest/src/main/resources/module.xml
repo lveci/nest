@@ -2,15 +2,15 @@
 
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>doris-operators</symbolicName>
-    <version>4B-1.0</version>
+    <version>0.2</version>
     <name>NEST-DORIS Operators</name>
     <description>NEST-DORIS InSAR operators</description>
 
     <vendor>PPO.labs</vendor>
-    <contactAddress>XXXX</contactAddress>
-    <copyright>XXXX</copyright>
-    <url>XXXX</url>
+    <copyright>(C) 2011 by PPO.labs</copyright>
+    <url>https://github.com/ppolabs/jdoris</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+	<funding>European Space Agency</funding>
 
     <dependency>
         <module>beam-visat</module>
@@ -72,12 +72,12 @@
             <parent>insar_tools</parent>
         </action>
 
-        <action>
+        <!--action>
             <id>graphs</id>
             <class>org.esa.nest.dat.actions.ComingSoonAction</class>
             <text>Processing Graphs</text>
             <parent>insar</parent>
-        </action>
+        </action-->
 
 
         <!--/// PRODUCTS ///-->

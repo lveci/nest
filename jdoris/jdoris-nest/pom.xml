@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.jdoris</groupId>
             <artifactId>jdoris-core</artifactId>
-            <version>0.0</version>
+            <version>${jdoris.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
