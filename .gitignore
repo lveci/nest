@@ -6,3 +6,4 @@ modules/
 target/
 CVS/
 .cvsignore
+/compile.log
