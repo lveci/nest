@@ -20,7 +20,6 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
-import sun.awt.shell.Win32ShellFolderManager2;
 
 import java.io.*;
 
