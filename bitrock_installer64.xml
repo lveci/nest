@@ -5,6 +5,17 @@
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
+    <initializationActionList>
+        <showWarning>
+            <text>Please uninstall any previous version of NEST before continuing</text>
+        </showWarning>
+    </initializationActionList>
+    <preInstallationActionList>
+        <deleteEnvironmentVariable>
+            <name>NEST_HOME</name>
+            <scope>user</scope>
+        </deleteEnvironmentVariable>
+    </preInstallationActionList>
     <postInstallationActionList>
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
@@ -37,17 +48,29 @@
     <postUninstallationActionList>
         <runConsoleProgram>
             <abortOnError>0</abortOnError>
-            <program>${installdir}/post-uninstall.bat</program>
+            <program>${InstallDir}/post-uninstall.bat</program>
             <programArguments></programArguments>
             <show>0</show>
             <showMessageOnError>0</showMessageOnError>
         </runConsoleProgram>
+        <deleteEnvironmentVariable>
+            <abortOnError>0</abortOnError>
+            <name>NEST_HOME</name>
+            <scope>user</scope>
+            <show>0</show>
+            <showMessageOnError>0</showMessageOnError>
+        </deleteEnvironmentVariable>
+        <removeDirectoryFromPath>
+            <path>${InstallDir}</path>
+            <scope>user</scope>
+        </removeDirectoryFromPath>
     </postUninstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
     <enableTimestamp>1</enableTimestamp>
     <outputDirectory>../dist</outputDirectory>
     <saveRelativePaths>1</saveRelativePaths>
+    <startMenuGroupName>${product_fullname}-${product_version}</startMenuGroupName>
     <vendor>ESA</vendor>
     <componentList>
         <component>
@@ -242,7 +265,23 @@
                     <comment>NEST Documentation</comment>
                     <name>Online Help</name>
                     <runInTerminal>0</runInTerminal>
-                    <url> ${installdir}\modules\nest-help-4B\doc\help\index.html</url>
+                    <url> ${installdir}\modules\nest-help-4B-1.0\doc\help\index.html</url>
+                    <windowsIcon></windowsIcon>
+                </startMenuLinkShortcut>
+                <startMenuShortcut>
+                    <comment>Command Prompt for the GPT</comment>
+                    <name>GPT Command Line Interface</name>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>${installdir}/cli.bat</windowsExec>
+                    <windowsExecArgs></windowsExecArgs>
+                    <windowsIcon></windowsIcon>
+                    <windowsPath>${installdir}</windowsPath>
+                </startMenuShortcut>
+                <startMenuLinkShortcut>
+                    <comment>User Help Forum on the website</comment>
+                    <name>User Help Forum</name>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://nest.array.ca/web/nest/forum</url>
                     <windowsIcon></windowsIcon>
                 </startMenuLinkShortcut>
             </startMenuShortcutList>

@@ -37,7 +37,7 @@ public class InterferogramOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {"1", "2", "3", "4", "5", "6", "7", "8"},
+    @Parameter(valueSet = {"0", "1", "2", "3", "4", "5", "6", "7", "8"},
             description = "Order of 'Flat earth phase' polynomial",
             defaultValue = "5",
             label = "Degree of \"Flat Earth\" polynomial")
@@ -50,7 +50,7 @@ public class InterferogramOp extends Operator {
     private int srpNumberPoints = 501;
 
 
-    @Parameter(valueSet = {"0", "1", "2", "3", "4", "5"},
+    @Parameter(valueSet = {"1", "2", "3", "4", "5"},
             description = "Degree of orbit (polynomial) interpolator",
             defaultValue = "3",
             label = "Orbit interpolation degree")
@@ -117,11 +117,19 @@ public class InterferogramOp extends Operator {
         try {
 
             checkUserInput();
-            
-            masterBand1 = sourceProduct.getBandAt(0);
-            if (masterBand1.getUnit() != null && masterBand1.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
-                masterBand2 = sourceProduct.getBandAt(1);
+
+
+            final String[] masterBandNames = sourceProduct.getBandNames();
+            for (int i = 0; i < masterBandNames.length; i++) {
+                if (masterBandNames[i].contains("mst")) {
+                    masterBand1 = sourceProduct.getBand(masterBandNames[i]);
+                    if (masterBand1.getUnit() != null && masterBand1.getUnit().equals(Unit.REAL)) {
+                        masterBand2 = sourceProduct.getBand(masterBandNames[i+1]);
+                    }
+                    break;
+                }
             }
+
 
             getMetadata();
             getSourceImageDimension();
