@@ -54,7 +54,7 @@
         </repository>
         <repository>
             <id>ppolabs-mvn-repo</id>
-            <name>Public Maven Repository of PPO.labs hosted on github.com</name>
+            <name>Public Maven Repository of PPO.labs</name>
             <url>http://94.209.52.167/mvn</url>
             <releases>
                 <enabled>true</enabled>

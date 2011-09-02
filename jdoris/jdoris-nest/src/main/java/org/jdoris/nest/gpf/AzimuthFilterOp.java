@@ -371,19 +371,14 @@ public class AzimuthFilterOp extends Operator {
                 azimuthMaster.applyFilter();
 
                 // get data from filter
-//                final ComplexDoubleMatrix filteredMaster = azimuthMaster.getData();
-//                final ComplexDoubleMatrix filteredMaster = azimuthFilterMaster.filterBlock(data, product.sourceMaster.metaData, product.sourceSlave.metaData, alphaHamming);
-
                 // commit real() to target
                 targetBand = targetProduct.getBand(product.targetBandName_I);
                 tileRealMaster = targetTileMap.get(targetBand);
-//                TileUtilsDoris.pushFloatMatrix(filteredMaster.real(), tileRealMaster, targetRectangle);
                 TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().real(), tileRealMaster, targetRectangle);
 
                 // commit imag() to target
                 targetBand = targetProduct.getBand(product.targetBandName_Q);
                 tileImagMaster = targetTileMap.get(targetBand);
-//                TileUtilsDoris.pushFloatMatrix(filteredMaster.imag(), tileImagMaster, targetRectangle);
                 TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().imag(), tileImagMaster, targetRectangle);
 
             }
