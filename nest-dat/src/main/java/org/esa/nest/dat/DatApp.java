@@ -371,7 +371,7 @@ public class DatApp extends VisatApp {
         for(int i=0; i < numCmds; ++i) {
             final Command cmd = cmdMan.getCommandAt(i);
             final String parent = cmd.getParent();
-            if(parent.equals(LABELS_TOOL_BAR_ID)) {
+            if(parent != null && parent.equals(LABELS_TOOL_BAR_ID)) {
                 placeAfterMap.put(cmd.getCommandID(), cmd.getPlaceAfter());
                 cmdList.add(cmd.getCommandID());
             }

@@ -44,17 +44,14 @@ public abstract class RecursiveProcessor {
                 }
             } else {
                 try {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if(reader != null) {
-                        final Product sourceProduct = reader.readProductNodes(file, null);
+                    final Product sourceProduct = ProductIO.readProduct(file);
+                    if(sourceProduct != null) {
                         if(TestUtils.contains(sourceProduct.getProductType(), productTypeExemptions))
                             continue;
 
                         process(sourceProduct);
 
                         ++iterations;
-                    } else {
-                        //System.out.println(file.getName() + " is non valid");
                     }
                 } catch(Exception e) {
                     boolean ok = false;

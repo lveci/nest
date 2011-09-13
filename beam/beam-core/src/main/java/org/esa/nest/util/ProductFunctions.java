@@ -17,6 +17,7 @@ import java.util.ArrayList;
 public class ProductFunctions {
 
     private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5"};
+    final static String[] xmlPrefix = { "product", "tsx1_sar", "tsx2_sar", "tdx1_sar", "tdx2_sar" };
 
     private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
@@ -34,6 +35,15 @@ public class ProductFunctions {
                 return true;
             }
         }
+        if(ext.equals("xml")) {
+            final String name = file.getName().toLowerCase();
+            for(String str : xmlPrefix) {
+                if(name.startsWith(str)) {
+                    return true;
+                }
+            }
+        }
+
         // test with readers
         final ProductReader reader = ProductIO.getProductReaderForFile(file);
         if(reader != null)

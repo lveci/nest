@@ -80,7 +80,7 @@ public class CustomCrsPanel extends JPanel {
     private static final String DATUM = "datum";
     private static final String PARAMETERS = "parameters";
 
-    private final List<GeodeticDatum> datumList;
+    private final static List<GeodeticDatum> datumList = CustomCrsPanel.createDatumList();
     private final List<AbstractCrsProvider> crsProviderList;
     private final CustomCrsPanel.Model model;
     private final PropertyContainer vc;
@@ -94,7 +94,6 @@ public class CustomCrsPanel extends JPanel {
     public CustomCrsPanel(Window parent) {
         this.parent = parent;
 
-        this.datumList = CustomCrsPanel.createDatumList();
         Collections.sort(this.datumList, AbstractIdentifiedObject.NAME_COMPARATOR);
         GeodeticDatum wgs84Datum = null;
         for (GeodeticDatum geodeticDatum : this.datumList) {

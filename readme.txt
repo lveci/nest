@@ -24,7 +24,7 @@ Building NEST from the source
 5. Build NEST from source: Type mvn compile or mvn package
 6. Open project in the your IDE. IntelliJ IDEA users:
 
-    * To build IDEA project files for NEST: Type mvn idea:idea
+    * To build IDEA project files for NEST: Type mvn compile idea:idea
     * In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the created project file $MY_PROJECTS/nest/nest.ipr
 
 7. Open project in the your IDE. Eclipse users:
@@ -50,5 +50,8 @@ Building NEST from the source
     * Working directory: $MY_PROJECTS/nest/output
     * Use classpath of module: nest-bootstrap
 
-
+10. To package a distribution
+	mvn package assembly:assembly
+	note: the corresponding JRE for the platform will be needed in the NEST install folder 
+	
 Enjoy!
