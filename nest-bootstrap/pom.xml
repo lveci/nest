@@ -120,10 +120,6 @@
             <artifactId>jdom</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.bc.jnn</groupId>
-            <artifactId>jnn</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>compile</scope>
@@ -202,7 +198,7 @@
         </dependency>
 		<dependency>
             <groupId>org.geotools</groupId>
-            <artifactId>gt-property</artifactId>
+            <artifactId>gt-cql</artifactId>
         </dependency>
     </dependencies>
 

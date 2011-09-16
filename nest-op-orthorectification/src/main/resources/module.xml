@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-orthorectification</symbolicName>
-    <version>4B-1.0</version>
+    <version>4B-1.1</version>
     <name>NEST Orthorectification</name>
     <description>NEST Orthorectification</description>
 	

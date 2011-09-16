@@ -75,10 +75,6 @@
             <artifactId>jdom</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.bc.jnn</groupId>
-            <artifactId>jnn</artifactId>
-        </dependency>
-        <dependency>
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
         </dependency>
@@ -106,6 +102,14 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-cql</artifactId>
         </dependency>
     </dependencies>
 
