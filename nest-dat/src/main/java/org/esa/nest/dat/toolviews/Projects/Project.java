@@ -33,6 +33,7 @@ import org.esa.nest.dat.dialogs.ProductSetDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.util.ProductFunctions;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -131,8 +132,7 @@ public class Project extends Observable {
                 boolean found = false;
                 final ProjectSubFolder.FolderType folderType = projSubFolder.getFolderType();
                 if(folderType == ProjectSubFolder.FolderType.PRODUCT) {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(f);
-                    found = reader != null;
+                    found = ProductFunctions.isValidProduct(f);
                 } else if(folderType == ProjectSubFolder.FolderType.PRODUCTSET ||
                         folderType == ProjectSubFolder.FolderType.GRAPH) {
                     found = f.getName().toLowerCase().endsWith(".xml");
@@ -348,18 +348,16 @@ public class Project extends Observable {
     }
 
     public static void openSubset(final ProjectSubFolder parentFolder, final File prodFile) {
-        final ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
-        if (reader != null) {
 
-                try {
-                    final Product product = reader.readProductNodes(prodFile, null);
-
-                    final Product subsetProduct = getProductSubset(product);
-                    if(subsetProduct != null)
-                        VisatApp.getApp().getProductManager().addProduct(subsetProduct);
-                } catch(Exception e) {
-                    VisatApp.getApp().showErrorDialog(e.getMessage());
-                }
+        try {
+            final Product product = ProductIO.readProduct(prodFile);
+            if(product != null) {
+                final Product subsetProduct = getProductSubset(product);
+                if(subsetProduct != null)
+                    VisatApp.getApp().getProductManager().addProduct(subsetProduct);
+            }
+        } catch(Exception e) {
+            VisatApp.getApp().showErrorDialog(e.getMessage());
         }
     }
 
@@ -615,14 +613,8 @@ public class Project extends Observable {
                         final ProjectFile projFile = prodList.get(i);
                         final File prodFile = projFile.getFile();
 
-                        final ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
-                        if (reader != null) {
-                            try {
-                                //Product product = reader.readProductNodes(prodFile, null);
-                                subFolder.addFile(projFile);
-                            } catch(Exception e) {
-                                VisatApp.getApp().showErrorDialog(e.getMessage());
-                            }
+                        if (ProductFunctions.isValidProduct(prodFile)) {
+                            subFolder.addFile(projFile);
                         }
                         pm.worked(1);
                     }

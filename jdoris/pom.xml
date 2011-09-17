@@ -7,7 +7,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdoris.version>0.2</jdoris.version>
-        <nest.version>4B-1.0</nest.version>
+        <nest.version>4B-1.1</nest.version>
         <beam.version>4.10-SNAPSHOT</beam.version>
         <jblas.version>1.2.0</jblas.version>
         <junit.version>4.8.2</junit.version>

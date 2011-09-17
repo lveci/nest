@@ -311,45 +311,49 @@ public class GraphExecuter extends Observable {
         try {
             if(filePath == null) return;
             final FileReader fileReader = new FileReader(filePath.getAbsolutePath());
-            Graph graphFromFile;
+            final Graph graphFromFile;
             try {
                 graphFromFile = GraphIO.read(fileReader, null);
             } finally {
                 fileReader.close();
             }
 
-            if(graphFromFile != null) {
-                graph = graphFromFile;
-                nodeList.clear();
-                lastLoadedGraphFile = filePath;
-
-                final Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
-                if(presentationXML != null) {
-                    // get graph description
-                    final Xpp3Dom descXML = presentationXML.getChild("Description");
-                    if(descXML != null && descXML.getValue() != null) {
-                        graphDescription = descXML.getValue();
-                    }
-                }
-
-                final Node[] nodes = graph.getNodes();
-                for (Node n : nodes) {
-                    final GraphNode newGraphNode = new GraphNode(n);
-                    if(presentationXML != null)
-                        newGraphNode.setDisplayParameters(presentationXML);
-                    nodeList.add(newGraphNode);
-
-                    if(addUI)
-                        newGraphNode.setOperatorUI(CreateOperatorUI(newGraphNode.getOperatorName()));
-
-                    setChanged();
-                    notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
-                    clearChanged();
-                }
-                idCount = nodes.length;
-            }
+            setGraph(graphFromFile, addUI);
+            lastLoadedGraphFile = filePath;
         } catch(Throwable e) {
             throw new GraphException("Unable to load graph " + filePath +"\n"+e.getMessage());
+        }
+    }
+
+    public void setGraph(final Graph graphFromFile, final boolean addUI) {
+        if(graphFromFile != null) {
+            graph = graphFromFile;
+            nodeList.clear();
+
+            final Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
+            if(presentationXML != null) {
+                // get graph description
+                final Xpp3Dom descXML = presentationXML.getChild("Description");
+                if(descXML != null && descXML.getValue() != null) {
+                    graphDescription = descXML.getValue();
+                }
+            }
+
+            final Node[] nodes = graph.getNodes();
+            for (Node n : nodes) {
+                final GraphNode newGraphNode = new GraphNode(n);
+                if(presentationXML != null)
+                    newGraphNode.setDisplayParameters(presentationXML);
+                nodeList.add(newGraphNode);
+
+                if(addUI)
+                    newGraphNode.setOperatorUI(CreateOperatorUI(newGraphNode.getOperatorName()));
+
+                setChanged();
+                notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
+                clearChanged();
+            }
+            idCount = nodes.length;
         }
     }
 

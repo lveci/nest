@@ -71,6 +71,19 @@
 			<osFolder>main/bin/linux64/</osFolder>
 		</properties>
 	  </profile>
+	  <profile>
+		<id>macosx</id>
+		<activation>
+			<os>
+				<family>mac</family>
+				<!-- arch not needed here since looks like *.jnilib are compiled to support both i386/x86_64 -->
+			</os>
+		</activation>
+		<properties>
+			<macosx>true</macosx>
+			<osFolder>main/bin/macosx/</osFolder>
+		</properties>
+	   </profile> 
 	</profiles>
 	
 	<build>

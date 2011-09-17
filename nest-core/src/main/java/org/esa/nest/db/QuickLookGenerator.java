@@ -202,14 +202,11 @@ public class QuickLookGenerator {
         // check if quicklook exist with product
         productFile = findProductBrowseImage(productFile);
 
-        final ProductReader reader = ProductIO.getProductReaderForFile(productFile);
-        if(reader != null) {
-            final Product sourceProduct = reader.readProductNodes(productFile, null);
-            if(sourceProduct != null) {
-                createQuickLook(id, sourceProduct);
+        final Product sourceProduct = ProductIO.readProduct(productFile);
+        if(sourceProduct != null) {
+            createQuickLook(id, sourceProduct);
 
-                sourceProduct.dispose();
-            }
+            sourceProduct.dispose();
         }
     }
 

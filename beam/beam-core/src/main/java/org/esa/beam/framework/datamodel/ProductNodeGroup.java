@@ -166,7 +166,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * @return true, if the node has been added
      */
     public boolean add(T node) {
-        Assert.notNull(node, "node");
+        //Assert.notNull(node, "node");
         boolean added = nodeList.add(node);
         if (added) {
             notifyAdded(node);
@@ -181,7 +181,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * @param node  the node to be added, ignored if <code>null</code>
      */
     public void add(int index, T node) {
-        Assert.notNull(node, "node");
+        //Assert.notNull(node, "node");
         nodeList.add(index, node);
         notifyAdded(node);
     }
@@ -193,7 +193,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
      * @return true, if the node was removed
      */
     public boolean remove(T node) {
-        Assert.notNull(node, "node");
+        //Assert.notNull(node, "node");
         boolean removed = nodeList.remove(node);
         if (removed) {
             notifyRemoved(node);

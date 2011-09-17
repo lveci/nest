@@ -106,15 +106,7 @@ public final class DBScanner extends SwingWorker {
 
                 try {
                     // quick test for common readers
-                    Product sourceProduct = ProductFunctions.readCommonProductReader(file);
-                    if(sourceProduct == null) {
-                        // check all other readers
-                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                        if(reader != null) {
-                            sourceProduct = reader.readProductNodes(file, null);
-                        }
-                    }
-
+                    final Product sourceProduct = ProductIO.readProduct(file);
                     if(sourceProduct != null) {
                         final ProductEntry entry = db.saveProduct(sourceProduct);
                         if(!entry.quickLookExists()) {

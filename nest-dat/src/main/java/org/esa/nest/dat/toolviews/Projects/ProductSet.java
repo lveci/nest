@@ -20,6 +20,7 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.ProductSetDialog;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.util.ProductFunctions;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -60,8 +61,8 @@ public final class ProductSet {
     }
 
     boolean addProduct(final File file) {
-        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-        if (reader != null) {
+
+        if (ProductFunctions.isValidProduct(file)) {
             fileList.add(file);
             return true;
         }

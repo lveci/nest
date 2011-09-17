@@ -20,7 +20,9 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.graph.GraphIO;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
@@ -40,6 +42,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -83,7 +86,7 @@ public class BatchGraphDialog extends ModelessDialog {
         tabbedPane.addChangeListener(new ChangeListener() {
 
             public void stateChanged(final ChangeEvent e) {
-                ValidateAllNodes();
+                ValidateAllNodes(true);
             }
         });
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
@@ -246,7 +249,7 @@ public class BatchGraphDialog extends ModelessDialog {
      */
     private void DoProcessing() {
 
-        if(ValidateAllNodes()) {
+        if(ValidateAllNodes(false)) {
 
             JAI.getDefaultInstance().getTileCache().flush();
             System.gc();
@@ -288,7 +291,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    private boolean ValidateAllNodes() {
+    private boolean ValidateAllNodes(final boolean oneOnly) {
         if(isProcessing) return false;
         if(productSetPanel == null)
             return false;
@@ -298,14 +301,14 @@ public class BatchGraphDialog extends ModelessDialog {
         boolean result;
         statusLabel.setText("");
         try {
-            cloneGraphs();
+            cloneGraphs(oneOnly);
 
-            assignParameters();
+            assignParameters(oneOnly);
 
             // first graph must pass
             result = graphExecuterList.get(0).InitGraph();
 
-        } catch(GraphException e) {
+        } catch(Exception e) {
             statusLabel.setText(e.getMessage());
             bottomStatusLabel.setText("");
             result = false;
@@ -383,7 +386,7 @@ public class BatchGraphDialog extends ModelessDialog {
         slaveFileMap = fileMap;
     }
 
-    void assignParameters() {
+    void assignParameters(final boolean oneOnly) {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
         targetFileMap.clear();
@@ -411,6 +414,9 @@ public class BatchGraphDialog extends ModelessDialog {
                 }
             }
             ++graphIndex;
+
+            if(oneOnly)
+                break;
         }
     }
 
@@ -452,7 +458,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    void cloneGraphs() {
+    void cloneGraphs(final boolean oneOnly) throws Exception {
         final GraphExecuter graphEx = graphExecuterList.get(0);
         for(int graphIndex = 1; graphIndex < graphExecuterList.size(); ++graphIndex) {
             final GraphExecuter cloneGraphEx = graphExecuterList.get(graphIndex);
@@ -461,11 +467,20 @@ public class BatchGraphDialog extends ModelessDialog {
         graphExecuterList.clear();
         graphExecuterList.add(graphEx);
 
+        // read graph file
+        final FileReader fileReader = new FileReader(graphFile.getAbsolutePath());
+        final Graph graphFromFile;
+        try {
+            graphFromFile = GraphIO.read(fileReader, null);
+        } finally {
+            fileReader.close();
+        }
+
         final File[] fileList = productSetPanel.getFileList();
         for(int graphIndex = 1; graphIndex < fileList.length; ++graphIndex) {
 
             final GraphExecuter cloneGraphEx = new GraphExecuter();
-            LoadGraph(cloneGraphEx, graphFile);
+            cloneGraphEx.setGraph(graphFromFile, true);
             graphExecuterList.add(cloneGraphEx);
 
             final ArrayList<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
@@ -474,6 +489,9 @@ public class BatchGraphDialog extends ModelessDialog {
                 if(node != null)
                     cloneNode.setOperatorUI(node.GetOperatorUI());
             }
+
+            if(oneOnly)
+                break;
         }
     }
 

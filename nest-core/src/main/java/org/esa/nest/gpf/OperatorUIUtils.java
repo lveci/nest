@@ -77,9 +77,9 @@ public final class OperatorUIUtils {
 
     public static double getNoDataValue(final File extFile) {
         try {
-            final ProductReader productReader = ProductIO.getProductReaderForFile(extFile);
-            final Product product = productReader.readProductNodes(extFile, null);
-            return product.getBandAt(0).getNoDataValue();
+            final Product product = ProductIO.readProduct(extFile);
+            if(product != null)
+                return product.getBandAt(0).getNoDataValue();
         } catch(Exception e) {
             //
         }

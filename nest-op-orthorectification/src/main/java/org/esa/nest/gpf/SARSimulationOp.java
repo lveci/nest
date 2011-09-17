@@ -50,7 +50,7 @@ import java.util.Map;
  * dimension as the original SAR image. The value of each pixel in the DEM image is the elevation of the same
  * pixel in the original SAR image. Then, for each cell in the DEM image, its corresponding pixel position
  * (row/column indices) in the simulated SAR image is computed based on the SAR model. Finally, the backscattered
- * power ? for the pixel is computed using backscattering model.
+ * power for the pixel is computed using backscattering model.
  *
  * Detailed procedure is as the follows:
  * 1. Get the following parameters from the metadata of the SAR image product:
@@ -586,42 +586,85 @@ public final class SARSimulationOp extends Operator {
                     continue;
                 }
 
-                // traverse from near range to far range to detect layover area
-                // todo should determine which side is near range first
-                double maxSlantRange = 0.0;
-                for (int x = x0; x < x0 + w; x++) {
-                    final int i = x - x0;
-                    if (savePixel[i]) {
-                        if (slrs[i] > maxSlantRange) {
-                            maxSlantRange = slrs[i];
-                        } else {
-                            layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                if (nearRangeOnLeft) {
+
+                    // traverse from near range to far range to detect layover area
+                    double maxSlantRange = 0.0;
+                    for (int x = x0; x < x0 + w; x++) {
+                        final int i = x - x0;
+                        if (savePixel[i]) {
+                            if (slrs[i] > maxSlantRange) {
+                                maxSlantRange = slrs[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                            }
                         }
                     }
-                }
 
-                // traverse from far range to near range to detect the remaining layover area
-                double minSlantRange = maxSlantRange;
-                for (int x = x0 + w - 1; x >= x0; x--) {
-                    int i = x - x0;
-                    if (savePixel[i]) {
-                        if (slrs[i] < minSlantRange) {
-                            minSlantRange = slrs[i];
-                        } else {
-                            layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                    // traverse from far range to near range to detect the remaining layover area
+                    double minSlantRange = maxSlantRange;
+                    for (int x = x0 + w - 1; x >= x0; x--) {
+                        int i = x - x0;
+                        if (savePixel[i]) {
+                            if (slrs[i] < minSlantRange) {
+                                minSlantRange = slrs[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                            }
                         }
                     }
-                }
 
-                // traverse from near range to far range to detect shadowing area
-                double maxElevAngle = 0.0;
-                for (int x = x0; x < x0 + w; x++) {
-                    int i = x - x0;
-                    if (savePixel[i]) {
-                        if (elev[i] > maxElevAngle) {
-                            maxElevAngle = elev[i];
-                        } else {
-                            layoverShadowMaskBuffer.setElemIntAt(index[i], 2 + layoverShadowMaskBuffer.getElemIntAt(index[i]));
+                    // traverse from near range to far range to detect shadowing area
+                    double maxElevAngle = 0.0;
+                    for (int x = x0; x < x0 + w; x++) {
+                        int i = x - x0;
+                        if (savePixel[i]) {
+                            if (elev[i] > maxElevAngle) {
+                                maxElevAngle = elev[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 2 + layoverShadowMaskBuffer.getElemIntAt(index[i]));
+                            }
+                        }
+                    }
+
+                } else {
+
+                    // traverse from near range to far range to detect layover area
+                    double maxSlantRange = 0.0;
+                    for (int x = x0 + w - 1; x >= x0; x--) {
+                        final int i = x - x0;
+                        if (savePixel[i]) {
+                            if (slrs[i] > maxSlantRange) {
+                                maxSlantRange = slrs[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                            }
+                        }
+                    }
+
+                    // traverse from far range to near range to detect the remaining layover area
+                    double minSlantRange = maxSlantRange;
+                    for (int x = x0; x < x0 + w; x++) {
+                        int i = x - x0;
+                        if (savePixel[i]) {
+                            if (slrs[i] < minSlantRange) {
+                                minSlantRange = slrs[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                            }
+                        }
+                    }
+
+                    // traverse from near range to far range to detect shadowing area
+                    double maxElevAngle = 0.0;
+                    for (int x = x0 + w - 1; x >= x0; x--) {
+                        int i = x - x0;
+                        if (savePixel[i]) {
+                            if (elev[i] > maxElevAngle) {
+                                maxElevAngle = elev[i];
+                            } else {
+                                layoverShadowMaskBuffer.setElemIntAt(index[i], 2 + layoverShadowMaskBuffer.getElemIntAt(index[i]));
+                            }
                         }
                     }
                 }

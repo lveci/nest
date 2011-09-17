@@ -36,7 +36,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     private final TiePointGrid latGrid;
     private final TiePointGrid lonGrid;
-    private final Approximation[] approximations;
+    private Approximation[] approximations = null;
     private final boolean swathResampling = true;
     private final int sceneRasterWidth;
     private final int sceneRasterHeight;
@@ -114,9 +114,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                 k++;
             }
         }
-        final TiePointGrid normalizedLonGrid = initNormalizedLonGrid();
-        initLatLonMinMax(normalizedLonGrid);
-        approximations = initApproximations(normalizedLonGrid);
     }
 
     /**
@@ -157,6 +154,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      * @return the approximation, never null
      */
     public Approximation getApproximation(int index) {
+        if(approximations == null)
+            approximations = initApproximations();
         return approximations[index];
     }
 
@@ -177,6 +176,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean canGetPixelPos() {
+        if(approximations == null)
+            approximations = initApproximations();
         return approximations != null;
     }
 
@@ -229,6 +230,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
+        if(approximations == null)
+            approximations = initApproximations();
         if (approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
@@ -559,7 +562,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     }
 
-    private Approximation[] initApproximations(TiePointGrid normalizedLonGrid) {
+    private Approximation[] initApproximations() {
+        final TiePointGrid normalizedLonGrid = initNormalizedLonGrid();
+        initLatLonMinMax(normalizedLonGrid);
         final int numPoints = latGrid.getRasterData().getNumElems();
         final int w = latGrid.getRasterWidth();
         final int h = latGrid.getRasterHeight();

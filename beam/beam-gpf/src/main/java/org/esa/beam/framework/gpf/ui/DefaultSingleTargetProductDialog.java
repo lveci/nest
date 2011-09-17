@@ -47,7 +47,7 @@ import java.util.List;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.18 $ $Date: 2011-06-16 19:12:39 $
+ * @version $Revision: 1.19 $ $Date: 2011-09-12 20:31:45 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -127,7 +127,8 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
     @Override
     public void hide() {
-        productChangedHandler.releaseProduct();
+        if(productChangedHandler != null)
+            productChangedHandler.releaseProduct();
         ioParametersPanel.releaseSourceProductSelectors();
         super.hide();
     }

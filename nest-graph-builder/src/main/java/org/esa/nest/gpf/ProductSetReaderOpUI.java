@@ -29,6 +29,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.db.ProductDB;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.ProductFunctions;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -128,8 +129,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                 final File[] files = GetFilePath(addButton, "Add Product");
                 if(files != null) {
                     for(File file : files) {
-                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                        if (reader != null) {
+                        if (ProductFunctions.isValidProduct(file)) {
                             fileModel.addFile(file);
                             countLabel.setText(fileModel.getRowCount()+" Products");
                         }
@@ -498,8 +498,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
                 final File file = new File(value);
                 if(file.exists()) {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if (reader != null) {
+                    if (ProductFunctions.isValidProduct(file)) {
                         fileModel.addFile(file);
                     }
                 }
