@@ -41,6 +41,8 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
     private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
     private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
+    private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
+
     private final GETASSE30ElevationModelDescriptor descriptor;
     private final GETASSE30File[][] elevationFiles;
     private final List<GETASSE30ElevationTile> elevationTileCache;
@@ -67,8 +69,8 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
 
     @Override
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
         final float elevation;
         synchronized (resampling) {
             resampling.computeIndex(pixelX, pixelY,
@@ -96,8 +98,6 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
         float pixelLon = pixelPos.x / (DEGREE_RES * NUM_PIXELS_PER_TILE) - 180.0f;
         return new GeoPos(pixelLat, pixelLon);
     }
-
-
 
     @Override
     public Resampling getResampling() {

@@ -28,6 +28,7 @@ import org.esa.nest.util.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.text.DateFormat;
 
 /**
  * This class represents a product directory.
@@ -141,8 +142,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         final MetadataElement orbitAndAttitude = sourceAttributes.getElement("orbitAndAttitude");
         final MetadataElement orbitInformation = orbitAndAttitude.getElement("orbitInformation");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
-                orbitInformation.getAttributeString("passDirection", defStr).toUpperCase());
+        final String pass = orbitInformation.getAttributeString("passDirection", defStr).toUpperCase();
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, pass);
         final String orbitFile = orbitInformation.getAttributeString("orbitDataFile", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.orbit_state_vector_file, orbitFile);
 
@@ -152,13 +153,27 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         // imageGenerationParameters
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
         final MetadataElement generalProcessingInformation = imageGenerationParameters.getElement("generalProcessingInformation");
+        final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
 
         productType = generalProcessingInformation.getAttributeString("productType", defStr);
         if(productType.contains("SLC"))
             setSLC(true);
 
+        final String productId = productElem.getAttributeString("productId", defStr);
+        final String beamMode = sourceAttributes.getAttributeString("beamModeMnemonic", defStr);
+        String passStr = "DES";
+        if(pass.equals("ASCENDING"))
+            passStr = "ASC";
+        final ProductData.UTC startTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine", timeFormat);
+        final ProductData.UTC stopTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeLastLine", timeFormat);
+
+        final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy_HH.mm");
+        final Date date = startTime.getAsDate();
+        final String dateString = dateFormat.format(date);
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
-        productName = getMission() +'-'+ productType + '-' + productElem.getAttributeString("productId", defStr);
+
+        productName = getMission() +'-'+ productType +'-'+ beamMode +'-'+ passStr +'-'+ dateString +'-'+ productId;
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
@@ -168,15 +183,12 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 ReaderUtils.getTime(generalProcessingInformation, "processingTime", timeFormat));
 
-        final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 getFlag(sarProcessingInformation, "elevationPatternCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
                 getFlag(sarProcessingInformation, "rangeSpreadingLossCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isSLC() ? 0 : 1);
 
-        final ProductData.UTC startTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine", timeFormat);
-        final ProductData.UTC stopTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeLastLine", timeFormat);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
         product.setStartTime(startTime);

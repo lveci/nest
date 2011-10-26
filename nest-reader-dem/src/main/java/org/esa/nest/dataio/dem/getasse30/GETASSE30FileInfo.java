@@ -94,7 +94,7 @@ public class GETASSE30FileInfo {
         return fileInfo;
     }
 
-    private ZipEntry getZipEntryIgnoreCase(final ZipFile zipFile, final String name) {
+    private static ZipEntry getZipEntryIgnoreCase(final ZipFile zipFile, final String name) {
         final Enumeration enumeration = zipFile.entries();
         while (enumeration.hasMoreElements()) {
             final ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();

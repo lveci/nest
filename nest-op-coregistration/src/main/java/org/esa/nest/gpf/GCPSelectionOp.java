@@ -28,10 +28,10 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.StatusProgressMonitor;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -39,7 +39,6 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -404,20 +403,20 @@ public class GCPSelectionOp extends Operator {
 
      if(gcpsComputedMap.get(slaveBand))
          return;
-     final VisatApp visatApp = VisatApp.getApp();
      try {
 
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
 
-        final ArrayList<Thread> threadList = new ArrayList<Thread>();
-        final int numCPU = Runtime.getRuntime().availableProcessors();
+        final ThreadManager threadManager = new ThreadManager();
 
         //final ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
         //timeMonitor.start();
 
-        int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
+        final StatusProgressMonitor status = new StatusProgressMonitor(numberOfMasterGCPs,
+                "Cross Correlating "+bandCountStr+" "+slaveBand.getName()+"... ");
+
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
             checkForCancellation();
 
@@ -469,54 +468,21 @@ public class GCPSelectionOp extends Operator {
                     }
 
                 };
-                threadList.add(worker);
-                worker.start();
 
-                if(threadList.size() >= numCPU) {
-                    for(Thread t: threadList) {
-                        t.join();
-                    }
-                    threadList.clear();
-                }
+                threadManager.add(worker);
             }
-
-            if(visatApp != null) {
-                final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
-                if(pct >= lastPct + 1) {
-                    visatApp.setStatusBarMessage("Cross Correlating "+
-                            bandCountStr+" "+slaveBand.getName()+"... "+pct+"%");
-                    lastPct = pct;
-                }
-            } else {
-                final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
-                if(pct >= lastPct + 10) {
-                    if(lastPct==0) {
-                        System.out.print("Cross Correlating "+bandCountStr+" "+slaveBand.getName()+"...");
-                    } 
-                    System.out.print(" "+pct+"%");
-                    lastPct = pct;
-                }    
-            }
+            status.worked(i);
         }
 
-        if(!threadList.isEmpty()) {
-            for(Thread t: threadList) {
-                t.join();
-            }
-        }
+        threadManager.finish();
 
         gcpsComputedMap.put(slaveBand, true);
          
         //final long duration = timeMonitor.stop();
         //System.out.println("XCorr completed in "+ ProcessTimeMonitor.formatDuration(duration));
-
+        status.done();
      } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
-     } finally {
-         if(visatApp != null)
-            visatApp.setStatusBarMessage("");
-         else
-            System.out.println(" 100%");
+        OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      }
     }
 

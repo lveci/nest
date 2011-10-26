@@ -19,11 +19,12 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.nest.dataio.dem.ElevationTile;
 import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 
 import java.io.IOException;
 
-public class ACEElevationTile {
+public class ACEElevationTile implements ElevationTile {
 
     private ACEElevationModel dem;
     private CachingObjectArray linesCache;

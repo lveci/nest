@@ -116,6 +116,7 @@ class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
                 addSeparator(popup);
                 createMenuItem(popup, "New Project...");
                 createMenuItem(popup, "Load Project...");
+                createMenuItem(popup, "Save Project");
                 createMenuItem(popup, "Save Project As...");
                 createMenuItem(popup, "Close Project");
                 createMenuItem(popup, "Refresh Project");
@@ -240,6 +241,8 @@ class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
             project.CreateNewProject();
         } else if(actionCmd.equals("Load Project...")) {
             project.LoadProject();
+        } else if(actionCmd.equals("Save Project")) {
+            project.SaveProject();
         } else if(actionCmd.equals("Save Project As...")) {
             project.SaveProjectAs();
         } else if(actionCmd.equals("Close Project")) {

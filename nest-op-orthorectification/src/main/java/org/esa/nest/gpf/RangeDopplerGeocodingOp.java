@@ -473,17 +473,17 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static String getMissionType(final MetadataElement absRoot) {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+        final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE).toUpperCase();
         if (mission.equals("ALOS")) {
-            throw new OperatorException("ALOS PALSAR product is currently not supported");
+            //throw new OperatorException("ALOS PALSAR product is currently not supported");
         }
 
-        if ((mission.contains("TSX") || mission.contains("TDX")) && !sampleType.equals("COMPLEX")) {
+        if ((mission.contains("TSX") || mission.contains("TDX")) && !productType.contains("SSC")) {
             throw new OperatorException("Only TerraSAR-X (SSC) products are currently supported");
         }
 
         if (mission.equals("RS1")) {
-            throw new OperatorException("RadarSAT-1 product is currently not supported");
+            //throw new OperatorException("RadarSAT-1 product is currently not supported");
         }
 
         return mission;
@@ -728,14 +728,14 @@ public class RangeDopplerGeocodingOp extends Operator {
                 if (saveSigmaNought) {
                     if (suffix != null && !suffix.isEmpty() && !isPolsar) {
                         if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
-                            targetBandName = "Sigma0_" + suffix + "_" + pol.toUpperCase();
+                            targetBandName = "Sigma0_" + suffix + '_' + pol.toUpperCase();
                         } else {
                             targetBandName = "Sigma0_" + suffix;
                         }
                     } else {
                         targetBandName = "Sigma0";
                     }
-                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand) != null) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, true);
                         if (usePreCalibrationOp) {
@@ -749,14 +749,14 @@ public class RangeDopplerGeocodingOp extends Operator {
                 if (saveSelectedSourceBand) {
                     if (suffix != null && !suffix.isEmpty() && !isPolsar) {
                         if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
-                            targetBandName = "Intensity_" + suffix + "_" + pol.toUpperCase();
+                            targetBandName = "Intensity_" + suffix + '_' + pol.toUpperCase();
                         } else {
                             targetBandName = "Intensity_" + suffix;
                         }
                     } else {
                         targetBandName = "Intensity";
                     }
-                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand) != null) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
                         targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
@@ -773,12 +773,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                     targetBandName = "Sigma0";
                     if (suffix != null && !suffix.isEmpty() && !isPolsar) {
                         if (pol != null && !pol.isEmpty() && !suffix.contains(pol) && !suffix.contains(pol.toUpperCase())) {
-                            targetBandName += "_" + suffix + "_" + pol.toUpperCase();
+                            targetBandName += '_' + suffix + '_' + pol.toUpperCase();
                         } else {
-                            targetBandName += "_" + suffix;
+                            targetBandName += '_' + suffix;
                         }
                     }
-                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand) != null) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, true);
                         if (usePreCalibrationOp) {
@@ -792,9 +792,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                 if (saveSelectedSourceBand) {
                     targetBandName = srcBand.getName();
                     if (pol != null && !pol.isEmpty() && !isPolsar && !srcBand.getName().toLowerCase().contains(pol)) {
-                        targetBandName += "_" + pol.toUpperCase();
+                        targetBandName += '_' + pol.toUpperCase();
                     }
-                    if (addTargetBand(targetBandName, unit, srcBand)) {
+                    if (addTargetBand(targetBandName, unit, srcBand) != null) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
                         targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
@@ -804,7 +804,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if(saveDEM) {
-            addTargetBand("elevation", Unit.METERS, null);
+            final Band elevBand = addTargetBand("elevation", Unit.METERS, null);
+            if(externalDEMFile != null)
+                demNoDataValue = (float)externalDEMNoDataValue;
+            elevBand.setNoDataValue(demNoDataValue);
+            elevBand.setNoDataValueUsed(true);
         }
 
         if(saveLocalIncidenceAngle) {
@@ -832,7 +836,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
-    private boolean addTargetBand(String bandName, String bandUnit, Band sourceBand) {
+    private Band addTargetBand(String bandName, String bandUnit, Band sourceBand) {
 
         if(targetProduct.getBand(bandName) == null) {
 
@@ -848,10 +852,10 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
             targetBand.setNoDataValueUsed(true);
             targetProduct.addBand(targetBand);
-            return true;
+            return targetBand;
         }
 
-        return false;
+        return null;
     }
 
     /**

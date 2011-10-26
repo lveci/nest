@@ -399,6 +399,10 @@ public abstract class Operator {
         context.checkForCancellation();
     }
 
+    public void cancel() {
+        context.setCancelled(true);
+    }
+
     /**
      * Gets the logger whuich can be used to log information during initialisation and tile computation.
      *

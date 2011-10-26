@@ -86,15 +86,16 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
     @Override
     public File getDemInstallDir() {
         if(aceDemInstallDir == null) {
-            String path = Settings.instance().get("DEM/aceDEMDataPath");
+            final String path = Settings.instance().get("DEM/aceDEMDataPath");
             aceDemInstallDir = new File(path);
+            if(!aceDemInstallDir.exists())
+                aceDemInstallDir.mkdirs();
         }
         return aceDemInstallDir;
     }
 
     public boolean isDemInstalled() {
-        final File file = getTileFile(-180, -90);   // todo (nf) - check all tiles
-        return file.canRead();
+        return true;
     }
 
     public URL getDemArchiveUrl() {

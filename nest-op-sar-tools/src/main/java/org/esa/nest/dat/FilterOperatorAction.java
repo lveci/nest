@@ -20,22 +20,21 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
- * FormatChange action.
+ * Filter operator action.
  *
  */
-public class ConvertDataTypeOpAction extends AbstractVisatAction {
+public class FilterOperatorAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog = null;
+    private NestSingleTargetProductDialog dialog;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Convert-Datatype", getAppContext(), "Convert-Datatype", getHelpId());
-            dialog.setTargetProductNameSuffix("_DC");
+            dialog = new NestSingleTargetProductDialog("Image-Filter", getAppContext(), "Image Filter", getHelpId());
+            dialog.setTargetProductNameSuffix("_Filt");
         }
         dialog.show();
 
     }
-
 }

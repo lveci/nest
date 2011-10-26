@@ -415,8 +415,8 @@ public class BatchGraphDialog extends ModelessDialog {
             }
             ++graphIndex;
 
-            if(oneOnly)
-                break;
+           // if(oneOnly)
+           //     break;
         }
     }
 
@@ -467,20 +467,21 @@ public class BatchGraphDialog extends ModelessDialog {
         graphExecuterList.clear();
         graphExecuterList.add(graphEx);
 
-        // read graph file
+   /*     // read graph file
         final FileReader fileReader = new FileReader(graphFile.getAbsolutePath());
         final Graph graphFromFile;
         try {
             graphFromFile = GraphIO.read(fileReader, null);
         } finally {
             fileReader.close();
-        }
+        }        */
 
         final File[] fileList = productSetPanel.getFileList();
         for(int graphIndex = 1; graphIndex < fileList.length; ++graphIndex) {
 
             final GraphExecuter cloneGraphEx = new GraphExecuter();
-            cloneGraphEx.setGraph(graphFromFile, true);
+            LoadGraph(cloneGraphEx, graphFile);
+            //cloneGraphEx.setGraph(graphFromFile, true);
             graphExecuterList.add(cloneGraphEx);
 
             final ArrayList<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
@@ -490,8 +491,8 @@ public class BatchGraphDialog extends ModelessDialog {
                     cloneNode.setOperatorUI(node.GetOperatorUI());
             }
 
-            if(oneOnly)
-                break;
+            //if(oneOnly)
+            //    break;
         }
     }
 

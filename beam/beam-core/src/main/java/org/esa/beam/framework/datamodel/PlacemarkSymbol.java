@@ -46,6 +46,8 @@ public class PlacemarkSymbol extends ShapeFigure {
 
     private static final Color SELECTION_COLOR = new Color(255, 255, 0, 200);
 
+    private static final ImageIcon GCPicon = new ImageIcon(PlacemarkSymbol.class.getResource("GcpShape.png"));
+
     public PlacemarkSymbol(String name, ImageIcon icon) {
         this(name, new Rectangle(0, 0, icon.getIconWidth(), icon.getIconHeight()));
         setIcon(icon);
@@ -237,9 +239,8 @@ public class PlacemarkSymbol extends ShapeFigure {
 //        gcpSymbol.setRefPoint(new PixelPos(0, 0));
 //        return gcpSymbol;
 
-        ImageIcon icon = new ImageIcon(PlacemarkSymbol.class.getResource("GcpShape.png"));
-        PlacemarkSymbol gcpSymbol = new PlacemarkSymbol("GCP-Symbol", icon);
-        gcpSymbol.setRefPoint(new PixelPos(icon.getIconWidth() * 0.5f, icon.getIconHeight() * 0.5f));
+        PlacemarkSymbol gcpSymbol = new PlacemarkSymbol("GCP-Symbol", GCPicon);
+        gcpSymbol.setRefPoint(new PixelPos(GCPicon.getIconWidth() * 0.5f, GCPicon.getIconHeight() * 0.5f));
         return gcpSymbol;
 
     }

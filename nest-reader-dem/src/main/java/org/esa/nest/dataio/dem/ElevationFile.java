@@ -15,13 +15,13 @@
  */
 package org.esa.nest.dataio.dem;
 
-import com.bc.io.IOUtils;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.ftpUtils;
+import org.esa.nest.util.StatusProgressMonitor;
 
 import java.io.*;
 import java.net.SocketException;
@@ -178,25 +178,20 @@ public abstract class ElevationFile {
         }
 
         try {
-            final VisatApp visatApp = VisatApp.getApp();
+            final StatusProgressMonitor status = new StatusProgressMonitor(contentLength,
+                    "Downloading "+localZipFile.getName()+"... ");
+            status.setAllowStdOut(false);
+
             final int size = 32768;
             final byte[] buf = new byte[size];
             int n;
-            int total = 0, lastPct = 0;
+            int total = 0;
             while ((n = is.read(buf, 0, size)) > -1)  {
                 os.write(buf, 0, n);
-                if(visatApp != null) {
-                    total += n;
-                    final int pct = (int)((total/(float)contentLength) * 100);
-                    if(pct >= lastPct + 1) {
-                        visatApp.setStatusBarMessage("Downloading "+localZipFile.getName()+"... "+pct+"%");
-                        lastPct = pct;
-                    }
-                }
+                total += n;
+                status.worked(total);
             }
-            if(visatApp != null)
-                visatApp.setStatusBarMessage("");
-
+            status.done();
 
             while (true) {
                 final int b = is.read();

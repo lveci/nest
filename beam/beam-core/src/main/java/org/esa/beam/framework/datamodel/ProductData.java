@@ -1423,7 +1423,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemFloatAt(int index, float value) {
-            _array[index] = (short) Math.round(value);
+            _array[index] = (short) StrictMath.floor((value+0.5));
         }
 
         /**
@@ -1431,7 +1431,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemDoubleAt(int index, double value) {
-            _array[index] = (short) Math.round(value);
+            _array[index] = (short) StrictMath.floor((value+0.5));
         }
 
         /**
@@ -1761,7 +1761,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemFloatAt(int index, float value) {
-            _array[index] = Math.round(value);
+            _array[index] = (int)StrictMath.floor((value+0.5));
         }
 
         /**
@@ -1769,7 +1769,7 @@ public abstract class ProductData implements Cloneable {
          */
         @Override
         public void setElemDoubleAt(int index, double value) {
-            _array[index] = (int) Math.round(value);
+            _array[index] = (int) StrictMath.floor((value+0.5));
         }
 
         /**
@@ -2055,7 +2055,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#getElemFloatAt(int)}.
          */
         @Override
-        public float getElemFloatAt(int index) {
+        public final float getElemFloatAt(int index) {
             return _array[index];
         }
 
@@ -2063,7 +2063,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#getElemDoubleAt(int)}.
          */
         @Override
-        public double getElemDoubleAt(int index) {
+        public final double getElemDoubleAt(int index) {
             return _array[index];
         }
 
@@ -2095,7 +2095,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#setElemFloatAt(int, float)}.
          */
         @Override
-        public void setElemFloatAt(int index, float value) {
+        public final void setElemFloatAt(int index, float value) {
             _array[index] = value;
         }
 
@@ -2103,7 +2103,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#setElemDoubleAt(int, double)}.
          */
         @Override
-        public void setElemDoubleAt(int index, double value) {
+        public final void setElemDoubleAt(int index, double value) {
             _array[index] = (float) value;
         }
 
@@ -2274,7 +2274,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#getElemFloatAt(int)}.
          */
         @Override
-        public float getElemFloatAt(int index) {
+        public final float getElemFloatAt(int index) {
             return (float) _array[index];
         }
 
@@ -2282,7 +2282,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#getElemDoubleAt(int)}.
          */
         @Override
-        public double getElemDoubleAt(int index) {
+        public final double getElemDoubleAt(int index) {
             return _array[index];
         }
 
@@ -2314,7 +2314,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#setElemFloatAt(int, float)}.
          */
         @Override
-        public void setElemFloatAt(int index, float value) {
+        public final void setElemFloatAt(int index, float value) {
             _array[index] = value;
         }
 
@@ -2322,7 +2322,7 @@ public abstract class ProductData implements Cloneable {
          * Please refer to {@link ProductData#setElemDoubleAt(int, double)}.
          */
         @Override
-        public void setElemDoubleAt(int index, double value) {
+        public final void setElemDoubleAt(int index, double value) {
             _array[index] = value;
         }
 

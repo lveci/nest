@@ -30,13 +30,15 @@
     <extension point="beam-ui:actions">
 
         <action>
-            <id>SlantRangeGroundRangeOp</id>
-            <class>org.esa.nest.dat.SRGROpAction</class>
-            <text>Slant Range to Ground Range</text>
-            <shortDescr>Converts a product to/from slant range to/from ground range</shortDescr>
-            <parent>geometry</parent>
+	        <id>SlantRangeGroundRangeOp</id>
+	        <helpId>SRGROp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>geometry</parent>
+	        <text>Slant Range to Ground Range</text>
+	        <operatorName>SRGR</operatorName>
+	        <dialogTitle>Converts from slant range to ground range</dialogTitle>
+            <targetProductNameSuffix>_GrdRg</targetProductNameSuffix>
             <placeAfter>DEMTools</placeAfter>
-            <helpId>SRGROp</helpId>
         </action>
 
         <action>
@@ -47,15 +49,17 @@
             <parent>sartools</parent>
             <helpId>MultilookOp</helpId>
         </action>
-		
-		<!--action>
-            <id>TileStackOp</id>
-            <class>org.esa.nest.dat.TileStackOpAction</class>
-            <text>TileStack</text>
-            <shortDescr>TileStack</shortDescr>
-            <parent>sartools</parent>
-            <helpId>TileStackOp</helpId>
-        </action-->
+
+        <!--action>
+	        <id>TileStackOp</id>
+	        <helpId>TileStackOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>sartools</parent>
+	        <text>TileStack</text>
+	        <operatorName>TileStackOp</operatorName>
+	        <dialogTitle>TileStack Test operator</dialogTitle>
+            <targetProductNameSuffix>_stk</targetProductNameSuffix>
+	    </action-->
 
         <action>
             <id>Resampling</id>
@@ -92,13 +96,15 @@
         </action>
 
         <action>
-            <id>ConvertDatatypeOp</id>
-            <class>org.esa.nest.dat.ConvertDataTypeOpAction</class>
-            <text>Convert Datatype</text>
-            <shortDescr>Change the datatype of the product</shortDescr>
-            <parent>DatasetConversion</parent>
-            <helpId>ConvertDatatypeOp</helpId>
-        </action>
+	        <id>ConvertDatatypeOp</id>
+	        <helpId>ConvertDatatypeOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>DatasetConversion</parent>
+	        <text>Convert Datatype</text>
+	        <operatorName>Convert-Datatype</operatorName>
+	        <dialogTitle>Change the datatype of the product</dialogTitle>
+            <targetProductNameSuffix>_Cnv</targetProductNameSuffix>
+	    </action>
 
         <action>
             <id>SLCtoPRI</id>
@@ -148,12 +154,14 @@
         </action>
 
         <action>
-            <id>WSSDeBurstOp</id>
-            <class>org.esa.nest.dat.WSSDeBurstOpAction</class>
-            <text>WSS Deburst</text>
-            <shortDescr>Invoke the ASAR WSS DeBurst operator.</shortDescr>
-            <parent>ASARWSS</parent>
-            <helpId>WSSDeburstOp</helpId>
+	        <id>WSSDeBurstOp</id>
+	        <helpId>WSSDeBurstOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>ASARWSS</parent>
+	        <text>ASAR WSS Deburst</text>
+	        <operatorName>DeburstWSS</operatorName>
+	        <dialogTitle>ASAR WSS Deburst operator</dialogTitle>
+            <targetProductNameSuffix>_Deburst</targetProductNameSuffix>
         </action>
 
         <action>
@@ -167,16 +175,17 @@
         </action>
 
         <action>
-            <id>applyOrbitFile</id>
-            <class>org.esa.nest.dat.ApplyOrbitFileOpAction</class>
-            <text>Apply Orbit File</text>
-            <shortDescr>Apply Orbit File to Product</shortDescr>
-            <description>Update product metadata with orbit file</description>
-            <helpId>ApplyOrbitFileOp</helpId>
-            <parent>tools</parent>
-            <placeBefore>Calibration</placeBefore>
+	        <id>applyOrbitFile</id>
+	        <helpId>ApplyOrbitFileOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>tools</parent>
+	        <text>Apply Orbit File</text>
+	        <operatorName>Apply-Orbit-File</operatorName>
+	        <dialogTitle>Apply Orbit File to Product</dialogTitle>
+            <targetProductNameSuffix>_Orb</targetProductNameSuffix>
+			<placeBefore>Calibration</placeBefore>
             <separatorAfter>true</separatorAfter>
-        </action>
+	    </action>
 
         <action>
             <id>replaceMetadata</id>
@@ -198,7 +207,7 @@
 
         <action>
             <id>SpeckleFilterOp</id>
-            <class>org.esa.nest.dat.filtering.SpeckleFilterOpAction</class>
+            <class>org.esa.nest.dat.SpeckleFilterOpAction</class>
             <text>Single Product</text>
             <shortDescr>Invoke the Speckle Filter operator on a single product.</shortDescr>
             <parent>SpeckleFilteringGroup</parent>
@@ -206,26 +215,30 @@
         </action>
 
         <action>
-            <id>MultiTemporalSpeckleFilterOp</id>
-            <class>org.esa.nest.dat.filtering.MultiTemporalSpeckleFilterOpAction</class>
-            <text>Multi-temporal Products</text>
-            <shortDescr>Invoke the Speckle Filter operator on multi-temporal products.</shortDescr>
-            <parent>SpeckleFilteringGroup</parent>
-            <helpId>MultiTemporalSpeckleFilterOp</helpId>
-        </action>
+	        <id>MultiTemporalSpeckleFilterOp</id>
+	        <helpId>MultiTemporalSpeckleFilterOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>SpeckleFilteringGroup</parent>
+	        <text>Multi-temporal Product</text>
+	        <operatorName>Multi-Temporal-Speckle-Filter</operatorName>
+	        <dialogTitle>Multi-temporal Speckle filtering</dialogTitle>
+            <targetProductNameSuffix>_Spk</targetProductNameSuffix>
+	    </action>
 
         <action>
-            <id>FillHoleOp</id>
-            <class>org.esa.nest.dat.FillHoleOpAction</class>
-            <text>Fill DEM Hole</text>
-            <shortDescr>Fill holes in DEM product</shortDescr>
-            <parent>DEMTools</parent>
-            <helpId>FillHoleOp</helpId>
-        </action>
+	        <id>FillHoleOp</id>
+	        <helpId>FillHoleOp</helpId>
+	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <parent>DEMTools</parent>
+	        <text>Fill DEM Hole</text>
+	        <operatorName>Fill-Hole</operatorName>
+	        <dialogTitle>Fill holes in DEM product</dialogTitle>
+            <targetProductNameSuffix>_Filled</targetProductNameSuffix>
+	    </action>
 
         <action>
             <id>ImageFilterOp</id>
-            <class>org.esa.nest.dat.filtering.FilterOperatorAction</class>
+            <class>org.esa.nest.dat.FilterOperatorAction</class>
             <text>Image Filtering</text>
             <shortDescr>Image filtering</shortDescr>
             <parent>tools</parent>

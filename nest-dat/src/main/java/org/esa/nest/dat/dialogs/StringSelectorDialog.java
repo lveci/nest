@@ -15,7 +15,6 @@
  */
 package org.esa.nest.dat.dialogs;
 
-import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
@@ -29,18 +28,18 @@ import java.awt.*;
  * Date: Jun 5, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class ProductSelectorDialog extends ModalDialog {
+public class StringSelectorDialog extends ModalDialog {
 
     private final JComboBox list;
     private boolean ok = false;
 
-    public ProductSelectorDialog(final String title, final String[] productNames) {
+    public StringSelectorDialog(final String title, final String[] itemNames) {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
 
         final JPanel content = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        list = new JComboBox(productNames);
+        list = new JComboBox(itemNames);
         list.setMinimumSize(new Dimension(50, 4));
         content.add(list, gbc);
 
@@ -49,7 +48,7 @@ public class ProductSelectorDialog extends ModalDialog {
         setContent(content);
     }
 
-    public String getSelectedProductName() {
+    public String getSelectedItem() {
         Object selection = list.getSelectedItem();
         if(selection == null) {
             if(list.getModel().getSize() > 0) {

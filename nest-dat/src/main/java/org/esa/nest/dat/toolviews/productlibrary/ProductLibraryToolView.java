@@ -37,11 +37,12 @@ import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+//import java.nio.file.*;
+//import static java.nio.file.StandardCopyOption.*;
 
 public class ProductLibraryToolView extends AbstractToolView {
 
@@ -149,6 +150,23 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
     }
 
+    private void performCopyToAction() {
+        final File targetFolder = promptForRepositoryBaseDir();
+        if(targetFolder == null) return;
+
+        final ProductEntry[] entries = getSelectedProductEntries();
+        for(ProductEntry entry : entries) {
+          /*  if(entry.getMission().equals("ENVISAT")) {
+                try {
+                    final File newFile = new File(targetFolder, entry.getFile().getName());
+                    Files.copy(entry.getFile().toPath(), newFile.toPath(), REPLACE_EXISTING);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }  */
+        }
+    }
+
     private ProductEntry[] getSelectedProductEntries() {
         final int[] selectedRows = productEntryTable.getSelectedRows();
         final ProductEntry[] selectedEntries = new ProductEntry[selectedRows.length];
@@ -183,6 +201,14 @@ public class ProductLibraryToolView extends AbstractToolView {
             }
         });
         popup.add(selectAllItem);
+
+        final JMenuItem copyToItem = new JMenuItem("Copy Selected To...");
+        copyToItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                performCopyToAction();
+            }
+        });
+        //popup.add(copyToItem);
 
         final JMenuItem exploreItem = new JMenuItem("Browse Folder");
         exploreItem.addActionListener(new ActionListener() {

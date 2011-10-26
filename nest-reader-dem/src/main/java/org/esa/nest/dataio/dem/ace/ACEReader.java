@@ -129,7 +129,7 @@ public class ACEReader extends AbstractProductReader {
      * @see #getSubsetDef
      */
     @Override
-    protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
@@ -217,7 +217,7 @@ public class ACEReader extends AbstractProductReader {
     }
 
 
-    private void readRasterDataImpl(final short[] elems,
+    private synchronized void readRasterDataImpl(final short[] elems,
                                     final int sourceOffsetY,
                                     final int sourceOffsetX,
                                     final int sourceStepX,
@@ -239,7 +239,6 @@ public class ACEReader extends AbstractProductReader {
                     _imageInputStream.seek(2 * sourcePos);      // 2 byte
                     _imageInputStream.readFully(elems, destPos, destWidth);
                     sourceY += sourceStepY;
-//                    _pc.fireProcessInProgress(destY);
                     pm.worked(sourceStepY);
                 }
             } else {
@@ -257,7 +256,6 @@ public class ACEReader extends AbstractProductReader {
                         sourceX += sourceStepX;
                     }
                     sourceY += sourceStepY;
-//                    _pc.fireProcessInProgress(destY);
                     pm.worked(sourceStepY);
                 }
             }

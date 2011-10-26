@@ -294,7 +294,9 @@ public class AdaptiveThresholdingOp extends Operator {
             final int stride = ((y - tileMinY) * tileStride) + tileOffset;
             for (int x = x0; x < maxx; x++) {
                 final double val = srcData.getElemDoubleAt((x - tileMinX) + stride);
-                if (val != noDataValue) {
+                if (val == noDataValue) {
+                    return noDataValue;
+                } else {
                     mean += val;
                     ++numPixels;
                 }
@@ -338,7 +340,9 @@ public class AdaptiveThresholdingOp extends Operator {
             for (int x = x0; x < maxx; x++) {
                 if (yGtrHalfGuard || Math.abs(x - tx) > halfGuardWindowSize) {
                     val = srcData.getElemDoubleAt((x - tileMinX) + stride);
-                    if (val != noDataValue) {
+                    if (val == noDataValue) {
+                        return Double.MAX_VALUE;
+                    } else {
                         sum += val;
                         dataArray[numPixels] = val;
                         ++numPixels;

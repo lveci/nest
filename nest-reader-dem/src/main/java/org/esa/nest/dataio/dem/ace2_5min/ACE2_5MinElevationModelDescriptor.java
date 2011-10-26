@@ -164,13 +164,11 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
             if(visatApp != null) {
                 visatApp.setStatusBarMessage("Downloading ACE2 5Min DEM...");
             }
-            if(false) {//visatApp != null) {
-                installWithProgressMonitor(parent);
-            } else {
-                final File archiveFile = FileDownloader.downloadFile(getDemArchiveUrl(), demInstallDir, parent);
-                FileUnpacker.unpackZip(archiveFile, demInstallDir, parent);
-                archiveFile.delete();
-            }
+
+            final File archiveFile = FileDownloader.downloadFile(getDemArchiveUrl(), demInstallDir, parent);
+            FileUnpacker.unpackZip(archiveFile, demInstallDir, parent);
+            archiveFile.delete();
+
             if(visatApp != null) {
                 visatApp.setStatusBarMessage("");
             }

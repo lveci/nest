@@ -586,6 +586,17 @@
             <helpId>settings</helpId>
         </action>
 
+        <action>
+            <parent>export</parent>
+            <id>exportKmzProduct</id>
+            <class>org.esa.nest.dat.actions.ExportKmzProductAction</class>
+            <text>Export Product as Google Earth KMZ...</text>
+            <shortDescr>Export the product as Google Earth KMZ file.</shortDescr>
+            <description>Export the product as Google Earth KMZ file.</description>
+            <helpId>exportKmzFile</helpId>
+            <placeAfter>exportKmzFile</placeAfter>
+        </action>
+
     </extension>
 
 	<extension point="beam-ui:helpSets">
