@@ -236,16 +236,19 @@ class CommandLineTool {
                 graph.addNode(targetNode);
             } else {
                 String targetPath = lineArgs.getTargetFilepath();
-                if(targetPath == null) {
-                    targetPath = lineArgs.getTargetFilepathMap().get(lineArgs.getTargetFilepathMap().firstKey());    
+                if(targetPath == null && !lineArgs.getTargetFilepathMap().isEmpty()) {
+                    final String key = lineArgs.getTargetFilepathMap().firstKey();
+                    targetPath = lineArgs.getTargetFilepathMap().get(key);    
                 }
 
-                final DomElement param = new DefaultDomElement("parameters");
-                param.createChild("file").setValue(targetPath);
-                if(lineArgs.getTargetFormatName() != null)
-                    param.createChild("formatName").setValue(lineArgs.getTargetFormatName());
-                param.createChild("clearCacheAfterRowWrite").setValue(Boolean.toString(lineArgs.isClearCacheAfterRowWrite()));
-                WriterNode.setConfiguration(param);
+                if(targetPath != null) {
+                    final DomElement param = new DefaultDomElement("parameters");
+                    param.createChild("file").setValue(targetPath);
+                    if(lineArgs.getTargetFormatName() != null)
+                        param.createChild("formatName").setValue(lineArgs.getTargetFormatName());
+                    param.createChild("clearCacheAfterRowWrite").setValue(Boolean.toString(lineArgs.isClearCacheAfterRowWrite()));
+                    WriterNode.setConfiguration(param);
+                }
             }
 
             final ProductSetData[] productSetDataList = findProductSetStacks(graph, "ProductSet-Reader", lineArgs.getInFolderPath());

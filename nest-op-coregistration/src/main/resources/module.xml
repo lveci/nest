@@ -61,8 +61,17 @@
             <id>openPCADialog</id>
             <class>org.esa.nest.dat.PCAAction</class>
             <parent>imageAnalysis</parent>
-            <text>Principal Component Analysis</text>
+            <text>Principal Component Analysis (old)</text>
             <shortDescr>Perform Principal Component Analysis</shortDescr>
+            <helpId>PCA</helpId>
+        </action>
+
+        <action>
+            <id>PCA</id>
+            <class>org.esa.nest.dat.PCAOpAction</class>
+            <text>Principal Component Analysis</text>
+            <shortDescr>Principal Component Analysis</shortDescr>
+            <parent>imageAnalysis</parent>
             <helpId>PCA</helpId>
         </action>
 

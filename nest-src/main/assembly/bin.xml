@@ -129,6 +129,7 @@
 						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
                         <excludes>
 							<exclude>jdom:jdom</exclude>
+							<exclude>xerces:xercesImpl</exclude>
 							<exclude>ncsa.hdf:lib-hdf</exclude>
 							<exclude>org.esa.nest:nest-core</exclude>
 							<exclude>org.esa.nest:nest-graph-builder</exclude>

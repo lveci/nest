@@ -19,6 +19,7 @@
     <maxVersion></maxVersion>
     <jdkPreference>jdkOnly</jdkPreference>
     <initialHeapPercent>10</initialHeapPercent>
-    <maxHeapPercent>80</maxHeapPercent>
+    <maxHeapPercent>60</maxHeapPercent>
+    <opt>-Dceres.context=nest</opt>
   </jre>
 </launch4jConfig>

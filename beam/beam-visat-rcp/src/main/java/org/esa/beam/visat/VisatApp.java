@@ -1358,14 +1358,16 @@ public class VisatApp extends BasicApp implements AppContext {
                 }
                 docTitle.append("]");
             }
-            docTitle.append(" - [");
+
             final File sessionFile = getSessionFile();
             if (sessionFile != null) {
+                docTitle.append(" - [");
                 docTitle.append(FileUtils.getDisplayText(sessionFile, 50));
+                docTitle.append("]");
             } else {
-                docTitle.append("Session not saved");
+                //docTitle.append("Session not saved");     //NESTMOD
             }
-            docTitle.append("]");
+
         }
 
         setCurrentDocTitle(docTitle.toString());

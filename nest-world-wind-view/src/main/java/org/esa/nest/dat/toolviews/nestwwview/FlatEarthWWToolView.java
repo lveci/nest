@@ -67,7 +67,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
         // world wind canvas
         initialize(mainPane);
-        if(wwjPanel == null) return null;
+        if(wwjPanel == null) return mainPane;
 
         final LayerList layerList = getWwd().getModel().getLayers();
 

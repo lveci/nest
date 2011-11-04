@@ -5,7 +5,7 @@ if [ -z "$NEST_HOME" ]; then
 fi
 
 java \
-    -Xmx1024M -XX:CompileThreshold=100 -Xverify:none -XX:+UseParallelGC \
+    -Xmx1024M -XX:CompileThreshold=10000 -Xverify:none -XX:+UseParallelGC \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio \
     -Dceres.context=nest \
     -Dnest.debug=false \

@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.awt.*;
 
 /**
  * Helper methods for working with Operators
@@ -612,4 +614,33 @@ public final class OperatorUtils {
         }
     }
 
+    /**
+     * Get an array of rectangles for all source tiles of the image
+     * @return Array of rectangles
+     */
+    public static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {
+
+        final int rasterHeight = sourceProduct.getSceneRasterHeight();
+        final int rasterWidth = sourceProduct.getSceneRasterWidth();
+
+        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
+
+        final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
+        final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
+
+        final Rectangle[] rectangles = new Rectangle[tileCountX * tileCountY];
+        int index = 0;
+        for (int tileY = 0; tileY < tileCountY; tileY++) {
+            for (int tileX = 0; tileX < tileCountX; tileX++) {
+                final Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                                              tileY * tileSize.height,
+                                                              tileSize.width,
+                                                              tileSize.height);
+                final Rectangle intersection = boundary.intersection(tileRectangle);
+                rectangles[index] = intersection;
+                index++;
+            }
+        }
+        return rectangles;
+    }
 }

@@ -20,7 +20,9 @@ import org.esa.nest.gpf.OperatorUtils;
 import org.jblas.ComplexDoubleMatrix;
 import org.jdoris.core.Orbit;
 import org.jdoris.core.SLCImage;
+import org.jdoris.core.Window;
 import org.jdoris.core.filtering.AzimuthFilter;
+import org.jdoris.core.utils.LinearAlgebraUtils;
 import org.jdoris.nest.utils.BandUtilsDoris;
 import org.jdoris.nest.utils.CplxContainer;
 import org.jdoris.nest.utils.ProductContainer;
@@ -81,6 +83,10 @@ public class AzimuthFilterOp extends Operator {
     private static final String PRODUCT_TAG = "azifilt";
 
     private static final int OUT_PRODUCT_DATA_TYPE = ProductData.TYPE_FLOAT32;
+    private int tileSizeX;
+    private int tileSizeY;
+    private int productSizeX;
+    private int productSizeY;
 
 
     /**
@@ -257,7 +263,15 @@ public class AzimuthFilterOp extends Operator {
                 sourceProduct.getSceneRasterHeight());
 
         /// set prefered tile size : should be used only for testing and dev
-//        targetProduct.setPreferredTileSize(1024, 128);
+        targetProduct.setPreferredTileSize(128,128);
+        tileSizeX = targetProduct.getPreferredTileSize().width;
+        tileSizeY = targetProduct.getPreferredTileSize().height;
+
+//        tileSizeX = sourceProduct.getPreferredTileSize().width;
+//        tileSizeY = sourceProduct.getPreferredTileSize().height;
+
+        productSizeX = sourceProduct.getSceneRasterWidth();
+        productSizeY = sourceProduct.getSceneRasterHeight();
 
         // copy product nodes
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
@@ -288,12 +302,13 @@ public class AzimuthFilterOp extends Operator {
     }
 
     private void checkUserInput() throws OperatorException {
-//        TILE_OVERLAP_X = aziFilterOverlap;
-        // check for the logic in input paramaters
 
+        // TILE_OVERLAP_X = aziFilterOverlap;
+
+        // check for the logic in input paramaters
         final MetadataElement masterMeta = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         final int isCoregStack = masterMeta.getAttributeInt(AbstractMetadata.coregistered_stack);
-        if(isCoregStack != 1) {
+        if (isCoregStack != 1) {
             throw new OperatorException("Input should be a coregistered SLC stack");
         }
     }
@@ -322,23 +337,33 @@ public class AzimuthFilterOp extends Operator {
             throws OperatorException {
         try {
 
-//            int w = targetRectangle.width;
-//            int x0 = targetRectangle.x;
-//            int y0 = targetRectangle.y;
-//            int h = targetRectangle.height;
+            int w = targetRectangle.width;
+            int h = targetRectangle.height;
+            int x0 = targetRectangle.x;
+            int y0 = targetRectangle.y;
 //            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-            int extraRange = 0;
+            boolean rectAdjusted = false;
+
+            if (w < tileSizeX) {
+                x0 = productSizeX - tileSizeX;
+                w = tileSizeX;
+                rectAdjusted = true;
+            }
+            if (h < tileSizeY) {
+                y0 = productSizeY - tileSizeY;
+                h = tileSizeY;
+                rectAdjusted = true;
+            }
+//            final Rectangle rect = new Rectangle(targetRectangle);
+            Rectangle rect = new Rectangle(x0, y0, w, h);
+//            System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
+//            System.out.println("------");
 
             // target
             Band targetBand;
 
             final BorderExtender border = BorderExtender.createInstance(BorderExtender.BORDER_ZERO);
-
-            final Rectangle rect = new Rectangle(targetRectangle);
-            rect.width += (TILE_OVERLAP_X + extraRange);
-            rect.height += TILE_OVERLAP_Y;
-//            System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
 
             // loop over ifg(product)Container : both master and slave defined in container
             for (String ifgTag : targetMap.keySet()) {
@@ -360,7 +385,7 @@ public class AzimuthFilterOp extends Operator {
                 azimuthMaster.setMetadata1(product.sourceSlave.metaData);
                 // TODO: variable constant hard-coded, further testing needed
                 azimuthMaster.setVariableFilter(false); // hardcoded to const filtering!
-                azimuthMaster.setTile(new org.jdoris.core.Window(rect));
+                azimuthMaster.setTile(new Window(rect));
 
                 // set data for filtering
                 azimuthMaster.setData(dataMaster);
@@ -370,16 +395,34 @@ public class AzimuthFilterOp extends Operator {
                 azimuthMaster.defineFilter();
                 azimuthMaster.applyFilter();
 
+                ComplexDoubleMatrix filteredData;
+                if (rectAdjusted) {
+
+                    final int offsetX = rect.width - targetRectangle.width;
+                    final int offsetY = rect.height - targetRectangle.height;
+
+                    filteredData = new ComplexDoubleMatrix(targetRectangle.height, targetRectangle.width);
+
+                    LinearAlgebraUtils.setdata(filteredData,
+                            new Window(0, (long) (targetRectangle.height - 1),
+                                    0, (long) (targetRectangle.width - 1)),
+                            azimuthMaster.getData(),
+                            new Window(offsetY, rect.height - 1, offsetX, rect.width - 1));
+
+                } else {
+                    filteredData = azimuthMaster.getData();
+                }
+
                 // get data from filter
                 // commit real() to target
                 targetBand = targetProduct.getBand(product.targetBandName_I);
                 tileRealMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().real(), tileRealMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredData.real(), tileRealMaster, targetRectangle);
 
                 // commit imag() to target
                 targetBand = targetProduct.getBand(product.targetBandName_Q);
                 tileImagMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(azimuthMaster.getData().imag(), tileImagMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredData.imag(), tileImagMaster, targetRectangle);
 
             }
         } catch (Throwable e) {

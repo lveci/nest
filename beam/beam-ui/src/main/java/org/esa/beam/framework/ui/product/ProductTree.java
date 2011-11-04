@@ -428,7 +428,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                                                       boolean leaf,
                                                       int row,
                                                       boolean hasFocus) {
-
+            try {
             super.getTreeCellRendererComponent(tree,
                                                value,
                                                sel,
@@ -563,7 +563,9 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 this.setText(text);
                 this.setToolTipText(toolTipBuffer.toString());
             }
-
+            } catch(Throwable t) {
+                t.printStackTrace();
+            }
             return this;
         }
     }

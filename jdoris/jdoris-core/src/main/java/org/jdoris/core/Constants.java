@@ -18,5 +18,9 @@ public class Constants {
 
     public static final long MEGA = 1000000; // Math.pow(10,6)
 
+    public static final double PI = 3.14159265358979323846264338327950288;
+
+
+
 
 }

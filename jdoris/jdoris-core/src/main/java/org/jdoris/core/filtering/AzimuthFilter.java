@@ -118,13 +118,13 @@ public class AzimuthFilter extends SlcDataFilter {
 
         SpectralUtils.fft_inplace(data, 1);
 
-        if (metadata.doppler.isF_DC_const() && metadata1.doppler.isF_DC_const() && !variableFilter) {
-            // FILTERED = diagxmat(FILTER,SLCIMAGE)
+//        if (metadata.doppler.isF_DC_const() && metadata1.doppler.isF_DC_const() && !variableFilter) {
+//            // FILTERED = diagxmat(FILTER,SLCIMAGE)
             ComplexDoubleMatrix dataTemp = new ComplexDoubleMatrix(filter).mmul(data);
             data = dataTemp.dup();
-        } else {
-            data.muli(new ComplexDoubleMatrix(filter));
-        }
+//        } else {
+//            data.muli(new ComplexDoubleMatrix(filter));
+//        }
 
         SpectralUtils.invfft_inplace(data, 1);
 
