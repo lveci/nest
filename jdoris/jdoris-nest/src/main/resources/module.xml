@@ -124,13 +124,13 @@
             <parent>spectral_filtering</parent>
         </action>
 
-        <action>
+        <!--action>
             <id>PhaseFilterOp</id>
             <class>org.esa.nest.dat.actions.ComingSoonAction</class>
             <text>Phase Filtering (coming soon)</text>
             <shortDescr>Phase filtering of stack of interferograms</shortDescr>
             <parent>insar_tools</parent>
-        </action>
+        </action-->
 
     </extension>
 

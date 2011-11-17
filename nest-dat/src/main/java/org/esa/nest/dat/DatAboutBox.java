@@ -39,7 +39,8 @@ class DatAboutBox extends ModalDialog {
     }
 
     private DatAboutBox(JButton[] others) {
-        super(DatApp.getApp().getMainFrame(), "About DAT", ModalDialog.ID_OK, others, null);    /*I18N*/
+        super(DatApp.getApp().getMainFrame(), "About "+DatApp.getApp().getAppName(),
+                ModalDialog.ID_OK, others, null);    /*I18N*/
 
         final JButton creditsButton = others[0];
         creditsButton.setText("Credits...");  /*I18N*/

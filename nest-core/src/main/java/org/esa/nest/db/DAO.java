@@ -60,7 +60,7 @@ public abstract class DAO {
         return dbFileDir.exists();
     }
 
-    private void setDBSystemDir() {
+    private static void setDBSystemDir() {
         // create the db system directory
         final File fileSystemDir = getDBSystemDir();
         fileSystemDir.mkdir();
@@ -68,11 +68,11 @@ public abstract class DAO {
         System.setProperty("derby.system.home", fileSystemDir.getAbsolutePath());
     }
 
-    public File getDBSystemDir() {
-        return new File(ResourceUtils.getApplicationUserDir(true), dbName);
+    public static File getDBSystemDir() {
+        return new File(ResourceUtils.getApplicationUserDir(true), "productDB");
     }
 
-    private void loadDatabaseDriver(final String driverName) {
+    private static void loadDatabaseDriver(final String driverName) {
         // load Derby driver
         try {
             Class.forName(driverName);

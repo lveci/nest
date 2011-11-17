@@ -58,7 +58,6 @@ import org.esa.beam.framework.param.ParamChangeListener;
 import org.esa.beam.framework.param.ParamProperties;
 import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.util.ArrayUtils;
-import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.StringUtils;
 
@@ -66,7 +65,7 @@ import org.esa.beam.util.StringUtils;
  * The <code>UIUtils</code> class provides methods frequently used in connection with graphical user interfaces.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $  $Date: 2010-12-23 14:35:09 $
+ * @version $Revision: 1.6 $  $Date: 2011-11-14 20:45:46 $
  */
 public class UIUtils {
 

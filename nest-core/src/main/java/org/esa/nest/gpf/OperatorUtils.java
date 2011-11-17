@@ -249,6 +249,19 @@ public final class OperatorUtils {
         return false;
     }
 
+    public static boolean isQuadPol(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final String pol1 = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar, "").trim();
+            final String pol2 = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar, "").trim();
+            final String pol3 = absRoot.getAttributeString(AbstractMetadata.mds3_tx_rx_polar, "").trim();
+            final String pol4 = absRoot.getAttributeString(AbstractMetadata.mds4_tx_rx_polar, "").trim();
+            if(!pol1.isEmpty() && !pol2.isEmpty() && !pol3.isEmpty() && !pol4.isEmpty())
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Copy master GCPs to target product.
      * @param group input master GCP group

@@ -20,12 +20,14 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.gpf.ui.SourceUI;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
+import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
@@ -361,6 +363,21 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     }
 
     /**
+     * pass in a file list for a ProductSetReader
+     * @param product the product files
+     */
+    public void setInputFile(final Product product) {
+        final GraphNode readerNode = graphEx.findGraphNodeByOperator(
+                ReadOp.Spi.getOperatorAlias(ReadOp.class));
+        if(readerNode != null) {
+            SourceUI ui = (SourceUI)readerNode.GetOperatorUI();
+            ui.setSourceProduct(product);
+            
+            ValidateAllNodes();
+        }
+    }
+
+    /**
      * Call Help
      */             
     private void OnHelp() {
@@ -549,6 +566,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     public static File getInternalGraphFolder() {
         return ResourceUtils.getGraphFolder("internal");
+    }
+
+    public static File getStandardGraphFolder() {
+        return ResourceUtils.getGraphFolder("Standard Graphs");
     }
 
     public interface ProcessingListener {

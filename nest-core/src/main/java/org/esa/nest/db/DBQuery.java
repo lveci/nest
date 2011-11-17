@@ -54,6 +54,7 @@ public class DBQuery {
     private String selectedProductTypes[] = {};
     private String selectedAcquisitionMode = "";
     private String selectedPass = "";
+    private String selectedSampleType = "";
     private String selectedPolarization = ANY;
     private String selectedCalibration = ANY;
     private String selectedOrbitCorrection = ANY;
@@ -101,6 +102,15 @@ public class DBQuery {
 
     public String getSelectedPass() {
         return selectedPass;
+    }
+
+    public void setSelectedSampleType(final String sampleType) {
+        if(sampleType != null)
+            selectedSampleType = sampleType;
+    }
+
+    public String getSelectedSampleType() {
+        return selectedSampleType;
     }
 
     public void setSelectedPolarization(final String pol) {
@@ -176,34 +186,38 @@ public class DBQuery {
 
         String queryStr = "";
         if(selectedMissions.length > 0) {
-            queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.MISSION, selectedMissions);
+            queryStr += SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.MISSION, selectedMissions);
         }
         if(selectedProductTypes.length > 0) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += SQLUtils.getOrList(ProductDB.PROD_TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
+            queryStr += SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
         }
         if(!selectedAcquisitionMode.isEmpty() && !selectedAcquisitionMode.equals(ALL_MODES)) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+"'";
+            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+ '\'';
         }
         if(!selectedPass.isEmpty() && !selectedPass.equals(ALL_PASSES)) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+"'";
+            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+ '\'';
+        }
+        if(!selectedSampleType.isEmpty() && !selectedSampleType.equals(ANY)) {
+            queryStr += SQLUtils.addAND(queryStr);
+            queryStr += "( "+ MetadataTable.TABLE+'.'+AbstractMetadata.SAMPLE_TYPE+"='"+selectedSampleType+"' )";
         }
         if(!selectedPolarization.isEmpty() && !selectedPolarization.equals(ANY)) {
             queryStr += SQLUtils.addAND(queryStr);
             queryStr += "( "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='"+selectedPolarization+"'"+ " OR "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+"'"+ " )";                              
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+ '\'' + " )";
         }
         if(!selectedCalibration.isEmpty() && !selectedCalibration.equals(ANY)) {
             queryStr += SQLUtils.addAND(queryStr);
             if(selectedCalibration.equals(CALIBRATED))
-                queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1";
+                queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1";
             else if(selectedCalibration.equals(NOT_CALIBRATED))
-                queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0";
+                queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0";
         }
         if(!selectedOrbitCorrection.isEmpty() && !selectedOrbitCorrection.equals(ANY)) {
             queryStr = formOrbitCorrectionQuery(queryStr);
@@ -214,15 +228,15 @@ public class DBQuery {
             final Date start = SQLUtils.toSQLDate(startDate);
             if(endDate != null) {
                 final Date end = SQLUtils.toSQLDate(endDate);
-                queryStr += "( "+ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time
+                queryStr += "( "+ProductTable.TABLE+'.'+AbstractMetadata.first_line_time
                         +" BETWEEN '"+ start.toString() +"' AND '"+ end.toString() + "' )";
             } else {
-                queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time +">='"+ start.toString()+"'";
+                queryStr += ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +">='"+ start.toString()+ '\'';
             }
         } else if(endDate != null) {
             queryStr += SQLUtils.addAND(queryStr);
             final Date end = SQLUtils.toSQLDate(endDate);
-            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.first_line_time +"<='"+ end.toString()+"'";
+            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +"<='"+ end.toString()+ '\'';
         }
 
         final Set<String> metadataNames = metadataQueryMap.keySet();
@@ -230,23 +244,23 @@ public class DBQuery {
             final String value = metadataQueryMap.get(name);
             if(value != null && !value.isEmpty()) {
                 queryStr += SQLUtils.addAND(queryStr);
-                queryStr += ProductDB.META_TABLE+'.'+name+"='"+value+"'";
+                queryStr += MetadataTable.TABLE+'.'+name+"='"+value+ '\'';
             }
         }
 
         if(!freeQuery.isEmpty()) {
             queryStr += SQLUtils.addAND(queryStr);
-            final String metadataFreeQuery = SQLUtils.insertTableName(db.getMetadataNames(), ProductDB.META_TABLE, freeQuery);
+            final String metadataFreeQuery = SQLUtils.insertTableName(db.getMetadataNames(), MetadataTable.TABLE, freeQuery);
             queryStr += "( "+metadataFreeQuery+" )";
         }
 
         if(baseDir != null) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
         }
         if(excludeDir != null) {
             queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductDB.PROD_TABLE+'.'+AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
+            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
         }
 
         if(queryStr.isEmpty()) {
@@ -260,17 +274,17 @@ public class DBQuery {
     private String formOrbitCorrectionQuery(String queryStr) {
         queryStr += SQLUtils.addAND(queryStr);
         if(selectedOrbitCorrection.equals(ORBIT_VERIFIED)) {
-            queryStr += ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Verified%'";
+            queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Verified%'";
         } else if(selectedOrbitCorrection.equals(ORBIT_PRECISE)) {
             queryStr += "( "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Precise%' OR "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DELFT Precise%' OR "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'PRARE Precise%'"+ " )";
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Precise%' OR "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DELFT Precise%' OR "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'PRARE Precise%'"+ " )";
         } else if(selectedOrbitCorrection.equals(ORBIT_PRELIMINARY)) {
             queryStr += "( "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DORIS%' AND "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DELFT%' AND "+
-                    ProductDB.META_TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'PRARE%'"+ " )";
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DORIS%' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DELFT%' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'PRARE%'"+ " )";
         }
         return queryStr;
     }

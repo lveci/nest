@@ -401,6 +401,37 @@
         </action>
 
         <action>
+            <id>showSupport</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowSupportPageAction</class>
+            <text>Technical Support</text>
+            <shortDescr>Professional Technical Support</shortDescr>
+            <description>Professional Technical Support by Array Systems Computing Inc.</description>
+            <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
+            <id>showTraining</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowTrainingPageAction</class>
+            <text>Training Courses</text>
+            <shortDescr>User Training Courses</shortDescr>
+            <description>User Training Courses</description>
+            <placeAfter>showSupport</placeAfter>
+        </action>
+
+        <action>
+            <id>showGeoint</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowGeointPageAction</class>
+            <text>Get NEST Pro</text>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>The GEOINT SAR Toolbox and Support</shortDescr>
+            <description>The GEOINT SAR Toolbox and Support</description>
+            <placeAfter>showTraining</placeAfter>
+        </action>
+
+        <action>
             <id>showNestHomePage</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowHomePageAction</class>
@@ -444,11 +475,11 @@
             <id>aboutDAT</id>
             <parent>help</parent>
             <class>org.esa.beam.visat.actions.AboutAction</class>
-            <text>About DAT</text>
+            <text>About the Toolbox</text>
             <mnemonic>A</mnemonic>
             <accelerator>ctrl alt A</accelerator>
-            <shortDescr>Displays information about NEST DAT.</shortDescr>
-            <description>Displays information about NEST DAT.</description>
+            <shortDescr>Displays information about this software.</shortDescr>
+            <description>Displays information about this software.</description>
             <smallIcon>icons/About16.gif</smallIcon>
             <largeIcon>icons/About24.gif</largeIcon>
             <helpId>about</helpId>

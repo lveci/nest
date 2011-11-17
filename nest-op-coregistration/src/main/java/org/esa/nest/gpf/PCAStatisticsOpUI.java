@@ -40,8 +40,8 @@ public class PCAStatisticsOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
 
-    private final JComboBox selectEigenvaluesBy = new JComboBox(new String[] { PCAStatisticsOp.EIGENVALUE_THRESHOLD,
-                                                                         PCAStatisticsOp.NUMBER_EIGENVALUES } );
+    private final JComboBox selectEigenvaluesBy = new JComboBox(new String[] { PCAOp.EIGENVALUE_THRESHOLD,
+                                                                         PCAOp.NUMBER_EIGENVALUES } );
 
     private final JTextField eigenvalueThreshold = new JTextField("");
     private final JTextField numberOfEigenvalues = new JTextField("");
@@ -192,7 +192,7 @@ public class PCAStatisticsOpUI extends BaseOperatorUI {
             selectEigenvaluesByLabel.setVisible(true);
 
             String item = (String)selectEigenvaluesBy.getSelectedItem();
-            if(item.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+            if(item.equals(PCAOp.EIGENVALUE_THRESHOLD)) {
                 enableEigenvalueThreshold(true);
                 enableNumberOfEigenvalues(false);
             } else {

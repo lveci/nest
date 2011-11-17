@@ -601,7 +601,7 @@ public class PCAOp extends Operator {
             }
         }
 
-        if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+        if (selectEigenvaluesBy.equals(EIGENVALUE_THRESHOLD)) {
             double sum = 0.0;
             for (int i = 0; i < numOfSourceBands; i++) {
                 sum += eigenValues[i];
@@ -646,7 +646,7 @@ public class PCAOp extends Operator {
                 p.println("    " + sourceBandNames[i]);
             }
             p.println();
-            if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+            if (selectEigenvaluesBy.equals(EIGENVALUE_THRESHOLD)) {
                 p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold + " %");
                 p.println();
             }

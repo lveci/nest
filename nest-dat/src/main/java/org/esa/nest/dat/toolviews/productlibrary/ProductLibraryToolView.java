@@ -16,15 +16,13 @@
 package org.esa.nest.dat.toolviews.productlibrary;
 
 import com.jidesoft.swing.JideSplitPane;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
+import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
@@ -40,7 +38,6 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 //import java.nio.file.*;
 //import static java.nio.file.StandardCopyOption.*;
 
@@ -68,25 +65,14 @@ public class ProductLibraryToolView extends AbstractToolView {
     private LabelBarProgressMonitor progMon;
     private JProgressBar progressBar;
     private File currentDirectory;
-    private ProductOpenHandler openHandler;
+    private ProductOpener openHandler;
     private ProductLibraryConfig libConfig;
-    private final String helpId = "ProductLibrary";
+    private static final String helpId = "ProductLibrary";
 
     private WorldMapUI worldMapUI = null;
     private DatabasePane dbPane;
 
     public ProductLibraryToolView() {
-    }
-
-    /**
-     * Sets the ProductOpenHandler which handles the action when products should
-     * be opened.
-     *
-     * @param handler The <code>ProductOpenHandler</code>, can be
-     *                <code>null</code> to unset the handler.
-     */
-    public void setProductOpenHandler(final ProductOpenHandler handler) {
-        openHandler = handler;
     }
 
     @Override
@@ -97,7 +83,7 @@ public class ProductLibraryToolView extends AbstractToolView {
     public JComponent createControl() {
 
         libConfig = new ProductLibraryConfig(VisatApp.getApp().getPreferences());
-        setProductOpenHandler(new MyProductOpenHandler(VisatApp.getApp()));
+        openHandler = new ProductOpener(VisatApp.getApp());
 
         initUI();
         mainPanel.addComponentListener(new ComponentAdapter() {
@@ -324,7 +310,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
 
         final int answer = JOptionPane.showOptionDialog(mainPanel,
-                                                        "Search directory recursively?", "Add Repository",
+                                                        "Search folder recursively?", "Add Folder",
                                                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
                                                         null, null);
         boolean doRecursive = false;
@@ -592,7 +578,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         headerBar.add(updateButton, gbc);
 
-        headerBar.add(new JLabel("Repository:")); /* I18N */
+        headerBar.add(new JLabel("Folder:")); /* I18N */
         gbc.weightx = 99;
         repositoryListCombo = new JComboBox();
         setComponentName(repositoryListCombo, "repositoryListCombo");
@@ -693,54 +679,6 @@ public class ProductLibraryToolView extends AbstractToolView {
             toggleUpdateButton(LabelBarProgressMonitor.updateCommand);
             updateButton.setEnabled(true);
             mainPanel.setCursor(Cursor.getDefaultCursor());
-        }
-    }
-
-    /**
-     * Should be implemented for handling opening {@link org.esa.beam.framework.datamodel.Product} files.
-     */
-    public static interface ProductOpenHandler {
-
-        /**
-         * Implemetation should open the given files as {@link org.esa.beam.framework.datamodel.Product}s.
-         *
-         * @param productFiles the files to open.
-         */
-        public void openProducts(File[] productFiles);
-    }
-
-    private static class MyProductOpenHandler implements ProductOpenHandler {
-
-        private final VisatApp visatApp;
-
-        public MyProductOpenHandler(final VisatApp visatApp) {
-            this.visatApp = visatApp;
-        }
-
-        public void openProducts(final File[] productFiles) {
-            for (File productFile : productFiles) {
-                if (isProductOpen(productFile)) {
-                    continue;
-                }
-                try {
-                    final Product product = ProductIO.readProduct(productFile);
-
-                    final ProductManager productManager = visatApp.getProductManager();
-                    productManager.addProduct(product);
-                } catch (IOException e) {
-                    visatApp.showErrorDialog("Not able to open product:\n" +
-                            productFile.getPath());
-                }
-            }
-        }
-
-        private boolean isProductOpen(final File productFile) {
-            final Product openedProduct = visatApp.getOpenProduct(productFile);
-            if (openedProduct != null) {
-                visatApp.showInfoDialog("Product '" + openedProduct.getName() + "' is already opened.", null);
-                return true;
-            }
-            return false;
         }
     }
 

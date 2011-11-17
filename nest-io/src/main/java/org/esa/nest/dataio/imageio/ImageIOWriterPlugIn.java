@@ -80,7 +80,7 @@ public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
      * @return a new instance of the <code>GDALWriter</code> class
      */
     public ProductWriter createWriterInstance() {
-        return new ImageIOWriter(this, "jpeg2000"); 
+        return new ImageIOWriter(this, "tif"); 
     }
 
     public BeamFileFilter getProductFileFilter() {

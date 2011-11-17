@@ -183,24 +183,19 @@ class CommandLineTool {
                 String sourceId = entry.getKey();
                 String sourceFilepath = entry.getValue();
                 String sourceNodeId = sourceNodeIdMap.get(sourceId);
+                final DomElement param = new DefaultDomElement("parameters");
+                param.createChild("file").setValue(sourceFilepath);
                 if(readerNode != null) {
                     final Node n = graph.getNode(sourceId);
                     if(n != null) {
-                        final DomElement param = new DefaultDomElement("parameters");
-                        param.createChild("file").setValue(sourceFilepath);
                         n.setConfiguration(param);
                     } else if(sourceId.equals(GPF.SOURCE_PRODUCT_FIELD_NAME)) {
-                        final DomElement param = new DefaultDomElement("parameters");
-                        param.createChild("file").setValue(sourceFilepath);
                         readerNode.setConfiguration(param);
                     }
                 } else if (graph.getNode(sourceNodeId) == null) {
 
-                    DomElement configuration = new DefaultDomElement("parameters");
-                    configuration.createChild("file").setValue(sourceFilepath);
-
                     Node sourceNode = new Node(sourceNodeId, readOperatorAlias);
-                    sourceNode.setConfiguration(configuration);
+                    sourceNode.setConfiguration(param);
 
                     graph.addNode(sourceNode);
                 }
@@ -221,8 +216,8 @@ class CommandLineTool {
 
             // If the graph's last node isn't a WriteOp, then add one
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
-            final Node WriterNode = findNode(graph, writeOperatorAlias);
-            if (WriterNode == null) {
+            final Node writerNode = findNode(graph, writeOperatorAlias);
+            if (writerNode == null) {
 
                 DomElement configuration = new DefaultDomElement("parameters");
                 configuration.createChild("file").setValue(lineArgs.getTargetFilepath());
@@ -247,7 +242,7 @@ class CommandLineTool {
                     if(lineArgs.getTargetFormatName() != null)
                         param.createChild("formatName").setValue(lineArgs.getTargetFormatName());
                     param.createChild("clearCacheAfterRowWrite").setValue(Boolean.toString(lineArgs.isClearCacheAfterRowWrite()));
-                    WriterNode.setConfiguration(param);
+                    writerNode.setConfiguration(param);
                 }
             }
 

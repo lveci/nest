@@ -43,14 +43,6 @@ public class QuicklookProvider implements DataProvider {
         return quickLookComparator;
     }
 
-    public void cleanUp(final ProductEntry entry) {
-    /*    // nothing to do with propertyMap
-        final File quickLookFile = getQuickLookFile(repository.getStorageDir(), entry.getProductFile().getName());
-        if (quickLookFile != null && quickLookFile.exists()) {
-            quickLookFile.delete();
-        }   */
-    }
-
     public TableColumn getTableColumn() {
         if (quickLookColumn == null) {
             quickLookColumn = new TableColumn();

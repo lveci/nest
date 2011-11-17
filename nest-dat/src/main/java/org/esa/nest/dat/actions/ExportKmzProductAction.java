@@ -32,6 +32,9 @@ import org.esa.beam.util.io.BeamFileChooser;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.StringSelectorDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+import org.esa.nest.gpf.GPFProcessor;
+import org.esa.nest.util.ResourceUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
@@ -280,7 +283,13 @@ public class ExportKmzProductAction extends ExecCommand {
                     pm.worked(1);
 
                     final File imgFile = new File(file.getParent(), product.getName()+".tif");
-                    ProductIO.writeProduct(subsetProduct, imgFile, "GeoTIFF", true, SubProgressMonitor.create(pm, 1));
+                    final File graphFile = new File(GraphBuilderDialog.getInternalGraphFolder(), "DataConvertGraph.xml");
+
+                    final GPFProcessor proc = new GPFProcessor(graphFile);
+                    proc.setIO(product.getFileLocation(), imgFile, "GeoTIFF");
+                    proc.executeGraph(SubProgressMonitor.create(pm, 1));
+                    
+                    //ProductIO.writeProduct(subsetProduct, imgFile, "GeoTIFF", true, SubProgressMonitor.create(pm, 1));
                     pm.worked(1);
 
                     final FileInputStream fin = new FileInputStream(imgFile);

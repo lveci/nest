@@ -63,16 +63,19 @@ public class ConvertDataTypeOp extends Operator {
     private String targetDataType = ProductData.TYPESTRING_FLOAT32;
     private int dataType = ProductData.TYPE_FLOAT32;
 
-    @Parameter(valueSet = { SCALING_TRUNCATE, SCALING_LINEAR, SCALING_LINEAR_CLIPPED, SCALING_LOGARITHMIC },
-            defaultValue = SCALING_LINEAR, label="Scaling")
+    @Parameter(valueSet = { SCALING_TRUNCATE, SCALING_LINEAR,
+                            SCALING_LINEAR_CLIPPED, SCALING_LINEAR_PEAK_CLIPPED,
+                            SCALING_LOGARITHMIC },
+                            defaultValue = SCALING_LINEAR, label="Scaling")
     private String targetScalingStr = SCALING_LINEAR;
 
     protected final static String SCALING_TRUNCATE = "Truncate";
     protected final static String SCALING_LINEAR = "Linear (slope and intercept)";
-    protected final static String SCALING_LINEAR_CLIPPED = "Linear (between 95% clipped Histogram)";
+    protected final static String SCALING_LINEAR_CLIPPED = "Linear (between 95% clipped histogram)";
+    protected final static String SCALING_LINEAR_PEAK_CLIPPED = "Linear (peak clipped histogram)";
     protected final static String SCALING_LOGARITHMIC = "Logarithmic";
 
-    private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR_CLIPPED, LOGARITHMIC }
+    private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR_CLIPPED, LINEAR_PEAK_CLIPPED, LOGARITHMIC }
     private ScalingType targetScaling = ScalingType.LINEAR;
 
     /**
@@ -114,6 +117,8 @@ public class ConvertDataTypeOp extends Operator {
             return ScalingType.LINEAR;
         else if(scalingStr.equals(SCALING_LINEAR_CLIPPED))
             return ScalingType.LINEAR_CLIPPED;
+        else if(scalingStr.equals(SCALING_LINEAR_PEAK_CLIPPED))
+            return ScalingType.LINEAR_PEAK_CLIPPED;
         else if(scalingStr.equals(SCALING_LOGARITHMIC))
             return ScalingType.LOGARITHMIC;
         else if(scalingStr.equals(SCALING_TRUNCATE))
@@ -169,7 +174,20 @@ public class ConvertDataTypeOp extends Operator {
             final double srcNoDataValue = sourceBand.getNoDataValue();
             final double destNoDataValue = targetBand.getNoDataValue();
 
-            if(scaling == ScalingType.LINEAR_CLIPPED) {
+            if(scaling == ScalingType.LINEAR_PEAK_CLIPPED) {
+                final Histogram histogram = new Histogram(stx.getHistogramBins(), origMin, origMax);
+                final int[] bitCounts = histogram.getBinCounts();
+                double rightPct = 0.025;
+                for(int i=bitCounts.length-1; i > 0; --i) {
+                    if(bitCounts[i] > 10) {
+                        rightPct = i / (double)bitCounts.length;
+                        break;
+                    }
+                }
+                final Range autoStretchRange = histogram.findRange(0.025, rightPct);
+                origMin = autoStretchRange.getMin();
+                origMax = autoStretchRange.getMax();
+            } else if(scaling == ScalingType.LINEAR_CLIPPED) {
                 final Histogram histogram = new Histogram(stx.getHistogramBins(), origMin, origMax);
                 final Range autoStretchRange = histogram.findRangeFor95Percent();
                 origMin = autoStretchRange.getMin();
@@ -191,8 +209,13 @@ public class ConvertDataTypeOp extends Operator {
                         dstData.setElemDoubleAt(i, truncate(srcValue, newMin, newMax));
                     else if(scaling == ScalingType.LOGARITHMIC)
                         dstData.setElemDoubleAt(i, logScale(srcValue, origMin, newMin, origRange, newRange));
-                    else
+                    else {
+                        if(srcValue > origMax)
+                            srcValue = origMax;
+                        if(srcValue < origMin)
+                            srcValue = origMin;
                         dstData.setElemDoubleAt(i, scale(srcValue, origMin, newMin, origRange, newRange));
+                    }
                 }
                 pm.worked(1);
             }
