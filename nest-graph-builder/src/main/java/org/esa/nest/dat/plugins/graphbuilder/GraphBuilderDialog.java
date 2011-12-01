@@ -30,10 +30,10 @@ import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.MemUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.nest.gpf.ProductSetReaderOp;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -253,8 +253,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         if(ValidateAllNodes()) {
 
-            JAI.getDefaultInstance().getTileCache().flush();
-            System.gc();
+            MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
             progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
@@ -519,8 +518,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 isProcessing = false;
                 graphEx.disposeGraphContext();
                 // free cache
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
+                MemUtils.freeAllMemory();
 
                 pm.done();
             }

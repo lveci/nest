@@ -30,15 +30,17 @@ import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
+import org.esa.beam.util.jai.JAIUtils;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
+import org.esa.nest.util.MemUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
+import javax.media.jai.JAI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -89,6 +91,12 @@ public class DatApp extends VisatApp {
     }
 
     @Override
+    protected void configureJaiTileCache() {
+        MemUtils.createTileCache();
+        super.configureJaiTileCache();
+    }
+
+    @Override
     protected void postInit() {
         try {
             final String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
@@ -99,13 +107,16 @@ public class DatApp extends VisatApp {
                 VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");
             }
 
+            //disable JAI media library
+            System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+
             validateAuxDataFolder();
         } catch(Throwable t) {
             VisatApp.getApp().showErrorDialog("PostInit failed. "+t.toString());
         }
     }
 
-    private void validateAuxDataFolder() throws IOException {
+    private static void validateAuxDataFolder() throws IOException {
         File NestData = new File("~\\NestData");
         if(Settings.isWindowsOS()) {
             NestData = new File("c:\\NestData");
@@ -130,9 +141,7 @@ public class DatApp extends VisatApp {
         }
         
         ProductCache.instance().clearCache();
-        // free cache
-        JAI.getDefaultInstance().getTileCache().flush();
-        System.gc();
+        MemUtils.freeAllMemory();
     }
 
     /**
@@ -399,7 +408,7 @@ public class DatApp extends VisatApp {
         final CommandBar toolBar = createToolBar(INTERACTIONS_TOOL_BAR_ID, "Interactions");
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
-                "selectTool",
+                "selectLayerTool",
                 "rangeFinder",
                 "zoomTool",
                 "pannerTool",

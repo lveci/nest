@@ -197,7 +197,6 @@ public class ConvertDataTypeOp extends Operator {
 
             final int numElem = dstData.getNumElems();
             double srcValue;
-            pm.beginTask(getId(), numElem);
             for(int i=0; i < numElem; ++i) {
                 srcValue = srcData.getElemDoubleAt(i);
                 if(srcValue == srcNoDataValue) {
@@ -217,14 +216,11 @@ public class ConvertDataTypeOp extends Operator {
                         dstData.setElemDoubleAt(i, scale(srcValue, origMin, newMin, origRange, newRange));
                     }
                 }
-                pm.worked(1);
             }
 
             targetTile.setRawSamples(dstData);
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
-        } finally {
-            pm.done();
         }
     }
 

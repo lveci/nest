@@ -424,18 +424,19 @@ public class MosaicOp extends Operator {
                 overalMean = sum / cnt;
             }
 
-            final ArrayList<Float> sampleList = new ArrayList<Float>();
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                     final int trgIndex = targetTile.getDataBufferIndex(x, y);
                     
                     double targetVal = 0;
-                    sampleList.clear();
+                    final float[] sampleList = new float[validSourceData.size()];
+                    final int[] sampleDistanceList = new int[validSourceData.size()];
+                    int numSamples = 0;
                     for(final SourceData srcDat : validSourceData) {
                         final PixelPos sourcePixelPos = srcDat.srcPixPos[index];
-                        if(sourcePixelPos == null)
+                        if(sourcePixelPos == null) {
                             continue;
-
+                        }
                         resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
                                 srcDat.srcRasterWidth-feather, srcDat.srcRasterHeight-feather, srcDat.resamplingIndex);
                         sample = resampling.resample(srcDat.resamplingRaster, srcDat.resamplingIndex);
@@ -448,32 +449,40 @@ public class MosaicOp extends Operator {
 
                             targetVal = sample;
                             if (average) {
-                                sampleList.add(sample);
+                                sampleList[numSamples] = sample;
+                                sampleDistanceList[numSamples] = (int)Math.min(sourcePixelPos.x + 1,
+                                                                          srcDat.srcRasterWidth - sourcePixelPos.x);
+                                numSamples++;
                             }
                         }
                     }
                     if(targetVal != 0) {
-                        if (average && sampleList.size() > 1) {
+                        if (average && numSamples > 1) {
                             double sum = 0;
-                            for(Float f : sampleList) {
-                                sum += f;
+                            int totalWeight = 0;
+                            for(int i = 0; i < numSamples; i++) {
+                                sum += sampleList[i]*sampleDistanceList[i];
+                                totalWeight += sampleDistanceList[i];
                             }
-                            cnt = sampleList.size();
-                            final double localMean = sum / cnt;
+                            /*
+                            final double localMean = sum / numSamples;
+
                             double varSum = 0;
                             for(Float f : sampleList) {
                                 final double diff = f-localMean;
                                 varSum += diff*diff;
                             }
-                            final double stdDev = Math.sqrt(varSum/(cnt-1));
+
+                            final double stdDev = Math.sqrt(varSum/(numSamples-1));
                             for(Float f : sampleList) {
                                 final double var = (f-localMean)*(f-localMean);
-                                if(var > stdDev && cnt > 1) {
+                                if(var > stdDev && numSamples > 1) {
                                     sum -= f;
-                                    --cnt;
+                                    --numSamples;
                                 }
                             }
-                            targetVal = sum / cnt;
+                            */
+                            targetVal = sum / totalWeight;
                         }
                         if(normalizeByMean) {
                             targetVal *= overalMean;

@@ -55,6 +55,7 @@
                     <id>productGrabber</id>
                     <id>createFilteredBand</id>
                     <id>mosaicAction</id>
+                    <id>selectTool</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -424,7 +425,7 @@
             <id>showGeoint</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowGeointPageAction</class>
-            <text>Get NEST Pro</text>
+            <text>Upgrade to NEST Pro</text>
             <separatorAfter>true</separatorAfter>
             <shortDescr>The GEOINT SAR Toolbox and Support</shortDescr>
             <description>The GEOINT SAR Toolbox and Support</description>
@@ -563,6 +564,18 @@
             <parent>MetadataTools</parent>
         </action>
 
+        <action>
+            <id>selectLayerTool</id>
+            <class>org.esa.beam.visat.actions.ToolAction</class>
+            <interactor>org.esa.nest.dat.layers.SelectLayerInteractor</interactor>
+            <interactorListener>org.esa.beam.visat.actions.SelectionInteractorInterceptor</interactorListener>
+            <parent>tools</parent>
+            <text>Select</text>
+            <shortDescr>Select Layer Tool</shortDescr>
+            <largeIcon>icons/SelectTool24.gif</largeIcon>
+            <selected>false</selected>
+            <helpId>selectTool</helpId>
+        </action>
 
         <action>
             <id>showLayersToolBar</id>

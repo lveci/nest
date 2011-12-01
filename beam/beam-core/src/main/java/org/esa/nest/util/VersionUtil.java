@@ -22,10 +22,11 @@ public class VersionUtil {
         final String contextID = getContextID();
         final String arch = System.getProperty("sun.arch.data.model");
         final String os = System.getProperty("os.name").replaceAll(" ", "")+arch;
+        final String src = System.getProperty(contextID+".source");
         String remoteVersionUrl = "http://www.array.ca/nest-web/";
         remoteVersionUrl += "getversion.php?u="+System.getProperty("user.name")+"&a="+contextID+appName+
                 "&r="+System.getProperty("user.country")+"&v="+System.getProperty(contextID+".version")+
-                "&o="+os;
+                "&o="+os+"&s="+src;
         return remoteVersionUrl;
     }
 

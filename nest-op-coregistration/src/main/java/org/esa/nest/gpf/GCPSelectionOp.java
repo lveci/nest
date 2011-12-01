@@ -27,11 +27,13 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.StatusProgressMonitor;
+import org.esa.nest.util.MemUtils;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -286,7 +288,7 @@ public class GCPSelectionOp extends Operator {
             gcpsComputedMap.put(srcBand, false);
 
             if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveProcessed ||
-                    OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
+                    StringUtils.contains(masterBandNames, srcBand.getName())) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
                 final String unit = srcBand.getUnit();
@@ -322,13 +324,11 @@ public class GCPSelectionOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
                                 throws OperatorException {
         try {
-            /*
-            int x0 = targetRectangle.x;
-            int y0 = targetRectangle.y;
-            int w = targetRectangle.width;
-            int h = targetRectangle.height;
-            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-            */
+            //int x0 = targetRectangle.x;
+            //int y0 = targetRectangle.y;
+            //int w = targetRectangle.width;
+            //int h = targetRectangle.height;
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
 
@@ -340,7 +340,7 @@ public class GCPSelectionOp extends Operator {
                     break;
                 }
                 if (slaveBand == masterBand1 || slaveBand == masterBand2 ||
-                        OperatorUtils.isMasterBand(slaveBand, masterBandNames))
+                        StringUtils.contains(masterBandNames, slaveBand.getName()))
                     continue;
                 final String unit = slaveBand.getUnit();
                 if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))
@@ -415,7 +415,7 @@ public class GCPSelectionOp extends Operator {
 
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
         final StatusProgressMonitor status = new StatusProgressMonitor(numberOfMasterGCPs,
-                "Cross Correlating "+bandCountStr+" "+slaveBand.getName()+"... ");
+                "Cross Correlating "+bandCountStr+' '+slaveBand.getName()+"... ");
 
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
             checkForCancellation();
@@ -477,7 +477,9 @@ public class GCPSelectionOp extends Operator {
         threadManager.finish();
 
         gcpsComputedMap.put(slaveBand, true);
-         
+
+        MemUtils.tileCacheFreeOldTiles();
+
         //final long duration = timeMonitor.stop();
         //System.out.println("XCorr completed in "+ ProcessTimeMonitor.formatDuration(duration));
         status.done();
@@ -493,7 +495,7 @@ public class GCPSelectionOp extends Operator {
      */
     private void copyFirstTargetBandGCPs(final Band firstTargetBand, final Band targetBand) {
 
-        ProductNodeGroup<Placemark> firstTargetBandGcpGroup = targetProduct.getGcpGroup(firstTargetBand);
+        final ProductNodeGroup<Placemark> firstTargetBandGcpGroup = targetProduct.getGcpGroup(firstTargetBand);
         final ProductNodeGroup<Placemark> currentTargetBandGCPGroup = targetProduct.getGcpGroup(targetBand);
         final int numberOfGCPs = firstTargetBandGcpGroup.getNodeCount();
         for(int i = 0; i < numberOfGCPs; ++i) {

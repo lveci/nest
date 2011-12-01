@@ -32,4 +32,15 @@ public class GraphicsUtils {
         g.setColor(col);
         g.drawString(text, x, y);
     }
+
+    public static void highlightText(final Graphics2D g, final Color col, final String text, final int x, final int y,
+                                     final Color highlightColor) {
+        g.setColor(highlightColor);
+        g.drawString(text, x - 1, y - 1);
+        g.drawString(text, x - 1, y + 1);
+        g.drawString(text, x + 1, y - 1);
+        g.drawString(text, x + 1, y + 1);
+        g.setColor(col);
+        g.drawString(text, x, y);
+    }
 }

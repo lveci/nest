@@ -22,11 +22,13 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.image.RenderedImage;
+import java.util.ArrayList;
 
 /**
  * Shows the movement of GCP in a coregistered image
@@ -36,20 +38,44 @@ public class GCPVectorLayer extends Layer {
 
     private final Product product;
     private final Band band;
-    private final float lineThickness = 4.0f;
+    private static final float lineThickness = 4.0f;
+    private final ArrayList<GCPData> gcpList = new ArrayList<GCPData>(200);
 
     public GCPVectorLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);
         setName("GCP Movement");
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
+
+        getData();
+    }
+
+    private void getData() {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final MetadataElement bandElem = AbstractMetadata.getBandAbsMetadata(absRoot, band.getName(), false);
+            if(bandElem != null) {
+                final MetadataElement warpDataElem = bandElem.getElement("WarpData");
+                if(warpDataElem != null) {
+                    final MetadataElement[] gcpElems = warpDataElem.getElements();
+                    gcpList.clear();
+                    for(MetadataElement gcpElem : gcpElems) {
+                        final double mstX = gcpElem.getAttributeDouble("mst_x", 0);
+                        final double mstY = gcpElem.getAttributeDouble("mst_y", 0);
+
+                        final double slvX = gcpElem.getAttributeDouble("slv_x", 0);
+                        final double slvY = gcpElem.getAttributeDouble("slv_y", 0);
+
+                        gcpList.add(new GCPData(mstX, mstY, slvX, slvY));
+                    }
+                }
+            }
+        }
     }
 
     @Override
     protected void renderLayer(Rendering rendering) {
-
-        final Band masterBand = product.getBandAt(0);
-        if(band == null || masterBand == band)
+        if(gcpList.isEmpty())
             return;
 
         final Viewport vp = rendering.getViewport();
@@ -70,8 +96,7 @@ public class GCPVectorLayer extends Layer {
         if (irect.isEmpty()) {
             return;
         }
-        double zoom = rendering.getViewport().getZoomFactor();
-        System.out.println("zoom "+zoom);
+        final double zoom = rendering.getViewport().getZoomFactor();
         
         final AffineTransform m2v = vp.getModelToViewTransform();
 
@@ -82,28 +107,25 @@ public class GCPVectorLayer extends Layer {
         final double[] mpts = new double[8];
         final double[] vpts = new double[8];
 
-        final ProductNodeGroup<Placemark> slaveGCPGroup = product.getGcpGroup(band);
-        final ProductNodeGroup<Placemark> masterGCPGroup = product.getGcpGroup(masterBand);
+        graphics.setColor(Color.RED);
 
-        for(int i=0; i < slaveGCPGroup.getNodeCount(); ++i) {
-            final Placemark slaveGCP = slaveGCPGroup.get(i);
-            final Placemark masterGCP = masterGCPGroup.get(slaveGCP.getName());
-            if(masterGCP == null)
-                continue;
+        for(GCPData gcp : gcpList) {
 
-            createArrow((int)slaveGCP.getPixelPos().getX(),
-                        (int)slaveGCP.getPixelPos().getY(),
-                        (int)masterGCP.getPixelPos().getX(),
-                        (int)masterGCP.getPixelPos().getY(), 5, ipts, zoom);
+            createArrow((int)gcp.slvX,
+                        (int)gcp.slvY,
+                        (int)gcp.mstX,
+                        (int)gcp.mstY, 5, ipts, zoom);
 
             i2m.transform(ipts, 0, mpts, 0, 4);
             m2v.transform(mpts, 0, vpts, 0, 4);
 
-            graphics.setColor(Color.RED);
+            //arrowhead
             graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
             graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
-            graphics.setColor(Color.RED);
+            //body
             graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
+            //graphics.setColor(Color.BLUE);
+            //graphics.drawOval((int)vpts[2], (int)vpts[3], 2, 2);
         }
     }
 
@@ -115,12 +137,12 @@ public class GCPVectorLayer extends Layer {
         ipts[3] = yy;
         final double d = xx - x;
         final double d1 = -(yy - y);
-        double mult = 5/zoom;
+        double mult = 1;//5/zoom;
         if(zoom > 2)
             mult = 1;
         double d2 = Math.sqrt(d * d + d1 * d1);
         final double d3;
-        final double size = 3.0;
+        final double size = 2.0;
         if(d2 > (3.0 * i1))
             d3 = i1;
         else
@@ -136,6 +158,17 @@ public class GCPVectorLayer extends Layer {
             ipts[5] = (int)(d7 + d4);
             ipts[6] = (int)(d6 + d5);
             ipts[7] = (int)(d7 - d4);
+        }
+    }
+
+    private static class GCPData {
+        public final double mstX, mstY;
+        public final double slvX, slvY;
+        public GCPData(double mX, double mY, double sX, double sY) {
+            this.mstX = mX;
+            this.mstY = mY;
+            this.slvX = sX;
+            this.slvY = sY;
         }
     }
 }

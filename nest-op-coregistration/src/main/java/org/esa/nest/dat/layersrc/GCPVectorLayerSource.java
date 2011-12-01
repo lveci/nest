@@ -15,13 +15,11 @@
  */
 package org.esa.nest.dat.layersrc;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Placemark;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 import org.esa.beam.framework.ui.layer.LayerSource;
 import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * A source for {@link org.esa.nest.dat.layersrc.GCPVectorLayer}s.
@@ -32,11 +30,17 @@ public class GCPVectorLayerSource implements LayerSource {
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {
         final Product product = pageContext.getAppContext().getSelectedProduct();
-        final ProductNodeGroup<Placemark> masterGCPGroup = product.getGcpGroup(product.getBandAt(0));
         final Band band = product.getBand(pageContext.getAppContext().getSelectedProductSceneView().getRaster().getName());
 
-        return (masterGCPGroup != null && masterGCPGroup.getNodeCount() > 0 &&
-                band != null && product.getBandAt(0) != band);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final MetadataElement bandElem = AbstractMetadata.getBandAbsMetadata(absRoot, band.getName(), false);
+            if(bandElem != null) {
+                final MetadataElement warpDataElem = bandElem.getElement("WarpData");
+                return warpDataElem != null;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -221,9 +221,6 @@
                         <distributionFile>
                             <origin>target/nest-4B-1.1-bin-linux.dir/libjogl_cg.so</origin>
                         </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/libmlib_jai.so</origin>
-                        </distributionFile>
                         <distributionDirectory>
                             <origin>target/nest-4B-1.1-bin-linux.dir/jre</origin>
                         </distributionDirectory>
@@ -272,15 +269,6 @@
                             <origin>target/nest-4B-1.1-bin-win.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/mlib_jai.dll</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/mlib_jai_mmx.dll</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/mlib_jai_util.dll</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-4B-1.1-bin-win.dir/nest-dat.exe</origin>
                         </distributionFile>
                         <distributionFile>
@@ -312,9 +300,6 @@
                         <distributionDirectory>
                             <origin>target/nest-4B-1.1-bin-linux64.dir/jre</origin>
                         </distributionDirectory>
-                        <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libmlib_jai.so</origin>
-                        </distributionFile>
                         <distributionFile>
                             <origin>target/nest-4B-1.1-bin-linux64.dir/libclib_jiio.so</origin>
                         </distributionFile>
@@ -363,10 +348,10 @@
                             <origin>target/nest-4B-1.1-bin-mac.dir/libjogl_cg.jnilib</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/__MACOSX</origin>
+                            <origin>target/nest-4B-1.1-bin-mac.dir/NEST.app</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/NEST.app</origin>
+                            <origin>target/nest-4B-1.1-bin-mac.dir/__MACOSX</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>

@@ -312,7 +312,7 @@ public class DBQuery {
         return resultsList;
     }
 
-    private static Rectangle.Float getBoundingRect(final GeoPos[] geoPositions) {
+    public static Rectangle.Float getBoundingRect(final GeoPos[] geoPositions) {
         float minX = Float.MAX_VALUE;
         float maxX = -Float.MAX_VALUE;
         float minY = Float.MAX_VALUE;

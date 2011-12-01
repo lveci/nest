@@ -27,6 +27,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
+import javax.media.jai.JAI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -518,14 +519,6 @@ public final class OperatorUtils {
             }
         }
         return masterBandNames.toArray(new String[masterBandNames.size()]);
-    }
-
-    public static boolean isMasterBand(final Band band, final String[] masterBandNames) {
-        for(String mstName : masterBandNames) {
-            if(mstName.equals(band.getName()))
-                return true;
-        }
-        return false;
     }
 
     public static class SceneProperties {

@@ -1,5 +1,5 @@
 /*
- * $Id: CloseAllOthersAction.java,v 1.1 2011-02-27 18:40:09 lveci Exp $
+ * $Id: CloseAllOthersAction.java,v 1.2 2011-11-29 22:22:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,8 +20,7 @@ import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.VisatApp;
-
-import javax.media.jai.JAI;
+import org.esa.nest.util.MemUtils;
 
 /**
  * This action closes all opened products other than the one selected.
@@ -38,8 +37,7 @@ public class CloseAllOthersAction extends ExecCommand {
                 VisatApp.getApp().closeProduct(products[i]);
         }
         // free cache
-        JAI.getDefaultInstance().getTileCache().flush();
-        System.gc();
+        MemUtils.freeAllMemory();
     }
 
     @Override
