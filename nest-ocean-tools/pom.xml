@@ -2,14 +2,13 @@
   <parent>
     <artifactId>nest</artifactId>
     <groupId>org.esa.nest</groupId>
-    <version>${nest.version}</version>
+    <version>4B-1.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-ocean-tools</artifactId>
   <name>NEST Ocean Tools</name>
-  <version>${nest.version}</version>
   <description>Provides operators for ocean SAR applications</description>
   
   <dependencies>

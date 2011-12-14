@@ -7,13 +7,12 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>${nest.version}</version>
+        <version>4B-1.1</version>
     </parent>
 
     <name>NEST Core</name>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-core</artifactId>
-    <version>${nest.version}</version>
 
     <packaging>jar</packaging>
 

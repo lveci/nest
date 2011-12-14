@@ -5,13 +5,12 @@
 	<parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>${nest.version}</version>
+        <version>4B-1.1</version>
 		<relativePath>../../pom.xml</relativePath>
     </parent>
 	
     <groupId>org.esa.nest.maven</groupId>
     <artifactId>maven-nest-gpf-archetype</artifactId>
-    <version>${nest.version}</version>
     <name>Maven 2 Archetype Plugin for NEST GPF Operators</name>
     <description>A Maven 2 archetype for projects using NEST Graph Processing Framework (GPF).</description>
     <packaging>jar</packaging>
