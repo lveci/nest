@@ -2,8 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-	
-	<properties>
+
+    <name>NEST Project</name>
+    <url>http://www.array.ca/nest</url>
+    <groupId>org.esa.nest</groupId>
+    <artifactId>nest</artifactId>
+    <version>4B-1.1</version>
+
+    <properties>
         <!--
 	           In version 3.0 of Maven the sourceEncoding property will be embedded in the
 	           build tag. For now the convention is to that it as property.
@@ -22,12 +28,6 @@
 		<jdoris.version>0.2</jdoris.version>
 		<outputdir>../output</outputdir>
     </properties>
-	
-    <name>NEST Project</name>
-    <url>http://www.array.ca/nest</url>
-    <groupId>org.esa.nest</groupId>
-    <artifactId>nest</artifactId>
-    <version>${nest.version}</version>
 
     <packaging>pom</packaging>
 
