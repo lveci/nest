@@ -27,11 +27,13 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.StatusProgressMonitor;
+import org.esa.nest.util.MemUtils;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -39,7 +41,6 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -287,7 +288,7 @@ public class GCPSelectionOp extends Operator {
             gcpsComputedMap.put(srcBand, false);
 
             if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveProcessed ||
-                    OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
+                    StringUtils.contains(masterBandNames, srcBand.getName())) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
                 final String unit = srcBand.getUnit();
@@ -323,13 +324,11 @@ public class GCPSelectionOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
                                 throws OperatorException {
         try {
-            /*
-            int x0 = targetRectangle.x;
-            int y0 = targetRectangle.y;
-            int w = targetRectangle.width;
-            int h = targetRectangle.height;
-            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-            */
+            //int x0 = targetRectangle.x;
+            //int y0 = targetRectangle.y;
+            //int w = targetRectangle.width;
+            //int h = targetRectangle.height;
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
 
@@ -341,7 +340,7 @@ public class GCPSelectionOp extends Operator {
                     break;
                 }
                 if (slaveBand == masterBand1 || slaveBand == masterBand2 ||
-                        OperatorUtils.isMasterBand(slaveBand, masterBandNames))
+                        StringUtils.contains(masterBandNames, slaveBand.getName()))
                     continue;
                 final String unit = slaveBand.getUnit();
                 if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))
@@ -404,20 +403,20 @@ public class GCPSelectionOp extends Operator {
 
      if(gcpsComputedMap.get(slaveBand))
          return;
-     final VisatApp visatApp = VisatApp.getApp();
      try {
 
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
 
-        final ArrayList<Thread> threadList = new ArrayList<Thread>();
-        final int numCPU = Runtime.getRuntime().availableProcessors();
+        final ThreadManager threadManager = new ThreadManager();
 
         //final ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
         //timeMonitor.start();
 
-        int lastPct = 0;
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
+        final StatusProgressMonitor status = new StatusProgressMonitor(numberOfMasterGCPs,
+                "Cross Correlating "+bandCountStr+' '+slaveBand.getName()+"... ");
+
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
             checkForCancellation();
 
@@ -469,54 +468,23 @@ public class GCPSelectionOp extends Operator {
                     }
 
                 };
-                threadList.add(worker);
-                worker.start();
 
-                if(threadList.size() >= numCPU) {
-                    for(Thread t: threadList) {
-                        t.join();
-                    }
-                    threadList.clear();
-                }
+                threadManager.add(worker);
             }
-
-            if(visatApp != null) {
-                final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
-                if(pct >= lastPct + 1) {
-                    visatApp.setStatusBarMessage("Cross Correlating "+
-                            bandCountStr+" "+slaveBand.getName()+"... "+pct+"%");
-                    lastPct = pct;
-                }
-            } else {
-                final int pct = (int)((i/(float)numberOfMasterGCPs) * 100);
-                if(pct >= lastPct + 10) {
-                    if(lastPct==0) {
-                        System.out.print("Cross Correlating "+bandCountStr+" "+slaveBand.getName()+"...");
-                    } 
-                    System.out.print(" "+pct+"%");
-                    lastPct = pct;
-                }    
-            }
+            status.worked(i);
         }
 
-        if(!threadList.isEmpty()) {
-            for(Thread t: threadList) {
-                t.join();
-            }
-        }
+        threadManager.finish();
 
         gcpsComputedMap.put(slaveBand, true);
-         
+
+        MemUtils.tileCacheFreeOldTiles();
+
         //final long duration = timeMonitor.stop();
         //System.out.println("XCorr completed in "+ ProcessTimeMonitor.formatDuration(duration));
-
+        status.done();
      } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
-     } finally {
-         if(visatApp != null)
-            visatApp.setStatusBarMessage("");
-         else
-            System.out.println(" 100%");
+        OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      }
     }
 
@@ -527,7 +495,7 @@ public class GCPSelectionOp extends Operator {
      */
     private void copyFirstTargetBandGCPs(final Band firstTargetBand, final Band targetBand) {
 
-        ProductNodeGroup<Placemark> firstTargetBandGcpGroup = targetProduct.getGcpGroup(firstTargetBand);
+        final ProductNodeGroup<Placemark> firstTargetBandGcpGroup = targetProduct.getGcpGroup(firstTargetBand);
         final ProductNodeGroup<Placemark> currentTargetBandGCPGroup = targetProduct.getGcpGroup(targetBand);
         final int numberOfGCPs = firstTargetBandGcpGroup.getNodeCount();
         for(int i = 0; i < numberOfGCPs; ++i) {

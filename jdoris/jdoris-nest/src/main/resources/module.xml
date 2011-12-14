@@ -1,7 +1,7 @@
 <module>
 
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>doris-operators</symbolicName>
+    <symbolicName>jdoris-nest</symbolicName>
     <version>0.2</version>
     <name>NEST-DORIS Operators</name>
     <description>NEST-DORIS InSAR operators</description>
@@ -124,13 +124,13 @@
             <parent>spectral_filtering</parent>
         </action>
 
-        <action>
+        <!--action>
             <id>PhaseFilterOp</id>
             <class>org.esa.nest.dat.actions.ComingSoonAction</class>
             <text>Phase Filtering (coming soon)</text>
             <shortDescr>Phase filtering of stack of interferograms</shortDescr>
             <parent>insar_tools</parent>
-        </action>
+        </action-->
 
     </extension>
 

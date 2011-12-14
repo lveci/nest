@@ -71,7 +71,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.21 $ $Date: 2011-06-21 20:59:57 $
+ * @version $Revision: 1.22 $ $Date: 2011-11-02 23:04:54 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -140,7 +140,7 @@ public class NestWWToolView extends AbstractToolView {
 
         // world wind canvas
         initialize(mainPane);
-        if(wwjPanel == null) return null;
+        if(wwjPanel == null) return mainPane;
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
         virtualEarthLayerA.setName("MS Virtual Earth Aerial");

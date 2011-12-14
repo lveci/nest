@@ -25,8 +25,8 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
+import org.esa.nest.util.MemUtils;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -156,8 +156,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         if(ValidateAllNodes()) {
 
-            JAI.getDefaultInstance().getTileCache().flush();
-            System.gc();
+            MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
             progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
@@ -334,9 +333,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
 
-                // free cache
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
+                MemUtils.freeAllMemory();
 
                 if(ioPanel.isOpenInAppSelected()) {
                     final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);

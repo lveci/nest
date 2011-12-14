@@ -20,9 +20,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.graph.GraphIO;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
@@ -33,8 +31,8 @@ import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.MemUtils;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -42,7 +40,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -161,6 +158,10 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
     public void addListener(final BatchProcessListener listener) {
         if (!listenerList.contains(listener)) {
             listenerList.add(listener);
@@ -251,8 +252,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
         if(ValidateAllNodes(false)) {
 
-            JAI.getDefaultInstance().getTileCache().flush();
-            System.gc();
+            MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
             progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
@@ -415,8 +415,8 @@ public class BatchGraphDialog extends ModelessDialog {
             }
             ++graphIndex;
 
-            if(oneOnly)
-                break;
+           // if(oneOnly)
+           //     break;
         }
     }
 
@@ -467,20 +467,21 @@ public class BatchGraphDialog extends ModelessDialog {
         graphExecuterList.clear();
         graphExecuterList.add(graphEx);
 
-        // read graph file
+   /*     // read graph file
         final FileReader fileReader = new FileReader(graphFile.getAbsolutePath());
         final Graph graphFromFile;
         try {
             graphFromFile = GraphIO.read(fileReader, null);
         } finally {
             fileReader.close();
-        }
+        }        */
 
         final File[] fileList = productSetPanel.getFileList();
         for(int graphIndex = 1; graphIndex < fileList.length; ++graphIndex) {
 
             final GraphExecuter cloneGraphEx = new GraphExecuter();
-            cloneGraphEx.setGraph(graphFromFile, true);
+            LoadGraph(cloneGraphEx, graphFile);
+            //cloneGraphEx.setGraph(graphFromFile, true);
             graphExecuterList.add(cloneGraphEx);
 
             final ArrayList<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
@@ -490,8 +491,8 @@ public class BatchGraphDialog extends ModelessDialog {
                     cloneNode.setOperatorUI(node.GetOperatorUI());
             }
 
-            if(oneOnly)
-                break;
+            //if(oneOnly)
+            //    break;
         }
     }
 
@@ -536,8 +537,7 @@ public class BatchGraphDialog extends ModelessDialog {
                         statusLabel.setText(statusText);
                         notifyMSG(BatchProcessListener.BatchMSG.UPDATE, statusText);
 
-                        JAI.getDefaultInstance().getTileCache().flush();
-                        System.gc();
+                        MemUtils.freeAllMemory();
 
                         graphEx.InitGraph();
 
@@ -565,8 +565,7 @@ public class BatchGraphDialog extends ModelessDialog {
                     }
                 }
 
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
+                MemUtils.freeAllMemory();
 
             } catch(Exception e) {
                 System.out.print(e.getMessage());

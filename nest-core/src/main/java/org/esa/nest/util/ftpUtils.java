@@ -15,7 +15,6 @@
  */
 package org.esa.nest.util;
 
-import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -91,35 +90,24 @@ public final class ftpUtils {
             }
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
-            final VisatApp visatApp = VisatApp.getApp();
+            final StatusProgressMonitor status = new StatusProgressMonitor(fileSize,
+                    "Downloading "+localFile.getName()+"... ");
+            status.setAllowStdOut(false);
 
-            if(false) {//visatApp != null) {
-                if(!readFile(fis, fos, localFile.getName(), fileSize)) {
-                    return FTPError.READ_ERROR;    
+            final int size = 8192;
+            final byte[] buf = new byte[size];
+            int n;
+            int total = 0;
+            while ((n = fis.read(buf, 0, size)) > -1)  {
+                fos.write(buf, 0, n);
+                if(fileSize != null) {
+                    total += n;
+                    status.worked(total);
+                } else {
+                    status.working();
                 }
-            } else {
-                final int size = 8192;
-                final byte[] buf = new byte[size];
-                int n;
-                int total = 0, lastPct = 0;
-                while ((n = fis.read(buf, 0, size)) > -1)  {
-                    fos.write(buf, 0, n);
-                    if(visatApp != null) {
-                        if(fileSize != null) {
-                            total += n;
-                            final int pct = (int)((total/(float)fileSize) * 100);
-                            if(pct >= lastPct + 1) {
-                                visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... "+pct+"%");
-                                lastPct = pct;
-                            }
-                        } else {
-                            visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... ");
-                        }
-                    }
-                }
-                if(visatApp != null)
-                    visatApp.setStatusBarMessage("");
             }
+            status.done();
 
             ftpClient.completePendingCommand();
             return FTPError.OK;
@@ -151,37 +139,6 @@ public final class ftpUtils {
             }
         }
         return 0;
-    }
-
-    private static boolean readFile(final InputStream fis, final FileOutputStream fos,
-                                 final String fileName, final long fileSize) throws Exception {
-
-        final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Downloading...") {
-            @Override
-            protected Object doInBackground(com.bc.ceres.core.ProgressMonitor pm) throws Exception {
-                final int size = 4096;
-                final byte[] buf = new byte[size];
-
-                pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 200);
-                try {
-                    int n;
-                    while ((n = fis.read(buf, 0, size)) > -1) {
-                        fos.write(buf, 0, n);
-
-                        pm.worked(1);
-                    }
-                } catch(Exception e) {
-                    System.out.println(e.getMessage());
-                    return false;
-                } finally {
-                    pm.done();
-                }
-                return true;
-            }
-        };
-        worker.executeWithBlocking();
-
-        return (Boolean)worker.get();
     }
 
     private FTPFile[] getRemoteFileList(final String path) throws IOException {

@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 public class ProductSetDialog extends ModelessDialog {
 
-    private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
+    private final FileModel fileModel = new FileModel();
     private final JTable productSetTable = new JTable(fileModel);
     private final JTextField nameField;
     private final ProductSet productSet;

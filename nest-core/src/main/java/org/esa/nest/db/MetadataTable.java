@@ -30,6 +30,8 @@ import java.util.Arrays;
  */
 public class MetadataTable implements TableInterface {
 
+    public static final String TABLE = "APP.METADATA";
+
     private final Connection dbConnection;
     private final static ArrayList<String> metadataNamesList = new ArrayList<String>();
 
@@ -45,17 +47,17 @@ public class MetadataTable implements TableInterface {
     }
 
     private static final String strCreateProductTable =
-            "create table APP.METADATA (" +
+            "create table "+TABLE+" (" +
             "    ID          INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)";
 
     private static final String strSaveProduct =
-            "INSERT INTO APP.METADATA ";
+            "INSERT INTO "+TABLE+" ";
 
     private static final String strDeleteProduct =
-            "DELETE FROM APP.METADATA WHERE ID = ?";
+            "DELETE FROM "+TABLE+" WHERE ID = ?";
 
     private static final String strGetMetadata =
-            "SELECT * FROM APP.METADATA " +
+            "SELECT * FROM "+TABLE+" " +
             "WHERE ID = ?";
 
     public MetadataTable(final Connection dbConnection) {
@@ -72,7 +74,7 @@ public class MetadataTable implements TableInterface {
         final Statement alterStatement = dbConnection.createStatement();
         alterStatement.setMaxRows(2);
 
-        final String selectStr = "SELECT * FROM APP.METADATA";
+        final String selectStr = "SELECT * FROM "+TABLE;
         final ResultSet results = alterStatement.executeQuery(selectStr);
 
         final ResultSetMetaData meta = results.getMetaData();
@@ -94,7 +96,7 @@ public class MetadataTable implements TableInterface {
             }
             if(!found) {
                 final int dataType = attrib.getDataType();
-                    final String alterStr = "ALTER TABLE APP.METADATA ADD COLUMN "+ name +" "+ getDataType(dataType)+
+                    final String alterStr = "ALTER TABLE "+TABLE+" ADD COLUMN "+ name +" "+ getDataType(dataType)+
                         " DEFAULT "+ getDefault(dataType)+" NOT NULL";
                     alterStatement.execute(alterStr);
             }

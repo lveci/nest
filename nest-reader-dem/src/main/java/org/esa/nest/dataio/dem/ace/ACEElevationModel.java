@@ -16,15 +16,13 @@
 package org.esa.nest.dataio.dem.ace;
 
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
-import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
+import org.esa.nest.dataio.dem.ElevationTile;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,18 +43,19 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
     private final ACEElevationModelDescriptor descriptor;
-    private final ACEElevationTile[][] elevationTiles;
+    private final ACEFile[][] elevationFiles;
     private final List<ACEElevationTile> elevationTileCache = new ArrayList<ACEElevationTile>();
     private final Resampling resampling;
     private final Resampling.Index resamplingIndex;
     private final Resampling.Raster resamplingRaster;
+    private static final ProductReaderPlugIn productReaderPlugIn = getACEReaderPlugIn();
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         this.descriptor = descriptor;
         resampling = resamplingMethod;
         resamplingIndex = resampling.createIndex();
         resamplingRaster = this;
-        elevationTiles = createEleveationTiles();
+        this.elevationFiles = createElevationFiles();
     }
 
     /**
@@ -74,12 +73,15 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     public float getElevation(GeoPos geoPos) throws Exception {
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
-        resampling.computeIndex(pixelX, pixelY,
+        final float elevation;
+        synchronized (resampling) {
+            resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
                                  RASTER_HEIGHT,
                 resamplingIndex);
 
-        final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
+            elevation = resampling.resample(resamplingRaster, resamplingIndex);
+        }
         if (Float.isNaN(elevation)) {
             return NO_DATA_VALUE;
         }
@@ -100,13 +102,14 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         return new GeoPos(pixelLat, pixelLon);
     }
 
-
     public void dispose() {
+        for(ACEElevationTile tile : elevationTileCache) {
+            tile.dispose();
+        }
         elevationTileCache.clear();
-        for (ACEElevationTile[] _elevationTile : elevationTiles) {
-            for (ACEElevationTile a_elevationTile : _elevationTile) {
-                if (a_elevationTile != null)
-                    a_elevationTile.dispose();
+        for (ACEFile[] elevationFile : elevationFiles) {
+            for (ACEFile file : elevationFile) {
+                file.dispose();
             }
         }
     }
@@ -122,7 +125,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
-        final ACEElevationTile tile = elevationTiles[tileXIndex][tileYIndex];
+        final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if(tile == null) {
             return Float.NaN;
         }
@@ -134,26 +137,20 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         return sample;
     }
 
-    private ACEElevationTile[][] createEleveationTiles() throws IOException {
-        final ACEElevationTile[][] elevationTiles = new ACEElevationTile[NUM_X_TILES][NUM_Y_TILES];
-        final ProductReaderPlugIn ACEReaderPlugIn = getACEReaderPlugIn();
-        for (int i = 0; i < elevationTiles.length; i++) {
-            final int minLon = i * DEGREE_RES - 180;
+    private ACEFile[][] createElevationFiles() throws IOException {
+        final ACEFile[][] elevationFiles = new ACEFile[NUM_X_TILES][NUM_Y_TILES];
 
-            for (int j = 0; j < elevationTiles[i].length; j++) {
-                final ProductReader productReader = ACEReaderPlugIn.createReaderInstance();
-                final int minLat = j * DEGREE_RES - 90;
-
-                final File file = descriptor.getTileFile(minLon, minLat);
-                if (file != null && file.exists() && file.isFile()) {
-                    final Product product = productReader.readProductNodes(file, null);
-                    elevationTiles[i][NUM_Y_TILES - 1 - j] = new ACEElevationTile(this, product);
-                } else {
-                    elevationTiles[i][NUM_Y_TILES - 1 - j] = null;
-                }
+        final File demInstallDir = descriptor.getDemInstallDir();
+        for (int x = 0; x < elevationFiles.length; x++) {
+            final int minLon = x * DEGREE_RES - 180;
+            for (int y = 0; y < elevationFiles[x].length; y++) {
+                final int minLat = y * DEGREE_RES - 90;
+                final String fileName = ACEElevationModelDescriptor.createTileFilename(minLat, minLon);
+                final File localFile = new File(demInstallDir, fileName);
+                elevationFiles[x][NUM_Y_TILES - 1 - y] = new ACEFile(this, localFile, productReaderPlugIn.createReaderInstance());
             }
         }
-        return elevationTiles;
+        return elevationFiles;
     }
 
     public void updateCache(ACEElevationTile tile) {

@@ -235,13 +235,13 @@ class SettingsTree extends JTree implements PopupMenuFactory, ActionListener {
                     this.setText(elem.getName());
                 }
 
-                final Attribute elemValue = elem.getAttribute(Settings.VALUE);
+             /*   final Attribute elemValue = elem.getAttribute(Settings.VALUE);
                 if(elemValue != null) {
                     this.setIcon(prefIcon);
                     this.setToolTipText(elemValue.getValue());     
                 } else {
                     this.setToolTipText(elem.getName());
-                }
+                }      */
             }
 
             return this;

@@ -47,7 +47,7 @@ import java.util.List;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.19 $ $Date: 2011-09-12 20:31:45 $
+ * @version $Revision: 1.20 $ $Date: 2011-09-20 15:10:00 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -70,7 +70,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
-            throw new IllegalArgumentException("operatorName");
+            throw new IllegalArgumentException("operatorName "+operatorName);
         }
 
         ioParametersPanel = new DefaultIOParametersPanel(getAppContext(), operatorSpi, getTargetProductSelector());

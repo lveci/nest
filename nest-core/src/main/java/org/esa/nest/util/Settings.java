@@ -181,4 +181,5 @@ public final class Settings {
             throw new IOException("Cannot find AuxDataPath in setting.xml file");
         return new File(auxDataPath);
     }
+
 }

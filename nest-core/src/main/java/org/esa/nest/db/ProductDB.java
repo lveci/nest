@@ -39,11 +39,9 @@ public class ProductDB extends DAO {
 
     private static ProductDB _instance = null;
     public static final String DEFAULT_PRODUCT_DATABASE_NAME = "productDB";
-    public static final String PROD_TABLE = "APP.PRODUCTS";
-    public static final String META_TABLE = "APP.METADATA";
-    
+
     private static final String strGetProductsWhere =
-            "SELECT * FROM APP.PRODUCTS, APP.METADATA WHERE APP.PRODUCTS.ID = APP.METADATA.ID AND ";
+            "SELECT * FROM "+ProductTable.TABLE+", "+MetadataTable.TABLE+" WHERE "+ProductTable.TABLE+".ID = "+MetadataTable.TABLE+".ID AND ";
 
     public static ProductDB instance() throws Exception {
         if(_instance == null) {

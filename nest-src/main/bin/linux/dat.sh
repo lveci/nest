@@ -12,9 +12,9 @@ fi
 chmod 755 $NEST_HOME/jre/bin/*
 
 $NEST_HOME/jre/bin/java \
-    -server -Xms512M -Xmx1024M -XX:PermSize=512m -XX:MaxPermSize=512m -Xverify:none \
+    -server -Xms512M -Xmx1024M -Xverify:none \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000 \
-    -XX:+UseParallelGC -XX:+UseNUMA -XX:-UseLoopPredicate -XX:+UseStringCache -XX:+UseCompressedStrings \
+    -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache -XX:+UseCompressedStrings \
     -Dceres.context=nest \
     -Dnest.debug=false \
     -Djava.library.path=$PATH:$NEST_HOME \

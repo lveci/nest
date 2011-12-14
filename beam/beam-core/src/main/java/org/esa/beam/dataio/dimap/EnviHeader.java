@@ -20,11 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MapGeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.LambertConformalConicDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
@@ -287,6 +283,14 @@ public class EnviHeader {
         if (product == null) {
             return;
         }
+        if (product.getGeoCoding() instanceof CrsGeoCoding) {
+            //CrsGeoCoding crsGeoCoding = (CrsGeoCoding) product.getGeoCoding();
+            //String wkt = crsGeoCoding.getMapCRS().toWKT();
+            //System.out.println(wkt);
+
+            return;
+        }
+
         MapGeoCoding mapGeoCoding = null;
         if (product.getGeoCoding() instanceof MapGeoCoding) {
             mapGeoCoding = (MapGeoCoding) product.getGeoCoding();

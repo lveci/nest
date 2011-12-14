@@ -16,7 +16,7 @@
       <sourceBands>
       </sourceBands>
       <resamplingMethod>NEAREST_NEIGHBOUR</resamplingMethod>
-	  <average>false</average>
+	  <average>true</average>
 	  <normalizeByMean>false</normalizeByMean>
 	  <pixelSize>0</pixelSize>
       <sceneWidth>0</sceneWidth>

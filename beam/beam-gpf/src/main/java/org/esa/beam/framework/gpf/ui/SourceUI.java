@@ -86,8 +86,18 @@ public class SourceUI extends BaseOperatorUI {
     public void updateParameters() {
         if(sourceProductSelector != null) {
             final Product prod = sourceProductSelector.getSelectedProduct();
-            if(prod != null && prod.getFileLocation() != null)
+            if(prod != null && prod.getFileLocation() != null) {
                 paramMap.put(FILE_PARAMETER, prod.getFileLocation());
+            }
+        }
+    }
+
+    public void setSourceProduct(final Product product) {
+        if(sourceProductSelector != null) {
+            sourceProductSelector.setSelectedProduct(product);
+            if(product != null && product.getFileLocation() != null) {
+                paramMap.put(FILE_PARAMETER, product.getFileLocation());
+            }
         }
     }
 }

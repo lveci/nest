@@ -772,7 +772,6 @@
             <mnemonic>I</mnemonic>
             <shortDescr>Export the current view as an image.</shortDescr>
             <description>Export the current view as an image.</description>
-            <context>image</context>
             <helpId>exportImageFile</helpId>
         </action>
 
@@ -784,7 +783,6 @@
             <mnemonic>K</mnemonic>
             <shortDescr>Export the current view as Google Earth KMZ file.</shortDescr>
             <description>Export the current view as Google Earth KMZ file.</description>
-            <context>image</context>
             <helpId>exportKmzFile</helpId>
         </action>
 
@@ -796,7 +794,6 @@
             <mnemonic>C</mnemonic>
             <shortDescr>Export the colour legend as an image.</shortDescr>
             <description>Export the colour legend of the current view as an image.</description>
-            <context>image</context>
             <helpId>exportLegendImageFile</helpId>
         </action>
 
@@ -808,7 +805,6 @@
             <mnemonic>a</mnemonic>
             <shortDescr>Export the colour palette to plain text.</shortDescr>
             <description>Export the colour palette of the current view to a plain text file.</description>
-            <context>image</context>
             <helpId>exportColorPalette</helpId>
         </action>
 
@@ -820,7 +816,6 @@
             <mnemonic>R</mnemonic>
             <shortDescr>Export the pixels of a Mask.</shortDescr>
             <description>Export the pixels of a mask as tab-separated text.</description>
-            <context>image</context>
             <helpId>exportMaskPixels</helpId>
         </action>
 
@@ -832,7 +827,6 @@
             <mnemonic>T</mnemonic>
             <shortDescr>Export transect pixels.</shortDescr>
             <description>Export transect pixels as tab-separated text.</description>
-            <context>image</context>
             <helpId>exportTransectPixels</helpId>
         </action>
 

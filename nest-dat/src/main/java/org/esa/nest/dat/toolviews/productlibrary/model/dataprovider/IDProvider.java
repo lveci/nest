@@ -32,9 +32,6 @@ public class IDProvider implements DataProvider {
         return comparator;
     }
 
-    public void cleanUp(final ProductEntry entry) {
-    }
-
     public TableColumn getTableColumn() {
         if(column == null) {
             column = new TableColumn();

@@ -21,16 +21,19 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
+import javax.media.jai.JAI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.awt.*;
 
 /**
  * Helper methods for working with Operators
@@ -242,6 +245,19 @@ public final class OperatorUtils {
         if(absRoot != null) {
             final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").trim();
             if(sampleType.equalsIgnoreCase("complex"))
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean isQuadPol(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        if(absRoot != null) {
+            final String pol1 = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar, "").trim();
+            final String pol2 = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar, "").trim();
+            final String pol3 = absRoot.getAttributeString(AbstractMetadata.mds3_tx_rx_polar, "").trim();
+            final String pol4 = absRoot.getAttributeString(AbstractMetadata.mds4_tx_rx_polar, "").trim();
+            if(!pol1.isEmpty() && !pol2.isEmpty() && !pol3.isEmpty() && !pol4.isEmpty())
                 return true;
         }
         return false;
@@ -505,14 +521,6 @@ public final class OperatorUtils {
         return masterBandNames.toArray(new String[masterBandNames.size()]);
     }
 
-    public static boolean isMasterBand(final Band band, final String[] masterBandNames) {
-        for(String mstName : masterBandNames) {
-            if(mstName.equals(band.getName()))
-                return true;
-        }
-        return false;
-    }
-
     public static class SceneProperties {
         public int sceneWidth, sceneHeight;
         public double latMin, lonMin, latMax, lonMax;
@@ -569,11 +577,11 @@ public final class OperatorUtils {
                 targetBandName = "Intensity";
                 final String suff = getSuffixFromBandName(srcBandNames[0]);
                 if (suff != null) {
-                    targetBandName += "_" + suff;
+                    targetBandName += '_' + suff;
                 }
                 final String pol = getBandPolarization(srcBandNames[0], absRoot);
                 if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
+                    targetBandName += '_' + pol.toUpperCase();
                 }
                 if(isPolsar) {
                     final String pre = getprefixFromBandName(srcBandNames[0]);
@@ -591,7 +599,7 @@ public final class OperatorUtils {
                 targetBandName = srcBand.getName();
                 final String pol = getBandPolarization(targetBandName, absRoot);
                 if (pol != null && !pol.isEmpty() && !isPolsar && !targetBandName.toLowerCase().contains(pol)) {
-                    targetBandName += "_" + pol.toUpperCase();
+                    targetBandName += '_' + pol.toUpperCase();
                 }
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -612,4 +620,33 @@ public final class OperatorUtils {
         }
     }
 
+    /**
+     * Get an array of rectangles for all source tiles of the image
+     * @return Array of rectangles
+     */
+    public static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {
+
+        final int rasterHeight = sourceProduct.getSceneRasterHeight();
+        final int rasterWidth = sourceProduct.getSceneRasterWidth();
+
+        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
+
+        final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
+        final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
+
+        final Rectangle[] rectangles = new Rectangle[tileCountX * tileCountY];
+        int index = 0;
+        for (int tileY = 0; tileY < tileCountY; tileY++) {
+            for (int tileX = 0; tileX < tileCountX; tileX++) {
+                final Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                                              tileY * tileSize.height,
+                                                              tileSize.width,
+                                                              tileSize.height);
+                final Rectangle intersection = boundary.intersection(tileRectangle);
+                rectangles[index] = intersection;
+                index++;
+            }
+        }
+        return rectangles;
+    }
 }

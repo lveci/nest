@@ -55,6 +55,7 @@
                     <id>productGrabber</id>
                     <id>createFilteredBand</id>
                     <id>mosaicAction</id>
+                    <id>selectTool</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -401,6 +402,37 @@
         </action>
 
         <action>
+            <id>showSupport</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowSupportPageAction</class>
+            <text>Technical Support</text>
+            <shortDescr>Professional Technical Support</shortDescr>
+            <description>Professional Technical Support by Array Systems Computing Inc.</description>
+            <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
+            <id>showTraining</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowTrainingPageAction</class>
+            <text>Training Courses</text>
+            <shortDescr>User Training Courses</shortDescr>
+            <description>User Training Courses</description>
+            <placeAfter>showSupport</placeAfter>
+        </action>
+
+        <action>
+            <id>showGeoint</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ShowGeointPageAction</class>
+            <text>Upgrade to NEST Pro</text>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>The GEOINT SAR Toolbox and Support</shortDescr>
+            <description>The GEOINT SAR Toolbox and Support</description>
+            <placeAfter>showTraining</placeAfter>
+        </action>
+
+        <action>
             <id>showNestHomePage</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowHomePageAction</class>
@@ -444,11 +476,11 @@
             <id>aboutDAT</id>
             <parent>help</parent>
             <class>org.esa.beam.visat.actions.AboutAction</class>
-            <text>About DAT</text>
+            <text>About the Toolbox</text>
             <mnemonic>A</mnemonic>
             <accelerator>ctrl alt A</accelerator>
-            <shortDescr>Displays information about NEST DAT.</shortDescr>
-            <description>Displays information about NEST DAT.</description>
+            <shortDescr>Displays information about this software.</shortDescr>
+            <description>Displays information about this software.</description>
             <smallIcon>icons/About16.gif</smallIcon>
             <largeIcon>icons/About24.gif</largeIcon>
             <helpId>about</helpId>
@@ -532,6 +564,18 @@
             <parent>MetadataTools</parent>
         </action>
 
+        <action>
+            <id>selectLayerTool</id>
+            <class>org.esa.beam.visat.actions.ToolAction</class>
+            <interactor>org.esa.nest.dat.layers.SelectLayerInteractor</interactor>
+            <interactorListener>org.esa.beam.visat.actions.SelectionInteractorInterceptor</interactorListener>
+            <parent>tools</parent>
+            <text>Select</text>
+            <shortDescr>Select Layer Tool</shortDescr>
+            <largeIcon>icons/SelectTool24.gif</largeIcon>
+            <selected>false</selected>
+            <helpId>selectTool</helpId>
+        </action>
 
         <action>
             <id>showLayersToolBar</id>
@@ -584,6 +628,17 @@
             <smallIcon>icons/Preferences16.gif</smallIcon>
             <largeIcon>icons/Preferences24.gif</largeIcon>
             <helpId>settings</helpId>
+        </action>
+
+        <action>
+            <parent>export</parent>
+            <id>exportKmzProduct</id>
+            <class>org.esa.nest.dat.actions.ExportKmzProductAction</class>
+            <text>Export Product as Google Earth KMZ...</text>
+            <shortDescr>Export the product as Google Earth KMZ file.</shortDescr>
+            <description>Export the product as Google Earth KMZ file.</description>
+            <helpId>exportKmzFile</helpId>
+            <placeAfter>exportKmzFile</placeAfter>
         </action>
 
     </extension>

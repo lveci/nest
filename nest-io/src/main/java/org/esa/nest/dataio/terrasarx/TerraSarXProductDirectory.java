@@ -17,6 +17,8 @@ package org.esa.nest.dataio.terrasarx;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
@@ -82,11 +84,13 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
-            productName = attrib.getData().getElemString();
-
+            productName = attrib.getData().getElemString().replace("_____", "_").replace("__", "_");
+        if(productName.endsWith(".xml"))
+                productName = productName.substring(0, productName.length()-4);
+        
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
-        productType = productVariantInfo.getAttributeString("productType", defStr);
+        productType = productVariantInfo.getAttributeString("productType", defStr).replace("_____", "_").replace("__", "_");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 generalHeader.getAttributeString("itemName", defStr));
@@ -447,7 +451,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 final String pol = ReaderUtils.findPolarizationInBandName(fileName);
                 if(!polsUnique) {
                     final int polIndex = fileName.indexOf(pol);
-                    extraInfo = fileName.substring(polIndex+2, fileName.indexOf("_", polIndex+3));
+                    extraInfo = fileName.substring(polIndex+2, fileName.indexOf(".", polIndex+3));
                 }
 
                 final Band realBand = new Band("i_"+pol+extraInfo, ProductData.TYPE_INT16, w, h);

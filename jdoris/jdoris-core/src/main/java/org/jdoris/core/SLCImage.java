@@ -202,6 +202,9 @@ public final class SLCImage {
         this.doppler.f_DC_a2 = dopplersArray[0].coefficients[2];
         this.doppler.checkConstant();
 
+        this.mlAz = (int) element.getAttributeDouble(AbstractMetadata.azimuth_looks);
+        this.mlRg = (int) element.getAttributeDouble(AbstractMetadata.range_looks);
+
     }
 
     public void parseResFile(File resFileName) throws Exception {

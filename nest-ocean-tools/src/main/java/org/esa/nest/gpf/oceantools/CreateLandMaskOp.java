@@ -175,17 +175,18 @@ public class CreateLandMaskOp extends Operator {
                     targetGeoCoding.getGeoPos(pixelPos, geoPos);
 
                     final int index = tileIndex.getIndex(x);
-                    
+                    float elev = dem.getElevation(geoPos);
+
                     if(landMask) {
                         if(useSRTM)
-                            valid = dem.getElevation(geoPos) == demNoDataValue;
+                            valid = elev == demNoDataValue;
                         else
-                            valid = dem.getElevation(geoPos) < seaThreshold;
+                            valid = elev < seaThreshold;
                     } else {
                         if(useSRTM)
-                            valid = dem.getElevation(geoPos) != demNoDataValue;
+                            valid = elev != demNoDataValue;
                         else
-                            valid = dem.getElevation(geoPos) > landThreshold;
+                            valid = elev > landThreshold;
                     }
 
                     if(valid) {
@@ -202,7 +203,7 @@ public class CreateLandMaskOp extends Operator {
             }
 
         } catch (Throwable e) {
-            OperatorUtils.catchOperatorException(getId(), e);
+                OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 

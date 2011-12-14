@@ -20,6 +20,7 @@ import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dataio.ReaderUtils;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -66,12 +67,7 @@ public class ImageIOWriter extends AbstractProductWriter {
     protected void writeProductNodesImpl() throws IOException {
         _outputStream = null;
 
-        final File file;
-        if (getOutput() instanceof String) {
-            file = new File((String) getOutput());
-        } else {
-            file = (File) getOutput();
-        }
+        final File file = ReaderUtils.getFileFromInput(getOutput());
 
         Iterator<ImageWriter> writerList = ImageIO.getImageWritersByFormatName(format);
         writer = writerList.next();
@@ -94,24 +90,29 @@ public class ImageIOWriter extends AbstractProductWriter {
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
 
-
-        final double[] dataArray = new double[sourceWidth];
-        int i = 0;
-        for(int y=sourceOffsetY; y < sourceHeight; ++y) {
-            for(int x=sourceOffsetX; x < sourceWidth; ++x) {
-                dataArray[i] = sourceBuffer.getElemDoubleAt(x);
+        try {
+            final double[] dataArray = new double[sourceWidth];
+            int i = 0;
+            for(int y=sourceOffsetY; y < sourceHeight; ++y) {
+                for(int x=sourceOffsetX; x < sourceWidth; ++x) {
+                    dataArray[i] = sourceBuffer.getElemDoubleAt(x);
+                }
             }
+
+            final ImageWriteParam param = writer.getDefaultWriteParam();
+            
+            param.setTilingMode(ImageWriteParam.MODE_DEFAULT);
+   
+            //param.setSourceRegion(new Rectangle(0, 0, sourceWidth, sourceHeight));
+            //param.setTiling(sourceWidth, sourceHeight, 0, 0);
+            //writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+
+
+            final RenderedImage img = createRenderedImage(dataArray, sourceWidth, sourceHeight);
+            writer.write(null, new IIOImage(img, null, null), param);
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-
-        final ImageWriteParam param = writer.getDefaultWriteParam();
-        //param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
-        param.setTiling(sourceWidth, sourceHeight, sourceOffsetX, sourceOffsetY);
-        //writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
-
-
-        final RenderedImage img = createRenderedImage(dataArray, sourceWidth, sourceHeight);
-        writer.write(null, new IIOImage(img, null, null), param);
-
     }
 
     private static RenderedImage createRenderedImage(final double[] array, final int w, final int h) {

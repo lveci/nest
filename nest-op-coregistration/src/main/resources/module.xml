@@ -56,13 +56,13 @@
             <separatorBefore>true</separatorBefore>
             <helpId>Coregistration</helpId>
         </action>
-        
+
         <action>
-            <id>openPCADialog</id>
-            <class>org.esa.nest.dat.PCAAction</class>
-            <parent>imageAnalysis</parent>
+            <id>PCA</id>
+            <class>org.esa.nest.dat.PCAOpAction</class>
             <text>Principal Component Analysis</text>
-            <shortDescr>Perform Principal Component Analysis</shortDescr>
+            <shortDescr>Principal Component Analysis</shortDescr>
+            <parent>imageAnalysis</parent>
             <helpId>PCA</helpId>
         </action>
 

@@ -136,10 +136,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(30);
-        String demNameParam = (String)parameterMap.get("demName");
-        if(demNameParam != null)
-            demName.setSelectedItem(appendAutoDEM(demNameParam));
-        enableExternalDEM(false);
+        final String demItem = ((String)demName.getSelectedItem()).replace(AUTODEM, "");
+        enableExternalDEM(demItem.equals(externalDEMStr));
 
         auxFile.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
@@ -306,7 +304,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     }
 
     public static String appendAutoDEM(String demName) {
-        if(demName.equals("GETASSE30") || demName.equals("SRTM 3Sec") || demName.equals("ACE2_5Min"))
+        if(demName.equals("GETASSE30") || demName.equals("SRTM 3Sec") || demName.equals("ACE2_5Min")
+           || demName.equals("ACE30"))
             demName += AUTODEM;
         return demName;
     }
@@ -315,7 +314,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     public void initParameters() {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
-        String demNameParam = (String)paramMap.get("demName");
+        final String demNameParam = (String)paramMap.get("demName");
         if(demNameParam != null)
             demName.setSelectedItem(appendAutoDEM(demNameParam));
 
@@ -375,9 +374,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         final File extDEMFile = (File)paramMap.get("externalDEMFile");
         if(extDEMFile != null) {
             externalDEMFile.setText(extDEMFile.getAbsolutePath());
-            externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
-        } else {
-            externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
+            extNoDataValue =  (Double)paramMap.get("externalDEMNoDataValue");
+            if(extNoDataValue != null)
+                externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
         }
 
         nodataValueAtSea = (Boolean)paramMap.get("nodataValueAtSea");

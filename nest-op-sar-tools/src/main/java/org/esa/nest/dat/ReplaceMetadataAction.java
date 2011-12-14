@@ -20,7 +20,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.dialogs.ProductSelectorDialog;
+import org.esa.nest.dat.dialogs.StringSelectorDialog;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.util.ResourceUtils;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.2 $ $Date: 2011-04-08 18:23:59 $
+ * @version $Revision: 1.3 $ $Date: 2011-10-24 16:13:39 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 
@@ -47,7 +47,7 @@ public class ReplaceMetadataAction extends ExecCommand {
             return;
         }
 
-        final ProductSelectorDialog dlg = new ProductSelectorDialog("Replace Metadata with", compatibleProductNames);
+        final StringSelectorDialog dlg = new StringSelectorDialog("Replace Metadata with", compatibleProductNames);
         dlg.show();
         if(dlg.IsOK()) {
             try {
@@ -55,7 +55,7 @@ public class ReplaceMetadataAction extends ExecCommand {
                 final int isPolsar = origAbsRoot.getAttributeInt(AbstractMetadata.polsarData, 0);
                 final int isCalibrated = origAbsRoot.getAttributeInt(AbstractMetadata.abs_calibration_flag, 0);
 
-                final String srcProductName = dlg.getSelectedProductName();
+                final String srcProductName = dlg.getSelectedItem();
                 final Product[] products = VisatApp.getApp().getProductManager().getProducts();
 
                 Product srcProduct = null;

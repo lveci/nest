@@ -506,6 +506,34 @@ public final class AbstractMetadata {
     }
 
     /**
+     * Band metadata element within AbstractedMetadata
+     * @param root abstracted metadata root
+     * @param bandName the name of the band
+     * @param create if null
+     * @return MetadataElement of band
+     */
+    public static MetadataElement getBandAbsMetadata(final MetadataElement root, final String bandName,
+                                                     final boolean create) {
+        final String bandElemName = "Band_"+bandName;
+        MetadataElement bandElem = root.getElement(bandElemName);
+        if(bandElem == null) {
+            // check real band
+            if(bandName.startsWith("Intensity")) {
+                String realBandName = bandName.replace("Intensity_", "i_");
+                bandElem = root.getElement("Band_"+realBandName);
+            } else if(bandName.startsWith("Phase")) {
+                String realBandName = bandName.replace("Phase_", "i_");    
+                bandElem = root.getElement("Band_"+realBandName);
+            }
+            if(bandElem == null && create) {
+                bandElem = new MetadataElement(bandElemName);
+                root.addElement(bandElem);
+            }
+        }
+        return bandElem;
+    }
+
+    /**
      * Get orbit state vectors.
      * @param absRoot Abstracted metadata root.
      * @return orbitStateVectors Array of orbit state vectors.

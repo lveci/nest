@@ -36,7 +36,7 @@ import java.util.ArrayList;
  */
 public class ProductSetPanel extends JPanel {
 
-    private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
+    private final FileModel fileModel = new FileModel();
     private final TargetFolderSelector targetProductSelector;
     private final AppContext appContext;
     private String targetProductNameSuffix = "";

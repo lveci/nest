@@ -20,18 +20,20 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.gpf.ui.SourceUI;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
+import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.MemUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.nest.gpf.ProductSetReaderOp;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -251,8 +253,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         if(ValidateAllNodes()) {
 
-            JAI.getDefaultInstance().getTileCache().flush();
-            System.gc();
+            MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
             progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
@@ -267,6 +268,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private void CancelProcessing() {
         if(progBarMonitor != null)
             progBarMonitor.setCanceled(true);
+        graphEx.cancel();
     }
 
     private boolean InitGraph() {
@@ -356,6 +358,21 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         if(productSetNode != null) {
             ProductSetReaderOpUI ui = (ProductSetReaderOpUI)productSetNode.GetOperatorUI();
             ui.setProductFileList(productFileList);
+        }
+    }
+
+    /**
+     * pass in a file list for a ProductSetReader
+     * @param product the product files
+     */
+    public void setInputFile(final Product product) {
+        final GraphNode readerNode = graphEx.findGraphNodeByOperator(
+                ReadOp.Spi.getOperatorAlias(ReadOp.class));
+        if(readerNode != null) {
+            SourceUI ui = (SourceUI)readerNode.GetOperatorUI();
+            ui.setSourceProduct(product);
+            
+            ValidateAllNodes();
         }
     }
 
@@ -501,8 +518,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 isProcessing = false;
                 graphEx.disposeGraphContext();
                 // free cache
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
+                MemUtils.freeAllMemory();
 
                 pm.done();
             }
@@ -548,6 +564,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     public static File getInternalGraphFolder() {
         return ResourceUtils.getGraphFolder("internal");
+    }
+
+    public static File getStandardGraphFolder() {
+        return ResourceUtils.getGraphFolder("Standard Graphs");
     }
 
     public interface ProcessingListener {

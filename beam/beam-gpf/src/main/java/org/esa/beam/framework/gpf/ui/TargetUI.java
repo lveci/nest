@@ -47,12 +47,16 @@ public class TargetUI extends BaseOperatorUI {
     @Override
     public void initParameters() {
         assert(paramMap != null);
+        String fileName = "target";
         final Object value = paramMap.get(FILE_PARAMETER);
         if(value != null) {
             final File file = (File)value;
-            targetProductSelector.getProductNameTextField().setText(file.getName());
-            targetProductSelector.getModel().setProductName(file.getName());
+            fileName = file.getName();
+        } else if(sourceProducts != null && sourceProducts.length > 0) {
+            fileName = sourceProducts[0].getName();
         }
+        targetProductSelector.getProductNameTextField().setText(fileName);
+        targetProductSelector.getModel().setProductName(fileName);
     }
 
     @Override

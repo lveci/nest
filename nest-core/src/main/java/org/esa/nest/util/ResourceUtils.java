@@ -28,6 +28,7 @@ import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.awt.image.BufferedImage;
 
 /**
  * Look up paths to resources
@@ -380,4 +382,19 @@ public final class ResourceUtils {
         }
     }
 
+    /**
+     * can be overriden to load the image to use
+     * @param imgFile the file to load
+     * @return BufferedImage
+     */
+    public static BufferedImage loadImage(final File imgFile) {
+        if(imgFile != null && imgFile.exists()) {
+            try {
+                return ImageIO.read(imgFile);
+            } catch(Exception e) {
+                //
+            }
+        }
+        return null;
+    }
 }

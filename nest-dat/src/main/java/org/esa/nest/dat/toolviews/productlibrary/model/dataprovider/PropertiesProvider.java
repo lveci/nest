@@ -16,8 +16,8 @@
 package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
 import org.esa.beam.framework.datamodel.ProductData.UTC;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.util.SQLUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -27,6 +27,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.DateFormat;
 import java.util.Comparator;
 
 /**
@@ -119,10 +120,13 @@ public class PropertiesProvider implements DataProvider {
                 final File file = entry.getFile();
                 final String fileSize = "("+(entry.getFileSize() / (1024 * 1024)) +" Mb)";
 
+                final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
+                final String dateString = dateFormat.format(entry.getFirstLineTime().getAsDate());
+
                 values = new String[]{
                         entry.getName(),
                         entry.getProductType()+"   "+entry.getPass(),
-                        SQLUtils.toSQLDate(entry.getFirstLineTime()).toString(),
+                        dateString,
                         entry.getFileFormat()+"   "+fileSize,
                         pixelSpacing
                 };

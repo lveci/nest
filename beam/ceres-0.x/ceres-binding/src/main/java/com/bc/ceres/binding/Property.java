@@ -19,12 +19,12 @@ package com.bc.ceres.binding;
 import com.bc.ceres.binding.accessors.ClassFieldAccessor;
 import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
+import com.bc.ceres.binding.converters.StringConverter;
 
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A property is composed of a {@link PropertyDescriptor} (static type description) and
@@ -134,10 +134,31 @@ public class Property {
                                                                    e.getMessage()),
                                               e);
             }
-            setValue(value);
+            try {
+                setValue(value);
+            } catch(ValidationException e) {
+                handleStringArray(text, converter);
+            }
         } else {
             setValue(text);
         }
+    }
+
+    private void handleStringArray(final String text, final Converter converter) throws ValidationException {
+        if(text.startsWith("[") && text.endsWith("]") && converter instanceof StringConverter) {
+            String[] array = csvToArray(text.substring(1, text.length()-1));
+            setValue(array);
+        }
+    }
+
+    private static String[] csvToArray(String csvString) {
+        //Guardian.assertNotNullOrEmpty("csvString", csvString);
+        final StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
+        final List<String> strList = new ArrayList<String>(tokenizer.countTokens());
+        while (tokenizer.hasMoreTokens()) {
+            strList.add(tokenizer.nextToken());
+        }
+        return strList.toArray(new String[strList.size()]);
     }
 
     public String getName() {

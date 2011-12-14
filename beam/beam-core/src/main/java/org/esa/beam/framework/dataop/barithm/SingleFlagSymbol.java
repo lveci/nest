@@ -57,19 +57,16 @@ public final  class SingleFlagSymbol extends RasterDataSymbol {
 
     @Override
     public final  boolean evalB(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask;
+        return (data.getElemIntAt(((RasterDataEvalEnv) env).getElemIndex()) & flagMask) == flagMask;
     }
 
     @Override
     public final int evalI(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask ? 1 : 0;
+        return (data.getElemIntAt(((RasterDataEvalEnv) env).getElemIndex()) & flagMask) == flagMask ? 1 : 0;
     }
 
     @Override
     public final double evalD(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask ? 1.0 : 0.0;
+        return (data.getElemIntAt(((RasterDataEvalEnv) env).getElemIndex()) & flagMask) == flagMask ? 1.0 : 0.0;
     }
 }

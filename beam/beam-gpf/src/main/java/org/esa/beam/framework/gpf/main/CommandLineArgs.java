@@ -144,7 +144,7 @@ class CommandLineArgs {
         if (graphFilepath == null && !targetFilepathMap.isEmpty()) {
             throw error("Defined target products only valid for graph XML");
         }
-        if (targetFilepath == null && targetFilepathMap.isEmpty()) {
+        if (graphFilepath == null && targetFilepath == null && targetFilepathMap.isEmpty()) {
             targetFilepath = CommandLineTool.DEFAULT_TARGET_FILEPATH;
         }
         if (targetFormatName == null && targetFilepath != null) {

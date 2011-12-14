@@ -64,6 +64,14 @@ public class GraphContext {
         this(graph, null);
     }
 
+    public void cancel() {
+        for(NodeContext nc : initNodeContextDeque) {
+            final Operator op = nc.getOperator();
+            if(op != null) {
+                op.cancel();                
+            }
+        }
+    }
 
     /**
      * Creates a GraphContext for the given {@code graph} and a {@code logger}.

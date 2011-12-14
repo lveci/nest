@@ -56,7 +56,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
     private final JCheckBox saveLayoverShadowMaskCheckBox = new JCheckBox("Save Layover-Shadow Mask as band");
 
     private boolean saveLayoverShadowMask = false;
-    private double extNoDataValue = 0;
+    private Double extNoDataValue = 0.0;
 
     private final DialogUtils.TextAreaKeyListener textAreaKeyListener = new DialogUtils.TextAreaKeyListener();
 
@@ -88,10 +88,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(30);
-        String demNameParam = (String)parameterMap.get("demName");
-        if(demNameParam != null)
-            demName.setSelectedItem(RangeDopplerGeocodingOpUI.appendAutoDEM(demNameParam));
-        enableExternalDEM(false);
+        final String demItem = ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, "");
+        enableExternalDEM(demItem.equals(externalDEMStr));
 
         externalDEMBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -119,7 +117,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
-        String demNameParam = (String)paramMap.get("demName");
+        final String demNameParam = (String)paramMap.get("demName");
         if(demNameParam != null)
             demName.setSelectedItem(RangeDopplerGeocodingOpUI.appendAutoDEM(demNameParam));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
@@ -127,11 +125,10 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         final File extFile = (File)paramMap.get("externalDEMFile");
         if(extFile != null) {
             externalDEMFile.setText(extFile.getAbsolutePath());
-            if(!textAreaKeyListener.isChangedByUser()) {
+            extNoDataValue =  (Double)paramMap.get("externalDEMNoDataValue");
+            if(extNoDataValue != null && !textAreaKeyListener.isChangedByUser()) {
                 externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
             }
-        } else {
-            externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
         }
 
         saveLayoverShadowMask = (Boolean)paramMap.get("saveLayoverShadowMask");

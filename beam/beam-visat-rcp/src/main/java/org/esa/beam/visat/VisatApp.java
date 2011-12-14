@@ -1358,14 +1358,16 @@ public class VisatApp extends BasicApp implements AppContext {
                 }
                 docTitle.append("]");
             }
-            docTitle.append(" - [");
+
             final File sessionFile = getSessionFile();
             if (sessionFile != null) {
+                docTitle.append(" - [");
                 docTitle.append(FileUtils.getDisplayText(sessionFile, 50));
+                docTitle.append("]");
             } else {
-                docTitle.append("Session not saved");
+                //docTitle.append("Session not saved");     //NESTMOD
             }
-            docTitle.append("]");
+
         }
 
         setCurrentDocTitle(docTitle.toString());
@@ -1704,7 +1706,7 @@ public class VisatApp extends BasicApp implements AppContext {
         }
     }
 
-    private void configureJaiTileCache() {
+    protected void configureJaiTileCache() {
         final int tileCacheCapacity = Integer.parseInt(System.getProperty(PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY, "256"));
         JAIUtils.setDefaultTileCacheCapacity(tileCacheCapacity);
         final int tileSize = Integer.parseInt(System.getProperty(PROPERTY_KEY_JAI_TILE_SIZE, "256"));

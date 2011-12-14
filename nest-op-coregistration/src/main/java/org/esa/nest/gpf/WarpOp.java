@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.AutoCloseOptionPane;
 import org.esa.nest.dataio.ReaderUtils;
@@ -99,7 +100,6 @@ public class WarpOp extends Operator {
     @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "false", label = "Show Residuals")
     private boolean openResidualsFile = false;
 
-    private ProductNodeGroup<Placemark> masterGCPGroup = null;
     private Band masterBand = null;
     private Band masterBand2 = null;
     private boolean complexCoregistration = false;
@@ -122,6 +122,7 @@ public class WarpOp extends Operator {
     private final Map<Band, WarpData> warpDataMap = new HashMap<Band, WarpData>(10);
 
     private String processedSlaveBand;
+    private String[] masterBandNames = null;
 
     /**
      * Default constructor. The graph processing framework
@@ -148,7 +149,7 @@ public class WarpOp extends Operator {
         try {
             // Disable JAI media library only for coregistration
             // reenable it in the dispose
-            System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+            //System.setProperty("com.sun.media.jai.disableMediaLib", "true");
 
             // clear any old residual file
             final File residualsFile = getResidualsFile(sourceProduct);
@@ -157,7 +158,6 @@ public class WarpOp extends Operator {
             }
 
             masterBand = sourceProduct.getBandAt(0);
-            masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
             if (masterBand.getUnit() != null && masterBand.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
                 complexCoregistration = true;
                 masterBand2 = sourceProduct.getBandAt(1);
@@ -200,11 +200,6 @@ public class WarpOp extends Operator {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
             processedSlaveBand = absRoot.getAttributeString("processed_slave");
 
-            // copy master GCPs
-            OperatorUtils.copyGCPsToTarget(masterGCPGroup,
-                    targetProduct.getGcpGroup(targetProduct.getBand(masterBand.getName())),
-                    targetProduct.getGeoCoding());
-
         } catch (Throwable e) {
             openResidualsFile = true;
             OperatorUtils.catchOperatorException(getId(), e);
@@ -212,16 +207,15 @@ public class WarpOp extends Operator {
     }
 
     public void dispose() {
-        System.setProperty("com.sun.media.jai.disableMediaLib", "false");
+        //System.setProperty("com.sun.media.jai.disableMediaLib", "false");
     }
 
     private void createInSARInterpTable(final int numberOfKernelPoints) {
-        final InSARInterpolationKernels intrpInsar = new InSARInterpolationKernels();
         final int subsampleBits = 7;
         final int precisionBits = 32;
         final int padding = numberOfKernelPoints/2 - 1;
-        final double[] kernelAxis = intrpInsar.defineXAxis(numberOfKernelPoints);
-        final double[] lutInsar = intrpInsar.constructKernel(kernelAxis, interpolationMethod);
+        final double[] kernelAxis = InSARInterpolationKernels.defineXAxis(numberOfKernelPoints);
+        final double[] lutInsar = InSARInterpolationKernels.constructKernel(kernelAxis, interpolationMethod);
         final float data[] = new float[lutInsar.length];
         int i = 0;
         for(double lut : lutInsar) {
@@ -260,7 +254,7 @@ public class WarpOp extends Operator {
                 sourceProduct.getSceneRasterWidth(),
                 sourceProduct.getSceneRasterHeight());
 
-        final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+        masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
 
         final int numSrcBands = sourceProduct.getNumBands();
         int inc = 1;
@@ -269,7 +263,8 @@ public class WarpOp extends Operator {
         for (int i = 0; i < numSrcBands; i += inc) {
             final Band srcBand = sourceProduct.getBandAt(i);
             Band targetBand;
-            if (srcBand == masterBand || srcBand == masterBand2 || OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
+            if (srcBand == masterBand || srcBand == masterBand2 ||
+                    StringUtils.contains(masterBandNames, srcBand.getName())) {
                 targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
@@ -281,7 +276,8 @@ public class WarpOp extends Operator {
             if (complexCoregistration) {
                 final Band srcBandQ = sourceProduct.getBandAt(i + 1);
                 Band targetBandQ;
-                if (srcBand == masterBand || srcBand == masterBand2 || OperatorUtils.isMasterBand(srcBand, masterBandNames)) {
+                if (srcBand == masterBand || srcBand == masterBand2 ||
+                        StringUtils.contains(masterBandNames, srcBand.getName())) {
                     targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
                     targetBandQ.setSourceImage(srcBandQ.getSourceImage());
                 } else {
@@ -291,7 +287,7 @@ public class WarpOp extends Operator {
                 sourceRasterMap.put(targetBandQ, srcBandQ);
 
                 complexSrcMap.put(srcBandQ, srcBand);
-                final String suffix = "_"+OperatorUtils.getSuffixFromBandName(srcBand.getName());
+                final String suffix = '_'+OperatorUtils.getSuffixFromBandName(srcBand.getName());
                 ReaderUtils.createVirtualIntensityBand(targetProduct, targetBand, targetBandQ, suffix);
                 ReaderUtils.createVirtualPhaseBand(targetProduct, targetBand, targetBandQ, suffix);
             }
@@ -335,7 +331,8 @@ public class WarpOp extends Operator {
         for (int i = 0; i < numSrcBands; i += inc) {
 
             final Band srcBand = sourceProduct.getBandAt(i);
-            if (srcBand == masterBand || srcBand == masterBand2)
+            if (srcBand == masterBand || srcBand == masterBand2 ||
+                StringUtils.contains(masterBandNames, srcBand.getName()))
                 continue;
 
             final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
@@ -350,6 +347,8 @@ public class WarpOp extends Operator {
             }
 
             int parseIdex = 0;
+            final ProductNodeGroup<Placemark> masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
+
             computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
             if(warpData.notEnoughGCPs) continue;
             outputCoRegistrationInfo(
@@ -394,8 +393,46 @@ public class WarpOp extends Operator {
             }
         }
 
+        // update metadata
+        writeWarpDataToMetadata();
+
         warpDataAvailable = true;
     }
+
+    private void writeWarpDataToMetadata() {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final Set<Band> bandSet = warpDataMap.keySet();
+
+        for(Band band : bandSet) {
+            final MetadataElement bandElem = AbstractMetadata.getBandAbsMetadata(absRoot, band.getName(), true);
+
+            MetadataElement warpDataElem = bandElem.getElement("WarpData");
+            if(warpDataElem == null) {
+                warpDataElem = new MetadataElement("WarpData");
+                bandElem.addElement(warpDataElem);
+            } else {
+                // empty out element
+                final MetadataAttribute[] attribList = warpDataElem.getAttributes();
+                for(MetadataAttribute attrib : attribList) {
+                    warpDataElem.removeAttribute(attrib);
+                }
+            }
+
+            final WarpData warpData = warpDataMap.get(band);
+            for (int i = 0; i < warpData.rms.length; i++) {
+                final MetadataElement gcpElem = new MetadataElement("GCP"+i);
+                warpDataElem.addElement(gcpElem);
+
+                gcpElem.setAttributeDouble("mst_x", warpData.masterGCPCoords[2 * i]);
+                gcpElem.setAttributeDouble("mst_y", warpData.masterGCPCoords[2 * i + 1]);
+
+                gcpElem.setAttributeDouble("slv_x", warpData.slaveGCPCoords[2 * i]);
+                gcpElem.setAttributeDouble("slv_y", warpData.slaveGCPCoords[2 * i + 1]);
+
+                gcpElem.setAttributeDouble("rms", warpData.rms[i]);
+            }
+        }
+    }     
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
