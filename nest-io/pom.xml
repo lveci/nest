@@ -32,11 +32,15 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-envi-reader</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>4C-1.2</version>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf</artifactId>
         </dependency>
+        <!--dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-imageio-ext-gdal</artifactId>
+        </dependency-->
     </dependencies>
 </project>

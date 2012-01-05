@@ -1,13 +1,12 @@
 package org.esa.nest.dat.layers;
 
-import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.glevel.MultiLevelImage;
-
-import java.awt.geom.AffineTransform;
-import java.awt.*;
-import java.awt.image.RenderedImage;
-
+import com.bc.ceres.grender.Viewport;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.RenderedImage;
 
 /**
  * Converts screen coordinates to pixel coordinates

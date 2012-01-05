@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * @author Marco Peters
-
+ 
  * @since BEAM 4.7
  */
 public class FailureCasesReprojectionOpTest extends AbstractReprojectionOpTest {

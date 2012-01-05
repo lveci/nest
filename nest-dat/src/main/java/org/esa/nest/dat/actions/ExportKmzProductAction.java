@@ -18,37 +18,34 @@ package org.esa.nest.dat.actions;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapTransformDescriptor;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.util.SystemUtils;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.io.BeamFileChooser;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.StringSelectorDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.gpf.GPFProcessor;
-import org.esa.nest.util.ResourceUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
-import javax.swing.JFileChooser;
-import java.awt.Cursor;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.ArrayList;
 
 public class ExportKmzProductAction extends ExecCommand {
     private static final String OVERLAY_KML = "overlay.kml";
@@ -105,7 +102,7 @@ public class ExportKmzProductAction extends ExecCommand {
     }
 
     private static String[] getValidBandNames(final Product product) {
-        final ArrayList<String> bandNames = new ArrayList<String>(4);
+        final List<String> bandNames = new ArrayList<String>(4);
         for(Band band : product.getBands()) {
             bandNames.add(band.getName());
         }

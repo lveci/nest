@@ -115,7 +115,7 @@ public class OilSpillClusteringOp extends Operator {
     private void addSelectedBands() throws OperatorException {
 
         final Band[] bands = sourceProduct.getBands();
-        final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+        final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
         for (Band band : bands) {
             bandNameList.add(band.getName());
         }

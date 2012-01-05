@@ -32,6 +32,7 @@ import org.esa.beam.framework.ui.SuppressibleOptionPane;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.util.ProgressMonitorList;
 
 import javax.swing.*;
 import javax.media.jai.JAI;
@@ -307,6 +308,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         protected Product doInBackground(ProgressMonitor pm) throws Exception {
             final TargetProductSelectorModel model = getTargetProductSelector().getModel();
             pm.beginTask("Writing...", model.isOpenInAppSelected() ? 100 : 95);
+            ProgressMonitorList.instance().add(pm);       //NESTMOD
             saveTime = 0L;
             Product product = null;
             try {
@@ -348,6 +350,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                 System.gc();
 
                 pm.done();
+                ProgressMonitorList.instance().remove(pm); //NESTMOD
                 if (product != targetProduct) {
                     targetProduct.dispose();
                 }

@@ -104,7 +104,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
 
     private CoordinateReferenceSystem targetCRS;
-    private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -216,7 +215,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         try {
             targetCRS = getCRS();
 
-            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+            final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
             final double pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
                                                         RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
             final double pixelSpacingInDegree = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixelSpacingInMeter);

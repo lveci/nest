@@ -39,7 +39,7 @@ import java.util.Map;
 
 /**
  * @author Marco Peters
-
+ 
  * @since BEAM 4.7
  */
 public abstract class AbstractReprojectionOpTest {

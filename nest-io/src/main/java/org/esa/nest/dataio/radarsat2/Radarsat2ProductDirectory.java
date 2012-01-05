@@ -27,8 +27,8 @@ import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import java.text.DateFormat;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -578,10 +578,10 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         class coefList {
             double utcSeconds = 0.0;
             double grOrigin = 0.0;
-            final ArrayList<Double> coefficients = new ArrayList<Double>();
+            final List<Double> coefficients = new ArrayList<Double>();
         }
 
-        final ArrayList<coefList> segmentsArray = new ArrayList<coefList>();
+        final List<coefList> segmentsArray = new ArrayList<coefList>();
 
         for(MetadataElement elem : imageGenerationParameters.getElements()) {
             if(elem.getName().equalsIgnoreCase("slantRangeToGroundRange")) {

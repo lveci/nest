@@ -104,6 +104,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private String savedProductName = null;
 
+    protected boolean useAvgSceneHeight = false;
     protected final JButton crsButton = new JButton();
     private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
     public final static String AUTODEM = " (Auto Download)";
@@ -564,16 +565,18 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalDEMFileLabel, externalDEMFile);
-        gbc.gridx = 2;
-        contentPane.add(externalDEMBrowseButton, gbc);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalDEMNoDataValueLabel, externalDEMNoDataValue);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
-        gbc.gridy++;
+        if(!useAvgSceneHeight) {
+            DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
+            gbc.gridy++;
+            DialogUtils.addComponent(contentPane, gbc, externalDEMFileLabel, externalDEMFile);
+            gbc.gridx = 2;
+            contentPane.add(externalDEMBrowseButton, gbc);
+            gbc.gridy++;
+            DialogUtils.addComponent(contentPane, gbc, externalDEMNoDataValueLabel, externalDEMNoDataValue);
+            gbc.gridy++;
+            DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
+            gbc.gridy++;
+        }
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, sourcePixelSpacingsLabelPart1, sourcePixelSpacingsLabelPart2);
@@ -593,8 +596,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         contentPane.add(nodataValueAtSeaCheckBox, gbc);
         gbc.gridy++;
         contentPane.add(saveSelectedSourceBandCheckBox, gbc);
-        gbc.gridx = 1;
-        contentPane.add(saveDEMCheckBox, gbc);
+        if(!useAvgSceneHeight) {
+            gbc.gridx = 1;
+            contentPane.add(saveDEMCheckBox, gbc);
+        }
         gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);

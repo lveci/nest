@@ -21,7 +21,10 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
@@ -29,6 +32,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Shows the movement of GCP in a coregistered image
@@ -39,7 +43,7 @@ public class GCPVectorLayer extends Layer {
     private final Product product;
     private final Band band;
     private static final float lineThickness = 4.0f;
-    private final ArrayList<GCPData> gcpList = new ArrayList<GCPData>(200);
+    private final List<GCPData> gcpList = new ArrayList<GCPData>(200);
 
     public GCPVectorLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);

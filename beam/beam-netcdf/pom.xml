@@ -22,20 +22,16 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4.10-SNAPSHOT</version>
+        <version>4C-4.10</version>
     </parent>
 
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-netcdf</artifactId>
     <name>BEAM NetCDF Product Reader and Writer</name>
-    <version>1.1-SNAPSHOT</version>
+    <version>4C-1.1</version>
     <url>http://envisat.esa.int/beam/</url>
 
     <dependencies>
-        <dependency>
-            <groupId>com.bc.ceres</groupId>
-            <artifactId>ceres-launcher</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
@@ -43,6 +39,10 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>nujan</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

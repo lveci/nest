@@ -24,14 +24,13 @@ import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.VersionChecker;
 import org.esa.beam.visat.AbstractVisatPlugIn;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.VersionUtil;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.VersionUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;

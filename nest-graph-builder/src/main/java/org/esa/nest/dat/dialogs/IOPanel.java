@@ -29,6 +29,7 @@ import org.esa.beam.util.SystemUtils;
 import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * NEST IO Panel to handle source and target selection
@@ -40,7 +41,7 @@ public class IOPanel {
     private final AppContext appContext;
     private final TargetProductSelector targetProductSelector;
     private final boolean useSourceSelector;
-    private final ArrayList<SourceProductSelector> sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
+    private final List<SourceProductSelector> sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
     private String targetProductNameSuffix = "";
 
     IOPanel(final AppContext theAppContext, final JTabbedPane tabbedPane, boolean createSourceSelector) {

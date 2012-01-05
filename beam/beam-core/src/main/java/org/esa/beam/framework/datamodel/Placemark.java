@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.jai.ImageManager;
-import org.esa.beam.util.Guardian;
+import org.esa.beam.util.Debug;
 import org.esa.beam.util.ObjectUtils;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.opengis.feature.simple.SimpleFeature;
@@ -34,12 +34,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class represents a placemark.
- * <p/>
  * Placemarks are displayed as symbols at the image's pixel position corresponding to their geographical position. The name is
  * displayed as label next to the symbol. If the user moves the mouse over a placemark, the textual description property shall
  * appear as tool-tip text. Single placemarks can be selected either by mouse-click or by the ? Prev./Next Placemark tool.
- * Placemarks are contained in the active product and stored in DIMAP format. To share placemarks between products,
+ * Placemarks are contained in the active product and stored in CSV format. To share placemarks between products,
  * the placemarks of a product can be imported and exported.
  *
  * @author Norman Fomferra
@@ -56,9 +54,7 @@ public class Placemark extends ProductNode {
     public static final String PROPERTY_NAME_PIXELPOS = "pixelPos";
     public static final String PROPERTY_NAME_GEOPOS = "geoPos";
     public static final String PROPERTY_NAME_DATETIME = "dateTime";
-    private static final String PROPERTY_NAME_SYMBOL = "symbol";
-
-    public static final String PROPERTY_NAME_PINSYMBOL = "pinSymbol";
+    public static final String PROPERTY_NAME_STYLE_CSS = PlainFeatureFactory.ATTRIB_NAME_STYLE_CSS;
 
     private final PlacemarkDescriptor descriptor;
     private final SimpleFeature feature;
@@ -95,10 +91,10 @@ public class Placemark extends ProductNode {
      * @param feature    The wrapped feature.
      */
     public Placemark(PlacemarkDescriptor descriptor, SimpleFeature feature) {
-        super(feature.getID(), getText(feature));
+        super(feature.getID(), getStringAttribute(feature, PROPERTY_NAME_TEXT));
         this.descriptor = descriptor;
         this.feature = feature;
-        setSymbol(this.descriptor.createDefaultSymbol()); // todo - remove
+        Debug.trace("Placemark created: descriptor=" + descriptor.getClass() + ", featureType=" + feature.getFeatureType().getTypeName() + ", feature=" + feature);
     }
 
     /**
@@ -118,25 +114,42 @@ public class Placemark extends ProductNode {
     }
 
     /**
+     * Gets the attribute value of the underlying feature.
+     *
+     * @param attributeName The feature's attribute name.
+     * @return The feature's attribute value, may be {@code null}.
+     */
+    public Object getAttributeValue(String attributeName) {
+        return feature.getAttribute(attributeName);
+    }
+
+    /**
+     * Sets the attribute value of the underlying feature.
+     *
+     * @param attributeName  The feature's attribute name.
+     * @param attributeValue The feature's attribute value, may be {@code null}.
+     */
+    public void setAttributeValue(String attributeName, Object attributeValue) {
+        if (!ObjectUtils.equalObjects(attributeValue, getAttributeValue(attributeName))) {
+            feature.setAttribute(attributeName, attributeValue);
+            fireProductNodeChanged(attributeName);
+        }
+    }
+
+    /**
      * Sets this placemark's label.
      *
      * @param label the label, if {@code null} an empty label is set.
      */
     public void setLabel(String label) {
-        if (label == null) {
-            label = "";
-        }
-        if (!label.equals(feature.getAttribute(PROPERTY_NAME_LABEL))) {
-            feature.setAttribute(PROPERTY_NAME_LABEL, label);
-            fireProductNodeChanged(PROPERTY_NAME_LABEL);
-        }
+        setAttributeValue(PROPERTY_NAME_LABEL, label != null ? label : "");
     }
 
     /**
      * @return This placemark's label, cannot be {@code null}.
      */
     public String getLabel() {
-        return (String) feature.getAttribute(PROPERTY_NAME_LABEL);
+        return (String) getAttributeValue(PROPERTY_NAME_LABEL);
     }
 
     /**
@@ -145,34 +158,32 @@ public class Placemark extends ProductNode {
      * @param text The text, if {@code null} an empty text is set.
      */
     public void setText(String text) {
-        if (text == null) {
-            text = "";
-        }
-        if (!text.equals(feature.getAttribute(PROPERTY_NAME_TEXT))) {
-            feature.setAttribute(PROPERTY_NAME_TEXT, text);
-            fireProductNodeChanged(PROPERTY_NAME_TEXT);
-        }
+        setAttributeValue(PROPERTY_NAME_TEXT, text != null ? text : "");
     }
 
     /**
      * @return This placemark's (XHTML) text, cannot be {@code null}.
      */
     public String getText() {
-        return getText(feature);
+        return getStringAttribute(feature, PROPERTY_NAME_TEXT);
     }
 
     /**
-     * Gets the (XHTML) text value of the given feature.
+     * Sets this placemark's CSS style.
      *
-     * @param feature The feature that provides the text.
-     * @return the label, cannot be {@code null}.
+     * @param styleCss The text, if {@code null} an empty text is set.
+     * @since BEAM 4.10
      */
-    public static String getText(SimpleFeature feature) {
-        Object attribute = feature.getAttribute(PROPERTY_NAME_TEXT);
-        if (attribute != null) {
-            return attribute.toString();
-        }
-        return "";
+    public void setStyleCss(String styleCss) {
+        setAttributeValue(PROPERTY_NAME_STYLE_CSS, styleCss != null ? styleCss : "");
+    }
+
+    /**
+     * @return This placemark's CSS style, cannot be {@code null}.
+     * @since BEAM 4.10
+     */
+    public String getStyleCss() {
+        return getStringAttribute(feature, PROPERTY_NAME_STYLE_CSS);
     }
 
     /**
@@ -195,18 +206,6 @@ public class Placemark extends ProductNode {
      */
     @Override
     public void acceptVisitor(ProductVisitor visitor) {
-    }
-
-    public PlacemarkSymbol getSymbol() {
-        return (PlacemarkSymbol) feature.getAttribute(PROPERTY_NAME_SYMBOL);
-    }
-
-    public void setSymbol(final PlacemarkSymbol symbol) {
-        Guardian.assertNotNull("symbol", symbol);
-        if (getSymbol() != symbol) {
-            feature.setAttribute(PROPERTY_NAME_SYMBOL, symbol);
-            fireProductNodeChanged(PROPERTY_NAME_PINSYMBOL);
-        }
     }
 
     public PixelPos getPixelPos() {
@@ -244,7 +243,7 @@ public class Placemark extends ProductNode {
     }
 
     private Coordinate getPixelPosAttribute() {
-        final Point point = (Point) feature.getAttribute(PROPERTY_NAME_PIXELPOS);
+        final Point point = (Point) getAttributeValue(PROPERTY_NAME_PIXELPOS);
         if (point != null) {
             return point.getCoordinate();
         }
@@ -259,7 +258,7 @@ public class Placemark extends ProductNode {
                 final GeometryFactory geometryFactory = new GeometryFactory();
                 feature.setAttribute(PROPERTY_NAME_PIXELPOS, geometryFactory.createPoint(newCoordinate));
             } else {
-                final Point point = (Point) feature.getAttribute(PROPERTY_NAME_PIXELPOS);
+                final Point point = (Point) getAttributeValue(PROPERTY_NAME_PIXELPOS);
                 point.getCoordinate().setCoordinate(newCoordinate);
                 point.geometryChanged();
             }
@@ -280,7 +279,7 @@ public class Placemark extends ProductNode {
     }
 
     private Coordinate getGeoPosAttribute() {
-        final Point point = (Point) feature.getAttribute(PROPERTY_NAME_GEOPOS);
+        final Point point = (Point) getAttributeValue(PROPERTY_NAME_GEOPOS);
         if (point != null) {
             return point.getCoordinate();
         }
@@ -295,7 +294,7 @@ public class Placemark extends ProductNode {
                 final GeometryFactory geometryFactory = new GeometryFactory();
                 feature.setAttribute(PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(newCoordinate));
             } else {
-                final Point point = (Point) feature.getAttribute(PROPERTY_NAME_GEOPOS);
+                final Point point = (Point) getAttributeValue(PROPERTY_NAME_GEOPOS);
                 point.getCoordinate().setCoordinate(newCoordinate);
                 point.geometryChanged();
             }
@@ -336,7 +335,7 @@ public class Placemark extends ProductNode {
         final AffineTransform i2m = ImageManager.getImageToModelTransform(geoCoding);
         PixelPos imagePos = pixelPos;
 
-        // todo - remove instanceof - bad code smell  (nf while revisioning Placemark API)
+        // todo - remove instanceof - bad code smell  (nf while revising Placemark API)
         if ((descriptor instanceof PinDescriptor || imagePos == null)
                 && geoPos != null
                 && geoCoding != null
@@ -368,17 +367,9 @@ public class Placemark extends ProductNode {
         if (geoPos != null) {
             feature.setAttribute(Placemark.PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(toCoordinate(geoPos)));
         }
-        if (label == null) {
-            feature.setAttribute(Placemark.PROPERTY_NAME_LABEL, "");
-        } else {
-            feature.setAttribute(Placemark.PROPERTY_NAME_LABEL, label);
-        }
-        if (text == null) {
-            feature.setAttribute(Placemark.PROPERTY_NAME_TEXT, "");
-        } else {
-            feature.setAttribute(Placemark.PROPERTY_NAME_TEXT, text);
-        }
-        feature.setAttribute(PROPERTY_NAME_SYMBOL, descriptor.createDefaultSymbol());
+
+        feature.setAttribute(Placemark.PROPERTY_NAME_LABEL, label != null ? label : "");
+        feature.setAttribute(Placemark.PROPERTY_NAME_TEXT, text != null ? text : "");
 
         return feature;
     }
@@ -436,9 +427,17 @@ public class Placemark extends ProductNode {
         builder.add(PROPERTY_NAME_TEXT, String.class);
         builder.add(PROPERTY_NAME_PIXELPOS, Point.class);
         builder.add(PROPERTY_NAME_GEOPOS, Point.class);
-        builder.add(PROPERTY_NAME_SYMBOL, PlacemarkSymbol.class);
         builder.add(PROPERTY_NAME_DATETIME, Date.class);
 
         return builder.buildFeatureType();
     }
+
+    private static String getStringAttribute(SimpleFeature feature, String attributeName) {
+        Object attribute = feature.getAttribute(attributeName);
+        if (attribute != null) {
+            return attribute.toString();
+        }
+        return "";
+    }
+
 }

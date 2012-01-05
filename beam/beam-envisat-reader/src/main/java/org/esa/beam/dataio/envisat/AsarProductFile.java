@@ -823,8 +823,11 @@ public class AsarProductFile extends ProductFile {
 
                             istream.seek(datasetOffset + (y * recordSize));
                             lineRecord.readFrom(istream);
-
-                            timeData[y] = ((ProductData.UTC) lineRecord.getFieldAt(0).getData()).getMJD();
+                            Field f = lineRecord.getFieldAt(0);
+                            if(f.getData().getElemIntAt(0) == 0)
+                                timeData[y] = 0;
+                            else
+                                timeData[y] = ((ProductData.UTC) f.getData()).getMJD();
                         }
 
                         final MetadataAttribute attribute = new MetadataAttribute("t", ProductData.TYPE_FLOAT64, height);

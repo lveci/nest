@@ -1,19 +1,20 @@
 package org.esa.nest.dat.dialogs;
 
-import org.esa.nest.db.ProductEntry;
-import org.esa.nest.db.ProductDB;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.gpf.OperatorUtils;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.db.ProductDB;
+import org.esa.nest.db.ProductEntry;
+import org.esa.nest.gpf.OperatorUtils;
 
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileModel extends AbstractTableModel {
 
@@ -47,14 +48,14 @@ public class FileModel extends AbstractTableModel {
             }
         }
 
-        private final ArrayList<File> fileList = new ArrayList<File>(10);
-        private final ArrayList<FileStats> dataList = new ArrayList<FileStats>(10);
+        private final List<File> fileList = new ArrayList<File>(10);
+        private final List<FileStats> dataList = new ArrayList<FileStats>(10);
 
         public FileModel() {
             addBlankFile();
         }
 
-        public ArrayList<File> getFileList() {
+        public List<File> getFileList() {
             return fileList;
         }
 
@@ -172,7 +173,7 @@ public class FileModel extends AbstractTableModel {
         }
 
         public File[] getFilesAt(final int[] indices) {
-            final ArrayList<File> files = new ArrayList<File>(indices.length);
+            final List<File> files = new ArrayList<File>(indices.length);
             for(int i : indices) {
                 files.add(fileList.get(i));
             }

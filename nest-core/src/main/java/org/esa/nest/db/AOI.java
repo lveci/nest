@@ -171,7 +171,7 @@ public class AOI {
             if(nameAttrib != null)
                 this.name = nameAttrib.getValue();
 
-            final ArrayList<GeoPos> geoPosList = new ArrayList<GeoPos>();
+            final List<GeoPos> geoPosList = new ArrayList<GeoPos>();
 
             final List children = root.getContent();
             for (Object aChild : children) {

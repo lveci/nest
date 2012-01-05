@@ -21,7 +21,7 @@ import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.*;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.netcdf.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
@@ -157,7 +157,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
     private static void removeQuickLooks(Map<NcRasterDim, List<Variable>> variableListMap) {
         final String[] excludeList = { "qlk" };
         final NcRasterDim[] keys = variableListMap.keySet().toArray(new NcRasterDim[variableListMap.keySet().size()]);
-        final ArrayList<NcRasterDim> removeList = new ArrayList<NcRasterDim>();
+        final List<NcRasterDim> removeList = new ArrayList<NcRasterDim>();
 
         for (final NcRasterDim rasterDim : keys) {
             final List<Variable> varList = variableListMap.get(rasterDim);

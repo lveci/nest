@@ -44,12 +44,12 @@ public class RecMom {
         this.dim = dim;
         this.npoints = 0;
         this.swgt = 0.;
-	this.av = new double[dim];
-        this.cov = new double[dim * (dim + 1) / 2];
         if (dim == 1) {
             this.avg = 0.;
             this.var = 0.;
         } else {
+            this.av = new double[dim];
+            this.cov = new double[dim * (dim + 1) / 2];
             int k = 0;
             for (int i = 0; i < dim; i++) {
                 this.av[i] = 0.;
@@ -77,14 +77,12 @@ public class RecMom {
     /**@param pt the unweighted point of dim>1
          @param wgt its weight*/
     public void recalc(double[] pt, double wgt) {
-        try {
         if (dim != pt.length)
             General.error("RecMom: dim's=" + dim + " " + pt.length);
         npoints++;
         double wold = swgt;
         swgt += wgt;
         int k = 0;
-        if(dim > 1) {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < i + 1; j++) {
                 cov[k] = wold * cov[k] / swgt + (wold * wgt) / (swgt * swgt) *
@@ -93,12 +91,7 @@ public class RecMom {
                 k++;
             }
         }
-        
         for (int i = 0; i < dim; i++) av[i] = (wold * av[i] + wgt * pt[i]) / swgt;
-        }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**get the moments (for dim=1 they can be accessed directly)

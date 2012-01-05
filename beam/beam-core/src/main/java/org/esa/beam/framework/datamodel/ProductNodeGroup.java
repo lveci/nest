@@ -282,10 +282,10 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
         }
 
         // notify listeners
-        Product product = getProduct();
-        if (product != null) {
-            product.fireNodeAdded(node, this);
-        }
+        //Product product = getProduct();
+        //if (product != null) {
+            //product.fireNodeAdded(node, this);
+        //}
 
         // Intended: set modified=true is last operation
         setModified(true);

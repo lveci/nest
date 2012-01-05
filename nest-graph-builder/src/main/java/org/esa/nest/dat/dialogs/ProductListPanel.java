@@ -21,7 +21,7 @@ import org.esa.nest.gpf.ProductSetReaderOpUI;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * List of Products
@@ -56,7 +56,7 @@ public class ProductListPanel extends JPanel {
     }
 
     public File[] getFileList() {
-        final ArrayList<File> fileList = fileModel.getFileList();
+        final List<File> fileList = fileModel.getFileList();
         return fileList.toArray(new File[fileList.size()]);
     }
 

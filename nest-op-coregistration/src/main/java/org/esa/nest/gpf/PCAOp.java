@@ -15,16 +15,21 @@
  */
 package org.esa.nest.gpf;
 
+import Jama.Matrix;
+import Jama.SingularValueDecomposition;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.StatusProgressMonitor;
 
@@ -33,12 +38,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import Jama.Matrix;
-import Jama.SingularValueDecomposition;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:
@@ -177,7 +180,7 @@ public class PCAOp extends Operator {
         // if no source band is selected by user, then select all bands
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }

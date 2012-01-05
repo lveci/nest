@@ -19,13 +19,13 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.io.FileUtils;
+import ucar.ma2.*;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFileWriteable;
-import ucar.ma2.*;
 
 import java.io.File;
 import java.io.IOException;

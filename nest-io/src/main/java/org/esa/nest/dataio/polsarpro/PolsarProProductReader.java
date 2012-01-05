@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class PolsarProProductReader extends NestEnviProductReader {
 
@@ -45,7 +46,7 @@ public class PolsarProProductReader extends NestEnviProductReader {
         else
             fileList = new File[] { inputFile };
 
-        final ArrayList<Header> headerList = new ArrayList<Header>();
+        final List<Header> headerList = new ArrayList<Header>();
         final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
         Header mainHeader = null;
         File mainHeaderFile = null;

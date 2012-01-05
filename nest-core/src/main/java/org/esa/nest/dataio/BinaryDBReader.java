@@ -18,18 +18,16 @@ package org.esa.nest.dataio;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.util.XMLSupport;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.io.File;
 
 /**
  * Binary database reader

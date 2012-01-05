@@ -35,12 +35,12 @@ import org.esa.beam.util.FeatureCollectionClipper;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -133,7 +133,7 @@ public class CreateStackOp extends Operator {
 
             appendToMaster = AbstractMetadata.getAbstractedMetadata(masterProduct).
                     getAttributeInt(AbstractMetadata.coregistered_stack, 0) == 1;
-            final ArrayList<String> masterProductBands = new ArrayList<String>();
+            final List<String> masterProductBands = new ArrayList<String>();
 
             final Band[] slaveBandList = getSlaveBands();
             if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
@@ -245,6 +245,7 @@ public class CreateStackOp extends Operator {
             copySlaveMetadata();
 
             saveMasterProductBandNames(targetProduct, masterProductBands);
+            saveSlaveProductNames(targetProduct);
 
             // create temporary metadata
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
@@ -269,12 +270,7 @@ public class CreateStackOp extends Operator {
     }
 
     private void copySlaveMetadata() {
-        final MetadataElement targetRoot = targetProduct.getMetadataRoot();
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            targetRoot.addElement(targetSlaveMetadataRoot);
-        }
+        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct);
         for(Product prod : sourceProduct) {
             if(prod != masterProduct) {
                 final MetadataElement slvAbsMetadata = AbstractMetadata.getAbstractedMetadata(prod);
@@ -288,19 +284,31 @@ public class CreateStackOp extends Operator {
         }
     }
 
-    private static void saveMasterProductBandNames(final Product targetProduct, final ArrayList<String> masterProductBands) {
-        final MetadataElement targetRoot = targetProduct.getMetadataRoot();
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-            targetRoot.addElement(targetSlaveMetadataRoot);
-        }
+    private static void saveMasterProductBandNames(final Product targetProduct, final List<String> masterProductBands) {
+        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct);
         String value = "";
         for(String name : masterProductBands) {
             value += name + " ";
         }
 
         targetSlaveMetadataRoot.setAttributeString(AbstractMetadata.MASTER_BANDS, value.trim());
+    }
+
+    private void saveSlaveProductNames(final Product targetProduct) {
+        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct);
+        final MetadataElement[] productMetadataElems = targetSlaveMetadataRoot.getElements();
+        for(MetadataElement elem : productMetadataElems) {
+            String value = "";
+            for(Band tgtBand : sourceRasterMap.keySet()) {
+                final Band srcBand = sourceRasterMap.get(tgtBand);
+                final Product srcProduct = srcBand.getProduct();
+                final String prodName = srcProduct.getName() + OperatorUtils.getBandTimeStamp(srcProduct);
+                if(elem.getName().equals(prodName)) {
+                    value += tgtBand.getName() + " ";
+                }
+            }
+            elem.setAttributeString(AbstractMetadata.SLAVE_BANDS, value.trim());
+        }
     }
 
     private Product getMasterProduct(final String name) {
@@ -314,7 +322,7 @@ public class CreateStackOp extends Operator {
     }
 
     private Band[] getSlaveBands() throws OperatorException {
-        final ArrayList<Band> bandList = new ArrayList<Band>(5);
+        final List<Band> bandList = new ArrayList<Band>(5);
 
         // add master band
         if(masterProduct == null) {
@@ -677,19 +685,24 @@ public class CreateStackOp extends Operator {
                 for (int ty = ty0; ty < maxY; ++ty) {
                     final int sy = ty + offset[1];
                     final boolean yOutofBounds = sy < 0 || sy >= srcImageHeight;
+                    if(yOutofBounds) {
+                        for (int tx = tx0; tx < maxX; ++tx) {
+                            trgData.setElemDoubleAt(trgIndex.getIndex(tx), noDataValue);
+                        }
+                        continue;
+                    }
                     trgIndex.calculateStride(ty);
                     srcIndex.calculateStride(sy);
                     for (int tx = tx0; tx < maxX; ++tx) {
-                        final int targIndex = trgIndex.getIndex(tx);
                         final int sx = tx + offset[0];
 
-                        if (sx < 0 || sx >= srcImageWidth || yOutofBounds) {
-                            trgData.setElemDoubleAt(targIndex, noDataValue);
+                        if (sx < 0 || sx >= srcImageWidth) {
+                            trgData.setElemDoubleAt(trgIndex.getIndex(tx), noDataValue);
                         } else {
                             if(isInt)
-                                trgData.setElemIntAt(targIndex, srcData.getElemIntAt(srcIndex.getIndex(sx)));
+                                trgData.setElemIntAt(trgIndex.getIndex(tx), srcData.getElemIntAt(srcIndex.getIndex(sx)));
                             else
-                                trgData.setElemDoubleAt(targIndex, srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
+                                trgData.setElemDoubleAt(trgIndex.getIndex(tx), srcData.getElemDoubleAt(srcIndex.getIndex(sx)));
                         }
                     }
                 }

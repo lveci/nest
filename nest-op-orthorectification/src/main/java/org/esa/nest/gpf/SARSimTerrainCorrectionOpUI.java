@@ -36,7 +36,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
-        JComponent pane = super.CreateOpTab(operatorName, parameterMap, appContext);
+        final JComponent pane = super.CreateOpTab(operatorName, parameterMap, appContext);
 
         openShiftsFileCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {

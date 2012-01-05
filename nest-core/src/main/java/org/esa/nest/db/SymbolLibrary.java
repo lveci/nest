@@ -1,13 +1,13 @@
 package org.esa.nest.db;
 
-import org.esa.nest.util.ResourceUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
-import java.io.File;
-import java.util.Map;
-import java.util.HashMap;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Caches symbols

@@ -1,18 +1,17 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.gpf.graph.*;
+import com.bc.ceres.binding.dom.DefaultDomElement;
+import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 
-import java.util.Map;
-import java.io.IOException;
-import java.io.FileReader;
 import java.io.File;
-
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.binding.dom.DomElement;
-import com.bc.ceres.binding.dom.DefaultDomElement;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Processes a graph

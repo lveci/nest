@@ -17,7 +17,6 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
@@ -29,14 +28,18 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,8 +66,8 @@ public class MosaicOp extends Operator {
             label = "Resampling Type")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
-    //@Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
-    private String projectionName = IdentityTransformDescriptor.NAME;
+    @Parameter(description = "The coordinate reference system in well known text format", defaultValue="WGS84(DD)")
+    private String mapProjection = "WGS84(DD)";
 
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
     private boolean average = true;
@@ -96,7 +99,7 @@ public class MosaicOp extends Operator {
             }
 
             final Band[] srcBands = getSourceBands();
-            final ArrayList<Product> selectedProductList = new ArrayList<Product>();
+            final List<Product> selectedProductList = new ArrayList<Product>();
             for (Band srcBand : srcBands) {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
                 selectedProductList.add(srcBand.getProduct());
@@ -129,9 +132,26 @@ public class MosaicOp extends Operator {
 
             targetProduct = new Product("mosiac", "mosiac", sceneWidth, sceneHeight);
 
-            OperatorUtils.addGeoCoding(targetProduct, scnProp);
-            ReaderUtils.createMapGeocoding(targetProduct, projectionName, 0);
+            CoordinateReferenceSystem targetCRS = MapProjectionHandler.getCRS(mapProjection);
 
+            double pixSize = pixelSize;
+            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
+                pixSize = pixelSize / Constants.semiMajorAxis * org.esa.beam.util.math.MathUtils.RTOD;
+            }
+
+            final Rectangle2D bounds = new Rectangle2D.Double();
+            bounds.setFrameFromDiagonal(scnProp.lonMin, scnProp.latMin, scnProp.lonMax, scnProp.latMax);
+            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, targetCRS);
+            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                                                            sceneWidth,
+                                                            sceneHeight,
+                                                            targetEnvelope.getMinimum(0),
+                                                            targetEnvelope.getMaximum(1),
+                                                            pixSize, pixSize);
+
+            targetProduct.setGeoCoding(geoCoding);
+            
             final Band targetBand = new Band("mosaic", ProductData.TYPE_FLOAT32, sceneWidth, sceneHeight);
 
             targetBand.setUnit(sourceProduct[0].getBandAt(0).getUnit());
@@ -166,12 +186,12 @@ public class MosaicOp extends Operator {
     }
 
     private Band[] getSourceBands() throws OperatorException {
-        final ArrayList<Band> bandList = new ArrayList<Band>(5);
+        final List<Band> bandList = new ArrayList<Band>(5);
 
         if (sourceBandNames.length == 0) {
-            for (Product slvProduct : sourceProduct) {
+            for (final Product srcProduct : sourceProduct) {
 
-                for (Band band : slvProduct.getBands()) {
+                for (final Band band : srcProduct.getBands()) {
                     if (band.getUnit() != null && band.getUnit().equals(Unit.PHASE))
                         continue;
                     if (band instanceof VirtualBand)
@@ -310,7 +330,7 @@ public class MosaicOp extends Operator {
 
         try {
             final Rectangle targetRect = targetTile.getRectangle();
-            final ArrayList<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
+            final List<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
 
             for (final Product srcProduct : selectedProducts) {
                 final Rectangle srcRect = srcRectMap.get(srcProduct);
@@ -322,7 +342,7 @@ public class MosaicOp extends Operator {
             if (validProducts.isEmpty())
                 return;
 
-            final ArrayList<PixelPos[]> srcPixelCoords = new ArrayList<PixelPos[]>(validProducts.size());
+            final List<PixelPos[]> srcPixelCoords = new ArrayList<PixelPos[]>(validProducts.size());
             final int numPixelPos = targetRect.width * targetRect.height;
             for (Product validProduct : validProducts) {
                 srcPixelCoords.add(new PixelPos[numPixelPos]);
@@ -360,7 +380,7 @@ public class MosaicOp extends Operator {
             }
 
             final Resampling resampling = ResamplingFactory.createResampling(resamplingMethod);
-            final ArrayList<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
+            final List<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
 
             index = 0;
             for (Product srcProduct : validProducts) {
@@ -403,7 +423,7 @@ public class MosaicOp extends Operator {
         }
     }
 
-    private void collocateSourceBand(final ArrayList<SourceData> validSourceData, final Resampling resampling,
+    private void collocateSourceBand(final List<SourceData> validSourceData, final Resampling resampling,
                                      final Tile targetTile) throws OperatorException {
         try {
             final Rectangle targetRectangle = targetTile.getRectangle();

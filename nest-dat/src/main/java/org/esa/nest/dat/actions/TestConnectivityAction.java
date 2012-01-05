@@ -27,14 +27,12 @@ import org.esa.nest.util.ftpUtils;
  */
 public class TestConnectivityAction extends ExecCommand {
 
-    private static final String remoteFTPSRTM = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
-    private static final String remotePathSRTM = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
-
-    private static final String delftFTP = Settings.instance().get("OrbitFiles/delftFTP");
-    private static final String delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS2_precise_remotePath");
-
     @Override
     public void actionPerformed(CommandEvent event) {
+        final String remoteFTPSRTM = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
+        final String remotePathSRTM = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
+        final String delftFTP = Settings.instance().get("OrbitFiles/delftFTP");
+        final String delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS2_precise_remotePath");
 
         boolean failed = false;
         String msg1 = "Connection to FTP "+ remoteFTPSRTM + remotePathSRTM;

@@ -15,6 +15,7 @@
  */
 package org.esa.nest.util;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.visat.VisatApp;
 
 /**
@@ -37,7 +38,7 @@ public final class StatusProgressMonitor {
         if(visatApp != null) {
             final int pct = (int)((i/max) * 100);
             if(pct >= lastPct + 1) {
-                visatApp.setStatusBarMessage(msg+pct+'%');
+                setText(msg+pct+'%');
                 lastPct = pct;
             }
         } else if(allowStdOut) {
@@ -54,19 +55,31 @@ public final class StatusProgressMonitor {
 
     public void working() {
         if(visatApp != null) {
-            visatApp.setStatusBarMessage(msg);
+            setText(msg);
         }
     }
 
     public void done() {
-        if(visatApp != null)
-            visatApp.setStatusBarMessage("");
-        else if(allowStdOut)
+        if(visatApp != null) {
+            setText(" ");
+        } else if(allowStdOut) {
             System.out.println(" 100%");
+        }
     }
 
     public void setAllowStdOut(final boolean flag) {
         allowStdOut = flag;
+    }
+
+    private void setText(final String msg) {
+        if(!ProgressMonitorList.instance().isEmpty()) {
+            final ProgressMonitor[] pmList = ProgressMonitorList.instance().getList();
+            for(ProgressMonitor pm : pmList) {
+                pm.setTaskName(msg);
+            }
+        } else {
+            visatApp.setStatusBarMessage(msg);
+        }
     }
 
 }

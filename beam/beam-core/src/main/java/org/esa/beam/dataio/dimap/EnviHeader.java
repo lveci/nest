@@ -21,12 +21,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.LambertConformalConicDescriptor;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapTransform;
-import org.esa.beam.framework.dataop.maptransf.TransverseMercatorDescriptor;
-import org.esa.beam.framework.dataop.maptransf.UTMProjection;
+import org.esa.beam.framework.dataop.maptransf.*;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * This utility class is used to write ENVI header files.
@@ -283,75 +279,106 @@ public class EnviHeader {
         if (product == null) {
             return;
         }
+
+        String mapProjectionName = "Arbitrary";
+        String mapUnits = "Meters";
+        double referencePixelX=0, referencePixelY=0;
+        double easting=0, northing=0;
+        double pixelSizeX=0, pixelSizeY=0;
+        String datumName = "";
+        int utmZone=-1;
+        String utmHemisphere="";
+        MapProjection mapProjection = null;
+
         if (product.getGeoCoding() instanceof CrsGeoCoding) {
-            //CrsGeoCoding crsGeoCoding = (CrsGeoCoding) product.getGeoCoding();
-            //String wkt = crsGeoCoding.getMapCRS().toWKT();
-            //System.out.println(wkt);
+            final CrsGeoCoding crsGeoCoding = (CrsGeoCoding) product.getGeoCoding();
+            final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
 
-            return;
-        }
+            final ImageGeometry imgGeom = ImageGeometry.createTargetGeometry(product, crs,
+                null, null, null, null,
+                null, null, null, null, null);
 
-        MapGeoCoding mapGeoCoding = null;
-        if (product.getGeoCoding() instanceof MapGeoCoding) {
-            mapGeoCoding = (MapGeoCoding) product.getGeoCoding();
-        }
-        if (mapGeoCoding == null) {
-            return;
-        }
-        MapInfo info = mapGeoCoding.getMapInfo();
-        if (info == null) {
-            return;
-        }
-        final MapProjection mapProjection = info.getMapProjection();
+            final String crsName = crs.getName().toString();
+            if(crsName.equals("WGS84(DD)")) {
+                mapProjectionName = "Geographic Lat/Lon";
+                mapUnits = "Degrees";
+            } else if(crsName.contains("UTM")) {
+                mapProjectionName = "UTM";
+                String zoneStr = crsName.substring(crsName.indexOf("Zone")+5, crsName.indexOf('/')).trim();
+                utmZone = Integer.parseInt(zoneStr);
 
-        final String mapProjectionName;
-        if (mapProjection instanceof UTMProjection) {
-            mapProjectionName = "UTM";
-        } else if (mapProjection.isPreDefined()) {
-            mapProjectionName = mapProjection.getName();
+                GeoPos centrePos = crsGeoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth()/2,
+                                                                product.getSceneRasterHeight()/2), null);
+                utmHemisphere = centrePos.getLat() > 0 ? "North" : "South";
+            }
+            referencePixelX = imgGeom.getReferencePixelX();
+            referencePixelY = imgGeom.getReferencePixelY();
+            easting = imgGeom.getEasting();
+            northing = imgGeom.getNorthing();
+            pixelSizeX = imgGeom.getPixelSizeX();
+            pixelSizeY = imgGeom.getPixelSizeY();
+            datumName = crsGeoCoding.getDatum().getName();
+
+        } else if (product.getGeoCoding() instanceof MapGeoCoding) {
+            final MapGeoCoding mapGeoCoding = (MapGeoCoding) product.getGeoCoding();
+
+            final MapInfo info = mapGeoCoding.getMapInfo();
+            if (info == null) {
+                return;
+            }
+            mapProjection = info.getMapProjection();
+
+            if (mapProjection instanceof UTMProjection) {
+                mapProjectionName = "UTM";
+                final UTMProjection utmProjection = (UTMProjection) mapProjection;
+                utmZone = utmProjection.getZone();
+                utmHemisphere = utmProjection.isNorth() ? "North" : "South";
+            } else if (mapProjection.isPreDefined()) {
+                mapProjectionName = mapProjection.getName();
+            }
+
+            if ("meter".equals(mapProjection.getMapUnit())) {
+                mapUnits = "Meters";
+            } else if ("degree".equals(mapProjection.getMapUnit())) {
+                mapUnits = "Degrees";
+            } else {
+                mapUnits = mapProjection.getMapUnit();
+            }
+
+            datumName = mapGeoCoding.getDatum().getName();
         } else {
-            mapProjectionName = "User-Defined " + mapProjection.getName();
-        }
-
-        final String mapUnits;
-        if ("meter".equals(mapProjection.getMapUnit())) {
-            mapUnits = "Meters";
-        } else if ("degree".equals(mapProjection.getMapUnit())) {
-            mapUnits = "Degrees";
-        } else {
-            mapUnits = mapProjection.getMapUnit();
+            return;
         }
 
         out.print(_enviMapInfo);
         out.print(" = {");
         out.print(mapProjectionName);
         out.print(",");
-        out.print(info.getPixelX() + 1.0f);
+        out.print(referencePixelX + 1.0f);
         out.print(",");
-        out.print(info.getPixelY() + 1.0f);
+        out.print(referencePixelY + 1.0f);
         out.print(",");
-        out.print(info.getEasting());
+        out.print(easting);
         out.print(",");
-        out.print(info.getNorthing());
+        out.print(northing);
         out.print(",");
-        out.print(info.getPixelSizeX());
+        out.print(pixelSizeX);
         out.print(",");
-        out.print(info.getPixelSizeY());
+        out.print(pixelSizeY);
         out.print(",");
-        if (mapProjection instanceof UTMProjection) {
-            UTMProjection utmProjection = (UTMProjection) mapProjection;
-            out.print(utmProjection.getZone());
+        if (utmZone != -1) {
+            out.print(utmZone);
             out.print(",");
-            out.print(utmProjection.isNorth() ? "North" : "South");
+            out.print(utmHemisphere);
             out.print(",");
         }
-        out.print(info.getDatum().getName());
+        out.print(datumName);
         out.print(",");
         out.print("units=" + mapUnits);
         out.print("}");
         out.println();
 
-        if (!mapProjection.isPreDefined()) {
+        if (mapProjection != null && !mapProjection.isPreDefined()) {
             final MapTransform mapTransform = mapProjection.getMapTransform();
             final double[] parameterValues = mapTransform.getParameterValues();
             final String transformName = mapTransform.getDescriptor().getName();

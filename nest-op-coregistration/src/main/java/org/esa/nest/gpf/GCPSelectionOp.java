@@ -32,8 +32,8 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.StatusProgressMonitor;
 import org.esa.nest.util.MemUtils;
+import org.esa.nest.util.StatusProgressMonitor;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -109,6 +109,8 @@ public class GCPSelectionOp extends Operator {
     @Parameter(description = "Use sliding window for coherence calculation", defaultValue = "false",
                 label="Compute coherence with sliding window")
     private boolean useSlidingWindow = false;
+
+    private boolean useAllPolarimetricBands = false;
 
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
@@ -331,6 +333,9 @@ public class GCPSelectionOp extends Operator {
             //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+            
+            // select only one band per slave product
+            final Map<String, Band> singleSlvBandMap = new HashMap<String, Band>();
 
             final Map<Band, Band> bandList = new HashMap<Band, Band>();
             for(Band targetBand : targetProduct.getBands()) {
@@ -342,15 +347,20 @@ public class GCPSelectionOp extends Operator {
                 if (slaveBand == masterBand1 || slaveBand == masterBand2 ||
                         StringUtils.contains(masterBandNames, slaveBand.getName()))
                     continue;
+                if(!useAllPolarimetricBands) {
+                    final String slvProductName = OperatorUtils.getSlaveProductName(targetProduct, targetBand);
+                    if(singleSlvBandMap.get(slvProductName) != null) {
+                        continue;
+                    }
+                    singleSlvBandMap.put(slvProductName, targetBand);
+                }
                 final String unit = slaveBand.getUnit();
                 if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))
                     continue;
                 bandList.put(targetBand, slaveBand);
             }
 
-            final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
             int bandCnt = 0;
-            pm.beginTask("computeSlaveGCPs ", targetProduct.getNumBands()+numberOfMasterGCPs);
             Band firstTargetBand = null;
             for(Band targetBand : bandList.keySet()) {
                 ++bandCnt;
@@ -359,9 +369,9 @@ public class GCPSelectionOp extends Operator {
                 if (collocatedStack || !collocatedStack && bandCnt == 1) {
                     final String bandCountStr = bandCnt +" of "+ bandList.size();
                     if(complexCoregistration) {
-                        computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, bandCountStr, pm);
+                        computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, bandCountStr);
                     } else {
-                        computeSlaveGCPs(slaveBand, null, targetBand, bandCountStr, pm);
+                        computeSlaveGCPs(slaveBand, null, targetBand, bandCountStr);
                     }
 
                     if (bandCnt == 1) {
@@ -376,14 +386,11 @@ public class GCPSelectionOp extends Operator {
                 if(targetTile != null) {
                     targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle).getRawSamples());
                 }
-                pm.worked(1);
             }
             setGCPsCalculated();
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
-        } finally {
-            pm.done();
         }
     }
 
@@ -399,7 +406,7 @@ public class GCPSelectionOp extends Operator {
      * @param targetBand the output band
      */
     private synchronized void computeSlaveGCPs(final Band slaveBand, final Band slaveBand2, final Band targetBand,
-                                               final String bandCountStr, final ProgressMonitor pm) throws OperatorException {
+                                               final String bandCountStr) throws OperatorException {
 
      if(gcpsComputedMap.get(slaveBand))
          return;

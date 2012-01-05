@@ -253,8 +253,8 @@ public class TileCacheMonitor {
                 sb.append(tileCache.getClass().getName());
                 sb.append("\n");
             }
-            if (tileCache instanceof CacheDiagnostics) {
-                CacheDiagnostics sunTileCache = (CacheDiagnostics) tileCache;
+            if (tileCache instanceof SunTileCache) {
+                SunTileCache sunTileCache = (SunTileCache) tileCache;
 
                 sb.append("sunTileCache.cacheMemoryUsed: \t");
                 sb.append(sunTileCache.getCacheMemoryUsed() / (1024 * 1024));

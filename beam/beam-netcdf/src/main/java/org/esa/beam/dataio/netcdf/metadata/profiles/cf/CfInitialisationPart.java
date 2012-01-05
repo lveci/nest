@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,40 +16,61 @@
 
 package org.esa.beam.dataio.netcdf.metadata.profiles.cf;
 
-import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartIO;
 import org.esa.beam.dataio.netcdf.ProfileReadContext;
 import org.esa.beam.dataio.netcdf.ProfileWriteContext;
+import org.esa.beam.dataio.netcdf.metadata.ProfileInitPartIO;
+import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.util.Constants;
 import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.jai.ImageManager;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriteable;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
 public class CfInitialisationPart extends ProfileInitPartIO {
 
     @Override
     public Product readProductBody(ProfileReadContext ctx) throws ProductIOException {
-        return new Product(
+        Product product = new Product(
                 (String) ctx.getProperty(Constants.PRODUCT_FILENAME_PROPERTY),
                 readProductType(ctx),
-                ctx.getRasterDigest().getRasterDim().getDimX().getLength(),
-                ctx.getRasterDigest().getRasterDim().getDimY().getLength()
+                ctx.getRasterDigest().getRasterDim().getDimensionX().getLength(),
+                ctx.getRasterDigest().getRasterDim().getDimensionY().getLength()
         );
+        Attribute tileSize = ctx.getNetcdfFile().findGlobalAttribute("TileSize");
+        if (tileSize != null) {
+            String stringValue = tileSize.getStringValue();
+            if (stringValue!= null && stringValue.contains(":")) {
+                String[] tileSizes = stringValue.split(":");
+                if (tileSizes.length == 2) {
+                    try {
+                        int tHeight = Integer.parseInt(tileSizes[0]);
+                        int tWidth = Integer.parseInt(tileSizes[1]);
+                        product.setPreferredTileSize(tWidth, tHeight);
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+        }
+        return product;
     }
 
     @Override
     public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
-        NetcdfFileWriteable writeable = ctx.getNetcdfFileWriteable();
-        if (CfGeocodingPart.isGeographicLatLon(product.getGeoCoding())) {
+        NFileWriteable writeable = ctx.getNetcdfFileWriteable();
+        writeable.addGlobalAttribute("Conventions", "CF-1.4");
+        if (CfGeocodingPart.isGeographicCRS(product.getGeoCoding())) {
             writeDimensions(writeable, product, "lat", "lon");
         } else {
             writeDimensions(writeable, product, "y", "x");
         }
+        Dimension tileSize = ImageManager.getPreferredTileSize(product);
+        writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
     }
 
-    private void writeDimensions(NetcdfFileWriteable writeable, Product p, String dimY, String dimX) {
+    private void writeDimensions(NFileWriteable writeable, Product p, String dimY, String dimX) throws IOException {
         writeable.addDimension(dimY, p.getSceneRasterHeight());
         writeable.addDimension(dimX, p.getSceneRasterWidth());
     }

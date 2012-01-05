@@ -22,12 +22,13 @@ import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.DatContext;
-import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
+import org.esa.nest.dat.dialogs.CheckListDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
+import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
@@ -38,6 +39,8 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 //import java.nio.file.*;
 //import static java.nio.file.StandardCopyOption.*;
 
@@ -188,6 +191,14 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         popup.add(selectAllItem);
 
+        final JMenuItem openSelectedItem = new JMenuItem("Open Selected");
+        openSelectedItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                performOpenAction();              
+            }
+        });
+        popup.add(openSelectedItem);
+
         final JMenuItem copyToItem = new JMenuItem("Copy Selected To...");
         copyToItem.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
@@ -309,28 +320,29 @@ public class ProductLibraryToolView extends AbstractToolView {
             return;
         }
 
-        final int answer = JOptionPane.showOptionDialog(mainPanel,
-                                                        "Search folder recursively?", "Add Folder",
-                                                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                                                        null, null);
-        boolean doRecursive = false;
-        if (answer == JOptionPane.YES_OPTION) {
-            doRecursive = true;
-        }
+        final Map<String, Boolean> checkBoxMap = new HashMap<String, Boolean>(3);
+        checkBoxMap.put("Generate quicklooks?", true);
+        checkBoxMap.put("Search folder recursively?", true);
+
+        final CheckListDialog dlg = new CheckListDialog("Scan Folder Options", checkBoxMap);
+        dlg.show();
+
+        final boolean doRecursive = checkBoxMap.get("Search folder recursively?");
+        final boolean doQuicklooks = checkBoxMap.get("Generate quicklooks?");
 
         libConfig.addBaseDir(baseDir);
         final int index = repositoryListCombo.getItemCount();
         repositoryListCombo.insertItemAt(baseDir, index);
         setUIComponentsEnabled(repositoryListCombo.getItemCount() > 1);
 
-        updateRepostitory(baseDir, doRecursive);
+        updateRepostitory(baseDir, doRecursive, doQuicklooks);
     }
 
-    private void updateRepostitory(final File baseDir, final boolean doRecursive) {
+    private void updateRepostitory(final File baseDir, final boolean doRecursive, final boolean doQuicklooks) {
         if(baseDir == null) return;
         progMon = new LabelBarProgressMonitor(progressBar, statusLabel);
         progMon.addListener(new MyProgressBarListener());
-        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, true, progMon);
+        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, doQuicklooks, progMon);
         repositoryCollector.addListener(new MyDatabaseScannerListener());
         repositoryCollector.execute();
     }
@@ -566,11 +578,11 @@ public class ProductLibraryToolView extends AbstractToolView {
                     progMon.setCanceled(true);
                 } else {
                     if(repositoryListCombo.getSelectedIndex() != 0) {
-                        updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
+                        updateRepostitory((File)repositoryListCombo.getSelectedItem(), true, true);
                     } else {
                         final File[] baseDirList = libConfig.getBaseDirs();
                         for(File f : baseDirList) {
-                             updateRepostitory(f, true);
+                             updateRepostitory(f, true, true);
                         }
                     }
                 }

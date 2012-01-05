@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public final class Settings {
 
-    private static final Settings _instance = new Settings();
+    private static Settings _instance = null;
     private final String settingsFile;
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
@@ -47,8 +47,11 @@ public final class Settings {
     /**
     * @return The unique instance of this class.
     */
-    static public Settings instance() {
-      return _instance;
+    public static Settings instance() {
+        if(_instance == null) {
+            _instance = new Settings();
+        }
+        return _instance;
     }
 
     private Settings() {

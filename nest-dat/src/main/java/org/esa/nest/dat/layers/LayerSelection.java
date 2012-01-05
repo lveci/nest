@@ -1,7 +1,5 @@
 package org.esa.nest.dat.layers;
 
-import com.bc.ceres.swing.selection.SelectionContext;
-
 import java.awt.*;
 
 /**

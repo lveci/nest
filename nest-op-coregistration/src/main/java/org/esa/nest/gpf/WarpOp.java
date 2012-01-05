@@ -44,10 +44,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as
@@ -91,9 +89,10 @@ public class WarpOp extends Operator {
             label = "Warp Polynomial Order")
     private int warpPolynomialOrder = 2;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, TRI, CC4P, CC6P, TS6P, TS8P, TS16P}, defaultValue = BILINEAR,
-            label = "Interpolation Method")
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2,
+            TRI, CC4P, CC6P, TS6P, TS8P, TS16P}, defaultValue = BILINEAR, label = "Interpolation Method")
     private String interpolationMethod = BILINEAR;
+
     private Interpolation interp = null;
     private InterpolationTable interpTable = null;
 
@@ -190,8 +189,10 @@ public class WarpOp extends Operator {
                     interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
                 } else if (interpolationMethod.equals(BILINEAR)) {
                     interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-                } else {
-                    interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+                } else if (interpolationMethod.equals(BICUBIC)) {
+                    interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+                } else if (interpolationMethod.equals(BICUBIC2)) {
+                    interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
                 }
             }
 
@@ -306,22 +307,16 @@ public class WarpOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.coregistered_stack, 1);
     }
 
-    private synchronized void getWarpData(final Set<Band> keySet, final Rectangle targetRectangle) throws OperatorException {
+    private synchronized void getWarpData(final Rectangle targetRectangle) throws OperatorException {
 
         if (warpDataAvailable) {
             return;
         }
 
         // find first real slave band
-        for(Band targetBand : keySet) {
-            if(targetBand.getName().equals(processedSlaveBand)) {
-                final Band srcBand = sourceRasterMap.get(targetBand);
-                if(srcBand != null) {
-                    final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle);
-                    break;
-                }
-            }
-        }
+        final Band targetBand = targetProduct.getBand(processedSlaveBand);
+        // force getSourceTile to computeTiles on GCPSelection
+        final Tile sourceRaster = getSourceTile(sourceRasterMap.get(targetBand), targetRectangle);
 
         // for all slave bands or band pairs compute a warp
         final int numSrcBands = sourceProduct.getNumBands();
@@ -335,7 +330,21 @@ public class WarpOp extends Operator {
                 StringUtils.contains(masterBandNames, srcBand.getName()))
                 continue;
 
-            final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+            ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+            if (slaveGCPGroup.getNodeCount() < 3) {
+                // find others for same slave product
+                final String slvProductName = OperatorUtils.getSlaveProductName(sourceProduct, srcBand);
+                for(Band band : sourceProduct.getBands()) {
+                    if(band != srcBand) {
+                        final String productName = OperatorUtils.getSlaveProductName(sourceProduct, band);
+                        if(slvProductName.equals(productName)) {
+                            slaveGCPGroup = sourceProduct.getGcpGroup(band);
+                            if (slaveGCPGroup.getNodeCount() >= 3)
+                                break;
+                        }
+                    }
+                }
+            }
             final WarpData warpData = new WarpData(slaveGCPGroup);
             warpDataMap.put(srcBand, warpData);
 
@@ -444,9 +453,22 @@ public class WarpOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
+    //@Override
+   // public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
+   //         throws OperatorException {
+    /**
+     * Called by the framework in order to compute a tile for the given target band.
+     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
+     *
+     * @param targetBand The target band.
+     * @param targetTile The current tile associated with the target band to be computed.
+     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @throws org.esa.beam.framework.gpf.OperatorException
+     *          If an error occurs during computation of the target raster.
+     */
     @Override
-    public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
-            throws OperatorException {
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        final Rectangle targetRectangle = targetTile.getRectangle();
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
         final int w = targetRectangle.width;
@@ -454,17 +476,17 @@ public class WarpOp extends Operator {
         //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         try {
-            final Set<Band> keySet = targetTileMap.keySet();
+            //final Set<Band> keySet = targetTileMap.keySet();
 
             if(!warpDataAvailable) {
-                getWarpData(keySet, targetRectangle);
+                getWarpData(targetRectangle);
             }
 
-            for (Band targetBand : keySet) {
+            //for (Band targetBand : keySet) {
 
                 final Band srcBand = sourceRasterMap.get(targetBand);
                 if (srcBand == null)
-                    continue;
+                    return;
                 Band realSrcBand = complexSrcMap.get(srcBand);
                 if (realSrcBand == null)
                     realSrcBand = srcBand;
@@ -477,7 +499,7 @@ public class WarpOp extends Operator {
 
                 final WarpData warpData = warpDataMap.get(realSrcBand);
                 if(warpData.notEnoughGCPs)
-                    continue;
+                    return;
 
                 final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
@@ -487,11 +509,11 @@ public class WarpOp extends Operator {
                 // copy warped image data to target
                 final float[] dataArray = warpedImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
 
-                final Tile targetTile = targetTileMap.get(targetBand);
+               // final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
                 //sourceRaster.getDataBuffer().dispose();
-            }
+           // }
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
@@ -652,7 +674,7 @@ public class WarpOp extends Operator {
      */
     public static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
 
-        final ArrayList<Placemark> pinList = new ArrayList<Placemark>();
+        final List<Placemark> pinList = new ArrayList<Placemark>();
         for (int i = 0; i < warpData.rms.length; i++) {
             if (warpData.rms[i] >= threshold) {
                 pinList.add(warpData.slaveGCPList.get(i));
@@ -882,7 +904,7 @@ public class WarpOp extends Operator {
     }
 
     public static class WarpData {
-        public final ArrayList<Placemark> slaveGCPList = new ArrayList<Placemark>();
+        public final List<Placemark> slaveGCPList = new ArrayList<Placemark>();
         public WarpPolynomial warp = null;
 
         public int numValidGCPs = 0;

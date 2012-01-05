@@ -20,13 +20,14 @@ import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
 
  */
 public class AOIManager {
 
-    private final ArrayList<AOI> aoiList = new ArrayList<AOI>(5);
+    private final List<AOI> aoiList = new ArrayList<AOI>(5);
     public final static String LAST_INPUT_PATH = "aoi.last_input_path";
     public final static String LAST_OUTPUT_PATH = "aoi.last_output_path";
     public final static String LAST_GRAPH_PATH = "aoi.last_graph_path";

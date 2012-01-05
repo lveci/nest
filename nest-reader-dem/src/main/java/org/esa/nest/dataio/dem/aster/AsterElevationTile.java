@@ -17,7 +17,8 @@ package org.esa.nest.dataio.dem.aster;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.util.CachingObjectArray;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
 
 import java.io.IOException;
 

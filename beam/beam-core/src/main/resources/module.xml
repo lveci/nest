@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-core</symbolicName>
-    <version>4.10</version>
+    <version>4C-4.10</version>
     <name>BEAM Core Library</name>
 
 
@@ -42,8 +42,12 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.10:<br/>
-        [BEAM-1313] Sub-pixel geo-location is wrong<br/>
-        [BEAM-1310] Reprojection to MODIS sinusoidal grid does not properly work near dateline<br/>
+        [BEAM-1360] Auto-grouping of product sometimes wrong<br/>
+        [BEAM-1356] Scene view of a band can not be opened if all values are NaN<br/>
+        [BEAM-1334] ProductData.UTC does not handle dates before 01/01/2000 correctly<br/>
+        [BEAM-1345] Creating geophysical images for huge products fails<br/>
+        [BEAM-1339] Reduce memory consumption<br/>
+        [BEAM-1313] Sub-pixel geo-location is wrong for some product types<br/>
         <p>Changes in 4.9:<br/>
         [BEAM-1291] Virtual bands may compute wrong results for non-zero levels of image pyramids<br/>
         [BEAM-1281] Orthorectification can not be used if tie-points are selected as elevation model<br/>

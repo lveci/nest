@@ -19,6 +19,7 @@ import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.util.Locale;
 
@@ -38,7 +39,7 @@ public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getDefaultFileExtensions() {
-        return null;
+        return ImageIO.getWriterFileSuffixes();
     }
 
     /**

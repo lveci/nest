@@ -23,17 +23,18 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.StringSelectorDialog;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.gpf.ReplaceMetadataOp;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2011-10-24 16:13:39 $
+ * @version $Revision: 1.4 $ $Date: 2012-01-03 18:49:13 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 
@@ -96,7 +97,7 @@ public class ReplaceMetadataAction extends ExecCommand {
     }
 
     private static String[] getCompatibleProducts(final Product destProduct) {
-        final ArrayList<String> prodList = new ArrayList<String>();
+        final List<String> prodList = new ArrayList<String>();
 
         final Product[] products = VisatApp.getApp().getProductManager().getProducts();
         for(Product p : products) {

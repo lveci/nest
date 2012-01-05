@@ -23,12 +23,7 @@ import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.jidesoft.tree.AbstractTreeModel;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductManager;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
@@ -37,18 +32,14 @@ import org.esa.beam.jai.ImageManager;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,29 +95,29 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
 
     @Override
     public boolean performFinish() {
-        // NESTMOD multiple selections
+	// NESTMOD multiple selections
         final TreePath[] selectionPaths = tree.getSelectionPaths();
-        for(TreePath treePath : selectionPaths) {
-            final RasterDataNode rasterDataNode = (RasterDataNode) treePath.getLastPathComponent();
+        for(TreePath treePath : selectionPaths) {        
+	final RasterDataNode rasterDataNode = (RasterDataNode) tree.getSelectionPath().getLastPathComponent();
 
-            LayerType type = LayerTypeRegistry.getLayerType(RasterImageLayerType.class.getName());
-            PropertySet configuration = type.createLayerConfig(getContext().getLayerContext());
-            configuration.setValue(RasterImageLayerType.PROPERTY_NAME_RASTER, rasterDataNode);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, false);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
-            final ImageLayer imageLayer = (ImageLayer) type.createLayer(getContext().getLayerContext(),
-                                                                        configuration);
-            imageLayer.setName(rasterDataNode.getDisplayName());
+        LayerType type = LayerTypeRegistry.getLayerType(RasterImageLayerType.class.getName());
+        PropertySet configuration = type.createLayerConfig(getContext().getLayerContext());
+        configuration.setValue(RasterImageLayerType.PROPERTY_NAME_RASTER, rasterDataNode);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, false);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
+        final ImageLayer imageLayer = (ImageLayer) type.createLayer(getContext().getLayerContext(),
+                                                                    configuration);
+        imageLayer.setName(rasterDataNode.getDisplayName());
 
-            ProductSceneView sceneView = getContext().getAppContext().getSelectedProductSceneView();
-            Layer rootLayer = sceneView.getRootLayer();
-            rootLayer.getChildren().add(sceneView.getFirstImageLayerIndex(), imageLayer);
+        ProductSceneView sceneView = getContext().getAppContext().getSelectedProductSceneView();
+        Layer rootLayer = sceneView.getRootLayer();
+        rootLayer.getChildren().add(sceneView.getFirstImageLayerIndex(), imageLayer);
 
-            final LayerDataHandler layerDataHandler = new LayerDataHandler(rasterDataNode, imageLayer);
-            rasterDataNode.getProduct().addProductNodeListener(layerDataHandler);
-            rootLayer.addListener(layerDataHandler);
-        }
+        final LayerDataHandler layerDataHandler = new LayerDataHandler(rasterDataNode, imageLayer);
+        rasterDataNode.getProduct().addProductNodeListener(layerDataHandler);
+        rootLayer.addListener(layerDataHandler);
+	}
         return true;
     }
 

@@ -160,7 +160,7 @@ public final class AbstractMetadataIO {
             final Element elem = (Element) o;
             final String name = elem.getName();
             final List content = elem.getContent();
-            final ArrayList<Float> valueList = new ArrayList<Float>();
+            final List<Float> valueList = new ArrayList<Float>();
             int columnCount = 0;
             int rowCount = 0;
             for(Object row : content) {
@@ -200,7 +200,7 @@ public final class AbstractMetadataIO {
         }
     }
 
-    private static int parseTiePointGirdRow(final String line, final ArrayList<Float> valueList) {
+    private static int parseTiePointGirdRow(final String line, final List<Float> valueList) {
         final StringTokenizer tokenizer = new StringTokenizer(line, ",");
         int tokenCount = 0;
         while(tokenizer.hasMoreTokens()) {
@@ -210,7 +210,7 @@ public final class AbstractMetadataIO {
         return tokenCount;
     }
 
-    private static void addTiePointGrid(final Product product, final String name, final ArrayList<Float> valueList,
+    private static void addTiePointGrid(final Product product, final String name, final List<Float> valueList,
                                         final int inputWidth, final int inputHeight) {
         int gridWidth = inputWidth;
         int gridHeight = inputHeight;

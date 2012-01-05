@@ -15,10 +15,8 @@
  */
 package org.esa.nest.gpf;
 
-import Jama.Matrix;
 import com.bc.ceres.core.NullProgressMonitor;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
@@ -30,21 +28,17 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.OrbitalDataRecordReader;
 import org.esa.nest.dataio.PrareOrbitReader;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.Orbits;
-import org.esa.nest.util.Constants;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.ftpUtils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,10 +18,11 @@ package org.esa.beam.dataio.netcdf.metadata.profiles.cf;
 import org.esa.beam.dataio.netcdf.ProfileReadContext;
 import org.esa.beam.dataio.netcdf.ProfileWriteContext;
 import org.esa.beam.dataio.netcdf.metadata.ProfilePartIO;
+import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
+import org.esa.beam.dataio.netcdf.nc.NVariable;
 import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.dataio.netcdf.util.Dimension;
+import org.esa.beam.dataio.netcdf.util.DimKey;
 import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
@@ -30,25 +31,24 @@ import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
-import ucar.nc2.Group;
-import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.List;
 
 public class CfGeocodingPart extends ProfilePartIO {
 
-    private boolean usePixelGeoCoding;
-    private boolean latLonAlreadyPresent;
+    private boolean geographicCRS;
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
@@ -65,105 +65,110 @@ public class CfGeocodingPart extends ProfilePartIO {
     public void preEncode(ProfileWriteContext ctx, Product product) throws IOException {
         final GeoCoding geoCoding = product.getGeoCoding();
         if (geoCoding == null) {
-            // we don't need to encode a geo coding if there is none present
             return;
         }
-        usePixelGeoCoding = !isGeographicLatLon(geoCoding);
-        final NetcdfFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-        if (usePixelGeoCoding) {
-            addXYCoordVariables(ncFile);
-            Group rootGroup = ncFile.getRootGroup();
-            latLonAlreadyPresent = rootGroup.findVariable("lat") != null && rootGroup.findVariable("lon") != null;
-            if (!latLonAlreadyPresent) {
-                addLatLonBands(ncFile);
-            }
-            ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
+        geographicCRS = isGeographicCRS(geoCoding);
+        final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+        if (geographicCRS) {
+            final GeoPos ul = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
+            final int w = product.getSceneRasterWidth();
+            final int h = product.getSceneRasterHeight();
+            final GeoPos br = geoCoding.getGeoPos(new PixelPos(w - 0.5f, h - 0.5f), null);
+            addGeographicCoordinateVariables(ncFile, ul, br);
         } else {
-            GeoPos ul = geoCoding.getGeoPos(new PixelPos(0.5f, 0.5f), null);
-            GeoPos br = geoCoding.getGeoPos(
-                    new PixelPos(product.getSceneRasterWidth() - 0.5f, product.getSceneRasterHeight() - 0.5f), null);
-            addLatLonCoordVariables(ncFile, ul, br);
-            ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, true);
+            final boolean latLonPresent = isLatLonPresent(ncFile);
+            if (!latLonPresent) {
+                addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
+            }
         }
+        ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
+    }
+
+    private boolean isLatLonPresent(NFileWriteable ncFile) {
+        return ncFile.findVariable("lat") != null && ncFile.findVariable("lon") != null;
     }
 
     @Override
     public void encode(ProfileWriteContext ctx, Product product) throws IOException {
-        if (!usePixelGeoCoding && !latLonAlreadyPresent) {
+        NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+        if (!isLatLonPresent(ncFile)) {
             return;
         }
-        try {
-            final int h = product.getSceneRasterHeight();
-            final int w = product.getSceneRasterWidth();
+        final int h = product.getSceneRasterHeight();
+        final int w = product.getSceneRasterWidth();
+
+        final GeoCoding geoCoding = product.getGeoCoding();
+        final PixelPos pixelPos = new PixelPos();
+        final GeoPos geoPos = new GeoPos();
+
+        NVariable latVariable = ncFile.findVariable("lat");
+        NVariable lonVariable = ncFile.findVariable("lon");
+        if (geographicCRS) {
+            final float[] lat = new float[h];
+            final float[] lon = new float[w];
+            pixelPos.x = 0 + 0.5f;
+            for (int y = 0; y < h; y++) {
+                pixelPos.y = y + 0.5f;
+                geoCoding.getGeoPos(pixelPos, geoPos);
+                lat[y] = geoPos.getLat();
+            }
+            pixelPos.y = 0 + 0.5f;
+            for (int x = 0; x < w; x++) {
+                pixelPos.x = x + 0.5f;
+                geoCoding.getGeoPos(pixelPos, geoPos);
+                lon[x] = geoPos.getLon();
+            }
+            latVariable.writeFully(Array.factory(lat));
+            lonVariable.writeFully(Array.factory(lon));
+        } else {
             final float[] lat = new float[w];
             final float[] lon = new float[w];
-            PixelPos pixelPos = new PixelPos();
-            GeoPos geoPos = new GeoPos();
-            final Boolean isYFlipped = (Boolean) ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME);
+            final boolean isYFlipped = (Boolean) ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME);
             for (int y = 0; y < h; y++) {
                 pixelPos.y = y + 0.5f;
                 for (int x = 0; x < w; x++) {
                     pixelPos.x = x + 0.5f;
-                    product.getGeoCoding().getGeoPos(pixelPos, geoPos);
+                    geoCoding.getGeoPos(pixelPos, geoPos);
                     lat[x] = geoPos.getLat();
                     lon[x] = geoPos.getLon();
                 }
-                int flippedY = isYFlipped ? (h - 1) - y : y;
-                final int[] shape = new int[]{1, w};
-                final int[] origin = new int[]{flippedY, 0};
-                ctx.getNetcdfFileWriteable().write("lat", origin, Array.factory(DataType.FLOAT, shape, lat));
-                ctx.getNetcdfFileWriteable().write("lon", origin, Array.factory(DataType.FLOAT, shape, lon));
+                latVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lat));
+                lonVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lon));
             }
-        } catch (InvalidRangeException e) {
-            throw new ProductIOException("Data not in the expected range", e);
         }
     }
 
-    static boolean isGeographicLatLon(final GeoCoding geoCoding) {
-        if (geoCoding instanceof CrsGeoCoding || geoCoding instanceof MapGeoCoding) {
-            return CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
-        }
-        return false;
+    static boolean isGeographicCRS(final GeoCoding geoCoding) {
+        return (geoCoding instanceof CrsGeoCoding || geoCoding instanceof MapGeoCoding) &&
+               CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
     }
 
-    private void addLatLonCoordVariables(NetcdfFileWriteable ncFile, GeoPos ul, GeoPos br) {
-        final Variable latVar = ncFile.addVariable(null, "lat", DataType.FLOAT, "lat");
-        latVar.addAttribute(new Attribute("units", "degrees_north"));
-        latVar.addAttribute(new Attribute("long_name", "latitude coordinate"));
-        latVar.addAttribute(new Attribute("standard_name", "latitude"));
-        latVar.addAttribute(new Attribute(Constants.VALID_MIN_ATT_NAME, br.getLat()));
-        latVar.addAttribute(new Attribute(Constants.VALID_MAX_ATT_NAME, ul.getLat()));
+    private void addGeographicCoordinateVariables(NFileWriteable ncFile, GeoPos ul, GeoPos br) throws IOException {
+        final NVariable lat = ncFile.addVariable("lat", DataType.FLOAT, null, "lat");
+        lat.addAttribute("units", "degrees_north");
+        lat.addAttribute("long_name", "latitude");
+        lat.addAttribute("standard_name", "latitude");
+        lat.addAttribute(Constants.VALID_MIN_ATT_NAME, br.getLat());
+        lat.addAttribute(Constants.VALID_MAX_ATT_NAME, ul.getLat());
 
-        final Variable lonVar = ncFile.addVariable(null, "lon", DataType.FLOAT, "lon");
-        lonVar.addAttribute(new Attribute("units", "degrees_east"));
-        lonVar.addAttribute(new Attribute("long_name", "longitude coordinate"));
-        lonVar.addAttribute(new Attribute("standard_name", "longitude"));
-        lonVar.addAttribute(new Attribute(Constants.VALID_MIN_ATT_NAME, ul.getLon()));
-        lonVar.addAttribute(new Attribute(Constants.VALID_MAX_ATT_NAME, br.getLon()));
+        final NVariable lon = ncFile.addVariable("lon", DataType.FLOAT, null, "lon");
+        lon.addAttribute("units", "degrees_east");
+        lon.addAttribute("long_name", "longitude");
+        lon.addAttribute("standard_name", "longitude");
+        lon.addAttribute(Constants.VALID_MIN_ATT_NAME, ul.getLon());
+        lon.addAttribute(Constants.VALID_MAX_ATT_NAME, br.getLon());
     }
 
-    private void addXYCoordVariables(NetcdfFileWriteable ncFile) {
-        final Variable yVar = ncFile.addVariable(null, "y", DataType.FLOAT, "y");
-        yVar.addAttribute(new Attribute("axis", "y"));
-        yVar.addAttribute(new Attribute("long_name", "y-coordinate in Cartesian system"));
-        yVar.addAttribute(new Attribute("units", "m"));             // todo check
+    private void addLatLonBands(final NFileWriteable ncFile, Dimension tileSize) throws IOException {
+        final NVariable lat = ncFile.addVariable("lat", DataType.FLOAT, tileSize, "y x");
+        lat.addAttribute("units", "degrees_north");
+        lat.addAttribute("long_name", "latitude coordinate");
+        lat.addAttribute("standard_name", "latitude");
 
-        final Variable xVar = ncFile.addVariable(null, "x", DataType.FLOAT, "x");
-        xVar.addAttribute(new Attribute("axis", "x"));
-        xVar.addAttribute(new Attribute("long_name", "x-coordinate in Cartesian system"));
-        xVar.addAttribute(new Attribute("units", "m"));             // todo check
-    }
-
-    private void addLatLonBands(final NetcdfFileWriteable ncFile) {
-        final Variable latVar = ncFile.addVariable(null, "lat", DataType.FLOAT, "y x");
-        latVar.addAttribute(new Attribute("units", "degrees_north"));
-        latVar.addAttribute(new Attribute("long_name", "latitude coordinate"));
-        latVar.addAttribute(new Attribute("standard_name", "latitude"));
-
-        final Variable lonVar = ncFile.addVariable(null, "lon", DataType.FLOAT, "y x");
-        lonVar.addAttribute(new Attribute("units", "degrees_east"));
-        lonVar.addAttribute(new Attribute("long_name", "longitude coordinate"));
-        lonVar.addAttribute(new Attribute("standard_name", "longitude"));
+        final NVariable lon = ncFile.addVariable("lon", DataType.FLOAT, tileSize, "y x");
+        lon.addAttribute("units", "degrees_east");
+        lon.addAttribute("long_name", "longitude coordinate");
+        lon.addAttribute("standard_name", "longitude");
     }
 
     private static GeoCoding readConventionBasedMapGeoCoding(ProfileReadContext ctx, Product product) {
@@ -186,7 +191,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         if (lonLat != null) {
             final Variable lonVariable = lonLat[0];
             final Variable latVariable = lonLat[1];
-            final Dimension rasterDim = ctx.getRasterDigest().getRasterDim();
+            final DimKey rasterDim = ctx.getRasterDigest().getRasterDim();
             if (rasterDim.fitsTo(lonVariable, latVariable)) {
                 try {
                     return createConventionBasedMapGeoCoding(lonVariable, latVariable,
@@ -200,8 +205,8 @@ public class CfGeocodingPart extends ProfilePartIO {
         return null;
     }
 
-    private static GeoCoding createConventionBasedMapGeoCoding(Variable lonVar,
-                                                               Variable latVar,
+    private static GeoCoding createConventionBasedMapGeoCoding(Variable lon,
+                                                               Variable lat,
                                                                int sceneRasterWidth,
                                                                int sceneRasterHeight,
                                                                ProfileReadContext ctx) throws Exception {
@@ -212,43 +217,43 @@ public class CfGeocodingPart extends ProfilePartIO {
         double pixelSizeX;
         double pixelSizeY;
 
-        final Attribute lonValidMinAttr = lonVar.findAttribute(Constants.VALID_MIN_ATT_NAME);
-        final Attribute lonValidMaxAttr = lonVar.findAttribute(Constants.VALID_MAX_ATT_NAME);
+        final Attribute lonValidMinAttr = lon.findAttribute(Constants.VALID_MIN_ATT_NAME);
+        final Attribute lonValidMaxAttr = lon.findAttribute(Constants.VALID_MAX_ATT_NAME);
 
-        final Attribute latValidMinAttr = latVar.findAttribute(Constants.VALID_MIN_ATT_NAME);
-        final Attribute latValidMaxAttr = latVar.findAttribute(Constants.VALID_MAX_ATT_NAME);
+        final Attribute latValidMinAttr = lat.findAttribute(Constants.VALID_MIN_ATT_NAME);
+        final Attribute latValidMaxAttr = lat.findAttribute(Constants.VALID_MAX_ATT_NAME);
 
         boolean yFlipped;
         if (lonValidMinAttr != null && lonValidMaxAttr != null && latValidMinAttr != null && latValidMaxAttr != null) {
             // COARDS convention uses 'valid_min' and 'valid_max' attributes
 
-            double lonValidMin = lonValidMinAttr.getNumericValue().doubleValue();
-            double latValidMin = latValidMinAttr.getNumericValue().doubleValue();
-            double lonValidMax = lonValidMaxAttr.getNumericValue().doubleValue();
-            double latValidMAx = latValidMaxAttr.getNumericValue().doubleValue();
+            double minLon = lonValidMinAttr.getNumericValue().doubleValue();
+            double minLat = latValidMinAttr.getNumericValue().doubleValue();
+            double maxLon = lonValidMaxAttr.getNumericValue().doubleValue();
+            double maxLat = latValidMaxAttr.getNumericValue().doubleValue();
 
             pixelX = 0.5;
             pixelY = (sceneRasterHeight - 1.0) + 0.5;
-            easting = lonValidMin;
-            northing = latValidMin;
-            pixelSizeX = (lonValidMax - lonValidMin) / sceneRasterWidth;
-            pixelSizeY = (latValidMAx - latValidMin) / sceneRasterHeight;
-            // must flip
-            yFlipped = true; // todo - check
+            easting = minLon;
+            northing = minLat;
+            pixelSizeX = (maxLon - minLon) / (sceneRasterWidth - 1);
+            pixelSizeY = (maxLat - minLat) / (sceneRasterHeight - 1);
+            yFlipped = false;
         } else {
             // CF convention
-            final Array lonData = lonVar.read();
-            final Array latData = latVar.read();
+            final Array lonData = lon.read();
+            final Array latData = lat.read();
 
+            final int lonSize = lon.getShape(0);
             final Index i0 = lonData.getIndex().set(0);
-            final Index i1 = lonData.getIndex().set(1);
-            pixelSizeX = lonData.getDouble(i1) - lonData.getDouble(i0);
+            final Index i1 = lonData.getIndex().set(lonSize - 1);
+            pixelSizeX = (lonData.getDouble(i1) - lonData.getDouble(i0)) / (sceneRasterWidth - 1);
             easting = lonData.getDouble(i0);
 
-            int latSize = (int) latVar.getSize();
+            final int latSize = lat.getShape(0);
             final Index j0 = latData.getIndex().set(0);
-            final Index j1 = latData.getIndex().set(1);
-            pixelSizeY = latData.getDouble(j1) - latData.getDouble(j0);
+            final Index j1 = latData.getIndex().set(latSize - 1);
+            pixelSizeY = (latData.getDouble(j1) - latData.getDouble(j0)) / (sceneRasterHeight - 1);
 
             pixelX = 0.5f;
             pixelY = 0.5f;

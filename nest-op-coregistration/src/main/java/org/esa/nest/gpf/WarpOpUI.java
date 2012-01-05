@@ -33,7 +33,7 @@ public class WarpOpUI extends BaseOperatorUI {
 
     private final JComboBox warpPolynomialOrder = new JComboBox(new String[] { "1","2","3" } );
     private final JComboBox interpolationMethod = new JComboBox(new String[] {
-           WarpOp.NEAREST_NEIGHBOR, WarpOp.BILINEAR,
+           WarpOp.NEAREST_NEIGHBOR, WarpOp.BILINEAR, WarpOp.BICUBIC, WarpOp.BICUBIC2,
            WarpOp.TRI, WarpOp.CC4P, WarpOp.CC6P, WarpOp.TS6P, WarpOp.TS8P, WarpOp.TS16P} );
 
     private final JTextField rmsThreshold = new JTextField("");
@@ -69,6 +69,8 @@ public class WarpOpUI extends BaseOperatorUI {
                 interpolationMethod.removeAllItems();
                 interpolationMethod.addItem(WarpOp.NEAREST_NEIGHBOR);
                 interpolationMethod.addItem(WarpOp.BILINEAR);
+                interpolationMethod.addItem(WarpOp.BICUBIC);
+                interpolationMethod.addItem(WarpOp.BICUBIC2);
             }
         }
 

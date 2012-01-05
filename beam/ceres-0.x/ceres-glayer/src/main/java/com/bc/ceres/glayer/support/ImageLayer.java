@@ -192,7 +192,6 @@ public class ImageLayer extends Layer {
             return;
         }
         final Viewport vp = rendering.getViewport();
-        if(vp == null) return;
         final int level = getLevel(vp);
         final MultiLevelRenderer renderer = getRenderer(rendering);
         renderer.renderImage(rendering, multiLevelSource, level);
@@ -205,7 +204,6 @@ public class ImageLayer extends Layer {
     private void renderImageBorder(Rendering rendering, int level) {
         final Graphics2D graphics2D = rendering.getGraphics();
         final Viewport viewport = rendering.getViewport();
-        if(viewport == null) return;
 
         final Object oldAntialiasing = graphics2D.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         final Paint oldPaint = graphics2D.getPaint();

@@ -22,6 +22,7 @@ import org.esa.beam.visat.VisatApp;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -74,7 +75,7 @@ public class ProductLibraryConfig {
      * @return the stored repositories.
      */
     public File[] getBaseDirs() {
-        final ArrayList<File> dirList = new ArrayList<File>();
+        final List<File> dirList = new ArrayList<File>();
         final Set keys = properties.getProperties().keySet();
         for(Object o : keys) {
             if( o instanceof String) {

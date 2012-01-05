@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,7 +65,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<ERSImageFile> imgArray = new ArrayList<ERSImageFile>(imageFileNames.length);
+        final List<ERSImageFile> imgArray = new ArrayList<ERSImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final ERSImageFile imgFile = new ERSImageFile(createInputStream(new File(_baseDir, fileName)));

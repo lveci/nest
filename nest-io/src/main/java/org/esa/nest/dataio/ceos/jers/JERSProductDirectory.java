@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,7 +68,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<JERSImageFile> imgArray = new ArrayList<JERSImageFile>(imageFileNames.length);
+        final List<JERSImageFile> imgArray = new ArrayList<JERSImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final JERSImageFile imgFile = new JERSImageFile(createInputStream(new File(_baseDir, fileName)));

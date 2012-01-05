@@ -15,7 +15,7 @@
  */
 package org.esa.nest.util;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import org.apache.xerces.parsers.DOMParser;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -190,7 +190,7 @@ public final class XMLSupport {
     }
 
     public static String[] getStringList(final Element elem) {
-        final ArrayList<String> array = new ArrayList<String>();
+        final List<String> array = new ArrayList<String>();
         final List contentList = elem.getContent();
         for (Object o : contentList) {
             if (o instanceof Element) {

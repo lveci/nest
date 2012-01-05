@@ -21,6 +21,7 @@ import org.esa.nest.util.SQLUtils;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -241,7 +242,7 @@ public class ProductTable implements TableInterface {
     }
 
     public ProductEntry[] getProductEntryList() throws SQLException {
-        final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
+        final List<ProductEntry> listEntries = new ArrayList<ProductEntry>();
 
         final Statement queryStatement = dbConnection.createStatement();
         final ResultSet results = queryStatement.executeQuery(strGetListEntries);
@@ -252,7 +253,7 @@ public class ProductTable implements TableInterface {
     }
 
     public String[] getAllMissions() throws SQLException {
-        final ArrayList<String> listEntries = new ArrayList<String>();
+        final List<String> listEntries = new ArrayList<String>();
         final ResultSet results = stmtAllMissions.executeQuery();
         while(results.next()) {
             listEntries.add(results.getString(1));
@@ -266,7 +267,7 @@ public class ProductTable implements TableInterface {
      * @throws SQLException .
      */
     public String[] getAllProductTypes() throws SQLException {
-        final ArrayList<String> listEntries = new ArrayList<String>();
+        final List<String> listEntries = new ArrayList<String>();
         final ResultSet results = stmtAllProductTypes.executeQuery();
         while(results.next()) {
             listEntries.add(results.getString(1));
@@ -286,7 +287,7 @@ public class ProductTable implements TableInterface {
         String strMissionProductTypes = "SELECT DISTINCT "+AbstractMetadata.PRODUCT_TYPE+" FROM "+TABLE+" WHERE ";
         strMissionProductTypes += SQLUtils.getOrList(AbstractMetadata.MISSION, missions);
 
-        final ArrayList<String> listEntries = new ArrayList<String>();
+        final List<String> listEntries = new ArrayList<String>();
         final Statement queryStatement = dbConnection.createStatement();
         final ResultSet results = queryStatement.executeQuery(strMissionProductTypes);
         while(results.next()) {
@@ -301,7 +302,7 @@ public class ProductTable implements TableInterface {
      * @throws SQLException .
      */
     public String[] getAllAcquisitionModes() throws SQLException {
-        final ArrayList<String> listEntries = new ArrayList<String>();
+        final List<String> listEntries = new ArrayList<String>();
         final ResultSet results = stmtAllAcquisitionModes.executeQuery();
         while(results.next()) {
             listEntries.add(results.getString(1));
@@ -321,7 +322,7 @@ public class ProductTable implements TableInterface {
         String strMissionAcquisitionModes = "SELECT DISTINCT "+AbstractMetadata.ACQUISITION_MODE+" FROM "+TABLE+" WHERE ";
         strMissionAcquisitionModes += SQLUtils.getOrList(AbstractMetadata.MISSION, missions);
 
-        final ArrayList<String> listEntries = new ArrayList<String>();
+        final List<String> listEntries = new ArrayList<String>();
         final Statement queryStatement = dbConnection.createStatement();
         final ResultSet results = queryStatement.executeQuery(strMissionAcquisitionModes);
         while(results.next()) {

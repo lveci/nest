@@ -24,7 +24,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.10-SNAPSHOT</version>
+    <version>4C-4.10</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -35,9 +35,9 @@
            -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <beam.version>4.10-SNAPSHOT</beam.version>
-        <ceres.version>0.13-SNAPSHOT</ceres.version>
-        <geotools.version>2.7.2</geotools.version>
+        <beam.version>4C-4.10</beam.version>
+        <ceres.version>4C-0.13</ceres.version>
+        <geotools.version>2.7.4</geotools.version>
         <jide.version>2.9.5</jide.version>
         <hdf.version>2.7</hdf.version>
         <netcdf.version>4.2.20</netcdf.version>
@@ -71,7 +71,7 @@
     </scm>
 
     <repositories>
-        <repository>
+        <!--repository>
             <id>bc-mvn</id>
             <name>Public Maven Repository at Brockmann Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -82,8 +82,8 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
-	<repository>
+        </repository-->
+		<repository>
             <id>array-mvn-repo</id>
             <name>Public Maven Repository at Array Systems Computing Inc</name>
             <url>http://www.array.ca/nest-web/maven</url>
@@ -99,16 +99,16 @@
             <name>Java.net repository</name>
             <url>http://download.java.net/maven/2</url>
         </repository>
-        <repository>
+        <!--repository>
             <id>osgeo</id>
             <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository-->
+        <repository>
+			<id>opengeo</id>
+			<name>GeoTools Maven Repository</name>
+			<url>http://repo.opengeo.org/</url>
         </repository>
-        <!--<repository>-->
-        <!--<id>gt-primary</id>-->
-        <!--<name>Primary GeoTools Maven Repository</name>-->
-        <!--<url>http://maven.geotools.fr/repository</url>-->
-        <!--</repository>-->
     </repositories>
 
     <pluginRepositories>
@@ -269,19 +269,19 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-envisat-reader</artifactId>
-                <version>1.4</version>
+                <version>4C-1.5</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>4C-1.1</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-geotiff</artifactId>
-                <version>1.2-SNAPSHOT</version>
+                <version>4C-1.2</version>
             </dependency>
 
             <dependency>
@@ -294,6 +294,12 @@
                 <groupId>edu.ucar</groupId>
                 <artifactId>netcdf</artifactId>
                 <version>${netcdf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>nujan</artifactId>
+                <version>1.4.1</version>
             </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
@@ -402,6 +408,14 @@
                 <version>1.1</version>
             </dependency>
 
+            <!-- BC Neural Network Library ############################################# -->
+
+            <dependency>
+                <groupId>com.bc.jnn</groupId>
+                <artifactId>jnn</artifactId>
+                <version>1.6</version>
+            </dependency>
+
             <!-- Jama Matrix Algebra Library ############################################# -->
 
             <dependency>
@@ -487,6 +501,13 @@
                 <groupId>org.jython</groupId>
                 <artifactId>jython</artifactId>
                 <version>2.5.2</version>
+            </dependency>
+
+            <!-- TAR archive support ########################################  -->
+            <dependency>
+                <groupId>org.xeustechnologies</groupId>
+                <artifactId>jtar</artifactId>
+                <version>1.0.4</version>
             </dependency>
 
         </dependencies>

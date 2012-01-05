@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-envi-reader</symbolicName>
-    <version>1.2</version>
+    <version>4C-1.2</version>
     <name>ENVI Product Reader</name>
 
     <description>
@@ -10,7 +10,7 @@
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2008 by Brockmann Consult GmbH</copyright>
+    <copyright>(C) 2011 by Brockmann Consult GmbH</copyright>
     <url>http://www.brockmann-consult.de/</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 

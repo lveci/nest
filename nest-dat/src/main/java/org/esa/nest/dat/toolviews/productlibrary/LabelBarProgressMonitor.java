@@ -20,6 +20,7 @@ import com.bc.ceres.core.ProgressMonitor;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link com.bc.ceres.core.ProgressMonitor} which uses a
@@ -41,7 +42,7 @@ public class LabelBarProgressMonitor implements ProgressMonitor {
     private int lastWorkUI;
     private boolean cancelRequested;
 
-    private final ArrayList<ProgressBarListener> listenerList = new ArrayList<ProgressBarListener>(1);
+    private final List<ProgressBarListener> listenerList = new ArrayList<ProgressBarListener>(1);
 
     public LabelBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
         this.progressBar = progressBar;

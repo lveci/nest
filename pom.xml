@@ -12,13 +12,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 
-		<beam.version>4.10-SNAPSHOT</beam.version>
-        <ceres.version>0.13-SNAPSHOT</ceres.version>
-        <geotools.version>2.7.2</geotools.version>
+		<beam.version>4C-4.10</beam.version>
+        <ceres.version>4C-0.13</ceres.version>
+        <geotools.version>2.7.4</geotools.version>
 		<jide.version>2.9.5</jide.version>
 		<hdf.version>2.7</hdf.version>
         <netcdf.version>4.2.20</netcdf.version>
-		<nest.version>4B-1.1</nest.version>
+		<nest.version>4C-0.1</nest.version>
 		<jdoris.version>0.2</jdoris.version>
 		<outputdir>../output</outputdir>
     </properties>
@@ -81,15 +81,15 @@
           <name>Java.net repository</name>
           <url>http://download.java.net/maven/2</url>
         </repository>
-        <repository>
+        <!--repository>
           <id>osgeo</id>
           <name>Open Source Geospatial Foundation Repository</name>
           <url>http://download.osgeo.org/webdav/geotools/</url>
-        </repository>
+        </repository-->
         <repository>
-            <id>gt-primary</id>
-            <name>Primary GeoTools Maven Repository</name>
-            <url>http://maven.geotools.fr/repository</url>
+			<id>opengeo</id>
+			<name>GeoTools Maven Repository</name>
+			<url>http://repo.opengeo.org/</url>
         </repository>
     </repositories>
 
@@ -226,13 +226,13 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-envisat-reader</artifactId>
-                <version>1.4</version>
+                <version>4C-1.5</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-geotiff</artifactId>
-                <version>1.2-SNAPSHOT</version>
+                <version>4C-1.2</version>
             </dependency>
 
             <dependency>
@@ -250,7 +250,7 @@
 			<dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>4C-1.1</version>
             </dependency>
 			
 			<!-- JDoris Modules ############################################# -->
@@ -341,6 +341,11 @@
                 <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
             </dependency>
+			<!--dependency>
+	            <groupId>org.geotools</groupId>
+	            <artifactId>gt-imageio-ext-gdal</artifactId>
+	            <version>${geotools.version}</version>
+	        </dependency-->
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
@@ -572,11 +577,6 @@
                 </plugin>
 
                 <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.7</version>
-                </plugin>
-
-                <plugin>
                     <artifactId>maven-source-plugin</artifactId>
 					<version>2.1.2</version>
                     <executions>
@@ -606,6 +606,23 @@
                     </executions>
                 </plugin>
 
+				<plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.8</version>
+					<configuration>
+						<aggregate>true</aggregate>
+						<maxmemory>600m</maxmemory>
+						<links>
+	                            <link>http://java.sun.com/javase/6/docs/api/</link>
+	                    </links>
+	                    <subpackages>
+	                        org.esa.nest:com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
+	                    </subpackages>
+	                    <quiet>false</quiet>
+					</configuration>
+	            </plugin>
+				
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
 					<version>2.8</version>
@@ -707,10 +724,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
+				<version>2.8</version>
 				<configuration>
 					<aggregate>true</aggregate>
-					<maxmemory>1024m</maxmemory>
+					<maxmemory>600m</maxmemory>
+					<links>
+                            <link>http://java.sun.com/javase/6/docs/api/</link>
+                    </links>
+                    <subpackages>
+                        org.esa.nest:com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
+                    </subpackages>
+                    <quiet>false</quiet>
 				</configuration>
             </plugin>
         </plugins>

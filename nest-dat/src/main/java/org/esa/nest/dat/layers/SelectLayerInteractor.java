@@ -1,16 +1,15 @@
 package org.esa.nest.dat.layers;
 
-import com.bc.ceres.swing.figure.interactions.SelectionInteractor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerFilter;
 import com.bc.ceres.glayer.support.LayerUtils;
-
-import java.awt.event.MouseEvent;
-import java.awt.*;
-import java.util.List;
-
+import com.bc.ceres.swing.figure.interactions.SelectionInteractor;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.VisatApp;
+
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class SelectLayerInteractor extends SelectionInteractor {
 

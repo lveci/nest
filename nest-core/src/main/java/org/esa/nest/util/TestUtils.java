@@ -247,16 +247,11 @@ public class TestUtils {
         return Math.max(0, Math.min(val, max));
     }
 
-    private static boolean isAlos(Product prod) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(prod);
-        return absRoot != null && absRoot.getAttributeString(AbstractMetadata.MISSION).contains("ALOS");
-    }
-
     public static int recurseProcessFolder(final OperatorSpi spi, final File origFolder, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
 
-        final File[] folderList = origFolder.listFiles(new ProductFunctions.DirectoryFileFilter());
+        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
         for(File folder : folderList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
@@ -361,17 +356,20 @@ public class TestUtils {
         }
     }
 
-    public static void recurseReadFolder(final File folder,
+    public static void recurseReadFolder(final File origFolder,
                                          final ProductReaderPlugIn readerPlugin,
                                          final ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(file.isDirectory()) {
-                if(!file.getName().contains("skipTest")) {
-                    recurseReadFolder(file, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
-                }
-            } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
+        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
+        for(File folder : folderList) {
+            if(!folder.getName().contains("skipTest")) {
+                recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
+            }
+        }
+
+        for(File file : origFolder.listFiles()) {
+            if(file.isDirectory() && readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
                     //System.out.println("Reading "+ file.toString());

@@ -55,7 +55,7 @@ public class TestCreateStackOp extends TestCase {
         //ProductIO.writeProduct(slvProduct1, "c:\\data\\out\\slvProduct1", "BEAM-DIMAP");
 
         op.setSourceProducts(new Product[] {mstProduct, slvProduct1});
-        op.setTestParameters(CreateStackOp.MIN_EXTENT);
+        op.setTestParameters(CreateStackOp.MASTER_EXTENT);
 
         // get targetProduct gets initialize to be executed
         final Product targetProduct = op.getTargetProduct();

@@ -31,7 +31,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public class DatabasePane extends JPanel {
     private final DateComboBox startDateBox = new DateComboBox();
     private final DateComboBox endDateBox = new DateComboBox();
     private final JComboBox polarizationCombo = new JComboBox(new String[] {
-            DBQuery.ANY, "HH", "VV", "HV", "VH" });
+            DBQuery.ANY, DBQuery.DUALPOL, DBQuery.QUADPOL, "HH", "VV", "HV", "VH" });
     private final JComboBox calibrationCombo = new JComboBox(new String[] {
             DBQuery.ANY, DBQuery.CALIBRATED, DBQuery.NOT_CALIBRATED });
     private final JComboBox orbitCorrectionCombo = new JComboBox(new String[] {
@@ -415,7 +418,7 @@ public class DatabasePane extends JPanel {
 
     private int[] findIndices(final JList list, final String[] values) {
         final int size = list.getModel().getSize();
-        final ArrayList<Integer> indices = new ArrayList<Integer>();
+        final List<Integer> indices = new ArrayList<Integer>();
         for(int i=0; i < size; ++i) {
             final String str = (String)list.getModel().getElementAt(i);
             if(StringUtils.contains(values, str)) {

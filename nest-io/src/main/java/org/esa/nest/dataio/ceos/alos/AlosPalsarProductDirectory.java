@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,7 +75,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<AlosPalsarImageFile> imgArray = new ArrayList<AlosPalsarImageFile>(imageFileNames.length);
+        final List<AlosPalsarImageFile> imgArray = new ArrayList<AlosPalsarImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final AlosPalsarImageFile imgFile = new AlosPalsarImageFile(createInputStream(new File(_baseDir, fileName)),

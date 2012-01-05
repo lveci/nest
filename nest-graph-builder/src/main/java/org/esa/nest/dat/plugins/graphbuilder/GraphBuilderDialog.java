@@ -19,20 +19,20 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.SourceUI;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
-import org.esa.beam.gpf.operators.standard.ReadOp;
-import org.esa.nest.util.DialogUtils;
-import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.util.MemUtils;
-import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.nest.gpf.ProductSetReaderOp;
+import org.esa.nest.gpf.ProductSetReaderOpUI;
+import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.MemUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -43,6 +43,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -64,12 +65,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private JPanel progressPanel = null;
     private JProgressBar progressBar = null;
     private ProgressBarProgressMonitor progBarMonitor = null;
+    private JLabel progressMsgLabel = null;
     private boolean initGraphEnabled = true;
 
     private final GraphExecuter graphEx;
     private boolean isProcessing = false;
     private boolean allowGraphBuilding = true;
-    private final ArrayList<ProcessingListener> listenerList = new ArrayList<ProcessingListener>(1);
+    private final List<ProcessingListener> listenerList = new ArrayList<ProcessingListener>(1);
 
     //TabbedPanel
     private JTabbedPane tabbedPanel = null;
@@ -159,9 +161,11 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         // progress Bar
         progressBar = new JProgressBar();
         progressBar.setName(getClass().getName() + "progressBar");
-        progressBar.setStringPainted(true);       
+        progressBar.setStringPainted(true);  
         progressPanel = new JPanel();
         progressPanel.setLayout(new BorderLayout(2,2));
+        progressMsgLabel = new JLabel();
+        progressPanel.add(progressMsgLabel, BorderLayout.NORTH);
         progressPanel.add(progressBar, BorderLayout.CENTER);
         final JButton progressCancelBtn = new JButton("Cancel");
         progressCancelBtn.addActionListener(new ActionListener() {
@@ -256,7 +260,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
-            progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
+            progBarMonitor = new ProgressBarProgressMonitor(progressBar, progressMsgLabel, progressPanel);
             final SwingWorker processThread = new ProcessThread(progBarMonitor);
             processThread.execute();
 
@@ -546,7 +550,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     }
 
-    private void openTargetProducts(final ArrayList<File> fileList) {
+    private void openTargetProducts(final List<File> fileList) {
         if(!fileList.isEmpty()) {
             for(File file : fileList) {
                 try {

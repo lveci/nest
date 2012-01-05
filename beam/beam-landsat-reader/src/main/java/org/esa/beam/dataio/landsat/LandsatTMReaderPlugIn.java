@@ -16,12 +16,17 @@
 
 package org.esa.beam.dataio.landsat;
 
+import com.bc.ceres.core.VirtualDir;
+import org.esa.beam.dataio.landsat.tgz.VirtualDirTgz;
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -41,7 +46,6 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
     /**
      * @param input Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
      *              is capable of decoding the input's content.
-     *
      * @return <code> true </code> if the input data could be opened <code> false </code> if not
      */
     public final DecodeQualification getDecodeQualification(final Object input) {
@@ -54,13 +58,13 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
             } else {
                 return DecodeQualification.UNABLE;
             }
-            if(file.canDecodeInput()) {
+            if (file.canDecodeInput()) {
                 return DecodeQualification.INTENDED;
             }
         } catch (Throwable e) {
             return DecodeQualification.UNABLE;
-        }finally {
-            if(file != null) {
+        } finally {
+            if (file != null) {
                 file.close();
             }
         }
@@ -69,7 +73,6 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
 
     /**
      * @param input
-     *
      * @return inputFile
      */
     public static File getInputFile(final Object input) {
@@ -138,7 +141,6 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
      * <p> In a GUI, the description returned could be used as tool-tip text.
      *
      * @param locale the local for the given decription string, if <code>null</code> the default locale is used
-     *
      * @return a textual description of this product reader/writer
      */
     public final String getDescription(Locale locale) {

@@ -53,6 +53,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.List;
 
 /**
  * The operator generates orthorectified image using rigorous SAR simulation.
@@ -185,7 +186,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private float demNoDataValue = 0; // no data value for DEM
-    private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -476,7 +476,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         targetCRS = getCRS();
 
-        RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+        final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
         if (pixelSpacingInMeter <= 0.0) {
             pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
                                            RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
@@ -837,7 +837,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
 
-        final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
+        final List<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
         for(Band targetBand : keySet) {
 
             if(targetBand.getName().equals("elevation")) {

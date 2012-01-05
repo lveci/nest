@@ -30,7 +30,7 @@ import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Marco Peters
-
+ * @version $ Revision $ $ Date $
  * @since BEAM 4.6
  */
 public class SimpleLayerSource implements LayerSource {

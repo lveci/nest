@@ -25,12 +25,13 @@ import org.esa.nest.util.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.1 $ $Date: 2011-06-30 15:41:43 $
+ * @version $Revision: 1.2 $ $Date: 2012-01-03 18:49:13 $
  */
 public abstract class CEOSImageFile {
 
@@ -142,7 +143,7 @@ public abstract class CEOSImageFile {
     }
 
     public static String[] getImageFileNames(File baseDir, String[] prefixList) {
-        final ArrayList<String> list = new ArrayList<String>(2);
+        final List<String> list = new ArrayList<String>(2);
         final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();

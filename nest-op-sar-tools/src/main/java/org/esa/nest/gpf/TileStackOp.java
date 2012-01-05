@@ -31,6 +31,7 @@ import org.esa.beam.util.ProductUtils;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -122,7 +123,7 @@ public class TileStackOp extends Operator {
         // if user did not select any band then add all
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                     bandNameList.add(band.getName());
             }

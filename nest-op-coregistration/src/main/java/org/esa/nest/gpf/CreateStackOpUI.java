@@ -29,6 +29,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,8 +40,8 @@ public class CreateStackOpUI extends BaseOperatorUI {
     private final JList mstBandList = new JList();
     private final JList slvBandList = new JList();
 
-    private final ArrayList<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
-    private final ArrayList<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
+    private final List<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
+    private final List<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
 
     private final JComboBox resamplingType = new JComboBox(ResamplingFactory.resamplingNames);
 
@@ -78,10 +79,10 @@ public class CreateStackOpUI extends BaseOperatorUI {
         extent.setSelectedItem(paramMap.get("extent"));
     }
 
-    private static ArrayList<Integer> getSelectedIndices(final String[] allBandNames,
+    private static List<Integer> getSelectedIndices(final String[] allBandNames,
                                                          final String[] selBandNames,
-                                                         final ArrayList<Integer> defaultIndices) {
-        final ArrayList<Integer> bandIndices = new ArrayList<Integer>(2);
+                                                         final List<Integer> defaultIndices) {
+        final List<Integer> bandIndices = new ArrayList<Integer>(2);
         if(selBandNames != null && selBandNames.length > 0) {
             int i=0;
             for(String bandName : allBandNames) {
@@ -150,7 +151,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
     @Override
     protected String[] getBandNames() {
-        final ArrayList<String> bandNames = new ArrayList<String>(5);
+        final List<String> bandNames = new ArrayList<String>(5);
         if(sourceProducts == null) {
             return bandNames.toArray(new String[bandNames.size()]);
         }

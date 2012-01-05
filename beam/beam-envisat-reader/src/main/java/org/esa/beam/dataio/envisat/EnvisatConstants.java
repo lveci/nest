@@ -112,7 +112,7 @@ public interface EnvisatConstants {
     int AATSR_LOC_TIE_POINT_SUBSAMPLING_X = 25;
     int AATSR_LOC_TIE_POINT_SUBSAMPLING_Y = 32;
     int AATSR_LOC_TIE_POINT_RASTER_WIDTH = (AATSR_LOC_TIE_POINT_GRID_WIDTH - 1) * AATSR_LOC_TIE_POINT_SUBSAMPLING_X;
-    float AATSR_LOC_TIE_POINT_OFFSET_X = 0.5F * AATSR_SCENE_RASTER_WIDTH - 0.5F * AATSR_LOC_TIE_POINT_RASTER_WIDTH;
+    float AATSR_LOC_TIE_POINT_OFFSET_X = 0.5F * (AATSR_SCENE_RASTER_WIDTH - AATSR_LOC_TIE_POINT_RASTER_WIDTH);
 
     /**
      * Number of solar angle tie points in across track direction for the AATSR grid.
@@ -121,10 +121,10 @@ public interface EnvisatConstants {
     int AATSR_SOL_TIE_POINT_SUBSAMPLING_X = 50;
     int AATSR_SOL_TIE_POINT_SUBSAMPLING_Y = 32;
     int AATSR_SOL_TIE_POINT_RASTER_WIDTH = (AATSR_SOL_TIE_POINT_GRID_WIDTH - 1) * AATSR_SOL_TIE_POINT_SUBSAMPLING_X;
-    float AATSR_SOL_TIE_POINT_OFFSET_X = 0.5F * AATSR_SCENE_RASTER_WIDTH - 0.5F * AATSR_SOL_TIE_POINT_RASTER_WIDTH;
+    float AATSR_SOL_TIE_POINT_OFFSET_X = 0.5F * (AATSR_SCENE_RASTER_WIDTH - AATSR_SOL_TIE_POINT_RASTER_WIDTH);
 
     /**
-     * Y-offset of AATSR tie-points corresponds to the upper bound of a pixel.
+     * Y-offset of AATSR tie-points corresponds to the lower bound of a pixel.
      */
     float AATSR_TIE_POINT_OFFSET_Y = 0.0F;
 

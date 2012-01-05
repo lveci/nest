@@ -15,7 +15,6 @@
  */
 package org.esa.nest.dat.dialogs;
 
-import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
@@ -24,10 +23,9 @@ import org.esa.nest.db.ProductEntry;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * NEST IO Panel to handle source and target selection
@@ -97,7 +95,7 @@ public class ProductSetPanel extends JPanel {
     }
 
     public File[] getFileList() {
-        final ArrayList<File> fileList = fileModel.getFileList();
+        final List<File> fileList = fileModel.getFileList();
         return fileList.toArray(new File[fileList.size()]);
     }
 

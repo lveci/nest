@@ -19,8 +19,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;

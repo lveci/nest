@@ -15,9 +15,6 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
@@ -25,16 +22,11 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.db.ProductEntry;
-import org.esa.nest.db.ProductDB;
+import org.esa.nest.dat.dialogs.FileModel;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ProductFunctions;
-import org.esa.nest.dat.dialogs.FileModel;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -42,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -86,7 +79,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        final ArrayList<File> fileList = fileModel.getFileList();
+        final List<File> fileList = fileModel.getFileList();
         if(fileList.isEmpty()) return;
 
         final String[] fList = new String[fileList.size()];
@@ -157,7 +150,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             public void actionPerformed(final ActionEvent e) {
                 final int[] selRows = table.getSelectedRows();
-                final ArrayList<File> filesToRemove = new ArrayList<File>(selRows.length);
+                final List<File> filesToRemove = new ArrayList<File>(selRows.length);
                 for(int row : selRows) {
                     filesToRemove.add(fileModel.getFileAt(row));
                 }
@@ -175,7 +168,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             public void actionPerformed(final ActionEvent e) {
                 final int[] selRows = table.getSelectedRows();
-                final ArrayList<File> filesToMove = new ArrayList<File>(selRows.length);
+                final List<File> filesToMove = new ArrayList<File>(selRows.length);
                 for(int row : selRows) {
                     filesToMove.add(fileModel.getFileAt(row));
                 }
@@ -194,7 +187,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             public void actionPerformed(final ActionEvent e) {
                 final int[] selRows = table.getSelectedRows();
-                final ArrayList<File> filesToMove = new ArrayList<File>(selRows.length);
+                final List<File> filesToMove = new ArrayList<File>(selRows.length);
                 for(int row : selRows) {
                     filesToMove.add(fileModel.getFileAt(row));
                 }

@@ -32,11 +32,15 @@ import java.io.IOException;
 public class BandOpImage extends RasterDataNodeOpImage {
 
     public BandOpImage(Band band) {
-        super(band, ResolutionLevel.MAXRES);
+        this(band, ResolutionLevel.MAXRES);
     }
 
     public BandOpImage(Band band, ResolutionLevel level) {
         super(band, level);
+        if (!Boolean.getBoolean("beam.imageManager.enableSourceTileCaching")) {
+            System.out.println("Warning! Tile Caching not enabled");
+		    setTileCache(null);
+        }
     }
 
     public Band getBand() {

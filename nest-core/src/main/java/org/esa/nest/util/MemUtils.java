@@ -4,8 +4,6 @@ package org.esa.nest.util;
 
 import javax.media.jai.JAI;
 
-import com.bc.ceres.jai.tilecache.SwappingTileCache;
-
 /**
  * memory utils
  */

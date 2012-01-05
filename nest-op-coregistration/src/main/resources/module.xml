@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-coregistration</symbolicName>
-    <version>4B-1.1</version>
+    <version>4C-0.1</version>
     <name>NEST Coregistration</name>
     <description>NEST Coregistration</description>
 	
@@ -51,7 +51,7 @@
             <id>CoregistrationGraph</id>
             <class>org.esa.nest.dat.CoregistrationGraphAction</class>
             <text>Automatic Coregistration</text>
-            <shortDescr>Perform Coregistration in a single graph</shortDescr>
+            <shortDescr>Perform Automatic Coregistration</shortDescr>
             <parent>sartools</parent>
             <separatorBefore>true</separatorBefore>
             <helpId>Coregistration</helpId>

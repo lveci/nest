@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,7 +78,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             histogramRec = _trailerFile.getHistogramRecord();
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
+        final List<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final RadarsatImageFile imgFile = new RadarsatImageFile(createInputStream(new File(_baseDir, fileName)), histogramRec);

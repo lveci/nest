@@ -15,9 +15,10 @@
  */
 package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
-import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.nest.db.ProductEntry;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -26,8 +27,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.Comparator;
 
 /**
@@ -44,6 +45,7 @@ public class PropertiesProvider implements DataProvider {
             "Acquired:",
             "File Format:",
             "Pixel Size:",
+            "Pol:"
     };
 
     private static final String NOT_AVAILABLE = "not available";
@@ -68,14 +70,6 @@ public class PropertiesProvider implements DataProvider {
             propertiesColumn.setCellRenderer(new ProductPropertiesRenderer());
         }
         return propertiesColumn;
-    }
-
-    private static String formatStartTime(final UTC sceneRasterStartTime) {
-        String timeString = NOT_AVAILABLE;
-        if (sceneRasterStartTime != null) {
-            timeString = sceneRasterStartTime.getElemString();
-        }
-        return timeString;
     }
 
     private class ProductPropertiesRenderer extends JTable implements TableCellRenderer {
@@ -123,12 +117,18 @@ public class PropertiesProvider implements DataProvider {
                 final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
                 final String dateString = dateFormat.format(entry.getFirstLineTime().getAsDate());
 
+                String pol1 = entry.getMetadata().getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
+                String pol2 = entry.getMetadata().getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
+                String pol3 = entry.getMetadata().getAttributeString(AbstractMetadata.mds3_tx_rx_polar);
+                String pol4 = entry.getMetadata().getAttributeString(AbstractMetadata.mds4_tx_rx_polar);
+
                 values = new String[]{
                         entry.getName(),
                         entry.getProductType()+"   "+entry.getPass(),
                         dateString,
                         entry.getFileFormat()+"   "+fileSize,
-                        pixelSpacing
+                        pixelSpacing,
+                        pol1 +' '+ pol2 +' '+ pol3 +' '+ pol4
                 };
                 for (int i = 0; i < values.length; i++) {
                     setValueAt(values[i], i, 1);

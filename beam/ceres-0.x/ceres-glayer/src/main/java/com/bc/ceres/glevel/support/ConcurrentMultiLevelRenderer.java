@@ -355,8 +355,7 @@ public class ConcurrentMultiLevelRenderer implements MultiLevelRenderer {
 
     private static AffineTransform getImageToViewTransform(Viewport vp, MultiLevelSource multiLevelSource, int level) {
         final AffineTransform t = new AffineTransform(multiLevelSource.getModel().getImageToModelTransform(level));
-        if(vp != null)
-            t.preConcatenate(vp.getModelToViewTransform());
+        t.preConcatenate(vp.getModelToViewTransform());
         return t;
     }
 

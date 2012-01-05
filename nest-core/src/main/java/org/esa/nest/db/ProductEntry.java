@@ -15,19 +15,19 @@
  */
 package org.esa.nest.db;
 
-import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.image.BufferedImage;
-import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -71,26 +71,34 @@ public class ProductEntry {
     }
 
     public ProductEntry(final Product product) {
-        this.file = product.getFileLocation();
-        this.lastModified = file.lastModified();
-        this.fileSize = product.getRawStorageSize();
-        this.fileFormat = product.getProductReader().getReaderPlugIn().getFormatNames()[0];
-
-        this.name = product.getName();
-        this.absRoot = AbstractMetadata.getAbstractedMetadata(product).createDeepClone();
+        file = product.getFileLocation();
+        lastModified = file.lastModified();
+        fileSize = product.getRawStorageSize();
+        fileFormat = product.getProductReader().getReaderPlugIn().getFormatNames()[0];
+      
+        absRoot = AbstractMetadata.getAbstractedMetadata(product).createDeepClone();
         if(absRoot != null) {
-            this.name = absRoot.getAttributeString(AbstractMetadata.PRODUCT);
-            this.mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-            this.productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
-            this.acquisitionMode = absRoot.getAttributeString(AbstractMetadata.ACQUISITION_MODE);
-            this.pass = absRoot.getAttributeString(AbstractMetadata.PASS);
-            this.range_spacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
-            this.azimuth_spacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
-            this.firstLineTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
+            name = absRoot.getAttributeString(AbstractMetadata.PRODUCT);
+            mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+            acquisitionMode = absRoot.getAttributeString(AbstractMetadata.ACQUISITION_MODE);
+            pass = absRoot.getAttributeString(AbstractMetadata.PASS);
+            range_spacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
+            azimuth_spacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
+            firstLineTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
         }
+
+        // get defaults if not available in metadata
+        if(name.isEmpty() || name.equals(AbstractMetadata.NO_METADATA_STRING))
+            name = product.getName();
+        if(productType.isEmpty() || productType.equals(AbstractMetadata.NO_METADATA_STRING))
+            productType = product.getProductType();
+        if(firstLineTime.equals(AbstractMetadata.NO_METADATA_UTC))
+            firstLineTime = product.getStartTime();
+
         getCornerPoints(product);
 
-        this.geoboundary = getGeoBoundary(product);
+        geoboundary = getGeoBoundary(product);
 
         this.id = -1;
     }
@@ -158,19 +166,19 @@ public class ProductEntry {
     }
 
     public String formatGeoBoundayString() {
-        final StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder(geoboundary.length*4);
         for(GeoPos geo : geoboundary) {
             str.append(geo.getLat());
-            str.append(",");
+            str.append(',');
             str.append(geo.getLon());
-            str.append(",");
+            str.append(',');
         }
 
         return str.toString();
     }
 
     private static GeoPos[] parseGeoBoundaryStr(final String str) {
-        final ArrayList<GeoPos> geoPos = new ArrayList<GeoPos>();
+        final List<GeoPos> geoPos = new ArrayList<GeoPos>(100);
         if(str != null && !str.isEmpty()) {
             final StringTokenizer st = new StringTokenizer(str, ",");
             while(st.hasMoreTokens()) {
@@ -261,7 +269,7 @@ public class ProductEntry {
     public MetadataElement getMetadata() {
         if(absRoot == null) {
             try {
-                absRoot = ProductDB.instance().getProductMetadata(this.getId());
+                absRoot = ProductDB.instance().getProductMetadata(id);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -317,7 +325,7 @@ public class ProductEntry {
     }
 
     public static ProductEntry[] createProductEntryList(final File[] fileList) {
-        final ArrayList<ProductEntry> entryList = new ArrayList<ProductEntry>(fileList.length);
+        final List<ProductEntry> entryList = new ArrayList<ProductEntry>(fileList.length);
         for(File file : fileList) {
             try {
                 final Product prod = ProductIO.readProduct(file);

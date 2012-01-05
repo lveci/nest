@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,12 +19,12 @@ package org.esa.beam.dataio.netcdf.metadata.profiles.beam;
 import org.esa.beam.dataio.netcdf.ProfileReadContext;
 import org.esa.beam.dataio.netcdf.ProfileWriteContext;
 import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfInitialisationPart;
+import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.util.Constants;
 import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.Product;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.IOException;
 
@@ -58,13 +58,13 @@ public class BeamInitialisationPart extends CfInitialisationPart {
     @Override
     public void writeProductBody(ProfileWriteContext ctx, Product p) throws IOException {
         super.writeProductBody(ctx, p);
-        NetcdfFileWriteable writeable = ctx.getNetcdfFileWriteable();
-        writeable.addAttribute(null, new Attribute(PRODUCT_TYPE, p.getProductType()));
-        writeable.addAttribute(null, new Attribute("metadata_profile", "beam"));
-        writeable.addAttribute(null, new Attribute("metadata_version", "0.5"));
-        writeable.addAttribute(null, new Attribute("Conventions", "CF-1.4"));
+        NFileWriteable writeable = ctx.getNetcdfFileWriteable();
+        writeable.addGlobalAttribute(PRODUCT_TYPE, p.getProductType());
+        writeable.addGlobalAttribute("metadata_profile", "beam");
+        writeable.addGlobalAttribute("metadata_version", "0.5");
     }
 
+    @Override
     public String readProductType(ProfileReadContext ctx) {
         final Attribute productTypeAtt = ctx.getNetcdfFile().findGlobalAttribute(PRODUCT_TYPE);
         if (productTypeAtt != null) {

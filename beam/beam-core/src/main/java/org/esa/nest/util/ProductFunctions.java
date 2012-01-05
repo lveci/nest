@@ -103,12 +103,15 @@ public class ProductFunctions {
         }
     }
 
+    public final static DirectoryFileFilter directoryFileFilter = new DirectoryFileFilter();
+
     /**
      * collect valid folders to scan
      */
     public static class DirectoryFileFilter implements java.io.FileFilter {
 
-        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
+        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support",
+                                       "quality", "source_images", "schemas" };
 
         public boolean accept(final File file) {
             if(!file.isDirectory()) return false;

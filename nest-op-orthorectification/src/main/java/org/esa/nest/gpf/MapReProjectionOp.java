@@ -112,13 +112,7 @@ public final class MapReProjectionOp extends ReprojectionOp {
             if (includeTiePointGrids) {
                 reprojectRasterDataNodes(sourceProduct.getTiePointGrids());
             }
-            /*
-            * Placemarks & masks
-            */
-            copyPlacemarks(sourceProduct.getPinGroup(), targetProduct.getPinGroup(),
-                    PinDescriptor.getInstance());
-            copyPlacemarks(sourceProduct.getGcpGroup(), targetProduct.getGcpGroup(),
-                    GcpDescriptor.getInstance());
+
             ProductUtils.copyVectorData(sourceProduct, targetProduct);
             ProductUtils.copyMasks(sourceProduct, targetProduct);
             ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);

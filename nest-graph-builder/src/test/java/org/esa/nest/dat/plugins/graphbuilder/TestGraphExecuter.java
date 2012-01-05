@@ -18,7 +18,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.graph.GraphException;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Observer;
 import java.util.Set;
 
@@ -57,7 +57,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
         updateValue = "";
         graphEx.addOperator("testOp");
 
-        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
+        List<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
         assertEquals(updateValue, "Add");
     }
@@ -65,7 +65,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
     public void testClear() {
         graphEx.addOperator("testOp");
 
-        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
+        List<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
 
         graphEx.ClearGraph();
@@ -75,7 +75,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
     public void testRemoveOperator() {
         GraphNode node = graphEx.addOperator("testOp");
 
-        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
+        List<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
 
         updateValue = "";

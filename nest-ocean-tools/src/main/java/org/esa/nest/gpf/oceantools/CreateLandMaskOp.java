@@ -35,6 +35,7 @@ import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -223,7 +224,7 @@ public class CreateLandMaskOp extends Operator {
 
     private TileData[] getTargetTiles(final Map<Band, Tile> targetTiles, final Rectangle targetRectangle,
                                              final Product srcProduct) {
-        final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
+        final List<TileData> trgTileList = new ArrayList<TileData>();
         final Set<Band> keySet = targetTiles.keySet();
         for(Band targetBand : keySet) {
 

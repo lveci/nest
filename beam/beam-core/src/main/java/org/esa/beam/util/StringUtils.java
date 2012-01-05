@@ -69,7 +69,7 @@ public final class StringUtils {
 
         final String sepsStr = new String(separators);
         final StringTokenizer st = new StringTokenizer(text, sepsStr, true);
-        String token;
+        String token = null;
         String lastToken = null;
         while (st.hasMoreTokens()) {
             try {
@@ -77,10 +77,10 @@ public final class StringUtils {
             } catch (Exception e) {
                 break;
             }
-            if (token.length() == 1 && sepsStr.indexOf(token) >= 0) {
+            if (isSeparatorToken(token, sepsStr)) {
                 // If text starts with a separator or two succesive separators
                 // have been seen, add empty string
-                if (lastToken == null || (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
+                if (lastToken == null || isSeparatorToken(lastToken, sepsStr)) {
                     tokens.add("");
                 }
             } else {
@@ -92,7 +92,7 @@ public final class StringUtils {
             lastToken = token;
         }
         // If text ends with a separator, add empty string
-        if (lastToken != null && (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
+        if (lastToken != null && isSeparatorToken(lastToken, sepsStr)) {
             tokens.add("");
         }
 
@@ -737,11 +737,11 @@ public final class StringUtils {
      */
     public static String createValidName(String name, char[] validChars, char replaceChar) {
         Guardian.assertNotNull("name", name);
-        char[] sortedValidChars;
+        char[] sortedValidChars = null;
         if (validChars == null) {
             sortedValidChars = new char[0];
         } else {
-            sortedValidChars = validChars.clone();
+            sortedValidChars = (char[]) validChars.clone();
         }
         Arrays.sort(sortedValidChars);
         StringBuilder validName = new StringBuilder(name.length());

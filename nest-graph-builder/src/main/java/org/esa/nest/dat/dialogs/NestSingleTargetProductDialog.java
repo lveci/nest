@@ -15,32 +15,29 @@
  */
 package org.esa.nest.dat.dialogs;
 
-import com.bc.ceres.binding.*;
-import com.bc.ceres.swing.TableLayout;
-import com.bc.ceres.swing.binding.PropertyPane;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
-import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
-import com.bc.ceres.swing.selection.SelectionChangeListener;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorUI;
-import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
-import org.esa.beam.framework.gpf.ui.*;
+import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
+import org.esa.beam.framework.gpf.ui.SourceProductSelector;
+import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  */
@@ -74,7 +71,7 @@ public class NestSingleTargetProductDialog extends DefaultSingleTargetProductDia
         //                                             parameterSupport,
         //                                             helpID);
         final PropertySet propertyContainer = parameterSupport.getPopertySet();
-        final ArrayList<SourceProductSelector> sourceProductSelectorList = ioParametersPanel.getSourceProductSelectorList();
+        final List<SourceProductSelector> sourceProductSelectorList = ioParametersPanel.getSourceProductSelectorList();
 
         sourceProductSelectorList.get(0).addSelectionChangeListener(new AbstractSelectionChangeListener() {
 

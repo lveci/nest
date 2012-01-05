@@ -34,6 +34,7 @@ import org.esa.nest.datamodel.Unit;
 import java.awt.*;
 import java.text.ParseException;
 import java.util.*;
+import java.util.List;
 
 /**
  * De-Burst a WSS product
@@ -287,11 +288,11 @@ public final class DeburstWSSOp extends Operator {
         }
 
         int subSamplingX = 1;
-        final ArrayList<Double> time = new ArrayList<Double>(13);
-        final ArrayList<Float> lats = new ArrayList<Float>(143);
-        final ArrayList<Float> lons = new ArrayList<Float>(143);
-        final ArrayList<Float> slant = new ArrayList<Float>(143);
-        final ArrayList<Float> incidence = new ArrayList<Float>(143);
+        final List<Double> time = new ArrayList<Double>(13);
+        final List<Float> lats = new ArrayList<Float>(143);
+        final List<Float> lons = new ArrayList<Float>(143);
+        final List<Float> slant = new ArrayList<Float>(143);
+        final List<Float> incidence = new ArrayList<Float>(143);
 
         for(MetadataElement geolocElem : geolocElems) {
             final String swathStr = geolocElem.getAttributeString("swath_number");
@@ -360,7 +361,7 @@ public final class DeburstWSSOp extends Operator {
         targetProduct.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
     }
 
-    private static void addTiePoints(final MetadataElement elem, final String tag, final ArrayList<Float> array) {
+    private static void addTiePoints(final MetadataElement elem, final String tag, final List<Float> array) {
         final MetadataAttribute attrib = elem.getAttribute(tag);
         if(attrib != null) {
             if(attrib.getDataType() == ProductData.TYPE_FLOAT32) {
@@ -446,9 +447,9 @@ public final class DeburstWSSOp extends Operator {
                 sortLineTimes(sourceProduct, cBand.i);
             }
 
-            //int targetLine = targetRectangle.y;
             final int maxY = targetRectangle.y + targetRectangle.height;
             final int maxX = targetRectangle.x + targetRectangle.width;
+            //int targetLine = targetRectangle.y;
             //double startTime = targetLine * lineTimeInterval;
 
             //final double threshold = 0.000000139;
@@ -463,40 +464,64 @@ public final class DeburstWSSOp extends Operator {
                 double startTime = start + (y * interval);
 
                 burstLines.clear();
+                double min1 = Float.MAX_VALUE;
+                double min2 = Float.MAX_VALUE;
+                double min3 = Float.MAX_VALUE;
+                int i1=0, i2=0, i3=0;
                 for(int i=0; i < lineTimes.length; ++i) {
-                    if (lineTimes[i].visited)
+                    if (lineTimes[i].visited || lineTimes[i].time < 1)
                         continue;
 
                     double t = lineTimes[i].time;
                     final double diff = Math.abs(t - startTime);
-                    if (diff < threshold) {
-                        burstLines.add(lineTimes[i].line);
-                        setVisited(i);
+                    if (diff < min1) {
+                        if(min1 < min2) {
+                            if(min2 < min3) {
+                                min3 = min2;
+                                i3 = i2;
+                            }
+                            min2 = min1;
+                            i2 = i1;
+                        }
+                        min1 = diff;
+                        i1 = i;
+                    } else if(diff < min2) {
+                        if(min2 < min3) {
+                            min3 = min2;
+                            i3 = i2;
+                        }
+                        min2 = diff;
+                        i2 = i;
+                    } else if(diff < min3) {
+                        min3 = diff;
+                        i3 = i;
                     }
-
-                    if(burstLines.size() > 2)
-                        break;
                 }
 
-                //System.out.println(y+" found "+ burstLines.size() + " burstlines");
+                burstLines.add(lineTimes[i1].line);
+                setVisited(i1);
+                burstLines.add(lineTimes[i2].line);
+                setVisited(i2);
+                burstLines.add(lineTimes[i3].line);
+                setVisited(i3);
 
                 if (!burstLines.isEmpty()) {
 
                     final boolean ok = deburstTile(burstLines, y, targetRectangle.x, maxX, cBand.i, cBand.q,
                             targetTileI, targetTileQ, targetTileIntensity);
+                    if(!ok)
+                        System.out.println("not ok "+y);
                 }
             }
 
-        /*    int i = 0;
-            pm.beginTask("de-bursting WSS product", lineTimes.length-i);
+   /*         int i = 0;
             while (i < lineTimes.length) {
-                pm.worked(1);
                 if (lineTimes[i].visited || lineTimes[i].time < startTime) {
                     ++i;
                     continue;
                 }
 
-                final Vector<Integer> burstLines = new Vector<Integer>(4);
+                burstLines.clear();
                 burstLines.add(lineTimes[i].line);
                 setVisited(i);
 
@@ -521,7 +546,7 @@ public final class DeburstWSSOp extends Operator {
                 if (!burstLines.isEmpty()) {
 
                     final boolean ok = deburstTile(burstLines, targetLine, targetRectangle.x, maxX, cBand.i, cBand.q,
-                            targetTileI, targetTileQ, targetTileIntensity, pm);
+                            targetTileI, targetTileQ, targetTileIntensity);
                     if(ok)
                         ++targetLine;
                 }
@@ -529,12 +554,10 @@ public final class DeburstWSSOp extends Operator {
 
                 if(targetLine >= targetRectangle.y + targetRectangle.height)
                     break;
-            }          */
+            }    */
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
-        } finally {
-            pm.done();
         }
     }
 
@@ -689,7 +712,7 @@ public final class DeburstWSSOp extends Operator {
             sourceRasterQ = getSourceTile(srcBandQ, sourceRectangle);
             final short[] srcDataQ = (short[]) sourceRasterQ.getRawSamples().getElems();
 
-          /*  int invalidCount = 0;
+            int invalidCount = 0;
             int total = 0;
             final int max = Math.min(srcBandWidth, srcDataI.length);
             for(int i=500; i < max; i+= 50) {
@@ -700,7 +723,7 @@ public final class DeburstWSSOp extends Operator {
             if(invalidCount / (float)total > 0.4)  {
                 System.out.println("skipping " + y);
                 continue;
-            }   */
+            }   
 
             srcDataListI.add(srcDataI);
             srcDataListQ.add(srcDataQ);

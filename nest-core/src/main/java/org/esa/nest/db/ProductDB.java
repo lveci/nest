@@ -16,8 +16,8 @@
 package org.esa.nest.db;
 
 import org.apache.commons.io.FileDeleteStrategy;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -172,7 +173,7 @@ public class ProductDB extends DAO {
     }
 
     public ProductEntry[] queryProduct(final String queryStr) throws SQLException {
-        final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
+        final List<ProductEntry> listEntries = new ArrayList<ProductEntry>();
 
         final Statement queryStatement = dbConnection.createStatement();
         final ResultSet results = queryStatement.executeQuery(strGetProductsWhere + queryStr);

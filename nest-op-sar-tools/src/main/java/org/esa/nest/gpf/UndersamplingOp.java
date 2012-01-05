@@ -37,6 +37,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -190,7 +191,7 @@ public class UndersamplingOp extends Operator {
         try {
             if (sourceBandNames == null || sourceBandNames.length == 0) {
                 final Band[] bands = sourceProduct.getBands();
-                final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+                final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
                 for (Band band : bands) {
                     bandNameList.add(band.getName());
                 }

@@ -30,14 +30,13 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.dataio.dem.FileElevationModel;
+import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
     CreateElevationBandOp adds an elevation band to a product

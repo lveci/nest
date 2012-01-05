@@ -15,12 +15,10 @@
  */
 package org.esa.nest.dat.toolviews.Projects;
 
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.ProductSetDialog;
-import org.esa.nest.util.XMLSupport;
 import org.esa.nest.util.ProductFunctions;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -37,7 +35,7 @@ import java.util.List;
  */
 public final class ProductSet {
 
-    private ArrayList<File> fileList = new ArrayList<File>(10);
+    private List<File> fileList = new ArrayList<File>(10);
     private File productSetFile = null;
     private final File productSetFolder;
     private String name = null;
@@ -48,11 +46,11 @@ public final class ProductSet {
         setName(path.getName());
     }
 
-    public ArrayList<File> getFileList() {
+    public List<File> getFileList() {
         return fileList;
     }
 
-    public void setFileList(final ArrayList<File> inFileList) {
+    public void setFileList(final List<File> inFileList) {
         fileList = inFileList;
     }
 
@@ -147,7 +145,7 @@ public final class ProductSet {
         prodSet.Load(productSetFile);
 
         final StringBuilder listStr = new StringBuilder(256);
-        final ArrayList<File> fileList = prodSet.getFileList();
+        final List<File> fileList = prodSet.getFileList();
         for(File file : fileList) {
             listStr.append(file.getAbsolutePath());
             listStr.append('\n');

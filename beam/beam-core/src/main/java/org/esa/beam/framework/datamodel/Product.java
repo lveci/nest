@@ -17,40 +17,22 @@ package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.jexp.Namespace;
-import com.bc.jexp.ParseException;
-import com.bc.jexp.Parser;
-import com.bc.jexp.Term;
-import com.bc.jexp.WritableNamespace;
+import com.bc.jexp.*;
 import com.bc.jexp.impl.ParserImpl;
 import org.esa.beam.framework.dataio.*;
-import org.esa.beam.framework.dataop.barithm.BandArithmetic;
-import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
-import org.esa.beam.framework.dataop.barithm.RasterDataLoop;
-import org.esa.beam.framework.dataop.barithm.RasterDataSymbol;
-import org.esa.beam.framework.dataop.barithm.SingleFlagSymbol;
+import org.esa.beam.framework.dataop.barithm.*;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapTransform;
-import org.esa.beam.util.BitRaster;
-import org.esa.beam.util.Debug;
-import org.esa.beam.util.Guardian;
-import org.esa.beam.util.ObjectUtils;
-import org.esa.beam.util.StopWatch;
-import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.*;
 import org.esa.beam.util.math.MathUtils;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * <code>Product</code> instances are an in-memory representation of a remote sensing data product. The product is more
@@ -64,7 +46,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.31 $ $Date: 2011-06-28 21:05:49 $
+ * @version $Revision: 1.32 $ $Date: 2011-12-30 17:43:48 $
  */
 public class Product extends ProductNode {
 
@@ -75,6 +57,9 @@ public class Product extends ProductNode {
     public static final String PIN_MASK_NAME = "pins";
     @Deprecated
     public static final String GCP_MASK_NAME = "ground_control_points";
+
+    private static final String PIN_GROUP_NAME = "pins";
+    private static final String GCP_GROUP_NAME = "ground_control_points";
 
     public static final String PROPERTY_NAME_GEOCODING = "geoCoding";
     public static final String PROPERTY_NAME_PRODUCT_TYPE = "productType";
@@ -284,7 +269,10 @@ public class Product extends ProductNode {
     }
 
     private void handleGeoCodingChange() {
-        final ProductNodeGroup<Placemark> pinGroup = getPinGroup();
+        final ProductNodeGroup<Placemark> pinGroup = getPinGroup(false);
+        if (pinGroup == null) {
+            return;
+        }
         for (int i = 0; i < pinGroup.getNodeCount(); i++) {
             final Placemark pin = pinGroup.get(i);
             final PlacemarkDescriptor pinDescriptor = pin.getDescriptor();
@@ -1131,18 +1119,32 @@ public class Product extends ProductNode {
     /**
      * Gets the group of ground-control points (GCPs).
      *
+     * @param create If {@code true}, a new group will be created, in case none exists already.
+     * @return the GCP group, or {@code null} if none was found or created.
+     * @since BEAM 4.10
+     */
+    public synchronized PlacemarkGroup getGcpGroup(boolean create) {
+        VectorDataNode vectorDataNode = vectorDataGroup.get(GCP_GROUP_NAME);
+        if (vectorDataNode != null) {
+            return vectorDataNode.getPlacemarkGroup();
+        }
+        if (create) {
+            vectorDataNode = new VectorDataNode(GCP_GROUP_NAME, Placemark.createGcpFeatureType());
+            vectorDataNode.setDefaultCSS("symbol:plus; stroke:#ff8800; stroke-opacity:0.8; stroke-width:1.0");
+            this.vectorDataGroup.add(vectorDataNode);
+            return vectorDataNode.getPlacemarkGroup();
+        }
+        return null;
+    }
+
+    /**
+     * Gets the group of ground-control points (GCPs).
+     * Note that this method will create the group, if none exists already.
+     *
      * @return the GCP group.
      */
     public PlacemarkGroup getGcpGroup() {
-        VectorDataNode node = getVectorDataGroup().get(GCP_MASK_NAME);
-        if (node == null) {
-            synchronized (vectorDataGroup) {
-                node = new VectorDataNode(GCP_MASK_NAME, Placemark.createGcpFeatureType());
-                node.setDefaultCSS("symbol:plus; stroke:#ff8800; stroke-opacity:0.8; stroke-width:1.0");
-                this.vectorDataGroup.add(node);
-            }
-        }
-        return node.getPlacemarkGroup();
+        return getGcpGroup(true);
     }
 
     // NESTMOD
@@ -1156,18 +1158,32 @@ public class Product extends ProductNode {
     /**
      * Gets the group of pins.
      *
+     * @param create If {@code true}, a new group will be created, in case none exists already.
+     * @return the pin group.
+     * @since BEAM 4.10
+     */
+    public synchronized PlacemarkGroup getPinGroup(boolean create) {
+        VectorDataNode vectorDataNode = vectorDataGroup.get(PIN_GROUP_NAME);
+        if (vectorDataNode != null) {
+            return vectorDataNode.getPlacemarkGroup();
+        }
+        if (create) {
+            vectorDataNode = new VectorDataNode(PIN_GROUP_NAME, Placemark.createPinFeatureType());
+            vectorDataNode.setDefaultCSS("symbol:pin; fill:#0000ff; fill-opacity:0.7; stroke:#ffffff; stroke-opacity:1.0; stroke-width:0.5");
+            this.vectorDataGroup.add(vectorDataNode);
+            return vectorDataNode.getPlacemarkGroup();
+        }
+        return null;
+    }
+
+    /**
+     * Gets the group of pins.
+     * Note that this method will create the group, if none exists already.
+     *
      * @return the pin group.
      */
-    public PlacemarkGroup getPinGroup() {
-        VectorDataNode node = vectorDataGroup.get(PIN_MASK_NAME);
-        if (node == null) {
-            synchronized (vectorDataGroup) {
-                node = new VectorDataNode(PIN_MASK_NAME, Placemark.createPinFeatureType());
-                node.setDefaultCSS("symbol:pin; fill:#0000ff; fill-opacity:0.7; stroke:#ffffff; stroke-opacity:1.0; stroke-width:0.5");
-                this.vectorDataGroup.add(node);
-            }
-        }
-        return node.getPlacemarkGroup();
+    public synchronized PlacemarkGroup getPinGroup() {
+        return getPinGroup(true);
     }
 
     //
@@ -2042,14 +2058,31 @@ public class Product extends ProductNode {
         private static final String PATH_SEPARATOR = ":";
 
         private final String[][] paths;
+        private final Index[] indexes;
 
         private AutoGroupingImpl(String[][] paths) {
-            this.paths = paths;
+            this.paths = paths.clone();
+            this.indexes = new Index[paths.length];
+            for (int i = 0; i < paths.length; i++) {
+                String[] path = paths[i];
+                String entry = path.length > 0 ? path[0] : "";
+                indexes[i] = new Index(entry, i);
+            }
+            Arrays.sort(indexes, new Comparator<Index>() {
+                @Override
+                public int compare(Index o1, Index o2) {
+                    if (o1.entry.length() != o2.entry.length()) {
+                        return o2.entry.length() - o1.entry.length();
+                    }
+                    return o2.entry.compareTo(o1.entry);
+                }
+            });
         }
 
         @Override
         public int indexOf(String name) {
-            for (int i = 0, pathsLength = paths.length; i < pathsLength; i++) {
+            for (Index index : indexes) {
+                final int i = index.index;
                 String[] path = paths[i];
                 if (nameMatchesGroupPath(name, path)) {
                     return i;
@@ -2145,6 +2178,17 @@ public class Product extends ProductNode {
                 code += path.hashCode();
             }
             return code;
+        }
+
+
+        private static class Index {
+            final String entry;
+            final int index;
+
+            private Index(String entry, int index) {
+                this.entry = entry;
+                this.index = index;
+            }
         }
     }
 
@@ -2390,8 +2434,6 @@ public class Product extends ProductNode {
      * Creates a bit-packed mask for all pixels of the scene covered by this product.
      * The given term is considered to be boolean, if it evaluates to <code>true</code>
      * the related bit in the mask is set.
-     * <p>Since the masks created by this method are cached, the method {@link #releaseValidMask(org.esa.beam.util.BitRaster)}
-     * should be called in order to release it.
      *
      * @param term the boolean term, e.g. "l2_flags.LAND && reflec_10 >= 0.0"
      * @param pm   a progress monitor
@@ -2419,13 +2461,13 @@ public class Product extends ProductNode {
                                                        productWidth, productHeight,
                                                        new Term[]{term}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
-                              @Override
-                              public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
-                                  if (term.evalB(env)) {
-                                      validMask.set(pixelIndex);
-                                  }
-                              }
-                          }, "Computing valid-mask..."); /*I18N*/
+            @Override
+            public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
+                if (term.evalB(env)) {
+                    validMask.set(pixelIndex);
+                }
+            }
+        }, "Computing valid-mask..."); /*I18N*/
 
         setValidMask(id, validMask);
 
@@ -2553,15 +2595,15 @@ public class Product extends ProductNode {
                                                        width, height,
                                                        new Term[]{bitmaskTerm}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
-                              @Override
-                              public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
-                                  if (bitmaskTerm.evalB(env)) {
-                                      bitmask[pixelIndex] = trueValue;
-                                  } else {
-                                      bitmask[pixelIndex] = falseValue;
-                                  }
-                              }
-                          }, "Reading bitmask...");  /*I18N*/
+            @Override
+            public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
+                if (bitmaskTerm.evalB(env)) {
+                    bitmask[pixelIndex] = trueValue;
+                } else {
+                    bitmask[pixelIndex] = falseValue;
+                }
+            }
+        }, "Reading bitmask...");  /*I18N*/
     }
 
     /**

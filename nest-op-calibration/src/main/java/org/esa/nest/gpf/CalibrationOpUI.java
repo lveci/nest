@@ -138,14 +138,22 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
                 if (sampleType.equals("COMPLEX")) {
                     auxFile.removeItem(CalibrationOp.PRODUCT_AUX);
-                } else if (auxFile.getItemCount() == 2) {
-                    auxFile.addItem(CalibrationOp.PRODUCT_AUX);
+                    auxFile.setSelectedItem(paramMap.get("auxFile"));
+
+                } else {
+                    if (auxFile.getItemCount() == 2) {
+                        auxFile.addItem(CalibrationOp.PRODUCT_AUX);
+                    }
+                    auxFile.setSelectedItem(CalibrationOp.PRODUCT_AUX);
                 }
 
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
                 if(!mission.equals("ENVISAT")) {
                     auxFile.setEnabled(false);
                     auxFileLabel.setEnabled(false);
+                } else {
+                    auxFile.setEnabled(true);
+                    auxFileLabel.setEnabled(true);
                 }
 //                if (mission.equals("RS2") || mission.contains("TSX") || mission.contains("ALOS")) {
                 if (mission.equals("RS2") && sampleType.equals("COMPLEX")) {
@@ -171,9 +179,10 @@ public class CalibrationOpUI extends BaseOperatorUI {
                     saveInComplexCheckBox.setSelected(false);
                 }
             }
+        } else {
+
+            auxFile.setSelectedItem(paramMap.get("auxFile"));
         }
-                
-        auxFile.setSelectedItem(paramMap.get("auxFile"));
 
         final File extFile = (File)paramMap.get("externalAuxFile");
         if(extFile != null) {

@@ -22,20 +22,7 @@ import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.jidesoft.grid.SortableTable;
 import org.esa.beam.dataio.placemark.PlacemarkIO;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PinDescriptor;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Placemark;
-import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
-import org.esa.beam.framework.datamodel.PlacemarkSymbol;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProductNodeEvent;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.datamodel.ProductNodeListener;
-import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.DecimalTableCellRenderer;
 import org.esa.beam.framework.ui.FloatCellEditor;
@@ -56,49 +43,18 @@ import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.TableColumnModelListener;
+import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -370,38 +326,11 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                                                                 activePlacemark.getPixelPos(),
                                                                 activePlacemark.getGeoPos(),
                                                                 activePlacemark.getProduct().getGeoCoding());
-        newPlacemark.setSymbol(createPinSymbolCopy(activePlacemark.getSymbol()));
+        newPlacemark.setStyleCss(activePlacemark.getStyleCss());
         if (PlacemarkDialog.showEditPlacemarkDialog(getPaneWindow(), product, newPlacemark, placemarkDescriptor)) {
             makePlacemarkNameUnique(newPlacemark);
             updateUIState();
         }
-    }
-
-    private static PlacemarkSymbol createPinSymbolCopy(PlacemarkSymbol symbol) {
-        final PlacemarkSymbol placemarkSymbol = new PlacemarkSymbol(symbol.getName(), symbol.getShape());
-        final ImageIcon icon = symbol.getIcon();
-        if (icon != null) {
-            placemarkSymbol.setIcon(icon);
-        }
-        if (symbol.getFillPaint() instanceof Color) {
-            final Color color = (Color) symbol.getFillPaint();
-            placemarkSymbol.setFillPaint(
-                    new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()));
-        }
-        placemarkSymbol.setFilled(symbol.isFilled());
-        final Color outlineColor = symbol.getOutlineColor();
-        if (outlineColor != null) {
-            placemarkSymbol.setOutlineColor(
-                    new Color(outlineColor.getRed(), outlineColor.getGreen(), outlineColor.getBlue(),
-                              outlineColor.getAlpha()));
-        }
-        if (placemarkSymbol.getOutlineStroke() instanceof BasicStroke) {
-            BasicStroke basicStroke = (BasicStroke) placemarkSymbol.getOutlineStroke();
-            placemarkSymbol.setOutlineStroke(new BasicStroke(basicStroke.getLineWidth()));
-        }
-        final PixelPos refPoint = symbol.getRefPoint();
-        placemarkSymbol.setRefPoint(new PixelPos(refPoint.x, refPoint.y));
-        return placemarkSymbol;
     }
 
     private ProductNodeGroup<Placemark> getPlacemarkGroup() {
@@ -423,7 +352,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         final List<Placemark> placemarks = getSelectedPlacemarks();
         int i = JOptionPane.showConfirmDialog(getPaneWindow(),
                                               MessageFormat.format(
-                                                      "Do you really want to remove {0} selected{1}(s)?\nThis action can not be undone.",
+                                                      "Do you really want to remove {0} selected {1}(s)?\n" +
+                                                              "This action can not be undone.",
                                                       placemarks.size(), placemarkDescriptor.getRoleLabel()),
                                               MessageFormat.format("{0} - Remove {1}s", getDescriptor().getTitle(),
                                                                    placemarkDescriptor.getRoleLabel()),
@@ -488,9 +418,11 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     private void makePlacemarkNameUnique(Placemark newPlacemark) {
         if (makePlacemarkNameUnique0(newPlacemark)) {
-            String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
-            showWarningDialog(roleLabel + " has been renamed to '" + newPlacemark.getName() + "',\n" +
-                              "because a " + placemarkDescriptor.getRoleLabel() + " with the former name already exists.");
+            showWarningDialog(MessageFormat.format("{0} has been renamed to ''{1}'',\n" +
+                                                           "because a {2} with the former name already exists.",
+                                                   firstLetterUp(placemarkDescriptor.getRoleLabel()),
+                                                   newPlacemark.getName(),
+                                                   placemarkDescriptor.getRoleLabel()));
         }
     }
 
@@ -498,7 +430,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
      * Turns the first letter of the given string to upper case.
      *
      * @param string the string to change
-     *
      * @return a changed string
      */
     private String firstLetterUp(String string) {
@@ -558,7 +489,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         } catch (IOException e) {
             e.printStackTrace();
             showErrorDialog(
-                    "I/O error, failed to import " + placemarkDescriptor.getRoleLabel() + "s:\n" + e.getMessage());    /*I18N*/
+                    MessageFormat.format("I/O error, failed to import {0}s:\n{1}",  /*I18N*/
+                                         placemarkDescriptor.getRoleLabel(), e.getMessage()));
             return;
         }
         if (placemarks.isEmpty()) {
@@ -575,7 +507,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
             final PixelPos pixelPos = placemark.getPixelPos();
             if ((!product.containsPixel(pixelPos) && (geoCoding == null || !geoCoding.canGetPixelPos()))
-                && placemarkDescriptor instanceof PinDescriptor) {
+                    && placemarkDescriptor instanceof PinDescriptor) {
                 numInvalids++;
                 continue;
             }
@@ -679,8 +611,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     void exportSelectedPlacemarks() {
         final BeamFileChooser fileChooser = new BeamFileChooser();
-        String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
-        fileChooser.setDialogTitle("Export Selected " + roleLabel + "s");   /*I18N*/
+        fileChooser.setDialogTitle(MessageFormat.format("Export Selected {0}(s)",
+                                                        firstLetterUp(placemarkDescriptor.getRoleLabel())));   /*I18N*/
         setComponentName(fileChooser, "Export_Selected");
         fileChooser.addChoosableFileFilter(PlacemarkIO.createTextFileFilter());
         fileChooser.setFileFilter(PlacemarkIO.createPlacemarkFileFilter());
@@ -727,8 +659,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     void exportPlacemarkDataTable() {
         final BeamFileChooser fileChooser = new BeamFileChooser();
-        String roleLabel = firstLetterUp(placemarkDescriptor.getRoleLabel());
-        fileChooser.setDialogTitle("Export " + roleLabel + " Data Table");/*I18N*/
+        fileChooser.setDialogTitle(MessageFormat.format("Export {0} Data Table",  /*I18N*/
+                                                        firstLetterUp(placemarkDescriptor.getRoleLabel())));
         setComponentName(fileChooser, "Export_Data_Table");
         fileChooser.setFileFilter(PlacemarkIO.createTextFileFilter());
         final File ioDir = getIODir();
@@ -752,7 +684,8 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                         writer.close();
                     }
                 } catch (IOException ignored) {
-                    showErrorDialog("I/O Error.\nFailed to export " + roleLabel + " data table."); /*I18N*/
+                    showErrorDialog(MessageFormat.format("I/O Error.\nFailed to export {0} data table.",  /*I18N*/
+                                                         placemarkDescriptor.getRoleLabel()));
                 }
             }
         }
@@ -760,8 +693,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
 
     private void writePlacemarkDataTableText(final Writer writer) {
 
-        String roleLabel = placemarkDescriptor.getRoleLabel();
-        String productName = product.getName();
         final String[] standardColumnNames = placemarkTableModel.getStandardColumnNames();
         final int columnCountMin = standardColumnNames.length;
         final int columnCount = placemarkTableModel.getColumnCount();
@@ -784,8 +715,11 @@ public class PlacemarkManagerToolView extends AbstractToolView {
             }
         }
 
-        PlacemarkIO.writePlacemarksWithAdditionalData(writer, roleLabel, productName,
-                                                      placemarkList, valueList,
+        PlacemarkIO.writePlacemarksWithAdditionalData(writer,
+                                                      placemarkDescriptor.getRoleLabel(),
+                                                      product.getName(),
+                                                      placemarkList,
+                                                      valueList,
                                                       standardColumnNames,
                                                       additionalColumnNames);
     }
@@ -1061,7 +995,7 @@ public class PlacemarkManagerToolView extends AbstractToolView {
             if (layer instanceof VectorDataLayer) {
                 VectorDataLayer vectorDataLayer = (VectorDataLayer) layer;
                 if (vectorDataLayer.getVectorDataNode() == getProduct().getPinGroup().getVectorDataNode() ||
-                    vectorDataLayer.getVectorDataNode() == getProduct().getGcpGroup().getVectorDataNode()) {
+                        vectorDataLayer.getVectorDataNode() == getProduct().getGcpGroup().getVectorDataNode()) {
                     updateUIState();
                 }
             }

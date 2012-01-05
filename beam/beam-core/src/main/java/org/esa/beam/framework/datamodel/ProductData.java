@@ -176,6 +176,7 @@ public abstract class ProductData implements Cloneable {
      * Factory method which creates a value instance of the given type and with exactly one element.
      *
      * @param type the value's type
+     *
      * @return a new value instance, <code>null</code> if the given type is not known
      */
     public static ProductData createInstance(int type) {
@@ -187,7 +188,9 @@ public abstract class ProductData implements Cloneable {
      *
      * @param type     the value's type
      * @param numElems the number of elements, must be greater than zero if type is not {@link ProductData#TYPE_UTC}
+     *
      * @return a new value instance, <code>null</code> if the given type is not known
+     *
      * @throws IllegalArgumentException if one of the arguments is invalid
      */
     public static ProductData createInstance(int type, int numElems) {
@@ -225,7 +228,9 @@ public abstract class ProductData implements Cloneable {
      *
      * @param type the value's type
      * @param data if <code>type</code> is <code>TYPE_ASCII</code> the <code>String</code>, otherwise the primitive array type corresponding to <code>type</code>
+     *
      * @return a new value instance, <code>null</code> if the given type is not known
+     *
      * @throws IllegalArgumentException if one of the arguments is invalid
      */
     public static ProductData createInstance(int type, Object data) {
@@ -317,7 +322,9 @@ public abstract class ProductData implements Cloneable {
      * Gets the element size of an element of the given type in bytes.
      *
      * @param type the element type
+     *
      * @return the size of a single element in bytes.
+     *
      * @throws IllegalArgumentException if the type is not supported.
      */
     public static int getElemSize(int type) {
@@ -570,6 +577,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as an <code>int</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract int getElemIntAt(int index);
@@ -578,6 +586,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as a <code>long</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract long getElemUIntAt(int index);
@@ -586,6 +595,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as a <code>float</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract float getElemFloatAt(int index);
@@ -594,6 +604,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as a <code>double</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract double getElemDoubleAt(int index);
@@ -602,6 +613,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as a <code>String</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract String getElemStringAt(int index);
@@ -610,6 +622,7 @@ public abstract class ProductData implements Cloneable {
      * Gets the value element with the given index as a <code>boolean</code>.
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public boolean getElemBooleanAt(int index) {
@@ -621,6 +634,7 @@ public abstract class ProductData implements Cloneable {
      * calls <code>setElemInt(0, value)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemIntAt(int index, int value)
      */
     public void setElemInt(int value) {
@@ -632,6 +646,7 @@ public abstract class ProductData implements Cloneable {
      * value is a scalar and therefore simply calls <code>setElemUInt(0, value)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemUIntAt(int index, long value)
      */
     public void setElemUInt(long value) {
@@ -643,6 +658,7 @@ public abstract class ProductData implements Cloneable {
      * calls <code>setElemFloatAt(0, value)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemFloatAt(int index, float value)
      */
     public void setElemFloat(float value) {
@@ -654,6 +670,7 @@ public abstract class ProductData implements Cloneable {
      * calls <code>setElemDoubleAt(0)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemDoubleAt(int index, double value)
      */
     public void setElemDouble(double value) {
@@ -665,6 +682,7 @@ public abstract class ProductData implements Cloneable {
      * calls <code>setElemStringAt(0)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemStringAt
      */
     public void setElemString(String value) {
@@ -676,6 +694,7 @@ public abstract class ProductData implements Cloneable {
      * calls <code>setElemDoubleAt(0)</code>.
      *
      * @param value the value to be set
+     *
      * @see #setElemBooleanAt(int index, boolean value)
      */
     public void setElemBoolean(boolean value) {
@@ -687,6 +706,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract void setElemIntAt(int index, int value);
@@ -696,6 +716,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract void setElemUIntAt(int index, long value);
@@ -705,6 +726,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract void setElemFloatAt(int index, float value);
@@ -714,6 +736,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public abstract void setElemDoubleAt(int index, double value);
@@ -725,6 +748,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public /*abstract*/ void setElemStringAt(int index, String value) {
@@ -736,6 +760,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param index the value index, must be <code>&gt;=0</code> and <code>&lt;getNumDataElems()</code>
      * @param value the value to be set
+     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public void setElemBooleanAt(int index, boolean value) {
@@ -772,6 +797,7 @@ public abstract class ProductData implements Cloneable {
      * within the input stream.
      *
      * @param input a seekable data input stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public void readFrom(ImageInputStream input) throws IOException {
@@ -786,6 +812,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param pos   the destination position (zero-based)
      * @param input a seekable data input stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public void readFrom(int pos, ImageInputStream input) throws IOException {
@@ -802,6 +829,7 @@ public abstract class ProductData implements Cloneable {
      * @param startPos the destination start position (zero-based)
      * @param numElems the number of elements to read
      * @param input    a seekable data input stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public abstract void readFrom(int startPos, int numElems, ImageInputStream input) throws IOException;
@@ -818,6 +846,7 @@ public abstract class ProductData implements Cloneable {
      * @param numElems the number of elements to read
      * @param input    a seekable data input stream
      * @param inputPos the (zero-based) position in the data output stream where reading starts
+     *
      * @throws IOException if an I/O error occurs
      */
     public void readFrom(int startPos, int numElems, ImageInputStream input, long inputPos) throws IOException {
@@ -834,6 +863,7 @@ public abstract class ProductData implements Cloneable {
      * within the output stream.
      *
      * @param output a seekable data output stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public void writeTo(ImageOutputStream output) throws IOException {
@@ -848,6 +878,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @param pos    the source position (zero-based)
      * @param output a seekable data output stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public void writeTo(int pos, ImageOutputStream output) throws IOException {
@@ -864,6 +895,7 @@ public abstract class ProductData implements Cloneable {
      * @param startPos the source start position (zero-based)
      * @param numElems the number of elements to be written
      * @param output   a seekable data output stream
+     *
      * @throws IOException if an I/O error occurs
      */
     public abstract void writeTo(int startPos, int numElems, ImageOutputStream output) throws IOException;
@@ -880,6 +912,7 @@ public abstract class ProductData implements Cloneable {
      * @param numElems  the number of elements to be written
      * @param output    a seekable data output stream
      * @param outputPos the position in the data output stream where writing starts
+     *
      * @throws IOException if an I/O error occurs
      */
     public void writeTo(int startPos, int numElems, ImageOutputStream output, long outputPos) throws IOException {
@@ -1116,6 +1149,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1268,6 +1302,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1279,8 +1314,9 @@ public abstract class ProductData implements Cloneable {
                 for (int i = 0; i < getNumElems(); i++) {
                     final short shortValue = java.lang.Short.parseShort(strings[i]);
                     if (shortValue > java.lang.Byte.MAX_VALUE * 2 + 1
-                            || shortValue < 0) {
-                        throw new NumberFormatException("Value out of range. The value:'" + strings[i] + "' is not an unsigned byte value.");
+                        || shortValue < 0) {
+                        throw new NumberFormatException(
+                                "Value out of range. The value:'" + strings[i] + "' is not an unsigned byte value.");
                     }
                     _array[i] = (byte) shortValue;
                 }
@@ -1460,6 +1496,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1606,6 +1643,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1617,8 +1655,9 @@ public abstract class ProductData implements Cloneable {
                 for (int i = 0; i < getNumElems(); i++) {
                     final int intValue = Integer.parseInt(strings[i]);
                     if (intValue > java.lang.Short.MAX_VALUE * 2 + 1
-                            || intValue < 0) {
-                        throw new NumberFormatException("Value out of range. The value:'" + strings[i] + "' is not an unsigned short value.");
+                        || intValue < 0) {
+                        throw new NumberFormatException(
+                                "Value out of range. The value:'" + strings[i] + "' is not an unsigned short value.");
                     }
                     _array[i] = (short) intValue;
                 }
@@ -1798,6 +1837,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1960,6 +2000,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -1971,8 +2012,9 @@ public abstract class ProductData implements Cloneable {
                 for (int i = 0; i < getNumElems(); i++) {
                     final long longValue = Long.parseLong(strings[i]);
                     if (longValue > (long) Integer.MAX_VALUE * 2 + 1
-                            || longValue < 0) {
-                        throw new NumberFormatException("Value out of range. The value:'" + strings[i] + "' is not an unsigned int value.");
+                        || longValue < 0) {
+                        throw new NumberFormatException(
+                                "Value out of range. The value:'" + strings[i] + "' is not an unsigned int value.");
                     }
                     _array[i] = (int) longValue;
                 }
@@ -2133,6 +2175,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -2352,6 +2395,7 @@ public abstract class ProductData implements Cloneable {
          * <code>getNumDataElems</code> method.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does not have the required array length.
          */
@@ -2444,6 +2488,7 @@ public abstract class ProductData implements Cloneable {
          * Each has to have at least a length of one.
          *
          * @param data the data array
+         *
          * @throws IllegalArgumentException if data is <code>null</code> or it is not an array of the required type or
          *                                  does the array length is less than one.
          */
@@ -2458,7 +2503,7 @@ public abstract class ProductData implements Cloneable {
                 _array = (byte[]) data;
             } else {
                 throw new IllegalArgumentException("data is not an instance of String, char[] or byte[]" +
-                        "or the length is less than one");
+                                                   "or the length is less than one");
             }
         }
 
@@ -2564,6 +2609,7 @@ public abstract class ProductData implements Cloneable {
          * Constructs a MJD2000 date instance.
          *
          * @param mjd the Modified Julian Day 2000 (MJD2000) as double value
+         *
          * @see #getMJD()
          */
         public UTC(double mjd) {
@@ -2588,12 +2634,15 @@ public abstract class ProductData implements Cloneable {
          *
          * @param date   the UTC time
          * @param micros the microseconds fraction
+         *
          * @return a new UTC instance
          */
         public static UTC create(final Date date, long micros) {
             final Calendar calendar = createCalendar();
             final long offset = calendar.getTimeInMillis();
             calendar.setTime(date);
+            final int millsPerSecond = 1000;
+            final int millisPerDay = 24 * 60 * 60 * millsPerSecond;
             calendar.add(Calendar.DATE, -(int) (offset / millisPerDay));
             calendar.add(Calendar.MILLISECOND, -(int) (offset % millisPerDay));
             final long mjd2000Millis = calendar.getTimeInMillis();
@@ -2607,6 +2656,7 @@ public abstract class ProductData implements Cloneable {
          * 2000, 0:00.
          *
          * @return the MJD 2000 calendar
+         *
          * @see #getAsCalendar()
          */
         public static Calendar createCalendar() {
@@ -2631,7 +2681,9 @@ public abstract class ProductData implements Cloneable {
          * english locale ('en') and a calendar returned by the {@link #createCalendar()} method.
          *
          * @param pattern the data format pattern
+         *
          * @return a date format
+         *
          * @see java.text.SimpleDateFormat
          */
         public static DateFormat createDateFormat(String pattern) {
@@ -2645,7 +2697,9 @@ public abstract class ProductData implements Cloneable {
          * The method returns {@link #parse(String, String)} using {@link #DATE_FORMAT_PATTERN} as pattern.
          *
          * @param text a UTC value given as text
+         *
          * @return the UTC value represented by the given text
+         *
          * @throws ParseException
          * @see #createCalendar
          * @see #createDateFormat
@@ -2661,7 +2715,9 @@ public abstract class ProductData implements Cloneable {
          *
          * @param text    a UTC value given as text
          * @param pattern the date/time pattern
+         *
          * @return the UTC value represented by the given text
+         *
          * @throws ParseException
          * @see #createCalendar
          * @see #createDateFormat
@@ -2698,9 +2754,10 @@ public abstract class ProductData implements Cloneable {
          * Formats this UTC date/time value as a string using the format {@link #DATE_FORMAT_PATTERN} and the default
          * MJD 2000 calendar.
          *
+         * @return a formated UTC date/time string
+         *
          * @see #createCalendar
          * @see #createDateFormat
-         * @return a formated UTC date/time string
          */
         public String format() {
             final Calendar calendar = createCalendar();
@@ -2753,6 +2810,7 @@ public abstract class ProductData implements Cloneable {
          * The date of the calendar is set to this UTC value.
          *
          * @return the MJD 2000 calendar
+         *
          * @see #createCalendar()
          * @see #getAsDate()
          */
@@ -2781,13 +2839,15 @@ public abstract class ProductData implements Cloneable {
          */
         public double getMJD() {
             return getDaysFraction()
-                    + SECONDS_TO_DAYS * (getSecondsFraction()
-                    + MICROS_TO_SECONDS * getMicroSecondsFraction());
+                   + SECONDS_TO_DAYS * (getSecondsFraction()
+                                        + MICROS_TO_SECONDS * getMicroSecondsFraction());
         }
 
         /**
          * Returns the days fraction of the Modified Julian Day (MJD) as a signed integer (the 1st element of the
          * internal data array).
+         *
+         * @return This UTC's days fraction.
          *
          * @see #getMJD()
          */
@@ -2796,24 +2856,26 @@ public abstract class ProductData implements Cloneable {
         }
 
         /**
-         * Returns the seconds fraction of the Modified Julian Day (MJD) as an unsigned integer (the 2nd element of the
+         * Returns the seconds fraction of the Modified Julian Day (MJD) as a signed integer (the 2nd element of the
          * internal data array).
+         *
+         * @return This UTC's seconds fraction.
          *
          * @see #getMJD()
          */
         public long getSecondsFraction() {
-            //return this.getElemUIntAt(1);
             return this.getElemIntAt(1);
         }
 
         /**
-         * Returns the micro-seconds fraction of the Modified Julian Day (MJD) as an unsigned integer (the 3rd element
+         * Returns the micro-seconds fraction of the Modified Julian Day (MJD) as a signed integer (the 3rd element
          * of the internal data array).
+         *
+         * @return This UTC's micro-seconds fraction.
          *
          * @see #getMJD()
          */
         public long getMicroSecondsFraction() {
-            //return this.getElemUIntAt(2);
             return this.getElemIntAt(2);
         }
     }
