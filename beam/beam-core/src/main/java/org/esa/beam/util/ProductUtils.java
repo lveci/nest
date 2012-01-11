@@ -2200,7 +2200,6 @@ public class ProductUtils {
     }
 
     public static ArrayList<GeneralPath> assemblePathList(GeoPos[] geoPoints) {
-        final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
         final ArrayList<GeneralPath> pathList = new ArrayList<GeneralPath>(16);
 
         if (geoPoints.length > 1) {
@@ -2208,10 +2207,11 @@ public class ProductUtils {
             float minLon = lon;
             float maxLon = lon;
 
+            final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
             path.moveTo(lon, geoPoints[0].getLat());
-            for (int i = 1; i < geoPoints.length; i++) {
-                lon = geoPoints[i].getLon();
-                final float lat = geoPoints[i].getLat();
+            for (GeoPos pos : geoPoints) {
+                lon = pos.getLon();
+                final float lat = pos.getLat();
                 if (Float.isNaN(lon) || Float.isNaN(lat)) {
                     continue;
                 }
@@ -2225,8 +2225,8 @@ public class ProductUtils {
             }
             path.closePath();
 
-            int runIndexMin = (int) Math.floor((minLon + 180) / 360);
-            int runIndexMax = (int) Math.floor((maxLon + 180) / 360);
+            final int runIndexMin = (int) Math.floor((minLon + 180) / 360);
+            final int runIndexMax = (int) Math.floor((maxLon + 180) / 360);
 
             final Area pathArea = new Area(path);
             for (int k = runIndexMin; k <= runIndexMax; k++) {

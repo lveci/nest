@@ -17,6 +17,7 @@ package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
 import java.io.File;
@@ -30,7 +31,8 @@ public class CreateStackAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Create Stack", "CreateStackOp", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(),
+                "Create Stack", "CreateStackOp", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

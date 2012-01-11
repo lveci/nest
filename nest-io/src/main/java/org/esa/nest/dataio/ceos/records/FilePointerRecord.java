@@ -1,8 +1,8 @@
 package org.esa.nest.dataio.ceos.records;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.BinaryRecord;
+import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
 
 import java.io.IOException;
 

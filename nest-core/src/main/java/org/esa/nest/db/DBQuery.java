@@ -18,6 +18,7 @@ package org.esa.nest.db;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
 import org.esa.nest.util.XMLSupport;
@@ -26,6 +27,7 @@ import org.jdom.Element;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
@@ -311,7 +313,7 @@ public class DBQuery {
 
     private ProductEntry[] instersectMapSelection(final ProductEntry[] resultsList) {
         if(selectionRectangle != null && selectionRectangle.getWidth() != 0 && selectionRectangle.getHeight() != 0) {
-            final List<ProductEntry> intersectList = new ArrayList<ProductEntry>();
+            final List<ProductEntry> intersectList = new ArrayList<ProductEntry>(resultsList.length);
 
             //System.out.println("selBox x="+selectionRectangle.getX()+" y="+selectionRectangle.getY()+
             //                         " w="+selectionRectangle.getWidth()+" h="+selectionRectangle.getHeight());
@@ -321,10 +323,36 @@ public class DBQuery {
                 if(selectionRectangle.contains(new Point2D.Float(start.getLat(), start.getLon())) &&
                    selectionRectangle.contains(new Point2D.Float(end.getLat(), end.getLon()))) {
                     intersectList.add(entry);
+                } else {
+                    final GeoPos[] geoBounday = entry.getGeoBoundary();
+                    boolean allPoints = true; 
+                    for(GeoPos pos : geoBounday) {
+                        if(!selectionRectangle.contains(new Point2D.Float(pos.getLat(), pos.getLon()))) {
+                            allPoints = false;
+                            break;
+                        }
+                    }
+                    if(allPoints) {
+                        intersectList.add(entry);
+                    }
                 }
             }
             return intersectList.toArray(new ProductEntry[intersectList.size()]);
-        }
+        } /*else if(selectionRectangle != null) {
+            final List<ProductEntry> intersectList = new ArrayList<ProductEntry>(resultsList.length);
+
+            for(ProductEntry entry : resultsList) {
+                final List<GeneralPath> pathList = ProductUtils.assemblePathList(entry.getGeoBoundary());
+
+                for(GeneralPath path : pathList) {
+                    if(path.contains(selectionRectangle.getMinX(), selectionRectangle.getMinY())) {
+                        intersectList.add(entry);
+                        break;
+                    }
+                }
+            }
+            return intersectList.toArray(new ProductEntry[intersectList.size()]);
+        }     */
         return resultsList;
     }
 
@@ -352,7 +380,7 @@ public class DBQuery {
             }
         }
         if (minX >= maxX || minY >= maxY) {
-            return null;
+            return new Rectangle.Float(minX, minY, 0, 0);
         }
 
         return new Rectangle.Float(minX, minY, maxX - minX + 1, maxY - minY + 1);

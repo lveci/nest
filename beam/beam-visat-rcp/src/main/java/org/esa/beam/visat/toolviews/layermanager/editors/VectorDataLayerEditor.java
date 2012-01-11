@@ -132,9 +132,11 @@ public class VectorDataLayerEditor extends AbstractLayerConfigurationEditor {
 
     @Override
     public void handleEditorDetached() {
-        FigureEditor figureEditor = getAppContext().getSelectedProductSceneView().getFigureEditor();
-        if (figureEditor != null) {
-            figureEditor.removeSelectionChangeListener(selectionChangeHandler);
+        if(getAppContext().getSelectedProductSceneView() != null) {         //NESTMOD
+            FigureEditor figureEditor = getAppContext().getSelectedProductSceneView().getFigureEditor();
+            if (figureEditor != null) {
+                figureEditor.removeSelectionChangeListener(selectionChangeHandler);
+            }
         }
         getBindingContext().removePropertyChangeListener(styleUpdater);
     }

@@ -55,6 +55,10 @@ public class DatApp extends VisatApp {
         super(applicationDescriptor);
 
         DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = true;
+
+        // enable anti-aliased text:
+        System.setProperty("awt.useSystemAAFontSettings","on"); 
+        System.setProperty("swing.aatext", "true");
     }
 
     public static DatApp getApp() {
@@ -294,16 +298,34 @@ public class DatApp extends VisatApp {
         menuBar.setHidable(false);
         menuBar.setStretch(true);
 
+        boolean incMultispectralTools = false;
+        boolean incImageProcessing = false;
+        final CommandManager cmdMan = getCommandManager();
+        for (int i = 0; i < cmdMan.getNumCommands(); i++) {
+            final String parent = cmdMan.getCommandAt(i).getParent();
+            if(parent == null)
+                continue;
+
+            if(parent.equals("multispectraltools"))
+                incMultispectralTools = true;
+            if(parent.equals("Image Processing"))
+                incImageProcessing = true;
+        }
+
         menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
         menuBar.add(createJMenu("edit", "Edit", 'E')); /*I18N*/
         menuBar.add(createJMenu("view", "View", 'V'));  /*I18N*/
         menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
-        menuBar.add(createJMenu("tools", "Utilities", 'T')); /*I18N*/
+        menuBar.add(createJMenu("tools", "Utilities", 'U')); /*I18N*/
         menuBar.add(createJMenu("sartools", "SAR Tools", 'S')); /*I18N*/
         menuBar.add(createJMenu("geometry", "Geometry", 'G')); /*I18N*/
         menuBar.add(createJMenu("insar", "InSAR", 'I')); /*I18N*/
         menuBar.add(createJMenu("oceanTools", "Ocean Tools", 'O')); /*I18N*/
         menuBar.add(createJMenu("polarimetrictools", "Polarimetric", 'P')); /*I18N*/
+        if(incMultispectralTools)
+            menuBar.add(createJMenu("multispectraltools", "Multispectral Tools", 'M')); /*I18N*/
+        if(incImageProcessing)
+            menuBar.add(createJMenu("Image Processing", "Image Processing", 'C')); /*I18N*/
         menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
         menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
         menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
@@ -338,7 +360,7 @@ public class DatApp extends VisatApp {
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
-                        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""),
+                        final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(),
                             "Graph Builder", "graph_builder");
                         dialog.show();
                         dialog.LoadGraph(file);

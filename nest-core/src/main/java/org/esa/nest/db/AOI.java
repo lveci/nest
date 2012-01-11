@@ -19,6 +19,8 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -51,7 +53,8 @@ public class AOI {
             this.name = FileUtils.getFilenameWithoutExtension(file);
             this.inputFolder = AOIManager.getLastInputPath();
             this.outputFolder = AOIManager.getLastOutputPath();
-            this.processingGraph = AOIManager.getLastGraphPath();
+            this.processingGraph = Settings.getPref(AOIManager.LAST_GRAPH_PATH,
+                                        ResourceUtils.getGraphFolder("").getAbsolutePath());
         }
     }
 

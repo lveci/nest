@@ -15,10 +15,10 @@
  */
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.nest.dataio.BinaryDBReader;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.BinaryRecord;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
+import org.esa.nest.dataio.binary.*;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 
 import javax.imageio.stream.ImageInputStream;
@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.1 $ $Date: 2011-06-30 15:41:44 $
+ * @version $Revision: 1.2 $ $Date: 2012-01-10 21:22:00 $
  */
 class ERSImageFile extends CEOSImageFile {
 

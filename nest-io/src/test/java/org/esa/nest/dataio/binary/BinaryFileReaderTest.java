@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dataio;
+package org.esa.nest.dataio.binary;
 
 
 import junit.framework.Assert;
@@ -44,15 +44,15 @@ public class BinaryFileReaderTest extends TestCase {
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(1);
-        Assert.assertEquals(1, ceosReader.readB1());
+        assertEquals(1, ceosReader.readB1());
         ceosReader.seek(3);
-        Assert.assertEquals(3, ceosReader.readB1());
+        assertEquals(3, ceosReader.readB1());
         ceosReader.seek(9);
-        Assert.assertEquals(9, ceosReader.readB1());
+        assertEquals(9, ceosReader.readB1());
         ceosReader.seek(4);
-        Assert.assertEquals(4, ceosReader.readB1());
+        assertEquals(4, ceosReader.readB1());
         ceosReader.seek(14);
-        Assert.assertEquals(14, ceosReader.readB1());
+        assertEquals(14, ceosReader.readB1());
     }
 
     public void testSkipBytes() throws IOException,
@@ -67,11 +67,11 @@ public class BinaryFileReaderTest extends TestCase {
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.skipBytes(1);
-        Assert.assertEquals(1, ceosReader.readB1());
+        assertEquals(1, ceosReader.readB1());
         ceosReader.skipBytes(3);
-        Assert.assertEquals(5, ceosReader.readB1());
+        assertEquals(5, ceosReader.readB1());
         ceosReader.skipBytes(5);
-        Assert.assertEquals(11, ceosReader.readB1());
+        assertEquals(11, ceosReader.readB1());
     }
 
     public void testReadB1() throws IOException, IllegalBinaryFormatException {
@@ -80,7 +80,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(122, ceosReader.readB1());
+        assertEquals(122, ceosReader.readB1());
     }
 
     public void testReadB1GreatValue() throws IOException,
@@ -90,7 +90,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(245, ceosReader.readB1());
+        assertEquals(245, ceosReader.readB1());
     }
 
     public void testReadB1ThrowsException() throws IOException {
@@ -105,7 +105,7 @@ public class BinaryFileReaderTest extends TestCase {
             ceosReader.readB1();
             fail("IllegalBinaryFormatException expected");
         } catch (IllegalBinaryFormatException e) {
-            Assert.assertEquals(prefix.length(), e.getStreamPos());
+            assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
@@ -120,7 +120,7 @@ public class BinaryFileReaderTest extends TestCase {
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
-        Assert.assertEquals(expected, ceosReader.readB2());
+        assertEquals(expected, ceosReader.readB2());
     }
 
     public void testReadB4() throws IOException, IllegalBinaryFormatException {
@@ -133,7 +133,7 @@ public class BinaryFileReaderTest extends TestCase {
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
-        Assert.assertEquals(7100, ceosReader.readB4());
+        assertEquals(7100, ceosReader.readB4());
     }
 
     public void testReadB4Array() throws IOException, IllegalBinaryFormatException {
@@ -163,7 +163,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(281547991161788L, ceosReader.readB8());
+        assertEquals(281547991161788L, ceosReader.readB8());
     }
 
     public void testReadB8Array() throws IOException,
@@ -222,8 +222,8 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(1973, ceosReader.readIn(4));
-        Assert.assertEquals(60, ceosReader.readIn(4));
+        assertEquals(1973, ceosReader.readIn(4));
+        assertEquals(60, ceosReader.readIn(4));
     }
 
     public void testReadIn() throws IllegalBinaryFormatException, IOException {
@@ -232,7 +232,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(7358, ceosReader.readIn(6));
+        assertEquals(7358, ceosReader.readIn(6));
     }
 
     public void testReadFnWithNegative() throws IllegalBinaryFormatException, IOException {
@@ -241,7 +241,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(-89.0060123, ceosReader.readFn(16), 1E-10);
+        assertEquals(-89.0060123, ceosReader.readFn(16), 1E-10);
     }
 
     public void testReadFnWithPositive() throws IllegalBinaryFormatException, IOException {
@@ -250,7 +250,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(19.0060123, ceosReader.readFn(16), 1E-10);
+        assertEquals(19.0060123, ceosReader.readFn(16), 1E-10);
     }
 
     public void testReadFnWithLeadingZero() throws IllegalBinaryFormatException, IOException {
@@ -259,7 +259,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(9.0060123, ceosReader.readFn(16), 1E-10);
+        assertEquals(9.0060123, ceosReader.readFn(16), 1E-10);
     }
 
     public void testReadFnWithTrailingZero() throws IllegalBinaryFormatException, IOException {
@@ -268,7 +268,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(9.006, ceosReader.readFn(16), 1E-6);
+        assertEquals(9.006, ceosReader.readFn(16), 1E-6);
     }
 
     public void testReadEn() throws IllegalBinaryFormatException, IOException {
@@ -277,7 +277,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(17820, ceosReader.readFn(22), 1E-6);
+        assertEquals(17820, ceosReader.readFn(22), 1E-6);
     }
 
     public void testReadGn() throws IllegalBinaryFormatException, IOException {
@@ -286,7 +286,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(-1.06962770630708111E+01, ceosReader.readFn(24), 1E-25);
+        assertEquals(-1.06962770630708111E+01, ceosReader.readFn(24), 1E-25);
     }
 
     public void testReadGnArray() throws IllegalBinaryFormatException,
@@ -314,7 +314,7 @@ public class BinaryFileReaderTest extends TestCase {
 
         final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        Assert.assertEquals(expected, ceosReader.readAn(expected.length()));
+        assertEquals(expected, ceosReader.readAn(expected.length()));
     }
 
     public void testReadAnThrowsExceptionBecauseStreamIsToShort() throws IOException {
@@ -330,7 +330,7 @@ public class BinaryFileReaderTest extends TestCase {
             ceosReader.readAn(7); // try to read 7 bytes from stream position
             fail("IllegalBinaryFormatException expected");
         } catch (IllegalBinaryFormatException e) {
-            Assert.assertEquals(prefix.length(), e.getStreamPos());
+            assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
@@ -347,7 +347,7 @@ public class BinaryFileReaderTest extends TestCase {
             ceosReader.readFn(16);
             fail("IllegalBinaryFormatException expected");
         } catch (IllegalBinaryFormatException e) {
-            Assert.assertEquals(prefix.length(), e.getStreamPos());
+            assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
@@ -365,7 +365,7 @@ public class BinaryFileReaderTest extends TestCase {
             ceosReader.readFn(16);
             fail("IllegalBinaryFormatException expected");
         } catch (IllegalBinaryFormatException e) {
-            Assert.assertEquals(prefix.length(), e.getStreamPos());
+            assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 

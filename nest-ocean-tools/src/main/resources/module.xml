@@ -11,12 +11,18 @@
     <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 	<funding>European Space Agency</funding>
-	
+
+    <dependency>
+      <module>nest-dat</module>
+    </dependency>
     <dependency>
       <module>nest-reader-dem</module>
     </dependency>
     <dependency>
       <module>nest-graph-builder</module>
+    </dependency>
+    <dependency>
+      <module>nest-reader-dem</module>
     </dependency>
 
     <categories>Processing</categories>

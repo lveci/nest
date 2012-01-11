@@ -32,6 +32,7 @@ import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.MemUtils;
 import org.esa.nest.util.ProcessTimeMonitor;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -55,10 +56,9 @@ public class BatchGraphDialog extends ModelessDialog {
     private final ProductSetPanel productSetPanel;
     private final List<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
 
-    private final static File graphPath = ResourceUtils.getGraphFolder("");
+    private final static File defaultGraphPath = ResourceUtils.getGraphFolder("");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
-    private final JPanel mainPanel;
     private final JTabbedPane tabbedPane;
     private final JLabel statusLabel;
     private final JLabel bottomStatusLabel;
@@ -81,7 +81,7 @@ public class BatchGraphDialog extends ModelessDialog {
         this.appContext = theAppContext;
         this.closeOnDone = closeOnDone;
 
-        mainPanel = new JPanel(new BorderLayout(4, 4));
+        final JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 
         tabbedPane = new JTabbedPane();
         tabbedPane.addChangeListener(new ChangeListener() {
@@ -126,7 +126,7 @@ public class BatchGraphDialog extends ModelessDialog {
         getButton(ID_APPLY).setText("Run");
         getButton(ID_YES).setText("Load");
 
-        graphFile = new File(graphPath+File.separator+"internal", "importGraph.xml");
+        graphFile = new File(defaultGraphPath+File.separator+"internal", "importGraph.xml");
 
         setContent(mainPanel);
         super.getJDialog().setMinimumSize(new Dimension(400, 300));
@@ -134,10 +134,6 @@ public class BatchGraphDialog extends ModelessDialog {
 
     @Override
     public int show() {
-        //productSetPanel.initProducts();
-        //setContent(mainPanel);
-        //initGraphs();
-        //addGraphTabs("", true);
         return super.show();
     }
 
@@ -224,11 +220,14 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private static File getFilePath(Component component, String title) {
 
+        final File graphPath = new File(Settings.getPref("batch.last_graph_path", defaultGraphPath.getAbsolutePath()));
         final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(graphPath);
         chooser.setMultiSelectionEnabled(false);
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
+            final File file = chooser.getSelectedFile();
+            Settings.setPref("batch.last_graph_path", file.getAbsolutePath());
+            return file;
         }
         return null;
     }

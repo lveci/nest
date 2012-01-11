@@ -23,7 +23,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;

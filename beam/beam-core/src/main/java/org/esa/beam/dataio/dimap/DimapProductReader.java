@@ -28,6 +28,7 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.nest.util.ProductFunctions;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -349,7 +350,7 @@ public class DimapProductReader extends AbstractProductReader {
         ImageInputStream inputStream = getImageInputStream(band);
         if (inputStream == null) {
             try {
-                inputStream = new FileImageInputStream(file);
+                inputStream = FileImageInputStreamExtImpl.createInputStream(file);
             } catch (IOException e) {
                 BeamLogManager.getSystemLogger().log(Level.WARNING,
                                                      "DimapProductReader: Unable to read file '" + file + "' referenced by '" + band.getName() + "'.",

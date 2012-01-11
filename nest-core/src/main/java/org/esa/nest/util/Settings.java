@@ -16,6 +16,8 @@
 package org.esa.nest.util;
 
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.db.AOIManager;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -185,4 +187,12 @@ public final class Settings {
         return new File(auxDataPath);
     }
 
+    public static String getPref(final String id, final String defaultStr) {
+        return VisatApp.getApp().getPreferences().getPropertyString(id, defaultStr);
+    }
+
+    public static void setPref(final String id, final String value) {
+        VisatApp.getApp().getPreferences().setPropertyString(id, value);
+        VisatApp.getApp().savePreferences();
+    }
 }

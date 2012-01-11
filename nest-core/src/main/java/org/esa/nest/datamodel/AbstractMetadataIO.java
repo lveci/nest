@@ -17,7 +17,7 @@ package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Document;

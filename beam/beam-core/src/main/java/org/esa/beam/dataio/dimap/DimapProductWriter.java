@@ -26,6 +26,7 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.nest.dataio.FileImageOutputStreamExtImpl;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -339,11 +340,11 @@ public class DimapProductWriter extends AbstractProductWriter {
     }
 
     private ImageOutputStream createImageOutputStream(Band band) throws IOException {
-        return new FileImageOutputStream(getValidImageFile(band));
+        return FileImageOutputStreamExtImpl.createOutputStream(getValidImageFile(band));
     }
 
     private ImageOutputStream createImageOutputStream(TiePointGrid tiePointGrid) throws IOException {
-        return new FileImageOutputStream(getValidImageFile(tiePointGrid));
+        return FileImageOutputStreamExtImpl.createOutputStream(getValidImageFile(tiePointGrid));
     }
 
     private static long getImageFileSize(RasterDataNode band) {

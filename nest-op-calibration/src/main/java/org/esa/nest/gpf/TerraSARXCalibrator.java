@@ -21,7 +21,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;

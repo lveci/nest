@@ -29,7 +29,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.AutoCloseOptionPane;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.ResourceUtils;

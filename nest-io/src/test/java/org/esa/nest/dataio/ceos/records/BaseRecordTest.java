@@ -19,9 +19,9 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.BinaryRecord;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;

@@ -13,11 +13,16 @@
 	<funding>European Space Agency</funding>
 	
 	<dependency>
-        <module>beam-visat</module>
-        <optional>true</optional>
+        <module>beam-core</module>
     </dependency>
     <dependency>
         <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-nest-common</module>
+    </dependency>
+    <dependency>
+        <module>nest-dat</module>
     </dependency>
     <dependency>
         <module>nest-core</module>
@@ -58,7 +63,7 @@
         </action>
 
         <action>
-            <id>PCA</id>
+            <id>PCAStat</id>
             <class>org.esa.nest.dat.PCAOpAction</class>
             <text>Principal Component Analysis</text>
             <shortDescr>Principal Component Analysis</shortDescr>

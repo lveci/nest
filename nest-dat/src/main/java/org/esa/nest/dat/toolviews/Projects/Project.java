@@ -28,7 +28,6 @@ import org.esa.beam.framework.ui.product.ProductSubsetDialog;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
-import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.dialogs.ProductSetDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.util.ProductFunctions;
@@ -331,7 +330,7 @@ public class Project extends Observable {
     }
 
     public static void createNewGraph(final ProjectSubFolder subFolder) {
-        final ModelessDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", "graph_builder");
+        final ModelessDialog dialog = new GraphBuilderDialog(VisatApp.getApp(), "Graph Builder", "graph_builder");
         dialog.show();
     }
 
@@ -339,7 +338,7 @@ public class Project extends Observable {
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
             ProductSet.OpenProductSet(file);
         } else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
-            final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", "graph_builder");
+            final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(), "Graph Builder", "graph_builder");
             dialog.show();
             dialog.LoadGraph(file);
         } else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {

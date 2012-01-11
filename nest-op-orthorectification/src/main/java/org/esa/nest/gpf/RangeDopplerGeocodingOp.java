@@ -31,7 +31,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 import org.esa.nest.datamodel.AbstractMetadata;

@@ -21,7 +21,6 @@ import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.dialogs.CheckListDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
@@ -305,7 +304,7 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private static void batchProcess(final ProductEntry[] productEntryList, final File graphFile) {
-        final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
+        final BatchGraphDialog batchDlg = new BatchGraphDialog(VisatApp.getApp(),
                 "Batch Processing", "batchProcessing", false);
         batchDlg.setInputFiles(productEntryList);
         if(graphFile != null) {

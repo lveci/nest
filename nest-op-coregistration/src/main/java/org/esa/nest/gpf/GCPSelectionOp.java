@@ -33,7 +33,7 @@ import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.MemUtils;
-import org.esa.nest.util.StatusProgressMonitor;
+import org.esa.nest.gpf.StatusProgressMonitor;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;

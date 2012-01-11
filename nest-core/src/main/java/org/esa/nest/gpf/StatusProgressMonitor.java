@@ -13,13 +13,15 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.util;
+package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.ProgressMonitorList;
 
 /**
  * status bar Progress monitor
+ * This is used for showing progress on sub threads within an operator execution
  */
 public final class StatusProgressMonitor {
     private final VisatApp visatApp = VisatApp.getApp();

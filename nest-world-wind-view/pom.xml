@@ -3,14 +3,14 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>${nest.version}</version>
+        <version>4C-0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>NEST World Wind View</name>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-world-wind-view</artifactId>
-    <version>${nest.version}</version>
+    <version>4C-0.1</version>
 
     <packaging>jar</packaging>
 

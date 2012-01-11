@@ -14,7 +14,7 @@ public class SubtRefDemAction extends AbstractVisatAction {
         dialog.setTargetProductNameSuffix(SubtRefDemOp.PRODUCT_TAG);
         dialog.show();
 
-//        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "TOPO phase computation and subtraction", "SubtRefDemOp", false);
+//        final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(), "TOPO phase computation and subtraction", "SubtRefDemOp", false);
 //        dialog.show();
 //
 //        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

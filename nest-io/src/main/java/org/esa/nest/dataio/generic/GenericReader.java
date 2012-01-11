@@ -26,10 +26,10 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.GenericBinaryDialog;
-import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.ImageInputStream;

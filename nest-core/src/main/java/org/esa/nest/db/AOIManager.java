@@ -77,13 +77,4 @@ public class AOIManager {
     public static void setLastOutputPath(final String path) {
         VisatApp.getApp().getPreferences().setPropertyString(LAST_OUTPUT_PATH, path);
     }
-
-    public static String getLastGraphPath() {
-        return VisatApp.getApp().getPreferences().getPropertyString(LAST_GRAPH_PATH,
-                ResourceUtils.getGraphFolder("").getAbsolutePath());
-    }
-
-    public static void setLastGraphPath(final String path) {
-        VisatApp.getApp().getPreferences().setPropertyString(LAST_GRAPH_PATH, path);
-    }
 }

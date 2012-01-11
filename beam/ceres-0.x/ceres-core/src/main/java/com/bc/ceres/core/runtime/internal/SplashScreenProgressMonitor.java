@@ -125,17 +125,18 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
                                             progressBarHeight);
         }
 
-        taskLabelEnabled = getConfiguredTaskNameEnabled(config);
-        taskLabelColor = getConfiguredTaskLabelColor(config);
+	    taskLabelColor = getConfiguredTaskLabelColor(config);
         if (taskLabelColor == null) {
             taskLabelColor = Color.WHITE;
         }
+        
+	    taskLabelEnabled = getConfiguredTaskNameEnabled(config);
         if (taskLabelEnabled) {
-            String fontDesc = config.getContextProperty(CONFIG_KEY_TASK_LABEL_FONT);
-            taskLabelFont = getConfiguredTaskLabelFont(fontDesc);
+            final String fontDesc = config.getContextProperty(CONFIG_KEY_TASK_LABEL_FONT);
+		    taskLabelFont = getConfiguredTaskLabelFont(fontDesc);
 
-            String posStr = config.getContextProperty(CONFIG_KEY_TASK_LABEL_POS);
-            taskLabelPos = getConfiguredTaskLabelPos(posStr);
+	        final String posStr = config.getContextProperty(CONFIG_KEY_TASK_LABEL_POS);
+	        taskLabelPos = getConfiguredTaskLabelPos(posStr);
             if (taskLabelPos == null) {
                 taskLabelPos = new Point(progressBarArea.x,
                                          progressBarArea.y + progressBarArea.height + 10);
@@ -434,7 +435,6 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
                                              image.getHeight());
             bufferImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
             bufferGraphics = bufferImage.createGraphics();
-            //bufferGraphics.drawImage(backgroundImage, null, 0, 0); // NESTMOD
             setBounds(bounds);
             setFocusable(false);
             setAlwaysOnTop(false);

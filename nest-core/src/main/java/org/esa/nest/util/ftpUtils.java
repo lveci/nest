@@ -20,6 +20,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.gpf.StatusProgressMonitor;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;

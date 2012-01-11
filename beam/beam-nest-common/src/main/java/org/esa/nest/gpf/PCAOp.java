@@ -30,21 +30,22 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.util.StatusProgressMonitor;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 /**
- * The operator performs the following perations for all master/slave pairs that user selected:
+ * The operator performs the following operations for all master/slave pairs that user selected:
  *
  * 1. For both PCA images read in the min values computed in the previous step by PCAMinOp;
  * 2. Read also the eigendevector matrix saved in the temporary metadata;
@@ -52,7 +53,7 @@ import java.util.Map;
  * 4. Output the final PCA images to target product.
  */
 
-@OperatorMetadata(alias="PCA", description="Principle Component Analysis", category = "Analysis")
+@OperatorMetadata(alias="PCA", description="Principle Component Analysis", internal = false)
 public class PCAOp extends Operator {
 
     @SourceProduct
@@ -135,7 +136,7 @@ public class PCAOp extends Operator {
 
             setInitialValues();
         } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId(), e);
+            throw new OperatorException(e);
         }
     }
 
@@ -169,7 +170,16 @@ public class PCAOp extends Operator {
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
-        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        ProductUtils.copyMasks(sourceProduct, targetProduct);
+        ProductUtils.copyVectorData(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+        targetProduct.setDescription(sourceProduct.getDescription());
     }
 
     /**
@@ -295,7 +305,7 @@ public class PCAOp extends Operator {
             }
 
         } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId(), e);
+            throw new OperatorException(e);
         } finally {
             pm.done();
         }
@@ -310,13 +320,45 @@ public class PCAOp extends Operator {
         }
 
         final Dimension tileSize = new Dimension(256, 256);
-        final Rectangle[] tileRectangles = OperatorUtils.getAllTileRectangles(sourceProduct, tileSize);
+        final Rectangle[] tileRectangles = getAllTileRectangles(sourceProduct, tileSize);
 
         processStatistics(tileRectangles);
 
         processMin(tileRectangles);
 
         statsCalculated = true;
+    }
+
+    /**
+     * Get an array of rectangles for all source tiles of the image
+     * @param sourceProduct the input product
+     * @param tileSize the rect sizes
+     * @return Array of rectangles
+     */
+    private static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {
+
+        final int rasterHeight = sourceProduct.getSceneRasterHeight();
+        final int rasterWidth = sourceProduct.getSceneRasterWidth();
+
+        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
+
+        final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
+        final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
+
+        final Rectangle[] rectangles = new Rectangle[tileCountX * tileCountY];
+        int index = 0;
+        for (int tileY = 0; tileY < tileCountY; tileY++) {
+            for (int tileX = 0; tileX < tileCountX; tileX++) {
+                final Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
+                                                              tileY * tileSize.height,
+                                                              tileSize.width,
+                                                              tileSize.height);
+                final Rectangle intersection = boundary.intersection(tileRectangle);
+                rectangles[index] = intersection;
+                index++;
+            }
+        }
+        return rectangles;
     }
 
     private void processStatistics(final Rectangle[] tileRectangles) {
@@ -369,7 +411,7 @@ public class PCAOp extends Operator {
             completeStatistics();
 
         } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId()+ " computeInitialClusterCenters ", e);
+            throw new OperatorException(e);
         } finally {
             status.done();
         }
@@ -424,7 +466,7 @@ public class PCAOp extends Operator {
             threadManager.finish();
 
         } catch(Throwable e) {
-            OperatorUtils.catchOperatorException(getId()+ " computeInitialClusterCenters ", e);
+            throw new OperatorException(e);
         } finally {
             status.done();
         }
@@ -616,7 +658,6 @@ public class PCAOp extends Operator {
         }
     }
 
-
     /**
      * Compute statistics for the whole image.
      */
@@ -681,7 +722,7 @@ public class PCAOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(PCAOp.class);
-            super.setOperatorUI(PCAStatisticsOpUI.class);
+            //super.setOperatorUI(PCAStatisticsOpUI.class);
         }
     }
 }

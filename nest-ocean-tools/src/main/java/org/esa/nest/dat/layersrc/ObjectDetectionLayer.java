@@ -25,6 +25,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.oceantools.ObjectDiscriminationOp;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.dat.layers.ScreenPixelConverter;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -47,11 +48,11 @@ public class ObjectDetectionLayer extends Layer {
     private final Product product;
     private final Band band;
 
-    private final List<ObjectDiscriminationOp.ShipRecord> targetList = new ArrayList<ObjectDiscriminationOp.ShipRecord>();
+    private final List<ObjectDiscriminationOp.ShipRecord> targetList = new ArrayList<ObjectDiscriminationOp.ShipRecord>(200);
     private double rangeSpacing;
     private double azimuthSpacing;
-    private final float lineThickness = 2.0f;
-    private final double border = 5.0;
+    private final static float lineThickness = 2.0f;
+    private final static double border = 5.0;
 
     public ObjectDetectionLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(ObjectDetectionLayerType.class.getName()), configuration);
@@ -151,24 +152,10 @@ public class ObjectDetectionLayer extends Layer {
             return;
 
         final Viewport vp = rendering.getViewport();
-        final int level = 0;
-
         final RasterDataNode raster = product.getRasterDataNode(product.getBandAt(0).getName());
-        final MultiLevelImage mli = raster.getGeophysicalImage();
+        final ScreenPixelConverter screenPixel = new ScreenPixelConverter(vp, raster);
 
-        final AffineTransform m2i = mli.getModel().getModelToImageTransform(level);
-        final AffineTransform i2m = mli.getModel().getImageToModelTransform(level);
-
-        final Shape vbounds = vp.getViewBounds();
-        final Shape mbounds = vp.getViewToModelTransform().createTransformedShape(vbounds);
-        final Shape ibounds = m2i.createTransformedShape(mbounds);
-
-        final RenderedImage winduRI = mli.getImage(level);
-
-        final int width = winduRI.getWidth();
-        final int height = winduRI.getHeight();
-        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, width, height));
-        if (irect.isEmpty()) {
+        if (!screenPixel.withInBounds()) {
             return;
         }
 
@@ -180,9 +167,7 @@ public class ObjectDetectionLayer extends Layer {
         graphics.setStroke(new BasicStroke(lineThickness));
         graphics.setColor(Color.RED);
 
-        final AffineTransform m2v = vp.getModelToViewTransform();
         final double[] ipts = new double[4];
-        final double[] mpts = new double[4];
         final double[] vpts = new double[4];
 
         final DecimalFormat frmt = new DecimalFormat("0.00");
@@ -196,8 +181,8 @@ public class ObjectDetectionLayer extends Layer {
             ipts[1] = pix.getY()-halfHeight;
             ipts[2] = ipts[0]+target.width;
             ipts[3] = ipts[1]+target.length;
-            i2m.transform(ipts, 0, mpts, 0, 2);
-            m2v.transform(mpts, 0, vpts, 0, 2);
+
+            screenPixel.pixelToScreen(ipts, vpts);
 
             final double w = vpts[2]-vpts[0];
             final double h = vpts[3]-vpts[1];

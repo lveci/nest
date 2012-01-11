@@ -182,9 +182,7 @@ public class ProductEntry {
         if(str != null && !str.isEmpty()) {
             final StringTokenizer st = new StringTokenizer(str, ",");
             while(st.hasMoreTokens()) {
-                final float lat = Float.parseFloat(st.nextToken());
-                final float lon = Float.parseFloat(st.nextToken());
-                geoPos.add(new GeoPos(lat, lon));
+                geoPos.add(new GeoPos(Float.parseFloat(st.nextToken()), Float.parseFloat(st.nextToken())));
             }
         }
 

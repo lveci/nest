@@ -47,4 +47,10 @@ public class ScreenPixelConverter {
         i2m.transform(ipts, 0, mpts, 0, 1);
         m2v.transform(mpts, 0, vpts, 0, 1);
     }
+
+    public void pixelToScreen(final double[] inpts, final double[] vpts) {
+        final double[] tmppts = new double[inpts.length];
+        i2m.transform(inpts, 0, tmppts, 0, inpts.length/2);
+        m2v.transform(tmppts, 0, vpts, 0, inpts.length/2);
+    }
 }

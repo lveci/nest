@@ -89,7 +89,7 @@ public final class DBScanner extends SwingWorker {
                 ++i;
                 String taskMsg = "Scanning "+i+" of "+total+" files ";
                 if(prodCount > 0)
-                    taskMsg += "("+prodCount+" products found)";
+                    taskMsg += "("+prodCount+" products)";
                 pm.setTaskName(taskMsg);
                 pm.worked(1);
 

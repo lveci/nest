@@ -24,6 +24,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.FileImageOutputStreamExtImpl;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -78,7 +79,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
 
         ensureNamingConvention();
 
-        writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
+        writeGeoTIFFProduct(FileImageOutputStreamExtImpl.createOutputStream(outputFile), getSourceProduct());
     }
 
     private void ensureNamingConvention() {

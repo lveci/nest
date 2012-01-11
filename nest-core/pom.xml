@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>${nest.version}</version>
+        <version>4C-0.1</version>
     </parent>
 
     <name>NEST Core</name>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-core</artifactId>
-    <version>${nest.version}</version>
+    <version>4C-0.1</version>
 
     <packaging>jar</packaging>
 
@@ -31,10 +31,6 @@
             <artifactId>beam-visat-rcp</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.esa.beam</groupId>
-            <artifactId>beam-envisat-reader</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>
@@ -49,16 +45,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-			<groupId>org.jaitools</groupId>
-            <artifactId>jt-all</artifactId>
-			<version>1.2.0</version>
         </dependency>
     </dependencies>
 

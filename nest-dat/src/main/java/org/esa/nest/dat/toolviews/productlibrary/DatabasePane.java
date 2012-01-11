@@ -197,7 +197,7 @@ public class DatabasePane extends JPanel {
         label = DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
-        label = DialogUtils.addComponent(this, gbc, "Polarization Contains:", polarizationCombo);
+        label = DialogUtils.addComponent(this, gbc, "Polarization:", polarizationCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Calibration:", calibrationCombo);
@@ -416,9 +416,9 @@ public class DatabasePane extends JPanel {
         }
     }
 
-    private int[] findIndices(final JList list, final String[] values) {
+    private static int[] findIndices(final JList list, final String[] values) {
         final int size = list.getModel().getSize();
-        final List<Integer> indices = new ArrayList<Integer>();
+        final List<Integer> indices = new ArrayList<Integer>(size);
         for(int i=0; i < size; ++i) {
             final String str = (String)list.getModel().getElementAt(i);
             if(StringUtils.contains(values, str)) {

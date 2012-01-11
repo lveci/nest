@@ -169,6 +169,7 @@
 	<module>ceres-0.x</module>
 
         <module>beam-core</module>
+		<module>beam-nest-common</module>
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
         <module>beam-visat</module>
@@ -302,6 +303,12 @@
                 <version>1.4.1</version>
             </dependency>
 
+			<dependency>
+                <groupId>org.esa.nest</groupId>
+                <artifactId>nest-core</artifactId>
+                <version>4C-0.1</version>
+            </dependency>
+			
             <!-- GeoTools Libraries ############################################# -->
 
             <dependency>

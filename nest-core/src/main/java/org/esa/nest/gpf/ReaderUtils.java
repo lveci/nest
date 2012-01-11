@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dataio;
+package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -247,13 +247,6 @@ public final class ReaderUtils {
             }
         }
         return validName.toString();
-    }
-
-    public static void showErrorMsg(final String msg) {
-        System.out.println(msg);
-        if(VisatApp.getApp() != null) {
-            VisatApp.getApp().showErrorDialog(msg);
-        }
     }
 
     public static String findPolarizationInBandName(final String bandName) {

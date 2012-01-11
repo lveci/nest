@@ -33,6 +33,7 @@ import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.MemUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -56,6 +57,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon clearIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
     private static final ImageIcon helpIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
     private static final ImageIcon infoIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/info22.png");
+    public final static String LAST_GRAPH_PATH = "graphbuilder.last_graph_path";
 
     private final AppContext appContext;
     private GraphPanel graphPanel = null;
@@ -313,11 +315,12 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml",
-                ResourceUtils.getGraphFolder("").getAbsolutePath(), "Graph", false);
+        final String graphPath = Settings.getPref(LAST_GRAPH_PATH, ResourceUtils.getGraphFolder("").getAbsolutePath());
+        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", graphPath, "Graph", false);
         if(file == null) return;
 
         LoadGraph(file);
+        Settings.setPref(LAST_GRAPH_PATH, file.getAbsolutePath());
     }
 
     /**
