@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.bc.ceres.core.runtime.RuntimeContext;
+
 /**
 
  */
@@ -155,8 +157,9 @@ public class ProductFunctions {
     private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
 
     public static void discardUnusedMetadata(final Product product) {
-        final boolean dicardUnusedMetadata = Config.getConfigPropertyMap().getPropertyBool("discard.unused.metadata");
-        if(dicardUnusedMetadata) {
+        final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
+                                                    getContextProperty("discard.unused.metadata");
+        if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
             removeUnusedMetadata(product.getMetadataRoot());
         }
     }

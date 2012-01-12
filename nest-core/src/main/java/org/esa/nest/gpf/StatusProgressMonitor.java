@@ -17,7 +17,7 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.ProgressMonitorList;
+import org.esa.nest.gpf.ProgressMonitorList;
 
 /**
  * status bar Progress monitor

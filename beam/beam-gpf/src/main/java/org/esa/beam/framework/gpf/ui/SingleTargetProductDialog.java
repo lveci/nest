@@ -32,31 +32,26 @@ import org.esa.beam.framework.ui.SuppressibleOptionPane;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.util.ProgressMonitorList;
 
-import javax.swing.*;
-import javax.media.jai.JAI;
+import javax.swing.AbstractButton;
+import javax.swing.JOptionPane;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.concurrent.ExecutionException;
-import java.util.Date;
-import java.util.Calendar;
-import java.awt.*;
 
 /**
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
  * @author Marco Peters
-
+ * @version $Revision: 1.16 $ $Date: 2012-01-12 20:06:46 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
-    private TargetProductSelector targetProductSelector;
-    private AppContext appContext;
-    private JLabel statusLabel;  // NESTMOD
+    protected TargetProductSelector targetProductSelector;
+    protected AppContext appContext;
 
     protected SingleTargetProductDialog(AppContext appContext, String title, String helpID) {
         this(appContext, title, ID_APPLY_CLOSE_HELP, helpID);
@@ -90,11 +85,6 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         button.setText("Run");
         button.setMnemonic('R');
         updateRunButton();
-
-	// NESTMOD
-        statusLabel = new JLabel("");
-        statusLabel.setForeground(new Color(255,0,0));
-        this.getJDialog().getContentPane().add(statusLabel, BorderLayout.NORTH);
     }
 
     private void updateRunButton() {
@@ -137,7 +127,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         try {
             targetProduct = createTargetProduct();
             if (targetProduct == null) {
-                //throw new NullPointerException("Target product is null.");
+                throw new NullPointerException("Target product is null.");
             }
         } catch (Throwable t) {
             handleInitialisationError(t);
@@ -150,8 +140,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         if (targetProductSelector.getModel().isSaveToFileSelected()) {
             targetProduct.setFileLocation(targetProductSelector.getModel().getProductFile());
             final ProgressMonitorSwingWorker worker = new ProductWriterSwingWorker(targetProduct);
-            //worker.executeWithBlocking();
-            worker.execute();
+            worker.executeWithBlocking();
         } else if (targetProductSelector.getModel().isOpenInAppSelected()) {
             appContext.getProductManager().addProduct(targetProduct);
             showOpenInAppInfo();
@@ -192,7 +181,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                                     t.getMessage());
     }
 
-    private boolean canApply() {
+    protected boolean canApply() {
         final String productName = targetProductSelector.getModel().getProductName();
         if (productName == null || productName.isEmpty()) {
             showErrorDialog("Please specify a target product name.");
@@ -241,7 +230,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         showSuppressibleInformationDialog(message, "saveInfo");
     }
 
-    private void showOpenInAppInfo() {
+    protected void showOpenInAppInfo() {
         final String message = MessageFormat.format(
                 "The target product has successfully been created and opened in {0}.\n\n" +
                 "Actual processing of source to target data will be performed only on demand,\n" +
@@ -297,7 +286,6 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
 
         private final Product targetProduct;
         private long saveTime;
-        private Date executeStartTime;
 
         private ProductWriterSwingWorker(Product targetProduct) {
             super(getJDialog(), "Writing Target Product");
@@ -308,15 +296,9 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         protected Product doInBackground(ProgressMonitor pm) throws Exception {
             final TargetProductSelectorModel model = getTargetProductSelector().getModel();
             pm.beginTask("Writing...", model.isOpenInAppSelected() ? 100 : 95);
-            ProgressMonitorList.instance().add(pm);       //NESTMOD
             saveTime = 0L;
             Product product = null;
             try {
-                // free cache	// NESTMOD
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
-
-                executeStartTime = Calendar.getInstance().getTime();
                 long t0 = System.currentTimeMillis();
                 Operator operator = null;
                 if (targetProduct.getProductReader() instanceof OperatorProductReader) {
@@ -336,21 +318,15 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                 executor.execute(SubProgressMonitor.create(pm, 95));
 
                 saveTime = System.currentTimeMillis() - t0;
-                File targetFile = model.getProductFile();
-                if (model.isOpenInAppSelected() && targetFile.exists()) {
-                    product = ProductIO.readProduct(targetFile);
+                if (model.isOpenInAppSelected()) {
+                    product = ProductIO.readProduct(model.getProductFile());
                     if (product == null) {
                         product = targetProduct; // todo - check - this cannot be ok!!! (nf)
                     }
                     pm.worked(5);
                 }
             } finally {
-                // free cache
-                JAI.getDefaultInstance().getTileCache().flush();
-                System.gc();
-
                 pm.done();
-                ProgressMonitorList.instance().remove(pm); //NESTMOD
                 if (product != targetProduct) {
                     targetProduct.dispose();
                 }
@@ -362,21 +338,12 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         protected void done() {
             final TargetProductSelectorModel model = getTargetProductSelector().getModel();
             try {
-                final Date now = Calendar.getInstance().getTime();
-                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-                if(diff > 120) {
-                    final float minutes = diff / 60f;
-                    statusLabel.setText("Processing completed in " + minutes + " minutes");
-                } else {
-                    statusLabel.setText("Processing completed in " + diff + " seconds");
-                }
-
                 final Product targetProduct = get();
                 if (model.isOpenInAppSelected()) {
                     appContext.getProductManager().addProduct(targetProduct);
-                    //showSaveAndOpenInAppInfo(saveTime);
+                    showSaveAndOpenInAppInfo(saveTime);
                 } else {
-                    //showSaveInfo(saveTime);
+                    showSaveInfo(saveTime);
                 }
             } catch (InterruptedException e) {
                 // ignore

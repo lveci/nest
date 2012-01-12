@@ -17,7 +17,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.nest.util.ProgressMonitorList;
+import org.esa.nest.gpf.ProgressMonitorList;
 
 import javax.swing.*;
 

@@ -258,6 +258,12 @@
                 <version>4C-1.1</version>
             </dependency>
 			
+			<dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>nujan</artifactId>
+                <version>1.4.1</version>
+            </dependency>
+			
 			<!-- JDoris Modules ############################################# -->
 			
 			<dependency>
