@@ -29,7 +29,7 @@ import javax.swing.JDialog;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public class FloatingDialog extends JDialog implements FloatingComponent {
 

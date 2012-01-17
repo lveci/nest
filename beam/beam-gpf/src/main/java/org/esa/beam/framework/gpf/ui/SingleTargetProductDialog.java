@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.16 $ $Date: 2012-01-12 20:06:46 $
+ * @version $Revision$ $Date$
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 

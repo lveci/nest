@@ -23,7 +23,7 @@ import static java.lang.Math.*;
  * Tests for class {@link MultinormalDistribution}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class MultinormalDistributionTest extends TestCase {
 

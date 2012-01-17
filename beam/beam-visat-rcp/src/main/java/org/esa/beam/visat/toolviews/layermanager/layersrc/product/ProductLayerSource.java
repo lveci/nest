@@ -24,7 +24,7 @@ import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
  * from compatible products as new bands.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class ProductLayerSource implements LayerSource {

@@ -29,12 +29,15 @@ import org.esa.nest.datamodel.Unit;
 import java.io.File;
 import java.util.Arrays;
 
+import com.bc.ceres.core.runtime.RuntimeContext;
+
 /**
  * Common functions for readers
  */
 public final class ReaderUtils {
 
-
+    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
+    
     public static void createVirtualPhaseBand(Product product, Band bandI, Band bandQ, String countStr) {
         final String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
 
@@ -262,5 +265,31 @@ public final class ReaderUtils {
             return "VH";
 
         return null;
+    }
+
+    public static void discardUnusedMetadata(final Product product) {
+        final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
+                                                    getContextProperty("discard.unused.metadata");
+        if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
+            removeUnusedMetadata(product.getMetadataRoot());
+        }
+    }
+
+    private static void removeUnusedMetadata(final MetadataElement root) {
+        final MetadataElement[] elems = root.getElements();
+        for(MetadataElement elem : elems) {
+            final String name = elem.getName();
+            boolean keep = false;
+            for(String toKeep : elemsToKeep) {
+                if(name.equals(toKeep)) {
+                    keep = true;
+                    break;
+                }
+            }
+            if(!keep) {
+                root.removeElement(elem);
+                elem.dispose();
+            }
+        }
     }
 }

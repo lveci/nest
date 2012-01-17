@@ -105,7 +105,7 @@ import java.util.Vector;
  * dataset.
  *
  * @author Norman Fomferra
-
+ * @version $ Revision: $ $ Date: $
  */
 public class ProductSceneView extends BasicView
         implements FigureEditorAware, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, ProductLayerContext,

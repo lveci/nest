@@ -34,7 +34,7 @@ import java.util.List;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */

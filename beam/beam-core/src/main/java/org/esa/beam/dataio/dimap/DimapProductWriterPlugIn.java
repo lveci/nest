@@ -392,7 +392,7 @@ import java.util.Locale;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see DimapProductWriter
  */
 public class DimapProductWriterPlugIn implements ProductWriterPlugIn {

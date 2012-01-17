@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This Action shows the VISAT about box.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class AboutAction extends ExecCommand {
 

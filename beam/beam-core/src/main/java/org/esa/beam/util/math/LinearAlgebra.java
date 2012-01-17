@@ -23,7 +23,7 @@ package org.esa.beam.util.math;
  * no argument checking.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class LinearAlgebra {
 

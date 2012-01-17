@@ -27,7 +27,7 @@ import java.util.Vector;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public class DockablePane extends JPanel implements DockableComponent {
 

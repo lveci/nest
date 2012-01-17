@@ -55,7 +55,7 @@ import java.util.Map;
  * A context used to bind Swing components to properties in a value container.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.6
  */
 public class BindingContext {

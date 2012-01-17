@@ -19,7 +19,6 @@ import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.Debug;
-import org.esa.nest.util.ProductFunctions;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
@@ -28,6 +27,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.bc.ceres.core.runtime.RuntimeContext;
 
 
 /**
@@ -925,6 +926,34 @@ public class AsarProductFile extends ProductFile {
                 getVersionSuffix(getProductType(), getIODDVersion()), getFile());
         absMetadata.addAbstractedMetadataHeader(product, root);
 
-        ProductFunctions.discardUnusedMetadata(product);
+        discardUnusedMetadata(product);
+    }
+
+    private static void discardUnusedMetadata(final Product product) {
+        final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
+                                                    getContextProperty("discard.unused.metadata");
+        if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
+            removeUnusedMetadata(product.getMetadataRoot());
+        }
+    }
+
+    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH"};
+
+    private static void removeUnusedMetadata(final MetadataElement root) {
+        final MetadataElement[] elems = root.getElements();
+        for(MetadataElement elem : elems) {
+            final String name = elem.getName();
+            boolean keep = false;
+            for(String toKeep : elemsToKeep) {
+                if(name.equals(toKeep)) {
+                    keep = true;
+                    break;
+                }
+            }
+            if(!keep) {
+                root.removeElement(elem);
+                elem.dispose();
+            }
+        }
     }
 }

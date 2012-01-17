@@ -21,7 +21,7 @@ package org.esa.beam.framework.ui.command;
  * The <code>CommandListener</code> is a ...
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public interface CommandListener extends CommandStateListener {
 

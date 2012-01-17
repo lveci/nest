@@ -20,7 +20,7 @@ package org.esa.beam.dataio.envisat;
  * DDDB.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class DDDBException extends RuntimeException {
 

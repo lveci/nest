@@ -26,7 +26,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
  * A registry for operator SPI instances.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since 4.1
  */
 public class OperatorSpiRegistryImplTest extends TestCase {

@@ -31,7 +31,7 @@ import java.awt.event.ActionEvent;
  * A command which activates a tool.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class ToolCommand extends SelectableCommand {
 

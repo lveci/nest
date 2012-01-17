@@ -28,7 +28,7 @@ import javax.swing.JComponent;
  * A one-of-many selection editor using a Combobox.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class SingleSelectionEditor extends PropertyEditor {

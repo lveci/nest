@@ -25,7 +25,7 @@ import java.awt.Font;
  * A utility class which creates GUI componants with default settings.
  *
  * @author Sabine Embacher
-
+ * @version $Revision$  $Date$
  */
 public class UIDefaults {
 

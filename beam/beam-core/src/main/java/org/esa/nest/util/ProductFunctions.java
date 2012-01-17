@@ -153,32 +153,4 @@ public class ProductFunctions {
         }
         return null;
     }
-
-    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
-
-    public static void discardUnusedMetadata(final Product product) {
-        final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
-                                                    getContextProperty("discard.unused.metadata");
-        if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
-            removeUnusedMetadata(product.getMetadataRoot());
-        }
-    }
-
-    private static void removeUnusedMetadata(final MetadataElement root) {
-        final MetadataElement[] elems = root.getElements();
-        for(MetadataElement elem : elems) {
-            final String name = elem.getName();
-            boolean keep = false;
-            for(String toKeep : elemsToKeep) {
-                if(name.equals(toKeep)) {
-                    keep = true;
-                    break;
-                }
-            }
-            if(!keep) {
-                root.removeElement(elem);
-                elem.dispose();
-            }
-        }
-    }
 }

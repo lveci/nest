@@ -23,7 +23,7 @@ import com.bc.ceres.binding.ConversionException;
  * Class for converting enumeration types.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class EnumConverter<T extends Enum<T>> implements Converter<T> {
     private Class<T> type;

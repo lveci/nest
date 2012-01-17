@@ -23,7 +23,7 @@ import org.junit.Before;
 /**
  *
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class MoveLayerLeftActionTest extends AbstractMoveLayerTest {

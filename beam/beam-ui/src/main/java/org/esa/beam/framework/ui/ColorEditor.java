@@ -28,7 +28,7 @@ import javax.swing.JComponent;
  * A value editor for colors.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class ColorEditor extends PropertyEditor {

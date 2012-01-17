@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This action forces VISAT to shut down.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ExitAction extends ExecCommand {
 

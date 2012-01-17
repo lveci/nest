@@ -35,7 +35,7 @@ package org.esa.beam.util;
  * </pre>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class StopWatch {
 

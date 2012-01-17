@@ -24,7 +24,7 @@ import org.esa.beam.framework.param.Parameter;
  * The descriptor for a map transformation which represents the identity transformation.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * 
  * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.PlateCarree.Provider} instead.
  */

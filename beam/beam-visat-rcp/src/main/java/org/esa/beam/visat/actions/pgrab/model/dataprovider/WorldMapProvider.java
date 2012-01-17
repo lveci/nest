@@ -60,7 +60,7 @@ import java.util.Comparator;
  * Description of WorldMapProvider
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class WorldMapProvider implements DataProvider {
 

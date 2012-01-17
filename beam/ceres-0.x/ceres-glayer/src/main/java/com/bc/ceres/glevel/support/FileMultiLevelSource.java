@@ -30,7 +30,7 @@ import java.io.File;
  * the directory given by {@code location}.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class FileMultiLevelSource extends AbstractMultiLevelSource {

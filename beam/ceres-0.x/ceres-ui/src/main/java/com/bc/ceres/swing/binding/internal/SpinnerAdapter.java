@@ -30,7 +30,7 @@ import javax.swing.event.ChangeListener;
  * A binding for a {@link JSpinner} component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class SpinnerAdapter extends ComponentAdapter implements ChangeListener {

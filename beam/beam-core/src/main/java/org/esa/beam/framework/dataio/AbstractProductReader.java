@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * methods.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see #readProductNodes
  * @see #readBandRasterData
  */

@@ -31,7 +31,7 @@ import java.util.EventListener;
  * It can fire rotation, translation and scale events.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class NavControl2 extends JComponent {
     private static final int W = 100;

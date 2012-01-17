@@ -39,7 +39,7 @@ import java.util.WeakHashMap;
  * resets itself whenever any referred raster data have changed.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.7
  */
 class VirtualBandMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {

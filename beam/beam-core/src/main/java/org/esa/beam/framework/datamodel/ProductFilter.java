@@ -20,7 +20,7 @@ package org.esa.beam.framework.datamodel;
  * A filter for products.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public interface ProductFilter {
 

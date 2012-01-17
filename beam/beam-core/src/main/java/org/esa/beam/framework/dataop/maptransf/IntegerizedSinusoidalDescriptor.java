@@ -25,7 +25,7 @@ import org.esa.beam.util.Guardian;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * 
  * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.MathTransformProvider} instead.
  */

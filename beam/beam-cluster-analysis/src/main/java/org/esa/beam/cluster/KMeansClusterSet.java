@@ -19,7 +19,7 @@ package org.esa.beam.cluster;
  * A set of k-means clusters.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 class KMeansClusterSet {

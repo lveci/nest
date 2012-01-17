@@ -19,7 +19,7 @@ package org.esa.beam.cluster;
  * Index filter interface.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.5
  */
 public interface IndexFilter {

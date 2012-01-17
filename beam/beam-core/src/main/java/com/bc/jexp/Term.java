@@ -32,7 +32,7 @@ import java.util.List;
  * implementation of such a parser.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public abstract class Term {
 

@@ -37,7 +37,7 @@ import java.io.IOException;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class GeoTiffProductWriter extends AbstractProductWriter {
 

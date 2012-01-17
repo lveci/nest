@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This action opens a product.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class OpenAction extends ExecCommand {
 

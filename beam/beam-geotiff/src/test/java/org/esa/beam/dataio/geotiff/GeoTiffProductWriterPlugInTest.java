@@ -30,7 +30,7 @@ import java.util.Locale;
  * todo - add API doc
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class GeoTiffProductWriterPlugInTest {

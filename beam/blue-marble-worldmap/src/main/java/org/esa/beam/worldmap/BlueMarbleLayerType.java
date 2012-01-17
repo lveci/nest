@@ -34,7 +34,7 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class BlueMarbleLayerType extends WorldMapLayerType {

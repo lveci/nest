@@ -44,7 +44,7 @@ import java.util.EventObject;
  * The <code>ToolButtonFactory</code> can be used to create tool bar buttons which have a consistent look and feel.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class ToolButtonFactory {
 

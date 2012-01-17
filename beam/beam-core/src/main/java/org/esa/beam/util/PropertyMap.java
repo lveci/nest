@@ -42,7 +42,7 @@ import org.esa.beam.util.logging.BeamLogManager;
  * <p>Additionally the class provides property change support.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class PropertyMap {
 

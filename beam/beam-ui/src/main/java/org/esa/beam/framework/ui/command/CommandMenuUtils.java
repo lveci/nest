@@ -34,7 +34,7 @@ import java.util.Map;
  * to build up menus.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class CommandMenuUtils {
 

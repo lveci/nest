@@ -22,7 +22,7 @@ import javax.swing.JLabel;
  * A <code>ParamEditor</code> provides a UI component which is used to modify the value of a parameter.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public interface ParamEditor {
 

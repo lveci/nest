@@ -23,11 +23,14 @@
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2011 by Brockmann Consult GmbH</copyright>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
     <changelog>
         <![CDATA[
+        Changes in 1.2:<br/>
+        [BEAM-1340] GeoTIFF products with a single TAG_MODEL_TIE_POINT entry should be supported<br/>
+        [BEAM-1336] ArrayIndexOutOfBoundsException occurs when reading GeoTIFF<br/>
         Changes in 1.1.1:<br/>
         [BEAM-1290] GeoTIFF writer can't write very large files<br/>
         Changes in 1.0.2:<br/>

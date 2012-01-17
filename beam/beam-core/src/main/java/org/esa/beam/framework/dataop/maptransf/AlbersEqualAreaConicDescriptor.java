@@ -1,5 +1,5 @@
 /*
- * $Id: AlbersEqualAreaConicDescriptor.java,v 1.6 2010-12-23 14:35:09 lveci Exp $
+ * $Id: AlbersEqualAreaConicDescriptor.java,v 1.1.1.1 2006/09/11 08:16:45 norman Exp $
  *
  * Copyright (C) 2005 by Roman Gerlach (Friedrich-Schiller-University Jena, Germany)
  *

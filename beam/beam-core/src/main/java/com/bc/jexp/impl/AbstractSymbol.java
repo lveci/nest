@@ -26,7 +26,7 @@ import com.bc.jexp.Term;
  * Subclassers must still implement the <code>eval</code>X method group.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  * @see com.bc.jexp.Symbol#evalB
  * @see com.bc.jexp.Symbol#evalI
  * @see com.bc.jexp.Symbol#evalD

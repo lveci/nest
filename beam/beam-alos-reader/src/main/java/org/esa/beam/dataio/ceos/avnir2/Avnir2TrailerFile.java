@@ -28,7 +28,7 @@ import java.io.IOException;
  * * This class represents a trailer file of an Avnir-2 product.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 class Avnir2TrailerFile {
 

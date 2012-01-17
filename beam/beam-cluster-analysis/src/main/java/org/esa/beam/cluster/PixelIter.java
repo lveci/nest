@@ -24,7 +24,7 @@ import java.util.Iterator;
  * todo - add API doc
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 class PixelIter {

@@ -22,7 +22,7 @@ import org.esa.beam.util.StringUtils;
  * A class representing a refernce to a field or field element.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class FieldRef {
 

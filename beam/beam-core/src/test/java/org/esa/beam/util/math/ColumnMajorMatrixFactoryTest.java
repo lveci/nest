@@ -23,7 +23,7 @@ import java.util.Arrays;
  * Tests for class {@link ColumnMajorMatrixFactory}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class ColumnMajorMatrixFactoryTest extends TestCase {
 

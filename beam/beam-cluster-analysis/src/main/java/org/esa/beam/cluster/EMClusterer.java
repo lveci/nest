@@ -26,7 +26,7 @@ import java.util.Random;
  * todo - revise API to reduce the number of fields
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 class EMClusterer {
 

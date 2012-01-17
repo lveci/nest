@@ -20,7 +20,7 @@ import javax.swing.JInternalFrame;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface InternalFrameLayoutManager {
     void moveFrameToVisible(JDesktopPane desktopPane, JInternalFrame frame);

@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Saves a VISAT session with a new filename.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class SaveSessionAsAction extends ExecCommand {

@@ -32,7 +32,7 @@ import java.util.WeakHashMap;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2011-12-30 17:43:48 $
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class LayerManagerToolView extends AbstractLayerToolView {

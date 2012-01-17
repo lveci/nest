@@ -25,7 +25,7 @@ import java.io.IOException;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-12-23 14:35:09 $
+ * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
 public class TiffDirectoryEntry {
 

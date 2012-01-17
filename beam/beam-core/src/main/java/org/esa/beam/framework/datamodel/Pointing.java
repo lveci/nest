@@ -23,7 +23,7 @@ package org.esa.beam.framework.datamodel;
  * the {@link Object#equals(Object) equals()} and  {@link Object#hashCode() hashCode()} methods.</p>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface Pointing {
 

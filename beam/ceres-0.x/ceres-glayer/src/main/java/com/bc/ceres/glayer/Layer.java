@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Marco Peters
  * @author Norman Fomferra
-
+ * @version $revision$ $date$
  */
 public abstract class Layer extends ExtensibleObject {
 

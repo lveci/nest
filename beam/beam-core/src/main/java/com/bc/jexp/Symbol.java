@@ -25,7 +25,7 @@ package com.bc.jexp;
  * encounters a name and this name can be resolved through the parser's current namespace.
  * The resulting term in this case is an instance of <code>{@link Term.Ref}</code>.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface Symbol {
 

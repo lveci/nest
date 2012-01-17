@@ -148,7 +148,6 @@ public class Clucov {
 
 
     void calculate_moments() {
-        try {
         Cluster cl;
         for (Short s : this.clusters.keySet()) {
             cl = this.clusters.get(s);
@@ -163,9 +162,6 @@ public class Clucov {
                 cl.right.recalc(this.ds.pt[np], this.ds.wgt[np]);
             else
                 cl.left.recalc(this.ds.pt[np], this.ds.wgt[np]);
-        }
-        } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -188,7 +184,6 @@ public class Clucov {
      */
     public boolean clustering(boolean last) {
         boolean res = false;
-        try {
         int find_res = this.find_planes();
         if (!last) {
             if (find_res < 0)
@@ -211,9 +206,6 @@ public class Clucov {
         for (Short s : this.clusters.keySet()) {
             Cluster rc = this.clusters.get(s);
             rc.gauss = new Gaussian(rc.fm.avg, rc.fm.cov);
-        }
-        } catch(Exception e) {
-            e.printStackTrace();
         }
         return res;
     }

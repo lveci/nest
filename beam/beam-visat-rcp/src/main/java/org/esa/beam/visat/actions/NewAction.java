@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This action creates a new product derived from an existing.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class NewAction extends ExecCommand {
 

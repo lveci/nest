@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * @author Norman Fomferra
-
+ * @version $revision$ $date$
  */
 public class ImageManagerTest extends TestCase {
 

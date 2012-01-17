@@ -19,7 +19,7 @@ package org.esa.beam.cluster;
  * Multinormal distribution.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 class MultinormalDistribution implements Distribution {
 

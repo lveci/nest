@@ -27,7 +27,7 @@ import java.beans.PropertyChangeListener;
 
 /**
  * @author Marco Peters
-
+ * @version $ Revision: $ Date: $
  * @since BEAM 4.6
  */
 public class NoDataLayerEditor extends AbstractLayerConfigurationEditor {

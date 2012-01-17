@@ -27,7 +27,7 @@ import java.util.Locale;
  * The <code>Hdf5ProductWriterPlugIn</code> class is the plug-in entry-point for the HDF5 product writer.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class Hdf5ProductWriterPlugIn implements ProductWriterPlugIn {
 

@@ -63,12 +63,12 @@ import java.util.List;
  * 1. SAR simulation: Generate simulated SAR image using DEM, the geocoding and orbit state vectors from the
  *    original SAR image, and mathematical modeling of SAR imaging geometry. The simulated SAR image will have
  *    the same dimension and resolution as the original image. For detailed steps and parameters used in SAR
- *    simulation, the reader is refered to NEST help for SAR Simulation Operator.
+ *    simulation, the reader is referred to NEST help for SAR Simulation Operator.
  *
  * 2. Co-registration: The simulated SAR image (master) and the original SAR image (slave) are co-registered
  *    and a WARP function is produced. The WARP function maps each pixel in the simulated SAR image to its
  *    corresponding position in the original SAR image. For detailed steps and parameters used in co-registration,
- *    the reader is refered to NEST help for GCP Selection Operator.
+ *    the reader is referred to NEST help for GCP Selection Operator.
  *
  * 3. Terrain correction: Traverse DEM grid that covers the imaging area. For each cell in the DEM grid, compute
  *    its corresponding pixel position in the simulated SAR image using SAR model. Then its corresponding pixel

@@ -35,7 +35,7 @@ import java.util.Map;
  * AATSR data products.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.envisat.MerisProductFile
  */
 public class AatsrProductFile extends ProductFile {

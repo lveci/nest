@@ -43,7 +43,7 @@ import java.io.IOException;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see ProductData
  */
 public class VirtualBand extends Band {

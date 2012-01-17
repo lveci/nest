@@ -27,7 +27,7 @@ import javax.swing.JComponent;
  * An editor for boolean values using a JCheckbox.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class CheckBoxEditor extends PropertyEditor {

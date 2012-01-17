@@ -56,7 +56,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {

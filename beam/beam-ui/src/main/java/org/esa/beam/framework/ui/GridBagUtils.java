@@ -31,7 +31,7 @@ import org.esa.beam.util.Guardian;
  * A utility class providing helper methods for <code>JPanel</code>s with a <code>GridBagLayout</code> layout manager.
  *
  * @author Sabine Embacher
-
+ * @version $Revision$  $Date$
  */
 public class GridBagUtils {
 

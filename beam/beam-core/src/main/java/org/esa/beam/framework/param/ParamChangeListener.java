@@ -22,7 +22,7 @@ import java.util.EventListener;
  * A <code>ParamChangeListener</code> is notified when the value of parameter has changed.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @see Parameter
  * @see ParamChangeEvent
  */

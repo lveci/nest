@@ -59,7 +59,7 @@ import java.awt.image.BufferedImage;
  * {@link WakefulComponent#getVisualState() visualState} property.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class WakefulComponent extends JComponent {
 

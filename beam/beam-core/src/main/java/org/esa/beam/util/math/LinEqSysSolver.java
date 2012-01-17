@@ -22,7 +22,7 @@ import org.esa.beam.util.Debug;
  * A gauss-based solver for linear equation systems.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class LinEqSysSolver {
 

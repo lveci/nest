@@ -25,7 +25,7 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  * Geographic collocation action.
  *
  * @author Ralf Quast
- * @version $Revision: 1.5 $ $Date: 2011-06-16 19:10:37 $
+ * @version $Revision: 2535 $ $Date: 2008-07-09 14:10:01 +0200 (Mi, 09 Jul 2008) $
  */
 public class MosaicAction extends AbstractVisatAction {
 

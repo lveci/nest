@@ -25,7 +25,7 @@ import java.io.InterruptedIOException;
  * An input stream which can be used to observer progress of reading from some other input stream.
  *
  * @author Norman Fomferra
-
+ * @version
  */
 public class ObservableInputStream extends FilterInputStream {
     private InputStreamObserver observer;

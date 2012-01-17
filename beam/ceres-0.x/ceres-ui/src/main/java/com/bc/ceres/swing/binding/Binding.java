@@ -27,7 +27,7 @@ import javax.swing.JComponent;
  * This class is not intended to be implemented by clients.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.6
  */
 public interface Binding {

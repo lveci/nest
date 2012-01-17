@@ -36,7 +36,7 @@ import java.util.concurrent.CancellationException;
  * Creates an Scatterplot from two given bands.
  * 
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.5
  */
 public class ScatterPlot {

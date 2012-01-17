@@ -48,7 +48,7 @@ import java.util.Comparator;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public class TabbedDesktopPane extends JPanel {
 

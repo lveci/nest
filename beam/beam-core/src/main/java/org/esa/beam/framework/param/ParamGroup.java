@@ -25,7 +25,7 @@ import org.esa.beam.util.PropertyMap;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$  $Date$
  */
 public class ParamGroup {
 

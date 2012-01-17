@@ -33,7 +33,7 @@ import java.beans.PropertyChangeListener;
  * Base class for editors allowing to modify a layer's configuration.
  *
  * @author Marco Zühlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public abstract class AbstractLayerConfigurationEditor extends AbstractLayerEditor {

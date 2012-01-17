@@ -29,7 +29,7 @@ import java.awt.Color;
  * Editor for graticule layer.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class GraticuleLayerEditor extends AbstractLayerConfigurationEditor {

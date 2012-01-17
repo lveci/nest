@@ -41,7 +41,7 @@ import java.awt.geom.Point2D;
  * todo - add API doc
  *
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class GeoCodingMathTransformTest extends TestCase {

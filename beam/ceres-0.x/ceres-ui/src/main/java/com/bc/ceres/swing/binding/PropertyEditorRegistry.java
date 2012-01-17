@@ -27,7 +27,7 @@ import java.util.ServiceLoader;
  * A registry for {@link PropertyEditor}.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class PropertyEditorRegistry {

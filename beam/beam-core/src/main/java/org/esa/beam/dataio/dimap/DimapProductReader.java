@@ -27,7 +27,6 @@ import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.nest.util.ProductFunctions;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
@@ -140,7 +139,7 @@ public class DimapProductReader extends AbstractProductReader {
             initGeoCodings(dom);
             DimapProductHelpers.addMaskUsages(dom, this.product);
         }
-        ProductFunctions.discardUnusedMetadata(this.product);
+        //ProductFunctions.discardUnusedMetadata(this.product);
 
         this.product.setProductReader(this);
         this.product.setFileLocation(inputFile);

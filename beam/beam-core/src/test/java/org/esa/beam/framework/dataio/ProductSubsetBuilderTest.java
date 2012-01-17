@@ -32,7 +32,7 @@ import static org.junit.Assert.assertNotNull;
  * Tests for class {@link ProductSubsetBuilder}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class ProductSubsetBuilderTest {
 

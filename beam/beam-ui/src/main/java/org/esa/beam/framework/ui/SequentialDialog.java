@@ -39,7 +39,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class SequentialDialog {
 

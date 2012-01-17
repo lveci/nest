@@ -19,7 +19,7 @@ package org.esa.beam.cluster;
  * Distribution interface.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public interface Distribution {
     /**

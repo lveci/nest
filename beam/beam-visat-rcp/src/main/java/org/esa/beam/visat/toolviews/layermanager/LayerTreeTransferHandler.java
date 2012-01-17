@@ -37,7 +37,7 @@ import java.util.List;
  * which is backed by {@link Layer layer}.
  *
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 class LayerTreeTransferHandler extends TransferHandler {

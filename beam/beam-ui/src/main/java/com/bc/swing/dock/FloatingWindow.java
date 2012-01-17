@@ -40,7 +40,7 @@ import com.bc.swing.TitledPane;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public class FloatingWindow extends Window implements FloatingComponent {
 

@@ -28,7 +28,7 @@ import java.io.IOException;
  * web page.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class ShowHomePageAction extends ExecCommand {
     private static final String HOME_PAGE_URL_DEFAULT = "http://www.brockmann-consult.de/beam/";

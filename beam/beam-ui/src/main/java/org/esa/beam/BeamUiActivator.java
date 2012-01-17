@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  *
  * @author Marco Peters
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
 

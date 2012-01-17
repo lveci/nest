@@ -26,7 +26,7 @@ import javax.swing.JFrame;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public class FloatingFrame extends JFrame implements FloatingComponent {
 

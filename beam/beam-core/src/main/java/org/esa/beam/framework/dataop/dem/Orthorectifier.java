@@ -41,7 +41,7 @@ import org.opengis.referencing.operation.MathTransform;
  * @author Norman Fomferra
  * @author Sabine Embacher
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class Orthorectifier implements GeoCoding {
 

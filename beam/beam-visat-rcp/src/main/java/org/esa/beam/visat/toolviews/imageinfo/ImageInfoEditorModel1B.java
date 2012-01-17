@@ -23,7 +23,7 @@ import org.esa.beam.framework.ui.DefaultImageInfoEditorModel;
  * todo - add API doc
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 class ImageInfoEditorModel1B extends DefaultImageInfoEditorModel {

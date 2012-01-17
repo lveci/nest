@@ -28,7 +28,7 @@ import org.esa.beam.framework.param.validators.StringValidator;
  * A <code>ParamValidatorRegistry</code> stores the different validators for each of the different parameter types.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class ParamValidatorRegistry {
 

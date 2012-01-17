@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @see Command
  * @see java.util.ResourceBundle
  */

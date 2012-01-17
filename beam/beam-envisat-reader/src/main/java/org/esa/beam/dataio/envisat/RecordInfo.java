@@ -26,7 +26,7 @@ import java.util.Vector;
  * describing each field of a record.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see <{FieldInfo}>
  * @see <{Field}>
  * @see <{Record}>

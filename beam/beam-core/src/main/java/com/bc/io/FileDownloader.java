@@ -31,7 +31,7 @@ import javax.swing.ProgressMonitor;
 /**
  * A utility class for downloading files from the internet.
  * @author Norman Fomferra
-
+ * @version
  */
 public class FileDownloader {
     // todo (nf) - dont use progress monitor directly, use an observer instead

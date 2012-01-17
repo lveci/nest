@@ -25,7 +25,7 @@ import com.bc.ceres.glayer.support.ImageLayer;
  * <code>PixelPositionListener</code>s to instances of the <code>ImageDisplay</code> UI component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface PixelPositionListener {
 

@@ -21,7 +21,7 @@ import java.util.EventListener;
  * Listens for state changes of a tool.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

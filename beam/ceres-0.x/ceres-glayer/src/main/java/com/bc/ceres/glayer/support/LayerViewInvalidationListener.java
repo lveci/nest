@@ -26,7 +26,7 @@ import java.beans.PropertyChangeEvent;
  * {@link #handleViewInvalidation(com.bc.ceres.glayer.Layer, java.awt.geom.Rectangle2D)} handler.
  *
  * @author Norman Fomferra
-
+ * @version $revision$ $date$
  */
 public abstract class LayerViewInvalidationListener extends AbstractLayerListener {
     /**

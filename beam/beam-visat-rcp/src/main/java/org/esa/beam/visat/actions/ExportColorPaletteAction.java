@@ -37,7 +37,7 @@ import java.io.IOException;
  * This action exports the color palette of the selected product.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ExportColorPaletteAction extends ExecCommand {
 

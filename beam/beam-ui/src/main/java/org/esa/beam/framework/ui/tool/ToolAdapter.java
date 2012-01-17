@@ -19,7 +19,7 @@ package org.esa.beam.framework.ui.tool;
  * Provides (empty) default implementations for all operations of the <code>ToolListener</code> interface.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

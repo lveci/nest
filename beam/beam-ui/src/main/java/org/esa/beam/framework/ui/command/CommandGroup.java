@@ -28,7 +28,7 @@ import javax.swing.JMenuItem;
  * The <code>CommandGroup</code> is a ...
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class CommandGroup extends Command {
 

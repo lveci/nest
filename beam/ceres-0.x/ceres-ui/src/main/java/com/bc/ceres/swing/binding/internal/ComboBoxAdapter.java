@@ -34,7 +34,7 @@ import java.beans.PropertyChangeListener;
  * A binding for a {@link javax.swing.JComboBox} component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class ComboBoxAdapter extends ComponentAdapter implements ActionListener, PropertyChangeListener {

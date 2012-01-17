@@ -25,7 +25,7 @@ import javax.swing.JPopupMenu;
  * A factory for pop-up menues.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public interface PopupMenuFactory {
 

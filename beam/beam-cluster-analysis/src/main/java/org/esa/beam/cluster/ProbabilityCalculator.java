@@ -21,7 +21,7 @@ import static java.lang.Math.exp;
  * Strategy for calculating posterior cluster probabilities.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.5
  */
 public class ProbabilityCalculator {

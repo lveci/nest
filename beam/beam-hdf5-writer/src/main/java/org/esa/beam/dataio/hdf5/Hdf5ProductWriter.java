@@ -55,7 +55,7 @@ import java.util.Map;
  * A product writer implementation for the HDF5 format.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
@@ -569,7 +569,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             attributeID = H5.H5Acreate(locationID, name, attrTypeID, attrSpaceID, HDF5Constants.H5P_DEFAULT);
             H5.H5Awrite(attributeID, attrTypeID, value);
         } catch (HDF5Exception e) {
-            //throw new ProductIOException(createErrorMessage(e));
+            throw new ProductIOException(createErrorMessage(e));
         } finally {
             closeH5A(attributeID);
             closeH5S(attrSpaceID);

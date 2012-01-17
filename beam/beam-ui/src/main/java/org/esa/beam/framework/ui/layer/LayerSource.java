@@ -24,7 +24,7 @@ package org.esa.beam.framework.ui.layer;
  *
  * @author Marco Peters
  * @author Marco Zühlke
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public interface LayerSource {

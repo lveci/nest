@@ -28,7 +28,7 @@ import static java.lang.Math.*;
  * Ground control point (GCP) geo-coding.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class GcpGeoCoding extends AbstractGeoCoding {
 
@@ -409,7 +409,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-    
+     * @version $Revision$ $Date$
      */
     public enum Method {
         // todo - use better names instead of  POLYNOMIAL<i> (nf - 18.01.2011)

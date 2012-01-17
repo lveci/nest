@@ -28,7 +28,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see ProductReader
  */
 public interface ProductWriter {

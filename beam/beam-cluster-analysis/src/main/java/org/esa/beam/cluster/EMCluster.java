@@ -20,7 +20,7 @@ package org.esa.beam.cluster;
  * Cluster class.
  *
  * @author Ralf Quast
-
+ * @version $Revision $ $Date $
  */
 public class EMCluster {
 

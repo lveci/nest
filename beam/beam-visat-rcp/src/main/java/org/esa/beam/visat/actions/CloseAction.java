@@ -23,7 +23,7 @@ import org.esa.beam.visat.VisatApp;
  * This action closes the currently selected product.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class CloseAction extends ExecCommand {
 

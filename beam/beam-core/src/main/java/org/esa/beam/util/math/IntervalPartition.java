@@ -20,7 +20,7 @@ package org.esa.beam.util.math;
  * i.e. a strictly increasing sequence of real numbers.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class IntervalPartition {
 

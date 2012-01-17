@@ -23,7 +23,7 @@ import java.io.File;
  * skipped..
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class FileHistory extends UserInputHistory {
 

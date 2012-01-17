@@ -29,7 +29,7 @@ import java.awt.Frame;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class WorldMapWindow extends JDialog {
 

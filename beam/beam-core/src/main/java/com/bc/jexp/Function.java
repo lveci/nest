@@ -27,7 +27,7 @@ package com.bc.jexp;
  * The resulting term in this case is an instance of <code>{@link Term.Call}</code>.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface Function {
 

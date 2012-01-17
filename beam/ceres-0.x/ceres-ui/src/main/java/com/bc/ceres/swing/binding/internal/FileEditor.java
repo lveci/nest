@@ -36,7 +36,7 @@ import java.io.File;
  * An editor for file names using a file chooser dialog.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class FileEditor extends PropertyEditor {

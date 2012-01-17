@@ -33,7 +33,7 @@ import java.awt.geom.AffineTransform;
  * the {@link Object#equals(Object) equals()} and  {@link Object#hashCode() hashCode()} methods.</p>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface GeoCoding {
 

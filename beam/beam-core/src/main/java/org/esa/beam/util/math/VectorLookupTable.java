@@ -24,7 +24,7 @@ package org.esa.beam.util.math;
  * todo - method for degrading a table (see {@link LookupTable})
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class VectorLookupTable {
 
