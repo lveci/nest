@@ -6,14 +6,14 @@
     <parent>
         <groupId>org.jdoris</groupId>
         <artifactId>jdoris</artifactId>
-        <version>${jdoris.version}</version>
+        <version>0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>jDoris Core Libs</name>
     <groupId>org.jdoris</groupId>
     <artifactId>jdoris-core</artifactId>
-    <version>${jdoris.version}</version>
+    <version>0.2</version>
 
     <dependencies>
         <dependency>

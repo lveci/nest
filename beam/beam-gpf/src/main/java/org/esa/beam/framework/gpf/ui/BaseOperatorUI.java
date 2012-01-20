@@ -19,7 +19,7 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.binding.*;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 
 /**
 * The abstract base class for all operator user interfaces intended to be extended by clients.
@@ -184,16 +184,16 @@ public abstract class BaseOperatorUI implements OperatorUI {
         }
     }
 
-    private void setParamsToConfiguration(final Xpp3Dom config) {
+    private void setParamsToConfiguration(final XppDom config) {
         if(paramMap == null) return;
         final Set<String> keys = paramMap.keySet();                     // The set of keys in the map.
         for (String key : keys) {
             final Object value = paramMap.get(key);             // Get the value for that key.
             if (value == null) continue;
 
-            Xpp3Dom xml = config.getChild(key);
+            XppDom xml = config.getChild(key);
             if (xml == null) {
-                xml = new Xpp3Dom(key);
+                xml = new XppDom(key);
                 config.addChild(xml);
             }
 

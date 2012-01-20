@@ -23,7 +23,7 @@ import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.draw.Figure;
 import org.esa.beam.framework.draw.LineFigure;
 import static org.junit.Assert.*;
@@ -100,7 +100,7 @@ public class AbstractFigureDomConverterTest {
         assertEquals(expectedXml, domElement.toXml());
     }
 
-    private Xpp3Dom createDom(String xml) {
+    private XppDom createDom(String xml) {
         XppDomWriter domWriter = new XppDomWriter();
         new HierarchicalStreamCopier().copy(new XppReader(new StringReader(xml)), domWriter);
         return domWriter.getConfiguration();

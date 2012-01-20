@@ -18,7 +18,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.core.ProgressMonitor;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
@@ -187,10 +187,10 @@ public class GraphExecuter extends Observable {
 
     private void AssignAllParameters() {
 
-        final Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
+        final XppDom presentationXML = new XppDom("Presentation");
 
         // save graph description
-        final Xpp3Dom descXML = new Xpp3Dom("Description");
+        final XppDom descXML = new XppDom("Description");
         descXML.setValue(graphDescription);
         presentationXML.addChild(descXML);
 
@@ -331,10 +331,10 @@ public class GraphExecuter extends Observable {
             graph = graphFromFile;
             nodeList.clear();
 
-            final Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
+            final XppDom presentationXML = graph.getApplicationData("Presentation");
             if(presentationXML != null) {
                 // get graph description
-                final Xpp3Dom descXML = presentationXML.getChild("Description");
+                final XppDom descXML = presentationXML.getChild("Description");
                 if(descXML != null && descXML.getValue() != null) {
                     graphDescription = descXML.getValue();
                 }

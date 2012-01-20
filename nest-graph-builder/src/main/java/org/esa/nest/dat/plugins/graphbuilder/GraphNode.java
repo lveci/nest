@@ -18,7 +18,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 import com.bc.ceres.binding.*;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -55,11 +55,11 @@ public class GraphNode {
 
     private Point displayPosition = new Point(0,0);
 
-    private Xpp3Dom displayParameters;
+    private XppDom displayParameters;
 
     GraphNode(final Node n) throws IllegalArgumentException {
         node = n;
-        displayParameters = new Xpp3Dom("node");
+        displayParameters = new XppDom("node");
         displayParameters.setAttribute("id", node.getId());
 
         initParameters();
@@ -131,12 +131,12 @@ public class GraphNode {
         return null;
     }
 
-    void setDisplayParameters(final Xpp3Dom presentationXML) {
-        for(Xpp3Dom params : presentationXML.getChildren()) {
+    void setDisplayParameters(final XppDom presentationXML) {
+        for(XppDom params : presentationXML.getChildren()) {
             final String id = params.getAttribute("id");
             if(id != null && id.equals(node.getId())) {
                 displayParameters = params;
-                final Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+                final XppDom dpElem = displayParameters.getChild("displayPosition");
                 if(dpElem != null) {
                     displayPosition.x = (int)Float.parseFloat(dpElem.getAttribute("x"));
                     displayPosition.y = (int)Float.parseFloat(dpElem.getAttribute("y"));
@@ -146,7 +146,7 @@ public class GraphNode {
         }
     }
 
-    void AssignParameters(final Xpp3Dom presentationXML) {
+    void AssignParameters(final XppDom presentationXML) {
 
         final Xpp3DomElement config = new Xpp3DomElement("parameters");
         updateParameterMap(config);
@@ -155,9 +155,9 @@ public class GraphNode {
         AssignDisplayParameters(presentationXML);
     }
 
-    void AssignDisplayParameters(final Xpp3Dom presentationXML) {
-        Xpp3Dom nodeElem = null;
-        for(Xpp3Dom elem : presentationXML.getChildren()) {
+    void AssignDisplayParameters(final XppDom presentationXML) {
+        XppDom nodeElem = null;
+        for(XppDom elem : presentationXML.getChildren()) {
             final String id = elem.getAttribute("id");
             if(id != null && id.equals(node.getId())) {
                 nodeElem = elem;
@@ -168,9 +168,9 @@ public class GraphNode {
             presentationXML.addChild(displayParameters);
         }
 
-        Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+        XppDom dpElem = displayParameters.getChild("displayPosition");
         if(dpElem == null) {
-            dpElem = new Xpp3Dom("displayPosition");
+            dpElem = new XppDom("displayPosition");
             displayParameters.addChild(dpElem);
         }
 

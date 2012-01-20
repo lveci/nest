@@ -7,20 +7,20 @@
     <parent>
         <artifactId>jdoris</artifactId>
         <groupId>org.jdoris</groupId>
-        <version>${jdoris.version}</version>
+        <version>0.2</version>
     </parent>
 
     <name>jDoris NEST Support</name>
     <groupId>org.jdoris</groupId>
     <artifactId>jdoris-nest</artifactId>
-    <version>${jdoris.version}</version>
+    <version>0.2</version>
     <description>NEST utilities and operators</description>
 
     <dependencies>
         <dependency>
             <groupId>org.jdoris</groupId>
             <artifactId>jdoris-core</artifactId>
-            <version>${jdoris.version}</version>
+            <version>0.2</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>

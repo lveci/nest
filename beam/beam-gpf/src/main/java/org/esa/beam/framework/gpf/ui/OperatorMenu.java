@@ -22,7 +22,7 @@ import com.jidesoft.action.CommandMenuBar;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.help.HelpSys;
@@ -192,7 +192,7 @@ public class OperatorMenu {
             }
         }
 
-        private Xpp3Dom createDom(String xml) {
+        private XppDom createDom(String xml) {
             XppDomWriter domWriter = new XppDomWriter();
             new HierarchicalStreamCopier().copy(new XppReader(new StringReader(xml)), domWriter);
             return domWriter.getConfiguration();

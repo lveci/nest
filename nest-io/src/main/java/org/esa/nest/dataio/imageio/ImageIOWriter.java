@@ -40,7 +40,6 @@ import java.util.Iterator;
 public class ImageIOWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream;
-    private ImageIOFile imgIOFile = null;
     private ImageWriter writer;
     private final String format;
 

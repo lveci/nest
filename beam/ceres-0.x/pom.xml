@@ -44,6 +44,11 @@
     </scm>
 
     <repositories>
+		<repository>
+          <id>repo1.maven.org</id>
+          <name>maven repository</name>
+          <url>http://repo1.maven.org/maven2/</url>
+        </repository>
         <repository>
             <id>array-mvn-repo</id>
             <name>Public Maven Repository at Array Systems Computing Inc</name>
@@ -55,6 +60,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+		
     </repositories>
 
 	<pluginRepositories>
@@ -94,18 +100,18 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.8.2</version>
+                <version>4.10</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.3</version>
+                <version>1.4.2</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>
                 <artifactId>xpp3</artifactId>
-                <version>1.1.3.3</version>
+                <version>1.1.3.4.O</version>
             </dependency>
             <dependency>
                 <groupId>com.bc.ceres</groupId>

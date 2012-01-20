@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>4B-1.1</version>
+    <version>4C-0.1</version>
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
@@ -20,7 +20,7 @@
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
             <friendlyName>Envisat</friendlyName>
-            <icon>C:\build\4b\nest\nest-src\main\assembly\dat.ico</icon>
+            <icon>C:\build\4C\nest\nest\nest-src\main\assembly\dat.ico</icon>
             <mimeType></mimeType>
             <progID></progID>
             <scope>user</scope>
@@ -68,7 +68,7 @@
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
     <enableTimestamp>1</enableTimestamp>
-    <outputDirectory>../dist</outputDirectory>
+    <outputDirectory>../../dist</outputDirectory>
     <saveRelativePaths>1</saveRelativePaths>
     <startMenuGroupName>${product_fullname}-${product_version}</startMenuGroupName>
     <vendor>ESA</vendor>
@@ -84,7 +84,7 @@
                     <comment>NEST Display and Analysis Tool</comment>
                     <exec> ${installdir}/dat.sh</exec>
                     <icon> ${installdir}/res/dat.png</icon>
-                    <name>NEST 4B</name>
+                    <name>NEST 4C</name>
                     <path> ${installdir}</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
@@ -102,37 +102,37 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/auxdata</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/bin</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/commandline</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/graphs</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/images</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/lib</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/licenses</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/modules</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/res</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/res</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/config</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/config</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin.dir/readme.txt</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/readme.txt</origin>
                         </distributionFile>
                     </distributionFileList>
                     <shortcutList>
@@ -158,70 +158,70 @@
                     <platforms>windows</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/cli.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/cli.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/clib_jiio.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/clib_jiio.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/clib_jiio_sse2.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/clib_jiio_sse2.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/clib_jiio_util.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/clib_jiio_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/dat.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/dat.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/gluegen-rt.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/gluegen-rt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/gpt.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/gpt.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jogl.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jogl.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jogl_awt.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jogl_awt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jogl_cg.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/nest-dat64.exe</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/nest-dat64.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/post-uninstall.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jhdf5.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jhdf5.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jhdf.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/jre</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/jre</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/nest-dat64.l4j.ini</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/nest-dat64.l4j.ini</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/nest-clean.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/nest-clean.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/LIBGFORTRAN-3.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/LIBGFORTRAN-3.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/CYGGCC_S-1.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/CYGGCC_S-1.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/IESHIMS.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/IESHIMS.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/LIBGCC_S_SJLJ-1.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/LIBGCC_S_SJLJ-1.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win64.dir/CYGWIN1.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/CYGWIN1.dll</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -238,7 +238,7 @@
                 </startMenuShortcut>
                 <startMenuShortcut>
                     <comment>Next ESA SAR Toolbox</comment>
-                    <name>NEST 4B</name>
+                    <name>NEST 4C</name>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
