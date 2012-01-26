@@ -57,6 +57,10 @@
       <artifactId>nest-reader-dem</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jdoris</groupId>
+      <artifactId>jdoris-core</artifactId>
+    </dependency>
+    <dependency>
         <groupId>org</groupId>
         <artifactId>jblas</artifactId>
     </dependency>

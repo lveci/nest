@@ -20,14 +20,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.esa.beam</groupId>
-            <artifactId>beam-gpf</artifactId>
-        </dependency>
-		<dependency>
-            <groupId>org.esa.nest</groupId>
-            <artifactId>nest-reader-dem</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-launcher</artifactId>
         </dependency>
@@ -56,9 +48,18 @@
             <artifactId>ceres-jai</artifactId>
         </dependency>
 		<dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-gpf</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>org.esa.nest</groupId>
+            <artifactId>nest-reader-dem</artifactId>
+        </dependency>
+		<dependency>
             <groupId>org.jdoris</groupId>
             <artifactId>jdoris-core</artifactId>
         </dependency>
+		
         <dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-dock</artifactId>
@@ -150,14 +151,14 @@
         </dependency>
 		<dependency>
             <groupId>gov.nasa</groupId>
-            <artifactId>worldwind</artifactId>
+            <artifactId>nasa-worldwind</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>jogl</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>gluegen-rt</artifactId>
         </dependency>
 		<dependency>
@@ -168,17 +169,6 @@
             <groupId>org</groupId>
             <artifactId>jblas</artifactId>
         </dependency>
-
-        <!--dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-gdal</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-gdalframework</artifactId>
-            <version>1.0.5</version>
-        </dependency-->
 		
         <dependency>
           <groupId>org.geotools</groupId>

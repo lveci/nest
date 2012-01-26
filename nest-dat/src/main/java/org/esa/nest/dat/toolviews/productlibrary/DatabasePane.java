@@ -50,6 +50,7 @@ public class DatabasePane extends JPanel {
     private final JComboBox acquisitionModeCombo = new JComboBox(new String[] { DBQuery.ALL_MODES });
     private final JComboBox passCombo = new JComboBox(new String[] {
             DBQuery.ALL_PASSES, DBQuery.ASCENDING_PASS, DBQuery.DESCENDING_PASS });
+    private final JTextField trackField = new JTextField();
     private final DateComboBox startDateBox = new DateComboBox();
     private final DateComboBox endDateBox = new DateComboBox();
     private final JComboBox polarizationCombo = new JComboBox(new String[] {
@@ -172,7 +173,7 @@ public class DatabasePane extends JPanel {
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         JLabel label;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
         gbc.gridy = 0;
         this.add(new JLabel("Mission:"), gbc);
@@ -188,6 +189,9 @@ public class DatabasePane extends JPanel {
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
+        label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Track:", trackField);
         label.setHorizontalAlignment(JLabel.RIGHT);
 
         gbc.gridy++;
@@ -225,6 +229,7 @@ public class DatabasePane extends JPanel {
         metadataArea.setToolTipText("Use AND,OR,NOT and =,<,>,<=,>-");
         gbc.gridx = 2;
         gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(updateButton, gbc);
         updateButton.setMaximumSize(new Dimension(3, 3));
 
@@ -344,6 +349,7 @@ public class DatabasePane extends JPanel {
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
         dbQuery.setSelectedAcquisitionMode((String) acquisitionModeCombo.getSelectedItem());
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
+        dbQuery.setSelectedTrack(trackField.getText());
         dbQuery.setStartEndDate(startDateBox.getCalendar(), endDateBox.getCalendar());
 
         dbQuery.setSelectedPolarization((String)polarizationCombo.getSelectedItem());

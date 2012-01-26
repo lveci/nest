@@ -209,9 +209,12 @@ public class ProductLibraryToolView extends AbstractToolView {
         final JMenuItem exploreItem = new JMenuItem("Browse Folder");
         exploreItem.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
-                final int row = productEntryTable.rowAtPoint(productEntryTable.getMousePosition());
+                final Point pos = productEntryTable.getMousePosition();
+                int row = 0;
+                if(pos != null)
+                    row = productEntryTable.rowAtPoint(pos);
                 final Object entry = productEntryTable.getValueAt(row, 0);
-                if(entry instanceof ProductEntry) {
+                if(entry != null && entry instanceof ProductEntry) {
                     final ProductEntry prodEntry = (ProductEntry)entry;
                     try {
                         Desktop.getDesktop().open(prodEntry.getFile().getParentFile());
@@ -513,7 +516,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         splitPane1H.add(new JScrollPane(dbPane));
 
         productEntryTable = new JTable();
-        productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         productEntryTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         productEntryTable.setComponentPopupMenu(createEntryTablePopup());
         productEntryTable.addMouseListener(new MouseAdapter() {
@@ -531,6 +534,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         splitPane1H.add(new JScrollPane(productEntryTable));
 
         final JideSplitPane splitPane1V = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+        splitPane1V.setShowGripper(true);
         splitPane1V.add(splitPane1H);
 
         worldMapUI = new WorldMapUI();

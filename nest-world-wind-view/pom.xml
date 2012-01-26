@@ -29,14 +29,14 @@
         </dependency>
         <dependency>
             <groupId>gov.nasa</groupId>
-            <artifactId>worldwind</artifactId>
+            <artifactId>nasa-worldwind</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>jogl</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>gluegen-rt</artifactId>
         </dependency>
     </dependencies>

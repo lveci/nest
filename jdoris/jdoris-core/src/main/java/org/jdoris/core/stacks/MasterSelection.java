@@ -3,13 +3,25 @@ package org.jdoris.core.stacks;
 import org.jdoris.core.Baseline;
 import org.jdoris.core.Orbit;
 import org.jdoris.core.SLCImage;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.visat.VisatApp;
+import org.esa.beam.util.Debug;
+import org.esa.nest.datamodel.AbstractMetadata;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.awt.*;
+
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
+import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * User: pmar@ppolabs.com
  * Date: 1/20/12
  * Time: 3:39 PM
  */
-public class MasterSelection {
+public class MasterSelection implements OptimalMaster {
 
     private final static int BTEMP_CRITICAL = 3 * 365;
     private final static int BPERP_CRITICAL = 1200;
@@ -25,7 +37,10 @@ public class MasterSelection {
     // TODO: function to sort input array according to modeled coherence
     // TODO: critical values for other sensors then C.band ESA
 
-    MasterSelection(SLCImage[] slcImages, Orbit[] orbits) {
+    public MasterSelection() {
+    }
+
+    public void setInput(SLCImage[] slcImages, Orbit[] orbits) {
         this.slcImages = slcImages;
         this.orbits = orbits;
         this.numOfImages = slcImages.length;
@@ -74,11 +89,12 @@ public class MasterSelection {
         return cplxContainers;
     }
 
-    private IfgStack[] setupIfgStack(CplxContainer[] cplxContainers) {
+    private IfgStack[] setupIfgStack(CplxContainer[] cplxContainers, ProgressMonitor pm) {
         // construct pairs from data in containers
         IfgStack[] ifgStack = new IfgStack[numOfImages];
         IfgPair[][] ifgPair = new IfgPair[numOfImages][numOfImages];
 
+        pm.beginTask("Computing...", numOfImages);
         for (int i = 0; i < numOfImages; i++) {
 
             CplxContainer master = cplxContainers[i];
@@ -93,15 +109,19 @@ public class MasterSelection {
             ifgStack[i] = new IfgStack(master, ifgPair[i]);
             ifgStack[i].meanCoherence();
 
+            pm.worked(1);
         }
+        pm.done();
         return ifgStack;
     }
 
-    private void findOptimalMaster(IfgStack[] ifgStack) {
+    private int findOptimalMaster(IfgStack[] ifgStack) {
 
         orbitNumber = ifgStack[0].master.orbitNumber;
         modeledCoherence = ifgStack[0].meanCoherence;
 
+        int index = 0;
+        int i = 0;
         for (IfgStack anIfgStack : ifgStack) {
 
             long orbit = anIfgStack.master.orbitNumber;
@@ -110,21 +130,88 @@ public class MasterSelection {
             if (coherence > modeledCoherence) {
                 modeledCoherence = coherence;
                 orbitNumber = orbit;
+                index = i;
+            }
+            ++i;
+        }
+        return index;
+    }
+
+    public int estimateOptimalMaster(final ProgressMonitor pm) {
+
+        CplxContainer[] cplxContainers = setupCplxContainers();
+        IfgStack[] ifgStack = setupIfgStack(cplxContainers, pm);
+        return findOptimalMaster(ifgStack);
+
+    }
+
+    /**
+     * Finds the optimal master product from a list of products
+     * @param srcProducts input products
+     * @return the optimal master product
+     */
+    public static Product findOptimalMasterProduct(final Product[] srcProducts) {
+        final int size = srcProducts.length;
+        final List<SLCImage> imgList = new ArrayList<SLCImage>(size);
+        final List<Orbit> orbList = new ArrayList<Orbit>(size);
+
+        for(Product product : srcProducts) {
+            try {
+                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+                final SLCImage img = new SLCImage(absRoot);
+                final Orbit orb = new Orbit(absRoot, 3);
+
+                imgList.add(img);
+                orbList.add(orb);
+            } catch(Exception e) {
+                VisatApp.getApp().showErrorDialog("Error: "+product.getName()+'\n'+e.getMessage());
+            }
+        }
+
+        try {
+            if(VisatApp.getApp() != null) {
+                final Worker worker = new Worker(VisatApp.getApp().getMainFrame(), "Computing Optimal InSAR Master",
+                        imgList.toArray(new SLCImage[size]), orbList.toArray(new Orbit[size]));
+                worker.executeWithBlocking();
+
+                Integer index = (Integer)worker.get();
+                return srcProducts[index];
+            }  else {
+
+                final OptimalMaster dataStack = new MasterSelection();
+                dataStack.setInput(imgList.toArray(new SLCImage[size]), orbList.toArray(new Orbit[size]));
+                int index = dataStack.estimateOptimalMaster(ProgressMonitor.NULL);
+                return srcProducts[index];
             }
 
+        } catch(Throwable t) {
+            Debug.trace(t);
+        }
+        return srcProducts[0];
+    }
+
+
+    private static class Worker extends ProgressMonitorSwingWorker {
+        SLCImage[] imgList;
+        Orbit[] orbList;
+        Worker(final Component component, final String title,
+               final SLCImage[] imgList, final Orbit[] orbList) {
+            super(component, title);
+            this.imgList = imgList;
+            this.orbList = orbList;
+        }
+
+        @Override
+        protected Object doInBackground(ProgressMonitor pm) throws Exception {
+            final OptimalMaster dataStack = new MasterSelection();
+            dataStack.setInput(imgList, orbList);
+            return dataStack.estimateOptimalMaster(pm);
         }
     }
 
-    public void estimateOptimalMaster() {
-
-        CplxContainer[] cplxContainers = setupCplxContainers();
-        IfgStack[] ifgStack = setupIfgStack(cplxContainers);
-        findOptimalMaster(ifgStack);
-
-    }
 
     // inner classes
-    private class CplxContainer {
+    private static class CplxContainer {
 
         public long orbitNumber;
         public double dateMjd;

@@ -15,7 +15,6 @@
  */
 package org.esa.nest.util;
 
-import org.apache.xerces.parsers.DOMParser;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -28,6 +27,9 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,18 +61,25 @@ public final class XMLSupport {
 
     public static org.jdom.Document LoadXML(final String filePath) throws IOException {
 
-        final DOMBuilder builder = new DOMBuilder();
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        org.w3c.dom.Document w3cDocument = null;
 
-        final DOMParser parser = new DOMParser();
+        final DOMBuilder domBuilder = new DOMBuilder();
+
         try {
             // handle spaces in the path
             final String path = filePath.replaceAll(" ", "%20");
-            parser.parse(path);
-            return builder.build(parser.getDocument());
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            w3cDocument = builder.parse(filePath);
+
+            return domBuilder.build(w3cDocument);
         } catch (IOException e) {
             System.out.println("Path to xml is not valid: " + e.getMessage());
             throw e;
         } catch (SAXException e) {
+            System.out.println("cannot parse xml : " + e.getMessage());
+            throw new IOException(e.getMessage());
+        } catch (ParserConfigurationException e) {
             System.out.println("cannot parse xml : " + e.getMessage());
             throw new IOException(e.getMessage());
         }

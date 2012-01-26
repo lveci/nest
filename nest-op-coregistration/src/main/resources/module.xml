@@ -30,7 +30,9 @@
 	<dependency>
         <module>nest-graph-builder</module>
     </dependency>
-
+    <dependency>
+        <module>jdoris-core</module>
+    </dependency>
 
     <extension point="beam-ui:layerSources">
         <layerSource>

@@ -45,6 +45,7 @@ public class ProductListPanel extends JPanel {
         fileModel.setColumnWidths(table.getColumnModel());
         table.setColumnSelectionAllowed(true);
         table.setDropMode(DropMode.ON);
+        table.setDragEnabled(true);
         table.setTransferHandler(new ProductSetReaderOpUI.ProductSetTransferHandler(fileModel));
 
         final JScrollPane scrollPane = new JScrollPane(table);

@@ -30,6 +30,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -130,7 +131,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             }
         });
 
-        final JButton addAllOpenButton = DialogUtils.CreateButton("addAllOpenButton", "Add All Open", null, panel);
+        final JButton addAllOpenButton = DialogUtils.CreateButton("addAllOpenButton", "Add Opened", null, panel);
         addAllOpenButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -297,6 +298,18 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                 }
             }
             return true;
+        }
+
+        // export
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            final JTable table = (JTable)c;
+            final File selectedFile = fileModel.getFileAt(table.getSelectedRow());
+
+            if (selectedFile != null) {
+                return new StringSelection(selectedFile.getAbsolutePath());
+            }
+            return null;
         }
     }
 }

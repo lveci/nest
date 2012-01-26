@@ -315,47 +315,119 @@
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-api</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
+					<exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
@@ -370,7 +442,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
+			<dependency>
+				<groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>1.10</version>
+			</dependency>
+			
             <!-- JAI Libraries ############################################# -->
 
             <dependency>

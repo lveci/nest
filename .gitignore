@@ -5,5 +5,4 @@
 modules/
 target/
 CVS/
-.svn/
 .cvsignore

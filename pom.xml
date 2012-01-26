@@ -86,6 +86,10 @@
 			<name>GeoTools Maven Repository</name>
 			<url>http://repo.opengeo.org/</url>
         </repository>
+		<repository>
+		  <id>maven.iscpif.fr</id>
+		  <url>http://maven.iscpif.fr/public</url>
+		</repository>
     </repositories>
 
     <pluginRepositories>
@@ -316,52 +320,127 @@
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-api</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 			<dependency>
 				<groupId>org.geotools</groupId>
                 <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
-			<!--dependency>
-	            <groupId>org.geotools</groupId>
-	            <artifactId>gt-imageio-ext-gdal</artifactId>
-	            <version>${geotools.version}</version>
-	        </dependency-->
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
+					<exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
@@ -376,7 +455,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-			
+			<dependency>
+				<groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>1.10</version>
+			</dependency>
             <!-- JAI Libraries ############################################# -->
 
             <dependency>
@@ -527,16 +610,6 @@
             </dependency>
 
 			<dependency>
-	            <groupId>javax.media</groupId>
-	            <artifactId>jogl</artifactId>
-			    <version>1.2</version>
-	        </dependency>
-			<dependency>
-	            <groupId>javax.media</groupId>
-	            <artifactId>gluegen-rt</artifactId>
-				<version>1.2</version>
-	        </dependency>
-			<dependency>
 				<groupId>edu.emory.mathcs</groupId>
 				<artifactId>jtransforms</artifactId>
 				<version>2.3</version>
@@ -551,8 +624,18 @@
 			
 			<dependency>
 	            <groupId>gov.nasa</groupId>
-	            <artifactId>worldwind</artifactId>
-				<version>0.6.199</version>
+	            <artifactId>nasa-worldwind</artifactId>
+				<version>0.6.200</version>
+	        </dependency>
+			<dependency>
+	            <groupId>org.processing</groupId>
+	            <artifactId>jogl</artifactId>
+			    <version>1.5.r0196</version>
+	        </dependency>
+			<dependency>
+	            <groupId>org.processing</groupId>
+	            <artifactId>gluegen-rt</artifactId>
+				<version>1.5.r0196</version>
 	        </dependency>
 		
         </dependencies>

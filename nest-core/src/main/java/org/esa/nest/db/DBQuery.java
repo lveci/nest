@@ -59,6 +59,7 @@ public class DBQuery {
     private String selectedProductTypes[] = {};
     private String selectedAcquisitionMode = "";
     private String selectedPass = "";
+    private String selectedTrack = "";
     private String selectedSampleType = "";
     private String selectedPolarization = ANY;
     private String selectedCalibration = ANY;
@@ -107,6 +108,15 @@ public class DBQuery {
 
     public String getSelectedPass() {
         return selectedPass;
+    }
+
+    public void setSelectedTrack(final String track) {
+        if(track != null)
+            selectedTrack = track;
+    }
+
+    public String getSelectedTrack() {
+        return selectedTrack;
     }
 
     public void setSelectedSampleType(final String sampleType) {
@@ -204,6 +214,10 @@ public class DBQuery {
         if(!selectedPass.isEmpty() && !selectedPass.equals(ALL_PASSES)) {
             SQLUtils.addAND(queryStr);
             queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+ '\'');
+        }
+        if(!selectedTrack.isEmpty()) {
+            SQLUtils.addAND(queryStr);
+            queryStr.append("( "+ MetadataTable.TABLE+'.'+AbstractMetadata.REL_ORBIT+'='+selectedTrack+" )");
         }
         if(!selectedSampleType.isEmpty() && !selectedSampleType.equals(ANY)) {
             SQLUtils.addAND(queryStr);

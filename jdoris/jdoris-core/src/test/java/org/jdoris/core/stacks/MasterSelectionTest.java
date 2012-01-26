@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static junit.framework.Assert.assertEquals;
+import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * User: pmar@ppolabs.com
@@ -59,8 +60,9 @@ public class MasterSelectionTest {
     @Test
     public void testFindOptimalMaster() throws Exception {
 
-        MasterSelection dataStack = new MasterSelection(slcImages, orbits);
-        dataStack.estimateOptimalMaster();
+        final MasterSelection dataStack = new MasterSelection();
+        dataStack.setInput(slcImages, orbits);
+        dataStack.estimateOptimalMaster(ProgressMonitor.NULL);
 
         float modeledCoherence_ACTUAL = dataStack.getModeledCoherence();
         long optimalMaster_ACTUAL = dataStack.getOrbitNumber();

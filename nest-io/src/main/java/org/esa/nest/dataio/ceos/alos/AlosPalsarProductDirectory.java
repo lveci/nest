@@ -69,6 +69,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
+
+        updateProductType();
+
         _leaderFile = new AlosPalsarLeaderFile(
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
         _trailerFile = new AlosPalsarTrailerFile(
@@ -96,6 +99,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
            _leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
             isProductSLC = true;
         }
+    }
+
+    private void updateProductType() {
+        String prodType = productType.toUpperCase();
+        while(prodType.endsWith("A") || prodType.endsWith("D") || prodType.endsWith("U") || prodType.endsWith("_")) {
+            prodType = prodType.substring(0, prodType.length()-1);
+        }
+        productType = prodType;
     }
 
     public boolean isALOS() throws IOException {
