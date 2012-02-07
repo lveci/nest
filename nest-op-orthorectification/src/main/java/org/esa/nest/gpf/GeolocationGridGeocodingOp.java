@@ -472,10 +472,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 r0 = slantRangeTime.getPixelDouble(sourceImageWidth-1, azimuthIndex)/1000000000.0*Constants.halfLightSpeed;
             }
             rangeIndex = (slantRange - r0) / rangeSpacing;
+        }
 
-            if (!nearRangeOnLeft) {
-                rangeIndex = sourceImageWidth - 1 - rangeIndex;
-            }
+        if (!nearRangeOnLeft) {
+            rangeIndex = sourceImageWidth - 1 - rangeIndex;
         }
 
         return rangeIndex;
