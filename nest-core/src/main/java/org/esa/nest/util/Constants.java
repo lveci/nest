@@ -30,6 +30,8 @@ public final class Constants
 
     public static final double TWO_PI = 2.0*Math.PI;
 
+    public static final double EPS = 1e-15;
+
     private Constants()
     {
     }

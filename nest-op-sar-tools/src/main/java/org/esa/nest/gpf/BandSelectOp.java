@@ -17,7 +17,6 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -47,11 +46,7 @@ public final class BandSelectOp extends Operator {
             rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
-    @Parameter(description = "The list of tie point grids.", alias = "tiePointGrids", itemAlias = "tiepointgrid",
-            rasterDataNodeType = TiePointGrid.class, label="Tie Point Grids")
-    private String[] tiePointGrids;
-
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(10);
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
     /**
      * Initializes this operator and sets the one and only target product.

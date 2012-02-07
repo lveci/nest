@@ -65,6 +65,18 @@ public class TestUtils {
         return maxIteration;
     }
 
+    public static Product readSourceProduct(final String path) throws IOException {
+        final File inputFile = new File(path);
+        if(!inputFile.exists()) {
+            throw new IOException(path + " not found");
+            //System.out.println("path + \" not found\"");
+            //return null;
+        }
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        return reader.readProductNodes(inputFile, null);
+    }
+
     public static boolean canTestReadersOnAllProducts() {
         final String testAllProducts = testPreferences.getPropertyString(contextID+".test.ReadersOnAllProducts");
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
@@ -108,6 +120,10 @@ public class TestUtils {
     public static void verifyProduct(final Product product, final boolean verifyTimes,
                                      final boolean verifyGeoCoding) throws Exception {
         ReaderUtils.verifyProduct(product, verifyTimes, verifyGeoCoding);
+
+        // readPixels: execute computeTiles()
+        final float[] floatValues = new float[100];
+        product.getBandAt(0).readPixels(0, 0, 10, 10, floatValues, ProgressMonitor.NULL);
     }
 
     public static void attributeEquals(final MetadataElement elem, final String name,
@@ -164,7 +180,7 @@ public class TestUtils {
         }
     }
 
-    public static void compareProducts(final Operator op, final Product targetProduct,
+    public static void compareProducts(final Product targetProduct,
                                        final String expectedPath, final String[] excemptionList) throws Exception {
 
         final Band targetBand = targetProduct.getBandAt(0);

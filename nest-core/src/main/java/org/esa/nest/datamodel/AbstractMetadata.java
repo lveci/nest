@@ -33,6 +33,11 @@ import java.text.ParseException;
  */
 public final class AbstractMetadata {
 
+    /**
+     * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
+     */
+    private static final String METADATA_VERSION = "4C-0.1";
+
     public static final int NO_METADATA = 99999;
     //public static final short NO_METADATA_BYTE = 99;
     private static final short NO_METADATA_BYTE = 0;
@@ -164,6 +169,8 @@ public final class AbstractMetadata {
     public static final String range_bandwidth = "range_bandwidth";
     public static final String azimuth_bandwidth = "azimuth_bandwidth";
 
+    public static final String abstracted_metadata_version = "metadata_version";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -279,6 +286,9 @@ public final class AbstractMetadata {
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
         absRoot.addElement(new MetadataElement(dop_coefficients));
+
+        att = addAbstractedAttribute(absRoot, abstracted_metadata_version, ProductData.TYPE_ASCII, "", "AbsMetadata version");
+        att.getData().setElems(METADATA_VERSION);
 
         return absRoot;
     }
@@ -479,12 +489,17 @@ public final class AbstractMetadata {
     }
 
     private static void patchMissingMetadata(final MetadataElement abstractedMetadata) {
+        // check if version has changed
+        final String version = abstractedMetadata.getAttributeString(abstracted_metadata_version, "");
+        if(version.equals(METADATA_VERSION))
+            return;
+
         final MetadataElement tmpElem = new MetadataElement("tmp");
         final MetadataElement completeMetadata = addAbstractedMetadataHeader(tmpElem);
 
         final MetadataAttribute[] attribs = completeMetadata.getAttributes();
         for(MetadataAttribute at : attribs) {
-            if(abstractedMetadata.getAttribute(at.getName()) == null) {
+            if(!abstractedMetadata.containsAttribute(at.getName())) {
                 abstractedMetadata.addAttribute(at);
                 abstractedMetadata.getProduct().setModified(false);
             }

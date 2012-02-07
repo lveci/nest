@@ -186,18 +186,6 @@ public final class OperatorUtils {
         return null;
     }
 
-    public static String getBandTimeStamp(final Product product) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        if(absRoot != null) {
-            //final String mission = "_"+absRoot.getAttributeString(AbstractMetadata.MISSION, "");
-            String dateString = getAcquisitionDate(absRoot);
-            if(!dateString.isEmpty())
-                dateString = '_' + dateString;
-            return StringUtils.createValidName(dateString, new char[]{'_', '.'}, '_');
-        }
-        return "";
-    }
-
     public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -554,41 +542,6 @@ public final class OperatorUtils {
         targetProduct.setGeoCoding(tpGeoCoding);
     }
 
-    public static String[] getMasterBandNames(final Product sourceProduct) {
-        final List<String> masterBandNames = new ArrayList<String>();
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(slaveMetadataRoot != null) {
-            final String mstBandNames = slaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS, "");
-            final StringTokenizer st = new StringTokenizer(mstBandNames, " ");
-            final int length = st.countTokens();
-            for (int i = 0; i < length; i++) {
-                masterBandNames.add(st.nextToken());
-            }
-        }
-        return masterBandNames.toArray(new String[masterBandNames.size()]);
-    }
-
-    public static String[] getSlaveProductNames(final Product sourceProduct) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(slaveMetadataRoot != null) {
-            return slaveMetadataRoot.getElementNames();
-        }
-        return new String[]{};
-    }
-
-    public static String getSlaveProductName(final Product sourceProduct, final Band slvBand) {
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(slaveMetadataRoot != null) {
-            final String slvBandName = slvBand.getName();
-            for(MetadataElement elem : slaveMetadataRoot.getElements()) {
-                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
-                if(slvBandNames.contains(slvBandName))
-                    return elem.getName();
-            }
-        }
-        return null;
-    }
-
     public static class ImageGeoBoundary {
         public double latMin = 0.0, latMax = 0.0;
         public double lonMin = 0.0, lonMax= 0.0;
@@ -695,6 +648,8 @@ public final class OperatorUtils {
 
     /**
      * Get an array of rectangles for all source tiles of the image
+     * @param sourceProduct the input
+     * @param tileSize the rect
      * @return Array of rectangles
      */
     public static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {

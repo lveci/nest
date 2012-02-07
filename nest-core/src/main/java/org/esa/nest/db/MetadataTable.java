@@ -143,7 +143,7 @@ public class MetadataTable implements TableInterface {
             return " "; //"TIMESTAMP";
         else if(dataType < ProductData.TYPE_FLOAT32)
             return "99999";
-        return " ";
+        return "' '";
     }
 
 

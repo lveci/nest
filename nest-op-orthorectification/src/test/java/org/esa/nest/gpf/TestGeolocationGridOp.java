@@ -54,11 +54,7 @@ public class TestGeolocationGridOp extends TestCase {
      */
     public void testProcessing() throws Exception {
 
-        final File inputFile = new File(inputPathWSM);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPathWSM);
 
         final GeolocationGridGeocodingOp op = (GeolocationGridGeocodingOp)spi.createOperator();
         assertNotNull(op);
@@ -68,7 +64,7 @@ public class TestGeolocationGridOp extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, excemptionList);
+        TestUtils.compareProducts(targetProduct, expectedPathWSM, excemptionList);
     }
 
     public void testProcessAllASAR() throws Exception

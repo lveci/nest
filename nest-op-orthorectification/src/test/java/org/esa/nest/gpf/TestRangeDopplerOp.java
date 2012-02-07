@@ -67,11 +67,7 @@ public class TestRangeDopplerOp extends TestCase {
      */
     public void testProcessWSM() throws Exception {
 
-        final File inputFile = new File(inputPathWSM);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPathWSM);
 
         final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
         assertNotNull(op);
@@ -83,7 +79,7 @@ public class TestRangeDopplerOp extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
+        TestUtils.compareProducts(targetProduct, expectedPathWSM, null);
     }
 
     public void testGetLocalDEM() throws Exception {
@@ -119,11 +115,7 @@ public class TestRangeDopplerOp extends TestCase {
      */
     public void testProcessIMS() throws Exception {
 
-        final File inputFile = new File(inputPathIMS);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPathIMS);
 
         final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
         assertNotNull(op);
@@ -135,7 +127,7 @@ public class TestRangeDopplerOp extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathIMS, null);
+        TestUtils.compareProducts(targetProduct, expectedPathIMS, null);
     }
 
     /**
@@ -144,11 +136,7 @@ public class TestRangeDopplerOp extends TestCase {
      */
     public void testProcessAPM() throws Exception {
 
-        final File inputFile = new File(inputPathAPM);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPathAPM);
 
         final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
         assertNotNull(op);
@@ -160,7 +148,7 @@ public class TestRangeDopplerOp extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathAPM, null);
+        TestUtils.compareProducts(targetProduct, expectedPathAPM, null);
     }
 
     public void testProcessAllASAR() throws Exception
