@@ -86,7 +86,7 @@ public class NestWWToolView extends AbstractToolView {
     private ProductPanel productPanel = null;
 
     private JSlider opacitySlider = null;
-    private final ProductLayer productLayer = new ProductLayer(true);
+    private ProductLayer productLayer = null;
 
     private final Dimension wmsPanelSize = new Dimension(400, 600);
 
@@ -112,6 +112,7 @@ public class NestWWToolView extends AbstractToolView {
     @Override
     public JComponent createControl() {
 
+        productLayer = new ProductLayer(true);
         final Window windowPane = getPaneWindow();
         if(windowPane != null)
             windowPane.setSize(800,400);
