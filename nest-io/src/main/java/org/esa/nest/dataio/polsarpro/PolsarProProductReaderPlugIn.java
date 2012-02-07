@@ -51,11 +51,9 @@ public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
                         return fileQualification;
                 }
                 return folderQualification;
-            } else {
-                return super.getDecodeQualification(input);
-            }
+            } 
         } 
 
-        return super.getDecodeQualification(input);
+        return DecodeQualification.UNABLE; //super.getDecodeQualification(input);
     }
 }

@@ -6,30 +6,35 @@ import java.io.IOException;
 
 public class BinaryRecord {
 
-    private final long _startPos;
-    private final BinaryFileReader _reader;
+    private final long startPos;
+    private final BinaryFileReader reader;
 
-    private BinaryDBReader db;
+    private final BinaryDBReader db;
     private final Integer recordLength;
 
     public BinaryRecord(final BinaryFileReader reader, final long startPos,
-                        final org.jdom.Document recordDefinitionXML)
-            throws IOException {
-        _reader = reader;
+                        final org.jdom.Document recordDefinitionXML) throws IOException {
+        this(reader, startPos, recordDefinitionXML, "unknown");
+    }
+
+    public BinaryRecord(final BinaryFileReader reader, final long startPos,
+                        final org.jdom.Document recordDefinitionXML, final String recName) throws IOException {
+        this.reader = reader;
         // reposition start if needed
         if (startPos != -1) {
-            _startPos = startPos;
+            this.startPos = startPos;
             reader.seek(startPos);
         } else {
-            _startPos = reader.getCurrentPos();
+            this.startPos = reader.getCurrentPos();
         }
 
-        if(_startPos >= reader.getLength()) {
+        if(startPos >= reader.getLength()) {
             recordLength = 0;
+            db = null;
             return;
         }
 
-        db = new BinaryDBReader(recordDefinitionXML);
+        db = new BinaryDBReader(recordDefinitionXML, recName, this.startPos);
         db.readRecord(reader);
 
         recordLength = getAttributeInt("Record Length");
@@ -52,11 +57,11 @@ public class BinaryRecord {
     }
 
     public final long getStartPos() {
-        return _startPos;
+        return startPos;
     }
 
     public BinaryFileReader getReader() {
-        return _reader;
+        return reader;
     }
 
     public final BinaryDBReader getBinaryDatabase() {
@@ -64,11 +69,11 @@ public class BinaryRecord {
     }
 
     public long getRecordEndPosition() {
-        return _startPos + recordLength;
+        return startPos + recordLength;
     }
 
     public long getAbsolutPosition(final long relativePosition) {
-        return _startPos + relativePosition;
+        return startPos + relativePosition;
     }
 
     public void assignMetadataTo(final MetadataElement elem) {

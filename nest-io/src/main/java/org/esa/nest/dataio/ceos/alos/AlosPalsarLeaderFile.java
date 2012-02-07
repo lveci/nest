@@ -19,6 +19,8 @@ import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.ceos.CEOSLeaderFile;
+import org.esa.nest.dataio.ceos.CeosRecordHeader;
+import org.jdom.Document;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
@@ -29,69 +31,76 @@ import java.io.IOException;
  */
 class AlosPalsarLeaderFile extends CEOSLeaderFile {
 
-    private final static String mission = "alos";
+    protected final static String mission = "alos";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
 
     private int productLevel = -1;
 
-    private final static org.jdom.Document leaderXML = BinaryDBReader.loadDefinitionFile(mission, leader_recordDefinitionFile);
-    private final static org.jdom.Document sceneXML = BinaryDBReader.loadDefinitionFile(mission, scene_recordDefinitionFile);
-    private final static org.jdom.Document mapProjXML = BinaryDBReader.loadDefinitionFile(mission, mapproj_recordDefinitionFile);
-    private final static org.jdom.Document platformXML = BinaryDBReader.loadDefinitionFile(mission, platformPosition_recordDefinitionFile);
-    private final static org.jdom.Document histogramXML = BinaryDBReader.loadDefinitionFile(mission, histogram_recordDefinitionFile);
-    private final static org.jdom.Document detailedProcXML = BinaryDBReader.loadDefinitionFile(mission, detailedProcessing_recordDefinitionFile);
-    private final static org.jdom.Document attitudeXML = BinaryDBReader.loadDefinitionFile(mission, attitude_recordDefinitionFile);
-    private final static org.jdom.Document radiometricXML = BinaryDBReader.loadDefinitionFile(mission, radiometric_recordDefinitionFile);
-    private final static org.jdom.Document dataQualityXML = BinaryDBReader.loadDefinitionFile(mission, dataQuality_recordDefinitionFile);
-    private final static org.jdom.Document radiometricCompXML = BinaryDBReader.loadDefinitionFile(mission, radiometric_comp_recordDefinitionFile);
-    private final static org.jdom.Document facilityXML = BinaryDBReader.loadDefinitionFile(mission, facility_recordDefinitionFile);
-        
-    public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException {
-                final BinaryFileReader reader = new BinaryFileReader(stream);
+    private final static Document leaderXML = BinaryDBReader.loadDefinitionFile(mission, leader_recordDefinitionFile);
+    private final static Document sceneXML = BinaryDBReader.loadDefinitionFile(mission, scene_recordDefinitionFile);
+    private final static Document mapProjXML = BinaryDBReader.loadDefinitionFile(mission, mapproj_recordDefinitionFile);
+    private final static Document platformXML = BinaryDBReader.loadDefinitionFile(mission, platformPosition_recordDefinitionFile);
+    private final static Document attitudeXML = BinaryDBReader.loadDefinitionFile(mission, attitude_recordDefinitionFile);
+    private final static Document radiometricXML = BinaryDBReader.loadDefinitionFile(mission, radiometric_recordDefinitionFile);
+    private final static Document dataQualityXML = BinaryDBReader.loadDefinitionFile(mission, dataQuality_recordDefinitionFile);
+    private final static Document facilityXML = BinaryDBReader.loadDefinitionFile(mission, facility_recordDefinitionFile);
 
-        _leaderFDR = new BinaryRecord(reader, -1, leaderXML);
-        reader.seek(_leaderFDR.getRecordEndPosition());
+    public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException {
+        this(stream, leaderXML);
+    }
+
+    public AlosPalsarLeaderFile(final ImageInputStream stream, final Document fdrXML) throws IOException {
+
+        final BinaryFileReader reader = new BinaryFileReader(stream);
+
+        CeosRecordHeader header = new CeosRecordHeader(reader);
+        _leaderFDR = new BinaryRecord(reader, -1, fdrXML);
+        header.seekToEnd();
+
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of data set summary records"); ++i) {
-            _sceneHeaderRecord = new BinaryRecord(reader, -1, sceneXML);
-            reader.seek(_sceneHeaderRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _sceneHeaderRecord = new BinaryRecord(reader, -1, sceneXML, scene_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of map projection data records"); ++i) {
-            _mapProjRecord = new BinaryRecord(reader, -1, mapProjXML);
-            reader.seek(_mapProjRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _mapProjRecord = new BinaryRecord(reader, -1, mapProjXML, mapproj_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of platform pos. data records"); ++i) {
-            _platformPositionRecord = new BinaryRecord(reader, -1, platformXML);
-            reader.seek(_platformPositionRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data histograms records"); ++i) {
-            _histogramRecord = new BinaryRecord(reader, -1, histogramXML);
-            reader.seek(_histogramRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of det. processing records"); ++i) {
-            _detailedProcessingRecord = new BinaryRecord(reader, -1, detailedProcXML);
-            reader.seek(_detailedProcessingRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _platformPositionRecord = new BinaryRecord(reader, -1, platformXML, platformPosition_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of attitude data records"); ++i) {
-            _attitudeRecord = new BinaryRecord(reader, -1, attitudeXML);
-            reader.seek(_attitudeRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _attitudeRecord = new BinaryRecord(reader, -1, attitudeXML, attitude_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of radiometric data records"); ++i) {
-            _radiometricRecord = new BinaryRecord(reader, -1, radiometricXML);
-            reader.seek(_radiometricRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _radiometricRecord = new BinaryRecord(reader, -1, radiometricXML, radiometric_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of data quality summary records"); ++i) {
-            _dataQualityRecord = new BinaryRecord(reader, -1, dataQualityXML);
-            reader.seek(_dataQualityRecord.getRecordEndPosition());
-        }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of rad. compensation records"); ++i) {
-            _radiometricCompRecord = new BinaryRecord(reader, -1, radiometricCompXML);
-            reader.seek(_radiometricCompRecord.getRecordEndPosition());
+            header = new CeosRecordHeader(reader);
+            _dataQualityRecord = new BinaryRecord(reader, -1, dataQualityXML, dataQuality_recordDefinitionFile);
+            header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of facility data records"); ++i) {
-            _facilityRecord = new BinaryRecord(reader, -1, facilityXML);
-            reader.seek(_facilityRecord.getRecordEndPosition());
-        }
+            header = new CeosRecordHeader(reader);
+            int facilityRecordNum = 17;
+            int level = getProductLevel();
+            if(level != AlosPalsarConstants.LEVEL1_0 && level != AlosPalsarConstants.LEVEL1_1)
+                facilityRecordNum = 18;
+            while(header.getRecordNum() < facilityRecordNum) {
+                header.seekToEnd();
+                header = new CeosRecordHeader(reader);
+            }
 
+            _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
+            header.seekToEnd();
+        }
         reader.close();
     }
 

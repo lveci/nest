@@ -18,6 +18,7 @@ package org.esa.nest.dataio.binary;
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -192,6 +193,18 @@ public final class BinaryFileReader {
         }
     }
 
+    public double readEn(final int n) throws IOException {
+        final byte[] b = new byte[n];
+        int bytesRead = _stream.read(b);
+        String str = new String(b).trim();
+        if(str.isEmpty()) return 0;
+
+        ByteBuffer bBuffer = ByteBuffer.wrap(b);
+        double d = bBuffer.getDouble();
+
+        return d;
+    }
+
     public String readAn(final int n) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final byte[] bytes = new byte[n];
@@ -203,11 +216,10 @@ public final class BinaryFileReader {
             throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
         if (bytesRead != n) {
-            final String message = String.format(EM_EXPECTED_X_FOUND_Y_BYTES,
-                                                 n, bytesRead);
+            final String message = String.format(EM_EXPECTED_X_FOUND_Y_BYTES, n, bytesRead);
             throw new IllegalBinaryFormatException(message, streamPosition);
         }
-        String str = new String(bytes);
+        final String str = new String(bytes);
         if(str.contains("\0"))
             return str.replace("\0", " ");
 

@@ -46,8 +46,8 @@ public class PolsarProProductReader extends NestEnviProductReader {
         else
             fileList = new File[] { inputFile };
 
-        final List<Header> headerList = new ArrayList<Header>();
-        final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
+        final List<Header> headerList = new ArrayList<Header>(fileList.length);
+        final HashMap<Header, File> headerFileMap = new HashMap<Header, File>(fileList.length);
         Header mainHeader = null;
         File mainHeaderFile = null;
 

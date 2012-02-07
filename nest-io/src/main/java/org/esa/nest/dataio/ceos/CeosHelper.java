@@ -20,7 +20,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
-import org.esa.nest.dataio.ceos.records.FilePointerRecord;
+import org.esa.nest.dataio.ceos.FilePointerRecord;
 
 import java.io.File;
 import java.io.FilenameFilter;

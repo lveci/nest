@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.ceos.records;
+package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.binary.BinaryFileReader;
