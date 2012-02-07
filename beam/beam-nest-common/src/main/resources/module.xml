@@ -39,7 +39,6 @@
         <module>nest-core</module>
     </dependency>
 
-
     <changelog>
         <![CDATA[
         <p>Changes in 4.1:<br/>
@@ -48,5 +47,19 @@
     </changelog>
 
     <categories>System,Library</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>PCAOp</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <text>Principal Component Analysis</text>
+            <operatorName>PCA</operatorName>
+	        <dialogTitle>Principal Component Analysis</dialogTitle>
+            <targetProductNameSuffix>_pca</targetProductNameSuffix>
+            <shortDescr>Principal Component Analysis</shortDescr>
+            <parent>imageAnalysis</parent>
+            <helpId>PCA</helpId>
+        </action>
+    </extension>
 
 </module>

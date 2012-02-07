@@ -79,16 +79,13 @@ public class StatisticsToolView extends AbstractToolView {
     private PagePanel[] pagePanels;
     private Product product;
 
-    private final PagePanelPTL pagePanelPTL;
-    private final PagePanelIFL pagePanelIFL;
-    private final PagePanelLL pagePanelLL;
+    private PagePanelPTL pagePanelPTL;
+    private PagePanelIFL pagePanelIFL;
+    private PagePanelLL pagePanelLL;
     private SelectionChangeListener pagePanelSCL;
 
     public StatisticsToolView() {
-        pagePanelPTL = new PagePanelPTL();
-        pagePanelIFL = new PagePanelIFL();
-        pagePanelLL = new PagePanelLL();
-        pagePanelSCL = new PagePanelSCL();
+
     }
 
     public void show(final int tabIndex) {
@@ -103,6 +100,11 @@ public class StatisticsToolView extends AbstractToolView {
 
     @Override
     public JComponent createControl() {
+
+        pagePanelPTL = new PagePanelPTL();
+        pagePanelIFL = new PagePanelIFL();
+        pagePanelLL = new PagePanelLL();
+        pagePanelSCL = new PagePanelSCL();
 
         tabbedPane = new JTabbedPane();
         final InformationPanel informationPanel = new InformationPanel(this, helpIDs[0]);

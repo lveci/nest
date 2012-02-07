@@ -632,8 +632,11 @@ public final class StringUtils {
      * @throws IllegalArgumentException if the given csvString is <code>null</code> or <code>empty</code>.
      */
     public static String[] csvToArray(String csvString) {
-        //Guardian.assertNotNullOrEmpty("csvString", csvString);
-        final StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
+        return stringToArray(csvString, ",");
+    }
+
+    public static String[] stringToArray(final String csvString, final String delim) {
+        final StringTokenizer tokenizer = new StringTokenizer(csvString, delim);
         final List<String> strList = new ArrayList<String>(tokenizer.countTokens());
         while (tokenizer.hasMoreTokens()) {
             strList.add(tokenizer.nextToken());

@@ -55,24 +55,8 @@ import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
-import javax.swing.AbstractButton;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JToolBar;
-import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.FontUIResource;
 import java.awt.BorderLayout;
@@ -337,6 +321,7 @@ public class BasicApp {
 
             pm.setSubTaskName("Initialising UI components...");
             configureCommandsByResourceBundle();
+
             initMainMenuBar();
             initMainToolBar();
             initMainPane();
@@ -407,7 +392,15 @@ public class BasicApp {
             menuBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
             menuBar.getContext().setInitIndex(1);
             getMainFrame().getDockableBarManager().addDockableBar(menuBar);
-            insertCommandMenuItems();
+
+            final SwingWorker worker = new SwingWorker() {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    insertCommandMenuItems();
+                    return null;
+                }
+            };
+            worker.execute();
         }
     }
 

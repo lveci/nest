@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -37,6 +38,8 @@ public class Header {
                 interleave = line.substring(line.indexOf('=') + 1).trim();
             } else if (line.startsWith(EnviConstants.HEADER_KEY_SENSOR_TYPE)) {
                 sensorType = line.substring(line.indexOf('=') + 1).trim();
+            } else if (line.startsWith(EnviConstants.HEADER_KEY_WAVELENGTH_UNITS)) {
+                wavelengthsUnits = line.substring(line.indexOf('=') + 1).trim();
             } else if (line.startsWith(EnviConstants.HEADER_KEY_BYTE_ORDER)) {
                 byteOrder = Integer.parseInt(line.substring(line.indexOf('=') + 1).trim());
             } else if (line.startsWith(EnviConstants.HEADER_KEY_MAP_INFO)) {
@@ -47,7 +50,10 @@ public class Header {
                 parseProjectionInfo(line);
             } else if (line.startsWith(EnviConstants.HEADER_KEY_BAND_NAMES)) {
                 line = assembleMultilineString(reader, line);
-                parseBandNames(line);
+                bandNames = parseCommaSeparated(line);
+            } else if (line.startsWith(EnviConstants.HEADER_KEY_WAVELENGTH)) {
+                line = assembleMultilineString(reader, line);
+                wavelengths = parseCommaSeparated(line);
             } else if (line.startsWith(EnviConstants.HEADER_KEY_DESCRIPTION)) {
                 line = assembleMultilineString(reader, line);
                 description = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')).trim();
@@ -123,6 +129,15 @@ public class Header {
     public BeamProperties getBeamProperties() {
         return beamProperties;
     }
+
+    public String[] getWavelengths() {
+        return wavelengths;
+    }
+
+    public String getWavelengthsUnit() {
+        return wavelengthsUnits;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     /////// END OF PUBLIC
     ///////////////////////////////////////////////////////////////////////////
@@ -139,21 +154,39 @@ public class Header {
     private EnviMapInfo mapInfo = null;
     private EnviProjectionInfo projectionInfo = null;
     private String[] bandNames = null;
+    private String[] wavelengths = null;
+    private String wavelengthsUnits = null;
     private String description = null;
     private BeamProperties beamProperties = null;
 
     private void parseMapInfo(String line) {
-        mapInfo = new EnviMapInfo();
-        final StringTokenizer tokenizer = createTokenizerFromLine(line);
-        mapInfo.setProjectionName(tokenizer.nextToken().trim());
-        mapInfo.setReferencePixelX(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setReferencePixelY(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setEasting(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setNorthing(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setPixelSizeX(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setPixelSizeY(Double.parseDouble(tokenizer.nextToken()));
-        mapInfo.setDatum(tokenizer.nextToken().trim());
-        mapInfo.setUnit(tokenizer.nextToken().trim());
+        try {
+            mapInfo = new EnviMapInfo();
+            final StringTokenizer tokenizer = createTokenizerFromLine(line);
+            mapInfo.setProjectionName(tokenizer.nextToken().trim());
+            mapInfo.setReferencePixelX(Double.parseDouble(tokenizer.nextToken()));
+            mapInfo.setReferencePixelY(Double.parseDouble(tokenizer.nextToken()));
+            mapInfo.setEasting(Double.parseDouble(tokenizer.nextToken()));
+            mapInfo.setNorthing(Double.parseDouble(tokenizer.nextToken()));
+            mapInfo.setPixelSizeX(Double.parseDouble(tokenizer.nextToken()));
+            mapInfo.setPixelSizeY(Double.parseDouble(tokenizer.nextToken()));
+            if (mapInfo.getProjectionName().equalsIgnoreCase("UTM")) {
+                mapInfo.setUtmZone(Integer.parseInt(tokenizer.nextToken().trim()));
+                mapInfo.setUtmHemisphere(tokenizer.nextToken().trim());
+            }
+            mapInfo.setDatum(tokenizer.nextToken().trim());
+            while(tokenizer.hasMoreTokens()) {
+                String token = tokenizer.nextToken().trim();
+                if (token.startsWith("units=")) {
+                    mapInfo.setUnit(token.substring("units=".length()));
+                } else if (token.startsWith("rotation=")) {
+                    String rotation = token.substring("rotation=".length());
+                    mapInfo.setOrientation(Double.parseDouble(rotation));
+                }
+            }
+        } catch (NoSuchElementException e) {
+            // handle shorter string gracefully
+        }
     }
 
     private static StringTokenizer createTokenizerFromLine(String line) {
@@ -203,14 +236,15 @@ public class Header {
         return line;
     }
 
-    private void parseBandNames(String line) {
+    private String[] parseCommaSeparated(String line) {
         final StringTokenizer tokenizer = createTokenizerFromLine(line);
-        bandNames = new String[tokenizer.countTokens()];
+        String[] elems = new String[tokenizer.countTokens()];
         int index = 0;
         while (tokenizer.hasMoreTokens()) {
-            bandNames[index] = tokenizer.nextToken().trim();
+            elems[index] = tokenizer.nextToken().trim();
             ++index;
         }
+        return elems;
     }
 
     private void parseBeamProperties(final String txt) throws IOException {

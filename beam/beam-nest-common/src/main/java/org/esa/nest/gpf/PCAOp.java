@@ -209,6 +209,10 @@ public class PCAOp extends Operator {
             throw new OperatorException("Source band not found: " + sourcerBand);
         }
 
+        if (selectEigenvaluesBy.equals(EIGENVALUE_THRESHOLD)) {
+            numPCA = numOfSourceBands; 
+        }
+
         final int imageWidth = sourcerBand.getRasterWidth();
         final int imageHeight = sourcerBand.getRasterHeight();
         final String unit = sourcerBand.getUnit();
