@@ -60,16 +60,16 @@ public class MasterSelection implements OptimalMaster {
     }
 
     // methods
-    private float modelCoherence(float bPerp, float bTemp, float fDc, float bPerpCritical,
+    private static float modelCoherence(float bPerp, float bTemp, float fDc, float bPerpCritical,
                                  float bTempCritical, float fDcCritical) {
         return coherenceFnc(bPerp, bPerpCritical) * coherenceFnc(bTemp, bTempCritical) * coherenceFnc(fDc, fDcCritical);
     }
 
-    private float modelCoherence(float bPerp, float bTemp, float fDc) {
+    private static float modelCoherence(float bPerp, float bTemp, float fDc) {
         return coherenceFnc(bPerp, BPERP_CRITICAL) * coherenceFnc(bTemp, BTEMP_CRITICAL) * coherenceFnc(fDc, DFDC_CRITICAL);
     }
 
-    private float coherenceFnc(float value, float value_CRITICAL) {
+    private static float coherenceFnc(float value, float value_CRITICAL) {
         if (Math.abs(value) > value_CRITICAL) {
             return (float) 0.01;
         } else {
@@ -115,7 +115,7 @@ public class MasterSelection implements OptimalMaster {
         return ifgStack;
     }
 
-    private int findOptimalMaster(IfgStack[] ifgStack) {
+    public int findOptimalMaster(IfgStack[] ifgStack) {
 
         orbitNumber = ifgStack[0].master.orbitNumber;
         modeledCoherence = ifgStack[0].meanCoherence;
@@ -137,12 +137,13 @@ public class MasterSelection implements OptimalMaster {
         return index;
     }
 
-    public int estimateOptimalMaster(final ProgressMonitor pm) {
-
+    public IfgStack[] getCoherenceScores(final ProgressMonitor pm) {
         CplxContainer[] cplxContainers = setupCplxContainers();
-        IfgStack[] ifgStack = setupIfgStack(cplxContainers, pm);
-        return findOptimalMaster(ifgStack);
+        return setupIfgStack(cplxContainers, pm);
+    }
 
+    public int estimateOptimalMaster(final ProgressMonitor pm) {
+        return findOptimalMaster(getCoherenceScores(pm));
     }
 
     /**
@@ -238,7 +239,7 @@ public class MasterSelection implements OptimalMaster {
     }
 
 
-    private class IfgStack {
+    public static class IfgStack {
 
         CplxContainer master;
         IfgPair[] master_slave;
@@ -256,9 +257,12 @@ public class MasterSelection implements OptimalMaster {
             meanCoherence /= master_slave.length;
         }
 
+        public IfgPair[] getMasterSlave() {
+            return master_slave;
+        }
     }
 
-    private class IfgPair {
+    public static class IfgPair {
 
         CplxContainer master;
         CplxContainer slave;
@@ -268,15 +272,13 @@ public class MasterSelection implements OptimalMaster {
         float delft_fDc;     // doppler centroid frequency difference
         float coherence;     // modeled coherence
 
-        private Baseline tempBaseline;
-
         public IfgPair(CplxContainer master, CplxContainer slave) {
 
             this.master = master;
             this.slave = slave;
 
             try {
-                tempBaseline = new Baseline();
+                Baseline tempBaseline = new Baseline();
                 tempBaseline.model(master.metaData, slave.metaData, master.orbit, slave.orbit);
                 bPerp = (float) tempBaseline.getBperp(1, 1);
 
@@ -291,6 +293,29 @@ public class MasterSelection implements OptimalMaster {
 
         }
 
+        public float getPerpendicularBaseline() {
+            return bPerp;
+        }
+
+        public float getTemporalBaseline() {
+            return bTemp;
+        }
+
+        public float getDopplerDifference() {
+            return delft_fDc;
+        }
+
+        public float getCoherence() {
+            return coherence;
+        }
+
+        public SLCImage getMasterMetadata() {
+            return master.metaData;   
+        }
+
+        public SLCImage getSlaveMetadata() {
+            return slave.metaData;   
+        }
     }
 
 }

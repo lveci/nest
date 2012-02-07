@@ -9,11 +9,15 @@ import com.bc.ceres.core.ProgressMonitor;
  */
 public interface OptimalMaster {
 
-   public void setInput(SLCImage[] slcImages, Orbit[] orbits);
+    public void setInput(SLCImage[] slcImages, Orbit[] orbits);
 
-   public int estimateOptimalMaster(final ProgressMonitor pm);
+    public MasterSelection.IfgStack[] getCoherenceScores(final ProgressMonitor pm);
 
-   public float getModeledCoherence();
+    public int estimateOptimalMaster(final ProgressMonitor pm);
 
-   public long getOrbitNumber();
+    public int findOptimalMaster(MasterSelection.IfgStack[] ifgStack);
+
+    public float getModeledCoherence();
+
+    public long getOrbitNumber();
 }

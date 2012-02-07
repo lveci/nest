@@ -132,6 +132,14 @@
             <parent>insar_tools</parent>
         </action-->
 
+         <action>
+	        <id>InSARMaster</id>
+	        <helpId>InSARMaster</helpId>
+	        <class>org.jdoris.nest.dat.InSARMasterAction</class>
+	        <parent>insar</parent>
+	        <text>Find Optimal Master</text>
+	    </action>
+
     </extension>
 
     <extension point="beam-ui:helpSets">
