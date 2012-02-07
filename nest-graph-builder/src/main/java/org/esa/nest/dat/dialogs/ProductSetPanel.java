@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class ProductSetPanel extends JPanel {
 
-    private final FileModel fileModel = new FileModel();
+    private final FileTableModel fileModel = new FileModel();
     private final TargetFolderSelector targetProductSelector;
     private final AppContext appContext;
     private String targetProductNameSuffix = "";

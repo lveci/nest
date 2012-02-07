@@ -23,6 +23,7 @@ import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.FileModel;
+import org.esa.nest.dat.dialogs.FileTableModel;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ProductFunctions;
 
@@ -45,7 +46,7 @@ import java.util.Map;
  */
 public class ProductSetReaderOpUI extends BaseOperatorUI {
 
-    private final FileModel fileModel = new FileModel();
+    private final FileTableModel fileModel = new FileModel();
     private final JTable productSetTable = new JTable(fileModel);
 
     @Override
@@ -93,7 +94,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         paramMap.put("fileList", fList);
     }
 
-    public static JComponent createComponent(final JTable table, final FileModel fileModel) {
+    public static JComponent createComponent(final JTable table, final FileTableModel fileModel) {
 
         final JPanel fileListPanel = new JPanel(new BorderLayout(4, 4));
 
@@ -111,7 +112,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         return fileListPanel;
     }
 
-    private static JPanel initButtonPanel(final JTable table, final FileModel fileModel) {
+    private static JPanel initButtonPanel(final JTable table, final FileTableModel fileModel) {
         final JPanel panel = new JPanel(new GridLayout(10, 1));
         final JLabel countLabel = new JLabel();
 
@@ -248,9 +249,9 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
     public static class ProductSetTransferHandler extends TransferHandler {
 
-        private final FileModel fileModel;
+        private final FileTableModel fileModel;
 
-        public ProductSetTransferHandler(FileModel model) {
+        public ProductSetTransferHandler(FileTableModel model) {
             fileModel = model;
         }
 
@@ -304,10 +305,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         @Override
         protected Transferable createTransferable(JComponent c) {
             final JTable table = (JTable)c;
-            final File selectedFile = fileModel.getFileAt(table.getSelectedRow());
+            final int[] rows = table.getSelectedRows();
 
-            if (selectedFile != null) {
-                return new StringSelection(selectedFile.getAbsolutePath());
+            final StringBuilder listStr = new StringBuilder(256);
+            for(int row : rows) {
+                final File file = fileModel.getFileAt(row);
+                listStr.append(file.getAbsolutePath());
+                listStr.append('\n');
+            }
+            if(rows.length != 0) {
+                return new StringSelection(listStr.toString());
             }
             return null;
         }

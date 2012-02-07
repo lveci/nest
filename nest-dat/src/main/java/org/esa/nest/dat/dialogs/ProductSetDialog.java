@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class ProductSetDialog extends ModelessDialog {
 
-    private final FileModel fileModel = new FileModel();
+    private final FileTableModel fileModel = new FileModel();
     private final JTable productSetTable = new JTable(fileModel);
     private final JTextField nameField;
     private final ProductSet productSet;

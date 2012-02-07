@@ -28,18 +28,17 @@ import java.util.List;
  */
 public class ProductListPanel extends JPanel {
 
-    private final FileModel fileModel = new FileModel();
-    private final JTable table = new JTable(fileModel);
+    private final FileTableModel fileModel;
+    private final JTable table;
     private final static int width = 500;
     private final static int height = 100;
 
-    public ProductListPanel(final String title) {
-        this();
-        setBorder(BorderFactory.createTitledBorder(title));
-    }
-
-    public ProductListPanel() {
+    public ProductListPanel(final String title, final FileTableModel fileModel) {
         super(new BorderLayout());
+        setBorder(BorderFactory.createTitledBorder(title));
+
+        this.fileModel = fileModel;
+        table = new JTable(fileModel);
 
         table.setPreferredScrollableViewportSize(new Dimension(width, height));
         fileModel.setColumnWidths(table.getColumnModel());

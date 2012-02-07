@@ -18,38 +18,38 @@ package org.esa.nest.dat.dialogs;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
-import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import com.bc.ceres.core.*;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorUI;
-import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.experimental.Output;
-import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
-import org.esa.beam.framework.gpf.internal.OperatorProductReader;
 import org.esa.beam.framework.gpf.internal.OperatorExecutor;
+import org.esa.beam.framework.gpf.internal.OperatorProductReader;
+import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.gpf.ProgressMonitorList;
 
+import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.media.jai.JAI;
 import java.awt.*;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.io.File;
 
 /**
  */
