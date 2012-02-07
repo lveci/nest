@@ -278,7 +278,7 @@ public class GCPSelectionOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+        final String[] masterBandNames = StackUtils.getMasterBandNames(sourceProduct);
 
         final int numSrcBands = sourceProduct.getNumBands();
         boolean oneSlaveProcessed = false;          // all other use setSourceImage
@@ -332,7 +332,7 @@ public class GCPSelectionOp extends Operator {
             //int h = targetRectangle.height;
             //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-            final String[] masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+            final String[] masterBandNames = StackUtils.getMasterBandNames(sourceProduct);
             
             // select only one band per slave product
             final Map<String, Band> singleSlvBandMap = new HashMap<String, Band>();
@@ -348,7 +348,7 @@ public class GCPSelectionOp extends Operator {
                         StringUtils.contains(masterBandNames, slaveBand.getName()))
                     continue;
                 if(!useAllPolarimetricBands) {
-                    final String slvProductName = OperatorUtils.getSlaveProductName(targetProduct, targetBand);
+                    final String slvProductName = StackUtils.getSlaveProductName(targetProduct, targetBand);
                     if(singleSlvBandMap.get(slvProductName) != null) {
                         continue;
                     }

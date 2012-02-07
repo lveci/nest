@@ -133,7 +133,7 @@ public class CreateStackOp extends Operator {
 
             appendToMaster = AbstractMetadata.getAbstractedMetadata(masterProduct).
                     getAttributeInt(AbstractMetadata.coregistered_stack, 0) == 1;
-            final List<String> masterProductBands = new ArrayList<String>();
+            final List<String> masterProductBands = new ArrayList<String>(masterProduct.getNumBands());
 
             final Band[] slaveBandList = getSlaveBands();
             if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
@@ -186,7 +186,7 @@ public class CreateStackOp extends Operator {
             if(!appendToMaster) {
                 for (final Band srcBand : slaveBandList) {
                     if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                        suffix = "_mst" + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
+                        suffix = "_mst" + StackUtils.getBandTimeStamp(srcBand.getProduct());
 
                         final Band targetBand = new Band(srcBand.getName() + suffix,
                                 srcBand.getDataType(),
@@ -216,7 +216,7 @@ public class CreateStackOp extends Operator {
                 if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
                     if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                     } else {
-                        suffix = "_slv" + cnt++ + OperatorUtils.getBandTimeStamp(srcBand.getProduct());
+                        suffix = "_slv" + cnt++ + StackUtils.getBandTimeStamp(srcBand.getProduct());
                     }
                     final String tgtBandName = srcBand.getName() + suffix;
 
@@ -244,8 +244,9 @@ public class CreateStackOp extends Operator {
             // copy slave abstracted metadata
             copySlaveMetadata();
 
-            saveMasterProductBandNames(targetProduct, masterProductBands);
-            saveSlaveProductNames(targetProduct);
+            StackUtils.saveMasterProductBandNames(targetProduct,
+                    masterProductBands.toArray(new String[masterProductBands.size()]));
+            saveSlaveProductNames(targetProduct, sourceRasterMap);
 
             // create temporary metadata
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
@@ -275,7 +276,7 @@ public class CreateStackOp extends Operator {
             if(prod != masterProduct) {
                 final MetadataElement slvAbsMetadata = AbstractMetadata.getAbstractedMetadata(prod);
                 if(slvAbsMetadata != null) {
-                    final String timeStamp = OperatorUtils.getBandTimeStamp(prod);
+                    final String timeStamp = StackUtils.getBandTimeStamp(prod);
                     final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName()+timeStamp);
                     targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
                     ProductUtils.copyMetadata(slvAbsMetadata, targetSlaveMetadata);
@@ -284,30 +285,22 @@ public class CreateStackOp extends Operator {
         }
     }
 
-    private static void saveMasterProductBandNames(final Product targetProduct, final List<String> masterProductBands) {
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct);
-        String value = "";
-        for(String name : masterProductBands) {
-            value += name + " ";
-        }
+    private void saveSlaveProductNames(final Product targetProduct, final Map<Band, Band> sourceRasterMap) {
 
-        targetSlaveMetadataRoot.setAttributeString(AbstractMetadata.MASTER_BANDS, value.trim());
-    }
-
-    private void saveSlaveProductNames(final Product targetProduct) {
-        final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(targetProduct);
-        final MetadataElement[] productMetadataElems = targetSlaveMetadataRoot.getElements();
-        for(MetadataElement elem : productMetadataElems) {
-            String value = "";
-            for(Band tgtBand : sourceRasterMap.keySet()) {
-                final Band srcBand = sourceRasterMap.get(tgtBand);
-                final Product srcProduct = srcBand.getProduct();
-                final String prodName = srcProduct.getName() + OperatorUtils.getBandTimeStamp(srcProduct);
-                if(elem.getName().equals(prodName)) {
-                    value += tgtBand.getName() + " ";
+        for(Product prod : sourceProduct) {
+            if(prod != masterProduct) {
+                final String suffix = StackUtils.getBandTimeStamp(prod);
+                final List<String> bandNames = new ArrayList<String>(10);
+                for(Band tgtBand : sourceRasterMap.keySet()) {
+                    final Band srcBand = sourceRasterMap.get(tgtBand);
+                    final Product srcProduct = srcBand.getProduct();
+                    if(srcProduct == prod) {
+                        bandNames.add(tgtBand.getName());
+                    }
                 }
+                final String prodName = prod.getName() + suffix;
+                StackUtils.saveSlaveProductBandNames(targetProduct, prodName, bandNames.toArray(new String[bandNames.size()]));
             }
-            elem.setAttributeString(AbstractMetadata.SLAVE_BANDS, value.trim());
         }
     }
 

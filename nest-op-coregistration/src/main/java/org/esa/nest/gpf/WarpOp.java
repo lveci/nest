@@ -255,7 +255,7 @@ public class WarpOp extends Operator {
                 sourceProduct.getSceneRasterWidth(),
                 sourceProduct.getSceneRasterHeight());
 
-        masterBandNames = OperatorUtils.getMasterBandNames(sourceProduct);
+        masterBandNames = StackUtils.getMasterBandNames(sourceProduct);
 
         final int numSrcBands = sourceProduct.getNumBands();
         int inc = 1;
@@ -333,11 +333,11 @@ public class WarpOp extends Operator {
             ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
             if (slaveGCPGroup.getNodeCount() < 3) {
                 // find others for same slave product
-                final String slvProductName = OperatorUtils.getSlaveProductName(sourceProduct, srcBand);
+                final String slvProductName = StackUtils.getSlaveProductName(sourceProduct, srcBand);
                 for(Band band : sourceProduct.getBands()) {
                     if(band != srcBand) {
-                        final String productName = OperatorUtils.getSlaveProductName(sourceProduct, band);
-                        if(slvProductName.equals(productName)) {
+                        final String productName = StackUtils.getSlaveProductName(sourceProduct, band);
+                        if(slvProductName != null && slvProductName.equals(productName)) {
                             slaveGCPGroup = sourceProduct.getGcpGroup(band);
                             if (slaveGCPGroup.getNodeCount() >= 3)
                                 break;
