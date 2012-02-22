@@ -18,6 +18,7 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -110,8 +111,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private final Map<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
-    private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
-    private ResampleMethod imgResampling = null;
+    private Resampling imgResampling = null;
 
     private String mission = null;
     private boolean nearRangeOnLeft = true;
@@ -146,15 +146,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getTiePointGrids();
 
-            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
-                imgResampling = ResampleMethod.RESAMPLE_CUBIC;
-            } else {
-                throw new OperatorException("Unknown interpolation method");
-            }
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -487,26 +479,25 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
      */
-
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
                                  final Band sourceBand1, final Band sourceBand2) {
 
         Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
-        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, bandUnit, sourceTile, sourceTile2);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
             final Tile sourceTile = getSrcTile(sourceBand1, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);

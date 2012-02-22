@@ -300,7 +300,7 @@ public class DBQuery {
             Debug.trace("Query="+queryStr);
             return instersectMapSelection(db.queryProduct(queryStr.toString()));
         } else {
-            return instersectMapSelection(db.getProductEntryList());
+            return instersectMapSelection(db.getProductEntryList(true));
         }
     }
 

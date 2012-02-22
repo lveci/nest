@@ -33,20 +33,6 @@
 			<tocitem text="Wave Mode Polar View" target="polarView"/>
         </tocitem>
 		
-		<tocitem text="Menus">
-			<tocitem text="Main Toolbar" target="mainToolbar"/>
-	        <tocitem text="File Menu" target="fileMenu"/>
-	        <tocitem text="Edit Menu" target="editMenu"/>
-	        <tocitem text="View Menu" target="viewMenu"/>
-	        <tocitem text="Analysis Menu" target="analysisMenu"/>
-	        <tocitem text="Utilities Menu" target="toolsMenu"/>
-			<tocitem text="SAR Tools Menu" target="sarToolsMenu"/>
-			<tocitem text="Geometry Menu" target="geometryMenu"/>
-            <tocitem text="InSAR Tools Menu" target="InSARMenu"/>
-            <tocitem text="Window Menu" target="windowMenu"/>
-	        <tocitem text="Help Menu" target="helpMenu"/>
-		</tocitem>
-		
 		<tocitem text="Product Readers">
             <tocitem text="Open ENVISAT Data Product" target="importEnvisatProduct"/>
             <tocitem text="Open ERS (.E1, .E2) Data Product" target="importErsProduct"/>

@@ -64,7 +64,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
     private static String[] getPrunedImageIOExtensions() {
         final List<String> extList = new ArrayList<String>(20);
-        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
+     /*   extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
         extList.remove("jpeg");
         extList.remove("jls");
@@ -74,7 +74,12 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         extList.remove("ppm");
         extList.remove("tiff");
         extList.remove("tif");
-        extList.remove("n1");
+        extList.remove("n1");  */
+
+        extList.add("bmp");
+        extList.add("gif");
+        extList.add("jpg");
+        extList.add("png");
 
         return extList.toArray(new String[extList.size()]);
     }

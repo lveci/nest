@@ -37,10 +37,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The Mosaic operator.
@@ -190,14 +188,18 @@ public class MosaicOp extends Operator {
 
         if (sourceBandNames.length == 0) {
             for (final Product srcProduct : sourceProduct) {
-
-                for (final Band band : srcProduct.getBands()) {
-                    if (band.getUnit() != null && band.getUnit().equals(Unit.PHASE))
-                        continue;
-                    if (band instanceof VirtualBand)
-                        continue;
-                    bandList.add(band);
-                    break;
+                final String qlBandName = srcProduct.getQuicklookBandName();
+                if(qlBandName != null) {
+                    bandList.add(srcProduct.getBand(qlBandName));
+                } else {
+                    for (final Band band : srcProduct.getBands()) {
+                        if (band.getUnit() != null && band.getUnit().equals(Unit.PHASE))
+                            continue;
+                        if (band instanceof VirtualBand)
+                            continue;
+                        bandList.add(band);
+                        break;
+                    }
                 }
             }
         } else {
@@ -210,9 +212,7 @@ public class MosaicOp extends Operator {
                 final Band band = prod.getBand(bandName);
                 final String bandUnit = band.getUnit();
                 if (bandUnit != null) {
-                    if (bandUnit.contains(Unit.PHASE)) {
-                        throw new OperatorException("Phase bands not handled");
-                    } else if (bandUnit.contains(Unit.IMAGINARY) || bandUnit.contains(Unit.REAL)) {
+                    if (bandUnit.contains(Unit.IMAGINARY) || bandUnit.contains(Unit.REAL)) {
                         throw new OperatorException("Real and imaginary bands not handled");
                     } else {
                         bandList.add(band);
@@ -325,16 +325,24 @@ public class MosaicOp extends Operator {
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
+    /**
+     * Called by the framework in order to compute the stack of tiles for the given target bands.
+     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
+     *
+     * @param targetTiles     The current tiles to be computed for each target band.
+     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
+     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException if an error occurs during computation of the target rasters.
+     */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         try {
-            final Rectangle targetRect = targetTile.getRectangle();
             final List<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
 
             for (final Product srcProduct : selectedProducts) {
                 final Rectangle srcRect = srcRectMap.get(srcProduct);
-                if (srcRect == null || !srcRect.intersects(targetRect)) {
+                if (srcRect == null || !srcRect.intersects(targetRectangle)) {
                     continue;
                 }
                 validProducts.add(srcProduct);
@@ -343,7 +351,7 @@ public class MosaicOp extends Operator {
                 return;
 
             final List<PixelPos[]> srcPixelCoords = new ArrayList<PixelPos[]>(validProducts.size());
-            final int numPixelPos = targetRect.width * targetRect.height;
+            final int numPixelPos = targetRectangle.width * targetRectangle.height;
             for (Product validProduct : validProducts) {
                 srcPixelCoords.add(new PixelPos[numPixelPos]);
             }
@@ -351,19 +359,19 @@ public class MosaicOp extends Operator {
             final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
             final GeoPos geoPos = new GeoPos();
             final PixelPos pixelPos = new PixelPos();
-            final int maxX = targetRect.x + targetRect.width - 1;
-            final int maxY = targetRect.y + targetRect.height - 1;
+            final int maxX = targetRectangle.x + targetRectangle.width - 1;
+            final int maxY = targetRectangle.y + targetRectangle.height - 1;
 
             int coordIndex = 0;
             int index;
-            for (int y = targetRect.y; y <= maxY; ++y) {
-                for (int x = targetRect.x; x <= maxX; ++x) {
+            for (int y = targetRectangle.y; y <= maxY; ++y) {
+                for (int x = targetRectangle.x; x <= maxX; ++x) {
                     pixelPos.x = x + 0.5f;
                     pixelPos.y = y + 0.5f;
                     targetGeoCoding.getGeoPos(pixelPos, geoPos);
 
                     index = 0;
-                    for (Product srcProduct : validProducts) {
+                    for (final Product srcProduct : validProducts) {
                         srcProduct.getGeoCoding().getPixelPos(geoPos, pixelPos);
                         if (pixelPos.x >= feather && pixelPos.y >= feather &&
                                 pixelPos.x < srcProduct.getSceneRasterWidth()-feather &&
@@ -382,39 +390,43 @@ public class MosaicOp extends Operator {
             final Resampling resampling = ResamplingFactory.createResampling(resamplingMethod);
             final List<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
 
-            index = 0;
-            for (Product srcProduct : validProducts) {
-                final PixelPos[] pixPos = srcPixelCoords.get(index);
-                final Rectangle sourceRectangle = getBoundingBox(
-                        pixPos, feather, feather,
-                        srcProduct.getSceneRasterWidth()-feather,
-                        srcProduct.getSceneRasterHeight()-feather);
+            final Set<Band> bandSet = targetTiles.keySet();
+            for(final Band trgBand : bandSet) {
 
-                if (sourceRectangle != null) {
-                    final Band srcBand = srcBandMap.get(srcProduct);
-                    double min = 0, max = 0, mean = 0;
-                    if(normalizeByMean) {                  // get stat values
-                        try {
-                            final Stx stats = srcBand.getStx();
-                            mean = stats.getMean();
-                            min = stats.getMin();
-                            max = stats.getMax();
-                        } catch (Throwable e) {
-                            //OperatorUtils.catchOperatorException(getId(), e);
-                            normalizeByMean = false; // temporary disable
+                index = 0;
+                for (final Product srcProduct : validProducts) {
+                    final PixelPos[] pixPos = srcPixelCoords.get(index);
+                    final Rectangle sourceRectangle = getBoundingBox(
+                            pixPos, feather, feather,
+                            srcProduct.getSceneRasterWidth()-feather,
+                            srcProduct.getSceneRasterHeight()-feather);
+
+                    if (sourceRectangle != null) {
+                        final Band srcBand = srcBandMap.get(srcProduct);
+                        double min = 0, max = 0, mean = 0;
+                        if(normalizeByMean) {                  // get stat values
+                            try {
+                                final Stx stats = srcBand.getStx();
+                                mean = stats.getMean();
+                                min = stats.getMin();
+                                max = stats.getMax();
+                            } catch (Throwable e) {
+                                //OperatorUtils.catchOperatorException(getId(), e);
+                                normalizeByMean = false; // temporary disable
+                            }
+                        }
+
+                        final Tile srcTile = getSourceTile(srcBand, sourceRectangle);
+                        if(srcTile != null) {
+                            validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean));
                         }
                     }
-
-                    final Tile srcTile = getSourceTile(srcBand, sourceRectangle);
-                    if(srcTile != null) {
-                        validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean));
-                    }
+                    ++index;
                 }
-                ++index;
-            }
 
-            if(!validSourceData.isEmpty()) {
-                collocateSourceBand(validSourceData, resampling, targetTile);
+                if(!validSourceData.isEmpty()) {
+                    collocateSourceBand(validSourceData, resampling, targetTiles.get(trgBand));
+                }
             }
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -444,13 +456,15 @@ public class MosaicOp extends Operator {
                 overalMean = sum / cnt;
             }
 
+            final TileIndex trgIndex = new TileIndex(targetTile);
+            final float[] sampleList = new float[validSourceData.size()];
+            final int[] sampleDistanceList = new int[validSourceData.size()];
+
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                trgIndex.calculateStride(y);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                    final int trgIndex = targetTile.getDataBufferIndex(x, y);
-                    
+
                     double targetVal = 0;
-                    final float[] sampleList = new float[validSourceData.size()];
-                    final int[] sampleDistanceList = new int[validSourceData.size()];
                     int numSamples = 0;
                     for(final SourceData srcDat : validSourceData) {
                         final PixelPos sourcePixelPos = srcDat.srcPixPos[index];
@@ -507,7 +521,7 @@ public class MosaicOp extends Operator {
                         if(normalizeByMean) {
                             targetVal *= overalMean;
                         }
-                        trgBuffer.setElemDoubleAt(trgIndex, targetVal);
+                        trgBuffer.setElemDoubleAt(trgIndex.getIndex(x), targetVal);
                     }
                 }
             }
@@ -525,9 +539,14 @@ public class MosaicOp extends Operator {
         private final double noDataValue;
         private final double geophysicalNoDataValue;
         private final ProductData dataBuffer;
+        private final int minX, minY, maxX, maxY;
 
         public ResamplingRaster(final Tile tile) {
             this.tile = tile;
+            this.minX = tile.getMinX();
+            this.minY = tile.getMinY();
+            this.maxX = tile.getMaxX();
+            this.maxY = tile.getMaxY();
             this.dataBuffer = tile.getDataBuffer();
             final RasterDataNode rasterDataNode = tile.getRasterDataNode();
             this.usesNoData = rasterDataNode.isNoDataValueUsed();
@@ -545,7 +564,7 @@ public class MosaicOp extends Operator {
         }
 
         public final float getSample(final int x, final int y) throws Exception {
-            if(x < tile.getMinX() || y < tile.getMinY() || x > tile.getMaxX() || y > tile.getMaxY())
+            if(x < minX || y < minY || x > maxX || y > maxY)
                 return Float.NaN;
             
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));

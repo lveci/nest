@@ -44,6 +44,7 @@ public class SpeckleFilterOperatorTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        TestUtils.initTestEnvironment();
         spi = new SpeckleFilterOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }

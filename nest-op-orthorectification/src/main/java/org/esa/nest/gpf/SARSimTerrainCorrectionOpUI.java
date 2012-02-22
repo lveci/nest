@@ -44,7 +44,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
                 }
         });
                 
-        return pane;
+        return new JScrollPane(pane);
     }
 
     @Override
@@ -100,13 +100,15 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        contentPane.add(saveDEMCheckBox, gbc);
-        gbc.gridy++;
         contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
-        gbc.gridy++;
+        gbc.gridx = 1;
         contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
+        gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveSelectedSourceBandCheckBox, gbc);
+        gbc.gridx = 1;
+        contentPane.add(saveDEMCheckBox, gbc);
+        gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
         gbc.gridy++;

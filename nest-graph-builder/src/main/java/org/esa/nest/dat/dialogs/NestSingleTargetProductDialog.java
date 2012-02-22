@@ -70,7 +70,7 @@ public class NestSingleTargetProductDialog extends DefaultSingleTargetProductDia
 
         addParameters(operatorSpi, appContext, helpID);
 
-        getJDialog().setMinimumSize(new Dimension(500, 500));
+        getJDialog().setMinimumSize(new Dimension(400, 400));
 
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));

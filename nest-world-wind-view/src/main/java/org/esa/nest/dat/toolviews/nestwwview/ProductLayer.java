@@ -34,6 +34,7 @@ import javax.swing.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,7 @@ public class ProductLayer extends RenderableLayer {
                 final boolean highlight = name.equals(selectedProduct.getName());
                 for (Polyline line : lineList) {
                     line.setHighlighted(highlight);
+                    line.setHighlightColor(Color.RED);
                 }
             }
         }

@@ -18,7 +18,6 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -39,7 +38,7 @@ public class RemoveAntennaPatternOpUI extends BaseOperatorUI {
         final JComponent panel = createPanel();
         initParameters();
 
-        return new JScrollPane(panel);
+        return panel;
     }
 
     @Override
@@ -60,25 +59,11 @@ public class RemoveAntennaPatternOpUI extends BaseOperatorUI {
 
     private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets.top = 1;
-        gbc.insets.bottom = 1;
-        gbc.insets.right = 1;
-        gbc.insets.left = 1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        contentPane.add(new JLabel("Source Bands:"), gbc);
+        final JPanel contentPane = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Note:",
                 new JLabel("This operator removes antenna pattern and range spreading loss "));

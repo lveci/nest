@@ -190,12 +190,20 @@ public final class OperatorUtils {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyIndexCodings(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         targetProduct.setDescription(sourceProduct.getDescription());
+
+        if(targetProduct.getIndexCodingGroup().getNodeCount() > 0) {
+            final IndexCoding indexCoding = targetProduct.getIndexCodingGroup().get(0);
+            for(Band band : targetProduct.getBands()) {
+                band.setSampleCoding(indexCoding);
+            }
+        }
     }
 
     public static void copyVirtualBand(final Product product, final VirtualBand srcBand, final String name) {
@@ -641,6 +649,10 @@ public final class OperatorUtils {
                                                  targetProduct.getSceneRasterHeight());
 
                 targetBand.setUnit(targetUnit);
+                targetBand.setDescription(srcBand.getDescription());
+                targetBand.setNoDataValue(srcBand.getNoDataValue());
+                targetBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
+
                 targetProduct.addBand(targetBand);
             }
         }

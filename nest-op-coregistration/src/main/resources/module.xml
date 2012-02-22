@@ -65,9 +65,12 @@
         </action>
 
         <action>
-            <id>PCAStat</id>
-            <class>org.esa.nest.dat.PCAOpAction</class>
+            <id>PCAStatistic</id>
+            <class>org.esa.nest.dat.actions.OperatorAction</class>
             <text>Principal Component Analysis</text>
+            <operatorName>PCA</operatorName>
+	        <dialogTitle>Principal Component Analysis</dialogTitle>
+            <targetProductNameSuffix>_pca</targetProductNameSuffix>
             <shortDescr>Principal Component Analysis</shortDescr>
             <parent>imageAnalysis</parent>
             <helpId>PCA</helpId>

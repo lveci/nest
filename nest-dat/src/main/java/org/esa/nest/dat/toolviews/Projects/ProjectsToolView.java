@@ -41,11 +41,13 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
     private final Project project = Project.instance();
 
     public ProjectsToolView() {
-        Project.instance().addObserver(this);
+
     }
 
     @Override
     public JComponent createControl() {
+        Project.instance().addObserver(this);
+
         final JScrollPane prjScrollPane = new JideScrollPane(createTree());
         prjScrollPane.setPreferredSize(new Dimension(320, 480));
         prjScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

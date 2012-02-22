@@ -44,6 +44,7 @@ public class TestMultilookOperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        TestUtils.initTestEnvironment();
         spi = new MultilookOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }

@@ -147,9 +147,13 @@ public class ProductDB extends DAO {
     }
 
     public void deleteProductEntry(final ProductEntry entry) throws SQLException {
-        productTable.deleteRecord(entry.getId());
-        metadataTable.deleteRecord(entry.getId());
-        QuickLookGenerator.deleteQuickLook(entry.getId());
+        deleteRecord(entry.getId());
+    }
+
+    private void deleteRecord(final int id) throws SQLException {
+        productTable.deleteRecord(id);
+        metadataTable.deleteRecord(id);
+        QuickLookGenerator.deleteQuickLook(id);
     }
 
     public void removeProducts(final File baseDir) throws SQLException {
@@ -168,8 +172,20 @@ public class ProductDB extends DAO {
         }
     }
 
-    public ProductEntry[] getProductEntryList() throws SQLException {
-        return productTable.getProductEntryList();
+    public ProductEntry[] getProductEntryList(final boolean validate) throws SQLException {
+        if(!validate)
+            return productTable.getProductEntryList();
+
+        final ProductEntry[] entries = productTable.getProductEntryList();
+        final List<ProductEntry> list = new ArrayList<ProductEntry>(entries.length);
+        for(ProductEntry entry : entries) {
+            if(entry.getFile().exists()) {
+                list.add(entry);
+            } else {
+                deleteRecord(entry.getId());
+            }
+        }
+        return list.toArray(new ProductEntry[list.size()]);
     }
 
     public ProductEntry[] queryProduct(final String queryStr) throws SQLException {
@@ -182,21 +198,6 @@ public class ProductDB extends DAO {
         }
         return listEntries.toArray(new ProductEntry[listEntries.size()]);
     }
-    
-  /*  public ProductEntry getProductEntry(final int index) {
-        ProductEntry entry = null;
-        try {
-            stmtGetAddress.clearParameters();
-            stmtGetAddress.setInt(1, index);
-            final ResultSet result = stmtGetAddress.executeQuery();
-            if (result.next()) {
-                entry = new ProductEntry(result.getInt("ID"), result.getString("PATH"));
-            }
-        } catch(SQLException sqle) {
-            sqle.printStackTrace();
-        }
-        return entry;
-    }      */
 
     public String[] getAllMissions() throws SQLException {
         return productTable.getAllMissions();

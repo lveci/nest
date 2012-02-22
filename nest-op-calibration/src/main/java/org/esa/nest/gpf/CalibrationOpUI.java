@@ -75,7 +75,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 }
             }
         });
-        externalAuxFile.setColumns(30);
+        externalAuxFile.setColumns(20);
         auxFile.setSelectedItem(parameterMap.get("auxFile"));
         enableExternalAuxFile(false);
 
@@ -124,7 +124,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 }
         });
 
-        return new JScrollPane(panel);
+        return panel;
     }
 
     @Override
@@ -230,18 +230,14 @@ public class CalibrationOpUI extends BaseOperatorUI {
         final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
 
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
-        gbc.gridx = 2;
-        contentPane.add(externalAuxFileBrowseButton, gbc);
+        DialogUtils.addInnerPanel(contentPane, gbc, externalAuxFileLabel, externalAuxFile,
+                                  externalAuxFileBrowseButton);
 
         gbc.gridx = 0;
         gbc.gridy++;

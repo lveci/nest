@@ -55,6 +55,7 @@
                     <id>createFilteredBand</id>
                     <id>mosaicAction</id>
                     <id>selectTool</id>
+                    <id>PCAOp</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>

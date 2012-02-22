@@ -20,6 +20,8 @@ import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.dialogs.CheckListDialog;
@@ -32,6 +34,8 @@ import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.DialogUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -73,6 +77,7 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private WorldMapUI worldMapUI = null;
     private DatabasePane dbPane;
+    private final JTextArea productText = new JTextArea();
 
     public ProductLibraryToolView() {
     }
@@ -129,7 +134,47 @@ public class ProductLibraryToolView extends AbstractToolView {
         final ProductEntry[] selections = getSelectedProductEntries();
         setOpenProductButtonsEnabled(selections.length > 0);
 
+        updateProductSelectionText(selections);
         worldMapUI.setSelectedProductEntryList(selections);
+    }
+
+    private void updateProductSelectionText(final ProductEntry[] selections) {
+        if(selections.length == 1) {
+            final ProductEntry entry = selections[0];
+            final StringBuilder text = new StringBuilder(255);
+
+            final MetadataElement absRoot = entry.getMetadata();
+            final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, AbstractMetadata.NO_METADATA_STRING);
+            final ProductData.UTC acqTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
+            final int absOrbit = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, AbstractMetadata.NO_METADATA);
+            final int relOrbit = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, AbstractMetadata.NO_METADATA);
+            final String map = absRoot.getAttributeString(AbstractMetadata.map_projection, AbstractMetadata.NO_METADATA_STRING).trim();
+            final int cal = absRoot.getAttributeInt(AbstractMetadata.abs_calibration_flag, AbstractMetadata.NO_METADATA);
+            final int tc = absRoot.getAttributeInt(AbstractMetadata.is_terrain_corrected, AbstractMetadata.NO_METADATA);
+            final int coreg = absRoot.getAttributeInt(AbstractMetadata.coregistered_stack, AbstractMetadata.NO_METADATA);
+
+            text.append(entry.getName());  text.append("\n\n");
+            text.append(entry.getAcquisitionMode()+"   "+ sampleType+'\n');
+            text.append(acqTime.format());  text.append('\n');
+
+            text.append("Orbit: "+absOrbit);
+            if(relOrbit != AbstractMetadata.NO_METADATA)
+                text.append("  Track: "+relOrbit); 
+            text.append('\n');
+            if(!map.isEmpty()) {
+                text.append(map);  text.append('\n');   
+            }
+            if(cal==1)
+                text.append("Calibrated ");
+            if(coreg==1)
+                text.append("Coregistered ");
+            if(tc==1)
+                text.append("Terrain Corrected ");
+
+            productText.setText(text.toString());
+        } else {
+            productText.setText("");
+        }
     }
 
     private void performOpenAction() {
@@ -513,7 +558,19 @@ public class ProductLibraryToolView extends AbstractToolView {
         final MyDatabaseQueryListener dbQueryListener = new MyDatabaseQueryListener();
         dbPane = new DatabasePane();
         dbPane.addListener(dbQueryListener);
-        splitPane1H.add(new JScrollPane(dbPane));
+        final JPanel leftPanel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
+        final JScrollPane dbScroll = new JScrollPane(dbPane);
+        leftPanel.add(dbScroll, gbc);
+        dbScroll.setBorder(BorderFactory.createLineBorder(Color.RED, 0));
+
+        gbc.gridy++;
+        productText.setLineWrap(true);
+        productText.setRows(4);
+        productText.setBackground(dbPane.getBackground());
+        leftPanel.add(productText, gbc);
+        DialogUtils.fillPanel(leftPanel, gbc);
+        splitPane1H.add(new JScrollPane(leftPanel));
 
         productEntryTable = new JTable();
         productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -652,6 +709,8 @@ public class ProductLibraryToolView extends AbstractToolView {
         setOpenProductButtonsEnabled(selecteRows > 0);
         if(selecteRows > 0)
             selectedText = ", "+selecteRows+" Selected";
+        else
+            productText.setText("");
         statusLabel.setText(productEntryTable.getRowCount() + " Products"+ selectedText);
     }
 

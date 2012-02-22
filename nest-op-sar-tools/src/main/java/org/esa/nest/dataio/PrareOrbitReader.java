@@ -17,8 +17,10 @@ package org.esa.nest.dataio;
 
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.ZipUtils;
 
 import java.io.*;
 import java.util.Arrays;
@@ -74,15 +76,23 @@ public final class PrareOrbitReader {
      * Get buffered reader for given file ASCII.
      * @param file The file.
      * @return The reader.
+     * @throws IOException if can't be read
      */
-    private static BufferedReader getBufferedReader(File file) throws IOException {
+    private static BufferedReader getBufferedReader(final File file) throws IOException {
 
-        final String fileName = file.getAbsolutePath();
-        final String fileLower = fileName.toLowerCase();
-        if(fileLower.endsWith("gz") || fileLower.endsWith("z") || fileLower.endsWith("zip"))  {
+        String filePath = file.getAbsolutePath();
+        if(ZipUtils.isZipped(file))  {
             try {
-                final InputStream zipstream = ResourceUtils.getInflaterInputStream(file);
-                return new BufferedReader(new InputStreamReader(zipstream));
+                // check if previously unzipped
+                final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
+                final File prevFile = new File(tempFolder, FileUtils.getFilenameWithoutExtension(file));
+                if(prevFile.exists()) {
+                    filePath = prevFile.getAbsolutePath();   
+                } else {
+                    // open zip
+                    final File[] files = ZipUtils.unzipToFolder(file, tempFolder);
+                    filePath = files[0].getAbsolutePath();
+                }
             } catch(Exception e) {
                 throw new IOException(e.getMessage() +": "+ file.getAbsolutePath());
             }
@@ -90,9 +100,9 @@ public final class PrareOrbitReader {
 
         FileInputStream stream;
         try {
-            stream = new FileInputStream(fileName);
+            stream = new FileInputStream(filePath);
         } catch(FileNotFoundException e) {
-            throw new OperatorException("File not found: " + fileName);
+            throw new OperatorException("File not found: " + filePath);
         }
 
         return new BufferedReader(new InputStreamReader(stream));
@@ -166,7 +176,8 @@ public final class PrareOrbitReader {
         dataHeaderRecord.rmsFit = Integer.parseInt(new String(rmsFit).trim());
         dataHeaderRecord.sigPos = Integer.parseInt(new String(sigPos).trim());
         dataHeaderRecord.sigVel = Integer.parseInt(new String(sigVel).trim());
-        dataHeaderRecord.qualit = Integer.parseInt(new String(qualit).trim());
+        String qualitStr = new String(qualit).trim();
+        dataHeaderRecord.qualit = qualitStr.isEmpty() ? 0 : Integer.parseInt(qualitStr);
         dataHeaderRecord.tdtUtc = Float.parseFloat(new String(tdtUtc).trim());
         dataHeaderRecord.cmmnt = new String(cmmnt);
     }
@@ -196,7 +207,7 @@ public final class PrareOrbitReader {
             final TrajectoryRecord dataRecord = readTrajectoryRecord(reader);
 
             orbitVectors[i] = new OrbitVector();
-            // todo need to convert TDT time to UTC time
+            // convert TDT time to UTC time
             orbitVectors[i].utcTime = TDT2UTC((double)dataRecord.tTagD*0.1 +  0.5 +
                                               (double)dataRecord.tTagMs * microSecondToSecond * secondToDay);
             orbitVectors[i].xPos = (double)dataRecord.xSat * millimeterToMeter;
@@ -209,9 +220,11 @@ public final class PrareOrbitReader {
             recordTimes[i] = orbitVectors[i].utcTime;
         }
 
-        qualityParameterRecords = new QualityParameterRecord[numOfQualityParameterRecords];
-        for (int j = 0; j < numOfQualityParameterRecords; j++) {
-            qualityParameterRecords[j] = readQualityParameterRecord(reader);
+        if(numOfQualityParameterRecords > 0) {
+            qualityParameterRecords = new QualityParameterRecord[numOfQualityParameterRecords];
+            for (int j = 0; j < numOfQualityParameterRecords; j++) {
+                qualityParameterRecords[j] = readQualityParameterRecord(reader);
+            }
         }
 
         reader.close();
@@ -364,7 +377,7 @@ public final class PrareOrbitReader {
     public float getSensingStart() throws IOException {
         // The start time is given as Julian days since 1.1.2000 12h in TDT.
         // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT. 
-        // todo need to convert TDT time to UTC time
+        // convert TDT time to UTC time
         return (float)TDT2UTC(dataHeaderRecord.start*0.1f + 0.5f); // 0.1 days to days
     }
 
@@ -376,7 +389,7 @@ public final class PrareOrbitReader {
     public float getSensingStop() throws IOException {
         // The end time is given as Julian days since 1.1.2000 12h in TDT.
         // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT.
-        // todo need to convert TDT time to UTC time
+        // convert TDT time to UTC time
         return (float)TDT2UTC(dataHeaderRecord.end*0.1f + 0.5f); // 0.1 days to days
     }
 
@@ -386,7 +399,7 @@ public final class PrareOrbitReader {
      * @return The UTC time.
      * @throws IOException The exception.
      */
-    double TDT2UTC(double tdt) throws IOException {
+    private static double TDT2UTC(double tdt) throws IOException {
         double tai = tdt - 32.184*secondToDay;
 
         if (tai >= ProductData.UTC.create(new Date(109,1,1), 0).getMJD()) {                 /* 2009 Jan 1 */

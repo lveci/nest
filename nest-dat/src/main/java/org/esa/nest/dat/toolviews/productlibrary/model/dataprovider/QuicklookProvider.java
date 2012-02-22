@@ -30,6 +30,7 @@ public class QuicklookProvider implements DataProvider {
     private final static Comparator quickLookComparator = new QuickLookComparator();
     private TableColumn quickLookColumn;
     private static final int preferredWidth = 100;
+    private static final int preferredHeight = 65;
 
     public QuicklookProvider() {
     }
@@ -49,7 +50,7 @@ public class QuicklookProvider implements DataProvider {
             quickLookColumn.setHeaderValue("Quick Look");        /*I18N*/
             quickLookColumn.setPreferredWidth(preferredWidth);
             quickLookColumn.setResizable(true);
-            quickLookColumn.setCellRenderer(new QuickLookRenderer(preferredWidth));
+            quickLookColumn.setCellRenderer(new QuickLookRenderer(preferredHeight));
             quickLookColumn.setCellEditor(new QuickLookEditor());
         }
         return quickLookColumn;

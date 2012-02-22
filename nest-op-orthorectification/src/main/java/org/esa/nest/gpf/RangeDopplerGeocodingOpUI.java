@@ -42,15 +42,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private static final String externalDEMStr = "External DEM";
 
-    private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
-                                                                           ResamplingFactory.BISINC_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.BICUBIC_INTERPOLATION_NAME});
+    private final JComboBox demResamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
 
     final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                       ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME});
+                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME });
 
     final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
                                                                           RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
@@ -136,7 +132,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
             }
         });
-        externalDEMFile.setColumns(30);
+        externalDEMFile.setColumns(24);
         final String demItem = ((String)demName.getSelectedItem()).replace(AUTODEM, "");
         enableExternalDEM(demItem.equals(externalDEMStr));
 
@@ -151,7 +147,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
             }
         });
-        externalAuxFile.setColumns(30);
+        externalAuxFile.setColumns(24);
         final String auxFileParam = (String)parameterMap.get("auxFile");
         if(auxFileParam != null) {
             auxFile.setSelectedItem(auxFileParam);
@@ -203,6 +199,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         if (absRoot != null) {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
+                            // todo ALOS
+                            // todo move this into calibrator.canRadiometricallyNormalize(mission)
                             if (mission.equals("ENVISAT") || mission.contains("ERS") ||
                                 mission.equals("RS2") || mission.contains("TSX") || mission.contains("TDX") || mission.contains("CSKS")) {
 
@@ -301,9 +299,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
 
-        return new JScrollPane(panel);
+        return panel;
     }
 
+    // todo move into DEM
     public static String appendAutoDEM(String demName) {
         if(demName.equals("GETASSE30") || demName.equals("SRTM 3Sec") || demName.equals("ACE2_5Min")
            || demName.equals("ACE30"))
@@ -568,9 +567,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         if(!useAvgSceneHeight) {
             DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
             gbc.gridy++;
-            DialogUtils.addComponent(contentPane, gbc, externalDEMFileLabel, externalDEMFile);
-            gbc.gridx = 2;
-            contentPane.add(externalDEMBrowseButton, gbc);
+            DialogUtils.addInnerPanel(contentPane, gbc, externalDEMFileLabel, externalDEMFile, externalDEMBrowseButton);
+
             gbc.gridy++;
             DialogUtils.addComponent(contentPane, gbc, externalDEMNoDataValueLabel, externalDEMNoDataValue);
             gbc.gridy++;
@@ -628,12 +626,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         gbc.gridy++;
         gbc.gridx = 0;
-        gbc.insets.left = 20;
+        gbc.insets.left = 0;
         DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
-        gbc.gridx = 2;
-        contentPane.add(externalAuxFileBrowseButton, gbc);
+        DialogUtils.addInnerPanel(contentPane, gbc, externalAuxFileLabel, externalAuxFile, externalAuxFileBrowseButton);
 
         return contentPane;
     }

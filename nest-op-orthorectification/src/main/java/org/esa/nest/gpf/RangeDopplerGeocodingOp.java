@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -214,8 +215,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
-    private ResampleMethod imgResampling = null;
+    private Resampling imgResampling = null;
 
     boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
@@ -273,7 +273,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            imgResampling = getResampling(imgResamplingMethod);
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -312,18 +312,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().setStatusBarMessage(errMsg);
             }
-        }
-    }
-
-    static ResampleMethod getResampling(final String method) throws OperatorException {
-        if (method.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
-            return ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-        } else if (method.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
-            return ResampleMethod.RESAMPLE_BILINEAR;
-        } else if (method.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
-            return ResampleMethod.RESAMPLE_CUBIC;
-        } else {
-            throw new OperatorException("Unknown interpolation method");
         }
     }
 
@@ -1480,7 +1468,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final Band iSrcBand = srcBands[0];
         Tile sourceTile2 = null;
 
-        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
@@ -1490,7 +1478,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
@@ -1500,7 +1488,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
             final Rectangle srcRect = new Rectangle(Math.max(0, (int)rangeIndex - 1),
                                          Math.max(0, (int)azimuthIndex - 1), 4, 4);
@@ -1511,7 +1499,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
         } else {
-            throw new OperatorException("Unknown interpolation method");
+            throw new OperatorException("Unhandled interpolation method");
         }
     }
 

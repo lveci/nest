@@ -35,7 +35,7 @@
         <action>
 	        <id>SlantRangeGroundRangeOp</id>
 	        <helpId>SRGROp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>geometry</parent>
 	        <text>Slant Range to Ground Range</text>
 	        <operatorName>SRGR</operatorName>
@@ -53,17 +53,6 @@
             <helpId>MultilookOp</helpId>
         </action>
 
-        <!--action>
-	        <id>TileStackOp</id>
-	        <helpId>TileStackOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
-	        <parent>sartools</parent>
-	        <text>TileStack</text>
-	        <operatorName>TileStackOp</operatorName>
-	        <dialogTitle>TileStack Test operator</dialogTitle>
-            <targetProductNameSuffix>_stk</targetProductNameSuffix>
-	    </action-->
-
         <action>
             <id>Resampling</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
@@ -73,22 +62,44 @@
         </action>
 
         <action>
+	        <id>OverSamplingOp</id>
+	        <helpId>OverSamplingOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+	        <parent>Resampling</parent>
+	        <text>Oversample</text>
+	        <operatorName>Oversample</operatorName>
+	        <dialogTitle>Oversample an image</dialogTitle>
+            <targetProductNameSuffix>_OvrS</targetProductNameSuffix>
+        </action>
+
+        <!--action>
             <id>OverSamplingOp</id>
             <class>org.esa.nest.dat.OverSamplingOpAction</class>
             <text>OverSample</text>
             <shortDescr>Oversample an image</shortDescr>
             <parent>Resampling</parent>
             <helpId>OverSampleOp</helpId>
-        </action>
+        </action-->
 
         <action>
+	        <id>UnderSampleOp</id>
+	        <helpId>UnderSampleOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+	        <parent>Resampling</parent>
+	        <text>Undersample</text>
+	        <operatorName>Undersample</operatorName>
+	        <dialogTitle>Undersample an image</dialogTitle>
+            <targetProductNameSuffix>_UndS</targetProductNameSuffix>
+        </action>
+
+        <!--action>
             <id>UnderSamplingOp</id>
             <class>org.esa.nest.dat.UnderSamplingOpAction</class>
             <text>Undersample</text>
             <shortDescr>Undersample an image</shortDescr>
             <parent>Resampling</parent>
             <helpId>UnderSampleOp</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>DatasetConversion</id>
@@ -101,7 +112,7 @@
         <action>
 	        <id>ConvertDatatypeOp</id>
 	        <helpId>ConvertDatatypeOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>DatasetConversion</parent>
 	        <text>Convert Datatype</text>
 	        <operatorName>Convert-Datatype</operatorName>
@@ -159,7 +170,7 @@
         <action>
 	        <id>WSSDeBurstOp</id>
 	        <helpId>WSSDeBurstOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>ASARWSS</parent>
 	        <text>ASAR WSS Deburst</text>
 	        <operatorName>DeburstWSS</operatorName>
@@ -180,7 +191,7 @@
         <action>
 	        <id>applyOrbitFile</id>
 	        <helpId>ApplyOrbitFileOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>tools</parent>
 	        <text>Apply Orbit File</text>
 	        <operatorName>Apply-Orbit-File</operatorName>
@@ -220,7 +231,7 @@
         <action>
 	        <id>MultiTemporalSpeckleFilterOp</id>
 	        <helpId>MultiTemporalSpeckleFilterOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>SpeckleFilteringGroup</parent>
 	        <text>Multi-temporal Product</text>
 	        <operatorName>Multi-Temporal-Speckle-Filter</operatorName>
@@ -231,7 +242,7 @@
         <action>
 	        <id>FillHoleOp</id>
 	        <helpId>FillHoleOp</helpId>
-	        <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
 	        <parent>DEMTools</parent>
 	        <text>Fill DEM Hole</text>
 	        <operatorName>Fill-Hole</operatorName>

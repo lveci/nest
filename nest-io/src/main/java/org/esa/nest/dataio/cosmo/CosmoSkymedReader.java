@@ -198,7 +198,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         addAbstractedMetadataHeader(product, product.getMetadataRoot());
     }
 
-    private void addDeliveryNote(final Product product) {
+    private static void addDeliveryNote(final Product product) {
         try {
             final File folder = product.getFileLocation().getParentFile();
             File dnFile = null;
@@ -216,7 +216,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 AbstractMetadataIO.AddXMLMetadata(rootElement, product.getMetadataRoot());
             }
         } catch(IOException e) {
-            System.out.println("Unable to read Delivery Note for "+product.getName());
+            //System.out.println("Unable to read Delivery Note for "+product.getName());
         }
     }
 

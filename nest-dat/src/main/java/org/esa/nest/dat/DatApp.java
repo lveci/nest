@@ -27,6 +27,9 @@ import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.command.CommandManager;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
@@ -112,10 +115,20 @@ public class DatApp extends VisatApp {
             //disable JAI media library
             System.setProperty("com.sun.media.jai.disableMediaLib", "true");
 
+            disableUnwantedOperators();
+
             validateAuxDataFolder();
         } catch(Throwable t) {
             VisatApp.getApp().showErrorDialog("PostInit failed. "+t.toString());
         }
+    }
+    
+    private static void disableUnwantedOperators() {
+        final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+
+        //final OperatorSpi pcaOp = registry.getOperatorSpi("org.esa.nest.gpf.PCAOp$Spi");
+        //if(pcaOp != null)
+        //    registry.removeOperatorSpi(pcaOp);
     }
 
     private static void validateAuxDataFolder() throws IOException {
@@ -169,13 +182,20 @@ public class DatApp extends VisatApp {
 
     private static void cleanTempFolder() {
         final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
+
         File[] fileList = tempFolder.listFiles();
+        for(File file : fileList) {
+            if(file.getName().startsWith("tmp_")) {
+                ResourceUtils.deleteFile(file);
+            }
+        }
 
         long freeSpace = tempFolder.getFreeSpace() / 1024 / 1024 / 1024;
         int cutoff = 20;
         if(freeSpace > 30)
             cutoff = 60;
 
+        fileList = tempFolder.listFiles();
         if(fileList.length > cutoff) {
             final long[] dates = new long[fileList.length];
             int i = 0;
@@ -189,13 +209,6 @@ public class DatApp extends VisatApp {
                 if(file.lastModified() < cutoffDate) {
                     file.delete();
                 }
-            }
-        }
-
-        fileList = tempFolder.listFiles();
-        for(File file : fileList) {
-            if(file.getName().startsWith("tmp_")) {
-                ResourceUtils.deleteFile(file);
             }
         }
     }

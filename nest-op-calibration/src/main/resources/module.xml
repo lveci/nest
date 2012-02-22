@@ -33,22 +33,28 @@
         </action>
 
         <action>
-            <id>CalibrationOp</id>
-            <class>org.esa.nest.dat.CalibrationOpAction</class>
-            <text>Calibrate</text>
-            <shortDescr>Invoke the Calibration operator.</shortDescr>
-            <parent>Calibration</parent>
-            <helpId>CalibrationOp</helpId>
+	        <id>CalibrationOp</id>
+	        <helpId>CalibrationOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+	        <parent>Calibration</parent>
+	        <text>Calibrate</text>
+	        <dialogTitle>Calibration</dialogTitle>
+            <shortDescr>Invoke the Calibration operator</shortDescr>
+            <operatorName>Calibration</operatorName>
+            <targetProductNameSuffix>_Calib</targetProductNameSuffix>
         </action>
 
         <action>
-            <id>RemoveAntennaPatternOp</id>
-            <class>org.esa.nest.dat.RemoveAntennaPatternOpAction</class>
-            <text>Remove Antenna Pattern</text>
+	        <id>RemoveAntennaPatternOp</id>
+	        <helpId>RemoveAntennaPatternOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+	        <parent>Calibration</parent>
+	        <text>Remove Antenna Pattern</text>
+	        <dialogTitle>Remove Antenna Pattern</dialogTitle>
             <shortDescr>Remove the Antenna Pattern for ASAR and ERS products</shortDescr>
-            <parent>Calibration</parent>
+            <operatorName>RemoveAntennaPattern</operatorName>
+            <targetProductNameSuffix>_-AntPat</targetProductNameSuffix>
             <placeAfter>CalibrationOp</placeAfter>
-            <helpId>RemoveAntennaPatternOp</helpId>
         </action>
 
         <action>

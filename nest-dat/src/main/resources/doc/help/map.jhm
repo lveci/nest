@@ -28,19 +28,6 @@
 	<mapID target="settings" url="visat/SettingsDialog.html"/>
     <mapID target="polarView" url="visat/PolarView.html"/>   
 	
-	<!-- Menus -->
-	<mapID target="mainToolbar" url="visat/Toolbars.html"/>
-    <mapID target="fileMenu" url="visat/FileMenu.html"/>
-    <mapID target="editMenu" url="visat/EditMenu.html"/>
-    <mapID target="viewMenu" url="visat/ViewMenu.html"/>
-    <mapID target="analysisMenu" url="visat/AnalysisMenu.html"/>
-    <mapID target="toolsMenu" url="visat/ToolsMenu.html"/>
-	<mapID target="sarToolsMenu" url="visat/SARToolsMenu.html"/>
-	<mapID target="geometryMenu" url="visat/GeometryMenu.html"/>
-    <mapID target="InSARMenu" url="visat/InSARMenu.html"/>
-    <mapID target="windowMenu" url="visat/WindowMenu.html"/>
-    <mapID target="helpMenu" url="visat/HelpMenu.html"/>
-	
 	<!-- Product Readers -->   
     <mapID target="importEnvisatProduct" url="readers/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="readers/ImportErs.html"/>

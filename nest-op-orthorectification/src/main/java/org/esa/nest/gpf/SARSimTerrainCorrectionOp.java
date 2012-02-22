@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -211,7 +212,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    private RangeDopplerGeocodingOp.ResampleMethod imgResampling = null;
+    private Resampling imgResampling = null;
     private CoordinateReferenceSystem targetCRS;
 
     private boolean useAvgSceneHeight = false;
@@ -272,7 +273,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            imgResampling = RangeDopplerGeocodingOp.getResampling(imgResamplingMethod);
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -1168,7 +1169,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param bandUnit The corresponding source band unit.
      * @param subSwathIndex The subswath index.
      * @return The pixel value.
-     * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
                                  final RangeDopplerGeocodingOp.TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex) {
@@ -1180,21 +1180,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
             qBandName = srcBandNames[1];
         }
 
-        if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
             final Tile sourceTile = getSrcTile(iBandName, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);

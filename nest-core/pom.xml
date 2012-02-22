@@ -46,6 +46,16 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+		<dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding</artifactId>
+			<version>4.65-1.04</version>
+        </dependency>
+		<dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>native-libs</artifactId>
+			<version>4.65-1.04</version>
+        </dependency>
     </dependencies>
 
 </project>

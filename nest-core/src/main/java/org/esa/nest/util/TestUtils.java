@@ -16,6 +16,9 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.RuntimeConfig;
+import com.bc.ceres.core.runtime.RuntimeConfigException;
+import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.*;
 import org.esa.beam.framework.datamodel.*;
@@ -60,6 +63,13 @@ public class TestUtils {
     private final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
+
+    public static void initTestEnvironment() throws RuntimeConfigException {
+        final RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
+
+        //disable JAI media library
+        System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+    }
 
     public static int getMaxIterations() {
         return maxIteration;
@@ -188,8 +198,8 @@ public class TestUtils {
             throwErr("targetBand at 0 is null");
 
         // readPixels: execute computeTiles()
-        final float[] floatValues = new float[10000];
-        targetBand.readPixels(100, 101, 100, 99, floatValues, ProgressMonitor.NULL);
+        final float[] floatValues = new float[2500];
+        targetBand.readPixels(40, 40, 50, 50, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
         final File expectedFile = new File(expectedPath);
@@ -202,8 +212,8 @@ public class TestUtils {
         final Product expectedProduct = reader2.readProductNodes(expectedFile, null);
         final Band expectedBand = expectedProduct.getBandAt(0);
 
-        final float[] expectedValues = new float[10000];
-        expectedBand.readPixels(100, 101, 100, 99, expectedValues, ProgressMonitor.NULL);
+        final float[] expectedValues = new float[2500];
+        expectedBand.readPixels(40, 40, 50, 50, expectedValues, ProgressMonitor.NULL);
         if(!Arrays.equals(floatValues, expectedValues)) {
                 throwErr("Pixels are different in file "+expectedPath);
         }

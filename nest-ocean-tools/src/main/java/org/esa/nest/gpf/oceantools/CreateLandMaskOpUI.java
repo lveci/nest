@@ -70,6 +70,11 @@ public class CreateLandMaskOpUI extends BaseOperatorUI {
                 }
         });
 
+        final RadioListener myListener = new RadioListener();
+        landMask.addActionListener(myListener);
+        seaMask.addActionListener(myListener);
+        geometryMask.addActionListener(myListener);
+
         return new JScrollPane(panel);
     }
 
@@ -127,12 +132,9 @@ public class CreateLandMaskOpUI extends BaseOperatorUI {
         final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(landMask, gbc);
@@ -152,10 +154,7 @@ public class CreateLandMaskOpUI extends BaseOperatorUI {
     	group.add(landMask);
 	    group.add(seaMask);
         group.add(geometryMask);
-        final RadioListener myListener = new RadioListener();
-        landMask.addActionListener(myListener);
-        seaMask.addActionListener(myListener);
-        geometryMask.addActionListener(myListener);
+
         geometries.setEnabled(false);
         invertGeometryCheckBox.setEnabled(false);
 

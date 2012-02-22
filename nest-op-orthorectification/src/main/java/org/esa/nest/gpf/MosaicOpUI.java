@@ -128,11 +128,11 @@ public class MosaicOpUI extends BaseOperatorUI {
                 widthHeightRatio = width / (double)height;
                 pixelSizeHeightRatio = pixSize / (double) height;
 
-                long dim = (long)width*(long)height;
+                long dim = width*height;
                 while(dim > Integer.MAX_VALUE) {
                     width -= 1000;
                     height = (int)(width / widthHeightRatio);
-                    dim = (long)width*(long)height;
+                    dim = width*height;
                 }
             } catch(Exception e) {
                 width = 0;

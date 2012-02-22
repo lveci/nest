@@ -54,7 +54,7 @@ public class OversamplingOp extends Operator {
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {UndersamplingOp.IMAGE_SIZE, UndersamplingOp.RATIO, UndersamplingOp.PIXEL_SPACING},
-            defaultValue = UndersamplingOp.IMAGE_SIZE, label="Output Image By:")
+            defaultValue = UndersamplingOp.RATIO, label="Output Image By:")
     private String outputImageBy = UndersamplingOp.RATIO;
 
     @Parameter(description = "The row dimension of the output image", defaultValue = "1000", label="Output Image Rows")

@@ -87,7 +87,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphEx.addObserver(this);
 
         initUI();
-        super.getJDialog().setMinimumSize(new Dimension(600, 700));
 
         if(this.allowGraphBuilding) {
             final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
@@ -107,17 +106,18 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphEx.addObserver(this);
 
         initUI();
-        if(this.allowGraphBuilding) {
-            super.getJDialog().setMinimumSize(new Dimension(600, 700));
-        } else {
-            super.getJDialog().setMinimumSize(new Dimension(600, 500));
-        }
     }
 
     /**
      * Initializes the dialog components
      */
     private void initUI() {
+        if(this.allowGraphBuilding) {
+            super.getJDialog().setMinimumSize(new Dimension(600, 750));
+        } else {
+            super.getJDialog().setMinimumSize(new Dimension(600, 500));
+        }
+
         final JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 
         // north panel
@@ -467,7 +467,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * @param subject The Observerable subject
      * @param data optional data
      */
-    public void update(java.util.Observable subject, java.lang.Object data) {
+    public void update(Observable subject, Object data) {
 
         try {
             final GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
