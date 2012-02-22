@@ -53,7 +53,7 @@ import java.io.PrintStream;
  * 4. Output the final PCA images to target product.
  */
 
-@OperatorMetadata(alias="PCA", description="Principle Component Analysis", internal = false)
+@OperatorMetadata(alias="PCA", description="Principle Component Analysis", internal = false, category="Analysis")
 public class PCAOp extends Operator {
 
     @SourceProduct

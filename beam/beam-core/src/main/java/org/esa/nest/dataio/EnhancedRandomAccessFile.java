@@ -305,10 +305,14 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 		filePosition = pos;
 
         eraf.seek(pos);
+        //if(readonly)
+        //    dataSize = eraf.read(buffer, 0, buffer.length);
+        //else
+        //    dataSize = eraf.read(buffer, 0, 1);
         if(readonly)
-            dataSize = eraf.read(buffer, 0, buffer.length);
+            dataSize = read_(pos, buffer, 0, buffer.length);
         else
-            dataSize = eraf.read(buffer, 0, 1);
+            dataSize = read_(pos, buffer, 0, 1);
 
         if (dataSize <= 0) {
 			dataSize = 0;

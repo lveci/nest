@@ -551,8 +551,14 @@ public class SystemUtils {
      * @since BEAM 4.8
      */
     public static void init3rdPartyLibs(ClassLoader cl) {
+        // diable error messages to std out
+        final StdOut stdOut = new StdOut();
+        stdOut.disable();
+
         initJAI(cl);
         initGeoTools();
+
+        stdOut.enable();
     }
 
     private static void initGeoTools() {
@@ -612,4 +618,27 @@ public class SystemUtils {
         }
     }
 
+    /**
+     * turn off std out and std err temporarily
+     */
+    private static class StdOut {
+        private PrintStream origOut;
+        private PrintStream origErr;
+
+        public void disable() {
+            origOut = System.out;
+            origErr = System.err;
+            System.setOut(new PrintStream(new OutputStream() {
+                public void write(int b) {}
+            }));
+            System.setErr(new PrintStream(new OutputStream() {
+                public void write(int b) {}
+            }));
+        }
+
+        public void enable() {
+            System.setOut(origOut);
+            System.setOut(origErr);
+        }
+    }
 }

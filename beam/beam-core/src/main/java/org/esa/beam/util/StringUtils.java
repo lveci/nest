@@ -313,7 +313,7 @@ public final class StringUtils {
      *                                  type
      */
     public static String[] toStringArray(String text, String delims) {
-        Guardian.assertNotNull("text", text);
+        //Guardian.assertNotNull("text", text);
         if (delims == null || delims.length() == 0) {
             delims = ",";
         }
@@ -333,9 +333,10 @@ public final class StringUtils {
         if (objArray == null || objArray instanceof String[]) {
             return (String[]) objArray;
         }
-        String[] strArray = new String[objArray.length];
-        for (int i = 0; i < objArray.length; i++) {
-            strArray[i] = (objArray[i] != null) ? objArray[i].toString() : null;
+        final String[] strArray = new String[objArray.length];
+        int i=0;
+        for(Object obj : objArray) {
+            strArray[i++] = (obj != null) ? obj.toString() : null;
         }
         return strArray;
     }

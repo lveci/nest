@@ -1286,9 +1286,9 @@
         <action>
             <id>createVectorDataNode</id>
             <class>org.esa.beam.visat.actions.CreateVectorDataNodeAction</class>
-            <text>Create Geometry Container...</text>
-            <shortDescr>Create a new geometry container</shortDescr>
-            <description>Create a new geometry container for drawing line strings and polygons.</description>
+            <text>Create Vector Container...</text>
+            <shortDescr>Create a new vector container</shortDescr>
+            <description>Create a new vector container for drawing line strings and polygons.</description>
             <smallIcon>icons/NewVectorDataNode16.gif</smallIcon>
             <largeIcon>icons/NewVectorDataNode24.gif</largeIcon>
             <helpId>createVectorDataNode</helpId>

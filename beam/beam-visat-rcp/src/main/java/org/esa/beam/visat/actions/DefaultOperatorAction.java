@@ -40,10 +40,10 @@ import org.esa.beam.framework.ui.command.CommandEvent;
  */
 public class DefaultOperatorAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
-    private String operatorName;
-    private String dialogTitle;
-    private String targetProductNameSuffix;
+    protected ModelessDialog dialog;
+    protected String operatorName;
+    protected String dialogTitle;
+    protected String targetProductNameSuffix;
 
     @Override
     public void actionPerformed(CommandEvent event) {
@@ -56,9 +56,7 @@ public class DefaultOperatorAction extends AbstractVisatAction {
     @Override
     public void configure(ConfigurationElement config) throws CoreException {
         operatorName = getConfigString(config, "operatorName");
-        if (operatorName == null) {
-            throw new CoreException("Missing DefaultOperatorAction property 'operatorName'.");
-        }
+ 
         dialogTitle = getValue(config, "dialogTitle", operatorName);
         targetProductNameSuffix = getConfigString(config, "targetProductNameSuffix");
         super.configure(config);

@@ -387,7 +387,7 @@ public class VisatApp extends BasicApp implements AppContext {
         Command[] commands = VisatActivator.getInstance().getCommands();
         for (Command command : commands) {
             addCommand(command, getCommandManager());
-            if ("selectTool".equals(command.getCommandID())) {
+            if ("pannerTool".equals(command.getCommandID())) {
                 ToolCommand toolCommand = (ToolCommand) command;
                 selectionInteractor = toolCommand.getInteractor();
                 setActiveInteractor(selectionInteractor);
