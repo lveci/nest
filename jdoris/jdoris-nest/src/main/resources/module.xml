@@ -76,7 +76,6 @@
             <parent>insar</parent>
         </action-->
 
-
         <!--/// PRODUCTS ///-->
 
         <action>
@@ -105,6 +104,15 @@
             <parent>products</parent>
         </action>
 
+        <action>
+            <id>PhaseFilterOp</id>
+            <class>org.jdoris.nest.dat.PhaseFilterAction</class>
+            <text>Phase Filtering...</text>
+            <shortDescr>Phase filter stack of interferograms</shortDescr>
+            <!--<placeAfter>CoherenceOp</placeAfter>-->
+            <parent>products</parent>
+        </action>
+
         <!--/// FILTERING ///-->
 
         <action>
@@ -123,14 +131,6 @@
             <shortDescr>Filter stack of SAR images in AZIMUTH direction</shortDescr>
             <parent>spectral_filtering</parent>
         </action>
-
-        <!--action>
-            <id>PhaseFilterOp</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>Phase Filtering (coming soon)</text>
-            <shortDescr>Phase filtering of stack of interferograms</shortDescr>
-            <parent>insar_tools</parent>
-        </action-->
 
          <action>
 	        <id>InSARMaster</id>

@@ -90,7 +90,7 @@ public final class SubtRefDemOp extends Operator {
     // operator tags
     private static final boolean CREATE_VIRTUAL_BAND = true;
     private static final String PRODUCT_NAME = "srd_ifgs";
-    public static final String PRODUCT_TAG = "_srd";
+    public static final String PRODUCT_TAG = "_ifg_srd";
 
 
     /**
@@ -231,8 +231,8 @@ public final class SubtRefDemOp extends Operator {
                 final CplxContainer slave = slaveMap.get(keySlave);
                 final ProductContainer product = new ProductContainer(productName, master, slave, true);
 
-                product.targetBandName_I = "i_" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
-                product.targetBandName_Q = "q_" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
+                product.targetBandName_I = "i" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
+                product.targetBandName_Q = "q" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
 
                 product.masterSubProduct.name = topoPhaseBandName;
                 product.masterSubProduct.targetBandName_I = topoPhaseBandName + "_" + master.date + "_" + slave.date;
@@ -263,12 +263,15 @@ public final class SubtRefDemOp extends Operator {
             String targetBandName_I = targetMap.get(key).targetBandName_I;
             String targetBandName_Q = targetMap.get(key).targetBandName_Q;
             targetProduct.addBand(targetBandName_I, ProductData.TYPE_FLOAT64);
+            targetProduct.getBand(targetBandName_I).setUnit(Unit.REAL);
             targetProduct.addBand(targetBandName_Q, ProductData.TYPE_FLOAT64);
+            targetProduct.getBand(targetBandName_Q).setUnit(Unit.IMAGINARY);
 
             final String tag0 = targetMap.get(key).sourceMaster.date;
             final String tag1 = targetMap.get(key).sourceSlave.date;
             if (CREATE_VIRTUAL_BAND) {
-                String countStr = "_" + PRODUCT_TAG + "_" + tag0 + "_" + tag1;
+//                String countStr = "_" + PRODUCT_TAG + "_" + tag0 + "_" + tag1;
+                String countStr = PRODUCT_TAG + "_" + tag0 + "_" + tag1;
                 ReaderUtils.createVirtualIntensityBand(targetProduct, targetProduct.getBand(targetBandName_I), targetProduct.getBand(targetBandName_Q), countStr);
                 ReaderUtils.createVirtualPhaseBand(targetProduct, targetProduct.getBand(targetBandName_I), targetProduct.getBand(targetBandName_Q), countStr);
             }
@@ -312,6 +315,40 @@ public final class SubtRefDemOp extends Operator {
             Band targetBand_I;
             Band targetBand_Q;
 
+            // TODO: Smarter extension of search space:: use BEAM interpolation to get approximate heights of edges -- should be better then working on ellipsoid!???
+
+            /*
+                final GeoCoding geoCoding = targetProduct.getGeoCoding();
+                final ProductData trgData = targetTile.getDataBuffer();
+
+                pm.beginTask("Computing elevations from " + demName + "...", h);
+                try {
+                     final GeoPos geoPos = new GeoPos();
+                     final PixelPos pixelPos = new PixelPos();
+                     float elevation;
+
+                     for (int y = y0; y < y0 + h; ++y) {
+                         for (int x = x0; x < x0 + w; ++x) {
+                             pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                             geoCoding.getGeoPos(pixelPos, geoPos);
+                             try {
+                                    if(fileElevationModel != null) {
+                                        elevation = fileElevationModel.getElevation(geoPos);
+                                    } else {
+                                        elevation = dem.getElevation(geoPos);
+                                    }
+                                } catch (Exception e) {
+                                elevation = noDataValue;
+                            }
+                            trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                        }
+                        pm.worked(1);
+                    }
+
+             */
+
+            // TODO: smarter extension of search space : foreshortening extension? can I calculate how bit tile I
+            // need (extra space) for the coverage, taking into the consideration only height of the tile?
             for (String ifgKey : targetMap.keySet()) {
 
                 ProductContainer product = targetMap.get(ifgKey);
@@ -319,8 +356,9 @@ public final class SubtRefDemOp extends Operator {
                 /// get dem of tile ///
 
                 // compute tile geo-corners ~ work on ellipsoid
-                GeoPos[] geoCorners = GeoUtils.computeCorners(product.sourceMaster.metaData, product.sourceMaster.orbit,
-                        tileWindow);
+                GeoPos[] geoCorners = GeoUtils.computeCorners(product.sourceMaster.metaData,
+                                                              product.sourceMaster.orbit,
+                                                              tileWindow);
 
                 // get corners as DEM indices
                 PixelPos[] pixelCorners = new PixelPos[2];
