@@ -30,7 +30,7 @@ import java.awt.Font;
  * An editor for numeric values with an unlimited range.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class NumericEditor extends PropertyEditor {

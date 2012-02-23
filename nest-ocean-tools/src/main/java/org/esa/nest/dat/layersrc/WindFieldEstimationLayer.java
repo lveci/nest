@@ -25,6 +25,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.oceantools.WindFieldEstimationOp;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.dat.layers.ScreenPixelConverter;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -36,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.DecimalFormat;
 
 /**
  * Shows a detected object
@@ -46,8 +48,8 @@ public class WindFieldEstimationLayer extends Layer {
     private final Product product;
     private final Band band;
 
-    private final List<WindFieldEstimationOp.WindFieldRecord> targetList = new ArrayList<WindFieldEstimationOp.WindFieldRecord>();
-    private final float lineThickness = 2.0f;
+    private final List<WindFieldEstimationOp.WindFieldRecord> targetList = new ArrayList<WindFieldEstimationOp.WindFieldRecord>(200);
+    private final static float lineThickness = 2.0f;
 
     public WindFieldEstimationLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(WindFieldEstimationLayerType.class.getName()), configuration);
@@ -137,24 +139,10 @@ public class WindFieldEstimationLayer extends Layer {
             return;
 
         final Viewport vp = rendering.getViewport();
-        final int level = 0;
-
         final RasterDataNode raster = product.getRasterDataNode(product.getBandAt(0).getName());
-        final MultiLevelImage mli = raster.getGeophysicalImage();
+        final ScreenPixelConverter screenPixel = new ScreenPixelConverter(vp, raster);
 
-        final AffineTransform m2i = mli.getModel().getModelToImageTransform(level);
-        final AffineTransform i2m = mli.getModel().getImageToModelTransform(level);
-
-        final Shape vbounds = vp.getViewBounds();
-        final Shape mbounds = vp.getViewToModelTransform().createTransformedShape(vbounds);
-        final Shape ibounds = m2i.createTransformedShape(mbounds);
-
-        final RenderedImage winduRI = mli.getImage(level);
-
-        final int width = winduRI.getWidth();
-        final int height = winduRI.getHeight();
-        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, width, height));
-        if (irect.isEmpty()) {
+        if (!screenPixel.withInBounds()) {
             return;
         }
 
@@ -166,36 +154,16 @@ public class WindFieldEstimationLayer extends Layer {
         graphics.setStroke(new BasicStroke(lineThickness));
         graphics.setColor(Color.RED);
 
-        final AffineTransform m2v = vp.getModelToViewTransform();
-        final double[] ipts = new double[12]; // [8]
-        final double[] mpts = new double[12]; // [8]
-        final double[] vpts = new double[12]; // [8]
+        final double[] ipts = new double[14];
+        final double[] vpts = new double[14];
 
+        final DecimalFormat frmt = new DecimalFormat("0.00");
         for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
 
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
-            double dx = target.dx;
-            double dy = target.dy;
-            /*
-            ipts[0] = pix.getX();
-            ipts[1] = pix.getY();
-            ipts[2] = ipts[0] + dx;
-            ipts[3] = ipts[1] + dy;
-
-            ipts[4] = ipts[2] - (1.732*dx - dy)/6;
-            ipts[5] = ipts[3] - (1.732*dy + dx)/6;
-            ipts[6] = ipts[2] - (1.732*dx + dy)/6;
-            ipts[7] = ipts[3] - (1.732*dy - dx)/6;
-
-            i2m.transform(ipts, 0, mpts, 0, 4);
-            m2v.transform(mpts, 0, vpts, 0, 4);
-
-            graphics.setColor(Color.RED);
-            graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
-            graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
-            graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
-            */
+            final double dx = target.dx;
+            final double dy = target.dy;
 
             ipts[0] = pix.getX() - dx;
             ipts[1] = pix.getY() - dy;
@@ -212,8 +180,10 @@ public class WindFieldEstimationLayer extends Layer {
             ipts[10] = ipts[0] + (1.732*dx + dy)/6;
             ipts[11] = ipts[1] + (1.732*dy - dx)/6;
 
-            i2m.transform(ipts, 0, mpts, 0, 6);
-            m2v.transform(mpts, 0, vpts, 0, 6);
+            ipts[12] = pix.getX();
+            ipts[13] = pix.getY();
+            
+            screenPixel.pixelToScreen(ipts, vpts);
 
             graphics.setColor(Color.RED);
             graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
@@ -222,6 +192,8 @@ public class WindFieldEstimationLayer extends Layer {
 
             graphics.draw(new Line2D.Double(vpts[8], vpts[9], vpts[0], vpts[1]));
             graphics.draw(new Line2D.Double(vpts[10], vpts[11], vpts[0], vpts[1]));
+
+            graphics.drawString(frmt.format(target.speed) + "m/s", (int)vpts[12], (int)vpts[13]);
         }
     }
 }

@@ -15,7 +15,6 @@
  */
 package org.esa.nest.dataio.imageio;
 
-import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.beam.framework.datamodel.ColorPaletteDef;
 import org.esa.beam.framework.datamodel.ImageInfo;
@@ -58,11 +57,10 @@ public class ImageIOFile {
             throw new IOException("Unable to open " + inputFile.toString());
 
         final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
-        final ImageReader reader = imageReaders.next();
-
-        if(reader == null)
-            throw new IOException("Unable to open " + inputFile.toString());
-        return reader;
+        if(!imageReaders.hasNext())
+            throw new IOException("No ImageIO reader found for " + inputFile.toString());
+        
+        return imageReaders.next();
     }
 
     public static ImageReader getTiffIIOReader(final File inputFile) throws IOException {
@@ -224,20 +222,14 @@ public class ImageIOFile {
 
         if(dataBufferType == DataBuffer.TYPE_FLOAT &&
                 destBuffer.getElems() instanceof float[]) {
-            final float[] dArray = new float[destSize];
-            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
-            System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, (float[])destBuffer.getElems(), dataBuffer);
 
         } else if(dataBufferType == DataBuffer.TYPE_INT &&
                 destBuffer.getElems() instanceof int[]) {
-            final int[] dArray = new int[destSize];
-            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
-            System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, (int[])destBuffer.getElems(), dataBuffer);
         } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
                 destBuffer.getElems() instanceof int[]) {
-            final int[] dArray = new int[destSize];
-            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
-            System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+            sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, (int[])destBuffer.getElems(), dataBuffer);
         } else {
 
             final double[] dArray = new double[destSize];

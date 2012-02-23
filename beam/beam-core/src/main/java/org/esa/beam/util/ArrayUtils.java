@@ -21,7 +21,7 @@ package org.esa.beam.util;
  * <p> All functions have been implemented with extreme caution in order to provide a maximum performance.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ArrayUtils {
 

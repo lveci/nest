@@ -27,7 +27,7 @@ import java.awt.event.ActionListener;
  * An abstract binding for a {@link javax.swing.AbstractButton} component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class AbstractButtonAdapter extends ComponentAdapter implements ActionListener {

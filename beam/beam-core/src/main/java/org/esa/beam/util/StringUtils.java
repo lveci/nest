@@ -69,7 +69,7 @@ public final class StringUtils {
 
         final String sepsStr = new String(separators);
         final StringTokenizer st = new StringTokenizer(text, sepsStr, true);
-        String token;
+        String token = null;
         String lastToken = null;
         while (st.hasMoreTokens()) {
             try {
@@ -77,10 +77,10 @@ public final class StringUtils {
             } catch (Exception e) {
                 break;
             }
-            if (token.length() == 1 && sepsStr.indexOf(token) >= 0) {
+            if (isSeparatorToken(token, sepsStr)) {
                 // If text starts with a separator or two succesive separators
                 // have been seen, add empty string
-                if (lastToken == null || (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
+                if (lastToken == null || isSeparatorToken(lastToken, sepsStr)) {
                     tokens.add("");
                 }
             } else {
@@ -92,7 +92,7 @@ public final class StringUtils {
             lastToken = token;
         }
         // If text ends with a separator, add empty string
-        if (lastToken != null && (lastToken.length() == 1 && sepsStr.indexOf(lastToken) >= 0)) {
+        if (lastToken != null && isSeparatorToken(lastToken, sepsStr)) {
             tokens.add("");
         }
 
@@ -313,7 +313,7 @@ public final class StringUtils {
      *                                  type
      */
     public static String[] toStringArray(String text, String delims) {
-        Guardian.assertNotNull("text", text);
+        //Guardian.assertNotNull("text", text);
         if (delims == null || delims.length() == 0) {
             delims = ",";
         }
@@ -333,9 +333,10 @@ public final class StringUtils {
         if (objArray == null || objArray instanceof String[]) {
             return (String[]) objArray;
         }
-        String[] strArray = new String[objArray.length];
-        for (int i = 0; i < objArray.length; i++) {
-            strArray[i] = (objArray[i] != null) ? objArray[i].toString() : null;
+        final String[] strArray = new String[objArray.length];
+        int i=0;
+        for(Object obj : objArray) {
+            strArray[i++] = (obj != null) ? obj.toString() : null;
         }
         return strArray;
     }
@@ -632,8 +633,11 @@ public final class StringUtils {
      * @throws IllegalArgumentException if the given csvString is <code>null</code> or <code>empty</code>.
      */
     public static String[] csvToArray(String csvString) {
-        //Guardian.assertNotNullOrEmpty("csvString", csvString);
-        final StringTokenizer tokenizer = new StringTokenizer(csvString, ",");
+        return stringToArray(csvString, ",");
+    }
+
+    public static String[] stringToArray(final String csvString, final String delim) {
+        final StringTokenizer tokenizer = new StringTokenizer(csvString, delim);
         final List<String> strList = new ArrayList<String>(tokenizer.countTokens());
         while (tokenizer.hasMoreTokens()) {
             strList.add(tokenizer.nextToken());
@@ -737,11 +741,11 @@ public final class StringUtils {
      */
     public static String createValidName(String name, char[] validChars, char replaceChar) {
         Guardian.assertNotNull("name", name);
-        char[] sortedValidChars;
+        char[] sortedValidChars = null;
         if (validChars == null) {
             sortedValidChars = new char[0];
         } else {
-            sortedValidChars = validChars.clone();
+            sortedValidChars = (char[]) validChars.clone();
         }
         Arrays.sort(sortedValidChars);
         StringBuilder validName = new StringBuilder(name.length());

@@ -19,11 +19,10 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.SQLUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -33,7 +32,7 @@ public class MetadataTable implements TableInterface {
     public static final String TABLE = "APP.METADATA";
 
     private final Connection dbConnection;
-    private final static ArrayList<String> metadataNamesList = new ArrayList<String>();
+    private final static List<String> metadataNamesList = new ArrayList<String>();
 
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtDeleteProduct;
@@ -144,7 +143,7 @@ public class MetadataTable implements TableInterface {
             return " "; //"TIMESTAMP";
         else if(dataType < ProductData.TYPE_FLOAT32)
             return "99999";
-        return " ";
+        return "' '";
     }
 
 

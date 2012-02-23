@@ -18,7 +18,7 @@ package com.bc.jexp;
 /**
  * Represents a variable to which a value can be assigned.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface Variable extends Symbol {
 

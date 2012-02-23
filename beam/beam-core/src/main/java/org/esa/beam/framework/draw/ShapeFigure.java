@@ -35,7 +35,7 @@ import java.util.Map;
  * A figure which uses a <code>java.awt.Shape</code> for its representation.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
 * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

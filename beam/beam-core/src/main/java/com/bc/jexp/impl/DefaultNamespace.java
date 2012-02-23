@@ -52,7 +52,7 @@ import com.bc.jexp.Term;
  * fneq(x).
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public final class DefaultNamespace extends NamespaceImpl {
 

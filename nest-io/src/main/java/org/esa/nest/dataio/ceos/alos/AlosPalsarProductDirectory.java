@@ -21,9 +21,9 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.dataio.BinaryRecord;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.binary.BinaryRecord;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CeosHelper;
@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,13 +69,16 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
+
+        updateProductType();
+
         _leaderFile = new AlosPalsarLeaderFile(
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
         _trailerFile = new AlosPalsarTrailerFile(
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<AlosPalsarImageFile> imgArray = new ArrayList<AlosPalsarImageFile>(imageFileNames.length);
+        final List<AlosPalsarImageFile> imgArray = new ArrayList<AlosPalsarImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final AlosPalsarImageFile imgFile = new AlosPalsarImageFile(createInputStream(new File(_baseDir, fileName)),
@@ -95,6 +99,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
            _leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
             isProductSLC = true;
         }
+    }
+
+    private void updateProductType() {
+        String prodType = productType.toUpperCase();
+        while(prodType.endsWith("A") || prodType.endsWith("D") || prodType.endsWith("U") || prodType.endsWith("_")) {
+            prodType = prodType.substring(0, prodType.length()-1);
+        }
+        productType = prodType;
     }
 
     public boolean isALOS() throws IOException {

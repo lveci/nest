@@ -29,7 +29,7 @@ import java.io.IOException;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public abstract class FilterBand extends Band {
 

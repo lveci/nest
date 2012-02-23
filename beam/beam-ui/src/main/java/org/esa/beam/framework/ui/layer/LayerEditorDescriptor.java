@@ -26,7 +26,7 @@ import com.bc.ceres.glayer.LayerType;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public interface LayerEditorDescriptor {

@@ -28,7 +28,7 @@ import java.awt.geom.Rectangle2D;
  *
  * @author Norman Fomferra
  * @author Marco Zuehlke
-
+ * @version $revision$ $date$
  */
 public interface MultiLevelModel {
     /**

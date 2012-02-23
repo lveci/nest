@@ -19,7 +19,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.ui.RGBImageProfilePane;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
@@ -29,10 +28,8 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.actions.ShowImageViewRGBAction;
 import org.esa.nest.dat.dialogs.HSVImageProfilePane;
 
-import javax.swing.Icon;
-import javax.swing.JInternalFrame;
-import javax.swing.SwingWorker;
-import java.awt.Cursor;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * This action opens an HSV image view on the currently selected Product.

@@ -49,7 +49,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
     private final Dimension canvasSize = new Dimension(800, 600);
     private AppPanel wwjPanel = null;
 
-    private final ProductLayer productLayer = new ProductLayer(false);
+    private ProductLayer productLayer = null;
 
     private static final boolean includeStatusBar = true;
 
@@ -66,29 +66,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         mainPane.setSize(new Dimension(300, 300));
 
         // world wind canvas
-        initialize(mainPane);
-        if(wwjPanel == null) return mainPane;
-
-        final LayerList layerList = getWwd().getModel().getLayers();
-
-        final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
-        virtualEarthLayerA.setName("MS Virtual Earth Aerial");
-        layerList.add(virtualEarthLayerA);
-
-        productLayer.setOpacity(1.0);
-        productLayer.setPickEnabled(false);
-        productLayer.setName("Opened Products");
-        layerList.add(productLayer);
-
-        final Layer placeNameLayer = layerList.getLayerByName("Place Names");
-        placeNameLayer.setEnabled(true);
-
-        // Add an internal frame listener to VISAT so that we can update our
-        // world map window with the information of the currently activated  product scene view.
-        datApp.addInternalFrameListener(new FlatEarthWWToolView.WWIFL());
-        datApp.addProductTreeListener(new FlatEarthWWToolView.WWPTL());
-        setProducts(datApp.getProductManager().getProducts());
-        setSelectedProduct(datApp.getSelectedProduct());
+        initialize(mainPane);       
 
         return mainPane;
     }
@@ -99,17 +77,48 @@ public class FlatEarthWWToolView extends AbstractToolView {
         return wwjPanel.getWwd();
     }
 
-    private void initialize(JPanel mainPane) {
-        // Create the WorldWindow.
-        try {
-            wwjPanel = new AppPanel(canvasSize, includeStatusBar);
-            wwjPanel.setPreferredSize(canvasSize);
+    private void initialize(final JPanel mainPane) {
 
-            // Put the pieces together.
-            mainPane.add(wwjPanel, BorderLayout.CENTER);
-        } catch(Throwable e) {
-            System.out.println("Can't load openGL "+e.getMessage());
-        }
+
+        final SwingWorker worker = new SwingWorker() {
+            @Override
+            protected Object doInBackground() throws Exception {
+                // Create the WorldWindow.
+                try {
+                    wwjPanel = new AppPanel(canvasSize, includeStatusBar);
+                    wwjPanel.setPreferredSize(canvasSize);
+
+                    // Put the pieces together.
+                    mainPane.add(wwjPanel, BorderLayout.CENTER);
+
+                    final LayerList layerList = getWwd().getModel().getLayers();
+
+                    final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
+                    virtualEarthLayerA.setName("MS Virtual Earth Aerial");
+                    layerList.add(virtualEarthLayerA);
+
+                    productLayer = new ProductLayer(false);
+                    productLayer.setOpacity(1.0);
+                    productLayer.setPickEnabled(false);
+                    productLayer.setName("Opened Products");
+                    layerList.add(productLayer);
+
+                    final Layer placeNameLayer = layerList.getLayerByName("Place Names");
+                    placeNameLayer.setEnabled(true);
+
+                    // Add an internal frame listener to VISAT so that we can update our
+                    // world map window with the information of the currently activated  product scene view.
+                    datApp.addInternalFrameListener(new FlatEarthWWToolView.WWIFL());
+                    datApp.addProductTreeListener(new FlatEarthWWToolView.WWPTL());
+                    setProducts(datApp.getProductManager().getProducts());
+                    setSelectedProduct(datApp.getSelectedProduct());
+                } catch(Throwable e) {
+                    System.out.println("Can't load openGL "+e.getMessage());
+                }
+                return null;
+            }
+        };
+        worker.execute();
     }
 
     private void gotoProduct(Product product) {

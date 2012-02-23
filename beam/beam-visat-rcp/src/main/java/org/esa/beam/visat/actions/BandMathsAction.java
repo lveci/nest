@@ -28,7 +28,7 @@ import org.esa.beam.visat.dialogs.BandMathsDialog;
  * VISAT's band arithmetic feature.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-12-23 14:35:10 $
+ * @version $Revision: 8410 $ $Date: 2010-02-14 14:31:41 +0100 (So, 14 Feb 2010) $
  */
 public class BandMathsAction extends ExecCommand {
 

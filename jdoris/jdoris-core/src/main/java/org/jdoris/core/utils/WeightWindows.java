@@ -3,6 +3,8 @@ import org.jblas.DoubleMatrix;
 
 public class WeightWindows {
 
+    private static int n;
+
     public static DoubleMatrix rect(final DoubleMatrix x) throws IllegalArgumentException {
         if (!x.isVector()) {
             System.err.println("myrect: only lying vectors.");
@@ -23,6 +25,17 @@ public class WeightWindows {
         }
 
         return rectWin;
+    }
+
+
+    // w = .54 - .46*cos(2*pi*(0:M-1)'/(M-1));
+    // see: http://www.mathworks.com/help/toolbox/signal/hamming.html
+    public static double[] hamming(final int n) {
+        double[] window = new double[n];
+        for (int i = 0; i < n; i++) {
+            window[i] = 0.54 - 0.46 * Math.cos(2 * Math.PI * ((double) i / (double) (n - 1)));
+        }
+        return window;
     }
 
     /**

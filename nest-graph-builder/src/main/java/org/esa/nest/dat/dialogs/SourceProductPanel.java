@@ -16,19 +16,20 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.swing.TableLayout;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.datamodel.Product;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Source product selection panel
  */
 public class SourceProductPanel extends JPanel {
 
-    private final ArrayList<SourceProductSelector> sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
+    private final List<SourceProductSelector> sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
 
     public SourceProductPanel(final AppContext appContext) {
 

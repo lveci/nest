@@ -24,7 +24,7 @@ import Jama.SingularValueDecomposition;
  * function.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class RationalFunctionModel implements Cloneable {
 

@@ -77,4 +77,12 @@ public class WeightWindowsTest {
         Assert.assertEquals(new DoubleMatrix(inverseHamming_EXPECTED),inverseHamming_ACTUAL);
     }
 
+    @Test
+    public void testSimpleHamming() throws Exception {
+        final int n = 8;
+        double[] hammingWindow_EXPECTED = {0.08, 0.253194691144983, 0.642359629619905, 0.954445679235113, 0.954445679235113, 0.642359629619905, 0.253194691144983, 0.08};
+        double[] hammingWindow_ACTUAL = WeightWindows.hamming(8);
+        Assert.assertArrayEquals(hammingWindow_EXPECTED, hammingWindow_ACTUAL, DELTA);
+    }
+
 }

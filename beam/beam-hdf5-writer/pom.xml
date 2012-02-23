@@ -22,13 +22,13 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4.10-SNAPSHOT</version>
+        <version>4C-4.10</version>
     </parent>
 
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-hdf5-writer</artifactId>
     <name>BEAM HDF5 Product Writer</name>
-    <version>1.0</version>
+    <version>4C-1.0</version>
     <url>http://envisat.esa.int/beam/</url>
 
     <dependencies>

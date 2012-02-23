@@ -16,7 +16,9 @@
 package org.esa.nest.gpf.filtering;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -25,12 +27,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class SpeckleFilterOp extends Operator {
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {MEAN_SPECKLE_FILTER, MEDIAN_SPECKLE_FILTER, FROST_SPECKLE_FILTER,
-            GAMMA_MAP_SPECKLE_FILTER, LEE_SPECKLE_FILTER, LEE_REFINED_FILTER}, defaultValue = MEAN_SPECKLE_FILTER,
+            GAMMA_MAP_SPECKLE_FILTER, LEE_SPECKLE_FILTER, LEE_REFINED_FILTER}, defaultValue = LEE_REFINED_FILTER,
             label="Filter")
     private String filter;
 
@@ -92,7 +92,6 @@ public class SpeckleFilterOp extends Operator {
     private int halfSizeY;
     private int sourceImageWidth;
     private int sourceImageHeight;
-    private MetadataElement absRoot = null;
     private static final double NonValidPixelValue = -1.0;
 
     /**
@@ -137,8 +136,6 @@ public class SpeckleFilterOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             sourceImageWidth = sourceProduct.getSceneRasterWidth();
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
@@ -599,16 +596,16 @@ public class SpeckleFilterOp extends Operator {
     /**
      * Get the variance of pixel intensities in a given rectanglar region.
      * @param neighborValues The pixel values in the given rectanglar region.
+     * @param mean the mean of neighborValues
      * @return var The variance value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the variance.
      */
-    private static double getVarianceValue(final double[] neighborValues) {
+    private static double getVarianceValue(final double[] neighborValues, final double mean) {
 
         double var = 0.0;
         if (neighborValues.length > 1) {
 
-            final double mean = getMeanValue(neighborValues);
             for (double neighborValue : neighborValues) {
                 final double diff = neighborValue - mean;
                 var += diff * diff;
@@ -626,7 +623,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the median value.
      */
-    private double getMedianValue(final double[] neighborValues) {
+    private static double getMedianValue(final double[] neighborValues) {
 
         Arrays.sort(neighborValues);
 
@@ -670,7 +667,7 @@ public class SpeckleFilterOp extends Operator {
             return mean;
         }
 
-        final double var = getVarianceValue(neighborValues);
+        final double var = getVarianceValue(neighborValues, mean);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -701,7 +698,7 @@ public class SpeckleFilterOp extends Operator {
             return mean;
         }
 
-        final double var = getVarianceValue(neighborValues);
+        final double var = getVarianceValue(neighborValues, mean);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -740,7 +737,7 @@ public class SpeckleFilterOp extends Operator {
             return mean;
         }
 
-        final double var = getVarianceValue(neighborValues);
+        final double var = getVarianceValue(neighborValues, mean);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -983,7 +980,7 @@ public class SpeckleFilterOp extends Operator {
      * @param neighborPixelValues The pixel values in the neighborhood.
      * @return The filtered pixel value.
      */
-    private double computePixelValueUsingEdgeDetection(final double[][] neighborPixelValues) {
+    private static double computePixelValueUsingEdgeDetection(final double[][] neighborPixelValues) {
 
         final double[][] subAreaMeans = new double[3][3];
         computeSubAreaMeans(neighborPixelValues, subAreaMeans);
@@ -1048,7 +1045,7 @@ public class SpeckleFilterOp extends Operator {
         getNonEdgeAreaPixelValues(neighborPixelValues, d, pixels);
 
         final double meanY = getMeanValue(pixels);
-        final double varY = getVarianceValue(pixels);
+        final double varY = getVarianceValue(pixels, meanY);
         if (varY == 0.0) {
             return 0.0;
         }
@@ -1130,7 +1127,7 @@ public class SpeckleFilterOp extends Operator {
                 if (k == 9) {
                     final double subAreaMean = getMeanValue(subArea);
                     if (subAreaMean > 0) {
-                        subAreaVariances[numSubArea] = getVarianceValue(subArea) / (subAreaMean*subAreaMean);
+                        subAreaVariances[numSubArea] = getVarianceValue(subArea, subAreaMean) / (subAreaMean*subAreaMean);
                     } else {
                         subAreaVariances[numSubArea] = 0.0;
                     }
@@ -1178,9 +1175,10 @@ public class SpeckleFilterOp extends Operator {
      * @param d The direction index.
      * @param pixels The array of pixels.
      */
-    private static void getNonEdgeAreaPixelValues(final double[][] neighborPixelValues, final int d, double[] pixels) {
-
-        if (d == 0) {
+    private static void getNonEdgeAreaPixelValues(final double[][] neighborPixelValues, final int d,
+                                                  final double[] pixels) {
+        switch (d) {
+        case 0: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1189,8 +1187,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 1) {
+            break;
+        } case 1: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1199,8 +1197,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 2) {
+            break;
+        } case 2: {
 
             int k = 0;
             for (int y = 0; y < 4; y++) {
@@ -1209,8 +1207,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 3) {
+            break;
+        } case 3: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1219,8 +1217,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 4) {
+            break;
+        } case 4: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1229,8 +1227,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 5) {
+            break;
+        } case 5: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1239,8 +1237,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 6) {
+            break;
+        } case 6: {
 
             int k = 0;
             for (int y = 3; y < 7; y++) {
@@ -1249,8 +1247,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
-        } else if (d == 7) {
+            break;
+        } case 7: {
 
             int k = 0;
             for (int y = 0; y < 7; y++) {
@@ -1259,7 +1257,8 @@ public class SpeckleFilterOp extends Operator {
                     k++;
                 }
             }
-
+            break;
+        }
         }
     }
 

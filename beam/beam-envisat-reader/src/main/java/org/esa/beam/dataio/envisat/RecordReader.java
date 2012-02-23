@@ -32,7 +32,7 @@ import java.io.IOException;
  * is delegated to this record instances.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.envisat.DSD
  * @see org.esa.beam.dataio.envisat.Record
  * @see org.esa.beam.dataio.envisat.RecordInfo

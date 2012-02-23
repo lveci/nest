@@ -21,7 +21,7 @@ import java.util.EventObject;
  * A <code>ParamChangeEvent</code> occurs when the value of parameter has changed.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @see Parameter
  */
 public class ParamChangeEvent extends EventObject {

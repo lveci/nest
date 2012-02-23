@@ -16,8 +16,9 @@
 package org.esa.nest.db;
 
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.SQLUtils;
 import org.esa.nest.util.XMLSupport;
@@ -26,9 +27,11 @@ import org.jdom.Element;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 
 /**
 
@@ -43,6 +46,8 @@ public class DBQuery {
     public static final String DESCENDING_PASS = "DESCENDING";
     public static final String ALL_FOLDERS = "All_Folders";
     public static final String ANY = "Any";
+    public static final String DUALPOL = "Dual-Pol";
+    public static final String QUADPOL = "Quad-Pol";
     public static final String CALIBRATED = "Calibrated";
     public static final String NOT_CALIBRATED = "Not_Calibrated";
     public static final String ORBIT_PRELIMINARY = "Preliminary";
@@ -54,6 +59,7 @@ public class DBQuery {
     private String selectedProductTypes[] = {};
     private String selectedAcquisitionMode = "";
     private String selectedPass = "";
+    private String selectedTrack = "";
     private String selectedSampleType = "";
     private String selectedPolarization = ANY;
     private String selectedCalibration = ANY;
@@ -102,6 +108,15 @@ public class DBQuery {
 
     public String getSelectedPass() {
         return selectedPass;
+    }
+
+    public void setSelectedTrack(final String track) {
+        if(track != null)
+            selectedTrack = track;
+    }
+
+    public String getSelectedTrack() {
+        return selectedTrack;
     }
 
     public void setSelectedSampleType(final String sampleType) {
@@ -184,109 +199,126 @@ public class DBQuery {
         if(StringUtils.contains(selectedProductTypes, ALL_PRODUCT_TYPES))
             selectedProductTypes = new String[] {};
 
-        String queryStr = "";
+        final StringBuilder queryStr = new StringBuilder(1000);
         if(selectedMissions.length > 0) {
-            queryStr += SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.MISSION, selectedMissions);
+            queryStr.append(SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.MISSION, selectedMissions));
         }
         if(selectedProductTypes.length > 0) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes);
+            SQLUtils.addAND(queryStr);
+            queryStr.append(SQLUtils.getOrList(ProductTable.TABLE+'.'+AbstractMetadata.PRODUCT_TYPE, selectedProductTypes));
         }
         if(!selectedAcquisitionMode.isEmpty() && !selectedAcquisitionMode.equals(ALL_MODES)) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+ '\'';
+            SQLUtils.addAND(queryStr);
+            queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.ACQUISITION_MODE+"='"+selectedAcquisitionMode+ '\'');
         }
         if(!selectedPass.isEmpty() && !selectedPass.equals(ALL_PASSES)) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+ '\'';
+            SQLUtils.addAND(queryStr);
+            queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.PASS+"='"+selectedPass+ '\'');
+        }
+        if(!selectedTrack.isEmpty()) {
+            SQLUtils.addAND(queryStr);
+            queryStr.append("( "+ MetadataTable.TABLE+'.'+AbstractMetadata.REL_ORBIT+'='+selectedTrack+" )");
         }
         if(!selectedSampleType.isEmpty() && !selectedSampleType.equals(ANY)) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += "( "+ MetadataTable.TABLE+'.'+AbstractMetadata.SAMPLE_TYPE+"='"+selectedSampleType+"' )";
+            SQLUtils.addAND(queryStr);
+            queryStr.append("( "+ MetadataTable.TABLE+'.'+AbstractMetadata.SAMPLE_TYPE+"='"+selectedSampleType+"' )");
         }
         if(!selectedPolarization.isEmpty() && !selectedPolarization.equals(ANY)) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += "( "+
+            SQLUtils.addAND(queryStr);
+            if(selectedPolarization.equals(DUALPOL)) {
+               queryStr.append( "( "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"!='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"!='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='' )");
+            } else if(selectedPolarization.equals(QUADPOL)) {
+                queryStr.append( "( "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"!='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"!='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"!='' AND "+
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"!='' )");
+            } else {
+                queryStr.append("( "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.mds1_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.mds2_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.mds3_tx_rx_polar+"='"+selectedPolarization+ '\'' + " OR "+
-                    MetadataTable.TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+ '\'' + " )";
+                    MetadataTable.TABLE+'.'+AbstractMetadata.mds4_tx_rx_polar+"='"+selectedPolarization+ '\'' + " )");
+            }
         }
         if(!selectedCalibration.isEmpty() && !selectedCalibration.equals(ANY)) {
-            queryStr += SQLUtils.addAND(queryStr);
+            SQLUtils.addAND(queryStr);
             if(selectedCalibration.equals(CALIBRATED))
-                queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1";
+                queryStr.append(MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=1");
             else if(selectedCalibration.equals(NOT_CALIBRATED))
-                queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0";
+                queryStr.append(MetadataTable.TABLE+'.'+AbstractMetadata.abs_calibration_flag+"=0");
         }
         if(!selectedOrbitCorrection.isEmpty() && !selectedOrbitCorrection.equals(ANY)) {
-            queryStr = formOrbitCorrectionQuery(queryStr);
+            formOrbitCorrectionQuery(queryStr);
         }
 
         if(startDate != null) {
-            queryStr += SQLUtils.addAND(queryStr);
+            SQLUtils.addAND(queryStr);
             final Date start = SQLUtils.toSQLDate(startDate);
             if(endDate != null) {
                 final Date end = SQLUtils.toSQLDate(endDate);
-                queryStr += "( "+ProductTable.TABLE+'.'+AbstractMetadata.first_line_time
-                        +" BETWEEN '"+ start.toString() +"' AND '"+ end.toString() + "' )";
+                queryStr.append("( "+ProductTable.TABLE+'.'+AbstractMetadata.first_line_time
+                        +" BETWEEN '"+ start.toString() +"' AND '"+ end.toString() + "' )");
             } else {
-                queryStr += ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +">='"+ start.toString()+ '\'';
+                queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +">='"+ start.toString()+ '\'');
             }
         } else if(endDate != null) {
-            queryStr += SQLUtils.addAND(queryStr);
+            SQLUtils.addAND(queryStr);
             final Date end = SQLUtils.toSQLDate(endDate);
-            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +"<='"+ end.toString()+ '\'';
+            queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.first_line_time +"<='"+ end.toString()+ '\'');
         }
 
         final Set<String> metadataNames = metadataQueryMap.keySet();
         for(String name : metadataNames) {
             final String value = metadataQueryMap.get(name);
             if(value != null && !value.isEmpty()) {
-                queryStr += SQLUtils.addAND(queryStr);
-                queryStr += MetadataTable.TABLE+'.'+name+"='"+value+ '\'';
+                SQLUtils.addAND(queryStr);
+                queryStr.append(MetadataTable.TABLE+'.'+name+"='"+value+ '\'');
             }
         }
 
         if(!freeQuery.isEmpty()) {
-            queryStr += SQLUtils.addAND(queryStr);
+            SQLUtils.addAND(queryStr);
             final String metadataFreeQuery = SQLUtils.insertTableName(db.getMetadataNames(), MetadataTable.TABLE, freeQuery);
-            queryStr += "( "+metadataFreeQuery+" )";
+            queryStr.append("( "+metadataFreeQuery+" )");
         }
 
         if(baseDir != null) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'";
+            SQLUtils.addAND(queryStr);
+            queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.PATH+" LIKE '"+baseDir.getAbsolutePath()+"%'");
         }
         if(excludeDir != null) {
-            queryStr += SQLUtils.addAND(queryStr);
-            queryStr += ProductTable.TABLE+'.'+AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'";
+            SQLUtils.addAND(queryStr);
+            queryStr.append(ProductTable.TABLE+'.'+AbstractMetadata.PATH+" NOT LIKE '"+excludeDir.getAbsolutePath()+"%'");
         }
 
-        if(queryStr.isEmpty()) {
-            return instersectMapSelection(db.getProductEntryList());
-        } else {
+        if(queryStr.length() > 0) {
             Debug.trace("Query="+queryStr);
-            return instersectMapSelection(db.queryProduct(queryStr));
+            return instersectMapSelection(db.queryProduct(queryStr.toString()));
+        } else {
+            return instersectMapSelection(db.getProductEntryList(true));
         }
     }
 
-    private String formOrbitCorrectionQuery(String queryStr) {
-        queryStr += SQLUtils.addAND(queryStr);
+    private void formOrbitCorrectionQuery(final StringBuilder queryStr) {
+        SQLUtils.addAND(queryStr);
         if(selectedOrbitCorrection.equals(ORBIT_VERIFIED)) {
-            queryStr += MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Verified%'";
+            queryStr.append(MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Verified%'");
         } else if(selectedOrbitCorrection.equals(ORBIT_PRECISE)) {
-            queryStr += "( "+
+            queryStr.append("( "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DORIS Precise%' OR "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'DELFT Precise%' OR "+
-                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'PRARE Precise%'"+ " )";
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" LIKE 'PRARE Precise%'"+ " )");
         } else if(selectedOrbitCorrection.equals(ORBIT_PRELIMINARY)) {
-            queryStr += "( "+
+            queryStr.append("( "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DORIS%' AND "+
                     MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'DELFT%' AND "+
-                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'PRARE%'"+ " )";
+                    MetadataTable.TABLE+'.'+AbstractMetadata.orbit_state_vector_file+" NOT LIKE 'PRARE%'"+ " )");
         }
-        return queryStr;
     }
 
     public void setSelectionRect(final GeoPos[] selectionBox) {
@@ -295,7 +327,7 @@ public class DBQuery {
 
     private ProductEntry[] instersectMapSelection(final ProductEntry[] resultsList) {
         if(selectionRectangle != null && selectionRectangle.getWidth() != 0 && selectionRectangle.getHeight() != 0) {
-            final ArrayList<ProductEntry> intersectList = new ArrayList<ProductEntry>();
+            final List<ProductEntry> intersectList = new ArrayList<ProductEntry>(resultsList.length);
 
             //System.out.println("selBox x="+selectionRectangle.getX()+" y="+selectionRectangle.getY()+
             //                         " w="+selectionRectangle.getWidth()+" h="+selectionRectangle.getHeight());
@@ -305,10 +337,36 @@ public class DBQuery {
                 if(selectionRectangle.contains(new Point2D.Float(start.getLat(), start.getLon())) &&
                    selectionRectangle.contains(new Point2D.Float(end.getLat(), end.getLon()))) {
                     intersectList.add(entry);
+                } else {
+                    final GeoPos[] geoBounday = entry.getGeoBoundary();
+                    boolean allPoints = true; 
+                    for(GeoPos pos : geoBounday) {
+                        if(!selectionRectangle.contains(new Point2D.Float(pos.getLat(), pos.getLon()))) {
+                            allPoints = false;
+                            break;
+                        }
+                    }
+                    if(allPoints) {
+                        intersectList.add(entry);
+                    }
                 }
             }
             return intersectList.toArray(new ProductEntry[intersectList.size()]);
-        }
+        } /*else if(selectionRectangle != null) {
+            final List<ProductEntry> intersectList = new ArrayList<ProductEntry>(resultsList.length);
+
+            for(ProductEntry entry : resultsList) {
+                final List<GeneralPath> pathList = ProductUtils.assemblePathList(entry.getGeoBoundary());
+
+                for(GeneralPath path : pathList) {
+                    if(path.contains(selectionRectangle.getMinX(), selectionRectangle.getMinY())) {
+                        intersectList.add(entry);
+                        break;
+                    }
+                }
+            }
+            return intersectList.toArray(new ProductEntry[intersectList.size()]);
+        }     */
         return resultsList;
     }
 
@@ -336,7 +394,7 @@ public class DBQuery {
             }
         }
         if (minX >= maxX || minY >= maxY) {
-            return null;
+            return new Rectangle.Float(minX, minY, 0, 0);
         }
 
         return new Rectangle.Float(minX, minY, maxX - minX + 1, maxY - minY + 1);

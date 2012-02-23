@@ -31,14 +31,7 @@ import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.ViewportAware;
 import com.bc.ceres.grender.support.DefaultViewport;
-import com.bc.ceres.swing.figure.Figure;
-import com.bc.ceres.swing.figure.FigureChangeListener;
-import com.bc.ceres.swing.figure.FigureCollection;
-import com.bc.ceres.swing.figure.FigureEditor;
-import com.bc.ceres.swing.figure.FigureEditorAware;
-import com.bc.ceres.swing.figure.FigureSelection;
-import com.bc.ceres.swing.figure.Handle;
-import com.bc.ceres.swing.figure.ShapeFigure;
+import com.bc.ceres.swing.figure.*;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
@@ -112,7 +105,7 @@ import java.util.Vector;
  * dataset.
  *
  * @author Norman Fomferra
-
+ * @version $ Revision: $ $ Date: $
  */
 public class ProductSceneView extends BasicView
         implements FigureEditorAware, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, ProductLayerContext,
@@ -1522,6 +1515,29 @@ public class ProductSceneView extends BasicView
 
         @Override
         public void setMemento(Object memento) {
+        }
+
+        @Override
+        public FigureStyle getNormalStyle() {
+            return null;
+        }
+
+        @Override
+        public void setNormalStyle(FigureStyle normalStyle) {
+        }
+
+        @Override
+        public FigureStyle getSelectedStyle() {
+            return null;
+        }
+
+        @Override
+        public void setSelectedStyle(FigureStyle selectedStyle) {
+        }
+
+        @Override
+        public FigureStyle getEffectiveStyle() {
+            return null;
         }
 
         @Override

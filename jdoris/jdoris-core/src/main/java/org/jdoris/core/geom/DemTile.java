@@ -110,6 +110,13 @@ public class DemTile {
         double min_dem_buffer = data[0][0];
         double max_dem_buffer = data[0][0];
 
+        if (max_dem_buffer == noDataValue) {
+            max_dem_buffer = 0;
+        }
+        if (min_dem_buffer == noDataValue) {
+            min_dem_buffer = 0;
+        }
+
         try {
             totalNumPoints = data.length * data[0].length;
             for (double[] aData : data) {

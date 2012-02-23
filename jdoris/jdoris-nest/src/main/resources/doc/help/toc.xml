@@ -12,6 +12,7 @@
             <tocitem text="Coherence Estimation" target="CoherenceOp"/>
             <tocitem text="Azimuth Filtering" target="AzimuthFilterOp"/>
             <tocitem text="Range Filtering" target="RangeFilterOp"/>
+            <tocitem text="Phase Filtering" target="PhaseFilterOp"/>
 		</tocitem>
     </tocitem>
     

@@ -24,7 +24,7 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  * Geographic collocation action.
  *
  * @author Ralf Quast
- * @version $Revision: 1.5 $ $Date: 2011-02-10 19:37:02 $
+ * @version $Revision: 2535 $ $Date: 2008-07-09 14:10:01 +0200 (Mi, 09 Jul 2008) $
  */
 public class OrthorectificationAction extends AbstractVisatAction {
 

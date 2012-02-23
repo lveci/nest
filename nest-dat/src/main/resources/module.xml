@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-dat</symbolicName>
-    <version>4B-1.1</version>
+    <version>4C-0.1</version>
     <name>NEST Display and Analysis Tool</name>
 
     <description>NEST Display and Analysis Tool</description>
@@ -47,7 +47,6 @@
                     <id>new</id>
                     <id>open</id>
                     <id>createAsarNrcsBands</id>
-                    <id>selectionTool</id>
                     <id>showHomePage</id>
                     <id>about</id>
                     <id>createXYDisplacementBandsAction</id>
@@ -56,6 +55,7 @@
                     <id>createFilteredBand</id>
                     <id>mosaicAction</id>
                     <id>selectTool</id>
+                    <id>PCAOp</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>

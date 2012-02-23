@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
  * Tests the default value initialisation of GPF operators.
  *
  * @author Marco
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class OpParameterInitialisationTest {

@@ -26,7 +26,7 @@ import java.awt.image.RenderedImage;
  * <p/>Subclasses will have to to implement {@link #createImage(java.awt.image.RenderedImage[], int)}.
  *
  * @author Norman Fomferra
-
+ * @version $revision$ $date$
  */
 public abstract class GenericMultiLevelSource extends AbstractMultiLevelSource {
     private final MultiLevelSource[] multiLevelSources;

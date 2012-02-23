@@ -16,7 +16,7 @@
 
 package org.esa.beam.framework.gpf.graph;
 
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.internal.ApplicationData;
 
 import java.util.ArrayList;
@@ -163,7 +163,7 @@ public class Graph {
      *
      * @return the application data as an Xpp3Dom
      */
-    public Xpp3Dom getApplicationData(String appId) {
+    public XppDom getApplicationData(String appId) {
         for (ApplicationData appData : applicationData) {
             if (appData.getId().equals(appId)) {
                 return appData.getData();
@@ -178,7 +178,7 @@ public class Graph {
      * @param id   The application ID.
      * @param data The application data as Xpp3Dom.
      */
-    public void setAppData(String id, Xpp3Dom data) {
+    public void setAppData(String id, XppDom data) {
         for (int i = 0; i < applicationData.size(); i++) {
             if (applicationData.get(i).getId().equals(id)) {
                 applicationData.remove(i);

@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 class GeoTiffBandWriter {
 

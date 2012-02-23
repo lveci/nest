@@ -46,7 +46,7 @@ public class VectorDataCollectionLayer extends CollectionLayer {
     public VectorDataCollectionLayer(VectorDataCollectionLayerType layerType,
                                      ProductNodeGroup<VectorDataNode> vectorDataGroup,
                                      PropertySet configuration) {
-        super(layerType, configuration, "Geometries");
+        super(layerType, configuration, "Vectors");
         Assert.notNull(vectorDataGroup, "vectorDataGroup");
 
         reference = new WeakReference<ProductNodeGroup<VectorDataNode>>(vectorDataGroup);
@@ -69,7 +69,7 @@ public class VectorDataCollectionLayer extends CollectionLayer {
     }
 
     private Layer createLayer(final VectorDataNode vectorDataNode) {
-        final Layer layer = VectorDataLayerType.createLayer(vectorDataNode);
+        final Layer layer = VectorDataLayerType.createLayer(null, vectorDataNode);
         layer.setVisible(false);
         return layer;
     }

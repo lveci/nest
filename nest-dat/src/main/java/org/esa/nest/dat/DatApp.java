@@ -24,23 +24,24 @@ import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.framework.ui.command.CommandManager;
-import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
+import org.esa.beam.framework.ui.command.Command;
+import org.esa.beam.framework.ui.command.CommandManager;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
-import org.esa.beam.util.jai.JAIUtils;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.MemUtils;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
-import org.esa.nest.util.MemUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
-import javax.media.jai.JAI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -57,6 +58,10 @@ public class DatApp extends VisatApp {
         super(applicationDescriptor);
 
         DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = true;
+
+        // enable anti-aliased text:
+        System.setProperty("awt.useSystemAAFontSettings","on"); 
+        System.setProperty("swing.aatext", "true");
     }
 
     public static DatApp getApp() {
@@ -110,10 +115,20 @@ public class DatApp extends VisatApp {
             //disable JAI media library
             System.setProperty("com.sun.media.jai.disableMediaLib", "true");
 
+            disableUnwantedOperators();
+
             validateAuxDataFolder();
         } catch(Throwable t) {
             VisatApp.getApp().showErrorDialog("PostInit failed. "+t.toString());
         }
+    }
+    
+    private static void disableUnwantedOperators() {
+        final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+
+        //final OperatorSpi pcaOp = registry.getOperatorSpi("org.esa.nest.gpf.PCAOp$Spi");
+        //if(pcaOp != null)
+        //    registry.removeOperatorSpi(pcaOp);
     }
 
     private static void validateAuxDataFolder() throws IOException {
@@ -167,13 +182,20 @@ public class DatApp extends VisatApp {
 
     private static void cleanTempFolder() {
         final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
+
         File[] fileList = tempFolder.listFiles();
+        for(File file : fileList) {
+            if(file.getName().startsWith("tmp_")) {
+                ResourceUtils.deleteFile(file);
+            }
+        }
 
         long freeSpace = tempFolder.getFreeSpace() / 1024 / 1024 / 1024;
         int cutoff = 20;
         if(freeSpace > 30)
             cutoff = 60;
 
+        fileList = tempFolder.listFiles();
         if(fileList.length > cutoff) {
             final long[] dates = new long[fileList.length];
             int i = 0;
@@ -187,13 +209,6 @@ public class DatApp extends VisatApp {
                 if(file.lastModified() < cutoffDate) {
                     file.delete();
                 }
-            }
-        }
-
-        fileList = tempFolder.listFiles();
-        for(File file : fileList) {
-            if(file.getName().startsWith("tmp_")) {
-                ResourceUtils.deleteFile(file);
             }
         }
     }
@@ -296,16 +311,34 @@ public class DatApp extends VisatApp {
         menuBar.setHidable(false);
         menuBar.setStretch(true);
 
+        boolean incMultispectralTools = false;
+        boolean incImageProcessing = false;
+        final CommandManager cmdMan = getCommandManager();
+        for (int i = 0; i < cmdMan.getNumCommands(); i++) {
+            final String parent = cmdMan.getCommandAt(i).getParent();
+            if(parent == null)
+                continue;
+
+            if(parent.equals("multispectraltools"))
+                incMultispectralTools = true;
+            if(parent.equals("Image Processing"))
+                incImageProcessing = true;
+        }
+
         menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
         menuBar.add(createJMenu("edit", "Edit", 'E')); /*I18N*/
         menuBar.add(createJMenu("view", "View", 'V'));  /*I18N*/
         menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
-        menuBar.add(createJMenu("tools", "Utilities", 'T')); /*I18N*/
+        menuBar.add(createJMenu("tools", "Utilities", 'U')); /*I18N*/
         menuBar.add(createJMenu("sartools", "SAR Tools", 'S')); /*I18N*/
         menuBar.add(createJMenu("geometry", "Geometry", 'G')); /*I18N*/
         menuBar.add(createJMenu("insar", "InSAR", 'I')); /*I18N*/
         menuBar.add(createJMenu("oceanTools", "Ocean Tools", 'O')); /*I18N*/
         menuBar.add(createJMenu("polarimetrictools", "Polarimetric", 'P')); /*I18N*/
+        if(incMultispectralTools)
+            menuBar.add(createJMenu("multispectraltools", "Multispectral Tools", 'M')); /*I18N*/
+        if(incImageProcessing)
+            menuBar.add(createJMenu("Image Processing", "Image Processing", 'C')); /*I18N*/
         menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
         menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
         menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
@@ -340,7 +373,7 @@ public class DatApp extends VisatApp {
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
-                        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""),
+                        final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(),
                             "Graph Builder", "graph_builder");
                         dialog.show();
                         dialog.LoadGraph(file);

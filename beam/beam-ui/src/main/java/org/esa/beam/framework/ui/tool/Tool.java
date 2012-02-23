@@ -28,7 +28,7 @@ import java.awt.Cursor;
  * tools are usually mutually exclusive - only one tool can be activated at the same time.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

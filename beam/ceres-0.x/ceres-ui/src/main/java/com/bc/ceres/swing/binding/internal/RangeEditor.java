@@ -31,7 +31,7 @@ import java.util.Hashtable;
  * The editor is realized using a JSLider.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class RangeEditor extends NumericEditor {

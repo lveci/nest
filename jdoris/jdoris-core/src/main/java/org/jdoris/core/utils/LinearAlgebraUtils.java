@@ -418,7 +418,7 @@ public class LinearAlgebraUtils {
     }
 
     public static void setdata(ComplexDoubleMatrix outMatrix, ComplexDoubleMatrix inMatrix, Window inWin) {
-        setdata(outMatrix, new Window(0, outMatrix.rows, 0, outMatrix.columns), inMatrix, inWin);
+        setdata(outMatrix, new Window(0, outMatrix.rows - 1, 0, outMatrix.columns - 1), inMatrix, inWin);
     }
 
     public static void setdata(DoubleMatrix outMatrix, DoubleMatrix inMatrix, Window inWin) {

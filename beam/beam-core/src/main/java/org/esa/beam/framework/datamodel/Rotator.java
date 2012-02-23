@@ -24,7 +24,7 @@ import static java.lang.Math.*;
  * Class for rotating geographical positions.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 class Rotator {
 

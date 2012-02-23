@@ -25,7 +25,7 @@ import java.util.Map;
  * An abstract implementation the <code>Figure</code> interface.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

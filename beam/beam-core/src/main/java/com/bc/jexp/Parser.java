@@ -22,7 +22,7 @@ package com.bc.jexp;
  * the <code>{@link Term}</code> class.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface Parser {
 

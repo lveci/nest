@@ -26,7 +26,7 @@ import org.esa.beam.util.Debug;
  * the record.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.envisat.Field
  * @see org.esa.beam.dataio.envisat.Record
  * @see org.esa.beam.dataio.envisat.RecordInfo

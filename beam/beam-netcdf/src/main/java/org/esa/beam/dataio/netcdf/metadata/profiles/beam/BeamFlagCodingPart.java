@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,17 +16,16 @@
 package org.esa.beam.dataio.netcdf.metadata.profiles.beam;
 
 import org.esa.beam.dataio.netcdf.ProfileReadContext;
-import org.esa.beam.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.beam.dataio.netcdf.ProfileWriteContext;
+import org.esa.beam.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfFlagCodingPart;
+import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.util.ReaderUtils;
-import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.Product;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class BeamFlagCodingPart extends ProfilePartIO {
 
     @Override
     public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
-        NetcdfFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+        NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
         final Band[] bands = p.getBands();
         for (Band band : bands) {
             CfFlagCodingPart.writeFlagCoding(band, ncFile);
@@ -60,11 +59,11 @@ public class BeamFlagCodingPart extends ProfilePartIO {
         }
     }
 
-    public void writeFlagCoding(Band band, NetcdfFileWriteable ncFile) {
+    public void writeFlagCoding(Band band, NFileWriteable ncFile) throws IOException {
         final FlagCoding flagCoding = band.getFlagCoding();
         if (flagCoding != null) {
             final String[] flagNames = flagCoding.getFlagNames();
-            final StringBuffer descriptions = new StringBuffer();
+            final StringBuilder descriptions = new StringBuilder();
             for (String flagName : flagNames) {
                 final MetadataAttribute flag = flagCoding.getFlag(flagName);
                 if (flag != null) {
@@ -76,12 +75,12 @@ public class BeamFlagCodingPart extends ProfilePartIO {
                 descriptions.append(DESCRIPTION_SEPARATOR);
             }
             String variableName = ReaderUtils.getVariableName(band);
-            ncFile.addVariableAttribute(variableName, FLAG_CODING_NAME, flagCoding.getName());
-            ncFile.addVariableAttribute(variableName, FLAG_DESCRIPTIONS, descriptions.toString().trim());
+            ncFile.findVariable(variableName).addAttribute(FLAG_CODING_NAME, flagCoding.getName());
+            ncFile.findVariable(variableName).addAttribute(FLAG_DESCRIPTIONS, descriptions.toString().trim());
         }
     }
 
-    public static FlagCoding readFlagCoding(ProfileReadContext ctx, String variableName) throws ProductIOException {
+    public static FlagCoding readFlagCoding(ProfileReadContext ctx, String variableName) {
         final FlagCoding flagCoding = CfFlagCodingPart.readFlagCoding(ctx, variableName);
 
         if (flagCoding != null) {

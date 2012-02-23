@@ -27,7 +27,7 @@ import java.util.EventObject;
  * keyboard.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

@@ -21,7 +21,7 @@ import junit.framework.TestCase;
  * Test methods for class {@link IntervalPartition}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class IntervalPartitionTest extends TestCase {
 

@@ -27,12 +27,13 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProductEntryTableModel extends AbstractTableModel {
 
     private final ProductEntry[] productEntryList;
-    final ArrayList<DataProvider> dataProviders = new ArrayList<DataProvider>(5);
-    private final ArrayList<TableColumn> columnList = new ArrayList<TableColumn>();
+    final List<DataProvider> dataProviders = new ArrayList<DataProvider>(5);
+    private final List<TableColumn> columnList = new ArrayList<TableColumn>();
 
     public ProductEntryTableModel(final ProductEntry[] productList) {
         this.productEntryList = productList;

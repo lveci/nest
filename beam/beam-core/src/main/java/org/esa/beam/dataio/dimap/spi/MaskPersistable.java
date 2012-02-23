@@ -27,7 +27,7 @@ import static org.esa.beam.dataio.dimap.DimapProductConstants.*;
 
 /**
  * @author Marco Peters
-
+ * @version $ Revision $ Date $
  * @since BEAM 4.7
  */
 public abstract class MaskPersistable implements DimapPersistable {

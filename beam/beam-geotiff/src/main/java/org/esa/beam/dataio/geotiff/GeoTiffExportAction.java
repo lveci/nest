@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
 import java.io.File;
 
 /**
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.5
  */
 public class GeoTiffExportAction extends ProductExportAction {

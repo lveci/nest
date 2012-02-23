@@ -34,7 +34,7 @@ import java.io.File;
  * the orientation relative to the existing layers has to be given by hand.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class ImageFileLayerSource implements LayerSource {

@@ -187,7 +187,7 @@ public class ResFileTest {
     public void testParseTimeValue() throws Exception {
 
         ProductData.UTC expectedTime = ProductData.UTC.parse("11-JUN-2003 06:12:52.090719");
-        ProductData.UTC returnedTime = resFile.parseDatTimeValue("First_pixel_azimuth_time \\(UTC\\)");
+        ProductData.UTC returnedTime = resFile.parseDateTimeValue("First_pixel_azimuth_time \\(UTC\\)");
         Assert.assertEquals(expectedTime.toString(), returnedTime.toString());
 
     }

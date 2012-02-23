@@ -30,7 +30,7 @@ import javax.swing.JComponent;
  * The returned binding may be undone later by calling {@link BindingContext#unbind(Binding)}.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.6
  */
 public abstract class ComponentAdapter {

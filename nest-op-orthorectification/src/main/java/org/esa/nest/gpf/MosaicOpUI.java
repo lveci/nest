@@ -27,10 +27,7 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.Map;
 
 /**
@@ -41,8 +38,6 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JList bandList = new JList();
 
     private final JComboBox resamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
-
-    //private final JComboBox projectionName = new JComboBox();
 
     private final JTextField pixelSize = new JTextField("");
     private final JTextField sceneWidth = new JTextField("");
@@ -59,20 +54,17 @@ public class MosaicOpUI extends BaseOperatorUI {
     private double pixelSizeHeightRatio = 1;
     private final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
 
+    protected final JButton crsButton = new JButton();
+    private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        //final String[] projectionsValueSet = getProjectionsValueSet();
-        //Arrays.sort(projectionsValueSet);
-        //for(String name : projectionsValueSet) {
-        //    projectionName.addItem(name);
-        //}
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
 
-        //projectionName.setSelectedItem(IdentityTransformDescriptor.NAME);
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     average = (e.getStateChange() == ItemEvent.SELECTED);
@@ -83,6 +75,13 @@ public class MosaicOpUI extends BaseOperatorUI {
                 public void itemStateChanged(ItemEvent e) {
                     normalizeByMean = (e.getStateChange() == ItemEvent.SELECTED);
                 }
+        });
+
+        crsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mapProjHandler.promptForFeatureCrs(sourceProducts);
+                crsButton.setText(mapProjHandler.getCRSName());
+            }
         });
 
         pixelSize.addKeyListener(new TextAreaKeyListener());
@@ -98,7 +97,10 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
-        //projectionName.setSelectedItem(paramMap.get("projectionName"));
+
+        final String mapProjection = (String)paramMap.get("mapProjection");
+        mapProjHandler.initParameters(mapProjection, sourceProducts);
+        crsButton.setText(mapProjHandler.getCRSName());
 
         Double pixSize = (Double)paramMap.get("pixelSize");
         if(pixSize == null) pixSize = 0.0;
@@ -126,11 +128,11 @@ public class MosaicOpUI extends BaseOperatorUI {
                 widthHeightRatio = width / (double)height;
                 pixelSizeHeightRatio = pixSize / (double) height;
 
-                long dim = (long)width*(long)height;
+                long dim = width*height;
                 while(dim > Integer.MAX_VALUE) {
                     width -= 1000;
                     height = (int)(width / widthHeightRatio);
-                    dim = (long)width*(long)height;
+                    dim = width*height;
                 }
             } catch(Exception e) {
                 width = 0;
@@ -162,7 +164,11 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
-        //paramMap.put("projectionName", projectionName.getSelectedItem());
+
+        if(mapProjHandler.getCRS() != null) {
+            paramMap.put("mapProjection", mapProjHandler.getCRS().toWKT());
+        }
+
         paramMap.put("pixelSize", Double.parseDouble(pixelSize.getText()));
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
@@ -187,8 +193,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
-        //gbc.gridy++;
-        //DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Size (m):", pixelSize);
         gbc.gridy++;

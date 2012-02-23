@@ -17,6 +17,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.nest.gpf.ProgressMonitorList;
 
 import javax.swing.*;
 
@@ -71,6 +72,7 @@ public class ProgressBarProgressMonitor implements ProgressMonitor {
             progressBar.setMaximum(totalWork);
             //toggleUpdateButton(stopCommand);
 
+            ProgressMonitorList.instance().add(this);
         }
 
         /**
@@ -85,11 +87,10 @@ public class ProgressBarProgressMonitor implements ProgressMonitor {
                         progressBar.setValue(progressBar.getMaximum());
                         setVisibility(false);
                         //toggleUpdateButton(updateCommand);
-
-                        //mainPanel.setCursor(Cursor.getDefaultCursor());
                     }
                 }
             });
+            ProgressMonitorList.instance().remove(this);
         }
 
 
@@ -100,14 +101,14 @@ public class ProgressBarProgressMonitor implements ProgressMonitor {
          *
          * @param work the amount of work done
          */
-        public void internalWorked(double work) {
+        public void internalWorked(final double work) {
             currentWork += work;
             currentWorkUI = (int) (totalWorkUI * currentWork / totalWork);
             if (currentWorkUI > lastWorkUI) {
                 runInUI(new Runnable() {
                     public void run() {
                         if (progressBar != null) {
-                            int progress = progressBar.getMinimum() + currentWorkUI;
+                            final int progress = progressBar.getMinimum() + currentWorkUI;
                             progressBar.setValue(progress);
                             setVisibility(true);
                             //toggleUpdateButton(stopCommand);
@@ -203,11 +204,9 @@ public class ProgressBarProgressMonitor implements ProgressMonitor {
         }
 
         private void setDescription(final String description) {
-            //statusLabel.setText(description);
         }
 
         private void setVisibility(final boolean visible) {
             progressPanel.setVisible(visible);
-           // statusLabel.setVisible(visible);
         }
     }

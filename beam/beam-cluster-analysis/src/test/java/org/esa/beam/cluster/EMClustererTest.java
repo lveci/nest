@@ -25,7 +25,7 @@ import java.util.Random;
  * Tests for class {@link EMClusterer}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class EMClustererTest extends TestCase {
     private static final double A = 1.0;

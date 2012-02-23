@@ -100,4 +100,14 @@ public class MapProjectionHandler {
             crs = getCRSFromDialog(sourceProducts);
         }
     }
+
+    public static CoordinateReferenceSystem getCRS(String mapProjection) throws Exception {
+        try {
+            if(mapProjection == null || mapProjection.isEmpty())
+                mapProjection = "WGS84(DD)";
+            return CRS.parseWKT(mapProjection);
+        } catch (Exception e) {
+            return CRS.decode(mapProjection, true);
+        }
+    }
 }

@@ -110,72 +110,72 @@ class SummaryStxOp implements StxOp {
 
     @Override
     public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_BYTE, false);
         ValueConverter valueConverter = new UByteValueConverter(duid.getByteData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
 
     }
 
     @Override
     public void accumulateDataByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                   Raster maskTile, Rectangle r) {
+                                   Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_BYTE, false);
         ValueConverter valueConverter = new ByteValueConverter(duid.getByteData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     @Override
     public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                     Raster maskTile, Rectangle r) {
+                                     Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_USHORT, false);
         ValueConverter valueConverter = new UShortValueConverter(duid.getShortData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     @Override
     public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_SHORT, false);
         ValueConverter valueConverter = new ShortValueConverter(duid.getShortData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
 
     }
 
     @Override
     public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                  Raster maskTile, Rectangle r) {
+                                  Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_INT, false);
         ValueConverter valueConverter = new IntValueConverter(duid.getIntData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     @Override
     public void accumulateDataUInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                   Raster maskTile, Rectangle r) {
+                                   Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_INT, false);
         ValueConverter valueConverter = new UIntValueConverter(duid.getIntData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     @Override
     public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_FLOAT, false);
         ValueConverter valueConverter = new FloatValueConverter(duid.getFloatData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     @Override
     public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                     Raster maskTile, Rectangle r) {
+                                     Raster maskTile, Rectangle r, String unit) {
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_DOUBLE, false);
         ValueConverter valueConverter = new DoubleValueConverter(duid.getDoubleData(0));
-        accumulateData(duid, valueConverter, maskAccessor, maskTile, r);
+        accumulateData(duid, valueConverter, maskAccessor, maskTile, r, unit);
     }
 
     private void accumulateData(UnpackedImageData duid, ValueConverter valueConverter, PixelAccessor maskAccessor,
-                                Raster maskTile, Rectangle r) {
+                                Raster maskTile, Rectangle r, String unit) {
         final int dataPixelStride = duid.pixelStride;
         final int dataLineStride = duid.lineStride;
         final int dataBandOffset = duid.bandOffsets[0];
@@ -264,7 +264,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index];
         }
@@ -278,7 +278,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index] & 0xff;
         }
@@ -292,7 +292,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index];
         }
@@ -306,7 +306,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index] & 0xffff;
         }
@@ -320,7 +320,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index];
         }
@@ -334,7 +334,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index] & 0xffffffffL;
         }
@@ -348,7 +348,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index];
         }
@@ -362,7 +362,7 @@ class SummaryStxOp implements StxOp {
             this.data = data.clone();
         }
 
-        @Override
+//        @Override
         public double getValue(int index) {
             return data[index];
         }

@@ -21,7 +21,7 @@ import org.esa.beam.util.Guardian;
  * A {@link Pointing} which uses tie-point grids to compute the geometry for a given pixel position.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public final class TiePointGridPointing implements Pointing {
 

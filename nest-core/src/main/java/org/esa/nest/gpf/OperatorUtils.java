@@ -22,18 +22,15 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
-import javax.media.jai.JAI;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 import java.awt.*;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.List;
 
 /**
  * Helper methods for working with Operators
@@ -189,28 +186,24 @@ public final class OperatorUtils {
         return null;
     }
 
-    public static String getBandTimeStamp(final Product product) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        if(absRoot != null) {
-            //final String mission = "_"+absRoot.getAttributeString(AbstractMetadata.MISSION, "");
-            String dateString = getAcquisitionDate(absRoot);
-            if(!dateString.isEmpty())
-                dateString = '_' + dateString;
-            return StringUtils.createValidName(dateString, new char[]{'_', '.'}, '_');
-        }
-        return "";
-    }
-
     public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyIndexCodings(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         targetProduct.setDescription(sourceProduct.getDescription());
+
+        if(targetProduct.getIndexCodingGroup().getNodeCount() > 0) {
+            final IndexCoding indexCoding = targetProduct.getIndexCodingGroup().get(0);
+            for(Band band : targetProduct.getBands()) {
+                band.setSampleCoding(indexCoding);
+            }
+        }
     }
 
     public static void copyVirtualBand(final Product product, final VirtualBand srcBand, final String name) {
@@ -370,7 +363,7 @@ public final class OperatorUtils {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 if(!(band instanceof VirtualBand))
                     bandNameList.add(band.getName());
@@ -452,6 +445,56 @@ public final class OperatorUtils {
         }
     }
 
+    /**
+     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
+     * latitude/longitude.
+     * @param sourceProduct The input source product.
+     * @throws OperatorException for no geocoding
+     * @return geoBoundary The object to pass back the max/min lat/lon.
+     */
+    public static ImageGeoBoundary computeImageGeoBoundary(final Product sourceProduct) throws OperatorException {
+        final ImageGeoBoundary geoBoundary = new ImageGeoBoundary();
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        if(geoCoding == null) {
+            throw new OperatorException("Product does not contain a geocoding");
+        }
+        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
+        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
+        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
+                                                                      sourceProduct.getSceneRasterHeight()-1), null);
+
+        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
+        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
+
+        geoBoundary.latMin = 90.0;
+        geoBoundary.latMax = -90.0;
+        for (double lat : lats) {
+            if (lat < geoBoundary.latMin) {
+                geoBoundary.latMin = lat;
+            }
+            if (lat > geoBoundary.latMax) {
+                geoBoundary.latMax = lat;
+            }
+        }
+
+        geoBoundary.lonMin = 360.0;
+        geoBoundary.lonMax = 0.0;
+        for (double lon : lons) {
+            if (lon < 0) {
+                lon += 360;
+            }
+            if (lon < geoBoundary.lonMin) {
+                geoBoundary.lonMin = lon;
+            }
+            if (lon > geoBoundary.lonMax) {
+                geoBoundary.lonMax = lon;
+            }
+        }
+
+        return geoBoundary;
+    }
+
     public static void getSceneDimensions(final double minSpacing, final SceneProperties scnProp) {
         double minAbsLat;
         if (scnProp.latMin * scnProp.latMax > 0) {
@@ -486,8 +529,8 @@ public final class OperatorUtils {
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
 
-        float subSamplingX = (float) targetProduct.getSceneRasterWidth() / (gridWidth - 1);
-        float subSamplingY = (float) targetProduct.getSceneRasterHeight() / (gridHeight - 1);
+        final float subSamplingX = (float) targetProduct.getSceneRasterWidth() / (gridWidth - 1);
+        final float subSamplingY = (float) targetProduct.getSceneRasterHeight() / (gridHeight - 1);
 
         final TiePointGrid latGrid = new TiePointGrid(TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
@@ -507,18 +550,9 @@ public final class OperatorUtils {
         targetProduct.setGeoCoding(tpGeoCoding);
     }
 
-    public static String[] getMasterBandNames(final Product sourceProduct) {
-        final ArrayList<String> masterBandNames = new ArrayList<String>();
-        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
-        if(slaveMetadataRoot != null) {
-            final String mstBandNames = slaveMetadataRoot.getAttributeString(AbstractMetadata.MASTER_BANDS, "");
-            final StringTokenizer st = new StringTokenizer(mstBandNames, " ");
-            final int length = st.countTokens();
-            for (int i = 0; i < length; i++) {
-                masterBandNames.add(st.nextToken());
-            }
-        }
-        return masterBandNames.toArray(new String[masterBandNames.size()]);
+    public static class ImageGeoBoundary {
+        public double latMin = 0.0, latMax = 0.0;
+        public double lonMin = 0.0, lonMax= 0.0;
     }
 
     public static class SceneProperties {
@@ -615,6 +649,10 @@ public final class OperatorUtils {
                                                  targetProduct.getSceneRasterHeight());
 
                 targetBand.setUnit(targetUnit);
+                targetBand.setDescription(srcBand.getDescription());
+                targetBand.setNoDataValue(srcBand.getNoDataValue());
+                targetBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
+
                 targetProduct.addBand(targetBand);
             }
         }
@@ -622,6 +660,8 @@ public final class OperatorUtils {
 
     /**
      * Get an array of rectangles for all source tiles of the image
+     * @param sourceProduct the input
+     * @param tileSize the rect
      * @return Array of rectangles
      */
     public static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {

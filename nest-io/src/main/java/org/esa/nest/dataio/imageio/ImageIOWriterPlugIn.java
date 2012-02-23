@@ -19,13 +19,14 @@ import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.util.Locale;
 
 
 public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
 
-    private static final String FORMAT_NAME = "ImageIO";
+    private static final String[] FORMAT_NAMES = { "ImageIO", "JPEG2000" };
 
     /**
      * Constructs a new product writer plug-in instance.
@@ -34,11 +35,11 @@ public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getFormatNames() {
-        return new String[]{FORMAT_NAME};
+        return FORMAT_NAMES;
     }
 
     public String[] getDefaultFileExtensions() {
-        return null;
+        return ImageIO.getWriterFileSuffixes();
     }
 
     /**
@@ -77,7 +78,7 @@ public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
     /**
      * Creates an instance of the actual product writer class.
      *
-     * @return a new instance of the <code>GDALWriter</code> class
+     * @return a new instance of the writer class
      */
     public ProductWriter createWriterInstance() {
         return new ImageIOWriter(this, "tif"); 

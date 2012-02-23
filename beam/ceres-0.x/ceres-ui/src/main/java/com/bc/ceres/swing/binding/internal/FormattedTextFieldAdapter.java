@@ -27,7 +27,7 @@ import java.beans.PropertyChangeListener;
  * A binding for a {@link javax.swing.JFormattedTextField} component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public class FormattedTextFieldAdapter extends ComponentAdapter implements PropertyChangeListener {

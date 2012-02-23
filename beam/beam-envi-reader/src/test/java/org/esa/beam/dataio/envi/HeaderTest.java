@@ -126,6 +126,7 @@ public class HeaderTest extends TestCase {
         final String mapInfoLine = "map info = {testName, 1.0000, 2.0000, 3.0, 4.0, 5.0, 6.0, WGS-62, units=micrometer}";
         final BufferedReader in = createReader(mapInfoLine);
 
+
         final Header header = new Header(in);
 
         final EnviMapInfo mapInfo = header.getMapInfo();
@@ -137,7 +138,29 @@ public class HeaderTest extends TestCase {
         assertEquals(5.0, mapInfo.getPixelSizeX(), 1e-8);
         assertEquals(6.0, mapInfo.getPixelSizeY(), 1e-8);
         assertEquals("WGS-62", mapInfo.getDatum());
-        assertEquals("units=micrometer", mapInfo.getUnit());
+        assertEquals("micrometer", mapInfo.getUnit());
+        assertEquals(0, mapInfo.getOrientation(), 1E-5);
+    }
+
+    public void testParseMapInfo_UTM() throws IOException {
+        final String mapInfoLine = "map info = {UTM, 1.000, 1.000, 691415.705, 5974743.844, 9.3500000000e+01, 9.3500000000e+01, 32, North, WGS-84, units=Meters, rotation=-86.00000000}";
+        final BufferedReader in = createReader(mapInfoLine);
+
+        final Header header = new Header(in);
+
+        final EnviMapInfo mapInfo = header.getMapInfo();
+        assertEquals("UTM", mapInfo.getProjectionName());
+        assertEquals(1.0, mapInfo.getReferencePixelX(), 1e-8);
+        assertEquals(1.0, mapInfo.getReferencePixelY(), 1e-8);
+        assertEquals(691415.705, mapInfo.getEasting(), 1e-8);
+        assertEquals(5974743.844, mapInfo.getNorthing(), 1e-8);
+        assertEquals(9.3500000000e+01, mapInfo.getPixelSizeX(), 1e-8);
+        assertEquals(9.3500000000e+01, mapInfo.getPixelSizeY(), 1e-8);
+        assertEquals(32, mapInfo.getUtmZone());
+        assertEquals("North", mapInfo.getUtmHemisphere());
+        assertEquals("WGS-84", mapInfo.getDatum());
+        assertEquals("Meters", mapInfo.getUnit());
+        assertEquals(-86.0, mapInfo.getOrientation(), 1E-5);
     }
 
     public void testParseMapInfo_multipleLines() throws IOException {
@@ -155,7 +178,7 @@ public class HeaderTest extends TestCase {
         assertEquals(5.0, mapInfo.getPixelSizeX(), 1e-8);
         assertEquals(6.0, mapInfo.getPixelSizeY(), 1e-8);
         assertEquals("WGS-62", mapInfo.getDatum());
-        assertEquals("units=micrometer", mapInfo.getUnit());
+        assertEquals("micrometer", mapInfo.getUnit());
     }
 
     // @todo 2 tb/tb more tests with incomplete description, mis-spelled etc.

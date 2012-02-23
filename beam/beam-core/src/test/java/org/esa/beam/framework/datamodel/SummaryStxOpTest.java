@@ -52,7 +52,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataByte(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataByte(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(0.0, op.getMinimum(), 1.0e-8);
         assertEquals(20.0, op.getMaximum(), 1.0e-8);
@@ -73,7 +73,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataUByte(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataUByte(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(245.0, op.getMinimum(), 1.0e-8);
         assertEquals(255.0, op.getMaximum(), 1.0e-8);
@@ -91,7 +91,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataShort(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataShort(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(13.0, op.getMinimum(), 1.0e-8);
         assertEquals(23.0, op.getMaximum(), 1.0e-8);
@@ -112,7 +112,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataUShort(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataUShort(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(65525.0, op.getMinimum(), 1.0e-8);
         assertEquals(65535.0, op.getMaximum(), 1.0e-8);
@@ -130,7 +130,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataInt(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataInt(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(0.0, op.getMinimum(), 1.0e-8);
         assertEquals(10.0, op.getMaximum(), 1.0e-8);
@@ -148,7 +148,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataUInt(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataUInt(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(4294967285.0, op.getMinimum(), 1.0e-8);
         assertEquals(4294967295.0, op.getMaximum(), 1.0e-8);
@@ -166,7 +166,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataFloat(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataFloat(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(17.6, op.getMinimum(), 1.0e-6);
         assertEquals(18.6, op.getMaximum(), 1.0e-6);
@@ -185,7 +185,22 @@ public class SummaryStxOpTest {
         Rectangle rectangle = image.getData().getBounds();
         final RenderedOp maskImage = ConstantDescriptor.create((float) data.length, 1.0f, new Byte[]{0}, null);
         PixelAccessor maskAccessor = new PixelAccessor(maskImage);
-        op.accumulateDataFloat(dataAccessor, image.getData(), maskAccessor, maskImage.getData(), rectangle);
+        op.accumulateDataFloat(dataAccessor, image.getData(), maskAccessor, maskImage.getData(), rectangle, null);
+
+        assertEquals(Double.NaN, op.getMinimum(), 1.0e-6);
+        assertEquals(Double.NaN, op.getMaximum(), 1.0e-6);
+        assertEquals(Double.NaN, op.getMean(), 1.0e-6);
+        assertEquals(Double.NaN, op.getVariance(), 1.0e-6);
+        assertEquals(Double.NaN, op.getStdDev(), 1.0e-6);
+    }
+
+    @Test
+    public void testAccumulateWithOnlyNaNDataWithoutMask() throws Exception {
+        SummaryStxOp op = new SummaryStxOp();
+        final RenderedOp nanImage = ConstantDescriptor.create(11.0f, 1.0f, new Float[]{Float.NaN}, null);
+        PixelAccessor dataAccessor = new PixelAccessor(nanImage);
+        Rectangle rectangle = nanImage.getData().getBounds();
+        op.accumulateDataFloat(dataAccessor, nanImage.getData(), null, null, rectangle, null);
 
         assertEquals(Double.NaN, op.getMinimum(), 1.0e-6);
         assertEquals(Double.NaN, op.getMaximum(), 1.0e-6);
@@ -203,7 +218,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataDouble(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataDouble(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(18.6, op.getMinimum(), 1.0e-8);
         assertEquals(19.6, op.getMaximum(), 1.0e-8);
@@ -221,7 +236,7 @@ public class SummaryStxOpTest {
         PixelAccessor dataAccessor = new PixelAccessor(image);
         Rectangle rectangle = image.getData().getBounds();
 
-        op.accumulateDataDouble(dataAccessor, image.getData(), null, null, rectangle);
+        op.accumulateDataDouble(dataAccessor, image.getData(), null, null, rectangle, null);
 
         assertEquals(-2.6, op.getMinimum(), 1.0e-8);
         assertEquals(-1.6, op.getMaximum(), 1.0e-8);

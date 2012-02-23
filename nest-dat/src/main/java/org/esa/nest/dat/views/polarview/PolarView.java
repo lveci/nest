@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * NEST
@@ -175,7 +176,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
 
         final DecimalFormat frmt = new DecimalFormat("0.0000");
 
-        final ArrayList<String> metadataList = new ArrayList<String>(10);
+        final List<String> metadataList = new ArrayList<String>(10);
         metadataList.add("Time: " + zeroDopplerTime.toString());
         metadataList.add("Peak Direction: " + maxSpecDir + " deg");
         metadataList.add("Peak Wavelength: " + frmt.format(maxSpecWL) + " m");
@@ -588,7 +589,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
                 direction = (int)(-((float)thBin * thStep + thStep / 2.0f + thFirst));
             }             
 
-            final ArrayList<String> readoutList = new ArrayList<String>(5);
+            final List<String> readoutList = new ArrayList<String>(5);
             readoutList.add("Record: " + (currentRecord+1) + " of " + (numRecords+1));
             readoutList.add("Wavelength: " + wl + " m");
             readoutList.add("Direction: " + direction + " deg");

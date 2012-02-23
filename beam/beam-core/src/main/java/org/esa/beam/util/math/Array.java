@@ -19,7 +19,7 @@ package org.esa.beam.util.math;
  * Interface for wrapping primitive arrays.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public interface Array {
 

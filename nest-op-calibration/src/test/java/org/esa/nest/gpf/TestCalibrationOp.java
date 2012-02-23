@@ -75,12 +75,7 @@ public class TestCalibrationOp extends TestCase {
      */
     public void processFile(String inputPath, String expectedPath) throws Exception {
 
-        final File inputFile = new File(inputPath);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        assertNotNull(reader);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPath);
 
         final CalibrationOp op = (CalibrationOp)spi.createOperator();
         assertNotNull(op);

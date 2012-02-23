@@ -24,7 +24,7 @@ import java.io.File;
 
 /**
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class SourceProductSelectorTest extends TestCase {
 

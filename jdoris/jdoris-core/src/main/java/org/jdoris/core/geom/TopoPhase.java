@@ -121,14 +121,16 @@ public class TopoPhase {
         phi = upperLeftPhi;
         for (int i = 0; i < nRows; i++) {
 
-            if ((i % 100) == 0) {
-                logger.info("Radarcoding DEM line: " + i + " (" + Math.floor(.5 + (100. * (double) i / (double) (nRows))) + "%");
-            }
+//            if ((i % 100) == 0) {
+//                logger.info("Radarcoding DEM line: " + i + " (" + Math.floor(.5 + (100. * (double) i / (double) (nRows))) + "%");
+//            }
 
             lambda = upperLeftLambda;
+            double[] heightArray = dem.data[i];
+
             for (int j = 0; j < nCols; j++) {
 
-                height = dem.data[i][j];
+                height = heightArray[j];
 
                 if (height != dem.noDataValue) {
 
@@ -181,7 +183,7 @@ public class TopoPhase {
                     }
 
                     demRadarCode_phase[i][j] = ref_phase;
-                    lambda += dem.longitudeDelta;
+
 
                 } else {
 
@@ -194,8 +196,10 @@ public class TopoPhase {
                     demRadarCode_y[i][j] = line;
                     demRadarCode_x[i][j] = pix;
                     demRadarCode_phase[i][j] = 0;
+
                 }
 
+                lambda += dem.longitudeDelta;
             }
             phi -= dem.latitudeDelta;
         }

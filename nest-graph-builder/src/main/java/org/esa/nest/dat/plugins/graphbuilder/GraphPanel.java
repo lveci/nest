@@ -28,6 +28,7 @@ import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -81,7 +82,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         gpfOperatorSet.toArray(gpfOperatorList);
         Arrays.sort(gpfOperatorList);
 
-        final ArrayList<String> aliasList = new ArrayList<String>(gpfOperatorList.length);
+        final List<String> aliasList = new ArrayList<String>(gpfOperatorList.length);
         // place categories with folders first
         for(String alias : gpfOperatorList) {
             final String category = graphEx.getOperatorCategory(alias);
@@ -105,7 +106,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
             }
         }
 
-        final ArrayList<JMenu> subMenuList = new ArrayList<JMenu>(20);
+        final List<JMenu> subMenuList = new ArrayList<JMenu>(20);
         // add operators
         for (String anAlias : aliasList) {
             if(!graphEx.isOperatorInternal(anAlias)) {
@@ -126,7 +127,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         }
     }
 
-    private static JMenu getMenuFolder(final ArrayList<JMenu> subMenuList, final String folderName,
+    private static JMenu getMenuFolder(final List<JMenu> subMenuList, final String folderName,
                                        JMenu currentMenu) {
         boolean menuExists = false;
         for(JMenu sub : subMenuList) {
@@ -236,7 +237,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      * @param g the Graphics
      * @param nodeList the list of graphNodes
      */
-    private void DrawGraph(Graphics g, ArrayList<GraphNode> nodeList) {
+    private void DrawGraph(Graphics g, List<GraphNode> nodeList) {
 
         g.setFont(font);
         if(showRightClickHelp) {
@@ -328,6 +329,10 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     public void mouseClicked(MouseEvent e) {
         checkPopup(e);
         showRightClickHelp = false;
+
+        if(selectedNode != null) {
+            graphEx.setSelectedNode(selectedNode);
+        }
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -390,7 +395,6 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
             showHeadHotSpot = false;
             showTailHotSpot = false;
             selectedNode = n;
-            graphEx.setSelectedNode(selectedNode);
 
             repaint();
         }

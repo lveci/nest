@@ -21,7 +21,7 @@ import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.*;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.netcdf.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
@@ -157,7 +157,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
     private static void removeQuickLooks(Map<NcRasterDim, List<Variable>> variableListMap) {
         final String[] excludeList = { "qlk" };
         final NcRasterDim[] keys = variableListMap.keySet().toArray(new NcRasterDim[variableListMap.keySet().size()]);
-        final ArrayList<NcRasterDim> removeList = new ArrayList<NcRasterDim>();
+        final List<NcRasterDim> removeList = new ArrayList<NcRasterDim>();
 
         for (final NcRasterDim rasterDim : keys) {
             final List<Variable> varList = variableListMap.get(rasterDim);
@@ -198,7 +198,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         addAbstractedMetadataHeader(product, product.getMetadataRoot());
     }
 
-    private void addDeliveryNote(final Product product) {
+    private static void addDeliveryNote(final Product product) {
         try {
             final File folder = product.getFileLocation().getParentFile();
             File dnFile = null;
@@ -216,7 +216,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 AbstractMetadataIO.AddXMLMetadata(rootElement, product.getMetadataRoot());
             }
         } catch(IOException e) {
-            System.out.println("Unable to read Delivery Note for "+product.getName());
+            //System.out.println("Unable to read Delivery Note for "+product.getName());
         }
     }
 

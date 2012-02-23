@@ -29,10 +29,10 @@ import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 
 import javax.imageio.stream.FileCacheImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class GETASSE30Reader extends AbstractProductReader {
                 _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir());
                 fileName = FileUtils.getFilenameWithoutExtension(entryName);
             } else {
-                _imageInputStream = new FileImageInputStream(dataFile);
+                _imageInputStream = FileImageInputStreamExtImpl.createInputStream(dataFile);
                 fileName = FileUtils.getFilenameWithoutExtension(dataFile);
             }
         } catch (IOException e) {

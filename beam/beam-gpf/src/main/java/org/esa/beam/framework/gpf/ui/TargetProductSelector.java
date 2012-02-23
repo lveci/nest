@@ -49,7 +49,7 @@ import java.io.File;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class TargetProductSelector {
 

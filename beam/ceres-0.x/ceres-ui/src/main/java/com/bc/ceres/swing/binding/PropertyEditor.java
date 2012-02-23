@@ -25,7 +25,7 @@ import javax.swing.JLabel;
  * described by a {@link com.bc.ceres.binding.PropertyDescriptor}.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public abstract class PropertyEditor {

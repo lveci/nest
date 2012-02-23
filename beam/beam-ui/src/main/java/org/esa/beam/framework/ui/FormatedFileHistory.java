@@ -27,7 +27,7 @@ import org.esa.beam.util.Guardian;
  * skipped..
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class FormatedFileHistory extends FileHistory {
 

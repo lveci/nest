@@ -45,7 +45,7 @@ import javax.swing.JOptionPane;
  * Confirms Raster Data Node deletion by the user and performs them.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.7
  */
 public class RasterDataNodeDeleter {

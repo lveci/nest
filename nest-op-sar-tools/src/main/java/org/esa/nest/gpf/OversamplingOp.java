@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -53,7 +54,7 @@ public class OversamplingOp extends Operator {
     private String[] sourceBandNames;
 
     @Parameter(valueSet = {UndersamplingOp.IMAGE_SIZE, UndersamplingOp.RATIO, UndersamplingOp.PIXEL_SPACING},
-            defaultValue = UndersamplingOp.IMAGE_SIZE, label="Output Image By:")
+            defaultValue = UndersamplingOp.RATIO, label="Output Image By:")
     private String outputImageBy = UndersamplingOp.RATIO;
 
     @Parameter(description = "The row dimension of the output image", defaultValue = "1000", label="Output Image Rows")
@@ -204,7 +205,7 @@ public class OversamplingOp extends Operator {
     private void computeDopplerCentroidFreqForERSProd() {
 
         // get range sampling rate (in Hz)
-        final double samplingRate = abs.getAttributeDouble(AbstractMetadata.range_sampling_rate);
+        final double samplingRate = abs.getAttributeDouble(AbstractMetadata.range_sampling_rate)*1000000; // MHz to Hz
 
         // Get coefficients of Doppler frequency polynomial from
         // fields 105, 106 and 107 in PRI Data Set Summary Record
@@ -378,26 +379,47 @@ public class OversamplingOp extends Operator {
     }
 
     private void addSelectedBands() {
+
         final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
-        for(Band srcBand : sourceBands) {
+        for (int i = 0; i < sourceBands.length; i++) {
 
-            String unit = srcBand.getUnit();
+            String unit = sourceBands[i].getUnit();
             if(unit == null) {
                 unit = Unit.AMPLITUDE;  // assume amplitude
             }
 
-            if (unit.contains("phase")) {
-                continue;
+            if (unit.contains(Unit.REAL)) {
+                if(i+1 >= sourceBands.length) {
+                    throw new OperatorException("I and Q bands should be selected in pairs");
+                }
+                String nextUnit = sourceBands[i+1].getUnit();
+                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
+                    throw new OperatorException("I and Q bands should be selected in pairs");
+                }
+
+                final Band targetBandI = targetProduct.addBand(sourceBands[i].getName(), ProductData.TYPE_FLOAT32);
+                targetBandI.setUnit(unit);
+
+                final Band targetBandQ = targetProduct.addBand(sourceBands[i+1].getName(), ProductData.TYPE_FLOAT32);
+                targetBandQ.setUnit(nextUnit);
+
+                String suffix = OperatorUtils.getSuffixFromBandName(sourceBands[i].getName());
+                if (suffix == null) {
+                    suffix = "";
+                } else {
+                    suffix = '_' + suffix;
+                }
+                ReaderUtils.createVirtualIntensityBand(targetProduct, targetBandI, targetBandQ, suffix);
+                ReaderUtils.createVirtualPhaseBand(targetProduct, targetBandI, targetBandQ, suffix);
+                i++;
+            } else {
+                final String targetBandName = sourceBands[i].getName();
+                if (targetProduct.getBand(targetBandName) == null) {
+                    final Band targetBand = targetProduct.addBand(targetBandName, ProductData.TYPE_FLOAT32);
+                    targetBand.setUnit(unit);
+                }
             }
-
-            final Band targetBand = new Band(srcBand.getName(),
-                                       srcBand.getDataType(),
-                                       targetImageWidth,
-                                       targetImageHeight);
-
-            targetBand.setUnit(unit);
-            targetProduct.addBand(targetBand);
         }
     }
 
@@ -473,7 +495,11 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
-                System.out.println(i);
+                //System.out.println(i);
+
+                if (targetBands[i].isSynthetic()) {
+                    continue;
+                }
 
                 if (targetBands[i].getUnit().equals(Unit.REAL)) {
 

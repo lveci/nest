@@ -1,7 +1,7 @@
 package org.esa.nest.dat.dialogs;
 
-import org.esa.beam.framework.ui.RGBImageProfilePane;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.ui.RGBImageProfilePane;
 import org.esa.beam.util.PropertyMap;
 
 /**

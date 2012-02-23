@@ -25,7 +25,7 @@ import com.bc.ceres.core.Assert;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  */
 public class Guardian {
     /**

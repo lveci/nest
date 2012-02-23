@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
  * An abstract implementation of the tool interface.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

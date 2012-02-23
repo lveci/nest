@@ -19,7 +19,7 @@ package com.bc.swing.dock;
  * A component which can either be "docked" in a parent component or
  * be displayed "floating" in a separate window.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface DockableComponent {
 

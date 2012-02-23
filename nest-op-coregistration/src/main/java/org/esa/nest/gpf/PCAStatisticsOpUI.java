@@ -30,11 +30,7 @@ import java.awt.event.ItemListener;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Feb 12, 2008
- * Time: 1:52:49 PM
- * To change this template use File | Settings | File Templates.
+ * UI for PCA operator
  */
 public class PCAStatisticsOpUI extends BaseOperatorUI {
 

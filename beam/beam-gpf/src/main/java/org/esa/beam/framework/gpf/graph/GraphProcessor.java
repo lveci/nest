@@ -172,7 +172,7 @@ public class GraphProcessor {
         final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
 
         try {
-            pm.beginTask("Computing raster data...", numPmTicks);
+            pm.beginTask("", numPmTicks);
             for (Dimension dimension : dimList) {
                 List<NodeContext> nodeContextList = tileDimMap.get(dimension);
                 final int numXTiles = dimension.width;

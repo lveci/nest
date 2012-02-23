@@ -25,13 +25,14 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.util.ProcessTimeMonitor;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.MemUtils;
+import org.esa.nest.util.ProcessTimeMonitor;
+import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -41,7 +42,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  Provides the dialog for excuting a graph on a list of products
@@ -50,22 +54,22 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private final AppContext appContext;
     private final ProductSetPanel productSetPanel;
-    private final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
+    private final List<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
 
-    private final static File graphPath = ResourceUtils.getGraphFolder("");
+    private final static File defaultGraphPath = ResourceUtils.getGraphFolder("");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
-    private final JPanel mainPanel;
     private final JTabbedPane tabbedPane;
     private final JLabel statusLabel;
     private final JLabel bottomStatusLabel;
     private final JPanel progressPanel;
     private final JProgressBar progressBar;
+    private final JLabel progressMsgLabel;
     private ProgressBarProgressMonitor progBarMonitor = null;
 
     private Map<File, File[]> slaveFileMap = null;
     private final Map<File, File> targetFileMap = new HashMap<File, File>();
-    private final ArrayList<BatchProcessListener> listenerList = new ArrayList<BatchProcessListener>(1);
+    private final List<BatchProcessListener> listenerList = new ArrayList<BatchProcessListener>(1);
     private final boolean closeOnDone;
 
     private boolean isProcessing = false;
@@ -77,7 +81,7 @@ public class BatchGraphDialog extends ModelessDialog {
         this.appContext = theAppContext;
         this.closeOnDone = closeOnDone;
 
-        mainPanel = new JPanel(new BorderLayout(4, 4));
+        final JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 
         tabbedPane = new JTabbedPane();
         tabbedPane.addChangeListener(new ChangeListener() {
@@ -103,6 +107,8 @@ public class BatchGraphDialog extends ModelessDialog {
         progressPanel = new JPanel();
         progressPanel.setLayout(new BorderLayout(2,2));
         progressPanel.add(progressBar, BorderLayout.CENTER);
+        progressMsgLabel = new JLabel();
+        progressPanel.add(progressMsgLabel, BorderLayout.NORTH);
         final JButton progressCancelBtn = new JButton("Cancel");
         progressCancelBtn.addActionListener(new ActionListener() {
 
@@ -120,7 +126,7 @@ public class BatchGraphDialog extends ModelessDialog {
         getButton(ID_APPLY).setText("Run");
         getButton(ID_YES).setText("Load");
 
-        graphFile = new File(graphPath+File.separator+"internal", "importGraph.xml");
+        graphFile = new File(defaultGraphPath+File.separator+"internal", "importGraph.xml");
 
         setContent(mainPanel);
         super.getJDialog().setMinimumSize(new Dimension(400, 300));
@@ -128,10 +134,6 @@ public class BatchGraphDialog extends ModelessDialog {
 
     @Override
     public int show() {
-        //productSetPanel.initProducts();
-        //setContent(mainPanel);
-        //initGraphs();
-        //addGraphTabs("", true);
         return super.show();
     }
 
@@ -218,11 +220,14 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private static File getFilePath(Component component, String title) {
 
+        final File graphPath = new File(Settings.getPref("batch.last_graph_path", defaultGraphPath.getAbsolutePath()));
         final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(graphPath);
         chooser.setMultiSelectionEnabled(false);
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
+            final File file = chooser.getSelectedFile();
+            Settings.setPref("batch.last_graph_path", file.getAbsolutePath());
+            return file;
         }
         return null;
     }
@@ -255,7 +260,7 @@ public class BatchGraphDialog extends ModelessDialog {
             MemUtils.freeAllMemory();
 
             progressBar.setValue(0);
-            progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
+            progBarMonitor = new ProgressBarProgressMonitor(progressBar, progressMsgLabel, progressPanel);
 
             final SwingWorker processThread = new ProcessThread(progBarMonitor);
             processThread.execute();
@@ -484,7 +489,7 @@ public class BatchGraphDialog extends ModelessDialog {
             //cloneGraphEx.setGraph(graphFromFile, true);
             graphExecuterList.add(cloneGraphEx);
 
-            final ArrayList<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
+            final List<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
             for(GraphNode cloneNode : cloneGraphNodes) {
                 final GraphNode node = graphEx.findGraphNode(cloneNode.getID());
                 if(node != null)
@@ -496,7 +501,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    public ArrayList<File> getBatchProcessedTargetProducts() {
+    public List<File> getBatchProcessedTargetProducts() {
         final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
         return graphEx.getProductsToOpenInDAT();
     }
@@ -512,7 +517,7 @@ public class BatchGraphDialog extends ModelessDialog {
         private final ProgressMonitor pm;
         private ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
         private boolean errorOccured = false;
-        final ArrayList<String> errMsgs = new ArrayList<String>();
+        final List<String> errMsgs = new ArrayList<String>();
 
         public ProcessThread(final ProgressMonitor pm) {
             this.pm = pm;

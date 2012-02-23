@@ -30,7 +30,7 @@ import java.util.EventListener;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.framework.ui.product.ProductTree
  */
 public interface ProductTreeListener extends EventListener {

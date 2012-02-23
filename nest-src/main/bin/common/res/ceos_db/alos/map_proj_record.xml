@@ -36,5 +36,10 @@
 	<rec name="Last line last valid pixel geodetic longitude" type="5" num="16"/>
 	<rec name="Last line 1st pixel geodetic latitude" type="5" num="16"/>
 	<rec name="Last line 1st pixel geodetic longitude" type="5" num="16"/>
-	<!--rec name="skipBytes" type="0" num="8820"/-->
+	
+	<rec name="skipBytes" type="0" num="64"/>
+	<struct nloop="8">
+		<rec name="Line to Pixel coefficients" type="5" num="20"/>
+	</struct>
+	
 </ceos>

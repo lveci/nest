@@ -22,7 +22,7 @@ import java.io.IOException;
  * <code>ProductIO</code>.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ProductIOException extends IOException {
 

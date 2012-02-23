@@ -3,12 +3,12 @@ package org.esa.nest.db;
 import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
-import java.awt.image.BufferedImage;
-import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public  class SymbolNode {

@@ -27,7 +27,7 @@ package com.bc.jexp;
  * interfaces can cast the object to the application specific type in order to perform
  * an application specific evaluation of the <code>Symbol</code> or <code>Function</code>.
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface EvalEnv {
 

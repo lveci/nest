@@ -34,6 +34,7 @@ import org.esa.nest.gpf.TileIndex;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The Adaptive Thresholding ship detection operator.
@@ -161,7 +162,7 @@ public class AdaptiveThresholdingOp extends Operator {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) { // if user did not select any band
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 final String unit = band.getUnit();
                 if(!(unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY)))

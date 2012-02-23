@@ -20,13 +20,14 @@ import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
 
  */
 public class AOIManager {
 
-    private final ArrayList<AOI> aoiList = new ArrayList<AOI>(5);
+    private final List<AOI> aoiList = new ArrayList<AOI>(5);
     public final static String LAST_INPUT_PATH = "aoi.last_input_path";
     public final static String LAST_OUTPUT_PATH = "aoi.last_output_path";
     public final static String LAST_GRAPH_PATH = "aoi.last_graph_path";
@@ -75,14 +76,5 @@ public class AOIManager {
 
     public static void setLastOutputPath(final String path) {
         VisatApp.getApp().getPreferences().setPropertyString(LAST_OUTPUT_PATH, path);
-    }
-
-    public static String getLastGraphPath() {
-        return VisatApp.getApp().getPreferences().getPropertyString(LAST_GRAPH_PATH,
-                ResourceUtils.getGraphFolder("").getAbsolutePath());
-    }
-
-    public static void setLastGraphPath(final String path) {
-        VisatApp.getApp().getPreferences().setPropertyString(LAST_GRAPH_PATH, path);
     }
 }

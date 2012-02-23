@@ -16,6 +16,9 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.RuntimeConfig;
+import com.bc.ceres.core.runtime.RuntimeConfigException;
+import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.*;
 import org.esa.beam.framework.datamodel.*;
@@ -25,7 +28,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.RecursiveProcessor;
 
@@ -61,8 +64,27 @@ public class TestUtils {
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
 
+    public static void initTestEnvironment() throws RuntimeConfigException {
+        final RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
+
+        //disable JAI media library
+        System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+    }
+
     public static int getMaxIterations() {
         return maxIteration;
+    }
+
+    public static Product readSourceProduct(final String path) throws IOException {
+        final File inputFile = new File(path);
+        if(!inputFile.exists()) {
+            throw new IOException(path + " not found");
+            //System.out.println("path + \" not found\"");
+            //return null;
+        }
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        return reader.readProductNodes(inputFile, null);
     }
 
     public static boolean canTestReadersOnAllProducts() {
@@ -108,6 +130,10 @@ public class TestUtils {
     public static void verifyProduct(final Product product, final boolean verifyTimes,
                                      final boolean verifyGeoCoding) throws Exception {
         ReaderUtils.verifyProduct(product, verifyTimes, verifyGeoCoding);
+
+        // readPixels: execute computeTiles()
+        final float[] floatValues = new float[100];
+        product.getBandAt(0).readPixels(0, 0, 10, 10, floatValues, ProgressMonitor.NULL);
     }
 
     public static void attributeEquals(final MetadataElement elem, final String name,
@@ -164,7 +190,7 @@ public class TestUtils {
         }
     }
 
-    public static void compareProducts(final Operator op, final Product targetProduct,
+    public static void compareProducts(final Product targetProduct,
                                        final String expectedPath, final String[] excemptionList) throws Exception {
 
         final Band targetBand = targetProduct.getBandAt(0);
@@ -172,8 +198,8 @@ public class TestUtils {
             throwErr("targetBand at 0 is null");
 
         // readPixels: execute computeTiles()
-        final float[] floatValues = new float[10000];
-        targetBand.readPixels(100, 101, 100, 99, floatValues, ProgressMonitor.NULL);
+        final float[] floatValues = new float[2500];
+        targetBand.readPixels(40, 40, 50, 50, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
         final File expectedFile = new File(expectedPath);
@@ -186,8 +212,8 @@ public class TestUtils {
         final Product expectedProduct = reader2.readProductNodes(expectedFile, null);
         final Band expectedBand = expectedProduct.getBandAt(0);
 
-        final float[] expectedValues = new float[10000];
-        expectedBand.readPixels(100, 101, 100, 99, expectedValues, ProgressMonitor.NULL);
+        final float[] expectedValues = new float[2500];
+        expectedBand.readPixels(40, 40, 50, 50, expectedValues, ProgressMonitor.NULL);
         if(!Arrays.equals(floatValues, expectedValues)) {
                 throwErr("Pixels are different in file "+expectedPath);
         }
@@ -247,16 +273,11 @@ public class TestUtils {
         return Math.max(0, Math.min(val, max));
     }
 
-    private static boolean isAlos(Product prod) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(prod);
-        return absRoot != null && absRoot.getAttributeString(AbstractMetadata.MISSION).contains("ALOS");
-    }
-
     public static int recurseProcessFolder(final OperatorSpi spi, final File origFolder, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
 
-        final File[] folderList = origFolder.listFiles(new ProductFunctions.DirectoryFileFilter());
+        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
         for(File folder : folderList) {
             if(maxIteration > 0 && iterations >= maxIteration)
                 break;
@@ -361,17 +382,20 @@ public class TestUtils {
         }
     }
 
-    public static void recurseReadFolder(final File folder,
+    public static void recurseReadFolder(final File origFolder,
                                          final ProductReaderPlugIn readerPlugin,
                                          final ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(file.isDirectory()) {
-                if(!file.getName().contains("skipTest")) {
-                    recurseReadFolder(file, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
-                }
-            } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
+        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
+        for(File folder : folderList) {
+            if(!folder.getName().contains("skipTest")) {
+                recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
+            }
+        }
+
+        for(File file : origFolder.listFiles()) {
+            if(file.isDirectory() && readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
                     //System.out.println("Reading "+ file.toString());

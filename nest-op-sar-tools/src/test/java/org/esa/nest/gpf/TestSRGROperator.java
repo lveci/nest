@@ -37,6 +37,7 @@ public class TestSRGROperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        TestUtils.initTestEnvironment();
         spi = new SRGROp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }

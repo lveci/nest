@@ -21,14 +21,19 @@ import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dat.layers.ScreenPixelConverter;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Shows the movement of GCP in a coregistered image
@@ -39,7 +44,7 @@ public class GCPVectorLayer extends Layer {
     private final Product product;
     private final Band band;
     private static final float lineThickness = 4.0f;
-    private final ArrayList<GCPData> gcpList = new ArrayList<GCPData>(200);
+    private final List<GCPData> gcpList = new ArrayList<GCPData>(200);
 
     public GCPVectorLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);
@@ -79,32 +84,19 @@ public class GCPVectorLayer extends Layer {
             return;
 
         final Viewport vp = rendering.getViewport();
-        final int level = 0;
-
         final RasterDataNode raster = band;
-        final MultiLevelImage mli = raster.getGeophysicalImage();
+        final ScreenPixelConverter screenPixel = new ScreenPixelConverter(vp, raster);
 
-        final AffineTransform m2i = mli.getModel().getModelToImageTransform(level);
-        final AffineTransform i2m = mli.getModel().getImageToModelTransform(level);
-
-        final Shape vbounds = vp.getViewBounds();
-        final Shape mbounds = vp.getViewToModelTransform().createTransformedShape(vbounds);
-        final Shape ibounds = m2i.createTransformedShape(mbounds);
-
-        final RenderedImage ri = mli.getImage(level);
-        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, ri.getWidth(), ri.getHeight()));
-        if (irect.isEmpty()) {
+        if (!screenPixel.withInBounds()) {
             return;
         }
+
         final double zoom = rendering.getViewport().getZoomFactor();
-        
-        final AffineTransform m2v = vp.getModelToViewTransform();
 
         final Graphics2D graphics = rendering.getGraphics();
         graphics.setStroke(new BasicStroke(lineThickness));
 
         final double[] ipts = new double[8];
-        final double[] mpts = new double[8];
         final double[] vpts = new double[8];
 
         graphics.setColor(Color.RED);
@@ -116,8 +108,7 @@ public class GCPVectorLayer extends Layer {
                         (int)gcp.mstX,
                         (int)gcp.mstY, 5, ipts, zoom);
 
-            i2m.transform(ipts, 0, mpts, 0, 4);
-            m2v.transform(mpts, 0, vpts, 0, 4);
+            screenPixel.pixelToScreen(ipts, vpts);
 
             //arrowhead
             graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));

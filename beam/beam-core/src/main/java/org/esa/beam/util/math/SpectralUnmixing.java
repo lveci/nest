@@ -20,7 +20,7 @@ package org.esa.beam.util.math;
  * Linear spectral unmixing interface.
  *
  * @author Norman Fomferra.
-
+ * @version $Revision$ $Date$
  */
 public interface SpectralUnmixing {
 

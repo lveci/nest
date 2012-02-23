@@ -19,12 +19,13 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -41,7 +42,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
     private static String[] getFormatFileExtensions() {
 
-        ArrayList<String> extList = new ArrayList<String>();
+        final List<String> extList = new ArrayList<String>(20);
         extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
         // BEST extensions
@@ -56,14 +57,14 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         return extList.toArray(new String[extList.size()]);
     }
 
-    private static void addBESTExt(ArrayList<String> extList, String ext) {
-        extList.add(ext+"i"); extList.add(ext+"f"); extList.add(ext+"c");
-        extList.add(ext+"s"); extList.add(ext+"t"); extList.add(ext+"r");
+    private static void addBESTExt(final List<String> extList, final String ext) {
+        extList.add(ext+'i'); extList.add(ext+'f'); extList.add(ext+'c');
+        extList.add(ext+'s'); extList.add(ext+'t'); extList.add(ext+'r');
     }
 
     private static String[] getPrunedImageIOExtensions() {
-        ArrayList<String> extList = new ArrayList<String>();
-        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
+        final List<String> extList = new ArrayList<String>(20);
+     /*   extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
         extList.remove("jpeg");
         extList.remove("jls");
@@ -73,6 +74,12 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         extList.remove("ppm");
         extList.remove("tiff");
         extList.remove("tif");
+        extList.remove("n1");  */
+
+        extList.add("bmp");
+        extList.add("gif");
+        extList.add("jpg");
+        extList.add("png");
 
         return extList.toArray(new String[extList.size()]);
     }

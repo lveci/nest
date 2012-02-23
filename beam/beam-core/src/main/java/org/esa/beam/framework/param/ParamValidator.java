@@ -27,7 +27,7 @@ package org.esa.beam.framework.param;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$  $Date$
  */
 public interface ParamValidator {
 

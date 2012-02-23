@@ -21,7 +21,7 @@ package org.esa.beam.framework.datamodel;
  * processes.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface ProgressListener {
 

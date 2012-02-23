@@ -13,6 +13,9 @@ public class EnviProductReaderTest_WithFileIO extends TestCase {
     protected void setUp() throws Exception {
         final String ioTempDir = System.getProperty("java.io.tmpdir");
         tempDir = new File(ioTempDir, "tempEnviProductReaderTest");
+        if (tempDir.exists()) {
+            TestUtils.deleteFileTree(tempDir);
+        }
         assertEquals(true, tempDir.mkdir());
     }
 
@@ -22,24 +25,35 @@ public class EnviProductReaderTest_WithFileIO extends TestCase {
     }
 
     public void testCreateEnviImageFile() throws IOException {
-        final File hdrFile1 = new File(tempDir, "envifile.img.hdr");
-        final File hdrFile2 = new File(tempDir, "envifile.hdr");
+        doTest("envifile.hdr", "envifile.img");
+        doTest("envifile.img.hdr", "envifile.img");
 
-        final File expImgFile = new File(tempDir, "envifile.img");
-        assertEquals(true, expImgFile.createNewFile());
-        assertEquals(expImgFile, EnviProductReader.getEnviImageFile(hdrFile1));
-        assertEquals(expImgFile, EnviProductReader.getEnviImageFile(hdrFile2));
+        doTest("envifile.hdr", "envifile.IMG");
+        doTest("envifile.HDR", "envifile.img");
+        doTest("envifile.HDR", "envifile.IMG");
+
+        doTest("envifile.hdr", "envifile.bin");
+        doTest("envifile.img.hdr", "envifile.bin");
+        doTest("envifile.bin.hdr", "envifile.bin");
+
+        doTest("envifile.hdr", "envifile.bil");
+        doTest("envifile.bil.hdr", "envifile.bil");
+
+        doTest("envifile.hdr", "envifile.bsq");
+        doTest("envifile.bsq.hdr", "envifile.bsq");
+
     }
+    
+    private void doTest(String hdrFilename, String imgFilename) throws IOException {
+        final File hdrFile = new File(tempDir, hdrFilename);
+        assertEquals(true, hdrFile.createNewFile());
 
-    public void testCreateEnviImageFile_img_File_not_exist() throws IOException {
-        final File hdrFile1 = new File(tempDir, "envifile.img.hdr");
-        final File hdrFile2 = new File(tempDir, "envifile.hdr");
+        final File imgFile = new File(tempDir, imgFilename);
+        assertEquals(true, imgFile.createNewFile());
 
-        final File expImgFile = new File(tempDir, "envifile.img");
-        assertEquals(false, expImgFile.exists());
-        final File expBinFile = new File(tempDir, "envifile.bin");
-        assertEquals(true, expBinFile.createNewFile());
-        assertEquals(expBinFile, EnviProductReader.getEnviImageFile(hdrFile1));
-        assertEquals(expBinFile, EnviProductReader.getEnviImageFile(hdrFile2));
+        assertEquals(imgFile, EnviProductReader.getEnviImageFile(hdrFile));
+        // cleanup
+        imgFile.delete();
+        hdrFile.delete();
     }
 }

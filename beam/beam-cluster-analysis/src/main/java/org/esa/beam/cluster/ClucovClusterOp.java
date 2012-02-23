@@ -60,7 +60,7 @@ public class ClucovClusterOp extends Operator {
     //    private transient Band[] featureProbBands;
     private transient Band groupBand;
     private transient Clucov clucov;
-    private boolean clucovProcessed = false;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -92,8 +92,13 @@ public class ClucovClusterOp extends Operator {
 
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        if (!clucovProcessed) {
-            processClucov();
+        if (clucov == null) {
+            try {
+                computeClusters(pm);
+                storeClustersInProduct();
+            } catch (IOException e) {
+                throw new OperatorException(e);
+            }
         }
 
         if (band == groupBand) {
@@ -107,17 +112,6 @@ public class ClucovClusterOp extends Operator {
                 }
                 checkForCancellation();
             }
-        }
-    }
-
-    private synchronized void processClucov() throws OperatorException {
-        if(clucovProcessed) return;
-        try {
-            computeClusters();
-            storeClustersInProduct();
-            clucovProcessed = true;
-        } catch (IOException e) {
-            throw new OperatorException(e);
         }
     }
 
@@ -140,16 +134,14 @@ public class ClucovClusterOp extends Operator {
         }
     }
 
-    private void computeClusters() throws IOException {
+    private void computeClusters(ProgressMonitor pm) throws IOException {
         int width = sourceProduct.getSceneRasterWidth();
         int height = sourceProduct.getSceneRasterHeight();
         double[] scanLine = new double[width];
         double[][] dsVectors = new double[width][featureBands.length];
 
-        DataSet ds = new DataSet(width * height, featureBands.length);
-        try {
         // todo - handle valid expression! 
-
+        DataSet ds = new DataSet(width * height, featureBands.length);
         for (int y = 0; y < height; y++) {
             for (int i = 0; i < featureBands.length; i++) {
                 Band featureBand = featureBands[i];
@@ -164,18 +156,10 @@ public class ClucovClusterOp extends Operator {
             }
             checkForCancellation();
         }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            clucov = new Clucov(ds);
-            //clucov.
-            clucov.initialize(30);
-            clucov.run();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        clucov = new Clucov(ds);
+        //clucov.
+        clucov.initialize(30);
+        clucov.run();
     }
 
     @Override

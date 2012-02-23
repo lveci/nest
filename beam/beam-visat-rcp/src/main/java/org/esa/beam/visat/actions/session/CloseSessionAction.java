@@ -24,7 +24,7 @@ import org.esa.beam.visat.VisatApp;
  * Closes a VISAT session.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class CloseSessionAction extends ExecCommand {

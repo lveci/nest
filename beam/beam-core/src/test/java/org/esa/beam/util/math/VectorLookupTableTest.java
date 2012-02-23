@@ -23,7 +23,7 @@ import java.util.Arrays;
  * Tests for class {@link VectorLookupTable}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class VectorLookupTableTest extends TestCase {
 

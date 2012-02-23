@@ -34,6 +34,7 @@ import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * RemoveAntennaPattern for ASAR & ERS products.
@@ -135,7 +136,7 @@ public class RemoveAntennaPatternOp extends Operator {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 final String unit = band.getUnit();
                 if (unit != null && (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY))) {

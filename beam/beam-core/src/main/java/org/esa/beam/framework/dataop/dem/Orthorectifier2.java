@@ -29,7 +29,7 @@ import org.esa.beam.util.math.RsMathUtils;
  * this class for each orthorectifying thread.</i>
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class Orthorectifier2 extends Orthorectifier {
 

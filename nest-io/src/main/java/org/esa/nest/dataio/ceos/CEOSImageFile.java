@@ -18,19 +18,20 @@ package org.esa.nest.dataio.ceos;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.BinaryRecord;
+import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.1 $ $Date: 2011-06-30 15:41:43 $
+ * @version $Revision: 1.3 $ $Date: 2012-01-10 21:22:00 $
  */
 public abstract class CEOSImageFile {
 
@@ -142,7 +143,7 @@ public abstract class CEOSImageFile {
     }
 
     public static String[] getImageFileNames(File baseDir, String[] prefixList) {
-        final ArrayList<String> list = new ArrayList<String>(2);
+        final List<String> list = new ArrayList<String>(2);
         final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();

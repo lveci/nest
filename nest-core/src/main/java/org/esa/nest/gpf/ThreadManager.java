@@ -16,13 +16,14 @@
 package org.esa.nest.gpf;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages how many threads are working cuncurrently
  */
 public class ThreadManager {
     private final static int numCPU = Runtime.getRuntime().availableProcessors();
-    private final ArrayList<Thread> threadList = new ArrayList<Thread>(numCPU);
+    private final List<Thread> threadList = new ArrayList<Thread>(numCPU);
 
     public ThreadManager() {}
 

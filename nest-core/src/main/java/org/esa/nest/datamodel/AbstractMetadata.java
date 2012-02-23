@@ -33,10 +33,16 @@ import java.text.ParseException;
  */
 public final class AbstractMetadata {
 
+    /**
+     * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
+     */
+    private static final String METADATA_VERSION = "4C-0.1";
+
     public static final int NO_METADATA = 99999;
     //public static final short NO_METADATA_BYTE = 99;
     private static final short NO_METADATA_BYTE = 0;
     public static final String NO_METADATA_STRING = " ";
+    public static final ProductData.UTC NO_METADATA_UTC = new ProductData.UTC(0);
 
     public static final String ABSTRACT_METADATA_ROOT = "Abstracted_Metadata";
     @Deprecated
@@ -44,6 +50,7 @@ public final class AbstractMetadata {
 
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
     public static final String MASTER_BANDS = "Master_bands";
+    public static final String SLAVE_BANDS = "Slave_bands";
 
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
@@ -162,6 +169,8 @@ public final class AbstractMetadata {
     public static final String range_bandwidth = "range_bandwidth";
     public static final String azimuth_bandwidth = "azimuth_bandwidth";
 
+    public static final String abstracted_metadata_version = "metadata_version";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -278,6 +287,9 @@ public final class AbstractMetadata {
         absRoot.addElement(new MetadataElement(srgr_coefficients));
         absRoot.addElement(new MetadataElement(dop_coefficients));
 
+        att = addAbstractedAttribute(absRoot, abstracted_metadata_version, ProductData.TYPE_ASCII, "", "AbsMetadata version");
+        att.getData().setElems(METADATA_VERSION);
+
         return absRoot;
     }
 
@@ -385,10 +397,10 @@ public final class AbstractMetadata {
     public static ProductData.UTC parseUTC(final String timeStr) {
         try {
             if(timeStr == null)
-                return new ProductData.UTC(0);
+                return NO_METADATA_UTC;
             return ProductData.UTC.parse(timeStr);
         } catch(ParseException e) {
-            return new ProductData.UTC(0);
+            return NO_METADATA_UTC;
         }
     }
 
@@ -402,7 +414,7 @@ public final class AbstractMetadata {
             return ProductData.UTC.parse(timeStr, format);
         } catch(ParseException e) {
             System.out.println("UTC parse error:"+ e.toString());
-            return new ProductData.UTC(0);
+            return NO_METADATA_UTC;
         }
     }
 
@@ -477,16 +489,31 @@ public final class AbstractMetadata {
     }
 
     private static void patchMissingMetadata(final MetadataElement abstractedMetadata) {
+        // check if version has changed
+        final String version = abstractedMetadata.getAttributeString(abstracted_metadata_version, "");
+        if(version.equals(METADATA_VERSION))
+            return;
+
         final MetadataElement tmpElem = new MetadataElement("tmp");
         final MetadataElement completeMetadata = addAbstractedMetadataHeader(tmpElem);
 
         final MetadataAttribute[] attribs = completeMetadata.getAttributes();
         for(MetadataAttribute at : attribs) {
-            if(abstractedMetadata.getAttribute(at.getName()) == null) {
+            if(!abstractedMetadata.containsAttribute(at.getName())) {
                 abstractedMetadata.addAttribute(at);
                 abstractedMetadata.getProduct().setModified(false);
             }
         }
+    }
+
+    public static MetadataElement getSlaveMetadata(final Product product) {
+        final MetadataElement targetRoot = product.getMetadataRoot();
+        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+        if(targetSlaveMetadataRoot == null) {
+            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
+            targetRoot.addElement(targetSlaveMetadataRoot);
+        }
+        return targetSlaveMetadataRoot;
     }
 
     /**

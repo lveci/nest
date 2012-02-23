@@ -22,7 +22,7 @@ import java.lang.reflect.Constructor;
  * An implementation of a {@link com.bc.ceres.core.ExtensionFactory} for a single extension type.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.9
  */
 public class SingleTypeExtensionFactory<T, E> implements ExtensionFactory {

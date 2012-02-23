@@ -25,6 +25,7 @@ import org.esa.nest.db.ProductEntry;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
 
@@ -34,7 +35,7 @@ public class WorldMapUI {
     private final WorldMapPaneDataModel worldMapDataModel;
     private final NestWorldMapPane worlMapPane;
 
-    private final ArrayList<DatabaseQueryListener> listenerList = new ArrayList<DatabaseQueryListener>(1);
+    private final List<DatabaseQueryListener> listenerList = new ArrayList<DatabaseQueryListener>(1);
 
     public WorldMapUI() {
 

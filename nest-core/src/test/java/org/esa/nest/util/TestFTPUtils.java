@@ -41,7 +41,7 @@ public class TestFTPUtils extends TestCase {
         super.tearDown();
     }
 
-    public void testConnect() throws IOException {
+    public void testConnect() throws Exception {
         final String server = "xftp.jrc.it";
         final String remotePath = "/pub/srtmV4/tiff/";
 

@@ -24,6 +24,7 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
+import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelRenderer;
 import com.bc.ceres.glevel.MultiLevelSource;
@@ -192,7 +193,6 @@ public class ImageLayer extends Layer {
             return;
         }
         final Viewport vp = rendering.getViewport();
-        if(vp == null) return;
         final int level = getLevel(vp);
         final MultiLevelRenderer renderer = getRenderer(rendering);
         renderer.renderImage(rendering, multiLevelSource, level);
@@ -205,7 +205,6 @@ public class ImageLayer extends Layer {
     private void renderImageBorder(Rendering rendering, int level) {
         final Graphics2D graphics2D = rendering.getGraphics();
         final Viewport viewport = rendering.getViewport();
-        if(viewport == null) return;
 
         final Object oldAntialiasing = graphics2D.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         final Paint oldPaint = graphics2D.getPaint();
@@ -280,21 +279,10 @@ public class ImageLayer extends Layer {
         return configuration;
     }
 
+    @LayerTypeMetadata(name = "ImageLayerType",
+                       aliasNames = {"com.bc.ceres.glayer.support.ImageLayer$Type"})
     public static class Type extends LayerType {
 
-        private static final String TYPE_NAME = "ImageLayerType";
-        private static final String[] ALIASES = {"com.bc.ceres.glayer.support.ImageLayer$Type"};
-
-        @Override
-        public String getName() {
-            return TYPE_NAME;
-        }
-        
-        @Override
-        public String[] getAliases() {
-            return ALIASES;
-        }
-        
         @Override
         public boolean isValidFor(LayerContext ctx) {
             return true;

@@ -16,95 +16,38 @@
 package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
-import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
-import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Map;
 
 /**
  * User interface for EllipsoidCorrectionRDOp
  */
-public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
+public class EllipsoidCorrectionRDOpUI extends RangeDopplerGeocodingOpUI {
 
-    private final JList bandList = new JList();
-    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
-    private final JButton crsButton = new JButton();
-    private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
+    public EllipsoidCorrectionRDOpUI() {
+        useAvgSceneHeight = true;
+    }
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        initializeOperatorUI(operatorName, parameterMap);
+        final JComponent pane = super.CreateOpTab(operatorName, parameterMap, appContext);
 
-        final JComponent panel = createPanel();
-        initParameters();
-
-        crsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mapProjHandler.promptForFeatureCrs(sourceProducts);
-                crsButton.setText(mapProjHandler.getCRSName());
-            }
-        });
-
-        return new JScrollPane(panel);
+        return pane;
     }
 
     @Override
     public void initParameters() {
-
-        OperatorUIUtils.initBandList(bandList, getBandNames());
-        imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
-
-        final String mapProjection = (String)paramMap.get("mapProjection");
-        mapProjHandler.initParameters(mapProjection, sourceProducts);
-        crsButton.setText(mapProjHandler.getCRSName());
-    }
-
-    @Override
-    public UIValidation validateParameters() {
-
-        return new UIValidation(UIValidation.State.OK, "");
+        super.initParameters();
     }
 
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
-        paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
-
-        if(mapProjHandler.getCRS() != null) {
-            paramMap.put("mapProjection", mapProjHandler.getCRS().toWKT());
-        }
+        super.updateParameters();
     }
 
-    private JComponent createPanel() {
 
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
-        contentPane.add(new JLabel("Source Bands:"), gbc);
-
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
-        
-        DialogUtils.fillPanel(contentPane, gbc);
-
-        return contentPane;
-    }
 }

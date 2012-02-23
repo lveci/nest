@@ -20,7 +20,7 @@ package com.bc.ceres.core;
  * A factory providing runtime extensions for a given object.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface ExtensionFactory {
     /**

@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -31,7 +32,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
@@ -53,6 +54,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.List;
 
 /**
  * The operator generates orthorectified image using rigorous SAR simulation.
@@ -62,12 +64,12 @@ import java.util.*;
  * 1. SAR simulation: Generate simulated SAR image using DEM, the geocoding and orbit state vectors from the
  *    original SAR image, and mathematical modeling of SAR imaging geometry. The simulated SAR image will have
  *    the same dimension and resolution as the original image. For detailed steps and parameters used in SAR
- *    simulation, the reader is refered to NEST help for SAR Simulation Operator.
+ *    simulation, the reader is referred to NEST help for SAR Simulation Operator.
  *
  * 2. Co-registration: The simulated SAR image (master) and the original SAR image (slave) are co-registered
  *    and a WARP function is produced. The WARP function maps each pixel in the simulated SAR image to its
  *    corresponding position in the original SAR image. For detailed steps and parameters used in co-registration,
- *    the reader is refered to NEST help for GCP Selection Operator.
+ *    the reader is referred to NEST help for GCP Selection Operator.
  *
  * 3. Terrain correction: Traverse DEM grid that covers the imaging area. For each cell in the DEM grid, compute
  *    its corresponding pixel position in the simulated SAR image using SAR model. Then its corresponding pixel
@@ -185,7 +187,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private float demNoDataValue = 0; // no data value for DEM
-    private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -211,7 +212,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    private RangeDopplerGeocodingOp.ResampleMethod imgResampling = null;
+    private Resampling imgResampling = null;
     private CoordinateReferenceSystem targetCRS;
 
     private boolean useAvgSceneHeight = false;
@@ -272,7 +273,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            imgResampling = RangeDopplerGeocodingOp.getResampling(imgResamplingMethod);
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -476,7 +477,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         targetCRS = getCRS();
 
-        RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+        final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
         if (pixelSpacingInMeter <= 0.0) {
             pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
                                            RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
@@ -837,7 +838,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
 
-        final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
+        final List<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
         for(Band targetBand : keySet) {
 
             if(targetBand.getName().equals("elevation")) {
@@ -1168,7 +1169,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param bandUnit The corresponding source band unit.
      * @param subSwathIndex The subswath index.
      * @return The pixel value.
-     * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
                                  final RangeDopplerGeocodingOp.TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex) {
@@ -1180,21 +1180,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
             qBandName = srcBandNames[1];
         }
 
-        if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(RangeDopplerGeocodingOp.ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
             final Tile sourceTile = getSrcTile(iBandName, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);

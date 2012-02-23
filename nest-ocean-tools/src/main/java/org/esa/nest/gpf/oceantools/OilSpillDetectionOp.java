@@ -16,7 +16,10 @@
 package org.esa.nest.gpf.oceantools;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -33,6 +36,7 @@ import org.esa.nest.gpf.TileIndex;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The oil spill detection operator.
@@ -159,7 +163,7 @@ public class OilSpillDetectionOp extends Operator {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) { // if user did not select any band
             final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final List<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 if(band.getUnit() != null && band.getUnit().equals(Unit.INTENSITY))
                     bandNameList.add(band.getName());

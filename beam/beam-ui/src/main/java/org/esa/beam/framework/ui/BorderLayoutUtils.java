@@ -24,7 +24,7 @@ import javax.swing.JPanel;
  * A utility class providing helper methods for <code>JPanel</code>s with a <code>BorderLayout</code> layout manager.
  *
  * @author Sabine Embacher
-
+ * @version $Revision$  $Date$
  */
 public class BorderLayoutUtils {
 

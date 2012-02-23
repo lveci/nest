@@ -22,30 +22,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import com.vividsolutions.jts.geom.Geometry;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.ColorPaletteDef;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.ImageInfo;
-import org.esa.beam.framework.datamodel.IndexCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.PixelGeoCoding;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.datamodel.ProductVisitorAdapter;
-import org.esa.beam.framework.datamodel.RGBChannelDef;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.ScatterPlot;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VectorDataNode;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapTransform;
@@ -64,24 +41,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -986,6 +948,23 @@ public class ProductUtils {
     }
 
     /**
+     * Copies the index codings from the source product to the target.
+     *
+     * @param source the source product
+     * @param target the target product
+     */
+    public static void copyIndexCodings(Product source, Product target) {
+        Guardian.assertNotNull("source", source);
+        Guardian.assertNotNull("target", target);
+
+        int numCodings = source.getIndexCodingGroup().getNodeCount();
+        for (int n = 0; n < numCodings; n++) {
+            IndexCoding sourceFlagCoding = source.getIndexCodingGroup().get(n);
+            copyIndexCoding(sourceFlagCoding, target);
+        }
+    }
+
+    /**
      * Copies the given source index coding to the target product
      * If it exists already, the method simply returns the existing instance.
      *
@@ -1281,7 +1260,7 @@ public class ProductUtils {
 
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<VectorDataNode> vectorDataGroup = sourceProduct.getVectorDataGroup();
-        if (sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null || vectorDataGroup.getNodeCount() == 0) {
+        if (vectorDataGroup.getNodeCount() == 0) {
             return;
         }
         if (sourceProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
@@ -1297,10 +1276,16 @@ public class ProductUtils {
                 targetProduct.getVectorDataGroup().add(targetVDN);
             }
         } else {
+            if (sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null) {
+                return;
+            }
             Geometry clipGeometry;
             try {
                 Geometry sourceGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(sourceProduct);
                 Geometry targetGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(targetProduct);
+                if (!sourceGeometryWGS84.intersects(targetGeometryWGS84)) {
+                    return;
+                }
                 clipGeometry = sourceGeometryWGS84.intersection(targetGeometryWGS84);
             } catch (Exception e) {
                 return;
@@ -2232,7 +2217,6 @@ public class ProductUtils {
     }
 
     public static ArrayList<GeneralPath> assemblePathList(GeoPos[] geoPoints) {
-        final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
         final ArrayList<GeneralPath> pathList = new ArrayList<GeneralPath>(16);
 
         if (geoPoints.length > 1) {
@@ -2240,10 +2224,11 @@ public class ProductUtils {
             float minLon = lon;
             float maxLon = lon;
 
+            final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
             path.moveTo(lon, geoPoints[0].getLat());
-            for (int i = 1; i < geoPoints.length; i++) {
-                lon = geoPoints[i].getLon();
-                final float lat = geoPoints[i].getLat();
+            for (GeoPos pos : geoPoints) {
+                lon = pos.getLon();
+                final float lat = pos.getLat();
                 if (Float.isNaN(lon) || Float.isNaN(lat)) {
                     continue;
                 }
@@ -2257,8 +2242,8 @@ public class ProductUtils {
             }
             path.closePath();
 
-            int runIndexMin = (int) Math.floor((minLon + 180) / 360);
-            int runIndexMax = (int) Math.floor((maxLon + 180) / 360);
+            final int runIndexMin = (int) Math.floor((minLon + 180) / 360);
+            final int runIndexMax = (int) Math.floor((maxLon + 180) / 360);
 
             final Area pathArea = new Area(path);
             for (int k = runIndexMin; k <= runIndexMax; k++) {

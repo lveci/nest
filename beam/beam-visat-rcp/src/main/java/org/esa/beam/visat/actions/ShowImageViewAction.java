@@ -42,7 +42,7 @@ import java.text.MessageFormat;
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ShowImageViewAction extends ExecCommand {
 

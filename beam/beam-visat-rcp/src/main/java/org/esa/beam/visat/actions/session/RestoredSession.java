@@ -23,7 +23,7 @@ import org.esa.beam.framework.ui.product.ProductNodeView;
  * A restored session comprising products and views.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class RestoredSession {

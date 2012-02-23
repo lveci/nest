@@ -32,7 +32,7 @@ import java.io.Writer;
  * for their session.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class XStreamSessionIO extends SessionIO {

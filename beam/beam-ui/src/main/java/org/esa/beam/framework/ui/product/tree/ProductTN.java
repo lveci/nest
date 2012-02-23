@@ -30,7 +30,7 @@ class ProductTN extends AbstractTN {
     private static final String IDENTIFICATION = "Identification";
     private static final String METADATA = "Metadata";
     private static final String BANDS = "Bands";
-    private static final String VECTOR_DATA = "Geometries";
+    private static final String VECTOR_DATA = "Vectors";
     private static final String TIE_POINT_GRIDS = "Tie-point grids";
     private static final String FLAG_CODINGS = "Flag codings";
     private static final String INDEX_CODINGS = "Index codings";

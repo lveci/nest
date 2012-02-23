@@ -24,7 +24,7 @@ import Jama.Matrix;
  *
  * @author Helmut Schiller (GKSS)
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since 4.1
  */
 public class FullyConstrainedLSU implements SpectralUnmixing {

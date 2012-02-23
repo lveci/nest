@@ -24,7 +24,7 @@ import org.esa.nest.gpf.ProductSetReaderOpUI;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 public class ProductSetDialog extends ModelessDialog {
 
-    private final FileModel fileModel = new FileModel();
+    private final FileTableModel fileModel = new FileModel();
     private final JTable productSetTable = new JTable(fileModel);
     private final JTextField nameField;
     private final ProductSet productSet;
@@ -45,7 +45,7 @@ public class ProductSetDialog extends ModelessDialog {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
         productSet = prodSet;
 
-        final ArrayList<File> fileList = productSet.getFileList();
+        final List<File> fileList = productSet.getFileList();
         for(File file : fileList) {
             fileModel.addFile(file);
         }

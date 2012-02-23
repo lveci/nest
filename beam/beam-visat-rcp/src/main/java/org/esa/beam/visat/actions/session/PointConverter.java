@@ -35,7 +35,7 @@ import org.geotools.geometry.text.WKTParser;
  * A converter for {@link java.awt.Shape}s.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class PointConverter implements Converter {

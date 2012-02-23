@@ -35,7 +35,7 @@ import java.io.IOException;
  * a certain geophysical parameter.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.envisat.ProductFile#getBandLineReader
  * @see org.esa.beam.dataio.envisat.RecordReader
  */

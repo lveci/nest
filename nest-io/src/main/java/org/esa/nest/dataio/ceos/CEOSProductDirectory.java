@@ -17,14 +17,14 @@ package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.BinaryRecord;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.binary.BinaryRecord;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
+import org.esa.nest.gpf.ReaderUtils;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -356,6 +356,6 @@ public abstract class CEOSProductDirectory {
     }
 
     protected static ImageInputStream createInputStream(final File file) throws IOException {
-        return new FileImageInputStream(file);
+        return FileImageInputStreamExtImpl.createInputStream(file);
     }
 }

@@ -16,7 +16,6 @@
 package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.util.ProductFunctions;
 import org.esa.nest.util.TestUtils;

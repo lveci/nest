@@ -37,6 +37,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  *  Provides the dialog for excuting multiple graph from one user interface
@@ -45,7 +46,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     protected final AppContext appContext;
     protected final IOPanel ioPanel;
-    protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
+    protected final List<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
 
     private final JPanel mainPanel;
     protected final JTabbedPane tabbedPane;
@@ -225,7 +226,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         return result;
     }
 
-    private void openTargetProducts(final ArrayList<File> fileList) {
+    private void openTargetProducts(final List<File> fileList) {
         if(!fileList.isEmpty()) {
             for(File file : fileList) {
                 try {

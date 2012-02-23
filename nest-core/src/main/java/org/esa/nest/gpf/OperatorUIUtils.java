@@ -16,13 +16,13 @@
 package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,7 +41,7 @@ public final class OperatorUIUtils {
         bandList.setMinimumSize(new Dimension(50, 4));
         
         final int size = bandList.getModel().getSize();
-        final ArrayList<Integer> indices = new ArrayList<Integer>(size);
+        final List<Integer> indices = new ArrayList<Integer>(size);
 
         for (Object selectedValue : selectedValues) {
             final String selValue = (String) selectedValue;
@@ -57,7 +57,7 @@ public final class OperatorUIUtils {
         setSelectedListIndices(bandList, indices);
     }
 
-    public static void setSelectedListIndices(final JList list, final ArrayList<Integer> indices) {
+    public static void setSelectedListIndices(final JList list, final List<Integer> indices) {
         final int[] selIndex = new int[indices.size()];
         for(int i=0; i < indices.size(); ++i) {
             selIndex[i] = indices.get(i);

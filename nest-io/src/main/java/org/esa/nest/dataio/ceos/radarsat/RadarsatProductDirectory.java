@@ -22,9 +22,9 @@ import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.dataio.BinaryRecord;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.binary.BinaryRecord;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CeosHelper;
@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,7 +78,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             histogramRec = _trailerFile.getHistogramRecord();
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
-        final ArrayList<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
+        final List<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
                 final RadarsatImageFile imgFile = new RadarsatImageFile(createInputStream(new File(_baseDir, fileName)), histogramRec);

@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -31,7 +32,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -42,7 +43,6 @@ import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -50,6 +50,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.*;
+import java.util.List;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -119,8 +120,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Parameter(description = "The pixel spacing in degrees", defaultValue = "0", label="Pixel Spacing (deg)")
     private double pixelSpacingInDegree = 0;
 
-    @Parameter(description = "The coordinate reference system in well known text format")
-    private String mapProjection;
+    @Parameter(description = "The coordinate reference system in well known text format", defaultValue="WGS84(DD)")
+    private String mapProjection = "WGS84(DD)";
 
     @Parameter(defaultValue="true", label="Mask out areas with no elevation", description = "Mask the sea with no data value (faster)")
     private boolean nodataValueAtSea = true;
@@ -192,7 +193,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private float demNoDataValue = 0.0f; // no data value for DEM
 
     private CoordinateReferenceSystem targetCRS;
-    private final ImageGeoBoundary imageGeoBoundary = new ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -215,8 +215,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
-    private ResampleMethod imgResampling = null;
+    private Resampling imgResampling = null;
 
     boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
@@ -274,7 +273,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            imgResampling = getResampling(imgResamplingMethod);
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -313,18 +312,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(VisatApp.getApp() != null) {
                 VisatApp.getApp().setStatusBarMessage(errMsg);
             }
-        }
-    }
-
-    static ResampleMethod getResampling(final String method) throws OperatorException {
-        if (method.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
-            return ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-        } else if (method.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
-            return ResampleMethod.RESAMPLE_BILINEAR;
-        } else if (method.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
-            return ResampleMethod.RESAMPLE_CUBIC;
-        } else {
-            throw new OperatorException("Unknown interpolation method");
         }
     }
 
@@ -504,50 +491,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         return Constants.lightSpeed / radarFreq;
     }
 
-   /**
-     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
-     * latitude/longitude.
-     * @param sourceProduct The input source product.
-     * @param geoBoundary The object to pass back the max/min lat/lon.
-     */
-    public static void computeImageGeoBoundary(final Product sourceProduct,
-                                               final ImageGeoBoundary geoBoundary) {
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        if(geoCoding == null) {
-            throw new OperatorException("Product does not contain a geocoding");
-        }
-        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
-        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
-        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
-        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
-                                                                      sourceProduct.getSceneRasterHeight()-1), null);
-        
-        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
-        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
-
-        geoBoundary.latMin = 90.0;
-        geoBoundary.latMax = -90.0;
-        for (double lat : lats) {
-            if (lat < geoBoundary.latMin) {
-                geoBoundary.latMin = lat;
-            }
-            if (lat > geoBoundary.latMax) {
-                geoBoundary.latMax = lat;
-            }
-        }
-
-        geoBoundary.lonMin = 180.0;
-        geoBoundary.lonMax = -180.0;
-        for (double lon : lons) {
-            if (lon < geoBoundary.lonMin) {
-                geoBoundary.lonMin = lon;
-            }
-            if (lon > geoBoundary.lonMax) {
-                geoBoundary.lonMax = lon;
-            }
-        }
-    }
-
     /**
      * Get incidence angle at centre range pixel (in radian).
      * @param srcProduct The source product.
@@ -629,21 +572,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
-    private CoordinateReferenceSystem getCRS() throws Exception {
-        try {
-            if(mapProjection == null || mapProjection.isEmpty())
-                mapProjection = "WGS84(DD)";
-            return CRS.parseWKT(mapProjection);
-        } catch (Exception e) {
-            return CRS.decode(mapProjection, true);
-        }
-    }
-
     private void createTargetProduct() {
         try {
-            targetCRS = getCRS();
+            targetCRS = MapProjectionHandler.getCRS(mapProjection);
 
-            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+            final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
             if (pixelSpacingInMeter <= 0.0) {
                 pixelSpacingInMeter = Math.max(getAzimuthPixelSpacing(sourceProduct), getRangePixelSpacing(sourceProduct));
                 pixelSpacingInDegree = getPixelSpacingInDegree(pixelSpacingInMeter);
@@ -1017,7 +950,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             ProductData projectedIncidenceAngleBuffer = null;
             ProductData incidenceAngleFromEllipsoidBuffer = null;
 
-            final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
+            final List<TileData> trgTileList = new ArrayList<TileData>();
             final Set<Band> keySet = targetTiles.keySet();
             for(Band targetBand : keySet) {
 
@@ -1235,6 +1168,12 @@ public class RangeDopplerGeocodingOp extends Operator {
             for (int x = x0 - 1; x < maxX; x++) {
                 pixPos.setLocation(x,y);
                 targetGeoCoding.getGeoPos(pixPos, geoPos);
+                if (geoPos.lon > 180) {
+                    geoPos.lon -= 360;
+                } else if (geoPos.lon < - 180) {
+                    geoPos.lon += 360;
+                }
+
                 if(useDEM) {
                     alt = dem.getElevation(geoPos);
                 } else {
@@ -1529,7 +1468,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final Band iSrcBand = srcBands[0];
         Tile sourceTile2 = null;
 
-        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+        if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
@@ -1539,7 +1478,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
+        } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect);
@@ -1549,7 +1488,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
-        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
+        } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
             final Rectangle srcRect = new Rectangle(Math.max(0, (int)rangeIndex - 1),
                                          Math.max(0, (int)azimuthIndex - 1), 4, 4);
@@ -1560,7 +1499,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
         } else {
-            throw new OperatorException("Unknown interpolation method");
+            throw new OperatorException("Unhandled interpolation method");
         }
     }
 
@@ -2022,29 +1961,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         public double downPointLon;
         public double[] sensorPos;
         public double[] centrePoint;
-
-        public LocalGeometry() {
-        }
-        /*
-        public LocalGeometry(final double lat, final double lon, final double delLat, final double delLon,
-                             final double[] earthPoint, final double[] sensorPos) {
-            this.leftPointLat = lat;
-            this.leftPointLon = lon - delLon;
-            this.rightPointLat = lat;
-            this.rightPointLon = lon + delLon;
-            this.upPointLat = lat + delLat;
-            this.upPointLon = lon;
-            this.downPointLat = lat - delLat;
-            this.downPointLon = lon;
-            this.centrePoint = earthPoint;
-            this.sensorPos = sensorPos;
-        }
-        */
-    }
-
-    public static class ImageGeoBoundary {
-        public double latMin = 0.0, latMax = 0.0;
-        public double lonMin = 0.0, lonMax= 0.0;
     }
 
 

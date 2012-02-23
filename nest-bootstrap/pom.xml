@@ -7,7 +7,7 @@
     <parent>
         <artifactId>nest</artifactId>
         <groupId>org.esa.nest</groupId>
-        <version>${nest.version}</version>
+        <version>4C-0.1</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -16,17 +16,9 @@
     <artifactId>nest-bootstrap</artifactId>
     <name>NEST Bootstrap Classpath</name>
     <description>Provides the bootstrap classpath to launch DAT from your favourite IDE.</description>
-    <version>${nest.version}</version>
+    <version>4C-0.1</version>
 
     <dependencies>
-        <dependency>
-            <groupId>org.esa.beam</groupId>
-            <artifactId>beam-gpf</artifactId>
-        </dependency>
-		<dependency>
-            <groupId>org.esa.nest</groupId>
-            <artifactId>nest-reader-dem</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-launcher</artifactId>
@@ -56,9 +48,18 @@
             <artifactId>ceres-jai</artifactId>
         </dependency>
 		<dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-gpf</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>org.esa.nest</groupId>
+            <artifactId>nest-reader-dem</artifactId>
+        </dependency>
+		<dependency>
             <groupId>org.jdoris</groupId>
             <artifactId>jdoris-core</artifactId>
         </dependency>
+		
         <dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-dock</artifactId>
@@ -145,15 +146,19 @@
             <artifactId>netcdf</artifactId>
         </dependency>
 		<dependency>
-            <groupId>gov.nasa</groupId>
-            <artifactId>worldwind</artifactId>
+            <groupId>edu.ucar</groupId>
+            <artifactId>nujan</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>gov.nasa</groupId>
+            <artifactId>nasa-worldwind</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>org.processing</groupId>
             <artifactId>jogl</artifactId>
         </dependency>
 		<dependency>
-            <groupId>javax.media</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>gluegen-rt</artifactId>
         </dependency>
 		<dependency>
@@ -164,17 +169,16 @@
             <groupId>org</groupId>
             <artifactId>jblas</artifactId>
         </dependency>
-
-        <!--dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-gdal</artifactId>
-            <version>1.0.1</version>
+		<dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding</artifactId>
+			<version>4.65-1.04</version>
         </dependency>
-        <dependency>
-            <groupId>it.geosolutions.imageio-ext</groupId>
-            <artifactId>imageio-ext-gdalframework</artifactId>
-            <version>1.0.5</version>
-        </dependency-->
+		<dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>native-libs</artifactId>
+			<version>4.65-1.04</version>
+        </dependency>
 		
         <dependency>
           <groupId>org.geotools</groupId>

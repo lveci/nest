@@ -16,23 +16,17 @@
 
 package org.esa.beam.dataio.placemark;
 
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.ValidationException;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.dataio.dimap.DimapProductHelpers;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Placemark;
-import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
-import org.esa.beam.framework.datamodel.PlacemarkSymbol;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.XmlWriter;
 import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.beam.util.logging.BeamLogManager;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.DOMBuilder;
@@ -43,13 +37,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.PushbackReader;
-import java.io.Reader;
-import java.io.Writer;
+import java.awt.*;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -98,7 +87,7 @@ public class PlacemarkIO {
         final char[] magicBytes = new char[5];
         PushbackReader inputReader = new PushbackReader(reader, magicBytes.length);
         try {
-            inputReader.read(magicBytes); // todo - BAD PRACTICE HERE!!!
+            inputReader.read(magicBytes);
             inputReader.unread(magicBytes);
             if (XmlWriter.XML_HEADER_LINE.startsWith(new String(magicBytes))) {
                 return readPlacemarksFromXMLFile(inputReader, geoCoding, placemarkDescriptor);
@@ -264,62 +253,80 @@ public class PlacemarkIO {
                 product = placemark.getProduct();
             }
             if (product != null && additionalColumnNames.length != 0) {
-                pw.print("# Wavelength:");
-                //noinspection UnusedDeclaration
-                for (int i = 0; i < standardColumnNames.length + 2; i++) {
-                    // 2 additional for name and description of the placemark
-                    pw.print("\t");
-                }
-                for (String additionalColumnName : additionalColumnNames) {
-                    Band band = product.getBand(additionalColumnName);
-                    float spectralWavelength = 0.0f;
-                    if (band != null) {
-                        spectralWavelength = band.getSpectralWavelength();
-                    }
-                    pw.print(spectralWavelength + "\t");
-                }
-                pw.println();
+                pw.println(getWavelengthLine(product, standardColumnNames, additionalColumnNames));
             }
 
-
-            // Write header columns
-            pw.print(NAME_COL_NAME + "\t");
-            for (String name : standardColumnNames) {
-                pw.print(name + "\t");
-            }
-            pw.print(DESC_COL_NAME + "\t");
-            for (String additionalColumnName : additionalColumnNames) {
-                pw.print(additionalColumnName + "\t");
-            }
-            pw.println();
+            pw.println(getHeaderLine(standardColumnNames, additionalColumnNames));
 
             for (int i = 0; i < placemarkList.size(); i++) {
                 Placemark placemark = placemarkList.get(i);
                 Object[] values = valueList.get(i);
-                pw.print(placemark.getName() + "\t");
-                for (int col = 0; col < columnCountMin; col++) {
-                    printValue(pw, values[col]);
-                }
-                pw.print(placemark.getDescription() + "\t");
-                for (int col = columnCountMin; col < columnCount; col++) {
-                    printValue(pw, values[col]);
-                }
-                pw.println();
-
+                pw.println(getDataLine(placemark, values, columnCountMin, columnCount));
             }
         } finally {
             pw.close();
         }
     }
 
-    private static void printValue(PrintWriter pw, Object value) {
+    private static String getDataLine(Placemark placemark, Object[] values, int columnCountMin, int columnCount) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(placemark.getName());
+        for (int col = 0; col < columnCountMin; col++) {
+            formatValue(values[col], sb);
+        }
+        sb.append("\t");
+        sb.append(placemark.getDescription());
+        for (int col = columnCountMin; col < columnCount; col++) {
+            formatValue(values[col], sb);
+        }
+        return sb.toString();
+    }
+
+    private static void formatValue(Object value, StringBuilder sb) {
         String stringValue;
         if (value instanceof Date) {
             stringValue = dateFormat.format(value);
         } else {
             stringValue = value.toString();
         }
-        pw.print(stringValue + "\t");
+        sb.append("\t");
+        sb.append(stringValue);
+    }
+
+    private static String getHeaderLine(String[] standardColumnNames, String[] additionalColumnNames) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(NAME_COL_NAME);
+        for (String name : standardColumnNames) {
+            sb.append("\t");
+            sb.append(name);
+        }
+        sb.append("\t");
+        sb.append(DESC_COL_NAME);
+        for (String additionalColumnName : additionalColumnNames) {
+            sb.append("\t");
+            sb.append(additionalColumnName);
+        }
+        return sb.toString();
+    }
+
+    private static String getWavelengthLine(Product product, String[] standardColumnNames, String[] additionalColumnNames) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("# Wavelength:"); // --> Name
+        for (String standardColumnName : standardColumnNames) {
+            sb.append("\t");
+        }
+        sb.append("\t"); // --> Desc
+        for (String additionalColumnName : additionalColumnNames) {
+            Band band = product.getBand(additionalColumnName);
+            float spectralWavelength = 0.0f;
+            if (band != null) {
+                spectralWavelength = band.getSpectralWavelength();
+            }
+            sb.append("\t");
+            sb.append(spectralWavelength);
+        }
+        return sb.toString();
     }
 
     public static void writePlacemarksFile(Writer writer, List<Placemark> placemarks) throws IOException {
@@ -410,20 +417,43 @@ public class PlacemarkIO {
 
         final Placemark placemark = Placemark.createPointPlacemark(descriptor, name1, label, description1, pixelPos, geoPos, geoCoding);
 
-        PlacemarkSymbol symbol = descriptor.createDefaultSymbol();
-        final Color fillColor = createColor(element.getChild(DimapProductConstants.TAG_PLACEMARK_FILL_COLOR));
-        if (fillColor != null) {
-            symbol.setFillPaint(fillColor);
+        String styleCss = element.getChildTextTrim(DimapProductConstants.TAG_PLACEMARK_STYLE_CSS);
+        if (styleCss == null) {
+            styleCss = getStyleCssFromOldFormat(element);
         }
-        final Color outlineColor = createColor(element.getChild(DimapProductConstants.TAG_PLACEMARK_OUTLINE_COLOR));
-        if (outlineColor != null) {
-            symbol.setOutlineColor(outlineColor);
-        }
-
-        placemark.setSymbol(symbol);
+        placemark.setStyleCss(styleCss);
 
         return placemark;
 
+    }
+
+    private static String getStyleCssFromOldFormat(Element element) {
+        StringBuilder styleCss = new StringBuilder();
+        buildStyleCss(getColorProperty(element, DimapProductConstants.TAG_PLACEMARK_FILL_COLOR, "fill"), styleCss);
+        buildStyleCss(getColorProperty(element, DimapProductConstants.TAG_PLACEMARK_OUTLINE_COLOR, "stroke"), styleCss);
+        return styleCss.toString();
+    }
+
+    private static void buildStyleCss(Property strokeProperty, StringBuilder styleCss) {
+        if (strokeProperty.getValue() != null) {
+            if (styleCss.length() > 0) {
+                styleCss.append(";");
+            }
+            styleCss.append(strokeProperty.getName()).append(":").append(strokeProperty.getValueAsText());
+        }
+    }
+
+    private static Property getColorProperty(Element element, String elementName, String propertyName) {
+        final Property fillProperty = Property.create(propertyName, Color.class);
+        final Color fillColor = createColor(element.getChild(elementName));
+        if (fillColor != null) {
+            try {
+                fillProperty.setValue(fillColor);
+            } catch (ValidationException e) {
+                BeamLogManager.getSystemLogger().warning(e.getMessage());
+            }
+        }
+        return fillProperty;
     }
 
     private static Color createColor(Element elem) {
@@ -462,13 +492,9 @@ public class PlacemarkIO {
             writer.printLine(indent, DimapProductConstants.TAG_PLACEMARK_PIXEL_X, pixelPos.x);
             writer.printLine(indent, DimapProductConstants.TAG_PLACEMARK_PIXEL_Y, pixelPos.y);
         }
-        final Color fillColor = (Color) placemark.getSymbol().getFillPaint();
-        if (fillColor != null) {
-            writeColor(DimapProductConstants.TAG_PLACEMARK_FILL_COLOR, indent, fillColor, writer);
-        }
-        final Color outlineColor = placemark.getSymbol().getOutlineColor();
-        if (outlineColor != null) {
-            writeColor(DimapProductConstants.TAG_PLACEMARK_OUTLINE_COLOR, indent, outlineColor, writer);
+        final String styleCss = placemark.getStyleCss();
+        if (styleCss != null && !styleCss.isEmpty()) {
+            writer.printLine(indent, DimapProductConstants.TAG_PLACEMARK_STYLE_CSS, styleCss);
         }
         writer.println(pinTags[1]);
     }

@@ -20,24 +20,30 @@ import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.DatContext;
-import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
+import org.esa.nest.dat.dialogs.CheckListDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
+import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.DialogUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 //import java.nio.file.*;
 //import static java.nio.file.StandardCopyOption.*;
 
@@ -71,6 +77,7 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private WorldMapUI worldMapUI = null;
     private DatabasePane dbPane;
+    private final JTextArea productText = new JTextArea();
 
     public ProductLibraryToolView() {
     }
@@ -127,7 +134,47 @@ public class ProductLibraryToolView extends AbstractToolView {
         final ProductEntry[] selections = getSelectedProductEntries();
         setOpenProductButtonsEnabled(selections.length > 0);
 
+        updateProductSelectionText(selections);
         worldMapUI.setSelectedProductEntryList(selections);
+    }
+
+    private void updateProductSelectionText(final ProductEntry[] selections) {
+        if(selections.length == 1) {
+            final ProductEntry entry = selections[0];
+            final StringBuilder text = new StringBuilder(255);
+
+            final MetadataElement absRoot = entry.getMetadata();
+            final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, AbstractMetadata.NO_METADATA_STRING);
+            final ProductData.UTC acqTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
+            final int absOrbit = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, AbstractMetadata.NO_METADATA);
+            final int relOrbit = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, AbstractMetadata.NO_METADATA);
+            final String map = absRoot.getAttributeString(AbstractMetadata.map_projection, AbstractMetadata.NO_METADATA_STRING).trim();
+            final int cal = absRoot.getAttributeInt(AbstractMetadata.abs_calibration_flag, AbstractMetadata.NO_METADATA);
+            final int tc = absRoot.getAttributeInt(AbstractMetadata.is_terrain_corrected, AbstractMetadata.NO_METADATA);
+            final int coreg = absRoot.getAttributeInt(AbstractMetadata.coregistered_stack, AbstractMetadata.NO_METADATA);
+
+            text.append(entry.getName());  text.append("\n\n");
+            text.append(entry.getAcquisitionMode()+"   "+ sampleType+'\n');
+            text.append(acqTime.format());  text.append('\n');
+
+            text.append("Orbit: "+absOrbit);
+            if(relOrbit != AbstractMetadata.NO_METADATA)
+                text.append("  Track: "+relOrbit); 
+            text.append('\n');
+            if(!map.isEmpty()) {
+                text.append(map);  text.append('\n');   
+            }
+            if(cal==1)
+                text.append("Calibrated ");
+            if(coreg==1)
+                text.append("Coregistered ");
+            if(tc==1)
+                text.append("Terrain Corrected ");
+
+            productText.setText(text.toString());
+        } else {
+            productText.setText("");
+        }
     }
 
     private void performOpenAction() {
@@ -188,6 +235,14 @@ public class ProductLibraryToolView extends AbstractToolView {
         });
         popup.add(selectAllItem);
 
+        final JMenuItem openSelectedItem = new JMenuItem("Open Selected");
+        openSelectedItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                performOpenAction();              
+            }
+        });
+        popup.add(openSelectedItem);
+
         final JMenuItem copyToItem = new JMenuItem("Copy Selected To...");
         copyToItem.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
@@ -199,9 +254,12 @@ public class ProductLibraryToolView extends AbstractToolView {
         final JMenuItem exploreItem = new JMenuItem("Browse Folder");
         exploreItem.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
-                final int row = productEntryTable.rowAtPoint(productEntryTable.getMousePosition());
+                final Point pos = productEntryTable.getMousePosition();
+                int row = 0;
+                if(pos != null)
+                    row = productEntryTable.rowAtPoint(pos);
                 final Object entry = productEntryTable.getValueAt(row, 0);
-                if(entry instanceof ProductEntry) {
+                if(entry != null && entry instanceof ProductEntry) {
                     final ProductEntry prodEntry = (ProductEntry)entry;
                     try {
                         Desktop.getDesktop().open(prodEntry.getFile().getParentFile());
@@ -294,7 +352,7 @@ public class ProductLibraryToolView extends AbstractToolView {
     }
 
     private static void batchProcess(final ProductEntry[] productEntryList, final File graphFile) {
-        final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
+        final BatchGraphDialog batchDlg = new BatchGraphDialog(VisatApp.getApp(),
                 "Batch Processing", "batchProcessing", false);
         batchDlg.setInputFiles(productEntryList);
         if(graphFile != null) {
@@ -309,28 +367,29 @@ public class ProductLibraryToolView extends AbstractToolView {
             return;
         }
 
-        final int answer = JOptionPane.showOptionDialog(mainPanel,
-                                                        "Search folder recursively?", "Add Folder",
-                                                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                                                        null, null);
-        boolean doRecursive = false;
-        if (answer == JOptionPane.YES_OPTION) {
-            doRecursive = true;
-        }
+        final Map<String, Boolean> checkBoxMap = new HashMap<String, Boolean>(3);
+        checkBoxMap.put("Generate quicklooks?", true);
+        checkBoxMap.put("Search folder recursively?", true);
+
+        final CheckListDialog dlg = new CheckListDialog("Scan Folder Options", checkBoxMap);
+        dlg.show();
+
+        final boolean doRecursive = checkBoxMap.get("Search folder recursively?");
+        final boolean doQuicklooks = checkBoxMap.get("Generate quicklooks?");
 
         libConfig.addBaseDir(baseDir);
         final int index = repositoryListCombo.getItemCount();
         repositoryListCombo.insertItemAt(baseDir, index);
         setUIComponentsEnabled(repositoryListCombo.getItemCount() > 1);
 
-        updateRepostitory(baseDir, doRecursive);
+        updateRepostitory(baseDir, doRecursive, doQuicklooks);
     }
 
-    private void updateRepostitory(final File baseDir, final boolean doRecursive) {
+    private void updateRepostitory(final File baseDir, final boolean doRecursive, final boolean doQuicklooks) {
         if(baseDir == null) return;
         progMon = new LabelBarProgressMonitor(progressBar, statusLabel);
         progMon.addListener(new MyProgressBarListener());
-        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, true, progMon);
+        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, doQuicklooks, progMon);
         repositoryCollector.addListener(new MyDatabaseScannerListener());
         repositoryCollector.execute();
     }
@@ -499,10 +558,22 @@ public class ProductLibraryToolView extends AbstractToolView {
         final MyDatabaseQueryListener dbQueryListener = new MyDatabaseQueryListener();
         dbPane = new DatabasePane();
         dbPane.addListener(dbQueryListener);
-        splitPane1H.add(new JScrollPane(dbPane));
+        final JPanel leftPanel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
+        final JScrollPane dbScroll = new JScrollPane(dbPane);
+        leftPanel.add(dbScroll, gbc);
+        dbScroll.setBorder(BorderFactory.createLineBorder(Color.RED, 0));
+
+        gbc.gridy++;
+        productText.setLineWrap(true);
+        productText.setRows(4);
+        productText.setBackground(dbPane.getBackground());
+        leftPanel.add(productText, gbc);
+        DialogUtils.fillPanel(leftPanel, gbc);
+        splitPane1H.add(new JScrollPane(leftPanel));
 
         productEntryTable = new JTable();
-        productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        productEntryTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         productEntryTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         productEntryTable.setComponentPopupMenu(createEntryTablePopup());
         productEntryTable.addMouseListener(new MouseAdapter() {
@@ -520,6 +591,7 @@ public class ProductLibraryToolView extends AbstractToolView {
         splitPane1H.add(new JScrollPane(productEntryTable));
 
         final JideSplitPane splitPane1V = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+        splitPane1V.setShowGripper(true);
         splitPane1V.add(splitPane1H);
 
         worldMapUI = new WorldMapUI();
@@ -566,11 +638,11 @@ public class ProductLibraryToolView extends AbstractToolView {
                     progMon.setCanceled(true);
                 } else {
                     if(repositoryListCombo.getSelectedIndex() != 0) {
-                        updateRepostitory((File)repositoryListCombo.getSelectedItem(), true);
+                        updateRepostitory((File)repositoryListCombo.getSelectedItem(), true, true);
                     } else {
                         final File[] baseDirList = libConfig.getBaseDirs();
                         for(File f : baseDirList) {
-                             updateRepostitory(f, true);
+                             updateRepostitory(f, true, true);
                         }
                     }
                 }
@@ -637,6 +709,8 @@ public class ProductLibraryToolView extends AbstractToolView {
         setOpenProductButtonsEnabled(selecteRows > 0);
         if(selecteRows > 0)
             selectedText = ", "+selecteRows+" Selected";
+        else
+            productText.setText("");
         statusLabel.setText(productEntryTable.getRowCount() + " Products"+ selectedText);
     }
 

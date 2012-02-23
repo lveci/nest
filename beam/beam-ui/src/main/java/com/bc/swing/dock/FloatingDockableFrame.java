@@ -31,7 +31,7 @@ import java.awt.event.WindowListener;
 /**
  *
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.5
  */
 public class FloatingDockableFrame implements FloatingComponent {

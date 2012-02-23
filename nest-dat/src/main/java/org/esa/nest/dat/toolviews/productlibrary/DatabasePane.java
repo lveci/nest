@@ -31,7 +31,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,10 +50,11 @@ public class DatabasePane extends JPanel {
     private final JComboBox acquisitionModeCombo = new JComboBox(new String[] { DBQuery.ALL_MODES });
     private final JComboBox passCombo = new JComboBox(new String[] {
             DBQuery.ALL_PASSES, DBQuery.ASCENDING_PASS, DBQuery.DESCENDING_PASS });
+    private final JTextField trackField = new JTextField();
     private final DateComboBox startDateBox = new DateComboBox();
     private final DateComboBox endDateBox = new DateComboBox();
     private final JComboBox polarizationCombo = new JComboBox(new String[] {
-            DBQuery.ANY, "HH", "VV", "HV", "VH" });
+            DBQuery.ANY, DBQuery.DUALPOL, DBQuery.QUADPOL, "HH", "VV", "HV", "VH" });
     private final JComboBox calibrationCombo = new JComboBox(new String[] {
             DBQuery.ANY, DBQuery.CALIBRATED, DBQuery.NOT_CALIBRATED });
     private final JComboBox orbitCorrectionCombo = new JComboBox(new String[] {
@@ -169,7 +173,7 @@ public class DatabasePane extends JPanel {
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         JLabel label;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
         gbc.gridy = 0;
         this.add(new JLabel("Mission:"), gbc);
@@ -186,6 +190,9 @@ public class DatabasePane extends JPanel {
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Pass:", passCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);
+        gbc.gridy++;
+        label = DialogUtils.addComponent(this, gbc, "Track:", trackField);
+        label.setHorizontalAlignment(JLabel.RIGHT);
 
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Start Date:", startDateBox);
@@ -194,7 +201,7 @@ public class DatabasePane extends JPanel {
         label = DialogUtils.addComponent(this, gbc, "End Date:", endDateBox);
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
-        label = DialogUtils.addComponent(this, gbc, "Polarization Contains:", polarizationCombo);
+        label = DialogUtils.addComponent(this, gbc, "Polarization:", polarizationCombo);
         label.setHorizontalAlignment(JLabel.RIGHT);
         gbc.gridy++;
         label = DialogUtils.addComponent(this, gbc, "Calibration:", calibrationCombo);
@@ -222,6 +229,7 @@ public class DatabasePane extends JPanel {
         metadataArea.setToolTipText("Use AND,OR,NOT and =,<,>,<=,>-");
         gbc.gridx = 2;
         gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(updateButton, gbc);
         updateButton.setMaximumSize(new Dimension(3, 3));
 
@@ -341,6 +349,7 @@ public class DatabasePane extends JPanel {
         dbQuery.setSelectedProductTypes(toStringArray(productTypeJList.getSelectedValues()));
         dbQuery.setSelectedAcquisitionMode((String) acquisitionModeCombo.getSelectedItem());
         dbQuery.setSelectedPass((String)passCombo.getSelectedItem());
+        dbQuery.setSelectedTrack(trackField.getText());
         dbQuery.setStartEndDate(startDateBox.getCalendar(), endDateBox.getCalendar());
 
         dbQuery.setSelectedPolarization((String)polarizationCombo.getSelectedItem());
@@ -413,9 +422,9 @@ public class DatabasePane extends JPanel {
         }
     }
 
-    private int[] findIndices(final JList list, final String[] values) {
+    private static int[] findIndices(final JList list, final String[] values) {
         final int size = list.getModel().getSize();
-        final ArrayList<Integer> indices = new ArrayList<Integer>();
+        final List<Integer> indices = new ArrayList<Integer>(size);
         for(int i=0; i < size; ++i) {
             final String str = (String)list.getModel().getElementAt(i);
             if(StringUtils.contains(values, str)) {

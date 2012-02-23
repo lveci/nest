@@ -215,7 +215,7 @@ public final class ResFile {
         return Double.parseDouble(parseStringValue(key));
     }
 
-    public ProductData.UTC parseDatTimeValue(String key) throws ParseException {
+    public ProductData.UTC parseDateTimeValue(String key) throws ParseException {
         return ProductData.UTC.parse(parseStringValue(key));
     }
 

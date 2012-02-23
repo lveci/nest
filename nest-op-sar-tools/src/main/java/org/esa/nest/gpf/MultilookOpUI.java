@@ -177,8 +177,8 @@ public class MultilookOpUI extends BaseOperatorUI {
         contentPane.add(outputIntensityCheckBox, gbc);
         
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Note:",
-                new JLabel("Currently, detection for complex data is done without resampling"));
+        DialogUtils.addComponent(contentPane, gbc, "",
+                new JTextArea("Note: Detection for complex data\nis done without resampling."));
 
         DialogUtils.fillPanel(contentPane, gbc);
 

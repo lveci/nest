@@ -49,7 +49,7 @@ import java.util.Random;
  *
  * @author Norman Fomferra
  */
-class MoreFuncs {
+final class MoreFuncs {
 
     private static final Random RANDOM = new Random();
     public static final GeoPos INVALID_GEO_POS = new GeoPos(Float.NaN, Float.NaN);
@@ -219,17 +219,13 @@ class MoreFuncs {
         }
         final int n = s.length();
         final StringBuilder sb = new StringBuilder(n);
-        for (int i = 0; i < n; i++) {
-            if (i >= skipCount) {
-                if (i < n - 1) {
-                    final char c1 = s.charAt(i);
-                    final char c2 = s.charAt(i + 1);
-                    sb.append(Character.toLowerCase(c1));
-                    if (Character.isLowerCase(c1) && Character.isUpperCase(c2)) {
-                        sb.append('_');
-                    }
-                } else {
-                    sb.append(Character.toLowerCase(s.charAt(i)));
+        for (int i = skipCount; i < n; i++) {
+            final char c1 = s.charAt(i);
+            sb.append(Character.toLowerCase(c1));
+            if (i < n - 1 && Character.isLowerCase(c1)) {
+                final char c2 = s.charAt(i + 1);
+                if(Character.isUpperCase(c2)) {
+                    sb.append('_');
                 }
             }
         }

@@ -16,7 +16,7 @@
 
 package org.esa.beam.framework.gpf.graph;
 
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.TestOps;
@@ -102,14 +102,14 @@ public class GraphIOTest extends TestCase {
         Node node1 = new Node("node1", "Op1");
         graph1.addNode(node1);
         
-        Xpp3Dom xpp3Dom = new Xpp3Dom("");
-        Xpp3Dom font = new Xpp3Dom("font");
+        XppDom xpp3Dom = new XppDom("");
+        XppDom font = new XppDom("font");
         font.setValue("big");
         xpp3Dom.addChild(font);
         graph1.setAppData("foo", xpp3Dom);
 
-        Xpp3Dom xpp3Dom2 = new Xpp3Dom("");
-        Xpp3Dom colour = new Xpp3Dom("colour");
+        XppDom xpp3Dom2 = new XppDom("");
+        XppDom colour = new XppDom("colour");
         colour.setValue("red");
         xpp3Dom2.addChild(colour);
         graph1.setAppData("baz", xpp3Dom2);
@@ -199,13 +199,13 @@ public class GraphIOTest extends TestCase {
         StringReader reader = new StringReader(expectedXML);
         Graph graph = GraphIO.read(reader);
         
-        Xpp3Dom fooData = graph.getApplicationData("foo");
+        XppDom fooData = graph.getApplicationData("foo");
         assertNotNull(fooData);
         assertEquals(2, fooData.getChildCount());
         assertEquals("Big", fooData.getChild("font").getValue());
         assertEquals("red", fooData.getChild("colour").getValue());
         
-        Xpp3Dom barData = graph.getApplicationData("bar");
+        XppDom barData = graph.getApplicationData("bar");
         assertNotNull(barData);
         assertEquals(1, barData.getChildCount());
         assertEquals("true", barData.getChild("textmode").getValue());

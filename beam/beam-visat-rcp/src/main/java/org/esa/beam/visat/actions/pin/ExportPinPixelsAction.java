@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This action exports pins and their surrounding pixels.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  * @deprecated since BEAM 4.9, replaced by module beam-pixel-extraction
  */
 @Deprecated

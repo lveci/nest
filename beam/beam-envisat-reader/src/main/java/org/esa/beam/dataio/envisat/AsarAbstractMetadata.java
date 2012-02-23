@@ -31,6 +31,11 @@ public final class AsarAbstractMetadata {
 
     public static final String ABSTRACTED_METADATA_ROOT_NAME = "Abstracted_Metadata";
 
+    /**
+     * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
+     */
+    private static final String METADATA_VERSION = "4C-0.1";
+    
     private final String _productType;
     private final String _version;
     private final File _file;
@@ -303,6 +308,8 @@ public final class AsarAbstractMetadata {
         if(dopplerCentroidCoeffsADS != null) {
             addDopplerCentroidCoefficients(dopplerCentroidCoeffsADS, absRoot);
         }
+
+        addAbstractedAttribute("abstracted_metadata_version", METADATA_VERSION, absRoot, "AbsMetadata version");
     }
     
     public static String getMission(final String productType, final File file) {

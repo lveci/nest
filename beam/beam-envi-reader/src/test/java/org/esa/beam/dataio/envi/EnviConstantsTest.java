@@ -16,7 +16,7 @@ public class EnviConstantsTest extends TestCase {
         assertEquals("byte order", EnviConstants.HEADER_KEY_BYTE_ORDER);
         assertEquals("map info", EnviConstants.HEADER_KEY_MAP_INFO);
         assertEquals("projection info", EnviConstants.HEADER_KEY_PROJECTION_INFO);
-        assertEquals("wavelength units =", EnviConstants.HEADER_KEY_WAVELENGTH_UNITS);
+        assertEquals("wavelength units", EnviConstants.HEADER_KEY_WAVELENGTH_UNITS);
         assertEquals("band names", EnviConstants.HEADER_KEY_BAND_NAMES);
         assertEquals("description", EnviConstants.HEADER_KEY_DESCRIPTION);
 

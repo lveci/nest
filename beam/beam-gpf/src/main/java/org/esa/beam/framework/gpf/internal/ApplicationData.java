@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
 import com.thoughtworks.xstream.io.xml.XppDomReader;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 
 /**
  * Represents the application data for graphs. 
@@ -33,14 +33,14 @@ import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 public class ApplicationData {
 
     private final String appId;
-    private final Xpp3Dom data;
+    private final XppDom data;
 
     /** Constructs an Application Data object from the given Id and data objects.
      * 
      * @param string
      * @param xpp3Dom
      */
-    public ApplicationData(String string, Xpp3Dom xpp3Dom) {
+    public ApplicationData(String string, XppDom xpp3Dom) {
         appId = string;
         data = xpp3Dom;
     }
@@ -59,7 +59,7 @@ public class ApplicationData {
      * 
      * @return the data
      */
-    public Xpp3Dom getData() {
+    public XppDom getData() {
         return data;
     }
  
@@ -73,8 +73,8 @@ public class ApplicationData {
             
             ApplicationData applicationData = (ApplicationData) source;
             writer.addAttribute(ID_ATTRIBUTE_NAME, applicationData.appId);
-            Xpp3Dom[] children = applicationData.data.getChildren();
-            for (Xpp3Dom child : children) {
+            XppDom[] children = applicationData.data.getChildren();
+            for (XppDom child : children) {
                 HierarchicalStreamCopier copier = new HierarchicalStreamCopier();
                 XppDomReader reader = new XppDomReader(child);
                 copier.copy(reader, writer);
@@ -88,7 +88,7 @@ public class ApplicationData {
             XppDomWriter xppDomWriter = new XppDomWriter();
             String appId = reader.getAttribute(ID_ATTRIBUTE_NAME);
             copier.copy(reader, xppDomWriter);
-            Xpp3Dom xpp3Dom = xppDomWriter.getConfiguration();
+            XppDom xpp3Dom = xppDomWriter.getConfiguration();
             return new ApplicationData(appId, xpp3Dom);
         }
 

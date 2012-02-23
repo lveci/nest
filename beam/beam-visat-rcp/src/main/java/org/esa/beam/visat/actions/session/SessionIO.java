@@ -28,7 +28,7 @@ import java.io.Writer;
  * The Session I/O class is used to store and restore sessions.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public abstract class SessionIO {

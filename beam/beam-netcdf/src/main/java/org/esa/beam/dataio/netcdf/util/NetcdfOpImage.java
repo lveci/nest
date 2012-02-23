@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,8 +24,8 @@ import ucar.ma2.Section;
 import ucar.nc2.Variable;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
@@ -38,12 +38,14 @@ public class NetcdfOpImage extends SingleBandedOpImage {
     private final Variable variable;
     private final boolean isYFlipped;
     private final int sourceHeight;
+    private final int[] imageOrigin;
     private final Object readLock;
 
     /**
      * Used to construct an image.
      *
      * @param variable       The netCDF variable
+     * @param imageOrigin    The index within a multidimensional image dataset
      * @param isYFlipped     The {@code true} if this data should be flipped along the yAxis.
      * @param readLock       The the lock used for reading, usually the netcdf file that contains the variable
      * @param dataBufferType The data type.
@@ -52,11 +54,12 @@ public class NetcdfOpImage extends SingleBandedOpImage {
      * @param tileSize       The tile size for this image.
      * @param level          The resolution level.
      */
-    public NetcdfOpImage(Variable variable, boolean isYFlipped, Object readLock, int dataBufferType,
+    public NetcdfOpImage(Variable variable, int[] imageOrigin, boolean isYFlipped, Object readLock, int dataBufferType,
                          int sourceWidth, int sourceHeight,
                          Dimension tileSize, ResolutionLevel level) {
         super(dataBufferType, sourceWidth, sourceHeight, tileSize, null, level);
         this.variable = variable;
+        this.imageOrigin = imageOrigin.clone();
         this.readLock = readLock;
         this.isYFlipped = isYFlipped;
         this.sourceHeight = sourceHeight;
@@ -86,12 +89,15 @@ public class NetcdfOpImage extends SingleBandedOpImage {
         shape[yIndex] = sourceRect.height;
         shape[xIndex] = sourceRect.width;
 
-        origin[yIndex] = isYFlipped ? sourceHeight  - sourceRect.y - sourceRect.height : sourceRect.y;
+        if (imageOrigin.length >= 0) {
+            System.arraycopy(imageOrigin, 0, origin, 0, imageOrigin.length);
+        }
+        origin[yIndex] = isYFlipped ? sourceHeight - sourceRect.y - sourceRect.height : sourceRect.y;
         origin[xIndex] = sourceRect.x;
 
         double scale = getScale();
-        stride[yIndex] = (int)scale;
-        stride[xIndex] = (int)scale;
+        stride[yIndex] = (int) scale;
+        stride[xIndex] = (int) scale;
 
         Array array;
         synchronized (readLock) {
@@ -107,12 +113,12 @@ public class NetcdfOpImage extends SingleBandedOpImage {
         if (isYFlipped) {
             Array flippedArray = array.flip(yIndex);
             tile.setDataElements(destRect.x, destRect.y,
-                    destRect.width, destRect.height,
-                    flippedArray.copyTo1DJavaArray());
+                                 destRect.width, destRect.height,
+                                 flippedArray.copyTo1DJavaArray());
         } else {
             tile.setDataElements(destRect.x, destRect.y,
-                    destRect.width, destRect.height,
-                    array.getStorage());
+                                 destRect.width, destRect.height,
+                                 array.getStorage());
         }
     }
 

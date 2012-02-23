@@ -34,8 +34,10 @@ import javax.swing.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -91,6 +93,7 @@ public class ProductLayer extends RenderableLayer {
                 final boolean highlight = name.equals(selectedProduct.getName());
                 for (Polyline line : lineList) {
                     line.setHighlighted(highlight);
+                    line.setHighlightColor(Color.RED);
                 }
             }
         }
@@ -176,7 +179,7 @@ public class ProductLayer extends RenderableLayer {
         for (GeneralPath boundaryPath : boundaryPaths) {
             final PathIterator it = boundaryPath.getPathIterator(null);
             final float[] floats = new float[2];
-            final ArrayList<Position> positions = new ArrayList<Position>(4);
+            final List<Position> positions = new ArrayList<Position>(4);
 
             it.currentSegment(floats);
             final Position firstPosition = new Position(Angle.fromDegreesLatitude(floats[1]),
@@ -224,7 +227,7 @@ public class ProductLayer extends RenderableLayer {
             final GeoUtils.LatLonHeading corner3 = GeoUtils.vincenty_direct(r2.lon, r2.lat, 2500, heading - 90.0);
             final GeoUtils.LatLonHeading corner4 = GeoUtils.vincenty_direct(r2.lon, r2.lat, 2500, heading + 90.0);
 
-            final ArrayList<Position> positions = new ArrayList<Position>(4);
+            final List<Position> positions = new ArrayList<Position>(4);
             positions.add(new Position(Angle.fromDegreesLatitude(corner1.lat), Angle.fromDegreesLongitude(corner1.lon), 0.0));
             positions.add(new Position(Angle.fromDegreesLatitude(corner2.lat), Angle.fromDegreesLongitude(corner2.lon), 0.0));
             positions.add(new Position(Angle.fromDegreesLatitude(corner4.lat), Angle.fromDegreesLongitude(corner4.lon), 0.0));

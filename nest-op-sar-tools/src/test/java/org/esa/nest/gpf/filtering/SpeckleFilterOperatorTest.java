@@ -44,6 +44,7 @@ public class SpeckleFilterOperatorTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        TestUtils.initTestEnvironment();
         spi = new SpeckleFilterOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
@@ -284,11 +285,7 @@ public class SpeckleFilterOperatorTest extends TestCase {
      */
     public void testProcessing() throws Exception {
 
-        final File inputFile = new File(inputPathWSM);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPathWSM);
 
         final SpeckleFilterOp op = (SpeckleFilterOp)spi.createOperator();
         assertNotNull(op);
@@ -297,7 +294,7 @@ public class SpeckleFilterOperatorTest extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
+        TestUtils.compareProducts(targetProduct, expectedPathWSM, null);
     }
 
     public void testProcessAllASAR() throws Exception

@@ -91,7 +91,7 @@ public class TestProductDao extends TestCase {
 
     public void testListAll() throws SQLException {
 
-        final ProductEntry[] list = db.getProductEntryList();
+        final ProductEntry[] list = db.getProductEntryList(false);
         for(ProductEntry entry : list) {
             System.out.println(entry.getId() + " " + entry.getFile());
         }

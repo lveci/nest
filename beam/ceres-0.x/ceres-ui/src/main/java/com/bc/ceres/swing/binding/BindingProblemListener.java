@@ -21,7 +21,7 @@ package com.bc.ceres.swing.binding;
  * e.g. when a user edits a Swing component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.10
  */
 public interface BindingProblemListener {

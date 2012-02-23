@@ -19,7 +19,7 @@ import org.esa.beam.dataio.envi.Header;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.envi.NestEnviProductReader;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.ResourceUtils;
@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class PolsarProProductReader extends NestEnviProductReader {
 
@@ -45,8 +46,8 @@ public class PolsarProProductReader extends NestEnviProductReader {
         else
             fileList = new File[] { inputFile };
 
-        final ArrayList<Header> headerList = new ArrayList<Header>();
-        final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
+        final List<Header> headerList = new ArrayList<Header>(fileList.length);
+        final HashMap<Header, File> headerFileMap = new HashMap<Header, File>(fileList.length);
         Header mainHeader = null;
         File mainHeaderFile = null;
 

@@ -20,6 +20,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.gpf.StatusProgressMonitor;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -37,6 +38,9 @@ import java.util.Map;
 public final class ftpUtils {
 
     private final FTPClient ftpClient = new FTPClient();
+    private final String server;
+    private final String user;
+    private final String password;
     private boolean ftpClientConnected = false;
 
     public enum FTPError { FILE_NOT_FOUND, OK, READ_ERROR }
@@ -46,6 +50,13 @@ public final class ftpUtils {
     }
 
     public ftpUtils(final String server, final String user, final String password) throws IOException {
+        this.server = server;
+        this.user = user;
+        this.password = password;
+        connect();
+    }
+
+    private void connect() throws IOException {
         ftpClient.setRemoteVerificationEnabled(false);
         ftpClient.connect(server);
         int reply = ftpClient.getReplyCode();
@@ -68,7 +79,7 @@ public final class ftpUtils {
         }
     }
 
-    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws SocketException {
+    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws Exception {
         FileOutputStream fos = null;
         InputStream fis = null;
         try {
@@ -94,7 +105,7 @@ public final class ftpUtils {
                     "Downloading "+localFile.getName()+"... ");
             status.setAllowStdOut(false);
 
-            final int size = 8192;
+            final int size = 4096;//32768;
             final byte[] buf = new byte[size];
             int n;
             int total = 0;
@@ -114,9 +125,11 @@ public final class ftpUtils {
 
         } catch (SocketException e) {
             System.out.println(e.getMessage());
+            connect();
             throw new SocketException(e.getMessage()+"\nPlease verify that FTP is not blocked by your firewall.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            connect();
             return FTPError.READ_ERROR;
         } finally {
             try {

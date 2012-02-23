@@ -19,7 +19,7 @@ package org.esa.beam.framework.datamodel;
  * A listener which listens to internal data product changes.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface ProductNodeListener {
 

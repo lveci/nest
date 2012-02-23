@@ -24,7 +24,7 @@ import com.bc.ceres.binding.BindingException;
  * {@link com.bc.ceres.binding.Property Property}.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.10
  */
 public interface BindingProblem {

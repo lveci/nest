@@ -34,7 +34,7 @@ import java.awt.Window;
  * todo - add API doc
  *
  * @author Marco Peters
-
+ * @version $Revision: $ $Date: $
  * @since BEAM 4.6
  */
 public class AbstractMoveLayerTest {

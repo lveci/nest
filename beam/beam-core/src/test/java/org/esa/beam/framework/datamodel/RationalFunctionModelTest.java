@@ -24,7 +24,7 @@ import java.util.Random;
  * Tests for class {@link RationalFunctionModel}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class RationalFunctionModelTest extends TestCase {
 

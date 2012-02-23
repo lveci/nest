@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  */
 public class ProductSubsetDef {
 

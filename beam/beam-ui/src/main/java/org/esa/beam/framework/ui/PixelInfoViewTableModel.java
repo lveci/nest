@@ -24,7 +24,7 @@ import javax.swing.table.AbstractTableModel;
 /**
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.5.2
  */
 class PixelInfoViewTableModel extends AbstractTableModel {

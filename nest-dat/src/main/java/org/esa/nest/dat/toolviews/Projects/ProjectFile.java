@@ -15,7 +15,7 @@
  */
 package org.esa.nest.dat.toolviews.Projects;
 
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphIO;
 
@@ -44,9 +44,9 @@ public class ProjectFile {
         if(folderType == ProjectSubFolder.FolderType.GRAPH) {
             Graph graph = readGraph(file.getAbsolutePath());
             if(graph != null) {
-                Xpp3Dom presXML = graph.getApplicationData("Presentation");
+                XppDom presXML = graph.getApplicationData("Presentation");
                 if(presXML != null) {
-                    Xpp3Dom descXML = presXML.getChild("Description");
+                    XppDom descXML = presXML.getChild("Description");
                     if(descXML != null && descXML.getValue() != null) {
                         this.setToolTipText(descXML.getValue());
                     }

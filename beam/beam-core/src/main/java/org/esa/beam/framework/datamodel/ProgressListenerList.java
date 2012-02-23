@@ -24,7 +24,7 @@ import java.util.List;
  * products.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ProgressListenerList implements ProgressListener {
 

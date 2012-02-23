@@ -33,18 +33,72 @@ public class VirtualDirTest extends TestCase {
         final File file1 = virtualDir.getFile("File1");
         assertTrue(file1.exists());
         assertFalse("Path of File1 should not contain the parent path of the zip file.",
-                    file1.getAbsolutePath().contains(zipFile.getParent()));
+                file1.getAbsolutePath().contains(zipFile.getParent()));
 
         testFileNode(zipFile, virtualDir);
+
+        assertTrue(virtualDir.isCompressed());
+        assertTrue(virtualDir.isArchive());
     }
 
     public void testDir() throws IOException {
-        File file = getTestDataDir("VirtualDirTest.dir");
+        final File file = getTestDataDir("VirtualDirTest.dir");
         // make empty "dir2", because git removes empty dirs
-        File dir2 = new File(file, "dir2");
+        final File dir2 = new File(file, "dir2");
         dir2.mkdir();
         dir2.deleteOnExit();
-        testFileNode(file, VirtualDir.create(file));
+
+        final VirtualDir virtualDir = VirtualDir.create(file);
+        testFileNode(file, virtualDir);
+
+        assertFalse(virtualDir.isCompressed());
+        assertFalse(virtualDir.isArchive());
+    }
+
+    public void testNoZip() throws IOException {
+        File file = getTestDataDir("VirtualDirTest.nozip");
+        VirtualDir virtualDir = VirtualDir.create(file);
+        assertNull(virtualDir);
+    }
+
+    public void testNullArg() throws IOException {
+        try {
+            VirtualDir.create(null);
+            fail("NullPointerException?");
+        } catch (NullPointerException e) {
+            // ok
+        }
+    }
+
+    public void testFinalize() throws Throwable {
+        File zipFile = getTestDataDir("VirtualDirTest.zip");
+        final VirtualDir virtualDir = VirtualDir.create(zipFile);
+        final File file1 = virtualDir.getFile("File1");   // triggers the unzipping
+
+        final File tempDir = virtualDir.getTempDir();
+        assertNotNull(tempDir);
+
+        final File createdDir = new File(tempDir, "VirtualDirTest");
+        assertTrue(createdDir.isDirectory());
+
+        virtualDir.finalize();
+
+        assertFalse(createdDir.isDirectory());
+    }
+
+    private static File getTestDataDir() {
+        File dir = new File("./src/test/data/");
+        if (!dir.exists()) {
+            dir = new File("./ceres-core/src/test/data/");
+            if (!dir.exists()) {
+                junit.framework.Assert.fail("Can't find my test data. Where is '" + dir + "'?");
+            }
+        }
+        return dir;
+    }
+
+    private static File getTestDataDir(String path) {
+        return new File(getTestDataDir(), path);
     }
 
     private void testFileNode(File file, VirtualDir virtualDir) throws IOException {
@@ -66,7 +120,6 @@ public class VirtualDirTest extends TestCase {
             } finally {
                 reader.close();
             }
-
 
             List<String> dirNames = Arrays.asList(virtualDir.list("."));
             assertNotNull(dirNames);
@@ -122,36 +175,4 @@ public class VirtualDirTest extends TestCase {
             virtualDir.close();
         }
     }
-
-    public void testNoZip() throws IOException {
-        File file = getTestDataDir("VirtualDirTest.nozip");
-        VirtualDir virtualDir = VirtualDir.create(file);
-        assertNull(virtualDir);
-    }
-
-
-    public void testNullArg() throws IOException {
-        try {
-            VirtualDir.create(null);
-            fail("NullPointerException?");
-        } catch (NullPointerException e) {
-            // ok
-        }
-    }
-
-    private static File getTestDataDir() {
-        File dir = new File("./src/test/data/");
-        if (!dir.exists()) {
-            dir = new File("./ceres-core/src/test/data/");
-            if (!dir.exists()) {
-                junit.framework.Assert.fail("Can't find my test data. Where is '" + dir + "'?");
-            }
-        }
-        return dir;
-    }
-
-    private static File getTestDataDir(String path) {
-        return new File(getTestDataDir(), path);
-    }
-
 }

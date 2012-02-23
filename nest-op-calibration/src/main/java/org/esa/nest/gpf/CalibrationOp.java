@@ -25,11 +25,11 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;
 import java.util.HashMap;

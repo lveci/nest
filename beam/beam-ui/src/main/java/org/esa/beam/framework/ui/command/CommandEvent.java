@@ -25,7 +25,7 @@ import javax.swing.event.ChangeEvent;
  * The <code>CommandEvent</code> is a ...
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class CommandEvent extends ChangeEvent {
 

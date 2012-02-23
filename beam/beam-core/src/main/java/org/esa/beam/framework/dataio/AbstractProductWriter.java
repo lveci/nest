@@ -29,7 +29,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see #writeProductNodes
  */
 public abstract class AbstractProductWriter implements ProductWriter {

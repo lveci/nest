@@ -27,7 +27,7 @@ import java.util.List;
  * skipped.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class UserInputHistory {
 

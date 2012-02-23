@@ -51,7 +51,7 @@ import java.text.MessageFormat;
  * Installs commands into VISAT which lets a user attach a {@link org.esa.beam.framework.datamodel.PixelGeoCoding} based on pixels rather than tie points to the current product.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class CreateFilteredBandAction extends ExecCommand {
 

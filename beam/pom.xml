@@ -24,7 +24,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.10-SNAPSHOT</version>
+    <version>4C-4.10</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -35,9 +35,9 @@
            -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <beam.version>4.10-SNAPSHOT</beam.version>
-        <ceres.version>0.13-SNAPSHOT</ceres.version>
-        <geotools.version>2.7.2</geotools.version>
+        <beam.version>4C-4.10</beam.version>
+        <ceres.version>4C-0.13</ceres.version>
+        <geotools.version>2.7.4</geotools.version>
         <jide.version>2.9.5</jide.version>
         <hdf.version>2.7</hdf.version>
         <netcdf.version>4.2.20</netcdf.version>
@@ -71,7 +71,7 @@
     </scm>
 
     <repositories>
-        <repository>
+        <!--repository>
             <id>bc-mvn</id>
             <name>Public Maven Repository at Brockmann Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
@@ -82,8 +82,8 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
-	<repository>
+        </repository-->
+		<repository>
             <id>array-mvn-repo</id>
             <name>Public Maven Repository at Array Systems Computing Inc</name>
             <url>http://www.array.ca/nest-web/maven</url>
@@ -99,16 +99,16 @@
             <name>Java.net repository</name>
             <url>http://download.java.net/maven/2</url>
         </repository>
-        <repository>
+        <!--repository>
             <id>osgeo</id>
             <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository-->
+        <repository>
+			<id>opengeo</id>
+			<name>GeoTools Maven Repository</name>
+			<url>http://repo.opengeo.org/</url>
         </repository>
-        <!--<repository>-->
-        <!--<id>gt-primary</id>-->
-        <!--<name>Primary GeoTools Maven Repository</name>-->
-        <!--<url>http://maven.geotools.fr/repository</url>-->
-        <!--</repository>-->
     </repositories>
 
     <pluginRepositories>
@@ -169,6 +169,7 @@
 	<module>ceres-0.x</module>
 
         <module>beam-core</module>
+		<module>beam-nest-common</module>
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
         <module>beam-visat</module>
@@ -269,19 +270,19 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-envisat-reader</artifactId>
-                <version>1.4</version>
+                <version>4C-1.5</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-netcdf</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>4C-1.1</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-geotiff</artifactId>
-                <version>1.2-SNAPSHOT</version>
+                <version>4C-1.2</version>
             </dependency>
 
             <dependency>
@@ -296,53 +297,137 @@
                 <version>${netcdf.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>nujan</artifactId>
+                <version>1.4.1</version>
+            </dependency>
+
+			<dependency>
+                <groupId>org.esa.nest</groupId>
+                <artifactId>nest-core</artifactId>
+                <version>4C-0.1</version>
+            </dependency>
+			
             <!-- GeoTools Libraries ############################################# -->
 
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-api</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-render</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
+				<exclusions>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
+					<exclusion>
+                        <groupId>com.vividsolutions</groupId>
+                        <artifactId>jts</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
@@ -357,7 +442,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
+			<dependency>
+				<groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>1.10</version>
+			</dependency>
+			
             <!-- JAI Libraries ############################################# -->
 
             <dependency>
@@ -391,7 +481,7 @@
             <dependency>
                 <groupId>javax.help</groupId>
                 <artifactId>javahelp</artifactId>
-                <version>2.0.02</version>
+                <version>2.0.05</version>
             </dependency>
 
             <!-- JDOM Library ############################################# -->
@@ -400,6 +490,14 @@
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
                 <version>1.1</version>
+            </dependency>
+
+            <!-- BC Neural Network Library ############################################# -->
+
+            <dependency>
+                <groupId>com.bc.jnn</groupId>
+                <artifactId>jnn</artifactId>
+                <version>1.6</version>
             </dependency>
 
             <!-- Jama Matrix Algebra Library ############################################# -->
@@ -416,14 +514,14 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.8.2</version>
+                <version>4.10</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.8.5</version>
+                <version>1.9.0</version>
                 <scope>test</scope>
             </dependency>
 
@@ -460,12 +558,12 @@
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.3</version>
+                <version>1.4.2</version>
             </dependency>
             <dependency>
                 <groupId>xpp3</groupId>
                 <artifactId>xpp3</artifactId>
-                <version>1.1.3.3</version>
+                <version>1.1.3.4.O</version>
             </dependency>
 
             <!-- JFreeChart Libraries ############################################# -->
@@ -487,6 +585,13 @@
                 <groupId>org.jython</groupId>
                 <artifactId>jython</artifactId>
                 <version>2.5.2</version>
+            </dependency>
+
+            <!-- TAR archive support ########################################  -->
+            <dependency>
+                <groupId>org.xeustechnologies</groupId>
+                <artifactId>jtar</artifactId>
+                <version>1.0.4</version>
             </dependency>
 
         </dependencies>
@@ -582,7 +687,7 @@
 
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>2.8</version>
                     <configuration>
                         <links>
                             <link>http://java.sun.com/javase/6/docs/api/</link>
@@ -667,7 +772,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.8</version>
             </plugin>
         </plugins>
     </reporting>

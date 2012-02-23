@@ -1,9 +1,9 @@
 package org.esa.nest.dat.util;
 
-import org.esa.beam.visat.VisatApp;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductManager;
-import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.visat.VisatApp;
 
 import java.io.File;
 import java.io.IOException;

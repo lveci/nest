@@ -13,7 +13,8 @@ class EnviConstants {
     public static final String HEADER_KEY_BYTE_ORDER = "byte order";
     public static final String HEADER_KEY_MAP_INFO = "map info";
     public static final String HEADER_KEY_PROJECTION_INFO = "projection info";
-    public static final String HEADER_KEY_WAVELENGTH_UNITS = "wavelength units =";
+    public static final String HEADER_KEY_WAVELENGTH_UNITS = "wavelength units";
+    public static final String HEADER_KEY_WAVELENGTH = "wavelength";
     public static final String HEADER_KEY_BAND_NAMES = "band names";
     public static final String HEADER_KEY_DESCRIPTION = "description";
     public static final String FIRST_LINE = "ENVI";
@@ -25,6 +26,8 @@ class EnviConstants {
     public static final String HDR_EXTENSION = ".hdr";
     public static final String IMG_EXTENSION = ".img";
     public static final String BIN_EXTENSION = ".bin";
+    public static final String BIL_EXTENSION = ".bil";
+    public static final String BSQ_EXTENSION = ".bsq";
     public static final String ZIP_EXTENSION = ".zip";
 
 static final String[] VALID_EXTENSIONS = {HDR_EXTENSION, ZIP_EXTENSION};
@@ -35,6 +38,8 @@ static final String[] VALID_EXTENSIONS = {HDR_EXTENSION, ZIP_EXTENSION};
     public static final int TYPE_ID_INT32 = 3;
     public static final int TYPE_ID_FLOAT32 = 4;
     public static final int TYPE_ID_FLOAT64 = 5;
+    public static final int TYPE_ID_COMPLEXFLOAT32 = 6;
+    public static final int TYPE_ID_COMPLEXFLOAT64 = 9;
     public static final int TYPE_ID_UINT16 = 12;
     public static final int TYPE_ID_UINT32 = 13;
 

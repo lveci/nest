@@ -21,30 +21,30 @@ import org.esa.nest.gpf.ProductSetReaderOpUI;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * List of Products
  */
 public class ProductListPanel extends JPanel {
 
-    private final FileModel fileModel = new FileModel();
-    private final JTable table = new JTable(fileModel);
+    private final FileTableModel fileModel;
+    private final JTable table;
     private final static int width = 500;
     private final static int height = 100;
 
-    public ProductListPanel(final String title) {
-        this();
-        setBorder(BorderFactory.createTitledBorder(title));
-    }
-
-    public ProductListPanel() {
+    public ProductListPanel(final String title, final FileTableModel fileModel) {
         super(new BorderLayout());
+        setBorder(BorderFactory.createTitledBorder(title));
+
+        this.fileModel = fileModel;
+        table = new JTable(fileModel);
 
         table.setPreferredScrollableViewportSize(new Dimension(width, height));
         fileModel.setColumnWidths(table.getColumnModel());
         table.setColumnSelectionAllowed(true);
         table.setDropMode(DropMode.ON);
+        table.setDragEnabled(true);
         table.setTransferHandler(new ProductSetReaderOpUI.ProductSetTransferHandler(fileModel));
 
         final JScrollPane scrollPane = new JScrollPane(table);
@@ -56,7 +56,7 @@ public class ProductListPanel extends JPanel {
     }
 
     public File[] getFileList() {
-        final ArrayList<File> fileList = fileModel.getFileList();
+        final List<File> fileList = fileModel.getFileList();
         return fileList.toArray(new File[fileList.size()]);
     }
 

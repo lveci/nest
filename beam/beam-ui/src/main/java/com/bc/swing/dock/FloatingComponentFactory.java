@@ -19,7 +19,7 @@ import java.awt.Window;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
-
+ * @version $Revision$ $Date$
  */
 public interface FloatingComponentFactory {
 

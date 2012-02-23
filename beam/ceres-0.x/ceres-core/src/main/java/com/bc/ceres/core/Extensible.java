@@ -20,7 +20,7 @@ package com.bc.ceres.core;
  * Objects implementing this interface can be dynamically extended.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface Extensible {
     /**

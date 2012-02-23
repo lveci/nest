@@ -5,15 +5,15 @@
 	<parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>${nest.version}</version>
+        <version>4C-0.1</version>
 		<relativePath>../../pom.xml</relativePath>
     </parent>
 	
     <groupId>org.esa.nest.maven</groupId>
     <artifactId>maven-nest-dataio-archetype</artifactId>
-    <version>${nest.version}</version>
-    <name>Maven 2 NEST Data I/O Archetype Plugin</name>
-    <description>A Maven 2 archetype for projects using NEST Data I/O framework.</description>
+    <version>4C-0.1</version>
+    <name>Maven NEST Data I/O Archetype Plugin</name>
+    <description>A Maven archetype for projects using NEST Data I/O framework.</description>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -27,13 +27,13 @@
         <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>0.13-SNAPSHOT</version>
+            <version>4C-0.13</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.10-SNAPSHOT</version>
+            <version>4C-4.10</version>
         </dependency>
 
     </dependencies>

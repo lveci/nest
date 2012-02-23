@@ -30,7 +30,7 @@ import java.awt.*;
  * {@code MultiLevelSource}.
  *
  * @author Norman Fomferra
-
+ * @version $revision$ $date$
  */
 public abstract class MultiLevelImage extends PlanarImage implements MultiLevelSource {
 

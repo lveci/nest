@@ -25,7 +25,7 @@ import org.esa.beam.util.logging.BeamLogManager;
  * interface by providing some default method implementations and several utility methods for common validators.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @see ParamValidator
  */
 public abstract class AbstractParamValidator implements ParamValidator {

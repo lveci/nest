@@ -34,7 +34,7 @@ import java.util.Locale;
  * Tests for class {@link TargetProductSelectorModel}.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class TargetProductSelectorModelTest extends TestCase {
 

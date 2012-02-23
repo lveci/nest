@@ -26,7 +26,7 @@ import java.util.Vector;
  * <code>Product</code> was added or removed.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ProductManager {
 

@@ -38,6 +38,29 @@ public class EnviProductReaderTest extends TestCase {
         assertEquals("Band", bandNames[0]);
     }
 
+    public void testParseBandNames_withBandnameProperty() throws IOException {
+        final StringReader reader = new StringReader("band names = { myband_1, myband_2}");
+        final Header header = new Header(new BufferedReader(reader));
+
+        final String[] bandNames = EnviProductReader.getBandNames(header);
+
+        assertEquals(2, bandNames.length);
+        assertEquals("myband_1", bandNames[0]);
+        assertEquals("myband_2", bandNames[1]);
+    }
+
+    public void testParseBandNames_withBandNumberProperty() throws IOException {
+        final StringReader reader = new StringReader("bands = 3");
+        final Header header = new Header(new BufferedReader(reader));
+
+        final String[] bandNames = EnviProductReader.getBandNames(header);
+
+        assertEquals(3, bandNames.length);
+        assertEquals("Band_1", bandNames[0]);
+        assertEquals("Band_2", bandNames[1]);
+        assertEquals("Band_3", bandNames[2]);
+    }
+
     public void testReadProductNodes_WithoutSensingStartStop() throws IOException, ParseException {
         final String sensingStartStop = "";
         final String headerContent = createHeaderFileContent(sensingStartStop);

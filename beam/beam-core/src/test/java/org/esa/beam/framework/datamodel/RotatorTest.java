@@ -25,7 +25,7 @@ import java.util.Arrays;
  * Tests for class {@link Rotator}..
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class RotatorTest extends TestCase {
 

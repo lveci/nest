@@ -25,7 +25,7 @@ import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
  * Unstable API. Use at own risk.
  *
  * @author Marco Zuehlke
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class ShapefileLayerSource implements LayerSource {

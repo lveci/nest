@@ -15,18 +15,20 @@
  */
 package org.esa.nest.dataio.ceos.alos;
 
-import org.esa.nest.dataio.ceos.CEOSLeaderFile;
+import org.esa.nest.dataio.binary.BinaryDBReader;
+import org.jdom.Document;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 
-class AlosPalsarTrailerFile extends CEOSLeaderFile {
+class AlosPalsarTrailerFile extends AlosPalsarLeaderFile {
 
     private final static String trailer_recordDefinitionFile = "trailer_file.xml";
+    private final static Document trailerXML = BinaryDBReader.loadDefinitionFile(mission, trailer_recordDefinitionFile);
 
     public AlosPalsarTrailerFile(final ImageInputStream stream) throws IOException {
-        super(stream, AlosPalsarConstants.MISSION, trailer_recordDefinitionFile);
+        super(stream, trailerXML);
 
     }
 }

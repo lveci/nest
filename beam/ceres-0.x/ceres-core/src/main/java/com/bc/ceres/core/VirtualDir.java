@@ -16,18 +16,8 @@
 
 package com.bc.ceres.core;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
+import java.io.*;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
@@ -118,6 +108,20 @@ public abstract class VirtualDir {
         }
     }
 
+    public abstract boolean isCompressed();
+
+    public abstract boolean isArchive();
+
+    public File getTempDir() throws IOException {
+        return null;
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        super.finalize();
+    }
+
+
     private static class Dir extends VirtualDir {
 
         private final File dir;
@@ -156,6 +160,16 @@ public abstract class VirtualDir {
 
         @Override
         public void close() {
+        }
+
+        @Override
+        public boolean isCompressed() {
+            return false;
+        }
+
+        @Override
+        public boolean isArchive() {
+            return false;
         }
     }
 
@@ -240,6 +254,26 @@ public abstract class VirtualDir {
 
         @Override
         public void close() {
+            cleanup();
+        }
+
+        @Override
+        public void finalize() throws Throwable {
+            super.finalize();
+            cleanup();
+        }
+
+        @Override
+        public boolean isCompressed() {
+            return true;
+        }
+
+        @Override
+        public boolean isArchive() {
+            return true;
+        }
+
+        private void cleanup() {
             try {
                 zipFile.close();
             } catch (IOException e) {
@@ -266,7 +300,8 @@ public abstract class VirtualDir {
             return zipEntry;
         }
 
-        private static File getTempDir() throws IOException {
+        // package local to be usable in test tb 2012-02-17
+        public File getTempDir() throws IOException {
             File tempDir = null;
             String tempDirName = System.getProperty("java.io.tmpdir");
             if (tempDirName != null) {

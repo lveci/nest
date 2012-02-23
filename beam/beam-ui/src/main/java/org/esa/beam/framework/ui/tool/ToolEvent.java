@@ -21,7 +21,7 @@ import java.util.EventObject;
  * A special event type which is fired by tools to inform tool listeners about state changes of a tool.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

@@ -24,11 +24,15 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.DialogUtils;
+import org.jdoris.core.stacks.MasterSelection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,14 +43,16 @@ public class CreateStackOpUI extends BaseOperatorUI {
     private final JList mstBandList = new JList();
     private final JList slvBandList = new JList();
 
-    private final ArrayList<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
-    private final ArrayList<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
+    private final List<Integer> defaultMasterBandIndices = new ArrayList<Integer>(2);
+    private final List<Integer> defaultSlaveBandIndices = new ArrayList<Integer>(2);
 
     private final JComboBox resamplingType = new JComboBox(ResamplingFactory.resamplingNames);
 
     private final JComboBox extent = new JComboBox(new String[] {   CreateStackOp.MASTER_EXTENT,
                                                                     CreateStackOp.MIN_EXTENT,
                                                                     CreateStackOp.MAX_EXTENT });
+    private final JButton optimalMasterButton = new JButton("Find Optimal Master");
+    private Product masterProduct = null;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -63,25 +69,17 @@ public class CreateStackOpUI extends BaseOperatorUI {
     @Override
     public void initParameters() {
 
-        final String bandNames[] = getBandNames();
-        OperatorUIUtils.initBandList(mstBandList, bandNames);
-        OperatorUIUtils.initBandList(slvBandList, bandNames);
-
-        OperatorUIUtils.setSelectedListIndices(mstBandList, getSelectedIndices(bandNames,
-                                                                (String[])paramMap.get("masterBandNames"),
-                                                                defaultMasterBandIndices));
-        OperatorUIUtils.setSelectedListIndices(slvBandList, getSelectedIndices(bandNames,
-                                                                (String[])paramMap.get("slaveBandNames"),
-                                                                defaultSlaveBandIndices));
+        enableOptimalMasterButton();
+        updateMasterSlaveSelections();
 
         resamplingType.setSelectedItem(paramMap.get("resamplingType"));
         extent.setSelectedItem(paramMap.get("extent"));
     }
 
-    private static ArrayList<Integer> getSelectedIndices(final String[] allBandNames,
+    private static List<Integer> getSelectedIndices(final String[] allBandNames,
                                                          final String[] selBandNames,
-                                                         final ArrayList<Integer> defaultIndices) {
-        final ArrayList<Integer> bandIndices = new ArrayList<Integer>(2);
+                                                         final List<Integer> defaultIndices) {
+        final List<Integer> bandIndices = new ArrayList<Integer>(2);
         if(selBandNames != null && selBandNames.length > 0) {
             int i=0;
             for(String bandName : allBandNames) {
@@ -143,17 +141,58 @@ public class CreateStackOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Output Extents:", extent);
         gbc.gridy++;
 
+        optimalMasterButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if(sourceProducts != null) {
+                    masterProduct = MasterSelection.findOptimalMasterProduct(sourceProducts);
+                }
+                updateMasterSlaveSelections();
+            }
+        });
+        gbc.fill = GridBagConstraints.VERTICAL;
+        contentPane.add(optimalMasterButton, gbc);
+        gbc.gridy++;
+
         DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }
 
+    private void enableOptimalMasterButton() {
+        if(sourceProducts == null) return;
+
+        for(Product prod : sourceProducts) {
+            if(!OperatorUtils.isComplex(prod)) {
+                optimalMasterButton.setEnabled(false);
+                return;
+            }
+        }
+    }
+
+    private void updateMasterSlaveSelections() {
+        final String bandNames[] = getBandNames();
+        OperatorUIUtils.initBandList(mstBandList, bandNames);
+        OperatorUIUtils.initBandList(slvBandList, bandNames);
+
+        OperatorUIUtils.setSelectedListIndices(mstBandList, getSelectedIndices(bandNames,
+                                                                (String[])paramMap.get("masterBandNames"),
+                                                                defaultMasterBandIndices));
+        OperatorUIUtils.setSelectedListIndices(slvBandList, getSelectedIndices(bandNames,
+                                                                (String[])paramMap.get("slaveBandNames"),
+                                                                defaultSlaveBandIndices));
+    }
+
     @Override
     protected String[] getBandNames() {
-        final ArrayList<String> bandNames = new ArrayList<String>(5);
         if(sourceProducts == null) {
-            return bandNames.toArray(new String[bandNames.size()]);
+            return new String[] {};
         }
+        if(masterProduct == null && sourceProducts.length > 0) {
+            masterProduct = sourceProducts[0];
+        }
+        defaultMasterBandIndices.clear();
+        defaultSlaveBandIndices.clear();
+        final List<String> bandNames = new ArrayList<String>(5);
         boolean masterBandsSelected = false;
         for(Product prod : sourceProducts) {
             if(sourceProducts.length > 1) {
@@ -166,7 +205,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
                     if(!(band instanceof VirtualBand)) {
 
-                        if(!masterBandsSelected) {
+                        if(prod == masterProduct && !masterBandsSelected) {
                             defaultMasterBandIndices.add(index);
                             if(band.getUnit() != null && band.getUnit().equals(Unit.REAL)) {
                                 if(i+1 < bands.length) {
@@ -179,7 +218,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
                                 }
                             }
                             masterBandsSelected = true;
-                        } else { //if(index > defaultMasterBandIndices.size()) {
+                        } else {
                             defaultSlaveBandIndices.add(index);
                         }
                     }

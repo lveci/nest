@@ -58,12 +58,7 @@ public class TestALOSCalibrationOperator extends TestCase {
      */
     public void processFile(String inputPath, String expectedPath) throws Exception {
 
-        final File inputFile = new File(inputPath);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        assertNotNull(reader);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+        final Product sourceProduct = TestUtils.readSourceProduct(inputPath);
 
         final CalibrationOp op = (CalibrationOp)spi.createOperator();
         assertNotNull(op);
@@ -72,6 +67,6 @@ public class TestALOSCalibrationOperator extends TestCase {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPath, null);
+        TestUtils.compareProducts(targetProduct, expectedPath, null);
     }    
 }

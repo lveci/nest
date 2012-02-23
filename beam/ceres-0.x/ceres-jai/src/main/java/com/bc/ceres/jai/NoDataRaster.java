@@ -29,7 +29,7 @@ import java.awt.image.WritableRaster;
  * to contain no interpretable data.
  *
  * @author Ralf Quast
-
+ * @version $Revision: $ $Date: $
  * @since Ceres 0.10
  */
 public final class NoDataRaster extends Raster {

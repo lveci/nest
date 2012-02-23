@@ -390,7 +390,7 @@ public class NetCDFUtils {
 
     public static Variable[] getTiePointGridVariables(Map<NcRasterDim, List<Variable>> variableLists,
                                                Variable[] rasterVariables) {
-        final ArrayList<Variable> tpgList = new ArrayList<Variable>();
+        final List<Variable> tpgList = new ArrayList<Variable>();
         final Set<NcRasterDim> keySet = variableLists.keySet();
         for(NcRasterDim o : keySet) {
             final List<Variable> varList = variableLists.get(o);

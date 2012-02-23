@@ -407,7 +407,7 @@ public class WorldMapPane extends JPanel {
                                      final String text, final PixelPos textCenter,
                                      final Color fillColor, final Color borderColor) {
             ProductUtils.normalizeGeoPolygon(geoBoundary);
-            final ArrayList<GeneralPath> boundaryPaths = ProductUtils.assemblePathList(geoBoundary);
+            final List<GeneralPath> boundaryPaths = ProductUtils.assemblePathList(geoBoundary);
             final AffineTransform transform = layerCanvas.getViewport().getModelToViewTransform();
             for (GeneralPath boundaryPath : boundaryPaths) {
                 boundaryPath.transform(transform);

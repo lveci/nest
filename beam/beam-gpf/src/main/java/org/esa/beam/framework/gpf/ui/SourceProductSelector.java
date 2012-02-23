@@ -63,7 +63,7 @@ import java.util.Iterator;
  * todo - add capability to specify optional sources
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public class SourceProductSelector {
 

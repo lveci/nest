@@ -37,7 +37,7 @@ import java.net.URL;
  * @author Tom Block
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  */
 public class FileUtils {
 

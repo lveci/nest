@@ -16,6 +16,8 @@
 package org.esa.nest.util;
 
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.db.AOIManager;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -33,7 +35,7 @@ import java.util.Map;
  */
 public final class Settings {
 
-    private static final Settings _instance = new Settings();
+    private static Settings _instance = null;
     private final String settingsFile;
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
@@ -47,8 +49,11 @@ public final class Settings {
     /**
     * @return The unique instance of this class.
     */
-    static public Settings instance() {
-      return _instance;
+    public static Settings instance() {
+        if(_instance == null) {
+            _instance = new Settings();
+        }
+        return _instance;
     }
 
     private Settings() {
@@ -182,4 +187,12 @@ public final class Settings {
         return new File(auxDataPath);
     }
 
+    public static String getPref(final String id, final String defaultStr) {
+        return VisatApp.getApp().getPreferences().getPropertyString(id, defaultStr);
+    }
+
+    public static void setPref(final String id, final String value) {
+        VisatApp.getApp().getPreferences().setPropertyString(id, value);
+        VisatApp.getApp().savePreferences();
+    }
 }

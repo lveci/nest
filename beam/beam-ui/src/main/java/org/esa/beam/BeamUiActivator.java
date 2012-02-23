@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  *
  * @author Marco Peters
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
 
@@ -176,7 +176,7 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
             final String actionId = action.getCommandID();
             final Command existingAction = actionRegistry.get(actionId);
             if (existingAction != null) {
-                moduleContext.getLogger().info(String.format("Action [%s] has been redeclared!\n", actionId));
+                //moduleContext.getLogger().info(String.format("Action [%s] has been redeclared!\n", actionId));
             }
             actionRegistry.put(actionId, action);
         }

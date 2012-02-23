@@ -32,7 +32,7 @@ import java.text.MessageFormat;
  * such as the VISAT product scene view.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ToolAction extends ToolCommand {
 

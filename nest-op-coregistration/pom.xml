@@ -2,13 +2,13 @@
   <parent>
     <artifactId>nest</artifactId>
     <groupId>org.esa.nest</groupId>
-    <version>${nest.version}</version>
+    <version>4C-0.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-op-coregistration</artifactId>
   <name>NEST Coregistration</name>
-  <version>${nest.version}</version>
+  <version>4C-0.1</version>
   <description>GCP Selection and Warping</description>
 
   <dependencies>
@@ -25,6 +25,14 @@
       <artifactId>beam-gpf</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-nest-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-dat</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.esa.nest</groupId>
       <artifactId>nest-core</artifactId>
     </dependency>
@@ -32,7 +40,7 @@
       <groupId>org.esa.nest</groupId>
       <artifactId>nest-graph-builder</artifactId>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>edu.emory.mathcs</groupId>
       <artifactId>jtransforms</artifactId>
     </dependency>
@@ -47,6 +55,10 @@
     <dependency>
       <groupId>org.esa.nest</groupId>
       <artifactId>nest-reader-dem</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jdoris</groupId>
+      <artifactId>jdoris-core</artifactId>
     </dependency>
     <dependency>
         <groupId>org</groupId>

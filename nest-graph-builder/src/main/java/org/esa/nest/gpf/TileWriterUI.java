@@ -1,18 +1,17 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.BasicApp;
+import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.TargetProductSelector;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.SystemUtils;
 
 import javax.swing.*;
-import java.util.Map;
-import java.io.File;
 import java.awt.*;
-
-import com.bc.ceres.swing.TableLayout;
+import java.io.File;
+import java.util.Map;
 
 /**
  * Writer OperatorUI

@@ -28,7 +28,7 @@ import java.util.Locale;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class GeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
 

@@ -28,7 +28,7 @@ import java.awt.image.RenderedImage;
  *
  * @author Norman Fomferra
  * @author Marco Zühlke
-
+ * @version $revision$ $date$
  */
 public interface MultiLevelSource {
     MultiLevelSource NULL = DefaultMultiLevelSource.NULL;

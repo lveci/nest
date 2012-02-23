@@ -55,7 +55,7 @@
         </fileSet>
 		
 		<fileSet>
-            <directory>../dist/jdk7/linux64/jre</directory>
+            <directory>../../dist/jdk7/linux64/jre</directory>
             <outputDirectory>jre</outputDirectory>
 			<fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
@@ -91,8 +91,6 @@
                         <outputDirectory>lib</outputDirectory>
 						<outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
                         <excludes>
-							<exclude>jdom:jdom</exclude>
-							<exclude>xerces:xercesImpl</exclude>
 							<exclude>ncsa.hdf:lib-hdf</exclude>
 							<exclude>org.esa.nest:nest-core</exclude>
 							<exclude>org.esa.nest:nest-graph-builder</exclude>

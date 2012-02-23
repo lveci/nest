@@ -56,7 +56,7 @@ import java.util.concurrent.ExecutionException;
  * GCP geo-coding form.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 class GcpGeoCodingForm extends JPanel {
 

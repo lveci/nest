@@ -33,7 +33,7 @@ import java.awt.event.FocusListener;
  * A binding for a {@link javax.swing.text.JTextComponent} component.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since Ceres 0.9
  */
 public class TextComponentAdapter extends ComponentAdapter implements ActionListener, FocusListener {

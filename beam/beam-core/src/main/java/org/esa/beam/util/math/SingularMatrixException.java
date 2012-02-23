@@ -19,7 +19,7 @@ package org.esa.beam.util.math;
  * Thrown, if a matrix is singular and processing cannot be continued.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class SingularMatrixException extends ArithmeticException {
 

@@ -32,6 +32,7 @@ public class TestEllipsoidCorrectionRDOp extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        TestUtils.initTestEnvironment();
         spi = new EllipsoidCorrectionRDOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }

@@ -17,9 +17,10 @@ package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.BinaryDBReader;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.binary.BinaryDBReader;
+import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ceos.FilePointerRecord;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;

@@ -355,8 +355,7 @@ public class ConcurrentMultiLevelRenderer implements MultiLevelRenderer {
 
     private static AffineTransform getImageToViewTransform(Viewport vp, MultiLevelSource multiLevelSource, int level) {
         final AffineTransform t = new AffineTransform(multiLevelSource.getModel().getImageToModelTransform(level));
-        if(vp != null)
-            t.preConcatenate(vp.getModelToViewTransform());
+        t.preConcatenate(vp.getModelToViewTransform());
         return t;
     }
 
@@ -438,8 +437,11 @@ public class ConcurrentMultiLevelRenderer implements MultiLevelRenderer {
                 // Called from EDT.
                 @Override
                 public void run() {
-                    final Rectangle viewRegion = getViewRegion(rendering.getViewport(), multiLevelSource, level, tileBounds);
-                    rendering.invalidateRegion(viewRegion);
+                    final Viewport vp = rendering.getViewport();
+                    if(vp != null) {
+                        final Rectangle viewRegion = getViewRegion(vp, multiLevelSource, level, tileBounds);
+                        rendering.invalidateRegion(viewRegion);
+                    }
                 }
             });
         }

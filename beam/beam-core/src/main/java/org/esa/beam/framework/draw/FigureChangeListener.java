@@ -21,7 +21,7 @@ import java.util.EventListener;
  * A listener interested in figure changes.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

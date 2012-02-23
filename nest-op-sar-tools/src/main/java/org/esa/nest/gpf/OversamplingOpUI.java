@@ -27,11 +27,7 @@ import java.awt.event.ItemListener;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Feb 12, 2008
- * Time: 1:52:49 PM
- * To change this template use File | Settings | File Templates.
+ * Operator UI for Oversampling
  */
 public class OversamplingOpUI extends BaseOperatorUI {
 
@@ -64,6 +60,12 @@ public class OversamplingOpUI extends BaseOperatorUI {
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
+
+        outputImageBy.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent event) {
+                updateOutputImageBy(true);
+            }
+        });
 
         usePRFTileSizeCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -121,11 +123,6 @@ public class OversamplingOpUI extends BaseOperatorUI {
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, outputImageByLabel, outputImageBy);
-        outputImageBy.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent event) {
-                updateOutputImageBy(true);
-            }
-        });
 
         int savedY = ++gbc.gridy;
         DialogUtils.addComponent(contentPane, gbc, targetImageHeightLabel, targetImageHeight);
@@ -145,33 +142,30 @@ public class OversamplingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         contentPane.add(usePRFTileSizeCheckBox, gbc);
 
-        updateOutputImageBy(true);
-        DialogUtils.fillPanel(contentPane, gbc);
-
         return contentPane;
     }
 
-    private void enableRowColumn(boolean flag) {
+    private void enableRowColumn(final boolean flag) {
         DialogUtils.enableComponents(targetImageWidthLabel, targetImageWidth, flag);
         DialogUtils.enableComponents(targetImageHeightLabel, targetImageHeight, flag);
     }
 
-    private void enableRatio(boolean flag) {
+    private void enableRatio(final boolean flag) {
         DialogUtils.enableComponents(widthRatioLabel, widthRatio, flag);
         DialogUtils.enableComponents(heightRatioLabel, heightRatio, flag);
     }
 
-    private void enablePixelSpacing(boolean flag) {
+    private void enablePixelSpacing(final boolean flag) {
         DialogUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
         DialogUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
     }
 
-    private void updateOutputImageBy(boolean show) {
+    private void updateOutputImageBy(final boolean show) {
         if(show) {
             outputImageBy.setVisible(true);
             outputImageByLabel.setVisible(true);
 
-            String item = (String)outputImageBy.getSelectedItem();
+            final String item = (String)outputImageBy.getSelectedItem();
             if(item.equals(UndersamplingOp.IMAGE_SIZE)) {
                 enableRowColumn(true);
                 enableRatio(false);

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-coregistration</symbolicName>
-    <version>4B-1.1</version>
+    <version>4C-0.1</version>
     <name>NEST Coregistration</name>
     <description>NEST Coregistration</description>
 	
@@ -13,11 +13,16 @@
 	<funding>European Space Agency</funding>
 	
 	<dependency>
-        <module>beam-visat</module>
-        <optional>true</optional>
+        <module>beam-core</module>
     </dependency>
     <dependency>
         <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-nest-common</module>
+    </dependency>
+    <dependency>
+        <module>nest-dat</module>
     </dependency>
     <dependency>
         <module>nest-core</module>
@@ -25,7 +30,9 @@
 	<dependency>
         <module>nest-graph-builder</module>
     </dependency>
-
+    <dependency>
+        <module>jdoris-core</module>
+    </dependency>
 
     <extension point="beam-ui:layerSources">
         <layerSource>
@@ -51,16 +58,19 @@
             <id>CoregistrationGraph</id>
             <class>org.esa.nest.dat.CoregistrationGraphAction</class>
             <text>Automatic Coregistration</text>
-            <shortDescr>Perform Coregistration in a single graph</shortDescr>
+            <shortDescr>Perform Automatic Coregistration</shortDescr>
             <parent>sartools</parent>
             <separatorBefore>true</separatorBefore>
             <helpId>Coregistration</helpId>
         </action>
 
         <action>
-            <id>PCA</id>
-            <class>org.esa.nest.dat.PCAOpAction</class>
+            <id>PCAStatistic</id>
+            <class>org.esa.nest.dat.actions.OperatorAction</class>
             <text>Principal Component Analysis</text>
+            <operatorName>PCA</operatorName>
+	        <dialogTitle>Principal Component Analysis</dialogTitle>
+            <targetProductNameSuffix>_pca</targetProductNameSuffix>
             <shortDescr>Principal Component Analysis</shortDescr>
             <parent>imageAnalysis</parent>
             <helpId>PCA</helpId>

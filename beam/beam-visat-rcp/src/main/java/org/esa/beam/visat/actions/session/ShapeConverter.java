@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * A converter for {@link java.awt.Shape}s.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.6
  */
 public class ShapeConverter implements Converter {

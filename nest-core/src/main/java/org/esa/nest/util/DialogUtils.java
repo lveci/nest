@@ -42,6 +42,7 @@ public final class DialogUtils {
         contentPane.add(label, gbc);
         gbc.gridx = 1;
         contentPane.add(component, gbc);
+        gbc.gridx = 0;
     }
 
     public static JLabel addComponent(JPanel contentPane, GridBagConstraints gbc, String text, JComponent component) {
@@ -50,7 +51,22 @@ public final class DialogUtils {
         contentPane.add(label, gbc);
         gbc.gridx = 1;
         contentPane.add(component, gbc);
+        gbc.gridx = 0;
         return label;
+    }
+
+    public static void addInnerPanel(JPanel contentPane, GridBagConstraints gbc, JLabel label, 
+                                      JComponent component1, JComponent component2) {
+        contentPane.add(label, gbc);
+
+        final JPanel innerPane = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc2 = DialogUtils.createGridBagConstraints();
+        innerPane.add(component1, gbc2);
+        gbc2.gridx = 1;
+        innerPane.add(component2, gbc2);
+
+        gbc.gridx = 1;
+        contentPane.add(innerPane, gbc);
     }
 
     public static JFormattedTextField createFormattedTextField(final NumberFormat numFormat, final Object value,

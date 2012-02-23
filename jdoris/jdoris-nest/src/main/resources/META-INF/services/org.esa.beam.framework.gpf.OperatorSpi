@@ -3,3 +3,4 @@ org.jdoris.nest.gpf.CoherenceOp$Spi
 org.jdoris.nest.gpf.RangeFilterOp$Spi
 org.jdoris.nest.gpf.AzimuthFilterOp$Spi
 org.jdoris.nest.gpf.SubtRefDemOp$Spi
+org.jdoris.nest.gpf.PhaseFilterOp$Spi

@@ -21,7 +21,7 @@ import java.awt.Graphics2D;
  * Clients implementing this interface can be drawn on a <code>Graphics2D</code> drawing surface.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$  $Date$
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

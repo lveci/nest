@@ -390,6 +390,7 @@ public class Stx {
         Assert.argument(roiImage == null || level == 0, "level");
         Assert.notNull(pm, "pm");
 
+        String unit = raster.getUnit();
         final PlanarImage dataImage = ImageManager.getInstance().getSourceImage(raster, level);
         final SampleModel dataSampleModel = dataImage.getSampleModel();
         if (dataSampleModel.getNumBands() != 1) {
@@ -485,6 +486,7 @@ public class Stx {
                     }
                     if (tileContainsData) {
                         final Raster dataTile = dataImage.getTile(tileX, tileY);
+
                         if (!(dataTile instanceof NoDataRaster)) {
                             // data and mask image might not have the same tile size
                             // --> we can not use the tile index of the one for the other, so we use the bounds
@@ -494,28 +496,28 @@ public class Stx {
                                     dataTile.getBounds());
                             switch (raster.getDataType()) {
                                 case ProductData.TYPE_UINT8:
-                                    op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_INT8:
-                                    op.accumulateDataByte(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataByte(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_UINT16:
-                                    op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_INT16:
-                                    op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_UINT32:
-                                    op.accumulateDataUInt(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataUInt(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_INT32:
-                                    op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_FLOAT32:
-                                    op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                                 case ProductData.TYPE_FLOAT64:
-                                    op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                    op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                     break;
                             }
                         }

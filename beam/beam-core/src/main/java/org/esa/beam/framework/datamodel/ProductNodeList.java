@@ -317,7 +317,7 @@ public final class ProductNodeList<T extends ProductNode> {
      * @throws IllegalArgumentException if the name is <code>null</code>
      */
     public final int indexOf(String name) {
-        Guardian.assertNotNull("name", name);
+        //Guardian.assertNotNull("name", name);
         int n = size();
         for (int i = 0; i < n; i++) {
             if (getAt(i).getName().equalsIgnoreCase(name)) {
@@ -337,7 +337,7 @@ public final class ProductNodeList<T extends ProductNode> {
      * @throws IllegalArgumentException if the node is <code>null</code>
      */
     public final int indexOf(T node) {
-        Guardian.assertNotNull("node", node);
+        //Guardian.assertNotNull("node", node);
         return nodes.indexOf(node);
     }
 

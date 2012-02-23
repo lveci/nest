@@ -19,8 +19,8 @@ import org.esa.beam.framework.datamodel.ProductData;
 
 import java.sql.Date;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Calendar;
 
 /**
@@ -28,16 +28,20 @@ import java.util.Calendar;
 public class SQLUtils {
 
     public static String getOrList(final String columnStr, final String values[]) {
-        String orListStr = "(";
+        final StringBuilder orListStr = new StringBuilder(columnStr.length()*values.length);
+        orListStr.append('(');
         int i=0;
         for(String v : values) {
             if(i>0)
-                orListStr += " OR ";
-            orListStr += columnStr+" = '"+v+"'";
+                orListStr.append(" OR ");
+            orListStr.append(columnStr);
+            orListStr.append(" = '");
+            orListStr.append(v);
+            orListStr.append("'");
             ++i;
         }
-        orListStr += ")";
-        return orListStr;
+        orListStr.append(')');
+        return orListStr.toString();
     }
 
     public static Date toSQLDate(final ProductData.UTC utc) {
@@ -55,10 +59,9 @@ public class SQLUtils {
         return newList;
     }
 
-    public static String addAND(String str) {
-        if(!str.isEmpty())
-            return " AND ";
-        return "";
+    public static void addAND(StringBuilder str) {
+        if(str.length() > 0)
+            str.append(" AND ");
     }
 
     public static String insertTableName(final String[] tokens, final String tableName, final String freeQuery) {

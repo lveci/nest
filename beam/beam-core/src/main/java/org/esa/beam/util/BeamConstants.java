@@ -23,7 +23,7 @@ import java.util.Locale;
  * This interface is a container for constants specific for ENVISAT-products.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public interface BeamConstants {
 

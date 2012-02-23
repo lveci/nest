@@ -19,8 +19,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.dataio.ReaderUtils;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -40,7 +40,6 @@ import java.util.Iterator;
 public class ImageIOWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream;
-    private ImageIOFile imgIOFile = null;
     private ImageWriter writer;
     private final String format;
 

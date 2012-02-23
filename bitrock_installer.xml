@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>4B-1.1</version>
+    <version>4C-0.1</version>
     <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
@@ -23,7 +23,7 @@
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
             <friendlyName>Envisat</friendlyName>
-            <icon>C:\build\4B\nest\nest-src\main\assembly\dat.ico</icon>
+            <icon>C:\build\4C\nest\nest\nest-src\main\assembly\dat.ico</icon>
             <mimeType></mimeType>
             <progID></progID>
             <scope>user</scope>
@@ -114,7 +114,7 @@
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
     <enableTimestamp>1</enableTimestamp>
-    <outputDirectory>../dist</outputDirectory>
+    <outputDirectory>../../dist</outputDirectory>
     <saveRelativePaths>1</saveRelativePaths>
     <startMenuGroupName>${product_fullname}-${product_version}</startMenuGroupName>
     <vendor>ESA</vendor>
@@ -130,7 +130,7 @@
                     <comment>NEST Display and Analysis Tool</comment>
                     <exec>${installdir}/dat.sh</exec>
                     <icon>${installdir}/res/dat.png</icon>
-                    <name>NEST 4B</name>
+                    <name>NEST 4C</name>
                     <path>.</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
@@ -148,37 +148,37 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/auxdata</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/bin</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/commandline</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/graphs</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/images</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/lib</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/licenses</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/modules</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/res</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/res</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin.dir/config</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/config</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin.dir/readme.txt</origin>
+                            <origin>target/nest-4C-0.1-bin.dir/readme.txt</origin>
                         </distributionFile>
                     </distributionFileList>
                     <shortcutList>
@@ -204,25 +204,25 @@
                     <platforms>linux</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/dat.sh</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/gpt.sh</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/gpt.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/libgluegen-rt.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/libjogl.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/libjogl.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/libjogl_awt.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/libjogl_awt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/libjogl_cg.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/libjogl_cg.so</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-linux.dir/jre</origin>
+                            <origin>target/nest-4C-0.1-bin-linux.dir/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
@@ -233,55 +233,55 @@
                     <platforms>windows</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/cli.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/cli.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/clib_jiio.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/clib_jiio.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/clib_jiio_sse2.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/clib_jiio_sse2.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/clib_jiio_util.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/clib_jiio_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/dat.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/dat.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/gluegen-rt.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/gluegen-rt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/gpt.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/gpt.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jhdf5.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jhdf5.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jhdf.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jogl.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jogl.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jogl_awt.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jogl_awt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jogl_cg.dll</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/nest-dat.exe</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/nest-dat.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/post-uninstall.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-win.dir/jre</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/jre</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/nest-dat.l4j.ini</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/nest-dat.l4j.ini</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-win.dir/nest-clean.bat</origin>
+                            <origin>target/nest-4C-0.1-bin-win.dir/nest-clean.bat</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -292,28 +292,28 @@
                     <platforms>linux-x64</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/dat.sh</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/gpt.sh</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/gpt.sh</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/jre</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/jre</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libclib_jiio.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/libclib_jiio.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libgluegen-rt.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libjogl.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/libjogl.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libjogl_awt.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/libjogl_awt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-linux64.dir/libjogl_cg.so</origin>
+                            <origin>target/nest-4C-0.1-bin-linux64.dir/libjogl_cg.so</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -324,34 +324,34 @@
                     <platforms>osx</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/dat.command</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/dat.command</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/gpt.command</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/gpt.command</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libgluegen-rt.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libgluegen-rt.jnilib</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libjhdf.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libjhdf.jnilib</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libjhdf5.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libjhdf5.jnilib</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libjogl.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libjogl.jnilib</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libjogl_awt.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libjogl_awt.jnilib</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/libjogl_cg.jnilib</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/libjogl_cg.jnilib</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/NEST.app</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/NEST.app</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4B-1.1-bin-mac.dir/__MACOSX</origin>
+                            <origin>target/nest-4C-0.1-bin-mac.dir/__MACOSX</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
@@ -368,7 +368,7 @@
                 </startMenuShortcut>
                 <startMenuShortcut>
                     <comment>Next ESA SAR Toolbox</comment>
-                    <name>NEST 4B</name>
+                    <name>NEST 4C</name>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>

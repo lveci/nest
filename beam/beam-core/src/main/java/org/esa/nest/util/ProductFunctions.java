@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.bc.ceres.core.runtime.RuntimeContext;
+
 /**
 
  */
@@ -103,12 +105,15 @@ public class ProductFunctions {
         }
     }
 
+    public final static DirectoryFileFilter directoryFileFilter = new DirectoryFileFilter();
+
     /**
      * collect valid folders to scan
      */
     public static class DirectoryFileFilter implements java.io.FileFilter {
 
-        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support", "schemas" };
+        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support",
+                                       "quality", "source_images", "schemas" };
 
         public boolean accept(final File file) {
             if(!file.isDirectory()) return false;
@@ -147,32 +152,5 @@ public class ProductFunctions {
             }
         }
         return null;
-    }
-
-    private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
-
-    public static void discardUnusedMetadata(final Product product) {
-        final boolean dicardUnusedMetadata = Config.getConfigPropertyMap().getPropertyBool("discard.unused.metadata");
-        if(dicardUnusedMetadata) {
-            removeUnusedMetadata(product.getMetadataRoot());
-        }
-    }
-
-    private static void removeUnusedMetadata(final MetadataElement root) {
-        final MetadataElement[] elems = root.getElements();
-        for(MetadataElement elem : elems) {
-            final String name = elem.getName();
-            boolean keep = false;
-            for(String toKeep : elemsToKeep) {
-                if(name.equals(toKeep)) {
-                    keep = true;
-                    break;
-                }
-            }
-            if(!keep) {
-                root.removeElement(elem);
-                elem.dispose();
-            }
-        }
     }
 }

@@ -29,7 +29,7 @@ import java.awt.geom.*;
  * It can fire rotation, translation and scale events.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class NavControl extends JComponent {
     private static final Dimension PREFERRED_SIZE = new Dimension(100, 120);

@@ -37,7 +37,7 @@ public class IDProvider implements DataProvider {
             column = new TableColumn();
             column.setHeaderValue("ID");
             column.setPreferredWidth(34);
-            column.setResizable(false);
+            column.setResizable(true);
             column.setCellRenderer(new IDCellRenderer());
         }
         return column;

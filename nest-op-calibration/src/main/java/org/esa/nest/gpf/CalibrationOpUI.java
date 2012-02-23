@@ -75,7 +75,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 }
             }
         });
-        externalAuxFile.setColumns(30);
+        externalAuxFile.setColumns(20);
         auxFile.setSelectedItem(parameterMap.get("auxFile"));
         enableExternalAuxFile(false);
 
@@ -124,7 +124,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 }
         });
 
-        return new JScrollPane(panel);
+        return panel;
     }
 
     @Override
@@ -138,14 +138,22 @@ public class CalibrationOpUI extends BaseOperatorUI {
                 final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
                 if (sampleType.equals("COMPLEX")) {
                     auxFile.removeItem(CalibrationOp.PRODUCT_AUX);
-                } else if (auxFile.getItemCount() == 2) {
-                    auxFile.addItem(CalibrationOp.PRODUCT_AUX);
+                    auxFile.setSelectedItem(paramMap.get("auxFile"));
+
+                } else {
+                    if (auxFile.getItemCount() == 2) {
+                        auxFile.addItem(CalibrationOp.PRODUCT_AUX);
+                    }
+                    auxFile.setSelectedItem(CalibrationOp.PRODUCT_AUX);
                 }
 
                 final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
                 if(!mission.equals("ENVISAT")) {
                     auxFile.setEnabled(false);
                     auxFileLabel.setEnabled(false);
+                } else {
+                    auxFile.setEnabled(true);
+                    auxFileLabel.setEnabled(true);
                 }
 //                if (mission.equals("RS2") || mission.contains("TSX") || mission.contains("ALOS")) {
                 if (mission.equals("RS2") && sampleType.equals("COMPLEX")) {
@@ -171,9 +179,10 @@ public class CalibrationOpUI extends BaseOperatorUI {
                     saveInComplexCheckBox.setSelected(false);
                 }
             }
+        } else {
+
+            auxFile.setSelectedItem(paramMap.get("auxFile"));
         }
-                
-        auxFile.setSelectedItem(paramMap.get("auxFile"));
 
         final File extFile = (File)paramMap.get("externalAuxFile");
         if(extFile != null) {
@@ -221,18 +230,14 @@ public class CalibrationOpUI extends BaseOperatorUI {
         final JPanel contentPane = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Source Bands:", new JScrollPane(bandList));
 
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalAuxFileLabel, externalAuxFile);
-        gbc.gridx = 2;
-        contentPane.add(externalAuxFileBrowseButton, gbc);
+        DialogUtils.addInnerPanel(contentPane, gbc, externalAuxFileLabel, externalAuxFile,
+                                  externalAuxFileBrowseButton);
 
         gbc.gridx = 0;
         gbc.gridy++;

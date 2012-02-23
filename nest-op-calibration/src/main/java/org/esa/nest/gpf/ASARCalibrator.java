@@ -1258,27 +1258,9 @@ public class ASARCalibrator implements Calibrator {
      */
     private void computeEarthRadius() {
 
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        if(geoCoding == null) {
-            throw new OperatorException("Product does not contain a geocoding");
-        }
-        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
-        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
-        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
-        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
-                                                                      sourceProduct.getSceneRasterHeight()-1), null);
-
-        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
-        double latMin = 90.0;
-        latMax = -90.0;
-        for (double lat : lats) {
-            if (lat < latMin) {
-                latMin = lat;
-            }
-            if (lat > latMax) {
-                latMax = lat;
-            }
-        }
+        final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
+        latMax = imageGeoBoundary.latMax;
+        final double latMin = imageGeoBoundary.latMin;
 
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         double minAbsLat;

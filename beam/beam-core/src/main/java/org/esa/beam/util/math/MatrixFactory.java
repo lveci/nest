@@ -20,7 +20,7 @@ package org.esa.beam.util.math;
  * Matrix factory.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  */
 public interface MatrixFactory {
 
