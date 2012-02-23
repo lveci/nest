@@ -157,6 +157,17 @@
         </action>
 
         <action>
+            <id>importComplexGenericBinary</id>
+            <class>org.esa.nest.dat.actions.GenericComplexReaderAction</class>
+            <text>Open Complex Generic Binary... (totally work in progress)</text>
+            <formatName>Complex Binary</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import Complex Generic Binary</shortDescr>
+            <helpId>importComplexGenericBinary</helpId>
+            <parent>importFileFormats</parent>
+        </action>
+
+        <action>
             <id>exportGenericBinary</id>
             <text>Export Generic Binary</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
