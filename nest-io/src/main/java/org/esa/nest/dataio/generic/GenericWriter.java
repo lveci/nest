@@ -33,6 +33,9 @@ public class GenericWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream = null;
 
+    private String tempBandName = null;
+    private int tempBandCounter = 0;
+    
     /**
      * Construct a new instance of a product writer for the given product writer plug-in.
      *
@@ -90,14 +93,26 @@ public class GenericWriter extends AbstractProductWriter {
         final int sourceBandHeight = sourceBand.getSceneRasterHeight();
 
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX, sourceOffsetY);
-        long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
+
+        if (tempBandName == null) {
+            tempBandName = sourceBand.getName();
+        } else if (!tempBandName.equals(sourceBand.getName())) {
+            tempBandName = sourceBand.getName();
+            tempBandCounter++;
+        }
+
+        // Write all source bands in BSQ : Band Sequential Format
+        final int numOfBands = getSourceProduct().getNumBands();
+        // long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
+        long outputPos = sourceOffsetY * (numOfBands * sourceBandWidth) + sourceOffsetX + (tempBandCounter * sourceBandWidth);
+        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
             final long max = sourceHeight * sourceWidth;
             final int size = sourceBuffer.getElemSize();
             for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
                 sourceBuffer.writeTo(sourcePos, sourceWidth, size, _outputStream, outputPos);
-                outputPos += sourceBandWidth;
+                // outputPos += (numOfBands);
+                outputPos += (numOfBands * sourceBandWidth);
             }
             pm.worked(1);
         } finally {
