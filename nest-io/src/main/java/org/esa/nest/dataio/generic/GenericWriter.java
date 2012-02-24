@@ -19,12 +19,14 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.util.Guardian;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
 
 public class GenericWriter extends AbstractProductWriter {
@@ -50,8 +52,8 @@ public class GenericWriter extends AbstractProductWriter {
      */
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        _outputStream = null;
 
+//        _outputStream = null;
         final File file;
         if (getOutput() instanceof String) {
             file = new File((String) getOutput());
@@ -60,9 +62,12 @@ public class GenericWriter extends AbstractProductWriter {
         }
 
         _outputStream = new FileImageOutputStream(file);
+        // default to nativeOrder
+        _outputStream.setByteOrder(ByteOrder.nativeOrder());
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(getSourceProduct());
         AbstractMetadata.saveExternalMetadata(getSourceProduct(), absRoot, file);
+
     }
 
     /**
@@ -76,8 +81,48 @@ public class GenericWriter extends AbstractProductWriter {
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
 
-        sourceBuffer.writeTo(_outputStream);
+        Guardian.assertNotNull("sourceBand", sourceBand);
+        Guardian.assertNotNull("sourceBuffer", sourceBuffer);
+
+        checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
+
+        final int sourceBandWidth = sourceBand.getSceneRasterWidth();
+        final int sourceBandHeight = sourceBand.getSceneRasterHeight();
+
+        checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX, sourceOffsetY);
+        long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
+        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
+        try {
+            final long max = sourceHeight * sourceWidth;
+            final int size = sourceBuffer.getElemSize();
+            for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
+                sourceBuffer.writeTo(sourcePos, sourceWidth, size, _outputStream, outputPos);
+                outputPos += sourceBandWidth;
+            }
+            pm.worked(1);
+        } finally {
+            pm.done();
+        }
+
     }
+
+    private static void checkSourceRegionInsideBandRegion(int sourceWidth, final int sourceBandWidth, int sourceHeight,
+                                                          final int sourceBandHeight, int sourceOffsetX,
+                                                          int sourceOffsetY) {
+        Guardian.assertWithinRange("sourceWidth", sourceWidth, 1, sourceBandWidth);
+        Guardian.assertWithinRange("sourceHeight", sourceHeight, 1, sourceBandHeight);
+        Guardian.assertWithinRange("sourceOffsetX", sourceOffsetX, 0, sourceBandWidth - sourceWidth);
+        Guardian.assertWithinRange("sourceOffsetY", sourceOffsetY, 0, sourceBandHeight - sourceHeight);
+    }
+
+
+    // from BEAM EnviProductWriter
+    private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
+        final int expectedBufferSize = (sourceWidth * sourceHeight);
+        final int actualBufferSize = sourceBuffer.getNumElems();
+        Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
+    }
+
 
     /**
      * Deletes the physically representation of the given product from the hard disk.
