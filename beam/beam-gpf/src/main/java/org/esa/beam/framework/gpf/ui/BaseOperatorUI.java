@@ -17,7 +17,7 @@ import java.lang.reflect.Array;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.DomConverter;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.binding.*;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 
@@ -71,10 +71,10 @@ public abstract class BaseOperatorUI implements OperatorUI {
         }
     }
 
-    public void convertToDOM(final Xpp3DomElement parentElement) {
+    public void convertToDOM(final XppDomElement parentElement) {
 
         if(valueContainer == null) {
-            setParamsToConfiguration(parentElement.getXpp3Dom());
+            setParamsToConfiguration(parentElement.getXppDom());
             return;
         }
 

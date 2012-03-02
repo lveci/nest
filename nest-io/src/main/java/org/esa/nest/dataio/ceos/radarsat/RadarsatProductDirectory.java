@@ -70,8 +70,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         _leaderFile = new RadarsatLeaderFile(
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
-        _trailerFile = new RadarsatTrailerFile(
-                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
+        final File trlFile = CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix());
+        if(trlFile != null) {
+            _trailerFile = new RadarsatTrailerFile(createInputStream(trlFile));
+        }
 
         BinaryRecord histogramRec = _leaderFile.getHistogramRecord();
         if(histogramRec == null)

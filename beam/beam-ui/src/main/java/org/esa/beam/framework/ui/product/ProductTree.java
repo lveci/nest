@@ -17,18 +17,7 @@ package org.esa.beam.framework.ui.product;
 
 import com.bc.ceres.swing.TreeCellExtender;
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductManager;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.SampleCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VectorDataNode;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.ui.ExceptionHandler;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
@@ -47,32 +36,19 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.awt.datatransfer.StringSelection;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
+import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * A tree-view component for multiple <code>Product</code>s. Clients can register one or more
@@ -80,7 +56,7 @@ import java.util.StringTokenizer;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -111,8 +87,8 @@ public class ProductTree extends JTree implements PopupMenuFactory {
     public ProductTree(final boolean multipleSelect) {
         super((TreeModel) null);
         getSelectionModel().setSelectionMode(multipleSelect
-                                             ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
-                                             : TreeSelectionModel.SINGLE_TREE_SELECTION);
+                                                     ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
+                                                     : TreeSelectionModel.SINGLE_TREE_SELECTION);
         addTreeSelectionListener(new PTSelectionListener());
         addMouseListener(new PTMouseListener());
         setCellRenderer(new PTCellRenderer());
@@ -191,35 +167,10 @@ public class ProductTree extends JTree implements PopupMenuFactory {
     }
 
     /**
-     * Notifies this product tree, that a product scene view has opened.
-     *
-     * @param view The view.
-     *
-     * @deprecated since BEAM 4.7, use {@link #registerOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
-     */
-    @Deprecated
-    public void sceneViewOpened(ProductSceneView view) {
-        registerOpenedProductNodes(view.getRasters());
-    }
-
-    /**
-     * Notifies this product tree, that a product scene view has closed.
-     *
-     * @param view The view.
-     *
-     * @deprecated since BEAM 4.7, use {@link #deregisterOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
-     */
-    @Deprecated
-    public void sceneViewClosed(ProductSceneView view) {
-        deregisterOpenedProductNodes(view.getRasters());
-    }
-
-    /**
      * Registers "opened" product nodes, e.g. visible nodes, nodes currently edited, etc.
      * Opened product nodes may be differently displayed.
      *
      * @param nodes The products nodes which are in process.
-     *
      * @see #registerActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...)
      */
     public void registerOpenedProductNodes(ProductNode... nodes) {
@@ -238,7 +189,6 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Opened product nodes may be diffently displayed.
      *
      * @param nodes The products nodes which are in process.
-     *
      * @see #deregisterActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...)
      */
     public void deregisterOpenedProductNodes(ProductNode... nodes) {
@@ -295,17 +245,6 @@ public class ProductTree extends JTree implements PopupMenuFactory {
     }
 
     /**
-     * Sets the products for this product tree component.
-     *
-     * @param products a <code>Product[]</code> with the products to be displayed, must not be null.
-     *
-     * @deprecated since BEAM 4.7, no replacement. The <code>ProductTree</code> now detects the products automatically.
-     */
-    @Deprecated
-    public void setProducts(Product[] products) {
-    }
-
-    /**
      * Adds a new product tree listener to this product tree component.
      *
      * @param listener the listener to be added.
@@ -340,17 +279,6 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     public void setCommandUIFactory(CommandUIFactory commandUIFactory) {
         this.commandUIFactory = commandUIFactory;
-    }
-
-    /**
-     * This method does not have any effect.
-     *
-     * @param exceptionHandler is ignored
-     *
-     * @deprecated since BEAM 4.7, no replacement
-     */
-    @Deprecated
-    public void setExceptionHandler(ExceptionHandler exceptionHandler) {
     }
 
     private class PTMouseListener extends MouseAdapter {
@@ -542,23 +470,23 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                     toolTipBuffer.append(" x ");
                     toolTipBuffer.append(band.getRasterHeight());
                 } else if (productNode instanceof TiePointGrid) {
-                    TiePointGrid grid = (TiePointGrid) productNode;
+                    TiePointGrid tiePointGrid = (TiePointGrid) productNode;
                     if (opened) {
                         this.setIcon(tiePointGridVisibleIcon);
                     } else {
                         this.setIcon(tiePointGridInvisibleIcon);
                     }
                     toolTipBuffer.append(", raster size = ");
-                    toolTipBuffer.append(grid.getRasterWidth());
+                    toolTipBuffer.append(tiePointGrid.getRasterWidth());
                     toolTipBuffer.append(" x ");
-                    toolTipBuffer.append(grid.getRasterHeight());
+                    toolTipBuffer.append(tiePointGrid.getRasterHeight());
                 } else if (productNode instanceof VectorDataNode) {
-                    VectorDataNode grid = (VectorDataNode) productNode;
+                    VectorDataNode vectorDataNode = (VectorDataNode) productNode;
                     this.setIcon(vectorDataIcon);
                     toolTipBuffer.append(", type = ");
-                    toolTipBuffer.append(grid.getFeatureType().getTypeName());
+                    toolTipBuffer.append(vectorDataNode.getFeatureType().getTypeName());
                     toolTipBuffer.append(", #features = ");
-                    toolTipBuffer.append(grid.getFeatureCollection().size());
+                    toolTipBuffer.append(vectorDataNode.getFeatureCollection().size());
                 }
                 this.setText(text);
                 this.setToolTipText(toolTipBuffer.toString());
@@ -763,8 +691,8 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         public void dragEnter(DropTargetDragEvent dtde) {
             final int dropAction = dtde.getDropAction();
             if ((dropAction & DnDConstants.ACTION_COPY_OR_MOVE) != 0 &&
-                (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
-                 uriListFlavor != null && dtde.isDataFlavorSupported(uriListFlavor))) {
+                    (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                            uriListFlavor != null && dtde.isDataFlavorSupported(uriListFlavor))) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -809,7 +737,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             dtde.dropComplete(success);
         }
 
-        private boolean isProductAlreadyOpen(File file, ProductManager productManager ) {
+        private boolean isProductAlreadyOpen(File file, ProductManager productManager) {
             for (int i = 0; i < productManager.getProductCount(); i++) {
                 final Product product = productManager.getProduct(i);
                 final File productFile = product.getFileLocation();

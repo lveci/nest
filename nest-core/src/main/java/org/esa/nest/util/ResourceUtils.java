@@ -325,46 +325,10 @@ public final class ResourceUtils {
         return null;
     }
 
-    /**
-     * Opens an input stream for a compressed file (.gz or .zip).
-     *
-     * @param file the compressed file
-     * @return the input stream
-     * @throws java.io.IOException if an I/O error occured
-     */
-    public static InputStream getInflaterInputStream(File file) throws IOException {
-        if (file.getName().toLowerCase().endsWith(".gz")) {
-            try {
-                return createGZIPInputStream(file);
-            } catch (IOException e) {
-                // ok, try ZIP
-            }
-        }
-        return createZIPInputStream(file);
-    }
-
-    private static InputStream createZIPInputStream(File file) throws IOException {
-        final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
-        if (productZip.size() != 1) {
-            throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
-        }
-        final Enumeration<? extends ZipEntry> entries = productZip.entries();
-        final ZipEntry zipEntry = entries.nextElement();
-        if (zipEntry == null || zipEntry.isDirectory()) {
-            throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
-        }
-        return productZip.getInputStream(zipEntry);
-    }
-
-    private static InputStream createGZIPInputStream(File file) throws IOException {
-        return new GZIPInputStream(new FileInputStream(file));
-    }
-
     public static void sortFileList(final File[] filelist) {
         Comparator<File> byDirThenAlpha = new DirAlphaComparator();
 
         Arrays.sort(filelist, byDirThenAlpha);
-        
     }
 
     private static class DirAlphaComparator implements Comparator<File> {

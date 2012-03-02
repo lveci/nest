@@ -3,14 +3,14 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement"/>
+    <parameters/>
   </node>
   <node id="2-Write">
     <operator>Write</operator>
     <sources>
       <sourceProduct refid="6-Speckle-Filter"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>target.dim</file>
     </parameters>
@@ -20,7 +20,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <regionX>0</regionX>
       <regionY>0</regionY>
@@ -35,7 +35,7 @@
     <sources>
       <sourceProduct refid="3-SubsetOp"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>1</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -48,7 +48,7 @@
     <sources>
       <sourceProduct refid="4-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <demName>SRTM 3Sec</demName>
       <externalDEMFile/>
@@ -78,7 +78,7 @@
     <sources>
       <sourceProduct refid="5-Terrain-Correction"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <filter>Refined Lee</filter>
       <filterSizeX>3</filterSizeX>

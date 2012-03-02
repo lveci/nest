@@ -230,6 +230,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
     @Override
     public Viewport getViewport() {
+        if(model == null) return null;
         return model.getViewport();
     }
 

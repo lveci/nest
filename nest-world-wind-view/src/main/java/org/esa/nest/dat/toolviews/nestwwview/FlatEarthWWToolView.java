@@ -33,25 +33,37 @@ import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 
+import com.bc.ceres.grender.ViewportListener;
+import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.grender.support.DefaultViewport;
+import com.bc.ceres.glayer.swing.LayerCanvasModel;
+import com.bc.ceres.glayer.swing.DefaultLayerCanvasModel;
+
 /**
  * The window displaying the world map.
  *
  */
-public class FlatEarthWWToolView extends AbstractToolView {
+public class FlatEarthWWToolView extends AbstractToolView implements WWView {
 
     private final VisatApp datApp = VisatApp.getApp();
     private final Dimension canvasSize = new Dimension(800, 600);
     private AppPanel wwjPanel = null;
 
     private ProductLayer productLayer = null;
+    private Position eyePosition = null;
+    private ProductSceneView currentView;
+    private ObservedViewportHandler observedViewportHandler;
 
     private static final boolean includeStatusBar = true;
+    private final static String useflatWorld = System.getProperty(ResourceUtils.getContextID()+".use.flat.worldmap");
+    private final static boolean flatWorld = !(useflatWorld != null && useflatWorld.equals("false"));
 
     public FlatEarthWWToolView() {
     }
@@ -68,6 +80,8 @@ public class FlatEarthWWToolView extends AbstractToolView {
         // world wind canvas
         initialize(mainPane);       
 
+        observedViewportHandler = new ObservedViewportHandler();
+
         return mainPane;
     }
 
@@ -78,7 +92,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
     }
 
     private void initialize(final JPanel mainPane) {
-
+        final WWView toolView = this;
 
         final SwingWorker worker = new SwingWorker() {
             @Override
@@ -94,7 +108,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
                     final LayerList layerList = getWwd().getModel().getLayers();
 
                     final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
-                    virtualEarthLayerA.setName("MS Virtual Earth Aerial");
+                    virtualEarthLayerA.setName("MS Bing Aerial");
                     layerList.add(virtualEarthLayerA);
 
                     productLayer = new ProductLayer(false);
@@ -109,7 +123,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
                     // Add an internal frame listener to VISAT so that we can update our
                     // world map window with the information of the currently activated  product scene view.
                     datApp.addInternalFrameListener(new FlatEarthWWToolView.WWIFL());
-                    datApp.addProductTreeListener(new FlatEarthWWToolView.WWPTL());
+                    datApp.addProductTreeListener(new WWProductTreeListener(toolView));
                     setProducts(datApp.getProductManager().getProducts());
                     setSelectedProduct(datApp.getSelectedProduct());
                 } catch(Throwable e) {
@@ -130,34 +144,56 @@ public class FlatEarthWWToolView extends AbstractToolView {
         if(geoCoding != null) {
             final GeoPos centre = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()/2,
                                                                    product.getSceneRasterHeight()/2), null);
+            centre.normalize();
             theView.setEyePosition(Position.fromDegrees(centre.getLat(), centre.getLon(), origPos.getElevation()));
         }
     }
 
-    void setSelectedProduct(Product product) {
+    public void setCurrentView(final ProductSceneView newView) {
+        if (currentView != newView) {
+            final ProductSceneView oldView = currentView;
+            currentView = newView;
+
+            if (oldView != null) {
+                final Viewport observedViewport = oldView.getLayerCanvas().getViewport();
+                if(observedViewport != null)
+                    observedViewport.removeListener(observedViewportHandler);
+            }
+            if (newView != null) {
+                final Viewport observedViewport = newView.getLayerCanvas().getViewport();
+                if(observedViewport != null)
+                    observedViewport.addListener(observedViewportHandler);
+            }
+            //updateState();
+        }
+    }
+
+    public void setSelectedProduct(final Product product) {
+        if(product == getSelectedProduct() && eyePosition == getWwd().getView().getEyePosition())
+            return;
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
 
         if(isVisible()) {
             gotoProduct(product);
             getWwd().redrawNow();
+            eyePosition = getWwd().getView().getEyePosition();
         }
     }
 
-    Product getSelectedProduct() {
+    public Product getSelectedProduct() {
         if(productLayer != null)
             return productLayer.getSelectedProduct();
         return null;
     }
 
-    void setProducts(Product[] products) {
+    public void setProducts(Product[] products) {
         if(productLayer != null) {
             for (Product prod : products) {
                 try {
                     productLayer.addProduct(prod);
                 } catch(Exception e) {
-                    datApp.showErrorDialog("WorldWind unable to add product " + prod.getName()+
-                                            "\n"+e.getMessage());
+                    datApp.showErrorDialog("WorldWind unable to add product " + prod.getName()+'\n'+e.getMessage());
                 }
             }
         }
@@ -166,7 +202,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
     }
 
-    void removeProduct(Product product) {
+    public void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
         if(productLayer != null)
@@ -190,8 +226,10 @@ public class FlatEarthWWToolView extends AbstractToolView {
             // Create the default model as described in the current worldwind properties.            
             final Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
             this.wwd.setModel(m);
-            m.setGlobe(new EarthFlat());
-            this.wwd.setView(new FlatOrbitView());
+            if(flatWorld) {
+                m.setGlobe(new EarthFlat());
+                this.wwd.setView(new FlatOrbitView());
+            }
 
             final LayerList layerList = m.getLayers();
             for(Layer layer : layerList) {
@@ -199,7 +237,6 @@ public class FlatEarthWWToolView extends AbstractToolView {
                    layer instanceof LandsatI3WMSLayer || layer instanceof SkyGradientLayer)
                     layerList.remove(layer);
             }
-
 
             // Setup a select listener for the worldmap click-and-go feature
             this.wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
@@ -221,37 +258,6 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
     }
 
-    private class WWPTL implements ProductTreeListener {
-
-        public WWPTL() {
-        }
-
-        public void productAdded(final Product product) {
-            setProducts(datApp.getProductManager().getProducts());
-            setSelectedProduct(product);
-        }
-
-        public void productRemoved(final Product product) {
-            removeProduct(product);
-        }
-
-        public void productSelected(final Product product, final int clickCount) {
-            setSelectedProduct(product);
-        }
-
-        public void metadataElementSelected(final MetadataElement group, final int clickCount) {
-            setSelectedProduct(group.getProduct());
-        }
-
-        public void tiePointGridSelected(final TiePointGrid tiePointGrid, final int clickCount) {
-            setSelectedProduct(tiePointGrid.getProduct());
-        }
-
-        public void bandSelected(final Band band, final int clickCount) {
-            setSelectedProduct(band.getProduct());
-        }
-    }
-
     private class WWIFL extends InternalFrameAdapter {
 
         @Override
@@ -259,13 +265,29 @@ public class FlatEarthWWToolView extends AbstractToolView {
             final Container contentPane = e.getInternalFrame().getContentPane();
             Product product = null;
             if (contentPane instanceof ProductSceneView) {
-                product = ((ProductSceneView) contentPane).getProduct();
+                final ProductSceneView view = (ProductSceneView) contentPane;
+                    setCurrentView(view);
+                product = view.getProduct();
             }
             setSelectedProduct(product);
         }
 
         @Override
         public void internalFrameDeactivated(final InternalFrameEvent e) {
+        }
+    }
+
+    private class ObservedViewportHandler implements ViewportListener {
+
+        @Override
+        public void handleViewportChanged(Viewport observedViewport, boolean orientationChanged) {
+            /*if (!adjustingObservedViewport) {
+                if (orientationChanged) {
+                    thumbnailCanvas.getViewport().setOrientation(observedViewport.getOrientation());
+                    thumbnailCanvas.zoomAll();
+                }
+                updateMoveSliderRect();
+            }  */
         }
     }
 }

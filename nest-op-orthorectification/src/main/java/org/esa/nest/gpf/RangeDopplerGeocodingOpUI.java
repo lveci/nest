@@ -118,7 +118,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         initializeOperatorUI(operatorName, parameterMap);
 
-        final JComponent panel = createPanel();
+        final JComponent panel = new JScrollPane(createPanel());
         initParameters();
 
         demName.addItemListener(new ItemListener() {

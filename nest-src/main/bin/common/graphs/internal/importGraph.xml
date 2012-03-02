@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
       </sourceBands>
       <externalAuxFile/>

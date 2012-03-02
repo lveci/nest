@@ -22,7 +22,7 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.core.ServiceRegistry;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
@@ -337,8 +337,8 @@ class CommandLineTool {
     private static void ReplaceProductSetWithReaders(final Graph graph, final Node psNode, final String id, String value) {
 
         final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
-        final Xpp3DomElement config = new Xpp3DomElement("parameters");
-        final Xpp3DomElement fileParam = new Xpp3DomElement("file");
+        final XppDomElement config = new XppDomElement("parameters");
+        final XppDomElement fileParam = new XppDomElement("file");
         fileParam.setValue(value);
         config.addChild(fileParam);
         newNode.setConfiguration(config);

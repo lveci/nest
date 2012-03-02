@@ -93,6 +93,8 @@ public class OversamplingOpUI extends BaseOperatorUI {
             usePRFTileSizeCheckBox.setSelected(usePRFTileSize);
             usePRFTileSizeCheckBox.getModel().setPressed(usePRFTileSize);
         }
+
+        updateOutputImageBy(true);
     }
 
     public UIValidation validateParameters() {
@@ -141,7 +143,8 @@ public class OversamplingOpUI extends BaseOperatorUI {
 
         gbc.gridy++;
         contentPane.add(usePRFTileSizeCheckBox, gbc);
-
+        DialogUtils.fillPanel(contentPane, gbc);
+        
         return contentPane;
     }
 

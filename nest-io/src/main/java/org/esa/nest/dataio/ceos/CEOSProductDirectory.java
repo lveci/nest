@@ -356,6 +356,7 @@ public abstract class CEOSProductDirectory {
     }
 
     protected static ImageInputStream createInputStream(final File file) throws IOException {
+        if(file == null) return null;
         return FileImageInputStreamExtImpl.createInputStream(file);
     }
 }

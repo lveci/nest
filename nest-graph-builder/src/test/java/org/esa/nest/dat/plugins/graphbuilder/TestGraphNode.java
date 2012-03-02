@@ -15,7 +15,7 @@
  */
 package org.esa.nest.dat.plugins.graphbuilder;
 
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
@@ -41,7 +41,7 @@ public class TestGraphNode extends TestCase {
     @Override
     public void setUp() throws Exception {
         node = new Node("id", "readOp");
-        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
+        final XppDomElement parameters = new XppDomElement("parameters");
         node.setConfiguration(parameters);
 
         graphNode = new GraphNode(node);
@@ -71,7 +71,7 @@ public class TestGraphNode extends TestCase {
 
     public void testSourceConnection() {
         final Node sourceNode = new Node("sourceID", "testSourceNodeOp");
-        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
+        final XppDomElement parameters = new XppDomElement("parameters");
         sourceNode.setConfiguration(parameters);
 
         GraphNode sourceGraphNode = new GraphNode(sourceNode);

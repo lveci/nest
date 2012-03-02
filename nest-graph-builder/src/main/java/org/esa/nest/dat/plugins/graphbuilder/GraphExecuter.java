@@ -16,7 +16,7 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.binding.dom.DomElement;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.GPF;
@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.nest.gpf.ProductSetReaderOp;
+import org.esa.nest.gpf.GPFProcessor;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
@@ -134,7 +135,7 @@ public class GraphExecuter extends Observable {
     private GraphNode createNewGraphNode(final String opName, final String id) {
         final Node newNode = new Node(id, opName);
 
-        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
+        final XppDomElement parameters = new XppDomElement("parameters");
         newNode.setConfiguration(parameters);
 
         graph.addNode(newNode);
@@ -179,7 +180,7 @@ public class GraphExecuter extends Observable {
         final Node node = graph.getNode(id);
         DomElement xml = node.getConfiguration().getChild(paramName);
         if(xml == null) {
-            xml = new Xpp3DomElement(paramName);
+            xml = new XppDomElement(paramName);
             node.getConfiguration().addChild(xml);
         }
         xml.setValue(value);
@@ -311,18 +312,12 @@ public class GraphExecuter extends Observable {
 
         try {
             if(filePath == null) return;
-            final FileReader fileReader = new FileReader(filePath.getAbsolutePath());
-            final Graph graphFromFile;
-            try {
-                graphFromFile = GraphIO.read(fileReader, null);
-            } finally {
-                fileReader.close();
-            }
+            final Graph graphFromFile = GPFProcessor.readGraph(filePath, null);
 
             setGraph(graphFromFile, addUI);
             lastLoadedGraphFile = filePath;
         } catch(Throwable e) {
-            throw new GraphException("Unable to load graph " + filePath +"\n"+e.getMessage());
+            throw new GraphException("Unable to load graph " + filePath +'\n'+e.getMessage());
         }
     }
 
@@ -443,7 +438,7 @@ public class GraphExecuter extends Observable {
         newReaderNode.setOperatorUI(null);
         newReaderNode.getNode().getConfiguration();
         final DomElement config = newReaderNode.getNode().getConfiguration();
-        final DomElement fileParam = new Xpp3DomElement("file");
+        final DomElement fileParam = new XppDomElement("file");
         fileParam.setValue(value);
         config.addChild(fileParam);
 

@@ -5,17 +5,15 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 
 class IdentificationTN extends AbstractTN {
     private MetadataElement metadataElement;
-    private MetadataElement rootElement;
 
     IdentificationTN(String name, MetadataElement element, AbstractTN parent) {
         super(name, element, parent);
 
-        rootElement = element;
         final MetadataElement absRoot = element.getElement("Abstracted_Metadata");
         if(absRoot != null)
             metadataElement = createIdentificationNodes(element, absRoot);
         else
-            metadataElement = rootElement;
+            metadataElement = element;
         metadataElement.setOwner(element.getProduct());
     }
 
@@ -47,7 +45,7 @@ class IdentificationTN extends AbstractTN {
         return -1;
     }
 
-    private MetadataElement createIdentificationNodes(final MetadataElement rootElement, final MetadataElement absRoot) {
+    private static MetadataElement createIdentificationNodes(final MetadataElement rootElement, final MetadataElement absRoot) {
         final MetadataElement identNode = new MetadataElement("Identification");
 
         addIDNode(absRoot, identNode, "Mission", "MISSION");

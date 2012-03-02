@@ -22,20 +22,12 @@ import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
 
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
-import javax.swing.UIManager;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.*;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.security.CodeSource;
 import java.text.MessageFormat;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
@@ -50,7 +42,7 @@ import java.util.logging.Level;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  */
 public class SystemUtils {
 
@@ -344,29 +336,6 @@ public class SystemUtils {
      */
     public static File getDefaultBeamCacheDir() {
         return new File(getApplicationDataDir(), CACHE_DIR_NAME);
-    }
-
-    /**
-     * Gets the BEAM auxdata directory.
-     * This is the directory where auxiliary data is searched.
-     * <p>Its value is <code><i>$BEAM_HOME</i>/auxdata</code>.</p>
-     *
-     * @return the auxdata directory
-     * @deprecated in 4.0, use {@link ResourceScanner} instead
-     */
-    @Deprecated
-    public static File getBeamAuxdataDir() {
-        CodeSource cs = SystemUtils.class.getProtectionDomain().getCodeSource();
-        if (cs != null) {
-            URL location = cs.getLocation();
-            try {
-                URI uri = location.toURI();
-                return new File(new File(uri), AUXDATA_DIR_NAME);
-            } catch (URISyntaxException e) {
-                // ok
-            }
-        }
-        return new File(getBeamHomeDir(), AUXDATA_DIR_NAME);
     }
 
     /**

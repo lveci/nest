@@ -113,6 +113,8 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         heightRatio.setText(String.valueOf(paramMap.get("heightRatio")));
         rangeSpacing.setText(String.valueOf(paramMap.get("rangeSpacing")));
         azimuthSpacing.setText(String.valueOf(paramMap.get("azimuthSpacing")));
+
+        updateMethod();
     }
 
     @Override
@@ -154,16 +156,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Under-Sampling Method:", method);
         method.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                String item = (String)method.getSelectedItem();
-                if(item.equals(UndersamplingOp.SUB_SAMPLING)) {
-                    enableKernelFiltering(false);
-                    enableSubSampling(true);
-                    updateOutputImageBy(false);
-                } else {
-                    enableKernelFiltering(true);
-                    enableSubSampling(false);
-                    updateOutputImageBy(true);
-                }
+                updateMethod();
             }
         });
 
@@ -223,7 +216,6 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, azimuthSpacingLabel, azimuthSpacing);
 
-        updateOutputImageBy(false);
         DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
@@ -254,6 +246,19 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     private void enablePixelSpacing(boolean flag) {
         DialogUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
         DialogUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
+    }
+
+    private void updateMethod() {
+        final String item = (String)method.getSelectedItem();
+        if(item.equals(UndersamplingOp.SUB_SAMPLING)) {
+            enableKernelFiltering(false);
+            enableSubSampling(true);
+            updateOutputImageBy(false);
+        } else {
+            enableKernelFiltering(true);
+            enableSubSampling(false);
+            updateOutputImageBy(true);
+        }
     }
 
     private void updateOutputImageBy(boolean show) {

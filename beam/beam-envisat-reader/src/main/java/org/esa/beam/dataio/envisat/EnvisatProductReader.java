@@ -19,23 +19,28 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductIOException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.PixelGeoCoding;
-import org.esa.beam.framework.datamodel.PointingFactory;
-import org.esa.beam.framework.datamodel.PointingFactoryRegistry;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ArrayUtils;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.CRSFactory;
+import org.opengis.referencing.crs.GeographicCRS;
+import org.opengis.referencing.operation.OperationMethod;
+import org.opengis.referencing.operation.CoordinateOperationFactory;
+import org.opengis.referencing.operation.Conversion;
+import org.opengis.referencing.datum.GeodeticDatum;
+import org.opengis.referencing.FactoryException;
+import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.parameter.ParameterDescriptorGroup;
+import org.opengis.parameter.ParameterDescriptor;
+import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.referencing.datum.DefaultGeodeticDatum;
+import org.geotools.referencing.operation.projection.TransverseMercator;
+import org.geotools.referencing.operation.projection.MapProjection;
+import org.geotools.referencing.cs.DefaultEllipsoidalCS;
+import org.geotools.referencing.cs.DefaultCartesianCS;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -45,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
+import java.util.HashMap;
 
 /**
  * The <code>EnvisatProductReader</code> class is an implementation of the <code>ProductReader</code> interface
@@ -394,8 +400,15 @@ public final class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
-    private static void addGeoCodingToProduct(Product product) {
-        initTiePointGeoCoding(product);
+    private static void addGeoCodingToProduct(final Product product) {
+        final String productType = product.getProductType();
+        if(productType.contains("IMG")) {
+            final boolean crsGeocodingCreated = initCRSGeoCoding(product);
+            if(!crsGeocodingCreated)    // if insufficient metadata found to create CRSGeocoding then use tie points
+                initTiePointGeoCoding(product);
+        } else {
+            initTiePointGeoCoding(product);
+        }
 
         final boolean usePixeGeoCoding = Boolean.getBoolean(SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING);
         if (usePixeGeoCoding) {
@@ -429,6 +442,88 @@ public final class EnvisatProductReader extends AbstractProductReader {
         if (latGrid != null && lonGrid != null) {
             product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
         }
+    }
+
+    /**
+     * Creates CRS Geocoding from the metadata
+     * @param product the target product
+     * @return true if succeeds
+     */
+    private static boolean initCRSGeoCoding(final Product product) {
+        try {
+            final MetadataElement root = product.getMetadataRoot();
+            final MetadataElement mapElem = root.getElement("MAP_PROJECTION_GADS");
+            final MetadataElement sphElem = root.getElement("SPH");
+            final String map_descriptor = mapElem.getAttributeString("map_descriptor").trim();
+            if(map_descriptor.equalsIgnoreCase("UNIVERSAL_TRANSVERSE_MERCATOR")) {
+                final int firstNearLat = sphElem.getAttributeInt("FIRST_NEAR_LAT");
+                final boolean south = firstNearLat < 0;
+                final int utm_zone = Integer.parseInt(mapElem.getAttributeString("utm_zone").trim());
+                // todo this looks suspiciously ASAR specific??
+                final double easting = mapElem.getAttributeDouble("ASAR_Map_GADS.sd/position_northings_eastings.tl_easting");
+                final double northing = mapElem.getAttributeDouble("ASAR_Map_GADS.sd/position_northings_eastings.tl_northing");
+                final double sample_spacing = mapElem.getAttributeDouble("sample_spacing");
+                final double line_spacing = mapElem.getAttributeDouble("line_spacing");
+                final double utm_scale = mapElem.getAttributeDouble("utm_scale");
+
+                final GeodeticDatum datum = DefaultGeodeticDatum.WGS84;
+                final ParameterValueGroup tmParameters = createTransverseMercatorParameters(utm_zone, south, utm_scale,
+                                                                                            datum);
+                final String projectionName = "UTM Zone " + utm_zone + (south ? ", South" : "");
+
+                final CoordinateReferenceSystem targetCRS = createCrs(projectionName, new TransverseMercator.Provider(),
+                                                                      tmParameters, datum);
+
+                final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
+                                                                product.getSceneRasterWidth(),
+                                                                product.getSceneRasterHeight(),
+                                                                easting, northing,
+                                                                sample_spacing, line_spacing);
+                product.setGeoCoding(geoCoding);
+            } else {
+                return false;
+            }
+            return true;
+        } catch(Exception e) {
+            // map projection info not found in metadata
+            return false;
+        }
+    }
+
+    private static void setValue(ParameterValueGroup values, ParameterDescriptor<Double> descriptor, double value) {
+        values.parameter(descriptor.getName().getCode()).setValue(value);
+    }
+
+    private static ParameterValueGroup createTransverseMercatorParameters(int zoneIndex, boolean south, double scale,
+                                                                          GeodeticDatum datum) {
+        ParameterDescriptorGroup tmParameters = new TransverseMercator.Provider().getParameters();
+        ParameterValueGroup tmValues = tmParameters.createValue();
+
+        setValue(tmValues, MapProjection.AbstractProvider.SEMI_MAJOR, datum.getEllipsoid().getSemiMajorAxis());
+        setValue(tmValues, MapProjection.AbstractProvider.SEMI_MINOR, datum.getEllipsoid().getSemiMinorAxis());
+        setValue(tmValues, MapProjection.AbstractProvider.LATITUDE_OF_ORIGIN, 0.0);
+        setValue(tmValues, MapProjection.AbstractProvider.CENTRAL_MERIDIAN, (zoneIndex - 0.5) * 6.0 - 180.0);
+        setValue(tmValues, MapProjection.AbstractProvider.SCALE_FACTOR, scale);
+        setValue(tmValues, MapProjection.AbstractProvider.FALSE_EASTING, 500000.0);
+        setValue(tmValues, MapProjection.AbstractProvider.FALSE_NORTHING, south ? 10000000.0 : 0.0);
+        return tmValues;
+    }
+
+    private static CoordinateReferenceSystem createCrs(String crsName, OperationMethod method,
+                                                  ParameterValueGroup parameters,
+                                                  GeodeticDatum datum) throws FactoryException {
+        final CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(null);
+        final CoordinateOperationFactory coFactory = ReferencingFactoryFinder.getCoordinateOperationFactory(null);
+        final HashMap<String, Object> projProperties = new HashMap<String, Object>();
+        projProperties.put("name", crsName + " / " + datum.getName().getCode());
+        final Conversion conversion = coFactory.createDefiningConversion(projProperties,
+                                                                         method,
+                                                                         parameters);
+        final HashMap<String, Object> baseCrsProperties = new HashMap<String, Object>();
+        baseCrsProperties.put("name", datum.getName().getCode());
+        final GeographicCRS baseCrs = crsFactory.createGeographicCRS(baseCrsProperties, datum,
+                                                                     DefaultEllipsoidalCS.GEODETIC_2D);
+        return crsFactory.createProjectedCRS(projProperties, baseCrs, conversion, DefaultCartesianCS.PROJECTED);
     }
 
     /**

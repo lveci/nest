@@ -49,11 +49,11 @@ public class LayerPanelLayer extends LayerManagerLayer
                l.getName().equalsIgnoreCase("Scale bar") || l.getName().equalsIgnoreCase("Compass") ||
                l.getName().equalsIgnoreCase("NASA Blue Marble Image"))
                 continue;
-            if(l.getName().equalsIgnoreCase("MS Virtual Earth Aerial"))
+            if(l.getName().equalsIgnoreCase("MS Bing Aerial"))
                 virtualEarthAerialLayer = l;
-            else if(l.getName().equalsIgnoreCase("MS Virtual Earth Roads"))
+            else if(l.getName().equalsIgnoreCase("MS Bing Roads"))
                 virtualEarthRoadsLayer = l;
-            else if(l.getName().equalsIgnoreCase("MS Virtual Earth Hybrid"))
+            else if(l.getName().equalsIgnoreCase("MS Bing Hybrid"))
                 virtualEarthHybridLayer = l;
 
             validLayers.add(l);
@@ -216,7 +216,7 @@ public class LayerPanelLayer extends LayerManagerLayer
     protected String makeAnnotationText(LayerList layers)
     {
         // Compose html text
-        final StringBuilder text = new StringBuilder();
+        final StringBuilder text = new StringBuilder(255);
         Color color;
         int i = 0;
         final LayerList validLayers = getValidLayers();
@@ -232,7 +232,7 @@ public class LayerPanelLayer extends LayerManagerLayer
                 text.append(encodeHTMLColor(color));
                 text.append("\">");
                 text.append((layer.isEnabled() ? getLayerEnabledSymbol() : getLayerDisabledSymbol()));
-                text.append(" ");
+                text.append(' ');
                 text.append((layer.isEnabled() ? "<b>" : "<i>"));
                 text.append(layer.getName());
                 text.append((layer.isEnabled() ? "</b>" : "</i>"));

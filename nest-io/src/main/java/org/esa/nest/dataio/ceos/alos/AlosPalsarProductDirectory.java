@@ -74,8 +74,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         _leaderFile = new AlosPalsarLeaderFile(
                 createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
-        _trailerFile = new AlosPalsarTrailerFile(
-                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix())));
+        final File trlFile = CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix());
+        if(trlFile != null) {
+            _trailerFile = new AlosPalsarTrailerFile(createInputStream(trlFile));
+        }
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
         final List<AlosPalsarImageFile> imgArray = new ArrayList<AlosPalsarImageFile>(imageFileNames.length);

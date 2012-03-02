@@ -73,7 +73,7 @@ import java.net.URISyntaxException;
  *
  * @version $Revision: 1.22 $ $Date: 2011-11-02 23:04:54 $
  */
-public class NestWWToolView extends AbstractToolView {
+public class NestWWToolView extends AbstractToolView implements WWView {
 
     //private static final String loadDEMCommand = "loadDEM";
     //private static final ImageIcon loadDEMIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/dem24.gif");
@@ -144,16 +144,16 @@ public class NestWWToolView extends AbstractToolView {
         if(wwjPanel == null) return mainPane;
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
-        virtualEarthLayerA.setName("MS Virtual Earth Aerial");
+        virtualEarthLayerA.setName("MS Bing Aerial");
         insertTiledLayer(getWwd(), virtualEarthLayerA);
 
         final MSVirtualEarthLayer virtualEarthLayerR = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_ROADS);
-        virtualEarthLayerR.setName("MS Virtual Earth Roads");
+        virtualEarthLayerR.setName("MS Bing Roads");
         virtualEarthLayerR.setEnabled(false);
         insertTiledLayer(getWwd(), virtualEarthLayerR);
 
         final MSVirtualEarthLayer virtualEarthLayerH = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_HYBRID);
-        virtualEarthLayerH.setName("MS Virtual Earth Hybrid");
+        virtualEarthLayerH.setName("MS Bing Hybrid");
         virtualEarthLayerH.setEnabled(false);
         insertTiledLayer(getWwd(), virtualEarthLayerH);
 
@@ -171,7 +171,7 @@ public class NestWWToolView extends AbstractToolView {
         // Add an internal frame listener to VISAT so that we can update our
         // world map window with the information of the currently activated  product scene view.
         datApp.addInternalFrameListener(new NestWWToolView.WWIFL());
-        datApp.addProductTreeListener(new NestWWToolView.WWPTL());
+        datApp.addProductTreeListener(new WWProductTreeListener(this));
         setProducts(datApp.getProductManager().getProducts());
         setSelectedProduct(datApp.getSelectedProduct());
 
@@ -228,7 +228,7 @@ public class NestWWToolView extends AbstractToolView {
                             return;
                         }
 
-                        final String server = JOptionPane.showInputDialog("Enter wms server URL");
+                        final String server = JOptionPane.showInputDialog("Enter WMS server URL");
                         if (server == null || server.length() < 1) {
                             tabbedPane.setSelectedIndex(previousTabIndex);
                             return;
@@ -285,7 +285,7 @@ public class NestWWToolView extends AbstractToolView {
         //_eventListener.LoadDEM();
     }
 
-    void setSelectedProduct(Product product) {
+    public void setSelectedProduct(Product product) {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
         if(productPanel != null)
@@ -295,13 +295,13 @@ public class NestWWToolView extends AbstractToolView {
         }
     }
 
-    Product getSelectedProduct() {
+    public Product getSelectedProduct() {
         if(productLayer != null)
             return productLayer.getSelectedProduct();
         return null;
     }
 
-    void setProducts(Product[] products) {
+    public void setProducts(Product[] products) {
         if(productLayer != null) {
             for (Product prod : products) {
                 try {
@@ -319,7 +319,7 @@ public class NestWWToolView extends AbstractToolView {
         }
     }
 
-    void removeProduct(Product product) {
+    public void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
         if(productLayer != null)
@@ -448,37 +448,6 @@ public class NestWWToolView extends AbstractToolView {
 
         public final StatusBar getStatusBar() {
             return statusBar;
-        }
-    }
-
-    private class WWPTL implements ProductTreeListener {
-
-        public WWPTL() {
-        }
-
-        public void productAdded(final Product product) {
-            setSelectedProduct(product);
-            setProducts(datApp.getProductManager().getProducts());
-        }
-
-        public void productRemoved(final Product product) {
-            removeProduct(product);
-        }
-
-        public void productSelected(final Product product, final int clickCount) {
-            setSelectedProduct(product);
-        }
-
-        public void metadataElementSelected(final MetadataElement group, final int clickCount) {
-            setSelectedProduct(group.getProduct());
-        }
-
-        public void tiePointGridSelected(final TiePointGrid tiePointGrid, final int clickCount) {
-            setSelectedProduct(tiePointGrid.getProduct());
-        }
-
-        public void bandSelected(final Band band, final int clickCount) {
-            setSelectedProduct(band.getProduct());
         }
     }
 

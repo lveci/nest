@@ -3,7 +3,7 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file></file>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Amplitude</band>
       </sourceBands>
@@ -27,7 +27,7 @@
     <sources>
       <sourceProduct refid="2-Create-LandMask"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <targetWindowSizeInMeter>75</targetWindowSizeInMeter>
       <guardWindowSizeInMeter>400.0</guardWindowSizeInMeter>
       <backgroundWindowSizeInMeter>1000.0</backgroundWindowSizeInMeter>
@@ -39,7 +39,7 @@
     <sources>
       <sourceProduct refid="3-AdaptiveThresholding"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <minTargetSizeInMeter>80.0</minTargetSizeInMeter>
       <maxTargetSizeInMeter>400.0</maxTargetSizeInMeter>
     </parameters>
@@ -49,7 +49,7 @@
     <sources>
       <sourceProduct refid="4-Object-Discrimination"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Amplitude</band>
       </sourceBands>
@@ -62,7 +62,7 @@
     <sources>
       <sourceProduct refid="5-Oil-Spill-Detection"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <minClusterSizeInKm2>0.1</minClusterSizeInKm2>
     </parameters>
   </node>
@@ -71,7 +71,7 @@
     <sources>
       <sourceProduct refid="6-Oil-Spill-Clustering"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>ship_and_oill_spill_result.dim</file>
     </parameters>

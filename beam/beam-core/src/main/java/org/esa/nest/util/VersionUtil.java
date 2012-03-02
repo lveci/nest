@@ -36,8 +36,8 @@ public class VersionUtil {
             final VersionChecker versionChecker = new VersionChecker();
             versionChecker.setRemoteVersionUrlString(getRemoteVersionURL(appName));
             versionChecker.getRemoteVersion();
-        } catch(IOException e) {
-            //
+        } catch(Exception e) {
+            // ignore
         }
     }
 }

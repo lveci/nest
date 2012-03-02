@@ -3,7 +3,7 @@
   <node id="1-ProductSet-Reader">
     <operator>ProductSet-Reader</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <fileList></fileList>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="1-ProductSet-Reader"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <masterBands>
       </masterBands>
       <sourceBands>
@@ -26,7 +26,7 @@
     <sources>
       <sourceProduct refid="2-CreateStack"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <numGCPtoGenerate>200</numGCPtoGenerate>
       <coarseRegistrationWindowWidth>64</coarseRegistrationWindowWidth>
       <coarseRegistrationWindowHeight>64</coarseRegistrationWindowHeight>
@@ -47,7 +47,7 @@
     <sources>
       <sourceProduct refid="3-GCP-Selection"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <rmsThreshold>1.0</rmsThreshold>
       <warpPolynomialOrder>1</warpPolynomialOrder>
       <interpolationMethod>Bilinear interpolation</interpolationMethod>
@@ -59,7 +59,7 @@
     <sources>
       <sourceProduct refid="4-Warp"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>coregistered_stack.dim</file>
     </parameters>

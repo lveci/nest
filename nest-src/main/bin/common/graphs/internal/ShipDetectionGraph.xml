@@ -3,7 +3,7 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file></file>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Sigma0</band>
       </sourceBands>
@@ -28,7 +28,7 @@
     <sources>
       <sourceProduct refid="2-Create-LandMask"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <targetWindowSizeInMeter>80</targetWindowSizeInMeter>
       <guardWindowSizeInMeter>400</guardWindowSizeInMeter>
       <backgroundWindowSizeInMeter>1000</backgroundWindowSizeInMeter>
@@ -40,7 +40,7 @@
     <sources>
       <sourceProduct refid="3-AdaptiveThresholding"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
     </parameters>
   </node>
   <node id="5-Write">
@@ -48,7 +48,7 @@
     <sources>
       <sourceProduct refid="4-Object-Discrimination"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>ship_detection.dim</file>
     </parameters>

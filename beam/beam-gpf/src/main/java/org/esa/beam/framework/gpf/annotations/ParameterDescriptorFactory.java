@@ -176,7 +176,7 @@ public class ParameterDescriptorFactory implements PropertyDescriptorFactory {
         registry.loadOperatorSpis();
         OperatorSpi operatorSpi = registry.getOperatorSpi(operatorName);
         if (operatorSpi == null) {
-            throw new IllegalStateException("Operator SPI not found for operator [" + operatorName + "]");
+            throw new IllegalStateException("Operator not found for [" + operatorName + "]");
         }
         return operatorSpi.getOperatorClass();
     }

@@ -47,7 +47,7 @@ public class CalibrationOpUI extends BaseOperatorUI {
     private final JTextField externalAuxFile = new JTextField("");
     private final JButton externalAuxFileBrowseButton = new JButton("...");
 
-    private final JCheckBox saveInComplexCheckBox = new JCheckBox("Save in complex");
+    private final JCheckBox saveInComplexCheckBox = new JCheckBox("Save as complex output");
     private final JCheckBox saveInDbCheckBox = new JCheckBox("Save in dB");
     private final JCheckBox createGamma0VirtualBandCheckBox = new JCheckBox("Create gamma0 virtual band");
     private final JCheckBox createBeta0VirtualBandCheckBox = new JCheckBox("Create beta0 virtual band");

@@ -332,6 +332,7 @@ public final class MultilookOp extends Operator {
             srcData2 = sourceRaster2.getDataBuffer();
 
         final TileIndex trgIndex = new TileIndex(targetTile);
+        final TileIndex srcIndex = new TileIndex(sourceRaster1);
 
         double meanValue;
         final int maxy = ty0 + th;
@@ -340,7 +341,7 @@ public final class MultilookOp extends Operator {
             trgIndex.calculateStride(ty);
             for (int tx = tx0; tx < maxx; tx++) {
                 meanValue = getMeanValue(
-                        tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit, outputIntensity);
+                        tx, ty, sourceRaster1, srcData1, srcData2, srcIndex, nRgLooks, nAzLooks, bandUnit, outputIntensity);
                 trgData.setElemDoubleAt(trgIndex.getIndex(tx), meanValue);
             }
         }
@@ -361,6 +362,7 @@ public final class MultilookOp extends Operator {
      */
     private static double getMeanValue(final int tx, final int ty, final Tile sourceRaster1,
                                        final ProductData srcData1, final ProductData srcData2,
+                                       final TileIndex srcIndex,
                                        final int nRgLooks, final int nAzLooks,
                                        final Unit.UnitType bandUnit,
                                        final boolean outputIntensity) {
@@ -369,8 +371,6 @@ public final class MultilookOp extends Operator {
         final int yStart = ty * nAzLooks;
         final int xEnd = xStart + nRgLooks;
         final int yEnd = yStart + nAzLooks;
-
-        final TileIndex srcIndex = new TileIndex(sourceRaster1);
 
         double meanValue = 0.0;
         if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {

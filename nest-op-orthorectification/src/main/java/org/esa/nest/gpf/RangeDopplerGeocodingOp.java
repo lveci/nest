@@ -315,7 +315,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
-    static void validateDEM(final String demName, final Product srcProduct) {
+    public static void validateDEM(final String demName, final Product srcProduct) {
         // check if outside dem area
         if(demName.equals("SRTM 3Sec")) {
             final GeoCoding geocoding = srcProduct.getGeoCoding();
@@ -1849,14 +1849,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
-    private static void normalizeVector(final double[] v) {
+    public static void normalizeVector(final double[] v) {
         final double norm = Math.sqrt(innerProduct(v, v));
         v[0] /= norm;
         v[1] /= norm;
         v[2] /= norm;
     }
 
-    private static double innerProduct(final double[] a, final double[] b) {
+    public static double innerProduct(final double[] a, final double[] b) {
         return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
 

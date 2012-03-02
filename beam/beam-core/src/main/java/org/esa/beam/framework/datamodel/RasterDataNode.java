@@ -109,7 +109,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     private boolean log10Scaled;
     private boolean scalingApplied;
 
-    private boolean noDataValueUsed;
+    private boolean noDataValueUsed = true;
     private ProductData noData;
     private double geophysicalNoDataValue; // invariant, depending on _noData
     private String validPixelExpression;

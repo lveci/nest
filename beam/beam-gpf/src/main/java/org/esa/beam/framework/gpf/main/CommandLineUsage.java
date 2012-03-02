@@ -19,7 +19,7 @@ package org.esa.beam.framework.gpf.main;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
 import com.bc.ceres.binding.dom.DomElement;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.core.ServiceRegistry;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
@@ -443,7 +443,7 @@ class CommandLineUsage {
 
     private static void appendXmlUsage(StringBuilder usageText, OperatorClassDescriptor operatorClassDescriptor) {
 
-        final DomElement graphElem = new Xpp3DomElement("graph");
+        final DomElement graphElem = new XppDomElement("graph");
         graphElem.setAttribute("id", "someGraphId");
         final DomElement versionElem = graphElem.createChild("version");
         versionElem.setValue("1.0");

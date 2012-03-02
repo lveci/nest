@@ -3,14 +3,14 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement"/>
+    <parameters/>
   </node>
   <node id="2-Write">
     <operator>Write</operator>
     <sources>
       <sourceProduct refid="5-Terrain-Correction"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>target.dim</file>
     </parameters>
@@ -20,7 +20,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <orbitType>DORIS_VOR</orbitType>
     </parameters>
   </node>
@@ -29,7 +29,7 @@
     <sources>
       <sourceProduct refid="3-Apply-Orbit-File"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <externalAuxFile/>
 	  <outputImageInComplex>false</outputImageInComplex>
@@ -43,7 +43,7 @@
     <sources>
       <sourceProduct refid="4-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <demName>SRTM 3Sec</demName>
       <externalDEMFile/>

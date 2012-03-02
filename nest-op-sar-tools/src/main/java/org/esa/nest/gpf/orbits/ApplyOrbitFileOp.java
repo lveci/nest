@@ -134,15 +134,13 @@ public final class ApplyOrbitFileOp extends Operator {
             if(mission.equals("ENVISAT")) {
                 if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(DorisOrbitFile.DORIS_POR) &&
                    !orbitType.startsWith(DorisOrbitFile.DORIS_VOR)) {
-                    throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
+                    //throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
+                    orbitType = DorisOrbitFile.DORIS_VOR;
                 }
-            } else if(mission.equals("ERS1")) {
+            } else if(mission.equals("ERS1") || mission.equals("ERS2")) {
                 if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(PRARE_PRECISE)) {
-                    throw new OperatorException(orbitType + " is not suitable for an ERS1 product");
-                }
-            } else if(mission.equals("ERS2")) {
-                if(!orbitType.startsWith(DELFT_PRECISE) && !orbitType.startsWith(PRARE_PRECISE)) {
-                    throw new OperatorException(orbitType + " is not suitable for an ERS2 product");
+                    //throw new OperatorException(orbitType + " is not suitable for an ERS1 product");
+                    orbitType = PRARE_PRECISE;
                 }
             } else {
                 throw new OperatorException(orbitType + " is not suitable for a "+mission+" product");
@@ -346,9 +344,9 @@ public final class ApplyOrbitFileOp extends Operator {
         final GeoPos newGeoPos = new GeoPos();
         GeoUtils.xyz2geo(xyz, newGeoPos);
 
-        System.out.println("prev: "+geoPos.toString() +" new: "+newGeoPos.toString());
-        System.out.println("prev lat: "+geoPos.getLat() +" new lat: "+newGeoPos.getLat());
-        System.out.println("prev lon: "+geoPos.getLon() +" new lon: "+newGeoPos.getLon());
+        //System.out.println("prev: "+geoPos.toString() +" new: "+newGeoPos.toString());
+        //System.out.println("prev lat: "+geoPos.getLat() +" new lat: "+newGeoPos.getLat());
+        //System.out.println("prev lon: "+geoPos.getLon() +" new lon: "+newGeoPos.getLon());
 
         return newGeoPos;
     }
@@ -379,9 +377,11 @@ public final class ApplyOrbitFileOp extends Operator {
         AbstractMetadata.setOrbitStateVectors(tgtAbsRoot, orbitStateVectors);
 
         // save orbit file name
-        final String prefix = orbitType.substring(0, orbitType.indexOf('('));
+        String orbType = orbitType;
+        if(orbType.contains("("))
+            orbType = orbitType.substring(0, orbitType.indexOf('('));
         final File orbitFile = orbitProvider.getOrbitFile();
-        tgtAbsRoot.setAttributeString(AbstractMetadata.orbit_state_vector_file, prefix+' '+orbitFile.getName());
+        tgtAbsRoot.setAttributeString(AbstractMetadata.orbit_state_vector_file, orbType+' '+orbitFile.getName());
     }
 
     /**

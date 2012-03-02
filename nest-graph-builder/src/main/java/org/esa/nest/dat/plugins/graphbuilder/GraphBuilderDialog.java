@@ -87,12 +87,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphEx.addObserver(this);
 
         initUI();
-
+        
         if(this.allowGraphBuilding) {
-            final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
-            final File graphFile =  new File(graphPath, "ReadWriteGraph.xml");
-    
-            LoadGraph(graphFile);
             graphPanel.showRightClickHelp(true);
         }
     }
@@ -321,6 +317,9 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         LoadGraph(file);
         Settings.setPref(LAST_GRAPH_PATH, file.getAbsolutePath());
+
+        if(allowGraphBuilding)
+            this.setTitle("Graph Builder : "+file.getName());
     }
 
     /**

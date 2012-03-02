@@ -71,7 +71,7 @@ public class VectorDataNodeReader {
             vectorDataNode.setDescription(properties.get(ProductNode.PROPERTY_NAME_DESCRIPTION));
         }
         if (properties.containsKey(VectorDataNodeIO.PROPERTY_NAME_DEFAULT_CSS)) {
-            vectorDataNode.setDefaultCSS(properties.get(VectorDataNodeIO.PROPERTY_NAME_DEFAULT_CSS));
+            vectorDataNode.setDefaultStyleCss(properties.get(VectorDataNodeIO.PROPERTY_NAME_DEFAULT_CSS));
         }
         return vectorDataNode;
     }
@@ -176,11 +176,12 @@ public class VectorDataNodeReader {
                 Class<?> attributeType;
                 try {
                     attributeType = jtc.parse(attributeTypeName);
+                    builder.add(attributeName, attributeType);
                 } catch (ConversionException e) {
-                    throw new IOException(
-                            String.format("Unknown type in attribute descriptor '%s'", token), e);
+                    //throw new IOException(
+                    //        String.format("Unknown type in attribute descriptor '%s'", token), e);
                 }
-                builder.add(attributeName, attributeType);
+
             }
         }
         return builder.buildFeatureType();

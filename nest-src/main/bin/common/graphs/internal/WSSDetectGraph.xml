@@ -3,7 +3,7 @@
   <node id="0-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file></file>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="0-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <subSwath>SS1</subSwath>
       <produceIntensitiesOnly>true</produceIntensitiesOnly>
       <average>false</average>
@@ -23,7 +23,7 @@
     <sources>
       <sourceProduct refid="0-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <subSwath>SS2</subSwath>
       <produceIntensitiesOnly>true</produceIntensitiesOnly>
       <average>false</average>
@@ -34,7 +34,7 @@
     <sources>
       <sourceProduct refid="0-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <subSwath>SS3</subSwath>
       <produceIntensitiesOnly>true</produceIntensitiesOnly>
       <average>false</average>
@@ -45,7 +45,7 @@
     <sources>
       <sourceProduct refid="0-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <subSwath>SS4</subSwath>
       <produceIntensitiesOnly>true</produceIntensitiesOnly>
       <average>false</average>
@@ -56,7 +56,7 @@
     <sources>
       <sourceProduct refid="0-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <subSwath>SS5</subSwath>
       <produceIntensitiesOnly>true</produceIntensitiesOnly>
       <average>false</average>
@@ -67,7 +67,7 @@
     <sources>
       <sourceProduct refid="1-DeburstWSS"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Intensity_SS1</band>
       </sourceBands>
@@ -82,7 +82,7 @@
     <sources>
       <sourceProduct refid="2-DeburstWSS"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Intensity_SS2</band>
       </sourceBands>
@@ -97,7 +97,7 @@
     <sources>
       <sourceProduct refid="3-DeburstWSS"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Intensity_SS3</band>
       </sourceBands>
@@ -112,7 +112,7 @@
     <sources>
       <sourceProduct refid="4-DeburstWSS"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Intensity_SS4</band>
       </sourceBands>
@@ -127,7 +127,7 @@
     <sources>
       <sourceProduct refid="5-DeburstWSS"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Intensity_SS5</band>
       </sourceBands>
@@ -142,7 +142,7 @@
     <sources>
       <sourceProduct refid="6-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -154,7 +154,7 @@
     <sources>
       <sourceProduct refid="7-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -166,7 +166,7 @@
     <sources>
       <sourceProduct refid="8-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -178,7 +178,7 @@
     <sources>
       <sourceProduct refid="9-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -190,7 +190,7 @@
     <sources>
       <sourceProduct refid="10-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>1</nAzLooks>
@@ -202,7 +202,7 @@
     <sources>
       <sourceProduct refid="11-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SS1.dim</file>
     </parameters>
@@ -212,7 +212,7 @@
     <sources>
       <sourceProduct refid="12-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SS2.dim</file>
     </parameters>
@@ -222,7 +222,7 @@
     <sources>
       <sourceProduct refid="13-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SS3.dim</file>
     </parameters>
@@ -232,7 +232,7 @@
     <sources>
       <sourceProduct refid="14-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SS4.dim</file>
     </parameters>
@@ -242,7 +242,7 @@
     <sources>
       <sourceProduct refid="15-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SS5.dim</file>
     </parameters>

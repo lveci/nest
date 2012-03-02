@@ -3,7 +3,7 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file/>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="5-SARSim-Terrain-Correction"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>SarSimTC.dim</file>
     </parameters>
@@ -22,7 +22,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Amplitude</band>
       </sourceBands>
@@ -38,7 +38,7 @@
     <sources>
       <sourceProduct refid="3-SAR-Simulation"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <numGCPtoGenerate>200</numGCPtoGenerate>
       <coarseRegistrationWindowWidth>128</coarseRegistrationWindowWidth>
       <coarseRegistrationWindowHeight>128</coarseRegistrationWindowHeight>
@@ -59,7 +59,7 @@
     <sources>
       <sourceProduct refid="4-GCP-Selection"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <rmsThreshold>1.0</rmsThreshold>
       <warpPolynomialOrder>1</warpPolynomialOrder>
       <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>

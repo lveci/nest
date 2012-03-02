@@ -298,6 +298,8 @@ public class BasicApp {
         try {
             pm.beginTask("Starting " + getAppName(), 6);
 
+            initMainFrame();
+            
             pm.setSubTaskName("Loading preferences...");
             initLogger();
             initBeamUserDir();
@@ -310,8 +312,10 @@ public class BasicApp {
 
             pm.setSubTaskName("Creating main frame...");
             initCommandManager();
-            initMainFrame();
+            //logger.info("Creating MainFrame...");
+            //initMainFrame();
             initShutdownHook();
+            logger.info("Init Look and Feel...");
             initLookAndFeel();
             configureLayoutPersitence();
             configureDockingManager();

@@ -41,7 +41,7 @@ public class Main {
             RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
             new CommandLineTool().run(args);
         } catch (Exception e) {
-            System.err.println("\nError: " + e.getMessage());
+            System.out.println("\nError: " + e.getMessage());
             System.exit(1);
         }
     }

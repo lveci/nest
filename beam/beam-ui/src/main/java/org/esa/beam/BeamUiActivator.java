@@ -102,7 +102,7 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
                     moduleContext.getLogger().info(String.format("Removed action [%s]", actionId));
                 }
             } else {
-                moduleContext.getLogger().warning(String.format("Ignoring application descriptor [%s]", applicationId));
+                moduleContext.getLogger().info(String.format("Ignoring application descriptor [%s]", applicationDescriptor.getApplicationId()));
             }
         }
     }

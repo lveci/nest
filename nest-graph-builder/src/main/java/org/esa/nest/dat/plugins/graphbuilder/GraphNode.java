@@ -17,7 +17,7 @@ package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.binding.*;
 import com.bc.ceres.binding.dom.DomElement;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
@@ -148,7 +148,7 @@ public class GraphNode {
 
     void AssignParameters(final XppDom presentationXML) {
 
-        final Xpp3DomElement config = new Xpp3DomElement("parameters");
+        final XppDomElement config = new XppDomElement("parameters");
         updateParameterMap(config);
         node.setConfiguration(config);
 
@@ -293,7 +293,7 @@ public class GraphNode {
         }
     }
 
-    void updateParameterMap(final Xpp3DomElement parentElement) {
+    void updateParameterMap(final XppDomElement parentElement) {
         if(operatorUI != null) {
             operatorUI.updateParameters();
             operatorUI.convertToDOM(parentElement);

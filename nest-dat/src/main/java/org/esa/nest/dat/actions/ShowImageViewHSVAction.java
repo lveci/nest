@@ -85,7 +85,7 @@ public class ShowImageViewHSVAction extends ExecCommand {
         final VisatApp visatApp = VisatApp.getApp();
         final SwingWorker<ProductSceneImage, Object> worker = new ProgressMonitorSwingWorker<ProductSceneImage, Object>(
                 visatApp.getMainFrame(),
-                visatApp.getAppName() + " - Creating image for '" + name + "'") {
+                visatApp.getAppName() + " - Creating image for '" + name + '\'') {
 
             @Override
             protected ProductSceneImage doInBackground(ProgressMonitor pm) throws Exception {
@@ -130,7 +130,7 @@ public class ShowImageViewHSVAction extends ExecCommand {
         return internalFrame;
     }
 
-    private ProductSceneImage createProductSceneImageHSV(final String name, final Product product,
+    private static ProductSceneImage createProductSceneImageHSV(final String name, final Product product,
                                                          final String[] hsvExpressions,
                                                          final ProgressMonitor pm) throws Exception {
         final VisatApp visatApp = VisatApp.getApp();
@@ -142,6 +142,7 @@ public class ShowImageViewHSVAction extends ExecCommand {
             pm.beginTask("Creating HSV image...", 2);
             final String[] rgbaExpressions = convertHSVToRGBExpressions(hsvExpressions);
             rgbBands = ShowImageViewRGBAction.allocateRgbBands(product, rgbaExpressions);
+
             productSceneImage = new ProductSceneImage(name, rgbBands[0].band,
                                                       rgbBands[1].band,
                                                       rgbBands[2].band,
@@ -192,6 +193,7 @@ public class ShowImageViewHSVAction extends ExecCommand {
                 product.getSceneRasterHeight(),
                 expression);
         virtBand.setSynthetic(true);
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
         return virtBand;
     }
@@ -226,22 +228,22 @@ public class ShowImageViewHSVAction extends ExecCommand {
 
 
         final String[] rgbExpressions = new String[3];
-        rgbExpressions[0] = r.replace("(h)", "("+h+")").replace("(s)", "("+s+")").replace("(v)", "("+v+")");
-        rgbExpressions[1] = g.replace("(h)", "("+h+")").replace("(s)", "("+s+")").replace("(v)", "("+v+")");
-        rgbExpressions[2] = b.replace("(h)", "("+h+")").replace("(s)", "("+s+")").replace("(v)", "("+v+")");
+        rgbExpressions[0] = r.replace("(h)", '(' +h+ ')').replace("(s)", '(' +s+ ')').replace("(v)", '(' +v+ ')');
+        rgbExpressions[1] = g.replace("(h)", '(' +h+ ')').replace("(s)", '(' +s+ ')').replace("(v)", '(' +v+ ')');
+        rgbExpressions[2] = b.replace("(h)", '(' +h+ ')').replace("(s)", '(' +s+ ')').replace("(v)", '(' +v+ ')');
         return rgbExpressions;
     }
 
     private static String createSceneName(Product product, RGBImageProfile rgbImageProfile) {
-        final StringBuilder nameBuilder = new StringBuilder();
+        final StringBuilder nameBuilder = new StringBuilder(80);
         final String productRef = product.getProductRefString();
         if (productRef != null) {
             nameBuilder.append(productRef);
-            nameBuilder.append(" ");
+            nameBuilder.append(' ');
         }
         if (rgbImageProfile != null) {
             nameBuilder.append(rgbImageProfile.getName().replace("_", " "));
-            nameBuilder.append(" ");
+            nameBuilder.append(' ');
         }
         nameBuilder.append("HSV");
 

@@ -3,7 +3,7 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file>G:\RS\RollingArchive\Global Monitoring Mode\ASA_GM1_1PNPDE20090713_231652_000001502080_00402_38532_6299.N1</file>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="4-Multilook"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>I:\out\na2\target.dim</file>
     </parameters>
@@ -22,7 +22,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands>
         <band>Amplitude</band>
       </sourceBands>
@@ -39,7 +39,7 @@
     <sources>
       <sourceProduct refid="3-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <nRgLooks>2</nRgLooks>
       <nAzLooks>2</nAzLooks>

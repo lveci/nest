@@ -107,7 +107,7 @@ public class VersionChecker {
         }
         return line;
         } catch(Throwable t) {
-            t.printStackTrace();
+            //t.printStackTrace();
         }
         return "";
     }

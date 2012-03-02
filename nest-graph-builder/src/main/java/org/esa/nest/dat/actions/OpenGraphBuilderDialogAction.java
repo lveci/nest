@@ -20,6 +20,8 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.util.ResourceUtils;
 
+import java.io.File;
+
 public class OpenGraphBuilderDialogAction extends AbstractVisatAction {
 
     @Override
@@ -27,6 +29,11 @@ public class OpenGraphBuilderDialogAction extends AbstractVisatAction {
         final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Graph Builder", "graph_builder");
         dialog.getJDialog().setIconImage(ResourceUtils.nestIcon.getImage());
         dialog.show();
+        
+        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
+        final File graphFile =  new File(graphPath, "ReadWriteGraph.xml");
+
+        dialog.LoadGraph(graphFile);
     }
 
 }

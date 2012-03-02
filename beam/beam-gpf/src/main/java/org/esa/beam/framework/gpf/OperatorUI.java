@@ -7,7 +7,7 @@ import org.esa.beam.framework.datamodel.Product;
 import javax.swing.*;
 import java.util.Map;
 
-import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 
 /**
 * The abstract base class for all operator user interfaces intended to be extended by clients.
@@ -26,5 +26,5 @@ public interface OperatorUI {
 
     public void setSourceProducts(Product[] products);
 
-    public void convertToDOM(Xpp3DomElement parentElement);
+    public void convertToDOM(XppDomElement parentElement);
 }

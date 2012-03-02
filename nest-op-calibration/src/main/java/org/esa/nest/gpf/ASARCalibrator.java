@@ -647,7 +647,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get orbit state vectors from the abstracted metadata.
-     * @throws Exception The exceptions.
      */
     private void getOrbitStateVectors() {
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
@@ -655,7 +654,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
      */
     private void getFirstLineTime() {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
@@ -663,7 +661,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
      */
     private void getLineTimeInterval() {
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
@@ -679,7 +676,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get the new antenna pattern gain from the latest XCA file available.
-     * @throws Exception The exceptions.
      */
     private void getNewAntennaPattern() {
 
@@ -908,7 +904,6 @@ public class ASARCalibrator implements Calibrator {
 
         final ProductData trgData = targetTile.getDataBuffer();
         final TileIndex srcIndex = new TileIndex(sourceRaster1);
-        final TileIndex trgIndex = new TileIndex(targetTile);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
@@ -941,7 +936,6 @@ public class ASARCalibrator implements Calibrator {
 
         int index;
         for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
-            trgIndex.calculateStride(y);
             srcIndex.calculateStride(y);
 
             incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.InterpMode.QUADRATIC);
@@ -993,7 +987,7 @@ public class ASARCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(trgIndex.getIndex(x), sigma);
+                trgData.setElemDoubleAt(index, sigma);
             }
         }
     }

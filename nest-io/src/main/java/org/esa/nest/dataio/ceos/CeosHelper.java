@@ -72,7 +72,7 @@ public class CeosHelper {
                     return file;
             }
         }
-        throw new IOException("unable to find file starting with " + prefixList[0]);
+        return null;
     }
 
     public static String getProductName(final BinaryRecord textRecord) {

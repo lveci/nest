@@ -179,7 +179,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
 
     /**
      * Get calibration factors from abstracted metadata.
-     * @throws Exception for missing metadata
      */
     private void getCalibrationFactors() {
 
@@ -323,7 +322,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
 
         final ProductData trgData = targetTile.getDataBuffer();
         final TileIndex srcIndex = new TileIndex(sourceRaster1);
-        final TileIndex trgIndex = new TileIndex(targetTile);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
@@ -335,7 +333,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
         final double rescaleCalFactor = rescalingFactor*rescalingFactor*Ks;
 
         for (int y = y0; y < maxY; ++y) {
-            trgIndex.calculateStride(y);
             srcIndex.calculateStride(y);
             for (int x = x0; x < maxX; ++x) {
 
@@ -372,7 +369,7 @@ public class CosmoSkymedCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(trgIndex.getIndex(x), sigma);
+                trgData.setElemDoubleAt(index, sigma);
             }
         }
 	}

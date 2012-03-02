@@ -251,7 +251,6 @@ public class BatchGraphDialog extends ModelessDialog {
 
     /**
      * Validates the input and then call the GPF to execute the graph
-     * @throws org.esa.beam.framework.gpf.graph.GraphException on assignParameters
      */
     private void DoProcessing() {
 
@@ -402,15 +401,13 @@ public class BatchGraphDialog extends ModelessDialog {
                 name = (String) o;
             else
                 name = FileUtils.getFilenameWithoutExtension(f);
-            if(!name.endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION))
-                name += DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
 
             final File targetFile = new File(productSetPanel.getTargetFolder(), name);
             targetFileMap.put(f, targetFile);
 
             setIO(graphExecuterList.get(graphIndex),
                 "Read", f,
-                "Write", targetFile, internalFormat);
+                "Write", targetFile, null);
             if(slaveFileMap != null) {
                 final File[] slaveFiles = slaveFileMap.get(f);
                 if(slaveFiles != null) {
@@ -437,7 +434,8 @@ public class BatchGraphDialog extends ModelessDialog {
         if (writeID != null) {
             final GraphNode writeNode = graphEx.findGraphNodeByOperator(writeID);
             if (writeNode != null) {
-                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
+                if(format != null)
+                    graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
                 graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
             }
         }
@@ -456,7 +454,7 @@ public class BatchGraphDialog extends ModelessDialog {
         if(productSetNode != null) {
             StringBuilder str = new StringBuilder(masterFile.getAbsolutePath());
             for(File slaveFile : slaveFiles) {
-                str.append(",");
+                str.append(',');
                 str.append(slaveFile.getAbsolutePath());
             }
             graphEx.setOperatorParam(productSetNode.getID(), "fileList", str.toString());

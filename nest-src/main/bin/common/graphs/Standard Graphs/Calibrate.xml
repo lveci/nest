@@ -3,14 +3,14 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement"/>
+    <parameters/>
   </node>
   <node id="2-Write">
     <operator>Write</operator>
     <sources>
       <sourceProduct refid="3-Calibration"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>calibrated.dim</file>
     </parameters>
@@ -20,7 +20,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <externalAuxFile/>
 	  <outputImageInComplex>false</outputImageInComplex>

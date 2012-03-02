@@ -17,10 +17,9 @@ package org.esa.nest.dat.toolviews.Projects;
 
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.beam.framework.gpf.graph.Graph;
-import org.esa.beam.framework.gpf.graph.GraphIO;
+import org.esa.nest.gpf.GPFProcessor;
 
 import java.io.File;
-import java.io.FileReader;
 
 /**
  * Defines a File in a Project
@@ -42,35 +41,25 @@ public class ProjectFile {
     void setFolderType(ProjectSubFolder.FolderType folder) {
         folderType = folder;
         if(folderType == ProjectSubFolder.FolderType.GRAPH) {
-            Graph graph = readGraph(file.getAbsolutePath());
-            if(graph != null) {
-                XppDom presXML = graph.getApplicationData("Presentation");
-                if(presXML != null) {
-                    XppDom descXML = presXML.getChild("Description");
-                    if(descXML != null && descXML.getValue() != null) {
-                        this.setToolTipText(descXML.getValue());
+            try {
+                Graph graph = GPFProcessor.readGraph(file, null);
+                if(graph != null) {
+                    XppDom presXML = graph.getApplicationData("Presentation");
+                    if(presXML != null) {
+                        XppDom descXML = presXML.getChild("Description");
+                        if(descXML != null && descXML.getValue() != null) {
+                            tooltipText = descXML.getValue();
+                        }
                     }
                 }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private static Graph readGraph(String filepath) {
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(filepath);
-            return GraphIO.read(fileReader);
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            try {
-                if(fileReader != null)
-                    fileReader.close();
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
-        return null;
+    public ProjectSubFolder.FolderType getFolderType() {
+        return folderType;
     }
 
     public File getFile() {

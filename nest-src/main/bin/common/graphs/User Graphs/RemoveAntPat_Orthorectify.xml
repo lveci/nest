@@ -3,7 +3,7 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <file></file>
     </parameters>
   </node>
@@ -12,7 +12,7 @@
     <sources>
       <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
     </parameters>
   </node>
@@ -21,7 +21,7 @@
     <sources>
       <sourceProduct refid="2-RemoveAntennaPattern"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <sourceBands/>
       <demName>SRTM 3Sec</demName>
       <externalDEMFile/>
@@ -51,7 +51,7 @@
     <sources>
       <sourceProduct refid="3-Terrain-Correction"/>
     </sources>
-    <parameters class="com.bc.ceres.binding.dom.Xpp3DomElement">
+    <parameters>
       <formatName>BEAM-DIMAP</formatName>
       <file>RemoveAntPat_Orthorectify.dim</file>
     </parameters>

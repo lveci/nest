@@ -2621,15 +2621,14 @@ public final class ERSCalibrator implements Calibrator {
                     sigma *= adcPowerLoss[adcI][adcJ];
                 }
 
-                final int tgtIndex = targetTile.getDataBufferIndex(x, y);
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                    trgData.setElemDoubleAt(tgtIndex, Math.sqrt(sigma));
+                    trgData.setElemDoubleAt(srcIndex, Math.sqrt(sigma));
                 } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
-                    trgData.setElemDoubleAt(tgtIndex, 5.0*Math.log10(sigma));
+                    trgData.setElemDoubleAt(srcIndex, 5.0*Math.log10(sigma));
                 } else if (bandUnit == Unit.UnitType.INTENSITY) {
-                    trgData.setElemDoubleAt(tgtIndex, sigma);
+                    trgData.setElemDoubleAt(srcIndex, sigma);
                 } else  if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-                    trgData.setElemDoubleAt(tgtIndex, 10.0*Math.log10(sigma));
+                    trgData.setElemDoubleAt(srcIndex, 10.0*Math.log10(sigma));
                 }
             }
         }

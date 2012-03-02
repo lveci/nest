@@ -16,12 +16,7 @@
 
 package com.bc.ceres.binding.dom;
 
-import com.bc.ceres.binding.PropertyDescriptorFactory;
-import com.bc.ceres.binding.ConversionException;
-import com.bc.ceres.binding.Converter;
-import com.bc.ceres.binding.ConverterRegistry;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.*;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
@@ -29,20 +24,14 @@ import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.StringReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class DefaultDomConverterTest extends TestCase {
 
@@ -62,9 +51,9 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testUnknownElement() throws ValidationException, ConversionException {
         final String xml = ""
-                           + "<parameters>"
-                           + "  <kornField>42</kornField>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <kornField>42</kornField>"
+                + "</parameters>";
         final XppDom dom = createDom(xml);
         final SimplePojo value = new SimplePojo();
         try {
@@ -76,12 +65,12 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testDomToSimplePojo() throws ValidationException, ConversionException {
         final String xml = ""
-                           + "<parameters>"
-                           + "  <intField>42</intField>"
-                           + "  <stringField>a string</stringField>"
-                           + "  <doubleArrayField>1.2, 4.5, -0.034</doubleArrayField>"
-                           + "  <fileField>C:/data/MER.N1</fileField>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <intField>42</intField>"
+                + "  <stringField>a string</stringField>"
+                + "  <doubleArrayField>1.2, 4.5, -0.034</doubleArrayField>"
+                + "  <fileField>C:/data/MER.N1</fileField>"
+                + "</parameters>";
         final XppDom dom = createDom(xml);
         final SimplePojo value = new SimplePojo();
         assertEquals(0, value.intField);
@@ -101,12 +90,12 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testSimplePojoToDom() throws ValidationException, ConversionException {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>"
-                                   + "  <intField>43</intField>"
-                                   + "  <stringField>This is a test.</stringField>"
-                                   + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>"
+                + "  <intField>43</intField>"
+                + "  <stringField>This is a test.</stringField>"
+                + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>"
+                + "</parameters>";
         final XppDom dom = new XppDom("parameters");
         final SimplePojo value = new SimplePojo();
         value.intField = 43;
@@ -119,11 +108,11 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testWeirdPojoToDom() throws ValidationException, ConversionException {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <finalWeird/>"
-                                   + "  <weird/>"
-                                   + "  <name>ernie</name>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <finalWeird/>"
+                + "  <weird/>"
+                + "  <name>ernie</name>"
+                + "</parameters>";
         final XppDom dom = new XppDom("parameters");
         final WeirdPojo value = new WeirdPojo();
         value.weird = new Weird();
@@ -134,12 +123,12 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testDomToArrayPojo() {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>"
-                                   + "  <intField>43</intField>"
-                                   + "  <stringField>This is a test.</stringField>"
-                                   + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>"
+                + "  <intField>43</intField>"
+                + "  <stringField>This is a test.</stringField>"
+                + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>"
+                + "</parameters>";
         final XppDom dom = new XppDom("parameters");
         final SimplePojo value = new SimplePojo();
         value.intField = 43;
@@ -169,10 +158,10 @@ public class DefaultDomConverterTest extends TestCase {
         });
 
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <prince>bert</prince>"
-                                   + "  <allies>bibo,mimi</allies>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <prince>bert</prince>"
+                + "  <allies>bibo,mimi</allies>"
+                + "</parameters>";
 
         final XppDom dom = new XppDom("parameters");
         final ArrayPojo arrayPojo = new ArrayPojo();
@@ -188,13 +177,13 @@ public class DefaultDomConverterTest extends TestCase {
     public void testDomToAnnotatedPojo() throws ValidationException, ConversionException {
 
         final String xml = ""
-                           + "<parameters>"
-                           + "  <targetBand>result</targetBand>"
-                           + "  <targetBands>"
-                           + "    <band>a</band>"
-                           + "    <band>b</band>"
-                           + "  </targetBands>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <targetBand>result</targetBand>"
+                + "  <targetBands>"
+                + "    <band>a</band>"
+                + "    <band>b</band>"
+                + "  </targetBands>"
+                + "</parameters>";
         final XppDom dom = createDom(xml);
         final AnnotatedPojo value = new AnnotatedPojo();
         assertNull(value.targetBandName);
@@ -210,14 +199,14 @@ public class DefaultDomConverterTest extends TestCase {
     public void testAnnotatedPojoToDom() throws ValidationException, ConversionException {
 
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <targetBand>radiance_13</targetBand>"
-                                   + "  <targetBands>"
-                                   + "    <band>u</band>"
-                                   + "    <band>v</band>"
-                                   + "    <band>w</band>"
-                                   + "  </targetBands>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <targetBand>radiance_13</targetBand>"
+                + "  <targetBands>"
+                + "    <band>u</band>"
+                + "    <band>v</band>"
+                + "    <band>w</band>"
+                + "  </targetBands>"
+                + "</parameters>";
         final AnnotatedPojo value = new AnnotatedPojo();
         value.targetBandName = "radiance_13";
         value.targetBandNames = new String[]{"u", "v", "w"};
@@ -229,9 +218,9 @@ public class DefaultDomConverterTest extends TestCase {
     public void testDomToEnumPojo() throws ValidationException, ConversionException {
 
         final String xml = ""
-                           + "<parameters>"
-                           + "  <character>KERMIT</character>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <character>KERMIT</character>"
+                + "</parameters>";
         final XppDom dom = createDom(xml);
         final EnumPojo value = new EnumPojo();
         assertNull(value.character);
@@ -242,9 +231,9 @@ public class DefaultDomConverterTest extends TestCase {
     public void testEnumPojoToDom() throws ValidationException, ConversionException {
 
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <character>MISS_PIGGY</character>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <character>MISS_PIGGY</character>"
+                + "</parameters>";
         final EnumPojo value = new EnumPojo();
         value.character = DefaultDomConverterTest.EnumPojo.Muppet.MISS_PIGGY;
         final XppDom dom = new XppDom("parameters");
@@ -255,20 +244,20 @@ public class DefaultDomConverterTest extends TestCase {
     public void testDomToComplexPojo() throws ValidationException, ConversionException {
 
         final String xmlString = ""
-                                 + "<parameters>"
-                                 + "  <simple>"
-                                 + "    <intField>42</intField>"
-                                 + "    <stringField>a string</stringField>"
-                                 + "    <doubleArrayField>1.2, 4.5, -0.034</doubleArrayField>"
-                                 + "  </simple>"
-                                 + "  <annotatedPojo>"
-                                 + "    <targetBand>result</targetBand>"
-                                 + "    <targetBands>"
-                                 + "      <band>a</band>"
-                                 + "      <band>b</band>"
-                                 + "    </targetBands>"
-                                 + "  </annotatedPojo>"
-                                 + "</parameters>";
+                + "<parameters>"
+                + "  <simple>"
+                + "    <intField>42</intField>"
+                + "    <stringField>a string</stringField>"
+                + "    <doubleArrayField>1.2, 4.5, -0.034</doubleArrayField>"
+                + "  </simple>"
+                + "  <annotatedPojo>"
+                + "    <targetBand>result</targetBand>"
+                + "    <targetBands>"
+                + "      <band>a</band>"
+                + "      <band>b</band>"
+                + "    </targetBands>"
+                + "  </annotatedPojo>"
+                + "</parameters>";
         final XppDom dom = createDom(xmlString);
         final ComplexPojo value = new ComplexPojo();
         assertNull(value.simplePojo);
@@ -295,21 +284,21 @@ public class DefaultDomConverterTest extends TestCase {
     public void testComplexPojoToDom() throws ValidationException, ConversionException {
 
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <simple>"
-                                   + "    <intField>87</intField>"
-                                   + "    <stringField>Test, test, test!</stringField>"
-                                   + "    <doubleArrayField>0.5,1.0</doubleArrayField>"
-                                   + "    <fileField/>"
-                                   + "  </simple>"
-                                   + "  <annotatedPojo>"
-                                   + "    <targetBand>reflec_4</targetBand>"
-                                   + "    <targetBands>"
-                                   + "      <band>real</band>"
-                                   + "      <band>imag</band>"
-                                   + "    </targetBands>"
-                                   + "  </annotatedPojo>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <simple>"
+                + "    <intField>87</intField>"
+                + "    <stringField>Test, test, test!</stringField>"
+                + "    <doubleArrayField>0.5,1.0</doubleArrayField>"
+                + "    <fileField/>"
+                + "  </simple>"
+                + "  <annotatedPojo>"
+                + "    <targetBand>reflec_4</targetBand>"
+                + "    <targetBands>"
+                + "      <band>real</band>"
+                + "      <band>imag</band>"
+                + "    </targetBands>"
+                + "  </annotatedPojo>"
+                + "</parameters>";
         final ComplexPojo value = new ComplexPojo();
         value.simplePojo = new SimplePojo();
         value.simplePojo.intField = 87;
@@ -326,32 +315,32 @@ public class DefaultDomConverterTest extends TestCase {
     public void testDomToInlinedArrayPojo() throws ValidationException, ConversionException {
 
         final String xml = ""
-                           + "<parameters>"
-                           + "  <endmember>"
-                           + "    <name>Land</name>"
-                           + "    <size>4</size>"
-                           + "    <wavelengths>820,830,840,850</wavelengths>"
-                           + "    <radiances>220,230,240,250</radiances>"
-                           + "  </endmember>"
-                           + "  <defaultEndmember>"      // note the order!
-                           + "    <name>Fallback</name>"
-                           + "    <size>4</size>"
-                           + "    <wavelengths>820,830,840,850</wavelengths>"
-                           + "    <radiances>420,430,440,450</radiances>"
-                           + "  </defaultEndmember>"
-                           + "  <endmember>"
-                           + "    <name>Water</name>"
-                           + "    <size>4</size>"
-                           + "    <wavelengths>820,830,840,850</wavelengths>"
-                           + "    <radiances>620,630,640,650</radiances>"
-                           + "  </endmember>"
-                           + "  <endmember>"
-                           + "    <name>Cloud</name>"
-                           + "    <size>4</size>"
-                           + "    <wavelengths>820,830,840,850</wavelengths>"
-                           + "    <radiances>920,930,940,950</radiances>"
-                           + "  </endmember>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <endmember>"
+                + "    <name>Land</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820,830,840,850</wavelengths>"
+                + "    <radiances>220,230,240,250</radiances>"
+                + "  </endmember>"
+                + "  <defaultEndmember>"      // note the order!
+                + "    <name>Fallback</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820,830,840,850</wavelengths>"
+                + "    <radiances>420,430,440,450</radiances>"
+                + "  </defaultEndmember>"
+                + "  <endmember>"
+                + "    <name>Water</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820,830,840,850</wavelengths>"
+                + "    <radiances>620,630,640,650</radiances>"
+                + "  </endmember>"
+                + "  <endmember>"
+                + "    <name>Cloud</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820,830,840,850</wavelengths>"
+                + "    <radiances>920,930,940,950</radiances>"
+                + "  </endmember>"
+                + "</parameters>";
 
         final XppDom dom = createDom(xml);
         final InlinedArrayPojo value = new InlinedArrayPojo();
@@ -388,32 +377,32 @@ public class DefaultDomConverterTest extends TestCase {
     public void testInlinedArrayPojoToDom() throws ValidationException, ConversionException {
 
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <defaultEndmember>"
-                                   + "    <name>Fallback</name>"
-                                   + "    <size>4</size>"
-                                   + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
-                                   + "    <radiances>420.0,430.0,440.0,450.0</radiances>"
-                                   + "  </defaultEndmember>"
-                                   + "  <endmember>"
-                                   + "    <name>Land</name>"
-                                   + "    <size>4</size>"
-                                   + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
-                                   + "    <radiances>220.0,230.0,240.0,250.0</radiances>"
-                                   + "  </endmember>"
-                                   + "  <endmember>"
-                                   + "    <name>Water</name>"
-                                   + "    <size>4</size>"
-                                   + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
-                                   + "    <radiances>620.0,630.0,640.0,650.0</radiances>"
-                                   + "  </endmember>"
-                                   + "  <endmember>"
-                                   + "    <name>Cloud</name>"
-                                   + "    <size>4</size>"
-                                   + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
-                                   + "    <radiances>920.0,930.0,940.0,950.0</radiances>"
-                                   + "  </endmember>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <defaultEndmember>"
+                + "    <name>Fallback</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
+                + "    <radiances>420.0,430.0,440.0,450.0</radiances>"
+                + "  </defaultEndmember>"
+                + "  <endmember>"
+                + "    <name>Land</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
+                + "    <radiances>220.0,230.0,240.0,250.0</radiances>"
+                + "  </endmember>"
+                + "  <endmember>"
+                + "    <name>Water</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
+                + "    <radiances>620.0,630.0,640.0,650.0</radiances>"
+                + "  </endmember>"
+                + "  <endmember>"
+                + "    <name>Cloud</name>"
+                + "    <size>4</size>"
+                + "    <wavelengths>820.0,830.0,840.0,850.0</wavelengths>"
+                + "    <radiances>920.0,930.0,940.0,950.0</radiances>"
+                + "  </endmember>"
+                + "</parameters>";
 
         final InlinedArrayPojo value = new InlinedArrayPojo();
         value.defaultEndmember = new Endmember("Fallback", new double[]{820, 830, 840, 850},
@@ -432,20 +421,20 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testInterfaceFieldsPojoToDom() {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <shape1 class=\"java.awt.Rectangle\" >"
-                                   + "    <x>10</x>"
-                                   + "    <y>10</y>"
-                                   + "    <width>20</width>"
-                                   + "    <height>25</height>"
-                                   + "  </shape1>"
-                                   + "  <shape2 class=\"java.awt.geom.Line2D$Float\" >"
-                                   + "    <x1>0.0</x1>"
-                                   + "    <y1>10.3</y1>"
-                                   + "    <x2>15.7</x2>"
-                                   + "    <y2>34.6</y2>"
-                                   + "  </shape2>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <shape1 class=\"java.awt.Rectangle\" >"
+                + "    <x>10</x>"
+                + "    <y>10</y>"
+                + "    <width>20</width>"
+                + "    <height>25</height>"
+                + "  </shape1>"
+                + "  <shape2 class=\"java.awt.geom.Line2D$Float\" >"
+                + "    <x1>0.0</x1>"
+                + "    <y1>10.3</y1>"
+                + "    <x2>15.7</x2>"
+                + "    <y2>34.6</y2>"
+                + "  </shape2>"
+                + "</parameters>";
         final InterfaceFieldsPojo interfacePojo = new InterfaceFieldsPojo(new Rectangle(10, 10, 20, 25),
                                                                           new Line2D.Float(0.0f, 10.3f, 15.7f, 34.6f));
         final XppDom dom = new XppDom("parameters");
@@ -455,20 +444,20 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void testDomToInterfaceFieldsPojo() throws ValidationException, ConversionException {
         final String xml = ""
-                           + "<parameters>"
-                           + "  <shape1 class=\"java.awt.Rectangle\" >"
-                           + "    <x>10</x>"
-                           + "    <y>10</y>"
-                           + "    <width>20</width>"
-                           + "    <height>25</height>"
-                           + "  </shape1>"
-                           + "  <shape2 class=\"java.awt.geom.Line2D$Float\" >"
-                           + "    <x1>0.0</x1>"
-                           + "    <y1>10.3</y1>"
-                           + "    <x2>15.7</x2>"
-                           + "    <y2>34.6</y2>"
-                           + "  </shape2>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <shape1 class=\"java.awt.Rectangle\" >"
+                + "    <x>10</x>"
+                + "    <y>10</y>"
+                + "    <width>20</width>"
+                + "    <height>25</height>"
+                + "  </shape1>"
+                + "  <shape2 class=\"java.awt.geom.Line2D$Float\" >"
+                + "    <x1>0.0</x1>"
+                + "    <y1>10.3</y1>"
+                + "    <x2>15.7</x2>"
+                + "    <y2>34.6</y2>"
+                + "  </shape2>"
+                + "</parameters>";
 
         final XppDom dom = createDom(xml);
         final InterfaceFieldsPojo value = new InterfaceFieldsPojo(null, null);
@@ -496,23 +485,23 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void doNotTestMapFieldPojoToDom() {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <map class=\"java.util.HashMap\" >"
-                                   + "    <entry>"
-                                   + "      <key class=\"java.lang.String\">Bibo</key>"
-                                   + "      <value class=\"java.awt.Rectangle\">"
-                                   + "        <x>10</x>"
-                                   + "        <y>10</y>"
-                                   + "        <width>20</width>"
-                                   + "        <height>25</height>"
-                                   + "      </value>"
-                                   + "    </entry>"
-                                   + "    <entry>"
-                                   + "      <key class=\"java.lang.Integer\">12345</key>"
-                                   + "      <value class=\"java.awt.Color\">12,40,123</value>"
-                                   + "    </entry>"
-                                   + "  </map>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <map class=\"java.util.HashMap\" >"
+                + "    <entry>"
+                + "      <key class=\"java.lang.String\">Bibo</key>"
+                + "      <value class=\"java.awt.Rectangle\">"
+                + "        <x>10</x>"
+                + "        <y>10</y>"
+                + "        <width>20</width>"
+                + "        <height>25</height>"
+                + "      </value>"
+                + "    </entry>"
+                + "    <entry>"
+                + "      <key class=\"java.lang.Integer\">12345</key>"
+                + "      <value class=\"java.awt.Color\">12,40,123</value>"
+                + "    </entry>"
+                + "  </map>"
+                + "</parameters>";
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("Bibo", new Rectangle(10, 10, 20, 25));
@@ -525,23 +514,23 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void doNotTestDomToMapFieldPojo() throws ValidationException, ConversionException {
         final String xml = ""
-                           + "<parameters>"
-                           + "  <map class=\"java.util.HashMap\" >"
-                           + "    <entry>"
-                           + "      <key class=\"java.lang.String\">Bibo</key>"
-                           + "      <value class=\"java.awt.Rectangle\">"
-                           + "        <x>10</x>"
-                           + "        <y>10</y>"
-                           + "        <width>20</width>"
-                           + "        <height>25</height>"
-                           + "      </value>"
-                           + "    </entry>"
-                           + "    <entry>"
-                           + "      <key class=\"java.lang.Integer\">12345</key>"
-                           + "      <value class=\"java.awt.Color\">12,40,123</value>"
-                           + "    </entry>"
-                           + "  </map>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <map class=\"java.util.HashMap\" >"
+                + "    <entry>"
+                + "      <key class=\"java.lang.String\">Bibo</key>"
+                + "      <value class=\"java.awt.Rectangle\">"
+                + "        <x>10</x>"
+                + "        <y>10</y>"
+                + "        <width>20</width>"
+                + "        <height>25</height>"
+                + "      </value>"
+                + "    </entry>"
+                + "    <entry>"
+                + "      <key class=\"java.lang.Integer\">12345</key>"
+                + "      <value class=\"java.awt.Color\">12,40,123</value>"
+                + "    </entry>"
+                + "  </map>"
+                + "</parameters>";
 
         final XppDom dom = createDom(xml);
         final MapFieldPojo mapFieldPojo = new MapFieldPojo(null);
@@ -554,31 +543,31 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void doNotTestCollectionFieldPojoToDom() {
         final String expectedXml = ""
-                                   + "<parameters>"
-                                   + "  <collection class=\"java.util.Stack\">"
-                                   + "    <item class=\"java.awt.Rectangle\">"
-                                   + "      <x>0</x>"
-                                   + "      <y>0</y>"
-                                   + "      <width>10</width>"
-                                   + "      <height>10</height>"
-                                   + "    </item>"
-                                   + "    <item class=\"java.awt.geom.Line2D$Double\">"
-                                   + "      <x1>0.0</x1>"
-                                   + "      <y1>0.0</y1>"
-                                   + "      <x2>10.0</x2>"
-                                   + "      <y2>10.0</y2>"
-                                   + "    </item>"
-                                   + "    <item class=\"java.awt.geom.Arc2D$Double\">"
-                                   + "      <type>1</type>"
-                                   + "      <x>0.0</x>"
-                                   + "      <y>0.0</y>"
-                                   + "      <width>10.0</width>"
-                                   + "      <height>10.0</height>"
-                                   + "      <start>2.0</start>"
-                                   + "      <extent>3.0</extent>"
-                                   + "    </item>"
-                                   + "  </collection>"
-                                   + "</parameters>";
+                + "<parameters>"
+                + "  <collection class=\"java.util.Stack\">"
+                + "    <item class=\"java.awt.Rectangle\">"
+                + "      <x>0</x>"
+                + "      <y>0</y>"
+                + "      <width>10</width>"
+                + "      <height>10</height>"
+                + "    </item>"
+                + "    <item class=\"java.awt.geom.Line2D$Double\">"
+                + "      <x1>0.0</x1>"
+                + "      <y1>0.0</y1>"
+                + "      <x2>10.0</x2>"
+                + "      <y2>10.0</y2>"
+                + "    </item>"
+                + "    <item class=\"java.awt.geom.Arc2D$Double\">"
+                + "      <type>1</type>"
+                + "      <x>0.0</x>"
+                + "      <y>0.0</y>"
+                + "      <width>10.0</width>"
+                + "      <height>10.0</height>"
+                + "      <start>2.0</start>"
+                + "      <extent>3.0</extent>"
+                + "    </item>"
+                + "  </collection>"
+                + "</parameters>";
         Collection<Shape> stack = new Stack<Shape>();
         stack.add(new Rectangle(0, 0, 10, 10));
         stack.add(new Line2D.Double(0, 0, 10, 10));
@@ -591,31 +580,31 @@ public class DefaultDomConverterTest extends TestCase {
 
     public void doNotTestDomToCollectionFieldPojo() throws ValidationException, ConversionException {
         final String xml = ""
-                           + "<parameters>"
-                           + "  <collection class=\"java.util.Stack\">"
-                           + "    <item class=\"java.awt.Rectangle\">"
-                           + "      <x>0</x>"
-                           + "      <y>0</y>"
-                           + "      <width>10</width>"
-                           + "      <height>10</height>"
-                           + "    </item>"
-                           + "    <item class=\"java.awt.geom.Line2D$Double\">"
-                           + "      <x1>0.0</x1>"
-                           + "      <y1>0.0</y1>"
-                           + "      <x2>10.0</x2>"
-                           + "      <y2>10.0</y2>"
-                           + "    </item>"
-                           + "    <item class=\"java.awt.geom.Arc2D$Double\">"
-                           + "      <type>1</type>"
-                           + "      <x>0.0</x>"
-                           + "      <y>0.0</y>"
-                           + "      <width>10.0</width>"
-                           + "      <height>10.0</height>"
-                           + "      <start>2.0</start>"
-                           + "      <extent>3.0</extent>"
-                           + "    </item>"
-                           + "  </collection>"
-                           + "</parameters>";
+                + "<parameters>"
+                + "  <collection class=\"java.util.Stack\">"
+                + "    <item class=\"java.awt.Rectangle\">"
+                + "      <x>0</x>"
+                + "      <y>0</y>"
+                + "      <width>10</width>"
+                + "      <height>10</height>"
+                + "    </item>"
+                + "    <item class=\"java.awt.geom.Line2D$Double\">"
+                + "      <x1>0.0</x1>"
+                + "      <y1>0.0</y1>"
+                + "      <x2>10.0</x2>"
+                + "      <y2>10.0</y2>"
+                + "    </item>"
+                + "    <item class=\"java.awt.geom.Arc2D$Double\">"
+                + "      <type>1</type>"
+                + "      <x>0.0</x>"
+                + "      <y>0.0</y>"
+                + "      <width>10.0</width>"
+                + "      <height>10.0</height>"
+                + "      <start>2.0</start>"
+                + "      <extent>3.0</extent>"
+                + "    </item>"
+                + "  </collection>"
+                + "</parameters>";
 
         final XppDom dom = createDom(xml);
         final CollectionFieldPojo collectionFieldPojo = new CollectionFieldPojo(null);
@@ -638,7 +627,7 @@ public class DefaultDomConverterTest extends TestCase {
     public static void convertValueToDom(Object value, XppDom parentElement) {
         try {
             new DefaultDomConverter(value.getClass(), VALUE_DESCRIPTOR_FACTORY).convertValueToDom(value,
-                                                                                                  new Xpp3DomElement(
+                                                                                                  new XppDomElement(
                                                                                                           parentElement));
         } catch (ConversionException e) {
             e.printStackTrace();
@@ -647,10 +636,10 @@ public class DefaultDomConverterTest extends TestCase {
 
 
     public static void convertDomToValue(XppDom parentElement, Object value) throws ConversionException,
-                                                                                     ValidationException {
+            ValidationException {
 
         new DefaultDomConverter(value.getClass(), VALUE_DESCRIPTOR_FACTORY).convertDomToValue(
-                new Xpp3DomElement(parentElement), value);
+                new XppDomElement(parentElement), value);
     }
 
     public static class SimplePojo {
@@ -754,7 +743,7 @@ public class DefaultDomConverterTest extends TestCase {
     }
 
     @Retention(value = RetentionPolicy.RUNTIME)
-            @interface X {
+    @interface X {
 
         String alias() default "";
 
