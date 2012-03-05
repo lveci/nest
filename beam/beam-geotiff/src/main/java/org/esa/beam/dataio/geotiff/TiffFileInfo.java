@@ -96,7 +96,7 @@ class TiffFileInfo {
                 final double[] doubles = new double[count];
                 System.arraycopy(doubleValues, offsetOrValue, doubles, 0, count);
                 value = doubles;
-            } else if (tiffTagLocation == TAG_GEO_ASCII_PARAMS___SPOT) {
+            } else if (tiffTagLocation == TAG_GEO_ASCII_PARAMS___SPOT && strIdx < asciiValues.length) {
                 value = asciiValues[strIdx++];
             } else {
                 value = new Integer(offsetOrValue);
