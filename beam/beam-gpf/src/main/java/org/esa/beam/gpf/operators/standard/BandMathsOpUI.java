@@ -205,10 +205,8 @@ public class BandMathsOpUI extends BaseOperatorUI {
 
     private void setArithmetikValues() {
         final ParamProperties props = paramExpression.getProperties();
-        props.setPropertyValue(ParamProperties.COMP_PRODUCTS_FOR_BAND_ARITHMETHIK_KEY
-                , getCompatibleProducts());
-        props.setPropertyValue(ParamProperties.SEL_PRODUCT_FOR_BAND_ARITHMETHIK_KEY
-                , targetProduct);
+        props.setPropertyValue(ParamProperties.COMP_PRODUCTS_FOR_BAND_ARITHMETHIK_KEY, getCompatibleProducts());
+        props.setPropertyValue(ParamProperties.SEL_PRODUCT_FOR_BAND_ARITHMETHIK_KEY, targetProduct);
     }
 
      private ParamChangeListener createParamChangeListener() {
@@ -226,7 +224,7 @@ public class BandMathsOpUI extends BaseOperatorUI {
         }
         final Vector<Product> compatibleProducts = new Vector<Product>();
         compatibleProducts.add(targetProduct);
-            final float geolocationEps = 10;
+            final float geolocationEps = 180;
             Debug.trace("BandArithmetikDialog.geolocationEps = " + geolocationEps);
             Debug.trace("BandArithmetikDialog.getCompatibleProducts:");
             Debug.trace("  comparing: " + targetProduct.getName());
@@ -249,8 +247,7 @@ public class BandMathsOpUI extends BaseOperatorUI {
 
             public void actionPerformed(ActionEvent e) {
                 ProductExpressionPane pep = ProductExpressionPane.createGeneralExpressionPane(getCompatibleProducts(),
-                        targetProduct,
-                                                                                              new PropertyMap());
+                        targetProduct, new PropertyMap());
                 pep.setCode(paramExpression.getValueAsText());
                 int status = pep.showModalDialog(SwingUtilities.getWindowAncestor(panel), "Arithmetic Expression Editor");
                 if (status == ModalDialog.ID_OK) {

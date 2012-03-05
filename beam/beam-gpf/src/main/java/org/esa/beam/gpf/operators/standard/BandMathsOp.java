@@ -229,10 +229,15 @@ public class BandMathsOp extends Operator {
         }
         int width = sourceProducts[0].getSceneRasterWidth();
         int height = sourceProducts[0].getSceneRasterHeight();
+        int cnt = 1;
         for (Product product : sourceProducts) {
             if (product.getSceneRasterWidth() != width ||
                 product.getSceneRasterHeight() != height) {
                 throw new OperatorException("Products must have the same raster dimension.");
+            }
+            int refNo = product.getRefNo();
+            if(refNo == 0) {
+                product.setRefNo(cnt++);
             }
         }
         targetProduct = new Product(sourceProducts[0].getName() + "BandMath", "BandMath", width, height);
@@ -383,7 +388,8 @@ public class BandMathsOp extends Operator {
 
         @Override
         public String getPrefix(Product product) {
-            return "$" + getSourceProductId(product) + ".";
+            //return "$" + getSourceProductId(product) + ".";
+            return BandArithmetic.getProductNodeNamePrefix(product);
         }
     }
 }
