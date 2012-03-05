@@ -15,6 +15,7 @@ public class TargetUI extends BaseOperatorUI {
 
     TargetProductSelector targetProductSelector = null;
     private static final String FILE_PARAMETER = "file";
+    private static final String FORMAT_PARAMETER = "formatName";
     private AppContext appContext;
 
     @Override
@@ -48,15 +49,21 @@ public class TargetUI extends BaseOperatorUI {
     public void initParameters() {
         assert(paramMap != null);
         String fileName = "target";
-        final Object value = paramMap.get(FILE_PARAMETER);
-        if(value != null) {
-            final File file = (File)value;
+        String format = "BEAM-DIMAP";
+        final Object fileValue = paramMap.get(FILE_PARAMETER);
+        if(fileValue != null) {
+            final File file = (File)fileValue;
             fileName = file.getName();
         } else if(sourceProducts != null && sourceProducts.length > 0) {
             fileName = sourceProducts[0].getName();
         }
+        final Object formatValue = paramMap.get(FORMAT_PARAMETER);
+        if(formatValue != null) {
+            format = (String)formatValue;
+        } 
         targetProductSelector.getProductNameTextField().setText(fileName);
         targetProductSelector.getModel().setProductName(fileName);
+        targetProductSelector.getModel().setFormatName(format);
     }
 
     @Override

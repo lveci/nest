@@ -161,7 +161,7 @@ public class TargetProductSelectorModel {
     public void setProductDir(File productDir) {
         setValueContainerValue("productDir", productDir);
     }
-
+    
     public void setFormatName(String formatName) {
         setValueContainerValue("formatName", formatName);
     }
