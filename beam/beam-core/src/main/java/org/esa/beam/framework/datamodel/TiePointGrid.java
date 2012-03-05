@@ -29,6 +29,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.IndexValidator;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.util.math.Range;
+import org.apache.commons.math.util.FastMath;
 
 import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
@@ -414,7 +415,7 @@ public class TiePointGrid extends RasterDataNode {
             }
             final float sinAngle = _sinGrid.getPixelFloat(x, y);
             final float cosAngle = _cosGrid.getPixelFloat(x, y);
-            final float v = (float) (MathUtils.RTOD * Math.atan2(sinAngle, cosAngle));
+            final float v = (float) (MathUtils.RTOD * FastMath.atan2(sinAngle, cosAngle));
             if (_discontinuity == DISCONT_AT_360 && v < 0.0) {
                 return 360.0F + v;  // = 180 + (180 - abs(v))
             }
@@ -422,8 +423,8 @@ public class TiePointGrid extends RasterDataNode {
         }
         final float fi = (x - _offsetX) / _subSamplingX;
         final float fj = (y - _offsetY) / _subSamplingY;
-        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, _rasterWidthMinus2);
-        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, _rasterHeightMinus2);
+        final int i = MathUtils.crop((int) FastMath.floor(fi), 0, _rasterWidthMinus2);
+        final int j = MathUtils.crop((int) FastMath.floor(fj), 0, _rasterHeightMinus2);
         return interpolate(fi - i, fj - j, i, j);
     }
 
@@ -909,7 +910,7 @@ public class TiePointGrid extends RasterDataNode {
         _tiePoints = getTiePoints();
     }
 
-    private float interpolate(float wi, float wj, int i0, int j0) {
+    private final float interpolate(float wi, float wj, int i0, int j0) {
         if(_tiePoints == null)
             _tiePoints = getTiePoints();
         final int i1 = i0 + 1;

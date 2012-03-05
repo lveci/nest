@@ -19,11 +19,10 @@ import Jama.Matrix;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.datamodel.Orbits;
+import org.apache.commons.math.util.FastMath;
 
 public final class GeoUtils
 {
-    private static final double a = 6378137; // m (same for WGS84 and GRS80)
-
     private static final double EPS5 = 1e-5;
     private static final double EPS = 1e-10;
 
@@ -64,33 +63,31 @@ public final class GeoUtils
                                final double xyz[], final EarthModel geoSystem) {
 
         double a = 0.0;
-        double earthFlatCoef = 0.0;
+        double e2 = 0.0;
 
         if (geoSystem == EarthModel.WGS84) {
 
             a = WGS84.a;
-            earthFlatCoef = WGS84.earthFlatCoef;
+            e2 = WGS84.e2;
 
         } else if (geoSystem == EarthModel.GRS80) {
 
             a = GRS80.a;
-            earthFlatCoef = GRS80.earthFlatCoef;
+            e2 = GRS80.e2;
 
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
 
-        final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
-
         final double lat = latitude * org.esa.beam.util.math.MathUtils.DTOR;
         final double lon = longitude * org.esa.beam.util.math.MathUtils.DTOR;
 
-        final double sinLat = Math.sin(lat);
-        final double cosLat = Math.cos(lat);
+        final double sinLat = FastMath.sin(lat);
+        final double cosLat = FastMath.cos(lat);
         final double N = a / Math.sqrt(1 - e2*sinLat*sinLat);
 
-        xyz[0] = (N + altitude) * cosLat * Math.cos(lon); // in m
-        xyz[1] = (N + altitude) * cosLat * Math.sin(lon); // in m
+        xyz[0] = (N + altitude) * cosLat * FastMath.cos(lon); // in m
+        xyz[1] = (N + altitude) * cosLat * FastMath.sin(lon); // in m
         xyz[2] = ((1 - e2) * N + altitude) * sinLat;   // in m
     }
 
@@ -113,34 +110,34 @@ public final class GeoUtils
 
         double a = 0.0;
         double b = 0.0;
-        double earthFlatCoef = 0.0;
+        double e2 = 0.0;
+        double ep2 = 0.0;
 
         if (geoSystem == EarthModel.WGS84) {
 
             a = WGS84.a;
             b = WGS84.b;
-            earthFlatCoef = WGS84.earthFlatCoef;
+            e2 = WGS84.e2;
+            ep2 = WGS84.ep2;
 
         } else if (geoSystem == EarthModel.GRS80) {
 
             a = GRS80.a;
             b = GRS80.b;
-            earthFlatCoef = GRS80.earthFlatCoef;
+            e2 = GRS80.e2;
+            ep2 = GRS80.ep2;
 
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
 
-        final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
-        final double ep2 = e2 / (1 - e2);
-
         final double x = xyz[0];
         final double y = xyz[1];
         final double z = xyz[2];
         final double s = Math.sqrt(x*x + y*y);
-        final double theta = Math.atan(z*a/(s*b));
+        final double theta = FastMath.atan(z*a/(s*b));
 
-        geoPos.lon = (float)(Math.atan(y/x) * org.esa.beam.util.math.MathUtils.RTOD);
+        geoPos.lon = (float)(FastMath.atan(y/x) * org.esa.beam.util.math.MathUtils.RTOD);
         
         if (geoPos.lon < 0.0 && y >= 0.0) {
             geoPos.lon += 180.0;
@@ -148,7 +145,7 @@ public final class GeoUtils
             geoPos.lon -= 180.0;
         }
 
-        geoPos.lat = (float)(Math.atan((z + ep2*b*Math.pow(Math.sin(theta), 3)) /
+        geoPos.lat = (float)(FastMath.atan((z + ep2*b*Math.pow(Math.sin(theta), 3)) /
                                        (s - e2*a*Math.pow(Math.cos(theta), 3))) *
                                        org.esa.beam.util.math.MathUtils.RTOD);
     }
@@ -264,7 +261,7 @@ public final class GeoUtils
         double C = 1.0 - X;
         C = (X * X / 4.0 + 1) / C;
         double D = (0.375 * X * X - 1.0) * X;
-        TU = dist / R / a / C;
+        TU = dist / R / WGS84.a / C;
         double Y = TU;
 
         double SY, CY, CZ, E;
@@ -385,7 +382,7 @@ public final class GeoUtils
         D = (0.375 * X * X - 1.) * X;
         X = E * CY;
         S = 1. - E - E;
-        S = ((((SY * SY * 4. - 3.) * S * CZ * D / 6. - X) * D / 4. + CZ) * SY * D + Y) * C * a * R;
+        S = ((((SY * SY * 4. - 3.) * S * CZ * D / 6. - X) * D / 4. + CZ) * SY * D + Y) * C * WGS84.a * R;
 
         output.distance = S;
         output.heading1 = FAZ * org.esa.beam.util.math.MathUtils.RTOD;
@@ -415,11 +412,15 @@ public final class GeoUtils
         public static final double a = 6378137; // m
         public static final double b = 6356752.314245; // m
         public static final double earthFlatCoef = 298.257223563;
+        public static final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
+        public static final double ep2 = e2 / (1 - e2);
     }
 
     public static interface GRS80 {
         public static final double a = 6378137; // m
         public static final double b = 6356752.314140 ; // m
         public static final double earthFlatCoef = 298.257222101;
+        public static final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
+        public static final double ep2 = e2 / (1 - e2);
     }
 }

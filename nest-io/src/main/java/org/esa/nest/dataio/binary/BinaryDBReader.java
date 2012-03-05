@@ -209,9 +209,8 @@ public final class BinaryDBReader {
                     } default: {
                         throw new IllegalBinaryFormatException("Unknown type " + type, reader.getCurrentPos());
                     }
-                    //System.out.println();
                 }
-
+                //System.out.println();
             }
 
         } catch(Exception e) {

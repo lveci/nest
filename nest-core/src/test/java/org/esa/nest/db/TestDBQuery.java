@@ -60,9 +60,9 @@ public class TestDBQuery extends TestCase {
         showProductEntries(productEntryList);
     }
 
-    private void showProductEntries(final ProductEntry[] productEntryList) {
+    private static void showProductEntries(final ProductEntry[] productEntryList) {
         for(ProductEntry entry : productEntryList) {
-            System.out.println(entry.getId() +" "+ entry.getName());
+            //System.out.println(entry.getId() +" "+ entry.getName());
         }
     }
 }

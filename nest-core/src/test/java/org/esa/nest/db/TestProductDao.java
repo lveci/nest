@@ -79,7 +79,7 @@ public class TestProductDao extends TestCase {
                         System.out.println("Unable to read "+file.getAbsolutePath());
                     }
                     if(sourceProduct != null) {
-                        System.out.println("Adding "+file.getAbsolutePath());
+                        //System.out.println("Adding "+file.getAbsolutePath());
 
                         db.saveProduct(sourceProduct);
                         sourceProduct.dispose();
@@ -93,7 +93,7 @@ public class TestProductDao extends TestCase {
 
         final ProductEntry[] list = db.getProductEntryList(false);
         for(ProductEntry entry : list) {
-            System.out.println(entry.getId() + " " + entry.getFile());
+            //System.out.println(entry.getId() + " " + entry.getFile());
         }
     }
 

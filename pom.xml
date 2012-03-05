@@ -11,7 +11,7 @@
 	           -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
-
+		
 		<beam.version>4C-4.10</beam.version>
         <ceres.version>4C-0.13</ceres.version>
         <geotools.version>2.7.4</geotools.version>
@@ -602,13 +602,17 @@
 	            <artifactId>commons-net</artifactId>
 	            <version>3.0.1</version>
 	        </dependency>
-
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.1</version>
             </dependency>
-
+			<dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math</artifactId>
+                <version>2.2</version>
+            </dependency>
+			
 			<dependency>
 				<groupId>edu.emory.mathcs</groupId>
 				<artifactId>jtransforms</artifactId>

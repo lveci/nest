@@ -38,7 +38,7 @@ public class TestRadarsat2ProductReader extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
+        TestUtils.initTestEnvironment();
         readerPlugin = new Radarsat2ProductReaderPlugIn();
         reader = readerPlugin.createReaderInstance();
     }
@@ -63,6 +63,5 @@ public class TestRadarsat2ProductReader extends TestCase {
         if(TestUtils.canTestReadersOnAllProducts())
             TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
-
 
 }

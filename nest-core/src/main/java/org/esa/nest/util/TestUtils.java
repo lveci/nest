@@ -395,7 +395,7 @@ public class TestUtils {
         }
 
         for(File file : origFolder.listFiles()) {
-            if(file.isDirectory() && readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
+            if(!file.isDirectory() && readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
                     //System.out.println("Reading "+ file.toString());

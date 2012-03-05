@@ -71,8 +71,8 @@ public final class SRTM3GeoTiffElevationTile implements ElevationTile {
                 final int rowIdxInEGMArray = index / 300; // tile_height / numEGMSamplesInCol
                 for (int i = 0; i < line.length; i++) {
                     if (line[i] != noDataValue) {
-                        final int colIdxInEGMArray = i/300; // tile_width / numEGMSamplesInRow = 6000 / 20 = 300
-                        line[i] += egmArray[rowIdxInEGMArray][colIdxInEGMArray];
+                        //final int colIdxInEGMArray = i/300; // tile_width / numEGMSamplesInRow = 6000 / 20 = 300
+                        line[i] += egmArray[rowIdxInEGMArray][i/300];
                     }
                 }
                 return line;

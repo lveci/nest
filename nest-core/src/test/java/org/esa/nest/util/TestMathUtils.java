@@ -25,6 +25,8 @@ import junit.framework.TestCase;
  */
 public class TestMathUtils extends TestCase {
 
+    final int numItr = 20000000;
+
     public TestMathUtils(String name) {
         super(name);
     }
@@ -63,5 +65,53 @@ public class TestMathUtils extends TestCase {
 
         double yExpected = -0.06751353045007912;
         assertTrue(Double.compare(y, yExpected) == 0);
+    }
+
+     public void testMathCos() {
+        for(int i=0; i < numItr; ++i) {
+            double val = Math.cos(i);
+        }
+    }
+
+    public void testFastMathCos() {
+        for(int i=0; i < numItr; ++i) {
+           // double val = FastMath.cos(i);
+        }
+    }
+
+    public void testMathMin() {
+        for(int i=0; i < numItr; ++i) {
+            double val = Math.min(i, 500);
+        }
+    }
+
+    public void testFastMathMin() {
+        for(int i=0; i < numItr; ++i) {
+          //  double val = FastMath.min(i, 500);
+        }
+    }
+
+    public void testMathFloor() {
+        for(int i=0; i < numItr; ++i) {
+            double val = Math.floor(i);
+        }
+    }
+
+    public void testFastMathFloor() {
+        for(int i=0; i < numItr; ++i) {
+           // double val = FastMath.floor(i);
+        }
+    }
+
+    public void testMathAbs() {
+        for(int i=0; i < numItr; ++i) {
+            double val = Math.abs(i);
+        }
+    }
+
+    public void testFastMathAbs() {
+        for(int i=0; i < numItr; ++i) {
+           // double val = FastMath.abs(i);
+        }
     }
 }

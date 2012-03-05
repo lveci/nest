@@ -460,13 +460,16 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static String getMissionType(final MetadataElement absRoot) {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE).toUpperCase();
         if (mission.equals("ALOS")) {
-            //throw new OperatorException("ALOS PALSAR product is currently not supported");
+            throw new OperatorException("ALOS PALSAR product is currently not supported");
         }
 
-        if ((mission.contains("TSX") || mission.contains("TDX")) && !productType.contains("SSC")) {
-            throw new OperatorException("Only TerraSAR-X (SSC) products are currently supported");
+        if (mission.contains("TSX") || mission.contains("TDX")) {
+            final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE).toUpperCase();
+            final String sample = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+            if(!(sample.equals("COMPLEX") || productType.contains("SSC"))) {
+                 throw new OperatorException("Only TerraSAR-X (SSC) products are currently supported");
+            }
         }
 
         if (mission.equals("RS1")) {

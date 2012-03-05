@@ -41,7 +41,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
     private String productName = "TerraSar-X";
     private String productType = "TerraSar-X";
-    private final String productDescription = "";
+    private String productDescription = "";
 
     private final float[] latCorners = new float[4];
     private final float[] lonCorners = new float[4];
@@ -111,10 +111,17 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         final MetadataElement acquisitionInfo = productInfo.getElement("acquisitionInfo");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE,
-                getAcquisitionMode(acquisitionInfo.getAttributeString("imagingMode", defStr)));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
-                acquisitionInfo.getAttributeString("elevationBeamConfiguration", defStr));
+        if(acquisitionInfo != null) {
+            final String imagingMode = getAcquisitionMode(acquisitionInfo.getAttributeString("imagingMode", defStr));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, imagingMode);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
+                    acquisitionInfo.getAttributeString("elevationBeamConfiguration", defStr));
+            productDescription = productType +' '+ imagingMode;
+
+            if(missionInfo == null) {
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, acquisitionInfo.getAttributeString("orbitDirection", defStr));   
+            }
+        }
 
         final MetadataElement polarisationList = acquisitionInfo.getElement("polarisationList");
         final MetadataAttribute[] polList = polarisationList.getAttributes();
@@ -123,17 +130,11 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         if(sceneInfo != null) {
-            final ProductData.UTC startTime = ReaderUtils.getTime(sceneInfo.getElement("start"), "timeUTC", timeFormat);
-            final ProductData.UTC stopTime = ReaderUtils.getTime(sceneInfo.getElement("stop"), "timeUTC", timeFormat);
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
-            product.setStartTime(startTime);
-            product.setEndTime(stopTime);
+            setStartStopTime(product, absRoot, sceneInfo);
 
             getCornerCoords(sceneInfo, geocodedImageInfo);
-
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
+        } else if(acquisitionInfo != null) {
+            setStartStopTime(product, absRoot, acquisitionInfo);   
         }
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat, latCorners[0]);
@@ -257,7 +258,20 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
     }
 
-    private static String  getAcquisitionMode(final String mode) {
+    private static void setStartStopTime(final Product product,
+                                         final MetadataElement absRoot, final MetadataElement elem) {
+        final ProductData.UTC startTime = ReaderUtils.getTime(elem.getElement("start"), "timeUTC", timeFormat);
+        final ProductData.UTC stopTime = ReaderUtils.getTime(elem.getElement("stop"), "timeUTC", timeFormat);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
+        product.setStartTime(startTime);
+        product.setEndTime(stopTime);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
+    }
+
+    private static String getAcquisitionMode(final String mode) {
         if(mode.equalsIgnoreCase("SM"))
             return "Stripmap";
         else if(mode.equalsIgnoreCase("SL") || mode.equalsIgnoreCase("HS"))
