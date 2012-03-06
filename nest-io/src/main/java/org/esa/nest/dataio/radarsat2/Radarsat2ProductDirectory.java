@@ -128,14 +128,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
                 radarParameters.getAttributeString("beams", defStr));
 
-
-        final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
-        double prf = pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt);
-        if(aquisitionMode.equalsIgnoreCase("UltraFine")) {
-            prf *= 2.0;
-        }
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency, prf);
-
         final MetadataElement radarCenterFrequency = radarParameters.getElement("radarCenterFrequency");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                 radarCenterFrequency.getAttributeDouble("radarCenterFrequency", defInt) / 1000000.0);
@@ -148,7 +140,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.orbit_state_vector_file, orbitFile);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(orbitFile.substring(0, orbitFile.indexOf("_")).trim()));
+                Integer.parseInt(orbitFile.substring(0, orbitFile.indexOf('_')).trim()));
 
         // imageGenerationParameters
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
@@ -177,7 +169,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
-                generalProcessingInformation.getAttributeString("processingFacility", defStr) +"-"+
+                generalProcessingInformation.getAttributeString("processingFacility", defStr) +'-'+
                 generalProcessingInformation.getAttributeString("softwareVersion", defStr));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
@@ -225,11 +217,23 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 
         final MetadataElement sampledPixelSpacing = rasterAttributes.getElement("sampledPixelSpacing");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                sampledPixelSpacing.getAttributeDouble("sampledPixelSpacing", defInt));
+        final double rangeSpacing = sampledPixelSpacing.getAttributeDouble("sampledPixelSpacing", defInt);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing, rangeSpacing);
         final MetadataElement sampledLineSpacing = rasterAttributes.getElement("sampledLineSpacing");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sampledLineSpacing.getAttributeDouble("sampledLineSpacing", defInt));
+
+        final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
+        double prf = pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt);
+        final MetadataElement adcSamplingRate = radarParameters.getElement("adcSamplingRate");
+        double rangeSamplingRate = adcSamplingRate.getAttributeDouble("adcSamplingRate", defInt) / Constants.oneMillion;
+
+        if(aquisitionMode.equalsIgnoreCase("UltraFine")) {
+            prf *= 2.0;
+            rangeSamplingRate *= 2.0;
+        }
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency, prf);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate, rangeSamplingRate);
 
         final MetadataElement geographicInformation = imageAttributes.getElement("geographicInformation");
         if(geographicInformation != null) {
@@ -251,7 +255,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         addDopplerCentroidCoefficients(absRoot, imageGenerationParameters);
     }
 
-    protected void verifyProductFormat(final MetadataElement imageAttributes) throws IOException {
+    protected static void verifyProductFormat(final MetadataElement imageAttributes) throws IOException {
         final String imageProductFormat = imageAttributes.getAttributeString("productFormat");
         if(!imageProductFormat.equalsIgnoreCase("GeoTIFF")) {
             throw new IOException("Radarsat2 "+imageProductFormat+" format is not supported by this reader\n Contact nest_pr@array.ca");

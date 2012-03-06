@@ -323,6 +323,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
         if(s01Elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 s01Elem.getAttributeDouble("PRF", defInt));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                s01Elem.getAttributeDouble("Sampling Rate", defInt) / Constants.oneMillion);
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 s01Elem.getAttributeString("Polarisation", defStr));
 
@@ -357,7 +359,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         if(bandElem != null) {
             final double slantRangeTime = bandElem.getAttributeDouble("Zero Doppler Range First Time", 0); //s
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                slantRangeTime*Constants.lightSpeed*0.5);
+                slantRangeTime*Constants.halfLightSpeed);
         }
     }
 

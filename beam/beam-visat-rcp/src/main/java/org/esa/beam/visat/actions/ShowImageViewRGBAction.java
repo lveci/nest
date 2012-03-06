@@ -61,7 +61,7 @@ public class ShowImageViewRGBAction extends ExecCommand {
         final VisatApp visatApp = VisatApp.getApp();
         final Product[] openedProducts = visatApp.getProductManager().getProducts();
         final RGBImageProfilePane profilePane = new RGBImageProfilePane(visatApp.getPreferences(), product, openedProducts);
-        final String title = visatApp.getAppName() + " - Select RGB-Image Channels";
+        final String title = "Select RGB-Image Channels";
         final boolean ok = profilePane.showDialog(visatApp.getMainFrame(), title, helpId);
         if (!ok) {
             return;

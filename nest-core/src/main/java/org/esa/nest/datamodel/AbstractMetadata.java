@@ -120,10 +120,12 @@ public final class AbstractMetadata {
     public static final String range_sampling_rate = "range_sampling_rate";
     public static final String avg_scene_height = "avg_scene_height";
     public static final String multilook_flag = "multilook_flag";
+    // cosmo calibration
     public static final String ref_inc_angle = "ref_inc_angle";
     public static final String ref_slant_range = "ref_slant_range";
     public static final String ref_slant_range_exp = "ref_slant_range_exp";
     public static final String rescaling_factor = "rescaling_factor";
+
     public static final String coregistered_stack = "coregistered_stack";
 
     public static final String external_calibration_file = "external_calibration_file";

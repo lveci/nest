@@ -292,7 +292,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
             final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                    slantRangeTime*Constants.lightSpeed*0.5);
+                    slantRangeTime*Constants.halfLightSpeed);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));

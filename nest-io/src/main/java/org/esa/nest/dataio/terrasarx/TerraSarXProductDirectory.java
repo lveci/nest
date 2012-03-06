@@ -179,9 +179,12 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             final MetadataElement PRF = settingRecord.getElement("PRF");
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                     PRF.getAttributeDouble("PRF", defInt));
+            final MetadataElement RSF = settings.getElement("RSF");
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                    RSF.getAttributeDouble("RSF", defInt) / Constants.oneMillion);
             final MetadataElement radarParameters = instrument.getElement("radarParameters");
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
-                    radarParameters.getAttributeDouble("centerFrequency", defInt) / 1000000.0);
+                    radarParameters.getAttributeDouble("centerFrequency", defInt) / Constants.oneMillion);
         }
 
         int srgr = 1;
