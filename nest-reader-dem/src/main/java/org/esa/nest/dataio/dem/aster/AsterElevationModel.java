@@ -103,7 +103,7 @@ public final class AsterElevationModel implements ElevationModel, Resampling.Ras
     @Override
     public synchronized GeoPos getGeoPos(PixelPos pixelPos) throws Exception {
         float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 83.0f;
-        float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+        float pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
         return new GeoPos(pixelLat, pixelLon);
     }
 
