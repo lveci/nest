@@ -26,7 +26,7 @@ class TerraSarXConstants  {
     private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{"xml"};
     private final static String PLUGIN_DESCRIPTION = "TerraSarX Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    final static String[] HEADER_PREFIX = { "TSX1_SAR", "TSX2_SAR", "TDX1_SAR", "TDX2_SAR" };
+    final static String[] HEADER_PREFIX = { "TSX1", "TSX2", "TDX1", "TDX2" };
 
     final static String PRODUCT_DESCRIPTION_PREFIX = "TerraSarX product ";
 

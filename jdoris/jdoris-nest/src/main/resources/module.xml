@@ -46,7 +46,7 @@
         </action -->
 
         <action>
-            <id>products</id>
+            <id>insar_products</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Products</text>
             <placeBefore>insar_tools</placeBefore>
@@ -57,7 +57,7 @@
             <id>insar_tools</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Tools</text>
-             <placeAfter>Products</placeAfter>
+            <placeAfter>insar_products</placeAfter>
             <separatorAfter>true</separatorAfter>
             <parent>insar</parent>
         </action>
@@ -81,36 +81,36 @@
         <action>
             <id>InterferogramOp</id>
             <class>org.jdoris.nest.dat.InterferogramAction</class>
-            <text>Interferogram Formation...</text>
+            <text>Interferogram Formation</text>
             <shortDescr>Interferograms from stack with optional subtraction of 'flat earth' phase</shortDescr>
             <placeBefore>SubtRefDemOp</placeBefore>
-            <parent>products</parent>
+            <parent>insar_products</parent>
         </action>
 
         <action>
             <id>SubtRefDemOp</id>
             <class>org.jdoris.nest.dat.SubtRefDemAction</class>
-            <text>Topo Phase Removal...</text>
+            <text>Topo Phase Removal</text>
             <shortDescr>Compute and subtract topographic phase</shortDescr>
             <placeBefore>CoherenceOp</placeBefore>
-            <parent>products</parent>
+            <parent>insar_products</parent>
         </action>
 
         <action>
             <id>CoherenceOp</id>
             <class>org.jdoris.nest.dat.CoherenceAction</class>
-            <text>Coherence Estimation...</text>
+            <text>Coherence Estimation</text>
             <shortDescr>Estimate coherence of stack of images</shortDescr>
-            <parent>products</parent>
+            <parent>insar_products</parent>
         </action>
 
         <action>
             <id>PhaseFilterOp</id>
             <class>org.jdoris.nest.dat.PhaseFilterAction</class>
-            <text>Phase Filtering...</text>
+            <text>Phase Filtering</text>
             <shortDescr>Phase filter stack of interferograms</shortDescr>
             <!--<placeAfter>CoherenceOp</placeAfter>-->
-            <parent>products</parent>
+            <parent>insar_products</parent>
         </action>
 
         <!--/// FILTERING ///-->
@@ -118,7 +118,7 @@
         <action>
             <id>RangeFilterOp</id>
             <class>org.jdoris.nest.dat.RangeFilterAction</class>
-            <text>Range Filtering...</text>
+            <text>Range Filtering</text>
             <shortDescr>Filter stack of SAR images in RANGE direction</shortDescr>
             <placeBefore>org.jdoris.nest.dat.AzimuthFilterAction</placeBefore>
             <parent>spectral_filtering</parent>
@@ -127,7 +127,7 @@
         <action>
             <id>AzimuthFilterOp</id>
             <class>org.jdoris.nest.dat.AzimuthFilterAction</class>
-            <text>Azimuth Filtering...</text>
+            <text>Azimuth Filtering</text>
             <shortDescr>Filter stack of SAR images in AZIMUTH direction</shortDescr>
             <parent>spectral_filtering</parent>
         </action>

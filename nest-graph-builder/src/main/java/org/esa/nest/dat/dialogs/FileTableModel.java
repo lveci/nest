@@ -18,7 +18,7 @@ public interface FileTableModel extends TableModel {
 
     public void removeFile(final int index);
 
-    public List<File> getFileList();
+    public File[] getFileList();
 
     public void clear();
 

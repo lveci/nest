@@ -88,18 +88,26 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
             header.seekToEnd();
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of facility data records"); ++i) {
-            header = new CeosRecordHeader(reader);
-            int facilityRecordNum = 17;
-            int level = getProductLevel();
-            if(level != AlosPalsarConstants.LEVEL1_0 && level != AlosPalsarConstants.LEVEL1_1)
-                facilityRecordNum = 18;
-            while(header.getRecordNum() < facilityRecordNum) {
-                header.seekToEnd();
+            try {
                 header = new CeosRecordHeader(reader);
-            }
+                int level = getProductLevel();
+                if(level == AlosPalsarConstants.LEVEL1_0 || level == AlosPalsarConstants.LEVEL1_1) {
+                    int facilityRecordNum = 17;
 
-            _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
-            header.seekToEnd();
+                    while(header.getRecordNum() < facilityRecordNum) {
+                        header.seekToEnd();
+                        header = new CeosRecordHeader(reader);
+                    }
+
+                    _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
+                    header.seekToEnd();
+                } else {
+                    _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
+                    header.seekToEnd();
+                }
+            } catch(Exception e) {
+                System.out.println("Unable to read ALOS facility record: "+e.getMessage());
+            }
         }
         reader.close();
     }

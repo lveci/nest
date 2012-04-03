@@ -60,8 +60,6 @@ public class EnviProductWriter extends AbstractProductWriter {
         ensureNamingConvention();
         getSourceProduct().setProductWriter(this);
         deleteRemovedNodes();
-
-        writeConfigFile(getSourceProduct(), _outputDir);
     }
 
     /**
@@ -250,7 +248,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         return new File(_outputDir, createImageFilename(band));
     }
 
-    private static String createImageFilename(Band band) {
+    protected String createImageFilename(Band band) {
         return band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
     }
 
@@ -353,53 +351,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void writeConfigFile(final Product srcProduct, final File folder) {
-        PrintStream p = null;
-        try {
-            final File file = new File(folder, "config.txt");
-            final FileOutputStream out = new FileOutputStream(file);
-            p = new PrintStream(out);
-
-            p.println("Nrow");
-            p.println(srcProduct.getSceneRasterHeight());
-            p.println("---------");
-
-            p.println("Ncol");
-            p.println(srcProduct.getSceneRasterWidth());
-            p.println("---------");
-
-            p.println("PolarCase");
-            p.println("monostatic");
-            p.println("---------");
-
-            p.println("PolarType");
-            p.println(getPolarType(srcProduct.getMetadataRoot()));
-            p.println("---------");
-
-        } catch(Exception e) {
-            System.out.println("EnviWriter unable to write config.txt "+e.getMessage());
-        } finally {
-            if(p != null)
-                p.close();
-        }
-    }
-
-    private static String getPolarType(final MetadataElement root) {
-        if(root != null) {
-            final MetadataElement absRoot = root.getElement("Abstracted_Metadata");
-            if(absRoot != null) {
-                final String pol1 = absRoot.getAttributeString("mds1_tx_rx_polar", "").trim();
-                final String pol2 = absRoot.getAttributeString("mds2_tx_rx_polar", "").trim();
-                final String pol3 = absRoot.getAttributeString("mds3_tx_rx_polar", "").trim();
-                final String pol4 = absRoot.getAttributeString("mds4_tx_rx_polar", "").trim();
-                if(!pol1.isEmpty() && !pol2.isEmpty()) {
-                    if(!pol3.isEmpty() && !pol4.isEmpty()) {
-                        return "full";
-                    }
-                    return "dual";
-                }
-            }
-        }
-        return "single";
+    protected File getOutputDir() {
+        return _outputDir;
     }
 }

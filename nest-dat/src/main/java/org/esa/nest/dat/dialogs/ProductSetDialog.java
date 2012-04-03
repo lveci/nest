@@ -34,8 +34,7 @@ import java.util.List;
  */
 public class ProductSetDialog extends ModelessDialog {
 
-    private final FileTableModel fileModel = new FileModel();
-    private final JTable productSetTable = new JTable(fileModel);
+    private final FileTable productSetTable = new FileTable();
     private final JTextField nameField;
     private final ProductSet productSet;
 
@@ -45,12 +44,9 @@ public class ProductSetDialog extends ModelessDialog {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
         productSet = prodSet;
 
-        final List<File> fileList = productSet.getFileList();
-        for(File file : fileList) {
-            fileModel.addFile(file);
-        }
+        productSetTable.setFiles(productSet.getFileList());
 
-        final JComponent content =  ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
+        final JComponent content =  ProductSetPanel.createComponent(productSetTable, true);
 
         final JPanel topPanel = new JPanel(new BorderLayout(4, 4));
         final JLabel nameLabel = new JLabel("Name:");
@@ -66,7 +62,7 @@ public class ProductSetDialog extends ModelessDialog {
     @Override
     protected void onOK() {
         productSet.setName(nameField.getText());
-        productSet.setFileList(fileModel.getFileList());
+        productSet.setFileList(productSetTable.getFileList());
         productSet.Save();
         
         ok = true;

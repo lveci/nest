@@ -24,6 +24,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.DateFormat;
 
 /**
  * Created by IntelliJ IDEA.
@@ -172,6 +173,8 @@ public final class AbstractMetadata {
     public static final String azimuth_bandwidth = "azimuth_bandwidth";
 
     public static final String abstracted_metadata_version = "metadata_version";
+
+    public static final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -406,9 +409,9 @@ public final class AbstractMetadata {
         }
     }
 
-    public static ProductData.UTC parseUTC(final String timeStr, final String format) {
+    public static ProductData.UTC parseUTC(final String timeStr, final DateFormat format) {
         try {
-            final int dotPos = timeStr.lastIndexOf(".");
+            final int dotPos = timeStr.lastIndexOf('.');
             if (dotPos > 0) {
                 final String newTimeStr = timeStr.substring(0, Math.min(dotPos+6, timeStr.length()));
                 return ProductData.UTC.parse(newTimeStr, format);
@@ -458,7 +461,10 @@ public final class AbstractMetadata {
     public static void saveExternalMetadata(final Product product, final MetadataElement absRoot, final File productFile) {
          // load metadata xml file if found
         final String inputStr = productFile.getAbsolutePath();
-        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
+        int dotPos = inputStr.lastIndexOf('.');
+        if(dotPos < 0)
+            dotPos = inputStr.length();
+        final String metadataStr = inputStr.substring(0, dotPos) + ".xml";
         final File metadataFile = new File(metadataStr);
         AbstractMetadataIO.Save(product, absRoot, metadataFile);
     }

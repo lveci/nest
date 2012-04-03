@@ -68,7 +68,6 @@ public class BatchGraphDialog extends ModelessDialog {
     private ProgressBarProgressMonitor progBarMonitor = null;
 
     private Map<File, File[]> slaveFileMap = null;
-    private final Map<File, File> targetFileMap = new HashMap<File, File>();
     private final List<BatchProcessListener> listenerList = new ArrayList<BatchProcessListener>(1);
     private final boolean closeOnDone;
 
@@ -139,7 +138,6 @@ public class BatchGraphDialog extends ModelessDialog {
 
     @Override
     public void hide() {
-        productSetPanel.releaseProducts();
         if(progBarMonitor != null)
             progBarMonitor.setCanceled(true);
         notifyMSG(BatchProcessListener.BatchMSG.CLOSE);
@@ -182,7 +180,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private void notifyMSG(final BatchProcessListener.BatchMSG msg) {
         for (final BatchProcessListener listener : listenerList) {
-            listener.notifyMSG(msg, targetFileMap);
+            listener.notifyMSG(msg, productSetPanel.getFileList(), getAllBatchProcessedTargetProducts());
         }
     }
 
@@ -393,7 +391,6 @@ public class BatchGraphDialog extends ModelessDialog {
     void assignParameters(final boolean oneOnly) {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
-        targetFileMap.clear();
         for(File f : fileList) {
             String name;
             final Object o = productSetPanel.getValueAt(graphIndex, 0);
@@ -403,7 +400,6 @@ public class BatchGraphDialog extends ModelessDialog {
                 name = FileUtils.getFilenameWithoutExtension(f);
 
             final File targetFile = new File(productSetPanel.getTargetFolder(), name);
-            targetFileMap.put(f, targetFile);
 
             setIO(graphExecuterList.get(graphIndex),
                 "Read", f,
@@ -499,9 +495,12 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    public List<File> getBatchProcessedTargetProducts() {
-        final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
-        return graphEx.getProductsToOpenInDAT();
+    public File[] getAllBatchProcessedTargetProducts() {
+        final List<File> targetFileList = new ArrayList<File>();
+        for(GraphExecuter graphEx : graphExecuterList) {
+            targetFileList.addAll(graphEx.getProductsToOpenInDAT());
+        }
+        return targetFileList.toArray(new File[targetFileList.size()]);
     }
 
     void cleanUpTempFiles() {
@@ -597,11 +596,12 @@ public class BatchGraphDialog extends ModelessDialog {
                 //}
             }
             if(!errMsgs.isEmpty()) {
-                String msg = "The following errors occurred:\n";
+                final StringBuilder msg = new StringBuilder("The following errors occurred:\n");
                 for(String errStr : errMsgs) {
-                    msg += errStr +"\n";    
+                    msg.append(errStr);
+                    msg.append('\n');
                 }
-                showErrorDialog(msg);
+                showErrorDialog(msg.toString());
             }
             cleanUpTempFiles();
             notifyMSG(BatchProcessListener.BatchMSG.DONE);
@@ -615,7 +615,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
         public enum BatchMSG { DONE, UPDATE, CLOSE }
 
-        public void notifyMSG(final BatchMSG msg, final Map<File, File> targetFileMap);
+        public void notifyMSG(final BatchMSG msg, final File[] inputFileList, final File[] targetFileList);
         public void notifyMSG(final BatchMSG msg, final String text);
     }
 

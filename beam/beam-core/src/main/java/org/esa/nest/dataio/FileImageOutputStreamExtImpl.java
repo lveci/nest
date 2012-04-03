@@ -48,12 +48,11 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      * A constructor which accepts a File as input.
      * 
      * @param file eraf
-     * 
-     * @throws FileNotFoundException
+     *
      * @throws IOException
      */
     public FileImageOutputStreamExtImpl(File file)
-            throws FileNotFoundException, IOException {
+            throws IOException {
         this.file = file;
         eraf = new EnhancedRandomAccessFile(file, "rw");
         // NOTE: this must be done accordingly to what ImageInputStreamImpl
@@ -67,12 +66,11 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      * 
      * @param file eraf
      * @param bufSize
-     * 
-     * @throws FileNotFoundException
+     *
      * @throws IOException
      */
     public FileImageOutputStreamExtImpl(File file, int bufSize)
-            throws FileNotFoundException, IOException {
+            throws IOException {
         this.file = file;
         eraf = new EnhancedRandomAccessFile(file, "rw", bufSize);
         // NOTE: this must be done accordingly to what ImageInputStreamImpl

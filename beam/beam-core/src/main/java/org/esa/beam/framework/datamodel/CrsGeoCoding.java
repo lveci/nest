@@ -222,6 +222,7 @@ public class CrsGeoCoding extends AbstractGeoCoding {
             DirectPosition directPixelPos = new DirectPosition2D(pixelPos);
             DirectPosition directGeoPos = imageToGeo.transform(directPixelPos, null);
             geoPos.setLocation((float) directGeoPos.getOrdinate(1), (float) directGeoPos.getOrdinate(0));
+            //geoPos.normalize();
         } catch (Exception ignored) {
             geoPos.setInvalid();
         }

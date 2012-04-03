@@ -137,19 +137,19 @@ public class GeoTiffProductReader extends AbstractProductReader {
             final int dataBufferType = dataBuffer.getDataType();
             if(dataBufferType == DataBuffer.TYPE_FLOAT &&
                destBuffer.getElems() instanceof float[]) {
-                final float[] dArray = new float[destSize];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
-                System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+                //final float[] dArray = new float[destSize];
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (float[])destBuffer.getElems(), dataBuffer);
+                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else if(dataBufferType == DataBuffer.TYPE_INT &&
                destBuffer.getElems() instanceof int[]) {
-                final int[] dArray = new int[destSize];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
-                System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+                //final int[] dArray = new int[destSize];
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (int[])destBuffer.getElems(), dataBuffer);
+                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
              } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
                 destBuffer.getElems() instanceof int[]) {
-                final int[] dArray = new int[destSize];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, dArray, dataBuffer);
-                System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+                //final int[] dArray = new int[destSize];
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (int[])destBuffer.getElems(), dataBuffer);
+                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else {
 
                 final double[] dArray = new double[destSize];

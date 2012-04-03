@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.text.DateFormat;
 
 /**
  * Calibration for TerraSAR-X data products.
@@ -49,7 +50,6 @@ public class TerraSARXCalibrator implements Calibrator {
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private int sourceImageWidth = 0;
-    private int sourceImageHeight = 0;
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid slantRangeTime = null;
     private String incidenceAngleSelection = null;
@@ -59,9 +59,6 @@ public class TerraSARXCalibrator implements Calibrator {
     private final HashMap<String, double[][]> rangeLineNoise = new HashMap<String, double[][]>(2);
 
     private static final double underFlowFloat = 1.0e-30;
-    private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
-    private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
-    
 
     /**
      * Default constructor. The graph processing framework
@@ -208,7 +205,7 @@ public class TerraSARXCalibrator implements Calibrator {
             NoiseRecord[] record = new NoiseRecord[numOfNoiseRecords];
             for (int i = 0; i < numOfNoiseRecords; ++i) {
                 record[i] = new NoiseRecord();
-                record[i].timeUTC = ReaderUtils.getTime(imageNoiseElem[i], "timeUTC", timeFormat).getMJD();
+                record[i].timeUTC = ReaderUtils.getTime(imageNoiseElem[i], "timeUTC", AbstractMetadata.dateFormat).getMJD();
                 record[i].noiseEstimateConfidence = Double.parseDouble(imageNoiseElem[i].getAttributeString("noiseEstimateConfidence"));
 
                 final MetadataElement noiseEstimate = imageNoiseElem[i].getElement("noiseEstimate");

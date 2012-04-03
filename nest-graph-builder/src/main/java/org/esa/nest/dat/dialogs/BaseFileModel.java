@@ -32,8 +32,8 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
 
         protected abstract TableData createFileStats(final ProductEntry entry);
 
-        public List<File> getFileList() {
-            return fileList;
+        public File[] getFileList() {
+            return fileList.toArray(new File[fileList.size()]);
         }
 
         private static ProductEntry getProductEntry(final File file) {

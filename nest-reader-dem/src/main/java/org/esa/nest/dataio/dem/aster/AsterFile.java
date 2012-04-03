@@ -33,12 +33,12 @@ import java.util.zip.ZipFile;
 public final class AsterFile {
 
     private final AsterElevationModel demModel;
-    private final File localFile;
+    private File localFile;
     private final ProductReader productReader;
     private boolean localFileExists = false;
     private boolean errorInLocalFile = false;
     private AsterElevationTile tile = null;
-    private final boolean unrecoverableError = false;
+    private final static boolean unrecoverableError = false;
     private final static File appTmpDir = ResourceUtils.getApplicationUserTempDataDir();
 
     public AsterFile(AsterElevationModel model, File localFile, ProductReader reader) {
@@ -73,6 +73,28 @@ public final class AsterFile {
             if(!localFileExists && !errorInLocalFile) {
                 if (localFile.exists() && localFile.isFile() && localFile.length() > 0) {
                     localFileExists = true;
+                } else {
+                    final String name = FileUtils.getFilenameWithoutExtension(localFile.getName());
+                    // check for version 2
+                    final String v2Name = name.replace("ASTGTM", "ASTGTM2");
+                    final File v2File = new File(localFile.getParentFile(), v2Name+".zip");
+                    if(v2File.exists()) {
+                        localFile = v2File;
+                        localFileExists = true;
+                    } else {
+                        // check if unzipped
+                        final File unzipFile = new File(localFile.getParentFile(), name+"_dem.tif");
+                        if(unzipFile.exists()) {
+                            localFile = unzipFile;
+                            localFileExists = true;
+                        } else {
+                            final File v2UnzipFile = new File(localFile.getParentFile(), v2Name+"_dem.tif");
+                            if(v2UnzipFile.exists()) {
+                                localFile = v2UnzipFile;
+                                localFileExists = true;
+                            }
+                        }
+                    }
                 }
             }
             if(localFileExists) {

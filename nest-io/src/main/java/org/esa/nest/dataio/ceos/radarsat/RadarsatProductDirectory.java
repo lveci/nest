@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.DateFormat;
 
 /**
  * This class represents a product directory.
@@ -567,6 +568,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
         final int numSRGRCoefSets = detailedProcRec.getAttributeInt("Number of SRGR coefficient sets");
+        final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyy-DDD-HH:mm:ss");
 
         for(int i=1; i <= numSRGRCoefSets; ++i) {
 
@@ -574,7 +576,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             srgrCoefficientsElem.addElement(srgrListElem);
 
             final String updateTimeStr = detailedProcRec.getAttributeString("SRGR update date/time "+i);
-            final ProductData.UTC utcTime = AbstractMetadata.parseUTC(updateTimeStr, "yyyy-DDD-HH:mm:ss");
+            final ProductData.UTC utcTime = AbstractMetadata.parseUTC(updateTimeStr, dateFormat);
             srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
             AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
                     ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");

@@ -9,8 +9,6 @@ if [ -z "$NEST_HOME" ]; then
     exit 2
 fi
 
-chmod 755 $NEST_HOME/jre/bin/*
-
 $NEST_HOME/jre/bin/java \
     -server -Xms512M -Xmx1024M -Xverify:none \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000 \

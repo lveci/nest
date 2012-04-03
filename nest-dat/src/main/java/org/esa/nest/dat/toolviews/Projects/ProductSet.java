@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Defines a list of Products
@@ -46,12 +47,13 @@ public final class ProductSet {
         setName(path.getName());
     }
 
-    public List<File> getFileList() {
-        return fileList;
+    public File[] getFileList() {
+        return fileList.toArray(new File[fileList.size()]);
     }
 
-    public void setFileList(final List<File> inFileList) {
-        fileList = inFileList;
+    public void setFileList(final File[] inFileList) {
+        fileList.clear();
+        fileList.addAll(Arrays.asList(inFileList));
     }
 
     public File getFile() {
@@ -145,7 +147,7 @@ public final class ProductSet {
         prodSet.Load(productSetFile);
 
         final StringBuilder listStr = new StringBuilder(256);
-        final List<File> fileList = prodSet.getFileList();
+        final File[] fileList = prodSet.getFileList();
         for(File file : fileList) {
             listStr.append(file.getAbsolutePath());
             listStr.append('\n');

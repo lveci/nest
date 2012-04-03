@@ -267,13 +267,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 getElevationModel();
             }
 
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
+
             createTargetProduct();
 
             processedSlaveBand = absRoot.getAttributeString("processed_slave");
 
             computeSensorPositionsAndVelocities();
-
-            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -459,25 +459,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private CoordinateReferenceSystem getCRS() throws Exception {
-        try {
-            if(mapProjection == null || mapProjection.isEmpty())
-                mapProjection = "WGS84(DD)";
-            return CRS.parseWKT(mapProjection);
-        } catch (Exception e) {
-            return CRS.decode(mapProjection, true);
-        }
-    }
-
     /**
      * Create target product.
      * @throws OperatorException The exception.
      */
     private void createTargetProduct() throws Exception {
 
-        targetCRS = getCRS();
-
-        final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
         if (pixelSpacingInMeter <= 0.0) {
             pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
                                            RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
@@ -485,45 +472,35 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
         delLat = pixelSpacingInDegree;
         delLon = pixelSpacingInDegree;
-        double pixelSizeX;
-        double pixelSizeY;
-        if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
-            pixelSizeX = pixelSpacingInDegree;
-            pixelSizeY = pixelSpacingInDegree;
-        } else {
-            pixelSizeX = pixelSpacingInMeter;
-            pixelSizeY = pixelSpacingInMeter;
-        }
 
-        final Rectangle2D bounds = new Rectangle2D.Double();
-        bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
-        final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
-        final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
-        final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
-        final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
-        final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
-                width,
-                height,
-                targetEnvelope.getMinimum(0),
-                targetEnvelope.getMaximum(1),
-                pixelSizeX, pixelSizeY);
+        final CRSGeoCodingHandler crsHandler = new CRSGeoCodingHandler(sourceProduct, mapProjection,
+                pixelSpacingInDegree, pixelSpacingInMeter);
+
+        targetCRS = crsHandler.getTargetCRS();
 
         targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                sourceProduct.getProductType(), width, height);
-        targetProduct.setGeoCoding(geoCoding);
+                sourceProduct.getProductType(), crsHandler.getTargetWidth(), crsHandler.getTargetHeight());
+        targetProduct.setGeoCoding(crsHandler.getCrsGeoCoding());
 
         targetImageWidth = targetProduct.getSceneRasterWidth();
         targetImageHeight = targetProduct.getSceneRasterHeight();
-
-        for (Band band : targetProduct.getBands()) {
-            targetProduct.removeBand(band);
-        }
 
         addSelectedBands();
 
         targetGeoCoding = targetProduct.getGeoCoding();
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyMasks(sourceProduct, targetProduct);
+        ProductUtils.copyVectorData(sourceProduct, targetProduct);
+        targetProduct.setDescription(sourceProduct.getDescription());
+
+        try {
+            OperatorUtils.copyIndexCodings(sourceProduct, targetProduct);
+        } catch(Exception e) {
+            if(!imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
+                throw new OperatorException("Use Nearest Neighbour with Classificaitons: "+e.getMessage());
+            }
+        }
 
         addLayoverShadowBitmasks(targetProduct);
     }
@@ -589,7 +566,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     targetBandName = "Sigma0";
                 }
 
-                if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand) != null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                     targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
                     if (usePreCalibrationOp) {
@@ -602,7 +579,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if (saveSelectedSourceBand) {
                 targetBandName = bandName;
-                if (addTargetBand(targetBandName, unit, srcBand)) {
+                int dataType = ProductData.TYPE_FLOAT32;
+                // use original dataType for nearest neighbour and indexCoding bands
+                if(imgResampling.equals(Resampling.NEAREST_NEIGHBOUR))
+                    dataType = srcBand.getDataType();
+                if (RangeDopplerGeocodingOp.addTargetBand(targetProduct, targetImageWidth, targetImageHeight,
+                                                          targetBandName, unit, srcBand, dataType) != null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                     targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
@@ -648,26 +630,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private boolean addTargetBand(String bandName, String bandUnit, Band sourceBand) {
+    private Band addTargetBand(final String bandName, final String bandUnit, final Band sourceBand) {
 
-        if(targetProduct.getBand(bandName) == null) {
-
-            final Band targetBand = new Band(bandName,
-                                             ProductData.TYPE_FLOAT32,
-                                             targetImageWidth,
-                                             targetImageHeight);
-
-            targetBand.setUnit(bandUnit);
-            if (sourceBand != null) {
-                targetBand.setDescription(sourceBand.getDescription());
-                targetBand.setNoDataValue(sourceBand.getNoDataValue());
-            }
-            targetBand.setNoDataValueUsed(true);
-            targetProduct.addBand(targetBand);
-            return true;
-        }
-
-        return false;
+        return RangeDopplerGeocodingOp.addTargetBand(targetProduct, targetImageWidth, targetImageHeight,
+                                    bandName, bandUnit, sourceBand, ProductData.TYPE_FLOAT32);
     }
 
     /**

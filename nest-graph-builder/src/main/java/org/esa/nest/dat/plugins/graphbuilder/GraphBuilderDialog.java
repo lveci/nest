@@ -33,7 +33,6 @@ import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.MemUtils;
 import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.util.Settings;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -57,7 +56,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon clearIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
     private static final ImageIcon helpIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
     private static final ImageIcon infoIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/info22.png");
-    public final static String LAST_GRAPH_PATH = "graphbuilder.last_graph_path";
 
     private final AppContext appContext;
     private GraphPanel graphPanel = null;
@@ -311,12 +309,12 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        final String graphPath = Settings.getPref(LAST_GRAPH_PATH, ResourceUtils.getGraphFolder("").getAbsolutePath());
-        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", graphPath, "Graph", false);
+        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", null, "Graph", false,
+                                                    GraphExecuter.LAST_GRAPH_PATH,
+                                                    ResourceUtils.getGraphFolder("").getAbsolutePath());
         if(file == null) return;
 
         LoadGraph(file);
-        Settings.setPref(LAST_GRAPH_PATH, file.getAbsolutePath());
 
         if(allowGraphBuilding)
             this.setTitle("Graph Builder : "+file.getName());
@@ -400,6 +398,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         }
     }
 
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
     /**
      * lets all operatorUIs validate their parameters
      * If parameter validation fails then a list of the failures is presented to the user
@@ -451,9 +453,15 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         listenerList.remove(listener);
     }
 
-    private void notifyMSG(final ProcessingListener.MSG msg) {
+    private void notifyMSG(final ProcessingListener.MSG msg, final String text) {
         for (final ProcessingListener listener : listenerList) {
-            listener.notifyMSG(msg, "");
+            listener.notifyMSG(msg, text);
+        }
+    }
+
+    private void notifyMSG(final ProcessingListener.MSG msg, final File[] fileList) {
+        for (final ProcessingListener listener : listenerList) {
+            listener.notifyMSG(msg, fileList);
         }
     }
 
@@ -542,18 +550,20 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 } else {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
-                notifyMSG(ProcessingListener.MSG.DONE);
+                final List<File> fileList = graphEx.getProductsToOpenInDAT();
+                notifyMSG(ProcessingListener.MSG.DONE, fileList.toArray(new File[fileList.size()]));
             }
 
             if(!errorOccured) {
-                openTargetProducts(graphEx.getProductsToOpenInDAT());
+                final List<File> fileList = graphEx.getProductsToOpenInDAT();
+                openTargetProducts(fileList.toArray(new File[fileList.size()]));
             }
         }
 
     }
 
-    private void openTargetProducts(final List<File> fileList) {
-        if(!fileList.isEmpty()) {
+    private void openTargetProducts(final File[] fileList) {
+        if(fileList.length != 0) {
             for(File file : fileList) {
                 try {
 
@@ -580,6 +590,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         public enum MSG { DONE, UPDATE }
 
+        public void notifyMSG(final MSG msg, final File[] fileList);
         public void notifyMSG(final MSG msg, final String text);
     }
 }

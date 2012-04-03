@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.DateFormat;
 
 /**
  * This class represents a product directory.
@@ -58,6 +59,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private int _sceneHeight = 0;
 
     private final transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
+    public static final DateFormat dateFormat1 = ProductData.UTC.createDateFormat("yyyyMMddHHmmssSSS");
+    public static final DateFormat dateFormat2 = ProductData.UTC.createDateFormat("yyyyMMdd HH:mm:ss");
 
     public AlosPalsarProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
@@ -537,7 +540,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     for(MetadataAttribute sum : summaryElem.getAttributes()) {
                         if(sum.getName().contains(tagInSummary)) {
                             return AbstractMetadata.parseUTC(summaryElem.getAttributeString(sum.getName().trim()),
-                                    "yyyyMMdd HH:mm:ss");
+                                    dateFormat2);
                         }
                     }
                 }
@@ -547,7 +550,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     for(MetadataAttribute workRep : workReportElem.getAttributes()) {
                         if(workRep.getName().contains(tagInWorkReport)) {
                             return AbstractMetadata.parseUTC(workReportElem.getAttributeString(workRep.getName().trim()),
-                                    "yyyyMMdd HH:mm:ss");
+                                    dateFormat2);
                         }
                     }
                 }
@@ -567,7 +570,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
-                return AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
+                return AbstractMetadata.parseUTC(centreTimeStr.trim(), dateFormat1);
             } catch(Exception e) {
                 time = new ProductData.UTC(0);
             }
@@ -586,7 +589,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     for(MetadataAttribute sum : summaryElem.getAttributes()) {
                         if(sum.getName().contains(tagInSummary)) {
                             return AbstractMetadata.parseUTC(summaryElem.getAttributeString(sum.getName().trim()),
-                                    "yyyyMMdd HH:mm:ss");
+                                    dateFormat2);
                         }
                     }
                 }
@@ -596,8 +599,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     for(MetadataAttribute workRep : workReportElem.getAttributes()) {
                         if(workRep.getName().contains(tagInWorkReport)) {
                             final ProductData.UTC centreTime = AbstractMetadata.parseUTC(
-                                    workReportElem.getAttributeString(workRep.getName().trim()),
-                                    "yyyyMMdd HH:mm:ss");
+                                    workReportElem.getAttributeString(workRep.getName().trim()), dateFormat2);
                             final double diff = centreTime.getMJD() - startTime.getMJD();
                             return new ProductData.UTC(startTime.getMJD() + (diff *2.0));
                         }
@@ -622,7 +624,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
                 
                 final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
-                final ProductData.UTC centreTime =  AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
+                final ProductData.UTC centreTime =  AbstractMetadata.parseUTC(centreTimeStr.trim(), dateFormat1);
                 final double diff = centreTime.getMJD() - startTime.getMJD();
                 return new ProductData.UTC(startTime.getMJD() + (diff *2.0));
             } catch(Exception e) {

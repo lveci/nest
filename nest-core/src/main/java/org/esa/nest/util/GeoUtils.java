@@ -145,8 +145,8 @@ public final class GeoUtils
             geoPos.lon -= 180.0;
         }
 
-        geoPos.lat = (float)(FastMath.atan((z + ep2*b*Math.pow(Math.sin(theta), 3)) /
-                                       (s - e2*a*Math.pow(Math.cos(theta), 3))) *
+        geoPos.lat = (float)(FastMath.atan((z + ep2*b*FastMath.pow(FastMath.sin(theta), 3)) /
+                                       (s - e2*a*FastMath.pow(FastMath.cos(theta), 3))) *
                                        org.esa.beam.util.math.MathUtils.RTOD);
     }
 
@@ -177,6 +177,7 @@ public final class GeoUtils
         J.set(0, 1, data.yVel);
         J.set(0, 2, data.zVel);
 
+        final double time2 = FastMath.pow(time*Constants.halfLightSpeed, 2.0);
         for (int i = 0; i < maxIter; i++) {
 
             final double x = X.get(0,0);
@@ -188,7 +189,7 @@ public final class GeoUtils
             final double dz = z - data.zPos;
 
             F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
-            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
+            F.set(1, 0, dx*dx + dy*dy + dz*dz - time2);
             F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
 
             J.set(1, 0, 2.0*dx);
@@ -200,7 +201,7 @@ public final class GeoUtils
 
             X = X.minus(J.inverse().times(F));
 
-            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
+            if (FastMath.abs(F.get(0,0)) <= del && FastMath.abs(F.get(1,0)) <= del && FastMath.abs(F.get(2,0)) <= del)  {
                 break;
             }
         }

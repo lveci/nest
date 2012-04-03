@@ -27,8 +27,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.gpf.ProductSetReaderOp;
 import org.esa.nest.gpf.GPFProcessor;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
@@ -39,6 +41,8 @@ import java.util.*;
 
 public class GraphExecuter extends Observable {
 
+    public final static String LAST_GRAPH_PATH = "graphbuilder.last_graph_path";
+    
     private final GPF gpf;
     private Graph graph;
     private GraphContext graphContext = null;
@@ -47,7 +51,7 @@ public class GraphExecuter extends Observable {
     private File lastLoadedGraphFile = null;
 
     private int idCount = 0;
-    private final List<GraphNode> nodeList = new ArrayList<GraphNode>();
+    private final List<GraphNode> nodeList = new ArrayList<GraphNode>(10);
 
     public enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
 
@@ -287,7 +291,8 @@ public class GraphExecuter extends Observable {
         String filename = "myGraph";
         if(lastLoadedGraphFile != null)
             filename = lastLoadedGraphFile.getAbsolutePath();
-        final File filePath = ResourceUtils.GetFilePath("Save Graph", "XML", "xml", filename, "Graph", true);
+        final File filePath = ResourceUtils.GetFilePath("Save Graph", "XML", "xml", filename, "Graph", true,
+                LAST_GRAPH_PATH, ResourceUtils.getGraphFolder("").getAbsolutePath());
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
     }
@@ -303,8 +308,8 @@ public class GraphExecuter extends Observable {
             } finally {
                 fileWriter.close();
             }
-        } catch(IOException e) {
-            throw new GraphException("Unable to write graph to " + filePath);
+        } catch(Exception e) {
+            throw new GraphException("Unable to write graph to " + filePath +'\n'+ e.getMessage());
         }
     }
 
@@ -462,8 +467,24 @@ public class GraphExecuter extends Observable {
                 final String filePath = fileParam.getValue();
                 if(filePath != null && !filePath.isEmpty()) {
                     final File file = new File(filePath);
-                    if(file.exists())
+                    if(file.exists()) {
                         fileList.add(file);
+                    } else {
+                        final DomElement formatParam = config.getChild("formatName");
+                        final String format = formatParam.getValue();
+
+                        final String ext = ReaderUtils.findExtensionForFormat(format);
+                       
+                        File newFile = new File(file.getAbsolutePath()+ext);
+                        if(newFile.exists()) {
+                            fileList.add(newFile);
+                        } else {
+                            final String name = FileUtils.getFilenameWithoutExtension(file);
+                            newFile = new File(name+ext);
+                            if(newFile.exists())
+                                fileList.add(newFile);
+                        }
+                    }
                 }
             }
         }

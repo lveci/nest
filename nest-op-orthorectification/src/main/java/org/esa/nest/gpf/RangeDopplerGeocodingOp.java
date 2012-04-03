@@ -269,11 +269,11 @@ public class RangeDopplerGeocodingOp extends Operator {
                 saveProjectedLocalIncidenceAngle = false;
             }
 
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
+            
             createTargetProduct();
 
             computeSensorPositionsAndVelocities();
-
-            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -577,54 +577,42 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private void createTargetProduct() {
         try {
-            targetCRS = MapProjectionHandler.getCRS(mapProjection);
-
-            final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
             if (pixelSpacingInMeter <= 0.0) {
                 pixelSpacingInMeter = Math.max(getAzimuthPixelSpacing(sourceProduct), getRangePixelSpacing(sourceProduct));
                 pixelSpacingInDegree = getPixelSpacingInDegree(pixelSpacingInMeter);
             }
             delLat = pixelSpacingInDegree;
             delLon = pixelSpacingInDegree;
-            double pixelSizeX;
-            double pixelSizeY;
-            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
-                pixelSizeX = pixelSpacingInDegree;
-                pixelSizeY = pixelSpacingInDegree;
-            } else {
-                pixelSizeX = pixelSpacingInMeter;
-                pixelSizeY = pixelSpacingInMeter;
-            }
 
-            final Rectangle2D bounds = new Rectangle2D.Double();
-            bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
-            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
-            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
-            final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
-            final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
-            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
-                                                            width,
-                                                            height,
-                                                            targetEnvelope.getMinimum(0),
-                                                            targetEnvelope.getMaximum(1),
-                                                            pixelSizeX, pixelSizeY);
+            final CRSGeoCodingHandler crsHandler = new CRSGeoCodingHandler(sourceProduct, mapProjection,
+                    pixelSpacingInDegree, pixelSpacingInMeter);
+
+            targetCRS = crsHandler.getTargetCRS();
 
             targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                    sourceProduct.getProductType(), width, height);
-            targetProduct.setGeoCoding(geoCoding);
+                    sourceProduct.getProductType(), crsHandler.getTargetWidth(), crsHandler.getTargetHeight());
+            targetProduct.setGeoCoding(crsHandler.getCrsGeoCoding());
 
             targetImageWidth = targetProduct.getSceneRasterWidth();
             targetImageHeight = targetProduct.getSceneRasterHeight();
-
-            for (final Band band : targetProduct.getBands()) {
-                targetProduct.removeBand(band);
-            }
 
             addSelectedBands();
 
             targetGeoCoding = targetProduct.getGeoCoding();
 
             ProductUtils.copyMetadata(sourceProduct, targetProduct);
+            ProductUtils.copyMasks(sourceProduct, targetProduct);
+            ProductUtils.copyVectorData(sourceProduct, targetProduct);
+            targetProduct.setDescription(sourceProduct.getDescription());
+
+            try {
+                OperatorUtils.copyIndexCodings(sourceProduct, targetProduct);
+            } catch(Exception e) {
+                if(!imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
+                    throw new OperatorException("Use Nearest Neighbour with Classificaitons: "+e.getMessage());
+                }
+            }
+
         } catch (Exception e) {
             throw new OperatorException(e);
         }
@@ -730,7 +718,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                     if (pol != null && !pol.isEmpty() && !isPolsar && !srcBand.getName().toLowerCase().contains(pol)) {
                         targetBandName += '_' + pol.toUpperCase();
                     }
-                    if (addTargetBand(targetBandName, unit, srcBand) != null) {
+                    int dataType = ProductData.TYPE_FLOAT32;
+                    // use original dataType for nearest neighbour and indexCoding bands
+                    if(imgResampling.equals(Resampling.NEAREST_NEIGHBOUR))
+                        dataType = srcBand.getDataType();
+                    if (addTargetBand(targetProduct, targetImageWidth, targetImageHeight,
+                                      targetBandName, unit, srcBand, dataType) != null) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
                         targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
@@ -772,14 +765,18 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
-    private Band addTargetBand(String bandName, String bandUnit, Band sourceBand) {
+    private Band addTargetBand(final String bandName, final String bandUnit, final Band sourceBand) {
+        return addTargetBand(targetProduct, targetImageWidth, targetImageHeight,
+                bandName, bandUnit, sourceBand, ProductData.TYPE_FLOAT32);
+    }
+
+    public static Band addTargetBand(final Product targetProduct, final int targetImageWidth, final int targetImageHeight,
+                                     final String bandName, final String bandUnit, final Band sourceBand,
+                                     final int dataType) {
 
         if(targetProduct.getBand(bandName) == null) {
 
-            final Band targetBand = new Band(bandName,
-                                             ProductData.TYPE_FLOAT32,
-                                             targetImageWidth,
-                                             targetImageHeight);
+            final Band targetBand = new Band(bandName, dataType, targetImageWidth, targetImageHeight);
 
             targetBand.setUnit(bandUnit);
             if (sourceBand != null) {

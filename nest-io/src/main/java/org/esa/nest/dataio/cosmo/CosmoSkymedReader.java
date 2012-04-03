@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.DateFormat;
 
 /**
  * The product reader for CosmoSkymed products.
@@ -55,9 +56,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
     private boolean isComplex = false;
     private final ProductReaderPlugIn readerPlugIn;
 
-    private final Map<Band, Variable> bandMap = new HashMap<Band, Variable>();
-
-    private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
+    private final Map<Band, Variable> bandMap = new HashMap<Band, Variable>(10);
 
     /**
      * Constructs a new abstract product reader.
@@ -242,7 +241,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, globalElem.getAttributeString("Satellite Id", "CSK"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
-                ReaderUtils.getTime(globalElem, "Product Generation UTC", timeFormat));
+                ReaderUtils.getTime(globalElem, "Product Generation UTC", AbstractMetadata.dateFormat));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
                 globalElem.getAttributeString("Processing Centre", defStr));
@@ -363,10 +362,10 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
     }
 
-    private void addOrbitStateVectors(final MetadataElement absRoot, final MetadataElement globalElem) {
+    private static void addOrbitStateVectors(final MetadataElement absRoot, final MetadataElement globalElem) {
 
         final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
-        final ProductData.UTC referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat);
+        final ProductData.UTC referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", AbstractMetadata.dateFormat);
         final int numPoints = globalElem.getAttributeInt("Number of State Vectors");
 
         for (int i = 0; i < numPoints; i++) {
@@ -435,7 +434,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
         final MetadataElement bandElem = getBandElement(product.getBandAt(0));
         
-        final double referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat).getMJD(); // in days
+        final double referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", AbstractMetadata.dateFormat).getMJD(); // in days
         /*
         final double firstLineTime = globalElem.getElement("S01").getElement("B001").getAttributeDouble("Azimuth First Time") / (24*3600); // in days
         final double lastLineTime = globalElem.getElement("S01").getElement("B001").getAttributeDouble("Azimuth Last Time") / (24*3600); // in days

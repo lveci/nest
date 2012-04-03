@@ -191,9 +191,9 @@ public final class Orbit {
             ellipsoidPosition.y += ellipsoidPositionSolution[1];
             ellipsoidPosition.z += ellipsoidPositionSolution[2];
 
-            logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
-            logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
-            logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
+            //logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
+            //logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
+            //logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
 
             // check convergence
             if (Math.abs(ellipsoidPositionSolution[0]) < CRITERPOS &&

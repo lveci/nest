@@ -176,6 +176,15 @@
             <shortDescr>Export Generic Binary</shortDescr>
             <helpId>exportGenericBinary</helpId>
         </action>
+        <action>
+            <id>exportPolsarPro</id>
+            <text>Export PolSARPro</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>PolSARPro</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Export PolSARPro</shortDescr>
+            <helpId>exportPolsarPro</helpId>
+        </action>
         <!--action>
             <id>exportImageIO</id>
             <text>Export ImageIO</text>

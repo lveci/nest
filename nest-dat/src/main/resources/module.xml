@@ -401,7 +401,7 @@
             <placeAfter>helpTopics</placeAfter>
         </action>
 
-        <action>
+        <!--action>
             <id>showSupport</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowSupportPageAction</class>
@@ -430,7 +430,7 @@
             <shortDescr>The GEOINT SAR Toolbox and Support</shortDescr>
             <description>The GEOINT SAR Toolbox and Support</description>
             <placeAfter>showTraining</placeAfter>
-        </action>
+        </action-->
 
         <action>
             <id>showNestHomePage</id>

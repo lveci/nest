@@ -316,8 +316,14 @@ public final class AbstractMetadataIO {
     }
 
     private static void addAttribute(final MetadataElement meta, final String name, String value) {
-        final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
-        attribute.getData().setElems(value);
-        meta.addAttribute(attribute);
+        try {
+            final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
+            if(value.isEmpty())
+                value = " ";
+            attribute.getData().setElems(value);
+            meta.addAttribute(attribute);
+        } catch(Exception e) {
+            System.out.println(e.getMessage()+" "+name +" "+ value);
+        }
     }
 }

@@ -16,7 +16,6 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
-import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.BasicApp;
@@ -29,6 +28,7 @@ import org.esa.beam.visat.VisatApp;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,11 +37,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Look up paths to resources
@@ -87,28 +83,42 @@ public final class ResourceUtils {
 
     public static File GetFilePath(final String title, final String formatName, final String extension,
                                    final String fileName, final String description, final boolean isSave) {
+        return GetFilePath(title, formatName, extension, fileName, description, isSave,
+                           BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR,
+                           FileSystemView.getFileSystemView().getRoots()[0].getAbsolutePath());
+    }
+
+    public static File GetFilePath(final String title, final String formatName, final String extension,
+                                   final String fileName, final String description, final boolean isSave,
+                                   final String lastDirPropertyKey, final String defaultPath) {
         BeamFileFilter fileFilter = null;
         if(!extension.isEmpty()) {
             fileFilter = new BeamFileFilter(formatName, extension, description);
         }
         File file;
         if (isSave) {
-            file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, fileName);
+            file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, fileName,
+                                                        lastDirPropertyKey);
         } else {
-            String lastDir = VisatApp.getApp().getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR,
-                                                            SystemUtils.getUserHomeDir().getPath());
+            String lastDir = VisatApp.getApp().getPreferences().getPropertyString(lastDirPropertyKey, defaultPath);
             if(fileName == null)
-                file = showFileOpenDialog(title, false, fileFilter, lastDir, BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR);
+                file = showFileOpenDialog(title, false, fileFilter, lastDir, lastDirPropertyKey);
             else
-                file = showFileOpenDialog(title, false, fileFilter, fileName, BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR);
+                file = showFileOpenDialog(title, false, fileFilter, fileName, lastDirPropertyKey);
         }
-        if (file == null) {
-            return null;
-        }
-
-        return FileUtils.ensureExtension(file, extension);
+        
+        return file == null ? null : FileUtils.ensureExtension(file, extension);
     }
 
+    /**
+     * allows the choice of picking directories only
+     * @param title
+     * @param dirsOnly
+     * @param fileFilter
+     * @param currentDir
+     * @param lastDirPropertyKey
+     * @return
+     */
     private static File showFileOpenDialog(String title,
                                          boolean dirsOnly,
                                          FileFilter fileFilter,
@@ -130,11 +140,10 @@ public final class ResourceUtils {
         }
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            if (file == null || file.getName().equals("")) {
+            if (file == null || file.getName().isEmpty()) {
                 return null;
             }
-            file = file.getAbsoluteFile();
-            return file;
+            return file.getAbsoluteFile();
         }
         return null;
     }

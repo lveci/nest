@@ -190,7 +190,6 @@ public final class OperatorUtils {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyIndexCodings(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
@@ -198,10 +197,23 @@ public final class OperatorUtils {
         targetProduct.setEndTime(sourceProduct.getEndTime());
         targetProduct.setDescription(sourceProduct.getDescription());
 
+        copyIndexCodings(sourceProduct, targetProduct);
+    }
+
+    public static void copyIndexCodings(final Product sourceProduct, final Product targetProduct) {
+        ProductUtils.copyIndexCodings(sourceProduct, targetProduct);
         if(targetProduct.getIndexCodingGroup().getNodeCount() > 0) {
-            final IndexCoding indexCoding = targetProduct.getIndexCodingGroup().get(0);
-            for(Band band : targetProduct.getBands()) {
-                band.setSampleCoding(indexCoding);
+            final Band[] srcBands = sourceProduct.getBands();
+            final Band[] trgBands = targetProduct.getBands();
+
+            for(int i=0; i < trgBands.length; ++i) {
+                if(srcBands[i].getName().equals(trgBands[i].getName())) {
+                    final String srcSampleCoding = srcBands[i].getSampleCoding().getName();
+                    final IndexCoding trgIndexCoding = targetProduct.getIndexCodingGroup().get(srcSampleCoding);
+                    if(trgIndexCoding != null) {
+                        trgBands[i].setSampleCoding(trgIndexCoding);
+                    }
+                }
             }
         }
     }

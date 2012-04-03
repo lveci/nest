@@ -2569,6 +2569,7 @@ public abstract class ProductData implements Cloneable {
          * The default pattern used to format date strings.
          */
         public static final String DATE_FORMAT_PATTERN = "dd-MMM-yyyy HH:mm:ss";
+        public static final DateFormat DEFAULT_DATE_FORMAT = createDateFormat(DATE_FORMAT_PATTERN);
 
         private static final double SECONDS_PER_DAY = 86400.0;
         private static final double SECONDS_TO_DAYS = 1.0 / SECONDS_PER_DAY;
@@ -2705,7 +2706,7 @@ public abstract class ProductData implements Cloneable {
          * @see #createDateFormat
          */
         public static UTC parse(String text) throws ParseException {
-            return parse(text, DATE_FORMAT_PATTERN);
+            return parse(text, DEFAULT_DATE_FORMAT);
         }
 
         /**
@@ -2723,6 +2724,24 @@ public abstract class ProductData implements Cloneable {
          * @see #createDateFormat
          */
         public static UTC parse(String text, String pattern) throws ParseException {
+            return parse(text, createDateFormat(pattern));
+        }
+
+        /**
+         * Parses a UTC value given as text. The method also considers an optional
+         * mircoseconds fraction at the end of the text string. The mircoseconds fraction
+         * is a dot '.' followed by a maximum of 6 digits.
+         *
+         * @param text    a UTC value given as text
+         * @param dateFormat the date/time pattern
+         *
+         * @return the UTC value represented by the given text
+         *
+         * @throws ParseException
+         * @see #createCalendar
+         * @see #createDateFormat
+         */
+        public static UTC parse(String text, DateFormat dateFormat) throws ParseException {
             //Guardian.assertNotNullOrEmpty("text", text);
             //Guardian.assertNotNullOrEmpty("pattern", pattern);
 
@@ -2745,7 +2764,6 @@ public abstract class ProductData implements Cloneable {
                 }
             }
 
-            final DateFormat dateFormat = createDateFormat(pattern);
             final Date date = dateFormat.parse(noFractionString);
             return create(date, micros);
         }

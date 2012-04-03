@@ -428,17 +428,19 @@ public class WarpOp extends Operator {
             }
 
             final WarpData warpData = warpDataMap.get(band);
-            for (int i = 0; i < warpData.rms.length; i++) {
-                final MetadataElement gcpElem = new MetadataElement("GCP"+i);
-                warpDataElem.addElement(gcpElem);
+            if(warpData.rms != null) {
+                for (int i = 0; i < warpData.rms.length; i++) {
+                    final MetadataElement gcpElem = new MetadataElement("GCP"+i);
+                    warpDataElem.addElement(gcpElem);
 
-                gcpElem.setAttributeDouble("mst_x", warpData.masterGCPCoords[2 * i]);
-                gcpElem.setAttributeDouble("mst_y", warpData.masterGCPCoords[2 * i + 1]);
+                    gcpElem.setAttributeDouble("mst_x", warpData.masterGCPCoords[2 * i]);
+                    gcpElem.setAttributeDouble("mst_y", warpData.masterGCPCoords[2 * i + 1]);
 
-                gcpElem.setAttributeDouble("slv_x", warpData.slaveGCPCoords[2 * i]);
-                gcpElem.setAttributeDouble("slv_y", warpData.slaveGCPCoords[2 * i + 1]);
+                    gcpElem.setAttributeDouble("slv_x", warpData.slaveGCPCoords[2 * i]);
+                    gcpElem.setAttributeDouble("slv_y", warpData.slaveGCPCoords[2 * i + 1]);
 
-                gcpElem.setAttributeDouble("rms", warpData.rms[i]);
+                    gcpElem.setAttributeDouble("rms", warpData.rms[i]);
+                }
             }
         }
     }     

@@ -743,10 +743,10 @@
             <id>importGeometry</id>
             <class>org.esa.beam.visat.actions.ImportGeometryAction</class>
             <parent>import</parent>
-            <text>Import Geometry...</text>
+            <text>Import Vector...</text>
             <mnemonic>S</mnemonic>
-            <shortDescr>Import geometry from plain text or ESRI shapefile.</shortDescr>
-            <description>Import geometry from plain text or ESRI shapefile.</description>
+            <shortDescr>Import vector from plain text or ESRI shapefile.</shortDescr>
+            <description>Import vector from plain text or ESRI shapefile.</description>
             <helpId>importGeometry</helpId>
             <separatorAfter>true</separatorAfter>
         </action>

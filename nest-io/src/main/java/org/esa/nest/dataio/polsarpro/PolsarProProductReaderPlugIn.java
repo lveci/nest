@@ -24,6 +24,8 @@ import java.util.Locale;
 
 public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
 
+    public static final String FORMAT_NAME = "PolSARPro";
+
     @Override
     public ProductReader createReaderInstance() {
         return new PolsarProProductReader(this);
@@ -31,7 +33,7 @@ public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
 
     @Override
     public String[] getFormatNames() {
-        return new String[]{"PolSARPro"};
+        return new String[]{ FORMAT_NAME };
     }
 
     @Override

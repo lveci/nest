@@ -70,7 +70,7 @@ public class MultilookOpUI extends BaseOperatorUI {
             outputIntensityCheckBox.setSelected(outputIntensity);
             outputIntensityCheckBox.getModel().setPressed(outputIntensity);
         }
-        outputIntensityCheckBox.setVisible(isComplexSrcProduct());
+        // outputIntensityCheckBox.setVisible(isComplexSrcProduct());
 
         setAzimuthLooks();
     }
@@ -99,6 +99,12 @@ public class MultilookOpUI extends BaseOperatorUI {
     @Override
     public UIValidation validateParameters() {
 
+        if (sourceProducts != null) {
+            if (!isComplexSrcProduct() && !outputIntensity) {
+                return new UIValidation(UIValidation.State.ERROR, "Cannot output in complex," +
+                        " please select output intensity");
+            }
+        }
         return new UIValidation(UIValidation.State.OK, "");
     }
 

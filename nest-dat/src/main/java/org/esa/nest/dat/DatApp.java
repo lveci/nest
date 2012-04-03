@@ -123,7 +123,7 @@ public class DatApp extends VisatApp {
         }
     }
     
-    private static void disableUnwantedOperators() {
+    protected void disableUnwantedOperators() {
         final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
 
         //final OperatorSpi pcaOp = registry.getOperatorSpi("org.esa.nest.gpf.PCAOp$Spi");
@@ -313,6 +313,7 @@ public class DatApp extends VisatApp {
 
         boolean incMultispectralTools = false;
         boolean incImageProcessing = false;
+        boolean incWizards = false;
         final CommandManager cmdMan = getCommandManager();
         for (int i = 0; i < cmdMan.getNumCommands(); i++) {
             final String parent = cmdMan.getCommandAt(i).getParent();
@@ -321,8 +322,10 @@ public class DatApp extends VisatApp {
 
             if(parent.equals("multispectraltools"))
                 incMultispectralTools = true;
-            if(parent.equals("Image Processing"))
+            else if(parent.equals("Image Processing"))
                 incImageProcessing = true;
+            else if(parent.equals("Wizards"))
+                incWizards = true;
         }
 
         menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
@@ -340,6 +343,8 @@ public class DatApp extends VisatApp {
         if(incImageProcessing)
             menuBar.add(createJMenu("Image Processing", "Image Processing", 'C')); /*I18N*/
         menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
+        if(incWizards)
+            menuBar.add(createJMenu("Wizards", "Wizards", 'Z')); /*I18N*/
         menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
         menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
 

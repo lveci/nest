@@ -376,7 +376,7 @@ public class NetCDFUtils {
     }
 
     private static ProductData.UTC parseDateTime(String dateTimeStr) throws ParseException {
-        return ProductData.UTC.parse(dateTimeStr, NetcdfConstants.DATE_TIME_PATTERN);
+        return ProductData.UTC.parse(dateTimeStr, AbstractMetadata.dateFormat);
     }
 
     private NetCDFUtils() {

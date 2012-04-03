@@ -76,6 +76,8 @@ public class ImageIOWriter extends AbstractProductWriter {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(getSourceProduct());
         AbstractMetadata.saveExternalMetadata(getSourceProduct(), absRoot, file);
+
+        setIncrementalMode(false);
     }
 
     /**
@@ -88,27 +90,16 @@ public class ImageIOWriter extends AbstractProductWriter {
                                     final int sourceHeight,
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
-
         try {
-            final double[] dataArray = new double[sourceWidth];
-            int i = 0;
-            for(int y=sourceOffsetY; y < sourceHeight; ++y) {
-                for(int x=sourceOffsetX; x < sourceWidth; ++x) {
-                    dataArray[i] = sourceBuffer.getElemDoubleAt(x);
-                }
-            }
-
             final ImageWriteParam param = writer.getDefaultWriteParam();
             
-            param.setTilingMode(ImageWriteParam.MODE_DEFAULT);
-   
-            //param.setSourceRegion(new Rectangle(0, 0, sourceWidth, sourceHeight));
-            //param.setTiling(sourceWidth, sourceHeight, 0, 0);
-            //writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+            param.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setDestinationOffset(new Point(sourceOffsetX, sourceOffsetY));
+            
+            param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+            param.setTiling(sourceWidth, sourceHeight, sourceOffsetX, sourceOffsetY);
+            writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
 
-
-            final RenderedImage img = createRenderedImage(dataArray, sourceWidth, sourceHeight);
-            writer.write(null, new IIOImage(img, null, null), param);
         } catch(Exception e) {
             e.printStackTrace();
         }

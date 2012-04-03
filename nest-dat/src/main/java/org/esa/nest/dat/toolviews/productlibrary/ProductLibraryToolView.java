@@ -35,6 +35,7 @@ import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.ClipboardUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
@@ -183,6 +184,15 @@ public class ProductLibraryToolView extends AbstractToolView {
         }
     }
 
+    /**
+     * Copy the selected file list to the clipboard
+     */
+    private void performCopyAction() {
+        final File[] fileList = getSelectedFiles();
+        if(fileList.length != 0)
+            ClipboardUtils.copyToClipboard(fileList);
+    }
+
     private void performCopyToAction() {
         final File targetFolder = promptForRepositoryBaseDir();
         if(targetFolder == null) return;
@@ -242,6 +252,14 @@ public class ProductLibraryToolView extends AbstractToolView {
             }
         });
         popup.add(openSelectedItem);
+
+        final JMenuItem copySelectedItem = new JMenuItem("Copy Selected");
+        copySelectedItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                performCopyAction();
+            }
+        });
+        popup.add(copySelectedItem);
 
         final JMenuItem copyToItem = new JMenuItem("Copy Selected To...");
         copyToItem.addActionListener(new ActionListener() {

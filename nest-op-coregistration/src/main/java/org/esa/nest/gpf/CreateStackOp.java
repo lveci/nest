@@ -628,8 +628,7 @@ public class CreateStackOp extends Operator {
     }
 
     private static void getPixelPos(final float lat, final float lon, final GeoCoding srcGeoCoding, final PixelPos pixelPos) {
-        final GeoPos geoPos = new GeoPos(lat, lon);
-        srcGeoCoding.getPixelPos(geoPos, pixelPos);
+        srcGeoCoding.getPixelPos(new GeoPos(lat, lon), pixelPos);
     }
 
     private void addOffset(final Product slvProd, final int offsetX, final int offsetY) {
@@ -677,14 +676,13 @@ public class CreateStackOp extends Operator {
 
                 for (int ty = ty0; ty < maxY; ++ty) {
                     final int sy = ty + offset[1];
-                    final boolean yOutofBounds = sy < 0 || sy >= srcImageHeight;
-                    if(yOutofBounds) {
+                    trgIndex.calculateStride(ty);
+                    if(sy < 0 || sy >= srcImageHeight) {
                         for (int tx = tx0; tx < maxX; ++tx) {
                             trgData.setElemDoubleAt(trgIndex.getIndex(tx), noDataValue);
                         }
                         continue;
                     }
-                    trgIndex.calculateStride(ty);
                     srcIndex.calculateStride(sy);
                     for (int tx = tx0; tx < maxX; ++tx) {
                         final int sx = tx + offset[0];

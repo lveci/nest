@@ -24,8 +24,6 @@ public interface NetcdfConstants {
 	final static String[] NETCDF_FORMAT_FILE_EXTENSIONS = { "nc", "nc3" };
     final static String NETCDF_PLUGIN_DESCRIPTION = "NetCDF Products";
 
-    final static String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-
     final static String GLOBAL_ATTRIBUTES_NAME = "Global_Attributes";
 
     final static String DESCRIPTION = "description";

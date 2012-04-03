@@ -16,65 +16,44 @@
 package org.esa.nest.dat.dialogs;
 
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.List;
 
 /**
  * List of Products
  */
 public class ProductListPanel extends JPanel {
 
-    private final FileTableModel fileModel;
-    private final JTable table;
-    private final static int width = 500;
-    private final static int height = 100;
+    private final FileTable table = new FileTable();
 
     public ProductListPanel(final String title, final FileTableModel fileModel) {
         super(new BorderLayout());
         setBorder(BorderFactory.createTitledBorder(title));
 
-        this.fileModel = fileModel;
-        table = new JTable(fileModel);
-
-        table.setPreferredScrollableViewportSize(new Dimension(width, height));
-        fileModel.setColumnWidths(table.getColumnModel());
-        table.setColumnSelectionAllowed(true);
-        table.setDropMode(DropMode.ON);
-        table.setDragEnabled(true);
-        table.setTransferHandler(new ProductSetReaderOpUI.ProductSetTransferHandler(fileModel));
-
+        table.setModel(fileModel);
         final JScrollPane scrollPane = new JScrollPane(table);
         this.add(scrollPane, BorderLayout.CENTER);
     }
 
     public File[] getSelectedFiles() {
-        return fileModel.getFilesAt(table.getSelectedRows());
+        return table.getModel().getFilesAt(table.getSelectedRows());
     }
 
     public File[] getFileList() {
-        final List<File> fileList = fileModel.getFileList();
-        return fileList.toArray(new File[fileList.size()]);
+        return table.getFileList();
     }
 
     public Object getValueAt(final int r, final int c) {
-        return fileModel.getValueAt(r, c);
+        return table.getModel().getValueAt(r, c);
     }
 
     public void setProductFileList(final File[] productFileList) {
-        fileModel.clear();
-        for(File file : productFileList) {
-            fileModel.addFile(file);
-        }
+        table.setFiles(productFileList);
     }
 
     public void setProductEntryList(final ProductEntry[] productEntryList) {
-        fileModel.clear();
-        for(ProductEntry entry : productEntryList) {
-            fileModel.addFile(entry);
-        }
+        table.setProductEntries(productEntryList);
     }
 }

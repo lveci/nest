@@ -198,59 +198,30 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
                         if (absRoot != null) {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+                            final int isCalibrated = absRoot.getAttributeInt(AbstractMetadata.abs_calibration_flag, 0);
 
                             // todo ALOS
                             // todo move this into calibrator.canRadiometricallyNormalize(mission)
-                            if (mission.equals("ENVISAT") || mission.contains("ERS") ||
-                                mission.equals("RS2") || mission.contains("TSX") || mission.contains("TDX") || mission.contains("CSKS")) {
+                            if (isCalibrated==0 && (mission.equals("ENVISAT") || mission.contains("ERS") ||
+                                mission.equals("RS2") || mission.contains("TSX") || mission.contains("TDX") || mission.contains("CSKS"))) {
 
-                                saveSigmaNoughtCheckBox.setEnabled(true);
+                                enableRadiometricNormalization(true);
+
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
-                                saveSigmaNoughtCheckBox.setSelected(true);
-                                incidenceAngleForSigma0.setEnabled(true);
-                                saveGammaNoughtCheckBox.setEnabled(true);
                                 saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
-                                incidenceAngleForGamma0.setEnabled(true);
-                                saveBetaNoughtCheckBox.setEnabled(true);
                                 saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
                                 saveSelectedSourceBandCheckBox.setSelected(false);
-                                auxFile.setEnabled(true);
-                                auxFileLabel.setEnabled(true);
-                                externalAuxFile.setEnabled(true);
-                                externalAuxFileLabel.setEnabled(true);
-                                externalAuxFileBrowseButton.setEnabled(true);
 
                             } else {
 
-                                saveSigmaNoughtCheckBox.setSelected(false);
-                                saveSigmaNoughtCheckBox.setEnabled(false);
-                                saveGammaNoughtCheckBox.setEnabled(false);
-                                saveBetaNoughtCheckBox.setEnabled(false);
-                                incidenceAngleForSigma0.setEnabled(false);
-                                incidenceAngleForGamma0.setEnabled(false);
+                                enableRadiometricNormalization(false);
                                 saveSelectedSourceBandCheckBox.setSelected(true);
-                                auxFile.setEnabled(false);
-                                auxFileLabel.setEnabled(false);
-                                externalAuxFile.setEnabled(false);
-                                externalAuxFileLabel.setEnabled(false);
-                                externalAuxFileBrowseButton.setEnabled(false);
                             }
                         }
 
                     } else {
-
-                        saveSigmaNoughtCheckBox.setSelected(false);
-                        saveSigmaNoughtCheckBox.setEnabled(false);
-                        saveGammaNoughtCheckBox.setEnabled(false);
-                        saveBetaNoughtCheckBox.setEnabled(false);
-                        incidenceAngleForSigma0.setEnabled(false);
-                        incidenceAngleForGamma0.setEnabled(false);
+                        enableRadiometricNormalization(false);
                         saveSelectedSourceBandCheckBox.setSelected(true);
-                        auxFile.setEnabled(false);
-                        auxFileLabel.setEnabled(false);
-                        externalAuxFile.setEnabled(false);
-                        externalAuxFileLabel.setEnabled(false);
-                        externalAuxFileBrowseButton.setEnabled(false);
                     }
                 }
         });
@@ -643,6 +614,20 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private void enableExternalAuxFile(boolean flag) {
         DialogUtils.enableComponents(externalAuxFileLabel, externalAuxFile, flag);
         externalAuxFileBrowseButton.setVisible(flag);
+    }
+
+    private void enableRadiometricNormalization(final boolean flag) {
+        saveSigmaNoughtCheckBox.setSelected(flag);
+        saveSigmaNoughtCheckBox.setEnabled(flag);
+        saveGammaNoughtCheckBox.setEnabled(flag);
+        saveBetaNoughtCheckBox.setEnabled(flag);
+        incidenceAngleForSigma0.setEnabled(flag);
+        incidenceAngleForGamma0.setEnabled(flag);
+        auxFile.setEnabled(flag);
+        auxFileLabel.setEnabled(flag);
+        externalAuxFile.setEnabled(flag);
+        externalAuxFileLabel.setEnabled(flag);
+        externalAuxFileBrowseButton.setEnabled(flag);
     }
 
     protected class PixelSpacingMeterListener implements FocusListener {

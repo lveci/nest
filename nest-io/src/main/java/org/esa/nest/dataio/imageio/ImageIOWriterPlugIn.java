@@ -22,11 +22,14 @@ import org.esa.beam.util.io.BeamFileFilter;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.util.Locale;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
 
-    private static final String[] FORMAT_NAMES = { "ImageIO", "JPEG2000" };
+    private static final String[] FORMAT_NAMES = { "ImageIO", "JPEG2000", "PNG", "JPEG", "BMP", "GIF" };
 
     /**
      * Constructs a new product writer plug-in instance.
@@ -39,7 +42,15 @@ public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getDefaultFileExtensions() {
-        return ImageIO.getWriterFileSuffixes();
+        final List<String> extList = new ArrayList<String>(20);
+        extList.addAll(Arrays.asList(ImageIO.getWriterFileSuffixes()));
+
+        final String[] exclude = { "pbm", "jpeg", "wbmp", "pgm", "ppm", "tiff"};
+        for(String ext : exclude) {
+            extList.remove(ext);    
+        }
+
+        return extList.toArray(new String[extList.size()]);
     }
 
     /**

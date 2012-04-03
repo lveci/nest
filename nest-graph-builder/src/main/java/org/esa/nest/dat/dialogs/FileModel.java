@@ -22,7 +22,7 @@ public class FileModel extends BaseFileModel implements FileTableModel {
             };
 
             widths = new int[]{
-                75, 10, 20, 5, 5
+                75, 10, 20, 3, 5
             };
         }
 

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.text.DateFormat;
 
 /**
 
@@ -39,6 +40,7 @@ public class ProductEntry {
     public final static String LAST_MODIFIED = "last_modified";
     public final static String FILE_FORMAT = "file_format";
     public final static String GEO_BOUNDARY = "geo_boundary";
+    public final static DateFormat yyyMMdd_Format = ProductData.UTC.createDateFormat("yyy-MM-dd");
 
     private int id;
     private File file;
@@ -114,7 +116,7 @@ public class ProductEntry {
         this.range_spacing = results.getDouble(AbstractMetadata.range_spacing);
         this.azimuth_spacing =results.getDouble(AbstractMetadata.azimuth_spacing);
         Date date = results.getDate(AbstractMetadata.first_line_time);
-        this.firstLineTime = AbstractMetadata.parseUTC(date.toString(), "yyy-MM-dd");
+        this.firstLineTime = AbstractMetadata.parseUTC(date.toString(), yyyMMdd_Format);
         this.fileSize = (long)results.getDouble(FILE_SIZE);
         this.lastModified = (long)results.getDouble(LAST_MODIFIED);
         this.fileFormat = results.getString(FILE_FORMAT);

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -42,6 +43,8 @@ public abstract class CEOSProductDirectory {
     protected CEOSVolumeDirectoryFile _volumeDirectoryFile = null;
     protected boolean isProductSLC = false;
     protected String productType = null;
+
+    public static final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyy-DDD-HH:mm:ss");
 
     protected abstract void readProductDirectory() throws IOException, IllegalBinaryFormatException;
 
@@ -166,7 +169,7 @@ public abstract class CEOSProductDirectory {
         }
         if(detailProcRec != null) {
             final String startTime = detailProcRec.getAttributeString("Processing start time");
-            return AbstractMetadata.parseUTC(startTime, "yyyy-DDD-HH:mm:ss");
+            return AbstractMetadata.parseUTC(startTime, dateFormat);
         }
         return new ProductData.UTC(0);
     }
@@ -179,7 +182,7 @@ public abstract class CEOSProductDirectory {
         }
         if(detailProcRec != null) {
             final String endTime = detailProcRec.getAttributeString("Processing stop time");
-            return AbstractMetadata.parseUTC(endTime, "yyyy-DDD-HH:mm:ss");
+            return AbstractMetadata.parseUTC(endTime, dateFormat);
         }
         return new ProductData.UTC(0);
     }
@@ -292,7 +295,7 @@ public abstract class CEOSProductDirectory {
         second += interval * (num-1);
 
         return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
-                                  hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
+                                  hour+':'+minute+':'+second, AbstractMetadata.dateFormat);
     }
 
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BinaryRecord facilityRec) {

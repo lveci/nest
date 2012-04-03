@@ -142,11 +142,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getSourceImageDimension();
 
+            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
+            
             createTargetProduct();
 
             getTiePointGrids();
-
-            imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -188,16 +188,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
-    private CoordinateReferenceSystem getCRS() throws Exception {
-        try {
-            if(mapProjection == null || mapProjection.isEmpty())
-                mapProjection = "WGS84(DD)";
-            return CRS.parseWKT(mapProjection);
-        } catch (Exception e) {
-            return CRS.decode(mapProjection, true);
-        }
-    }
-
     /**
      * Create target product.
      * @throws OperatorException The exception.
@@ -205,44 +195,21 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private void createTargetProduct() throws OperatorException {
 
         try {
-            targetCRS = getCRS();
+            double pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
+                    RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
+            double pixelSpacingInDegree = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixelSpacingInMeter);
 
-            final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
-            final double pixelSpacingInMeter = Math.max(RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProduct),
-                                                        RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProduct));
-            final double pixelSpacingInDegree = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixelSpacingInMeter);
             delLat = pixelSpacingInDegree;
             delLon = pixelSpacingInDegree;
-            double pixelSizeX;
-            double pixelSizeY;
-            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
-                pixelSizeX = pixelSpacingInDegree;
-                pixelSizeY = pixelSpacingInDegree;
-            } else {
-                pixelSizeX = pixelSpacingInMeter;
-                pixelSizeY = pixelSpacingInMeter;
-            }
 
-            final Rectangle2D bounds = new Rectangle2D.Double();
-            bounds.setFrameFromDiagonal(imageGeoBoundary.lonMin, imageGeoBoundary.latMin, imageGeoBoundary.lonMax, imageGeoBoundary.latMax);
-            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
-            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
-            final int width = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(0) / pixelSizeX);
-            final int height = org.esa.beam.util.math.MathUtils.floorInt(targetEnvelope.getSpan(1) / pixelSizeY);
-            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
-                    width,
-                    height,
-                    targetEnvelope.getMinimum(0),
-                    targetEnvelope.getMaximum(1),
-                    pixelSizeX, pixelSizeY);
+            final CRSGeoCodingHandler crsHandler = new CRSGeoCodingHandler(sourceProduct, mapProjection,
+                    pixelSpacingInDegree, pixelSpacingInMeter);
+
+            targetCRS = crsHandler.getTargetCRS();
 
             targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                    sourceProduct.getProductType(), width, height);
-            targetProduct.setGeoCoding(geoCoding);
-
-            for (Band band : targetProduct.getBands()) {
-                targetProduct.removeBand(band);
-            }
+                    sourceProduct.getProductType(), crsHandler.getTargetWidth(), crsHandler.getTargetHeight());
+            targetProduct.setGeoCoding(crsHandler.getCrsGeoCoding());
 
             OperatorUtils.addSelectedBands(
                     sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true);
@@ -250,6 +217,17 @@ public final class GeolocationGridGeocodingOp extends Operator {
             targetGeoCoding = targetProduct.getGeoCoding();
 
             ProductUtils.copyMetadata(sourceProduct, targetProduct);
+            ProductUtils.copyMasks(sourceProduct, targetProduct);
+            ProductUtils.copyVectorData(sourceProduct, targetProduct);
+            targetProduct.setDescription(sourceProduct.getDescription());
+
+            try {
+                OperatorUtils.copyIndexCodings(sourceProduct, targetProduct);
+            } catch(Exception e) {
+                if(!imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
+                    throw new OperatorException("Use Nearest Neighbour with Classificaitons: "+e.getMessage());
+                }
+            }
 
             updateTargetProductMetadata();
         } catch (Exception e) {

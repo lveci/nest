@@ -19,6 +19,8 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataio.ProductWriter;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
@@ -28,6 +30,7 @@ import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
 import java.util.Arrays;
+import java.text.DateFormat;
 
 import com.bc.ceres.core.runtime.RuntimeContext;
 
@@ -223,7 +226,7 @@ public final class ReaderUtils {
         }
     }
 
-    public static ProductData.UTC getTime(final MetadataElement elem, final String tag, final String timeFormat) {
+    public static ProductData.UTC getTime(final MetadataElement elem, final String tag, final DateFormat timeFormat) {
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
                 new char[]{':','.','-'}, ' ').trim();
         return AbstractMetadata.parseUTC(timeStr, timeFormat);
@@ -291,5 +294,10 @@ public final class ReaderUtils {
                 elem.dispose();
             }
         }
+    }
+
+    public static String findExtensionForFormat(final String formatName) {
+        final ProductWriter writer = ProductIO.getProductWriter(formatName);
+        return writer.getWriterPlugIn().getDefaultFileExtensions()[0];
     }
 }
