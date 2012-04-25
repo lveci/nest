@@ -136,7 +136,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
                                    HDF5Constants.H5F_ACC_TRUNC,
                                    HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
-        } catch (HDF5LibraryException e) {
+        } catch (Throwable e) {
             throw new ProductIOException(createErrorMessage(e));
         }
 
@@ -771,7 +771,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
 
-    private String createErrorMessage(HDF5Exception e) {
+    private static String createErrorMessage(Throwable e) {
         return "HDF library error: " + e.getMessage();
     }
 }

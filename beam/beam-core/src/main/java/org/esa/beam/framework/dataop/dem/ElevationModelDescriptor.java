@@ -92,6 +92,17 @@ public interface ElevationModelDescriptor {
      */
     int getPixelRes();
 
+    /**
+     * Gets the number of tiles in x direction
+     * @return number of rows
+     */
+    int getNumXTiles();
+
+    /**
+     * Gets the number of tiles in y direction
+     * @return number of columns
+     */
+    int getNumYTiles();
 
     /**
      * Creates the elevation model instance.
@@ -153,4 +164,12 @@ public interface ElevationModelDescriptor {
      * Currently not used.
      */
     int getInstallationStatus();
+
+    /**
+     * create the file name of a tile based on the position
+     * @param tileX x position
+     * @param tileY y position
+     * @return tile name
+     */
+    public String createTileFilename(final int tileX, final int tileY);
 }

@@ -148,8 +148,7 @@ public class ModuleManifestParser {
                     // ignore
                 }
             }
-        }
-        finally {
+        } finally {
             Field.setAccessible(stringFields.toArray(new Field[stringFields.size()]), false);
         }
     }

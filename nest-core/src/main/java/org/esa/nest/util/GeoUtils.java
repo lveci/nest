@@ -16,10 +16,10 @@
 package org.esa.nest.util;
 
 import Jama.Matrix;
+import org.apache.commons.math.util.FastMath;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.datamodel.Orbits;
-import org.apache.commons.math.util.FastMath;
 
 public final class GeoUtils
 {

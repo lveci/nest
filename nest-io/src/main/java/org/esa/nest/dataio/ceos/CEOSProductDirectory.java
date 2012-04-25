@@ -17,20 +17,20 @@ package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
-import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.ReaderUtils;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 
 /**

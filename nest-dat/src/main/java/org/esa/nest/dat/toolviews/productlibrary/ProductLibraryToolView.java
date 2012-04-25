@@ -16,12 +16,12 @@
 package org.esa.nest.dat.toolviews.productlibrary;
 
 import com.jidesoft.swing.JideSplitPane;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.dialogs.CheckListDialog;
@@ -30,19 +30,21 @@ import org.esa.nest.dat.toolviews.productlibrary.model.ProductEntryTableModel;
 import org.esa.nest.dat.toolviews.productlibrary.model.ProductLibraryConfig;
 import org.esa.nest.dat.toolviews.productlibrary.model.SortingDecorator;
 import org.esa.nest.dat.util.ProductOpener;
+import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.DBQuery;
 import org.esa.nest.db.DBScanner;
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ClipboardUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 //import java.nio.file.*;
@@ -407,9 +409,9 @@ public class ProductLibraryToolView extends AbstractToolView {
         if(baseDir == null) return;
         progMon = new LabelBarProgressMonitor(progressBar, statusLabel);
         progMon.addListener(new MyProgressBarListener());
-        final DBScanner repositoryCollector = new DBScanner(dbPane.getDB(), baseDir, doRecursive, doQuicklooks, progMon);
-        repositoryCollector.addListener(new MyDatabaseScannerListener());
-        repositoryCollector.execute();
+        final DBScanner scanner = new DBScanner(dbPane.getDB(), baseDir, doRecursive, doQuicklooks, progMon);
+        scanner.addListener(new MyDatabaseScannerListener());
+        scanner.execute();
     }
 
     private void removeRepository() {
@@ -742,6 +744,67 @@ public class ProductLibraryToolView extends AbstractToolView {
         worldMapUI.setSelectedProductEntryList(null);
     }
 
+    private static void handleErrorList(final java.util.List<DBScanner.ErrorFile> errorList) {
+        final StringBuilder str = new StringBuilder();
+        int cnt = 1;
+        for(DBScanner.ErrorFile err : errorList) {
+            str.append(err.message);
+            str.append("   ");
+            str.append(err.file.getAbsolutePath());
+            str.append('\n');
+            if(cnt >= 20) {
+                str.append("plus "+(errorList.size()-20)+" other errors...\n");
+                break;
+            }
+            ++cnt;
+        }
+        final String question = "\nWould you like to save the list to a text file?";
+        if(VisatApp.getApp().showQuestionDialog("Product Errors",
+                "The follow files have errors:\n"+ str.toString() + question,
+                null)== 0) {
+
+            File file = ResourceUtils.GetSaveFilePath("Save as...", "Text", ".txt",
+                                   "ProductErrorList", "Products with errors");
+            try {
+                writeErrors(errorList, file);
+            } catch(Exception e) {
+                VisatApp.getApp().showErrorDialog("Unable to save to "+file.getAbsolutePath());
+                file = ResourceUtils.GetSaveFilePath("Save as...", "Text", ".txt",
+                                   "ProductErrorList", "Products with errors");
+                try {
+                    writeErrors(errorList, file);
+                } catch(Exception ignore) {
+                    //
+                }
+            }
+            if (Desktop.isDesktopSupported() && file.exists()) {
+                try {
+                    Desktop.getDesktop().open(file);
+                } catch (Exception e) {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    private static void writeErrors(final java.util.List<DBScanner.ErrorFile> errorList, final File file) throws Exception {
+        if(file == null) return;
+
+        PrintStream p = null; // declare a print stream object
+        try {
+            final FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
+            // Connect print stream to the output stream
+            p = new PrintStream(out);
+
+            for(DBScanner.ErrorFile err : errorList) {
+                p.println(err.message +"   "+ err.file.getAbsolutePath());
+            }
+        } finally {
+            if (p != null)
+                p.close();
+        }
+    }
+
     private class MyDatabaseQueryListener implements DatabaseQueryListener {
 
         public void notifyNewProductEntryListAvailable() {
@@ -755,7 +818,13 @@ public class ProductLibraryToolView extends AbstractToolView {
 
     private class MyDatabaseScannerListener implements DBScanner.DBScannerListener {
 
-        public void notifyMSG(MSG msg) {
+        public void notifyMSG(final DBScanner dbScanner, final MSG msg) {
+            if(msg.equals(DBScanner.DBScannerListener.MSG.DONE)) {
+                final java.util.List<DBScanner.ErrorFile> errorList = dbScanner.getErrorList();
+                if(!errorList.isEmpty()) {
+                    handleErrorList(errorList);
+                }
+            }
             UpdateUI();
         }
     }

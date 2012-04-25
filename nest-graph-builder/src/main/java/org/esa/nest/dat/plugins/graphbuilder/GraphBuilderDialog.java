@@ -296,7 +296,9 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         //if(ValidateAllNodes()) {
             try {
-                graphEx.saveGraph();
+                final File file = graphEx.saveGraph();
+
+                this.setTitle("Graph Builder : "+file.getName());
             } catch(GraphException e) {
                 showErrorDialog(e.getMessage());
             }

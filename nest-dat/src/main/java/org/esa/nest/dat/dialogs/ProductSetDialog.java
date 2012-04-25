@@ -19,12 +19,9 @@ import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.toolviews.Projects.ProductSet;
-import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.

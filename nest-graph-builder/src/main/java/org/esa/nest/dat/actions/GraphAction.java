@@ -1,9 +1,9 @@
 package org.esa.nest.dat.actions;
 
+import com.bc.ceres.core.CoreException;
+import com.bc.ceres.core.runtime.ConfigurationElement;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
-import com.bc.ceres.core.runtime.ConfigurationElement;
-import com.bc.ceres.core.CoreException;
 
 import java.io.File;
 
@@ -33,6 +33,7 @@ public class GraphAction extends OperatorAction {
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
         final File graphFile =  new File(graphPath, graphFileName);
 
+        addIcon(dialog);
         dialog.LoadGraph(graphFile);
         return dialog;
     }

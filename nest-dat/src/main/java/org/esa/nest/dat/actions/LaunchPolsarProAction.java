@@ -70,15 +70,12 @@ public class LaunchPolsarProAction extends ExecCommand {
         }
     }
 
-    private void externalExecute(final File prog, final File tclWishFile) {
+    private static void externalExecute(final File prog, final File tclWishFile) {
         final File homeFolder = ResourceUtils.findHomeFolder();
         final File program = new File(homeFolder, "bin"+File.separator+"exec.bat");
 
         String wish = "wish";
-        if(tclWishFile.exists())
-            wish = tclWishFile.getAbsolutePath();
-
-        final String args = "\""+prog.getParent()+"\" "+wish+" "+prog.getName();
+        final String args = '\"' +prog.getParent()+"\" "+wish+ ' ' +prog.getName();
 
         System.out.println("Launching PolSARPro "+args);
 
@@ -87,11 +84,21 @@ public class LaunchPolsarProAction extends ExecCommand {
             @Override
             public void run() {
                 try {
-                    final Process proc = Runtime.getRuntime().exec(program.getAbsolutePath()+" "+args);
+                    final Process proc = Runtime.getRuntime().exec(program.getAbsolutePath()+ ' ' +args);
 
                     outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getInputStream())));
-                    outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
+                    boolean hasErrors = outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
 
+                    if(hasErrors && tclWishFile.exists()) {
+                        String wish = '\"' +tclWishFile.getAbsolutePath()+'\"';
+                        final String args = '\"' +prog.getParent()+"\" "+wish+ ' ' +prog.getName();
+                        System.out.println("Launching PolSARPro 2nd attempt "+args);
+
+                        final Process proc2 = Runtime.getRuntime().exec(program.getAbsolutePath()+ ' ' +args);
+
+                        outputTextBuffers(new BufferedReader(new InputStreamReader(proc2.getInputStream())));
+                        outputTextBuffers(new BufferedReader(new InputStreamReader(proc2.getErrorStream())));
+                    }
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());
                 }
@@ -144,11 +151,14 @@ public class LaunchPolsarProAction extends ExecCommand {
         }
     }
 
-    private static void outputTextBuffers(BufferedReader in) throws IOException {
+    private static boolean outputTextBuffers(BufferedReader in) throws IOException {
         char c;
+        boolean hasData = false;
         while ((c = (char)in.read()) != -1 && c != 65535) {
             //errStr += c;
             System.out.print(c);
+            hasData = true;
         }
+        return hasData;
     }
 }

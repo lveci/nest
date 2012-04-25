@@ -131,6 +131,9 @@ public class QuickLookGenerator {
 
         final BufferedImage image = ProductUtils.createColorIndexedImage(productSubset.getBand(srcBandName),
                                                                          ProgressMonitor.NULL);
+        if(productSubset.isCorrupt()) {
+            product.setCorrupt(true);
+        }
         productSubset.dispose();
        
         return image;
@@ -196,17 +199,20 @@ public class QuickLookGenerator {
         return productFile;
     }
 
-    public static void createQuickLook(final int id, File productFile) throws IOException {
+    public static boolean createQuickLook(final int id, File productFile) throws IOException {
 
         // check if quicklook exist with product
         productFile = findProductBrowseImage(productFile);
 
+        boolean isCorrupt = false;
         final Product sourceProduct = ProductIO.readProduct(productFile);
         if(sourceProduct != null) {
             createQuickLook(id, sourceProduct);
+            isCorrupt = sourceProduct.isCorrupt();
 
             sourceProduct.dispose();
         }
+        return isCorrupt;
     }
 
     public static void createQuickLook(final int id, final Product product) {

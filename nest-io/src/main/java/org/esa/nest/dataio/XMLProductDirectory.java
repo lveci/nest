@@ -23,8 +23,8 @@ import org.esa.nest.dataio.imageio.ImageIOFile;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.XMLSupport;
 import org.esa.nest.gpf.ReaderUtils;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 
 import java.io.File;

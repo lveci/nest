@@ -15,7 +15,9 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 

@@ -32,7 +32,7 @@ import java.io.IOException;
 
 /**
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ProductFlipper extends AbstractProductBuilder {
 
@@ -107,7 +107,6 @@ public class ProductFlipper extends AbstractProductBuilder {
     @Override
     public void close() throws IOException {
         disposeBandMap();
-        sourceProduct = null;
         super.close();
     }
 

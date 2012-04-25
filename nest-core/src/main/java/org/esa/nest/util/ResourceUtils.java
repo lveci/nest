@@ -46,6 +46,8 @@ public final class ResourceUtils {
 
     public static ImageIcon nestIcon = LoadIcon("org/esa/nest/icons/dat.png");
     public static ImageIcon rstbIcon = LoadIcon("array/rstb/icons/csa.png");
+    public static ImageIcon esaIcon = LoadIcon("org/esa/nest/icons/esa.png");
+    public static ImageIcon esaPlanetIcon = LoadIcon("org/esa/nest/icons/esa-planet.png");
 
     public static ImageIcon LoadIcon(final String path) {
         final java.net.URL imageURL = ResourceUtils.class.getClassLoader().getResource(path);
@@ -85,6 +87,13 @@ public final class ResourceUtils {
                                    final String fileName, final String description, final boolean isSave) {
         return GetFilePath(title, formatName, extension, fileName, description, isSave,
                            BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR,
+                           FileSystemView.getFileSystemView().getRoots()[0].getAbsolutePath());
+    }
+
+    public static File GetSaveFilePath(final String title, final String formatName, final String extension,
+                                   final String fileName, final String description) {
+        return GetFilePath(title, formatName, extension, fileName, description, true,
+                           BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR,
                            FileSystemView.getFileSystemView().getRoots()[0].getAbsolutePath());
     }
 

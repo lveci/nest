@@ -29,20 +29,20 @@ import java.net.URL;
 
 public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "SRTM 3Sec";
-    public static final String DB_FILE_SUFFIX = ".TIF";
-    public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
-    public static final int NUM_X_TILES = 72;
-    public static final int NUM_Y_TILES = 24;
-    public static final int DEGREE_RES = 5;
-    public static final int PIXEL_RES = 6000;
-    public static final int NO_DATA_VALUE = -32768;
+    private static final String NAME = "SRTM 3Sec";
+    private static final String DB_FILE_SUFFIX = ".tif";
+    private static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
+    private static final int NUM_X_TILES = 72;
+    private static final int NUM_Y_TILES = 24;
+    private static final int DEGREE_RES = 5;
+    private static final int PIXEL_RES = 6000;
+    private static final int NO_DATA_VALUE = -32768;
 
-    public static final GeoPos RASTER_ORIGIN = new GeoPos(60, 180);
-    public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
+    private static final GeoPos RASTER_ORIGIN = new GeoPos(60, 180);
+    private static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
+    private static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
 
-    public static final Datum DATUM = Datum.WGS_84;
+    private static final Datum DATUM = Datum.WGS_84;
 
     private File demInstallDir = null;
 
@@ -55,6 +55,14 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
 
     public Datum getDatum() {
         return DATUM;
+    }
+
+    public int getNumXTiles() {
+        return NUM_X_TILES;
+    }
+
+    public int getNumYTiles() {
+        return NUM_Y_TILES;
     }
 
     public float getNoDataValue() {
@@ -121,18 +129,19 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
         }
     }
 
-    public static String createTileFilename(int tileX, int tileY) {
-        String name = "srtm_";
-        if(tileX < 10)
-            name += "0" + tileX;
-        else
-            name += tileX;
-        name += '_';
-        if(tileY < 10)
-            name += "0" + tileY;
-        else
-            name += tileY;
-        return name + ".tif";
+    public String createTileFilename(final int tileX, final int tileY) {
+        final StringBuilder name = new StringBuilder("srtm_");
+        if(tileX < 10) {
+            name.append('0');
+        }
+        name.append(tileX);
+        name.append('_');
+        if(tileY < 10) {
+            name.append('0');
+        }
+        name.append(tileY);
+        name.append(DB_FILE_SUFFIX);
+        return name.toString();
     }
 
 }

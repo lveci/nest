@@ -13,35 +13,29 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dataio.dem.aster;
+package org.esa.nest.dataio.dem;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
 
 import java.io.IOException;
 
-public final class AsterElevationTile {
+public class BaseElevationTile implements ElevationTile {
 
     private CachingObjectArray linesCache;
     private Product product;
-    private final float noDataValue;
-    private float[][] egmArray = null;
-    private final String name;
+    protected final float noDataValue;
 
-    public AsterElevationTile(final AsterElevationModel dem, final Product product) {
+    public BaseElevationTile(final ElevationModel dem, final Product product) {
         this.product = product;
         noDataValue = dem.getDescriptor().getNoDataValue();
         linesCache = new CachingObjectArray(getLineFactory());
         linesCache.setCachedRange(0, product.getSceneRasterHeight());
-        name = product.getName();
 
-        //System.out.println("Dem Tile "+name);
-    }
-
-    public String getName() {
-        return name;
+        //System.out.println("Dem Tile "+product.getName());
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
@@ -70,13 +64,18 @@ public final class AsterElevationTile {
         final Band band = product.getBandAt(0);
         final int width = product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
-            public synchronized Object createObject(int index) throws Exception {
-                return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
+            public Object createObject(int index) throws Exception {
+                final float[] line =  band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
+                addGravitationalModel(index, line);
+                return line;
             }
         };
     }
 
-    private static IOException convertLineCacheException(Exception e) {
+    protected void addGravitationalModel(final int index, final float[] line) {
+    }
+
+    private static IOException convertLineCacheException(final Exception e) {
         IOException ioe;
         if (e instanceof IOException) {
             ioe = (IOException) e;

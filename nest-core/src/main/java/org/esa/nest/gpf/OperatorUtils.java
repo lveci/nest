@@ -22,15 +22,16 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
 import java.awt.*;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods for working with Operators
@@ -603,11 +604,11 @@ public final class OperatorUtils {
             if (unit.contains(Unit.PHASE) && outputIntensity) {
                 continue;
 
-            } else if (unit.contains(Unit.IMAGINARY) && outputIntensity) {
+            } else if (unit.contains(Unit.IMAGINARY) && outputIntensity && !isPolsar) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains(Unit.REAL) && outputIntensity) {
+            } else if (unit.contains(Unit.REAL) && outputIntensity && !isPolsar) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");

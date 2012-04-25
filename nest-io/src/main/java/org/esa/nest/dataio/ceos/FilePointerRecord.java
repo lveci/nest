@@ -8,13 +8,14 @@ import java.io.IOException;
 
 public class FilePointerRecord extends BinaryRecord {
 
-    public FilePointerRecord(final BinaryFileReader reader, final org.jdom.Document filePointerXML) throws IOException {
-        this(reader, filePointerXML, -1);
+    public FilePointerRecord(final BinaryFileReader reader, final org.jdom.Document filePointerXML, 
+                             final String recName) throws IOException {
+        this(reader, filePointerXML, -1, recName);
     }
 
-    public FilePointerRecord(final BinaryFileReader reader, final org.jdom.Document filePointerXML, final long startPos)
-            throws IOException {
-        super(reader, startPos, filePointerXML);
+    public FilePointerRecord(final BinaryFileReader reader, final org.jdom.Document filePointerXML, final long startPos,
+                             final String recName) throws IOException {
+        super(reader, startPos, filePointerXML, recName);
     }
 
     public void assignMetadataTo(final MetadataElement root, final String suffix) {

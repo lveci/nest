@@ -23,8 +23,8 @@ import org.esa.beam.framework.gpf.OperatorException;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.DateFormat;
+import java.text.ParseException;
 
 /**
  * Created by IntelliJ IDEA.

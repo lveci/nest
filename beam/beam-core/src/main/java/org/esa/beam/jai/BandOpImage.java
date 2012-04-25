@@ -23,6 +23,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.io.EOFException;
 
 
 /**
@@ -53,26 +54,30 @@ public class BandOpImage extends RasterDataNodeOpImage {
         if (productReader == null) {
             throw new IllegalStateException("no product reader for band " + getBand().getDisplayName());
         }
-        if (getLevel() == 0) {
-            productReader.readBandRasterData(getBand(), destRect.x, destRect.y,
-                                             destRect.width, destRect.height,
-                                             productData,
-                                             ProgressMonitor.NULL);
-        } else {
-            final int sourceWidth = getSourceWidth(destRect.width);
-            final ProductData lineData = ProductData.createInstance(getBand().getDataType(), sourceWidth);
-            final int[] sourceCoords = getSourceCoords(sourceWidth, destRect.width);
-            final Band band = getBand();
-            final int srcX = getSourceX(destRect.x);
-            for (int y = 0; y < destRect.height; y++) {
-                productReader.readBandRasterData(band,
-                                                 srcX,
-                                                 getSourceY(destRect.y + y),
-                                                 lineData.getNumElems(), 1,
-                                                 lineData,
+        try {
+            if (getLevel() == 0) {
+                productReader.readBandRasterData(getBand(), destRect.x, destRect.y,
+                                                 destRect.width, destRect.height,
+                                                 productData,
                                                  ProgressMonitor.NULL);
-                copyLine(y, destRect.width, lineData, productData, sourceCoords);
+            } else {
+                final int sourceWidth = getSourceWidth(destRect.width);
+                final ProductData lineData = ProductData.createInstance(getBand().getDataType(), sourceWidth);
+                final int[] sourceCoords = getSourceCoords(sourceWidth, destRect.width);
+                final Band band = getBand();
+                final int srcX = getSourceX(destRect.x);
+                for (int y = 0; y < destRect.height; y++) {
+                    productReader.readBandRasterData(band,
+                                                     srcX,
+                                                     getSourceY(destRect.y + y),
+                                                     lineData.getNumElems(), 1,
+                                                     lineData,
+                                                     ProgressMonitor.NULL);
+                    copyLine(y, destRect.width, lineData, productData, sourceCoords);
+                }
             }
+        } catch(EOFException e) {
+            getBand().getProduct().setCorrupt(true);    
         }
     }
 }

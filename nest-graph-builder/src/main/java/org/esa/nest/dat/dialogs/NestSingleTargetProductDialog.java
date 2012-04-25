@@ -41,6 +41,7 @@ import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.gpf.ProgressMonitorList;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -71,6 +72,7 @@ public class NestSingleTargetProductDialog extends DefaultSingleTargetProductDia
         addParameters(operatorSpi, appContext, helpID);
 
         getJDialog().setMinimumSize(new Dimension(450, 450));
+        getJDialog().setIconImage(ResourceUtils.nestIcon.getImage());
 
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));
@@ -124,11 +126,6 @@ public class NestSingleTargetProductDialog extends DefaultSingleTargetProductDia
 
             //getJDialog().setJMenuBar(operatorMenu.createDefaultMenu());
         }
-    }
-
-    public void setIcon(final ImageIcon ico) {
-        if(ico == null) return;
-        this.getJDialog().setIconImage(ico.getImage());
     }
 
     @Override

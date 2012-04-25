@@ -48,7 +48,7 @@ import java.util.logging.Level;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  * @see org.esa.beam.dataio.dimap.DimapProductWriterPlugIn
  */
@@ -140,7 +140,6 @@ public class DimapProductReader extends AbstractProductReader {
             DimapProductHelpers.addMaskUsages(dom, this.product);
         }
         //ProductFunctions.discardUnusedMetadata(this.product);
-
         this.product.setProductReader(this);
         this.product.setFileLocation(inputFile);
         this.product.setModified(false);

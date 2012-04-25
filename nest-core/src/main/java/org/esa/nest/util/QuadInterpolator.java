@@ -18,7 +18,6 @@ package org.esa.nest.util;
 import Jama.Matrix;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.nest.gpf.OperatorUtils;
-import org.esa.nest.util.MathUtils;
 
 /**
  * Created by IntelliJ IDEA.

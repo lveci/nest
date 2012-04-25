@@ -32,7 +32,7 @@ public final class ACEFile extends ElevationFile {
 
     private static final String remoteHTTP = "http://nest.s3.amazonaws.com/data/ACE30/";
 
-    public ACEFile(ACEElevationModel model, File localFile, ProductReader reader) {
+    public ACEFile(final ACEElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile,  reader);
         this.demModel = model;
     }

@@ -144,6 +144,9 @@ public class Product extends ProductNode {
     private Dimension preferredTileSize;
     private AutoGrouping autoGrouping;
 
+    // if product is incomplete or corrupt
+    private boolean corruptFlag = false;
+
     /**
      * Creates a new product without any reader (in-memory product)
      *
@@ -1170,7 +1173,9 @@ public class Product extends ProductNode {
         if (create) {
             vectorDataNode = new VectorDataNode(PIN_GROUP_NAME, Placemark.createPinFeatureType());
             vectorDataNode.setDefaultCSS("symbol:pin; fill:#0000ff; fill-opacity:0.7; stroke:#ffffff; stroke-opacity:1.0; stroke-width:0.5");
+            boolean wasModified = isModified();
             this.vectorDataGroup.add(vectorDataNode);
+            setModified(wasModified);
             return vectorDataNode.getPlacemarkGroup();
         }
         return null;
@@ -2190,6 +2195,14 @@ public class Product extends ProductNode {
                 this.index = index;
             }
         }
+    }
+
+    public void setCorrupt(final boolean flag) {
+        corruptFlag = flag;
+    }
+
+    public boolean isCorrupt() {
+        return corruptFlag;
     }
 
     /////////////////////////////////////////////////////////////////////////

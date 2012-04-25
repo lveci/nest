@@ -135,7 +135,7 @@ public class ProductIOPlugInManager {
         return writerPlugIns.removeService(writerPlugIn);
     }
 
-    private static final String[] excludeFormats = { "Generic Binary", "ImageIO"};
+    private static final String[] excludeFormats = { "Generic Binary"};
 
     /**
      * Returns a <code>String[]</code> which contains all the product writer format strings of registered product

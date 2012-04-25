@@ -1,17 +1,17 @@
 package org.esa.nest.dat.dialogs;
 
 import org.esa.nest.db.ProductEntry;
-import org.esa.nest.util.ProductFunctions;
 import org.esa.nest.util.ClipboardUtils;
+import org.esa.nest.util.ProductFunctions;
 
 import javax.swing.*;
-import java.io.File;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  * Table for listing product files

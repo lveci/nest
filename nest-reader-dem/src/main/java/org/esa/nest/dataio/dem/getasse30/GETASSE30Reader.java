@@ -29,8 +29,8 @@ import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
+import org.esa.nest.gpf.ReaderUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;

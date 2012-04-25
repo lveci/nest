@@ -123,10 +123,20 @@ public class WorldMapPane extends JPanel {
     }
 
     public void zoomToProduct(Product product) {
-        if (product == null || product.getGeoCoding() == null) {
+        final GeoPos[][] selGeoBoundaries = dataModel.getSelectedGeoBoundaries();
+        if ((product == null || product.getGeoCoding() == null) && selGeoBoundaries.length == 0) {
             return;
         }
-        final GeneralPath[] generalPaths = getGeoBoundaryPaths(product);
+
+		//NESTMOD
+        final GeneralPath[] generalPaths;
+        if (product != null && product.getGeoCoding() != null) {
+            generalPaths = getGeoBoundaryPaths(product);
+        } else {
+            final ArrayList<GeneralPath> pathList = ProductUtils.assemblePathList(selGeoBoundaries[0]);
+            generalPaths = pathList.toArray(new GeneralPath[pathList.size()]);
+        }
+
         Rectangle2D modelArea = new Rectangle2D.Double();
         final Viewport viewport = layerCanvas.getViewport();
         for (GeneralPath generalPath : generalPaths) {

@@ -15,10 +15,10 @@
  */
 package org.esa.nest.dat.toolviews.productlibrary.model.dataprovider;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductData.UTC;
-import org.esa.nest.db.ProductEntry;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.db.ProductEntry;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -59,11 +59,15 @@ public class PropertiesProvider implements DataProvider {
 
     public TableColumn getTableColumn() {
         if (propertiesColumn == null) {
-            propertiesColumn = new TableColumn();
-            propertiesColumn.setResizable(true);
-            propertiesColumn.setPreferredWidth(250);
-            propertiesColumn.setHeaderValue("Product Properties");
-            propertiesColumn.setCellRenderer(new ProductPropertiesRenderer());
+            try {
+                propertiesColumn = new TableColumn();
+                propertiesColumn.setResizable(true);
+                propertiesColumn.setPreferredWidth(250);
+                propertiesColumn.setHeaderValue("Product Properties");
+                propertiesColumn.setCellRenderer(new ProductPropertiesRenderer());
+            } catch(Throwable e) {
+                System.out.println("PropertiesProvider: "+e.getMessage());
+            }
         }
         return propertiesColumn;
     }
@@ -100,59 +104,67 @@ public class PropertiesProvider implements DataProvider {
                                                        final boolean isSelected,
                                                        final boolean hasFocus,
                                                        final int row, final int column) {
-            String[] values = null;
-            String toolTip = "";
-            if (value instanceof ProductEntry) {
-                final ProductEntry entry = (ProductEntry) value;
+            try {
+                String[] values = null;
+                String toolTip = "";
+                if (value instanceof ProductEntry) {
+                    final ProductEntry entry = (ProductEntry) value;
 
-                final String pixelSpacing = df.format(entry.getRangeSpacing()) +" x "+
-                                            df.format(entry.getAzimuthSpacing()) +" m";
-                final File file = entry.getFile();
-                final String fileSize = "("+(entry.getFileSize() / (1024 * 1024)) +" Mb)";
+                    final String pixelSpacing = df.format(entry.getRangeSpacing()) +" x "+
+                                                df.format(entry.getAzimuthSpacing()) +" m";
+                    final File file = entry.getFile();
+                    final String fileSize = "("+(entry.getFileSize() / (1024 * 1024)) +" Mb)";
 
-                final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
-                final String dateString = dateFormat.format(entry.getFirstLineTime().getAsDate());
+                    final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
+                    final String dateString = dateFormat.format(entry.getFirstLineTime().getAsDate());
 
-                final String pol1 = entry.getMetadata().getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
-                final String pol2 = entry.getMetadata().getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
-                final String pol3 = entry.getMetadata().getAttributeString(AbstractMetadata.mds3_tx_rx_polar);
-                final String pol4 = entry.getMetadata().getAttributeString(AbstractMetadata.mds4_tx_rx_polar);
+                    String polStr = "";
+                    final MetadataElement absRoot = entry.getMetadata();
+                    if(absRoot != null) {
+                        final String pol1 = entry.getMetadata().getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
+                        final String pol2 = entry.getMetadata().getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
+                        final String pol3 = entry.getMetadata().getAttributeString(AbstractMetadata.mds3_tx_rx_polar);
+                        final String pol4 = entry.getMetadata().getAttributeString(AbstractMetadata.mds4_tx_rx_polar);
+                        polStr = pol1 +' '+ pol2 +' '+ pol3 +' '+ pol4;
+                    }
 
-                values = new String[]{
-                        entry.getName(),
-                        entry.getMission()+"   "+entry.getProductType()+"   "+entry.getPass()+"  "+
-                                pol1 +' '+ pol2 +' '+ pol3 +' '+ pol4,
-                        dateString+"   Pixel Size: "+pixelSpacing,
-                        entry.getFileFormat()+"   "+fileSize
-                };
-                for (int i = 0; i < values.length; i++) {
-                    setValueAt(values[i], i, 1);
+                    values = new String[]{
+                            entry.getName(),
+                            entry.getMission()+"   "+entry.getProductType()+"   "+entry.getPass()+"  "+ polStr,
+                            dateString+"   Pixel Size: "+pixelSpacing,
+                            entry.getFileFormat()+"   "+fileSize
+                    };
+                    for (int i = 0; i < values.length; i++) {
+                        setValueAt(values[i], i, 1);
+                    }
+                    toolTip = file.getAbsolutePath();
+                } else if (value == null) {
+                    for (int i = 0; i < propertyLables.length; i++) {
+                        setValueAt(null, i, 1);
+                    }
                 }
-                toolTip = file.getAbsolutePath();
-            } else if (value == null) {
-                for (int i = 0; i < propertyLables.length; i++) {
-                    setValueAt(null, i, 1);
+
+                final Color backgroundColor;
+                final Color foregroundColor;
+                if (isSelected) {
+                    backgroundColor = table.getSelectionBackground();
+                    foregroundColor = table.getSelectionForeground();
+                } else {
+                    backgroundColor = table.getBackground();
+                    foregroundColor = table.getForeground();
                 }
-            }
+                setForeground(foregroundColor);
+                setBackground(backgroundColor);
+                centeringPanel.setForeground(foregroundColor);
+                centeringPanel.setBackground(backgroundColor);
+                centeringPanel.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));
+                centeringPanel.add(this, BorderLayout.CENTER);
 
-            final Color backgroundColor;
-            final Color foregroundColor;
-            if (isSelected) {
-                backgroundColor = table.getSelectionBackground();
-                foregroundColor = table.getSelectionForeground();
-            } else {
-                backgroundColor = table.getBackground();
-                foregroundColor = table.getForeground();
+                centeringPanel.setToolTipText(toolTip);
+                adjustCellSize(table, row, column, values);
+            } catch(Throwable e) {
+                System.out.println("ProductPropertiesRenderer: "+e.getMessage());
             }
-            setForeground(foregroundColor);
-            setBackground(backgroundColor);
-            centeringPanel.setForeground(foregroundColor);
-            centeringPanel.setBackground(backgroundColor);
-            centeringPanel.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));
-            centeringPanel.add(this, BorderLayout.CENTER);
-
-            centeringPanel.setToolTipText(toolTip);
-            adjustCellSize(table, row, column, values);
             return centeringPanel;
         }
 
@@ -215,12 +227,14 @@ public class PropertiesProvider implements DataProvider {
                 try {
                     final JLabel jLabel = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
                                                                                        row, column);
-                    jLabel.setHorizontalAlignment(JLabel.LEFT);
-                    if(row == 0)
-                        jLabel.setFont(_font);
-                    return jLabel;
+                    if(jLabel != null) {
+                        jLabel.setHorizontalAlignment(JLabel.LEFT);
+                        if(row == 0)
+                            jLabel.setFont(_font);
+                        return jLabel;
+                    }
                 } catch(Throwable e) {
-                    e.printStackTrace();   
+                    System.out.println("PropertyValueCellRenderer: "+e.getMessage());
                 }
                 return null;
             }

@@ -20,7 +20,6 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
-import org.esa.nest.dataio.ceos.FilePointerRecord;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -34,7 +33,7 @@ public class CeosHelper {
             public boolean accept(final File dir, final String fileName) {
                 final String name = fileName.toUpperCase();
                 for(String prefix : constants.getVolumeFilePrefix()) {
-                    if(name.startsWith(prefix) || name.endsWith("."+prefix))
+                    if(name.startsWith(prefix) || name.endsWith('.'+prefix))
                         return true;
                 }
                 return false;
@@ -51,14 +50,14 @@ public class CeosHelper {
         return files[0];
     }
 
-    public static FilePointerRecord[] readFilePointers(final BinaryRecord vdr, final org.jdom.Document filePointerXML)
-            throws IOException {
+    public static FilePointerRecord[] readFilePointers(final BinaryRecord vdr, final org.jdom.Document filePointerXML,
+                                                       final String recName) throws IOException {
         final int numFilePointers = vdr.getAttributeInt("Number of filepointer records");
         final BinaryFileReader reader = vdr.getReader();
         reader.seek(vdr.getRecordLength());
         final FilePointerRecord[] filePointers = new FilePointerRecord[numFilePointers];
         for (int i = 0; i < numFilePointers; i++) {
-            filePointers[i] = new FilePointerRecord(reader, filePointerXML);
+            filePointers[i] = new FilePointerRecord(reader, filePointerXML, recName);
         }
         return filePointers;
     }
@@ -68,7 +67,7 @@ public class CeosHelper {
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();
             for(String prefix : prefixList) {
-                if (name.startsWith(prefix) || name.endsWith("."+prefix))
+                if (name.startsWith(prefix) || name.endsWith('.'+prefix))
                     return file;
             }
         }
@@ -82,8 +81,15 @@ public class CeosHelper {
     }
 
     public static String getProductType(final BinaryRecord textRecord) {
-        final String type = textRecord.getAttributeString("Product type specifier").trim();
-        return type.replace("PRODUCT:", "").trim();
+        String type = textRecord.getAttributeString("Product type specifier").trim();
+        type = type.replace("PRODUCT:", "");
+        type = type.replace("JERS-1", "JERS1");
+        type = type.replace("JERS_1", "JERS1");
+        type = type.replace("ERS-1", "ERS1");
+        type = type.replace("ERS_1", "ERS1");
+        type = type.replace("ERS-2", "ERS2");
+        type = type.replace("ERS_2", "ERS2");
+        return type.trim();
     }
 
     public static ProductData.UTC createUTCDate(final int year, final int dayOfYear, final int millisInDay) {

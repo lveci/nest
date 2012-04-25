@@ -16,9 +16,9 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

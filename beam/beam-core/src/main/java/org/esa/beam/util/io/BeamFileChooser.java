@@ -68,14 +68,15 @@ public class BeamFileChooser extends JFileChooser {
         init();
     }
 
-    @Override
-    public Icon getIcon(File f) {
-        final Icon icon = super.getIcon(f);
-        if (f.isDirectory() && isCompoundDocument(f)) {
-            return new CompoundDocumentIcon(icon);
-        }
-        return icon;
-    }
+  //NESTMOD
+  //  @Override
+  //  public Icon getIcon(File f) {
+  //      final Icon icon = super.getIcon(f);
+  //      if (f.isDirectory() && isCompoundDocument(f)) {
+  //          return new CompoundDocumentIcon(icon);
+  //      }
+  //      return icon;
+  //  }
 
     @Override
     public boolean isTraversable(File f) {

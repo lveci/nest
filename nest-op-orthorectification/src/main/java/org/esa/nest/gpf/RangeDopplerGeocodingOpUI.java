@@ -80,7 +80,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 band");
     final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 band");
 
-    final JLabel auxFileLabel = new JLabel("Auxiliary File:");
+    final JLabel auxFileLabel = new JLabel("Auxiliary File (ASAR only):");
     final JLabel externalAuxFileLabel = new JLabel("External Aux File:");
     final JTextField externalAuxFile = new JTextField("");
     final JButton externalAuxFileBrowseButton = new JButton("...");
@@ -452,7 +452,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 if(isPolsar && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization is" +
-                            " not available for products imported from PolSARPro");
+                            " not available for polarimetric matrix products");
                 }
                 
                 if ((mission.equals("ENVISAT") || mission.contains("ERS")) &&
@@ -560,48 +560,48 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        contentPane.add(nodataValueAtSeaCheckBox, gbc);
-        gbc.gridy++;
-        contentPane.add(saveSelectedSourceBandCheckBox, gbc);
+
         if(!useAvgSceneHeight) {
+            gbc.gridx = 0;
+            gbc.gridy++;
+            contentPane.add(nodataValueAtSeaCheckBox, gbc);
+            gbc.gridy++;
+            contentPane.add(saveSelectedSourceBandCheckBox, gbc);
             gbc.gridx = 1;
             contentPane.add(saveDEMCheckBox, gbc);
+            gbc.gridx = 0;
+            gbc.gridy++;
+            contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
+            gbc.gridx = 1;
+            contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
+            gbc.gridx = 0;
+            gbc.gridy++;
+            contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
+            gbc.gridy++;
+            gbc.insets.left = 20;
+            contentPane.add(saveSigmaNoughtCheckBox, gbc);
+            gbc.gridx = 1;
+            gbc.insets.left = 1;
+            contentPane.add(incidenceAngleForSigma0, gbc);
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.insets.left = 20;
+            contentPane.add(saveGammaNoughtCheckBox, gbc);
+            gbc.gridx = 1;
+            gbc.insets.left = 1;
+            contentPane.add(incidenceAngleForGamma0, gbc);
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.insets.left = 20;
+            contentPane.add(saveBetaNoughtCheckBox, gbc);
+
+            gbc.gridy++;
+            gbc.gridx = 0;
+            gbc.insets.left = 0;
+            DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
+            gbc.gridy++;
+            DialogUtils.addInnerPanel(contentPane, gbc, externalAuxFileLabel, externalAuxFile, externalAuxFileBrowseButton);
         }
-        gbc.gridx = 0;
-        gbc.gridy++;
-        contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
-        gbc.gridx = 1;
-        contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
-        gbc.gridy++;
-        gbc.insets.left = 20;
-        contentPane.add(saveSigmaNoughtCheckBox, gbc);
-        gbc.gridx = 1;
-        gbc.insets.left = 1;
-        contentPane.add(incidenceAngleForSigma0, gbc);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.insets.left = 20;
-        contentPane.add(saveGammaNoughtCheckBox, gbc);
-        gbc.gridx = 1;
-        gbc.insets.left = 1;
-        contentPane.add(incidenceAngleForGamma0, gbc);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.insets.left = 20;
-        contentPane.add(saveBetaNoughtCheckBox, gbc);
-
-        gbc.gridy++;
-        gbc.gridx = 0;
-        gbc.insets.left = 0;
-        DialogUtils.addComponent(contentPane, gbc, auxFileLabel, auxFile);
-        gbc.gridy++;
-        DialogUtils.addInnerPanel(contentPane, gbc, externalAuxFileLabel, externalAuxFile, externalAuxFileBrowseButton);
-
         return contentPane;
     }
 

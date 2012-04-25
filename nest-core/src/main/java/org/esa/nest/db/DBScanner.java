@@ -17,6 +17,7 @@ package org.esa.nest.db;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.gpf.ThreadManager;
 import org.esa.nest.util.ProductFunctions;
 
 import javax.swing.*;
@@ -36,6 +37,7 @@ public final class DBScanner extends SwingWorker {
     private final boolean generateQuicklooks;
     private final com.bc.ceres.core.ProgressMonitor pm;
     private final List<DBScannerListener> listenerList = new ArrayList<DBScannerListener>(1);
+    private final List<ErrorFile> errorList = new ArrayList<ErrorFile>();
 
     public DBScanner(final ProductDB database, final File baseDir, final boolean doRecursive,
                      final boolean doQuicklooks, final com.bc.ceres.core.ProgressMonitor pm) {
@@ -58,12 +60,14 @@ public final class DBScanner extends SwingWorker {
 
     private void notifyMSG(final DBScannerListener.MSG msg) {
         for (final DBScannerListener listener : listenerList) {
-            listener.notifyMSG(msg);
+            listener.notifyMSG(this, msg);
         }
     }
 
     @Override
     protected Boolean doInBackground() throws Exception {
+        errorList.clear();
+
         final List<File> dirList = new ArrayList<File>(20);
         dirList.add(baseDir);
         if (doRecursive) {
@@ -93,9 +97,6 @@ public final class DBScanner extends SwingWorker {
                 pm.setTaskName(taskMsg);
                 pm.worked(1);
 
-                if(pm.isCanceled())
-                    break;
-
                 // check if already exists in db
                 final ProductEntry existingEntry = db.getProductEntry(file);
                 if(existingEntry != null) {
@@ -107,6 +108,9 @@ public final class DBScanner extends SwingWorker {
                     existingEntry.dispose();
                     continue;
                 }
+
+                if(pm.isCanceled())
+                    break;
 
                 try {
                     // quick test for common readers
@@ -124,7 +128,8 @@ public final class DBScanner extends SwingWorker {
                         System.out.println("No reader for "+file.getAbsolutePath());
                     }
                 } catch(Throwable e) {
-                    System.out.println("Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
+                    errorList.add(new ErrorFile(file, ErrorFile.UNREADABLE));
+                    System.out.println("Unable to read "+file.getAbsolutePath()+ '\n' +e.getMessage());
                 }
             }
 
@@ -135,20 +140,36 @@ public final class DBScanner extends SwingWorker {
             if(generateQuicklooks) {
                 final int numQL = qlProductFiles.size();
                 pm.beginTask("Generating Quicklooks...", numQL);
+                final ThreadManager threadManager = new ThreadManager();
+
                 for(int j=0; j < numQL; ++j) {
                     pm.setTaskName("Generating Quicklook... "+(j+1)+" of "+numQL);
                     pm.worked(1);
                     if(pm.isCanceled())
                         break;
-    
+
                     final File file = qlProductFiles.get(j);
-                    try {
-                        QuickLookGenerator.createQuickLook(qlIDs.get(j), file);
-                        notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
-                    } catch(Throwable e) {
-                        System.out.println("QL Unable to read "+file.getAbsolutePath()+"\n"+e.getMessage());
-                    }
+                    final int qlID = qlIDs.get(j);
+
+                    final Thread worker = new Thread() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                boolean isCorrupt = QuickLookGenerator.createQuickLook(qlID, file);
+                                if(isCorrupt) {
+                                    errorList.add(new ErrorFile(file, ErrorFile.CORRUPT));
+                                }
+                            } catch(Throwable e) {
+                                System.out.println("QL Unable to read "+file.getAbsolutePath()+ '\n' +e.getMessage());
+                            }
+                        }
+                    };
+                    threadManager.add(worker);
+                    
+                    notifyMSG(DBScannerListener.MSG.QUICK_LOOK_GENERATED);
                 }
+                threadManager.finish();
             }
             pm.setTaskName("");
 
@@ -178,10 +199,25 @@ public final class DBScanner extends SwingWorker {
         return dirList.toArray(new File[dirList.size()]);
     }
 
+    public List<ErrorFile> getErrorList() {
+        return errorList;
+    }
+
+    public static class ErrorFile {
+        public final File file;
+        public final String message;
+        public final static String CORRUPT = "Corrupt Image";
+        public final static String UNREADABLE = "Product unreadable";
+        public ErrorFile(final File file, final String msg) {
+            this.file = file;
+            this.message = msg;
+        }
+    }
+
     public interface DBScannerListener {
 
         public enum MSG { DONE, FOLDERS_SCANNED, QUICK_LOOK_GENERATED }
 
-        public void notifyMSG(MSG msg);
+        public void notifyMSG(final DBScanner dbScanner, final MSG msg);
     }
 }

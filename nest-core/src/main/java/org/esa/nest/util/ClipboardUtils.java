@@ -2,13 +2,12 @@ package org.esa.nest.util;
 
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.db.ProductEntry;
 import org.esa.nest.db.FileListSelection;
 
-import java.awt.datatransfer.StringSelection;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.util.List;
 

@@ -22,14 +22,13 @@ import com.jidesoft.action.DockableBarContext;
 import com.jidesoft.status.LabelStatusBarItem;
 import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.command.CommandManager;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
@@ -60,7 +59,7 @@ public class DatApp extends VisatApp {
         DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = true;
 
         // enable anti-aliased text:
-        System.setProperty("awt.useSystemAAFontSettings","on"); 
+        System.setProperty("awt.useSystemAAFontSettings","on");
         System.setProperty("swing.aatext", "true");
     }
 
@@ -71,7 +70,7 @@ public class DatApp extends VisatApp {
     @Override
     protected String getMainFrameTitle() {
         final String ver = System.getProperty(ResourceUtils.getContextID()+".version");
-        return getAppName() + " "+ver;
+        return getAppName() + ' '+ver;
     }
 
     // You can now override numerous createXXX() methods
@@ -91,6 +90,8 @@ public class DatApp extends VisatApp {
         toolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
         toolBar.getContext().setInitIndex(1);
         getMainFrame().getDockableBarManager().addDockableBar(toolBar);
+
+        getMainFrame().setIconImage(ResourceUtils.nestIcon.getImage());
 
         updateGraphMenu();
     }

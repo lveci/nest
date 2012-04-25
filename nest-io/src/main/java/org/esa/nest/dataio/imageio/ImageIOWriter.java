@@ -19,8 +19,9 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.nest.gpf.ReaderUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.gpf.ReaderUtils;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -39,20 +40,27 @@ import java.util.Iterator;
 
 public class ImageIOWriter extends AbstractProductWriter {
 
+    private File file;
     private ImageOutputStream _outputStream;
     private ImageWriter writer;
-    private final String format;
+    private String format = "";
+    private int[] dataArray = null;
+    private int pos = 0;
 
     /**
      * Construct a new instance of a product writer for the given product writer plug-in.
      *
      * @param writerPlugIn the given product writer plug-in, must not be <code>null</code>
-     * @param format
      */
-    public ImageIOWriter(final ProductWriterPlugIn writerPlugIn, final String format) {
+    public ImageIOWriter(final ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+    }
 
-        this.format = format;
+    /**
+     * Overwrite this method to set the format to write for writers which handle multiple formats.
+     */
+    public void setFormatName(final String formatName) {
+        format = formatName;
     }
 
     /**
@@ -66,9 +74,13 @@ public class ImageIOWriter extends AbstractProductWriter {
     protected void writeProductNodesImpl() throws IOException {
         _outputStream = null;
 
-        final File file = ReaderUtils.getFileFromInput(getOutput());
+        file = ReaderUtils.getFileFromInput(getOutput());
+        // ensure extension // this should not be done here
+        if(!file.getName().toLowerCase().endsWith(format.toLowerCase())) {
+            file = new File(file.getAbsolutePath()+'.'+format.toLowerCase());   
+        }
 
-        Iterator<ImageWriter> writerList = ImageIO.getImageWritersByFormatName(format);
+        final Iterator<ImageWriter> writerList = ImageIO.getImageWritersBySuffix(format);
         writer = writerList.next();
 
         _outputStream = ImageIO.createImageOutputStream(file);
@@ -92,25 +104,50 @@ public class ImageIOWriter extends AbstractProductWriter {
                                     ProgressMonitor pm) throws IOException {
         try {
             final ImageWriteParam param = writer.getDefaultWriteParam();
-            
-            param.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
-            param.setDestinationOffset(new Point(sourceOffsetX, sourceOffsetY));
-            
-            param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
-            param.setTiling(sourceWidth, sourceHeight, sourceOffsetX, sourceOffsetY);
-            writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+            final boolean canWriteTiles = param.canWriteTiles();
 
+       /*     if(canWriteTiles) {
+                param.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
+                //param.setDestinationOffset(new Point(sourceOffsetX, sourceOffsetY));
+
+                param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+                param.setTiling(sourceWidth, sourceHeight, sourceOffsetX, sourceOffsetY);
+                writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+            } else {
+                if(dataArray == null) {
+                    dataArray = new int[sourceBand.getRasterWidth() * sourceBand.getRasterHeight()];
+                }
+                final int num = sourceBuffer.getNumElems();
+                for(int i=0; i < num; ++i) {
+                    dataArray[pos++] = (short)sourceBuffer.getElemIntAt(i);
+                } */
+
+                if(sourceOffsetY == sourceBand.getRasterHeight()-1) {
+                    
+                /*    RenderedImage img = createRenderedImage(dataArray,
+                                                            sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+                    //writer.write(img);
+                    //writer.write(null, new IIOImage(img, null, null), param);
+                    //ImageIO.write(img, format, file);         */
+
+                    writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+                }
+        //    }
         } catch(Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            if(VisatApp.getApp()!=null) {
+                VisatApp.getApp().showErrorDialog(e.getMessage()+
+                        "\nTry using convertDataType to convert to UInt8 or a data type supported by the image format");    
+            }
         }
     }
 
-    private static RenderedImage createRenderedImage(final double[] array, final int w, final int h) {
+    private static RenderedImage createRenderedImage(final int[] array, final int w, final int h) {
 
         // create rendered image with demension being width by height
-        final SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, w, h, 1);
+        final SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_INT, w, h, 1);
         final ColorModel colourModel = PlanarImage.createColorModel(sampleModel);
-        final DataBufferDouble dataBuffer = new DataBufferDouble(array, array.length);
+        final DataBufferInt dataBuffer = new DataBufferInt(array, array.length);
         final WritableRaster raster = RasterFactory.createWritableRaster(sampleModel, dataBuffer, new Point(0,0));
 
         return new BufferedImage(colourModel, raster, false, new Hashtable());

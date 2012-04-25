@@ -17,6 +17,7 @@ package org.esa.nest.dataio.dem.getasse30;
 
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.dataio.dem.BaseElevationTile;
 import org.esa.nest.dataio.dem.ElevationFile;
 import org.esa.nest.dataio.dem.ElevationTile;
 
@@ -32,7 +33,7 @@ public final class GETASSE30File extends ElevationFile {
 
     private static final String remoteHTTP = "http://nest.s3.amazonaws.com/data/GETASSE30/";
 
-    public GETASSE30File(GETASSE30ElevationModel model, File localFile, ProductReader reader) {
+    public GETASSE30File(final GETASSE30ElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile,  reader);
         this.demModel = model;
     }
@@ -46,7 +47,7 @@ public final class GETASSE30File extends ElevationFile {
     }
 
     protected ElevationTile createTile(final Product product) {
-        final GETASSE30ElevationTile tile = new GETASSE30ElevationTile(demModel, product);
+        final ElevationTile tile = new BaseElevationTile(demModel, product);
         demModel.updateCache(tile);
         return tile;
     }

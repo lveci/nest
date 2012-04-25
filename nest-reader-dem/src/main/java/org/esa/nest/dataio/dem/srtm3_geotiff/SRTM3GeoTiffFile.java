@@ -36,7 +36,7 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
     private static final String remotePath = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
     private static final String remoteHTTP = "http://droppr.org/srtm/v4.1/6_5x5_TIFs/";
     
-    public SRTM3GeoTiffFile(SRTM3GeoTiffElevationModel model, File localFile, ProductReader reader) {
+    public SRTM3GeoTiffFile(final SRTM3GeoTiffElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile,  reader);
         this.demModel = model;
     }

@@ -16,7 +16,6 @@
 package org.esa.nest.dataio.binary;
 
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;

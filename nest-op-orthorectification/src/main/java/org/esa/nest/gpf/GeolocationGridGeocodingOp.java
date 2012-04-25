@@ -17,8 +17,8 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -28,18 +28,12 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.MathUtils;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,7 +109,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
     private String mission = null;
     private boolean nearRangeOnLeft = true;
-
+    private boolean unBiasedZeroDoppler = false;
+    private boolean isPolsar = false;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -174,10 +169,13 @@ public final class GeolocationGridGeocodingOp extends Operator {
             srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
         }
 
-        final String pass = absRoot.getAttributeString("PASS");
-        if (mission.equals("RS2") && pass.contains("DESCENDING")) {
-            nearRangeOnLeft = false;
+        if (mission.contains("CSKS") || mission.contains("TSX") || mission.equals("RS2")) {
+            unBiasedZeroDoppler = true;
         }
+
+        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(mission, absRoot);
+
+        isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
 
     /**
@@ -345,7 +343,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                     final double zeroDopplerTime = computeZeroDopplerTime(pixPos);
                     double azimuthIndex = 0.0;
                     double rangeIndex = 0.0;
-                    if (mission.contains("CSKS") || mission.contains("TSX") || mission.equals("RS2")) {
+                    if (unBiasedZeroDoppler) {
                         azimuthIndex = (zeroDopplerTime - firstLineUTC) / lineTimeInterval;
                         rangeIndex = computeRangeIndex(zeroDopplerTime, slantRange);
                     } else {
@@ -460,20 +458,19 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
                                  final Band sourceBand1, final Band sourceBand2) {
 
-        Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
         if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
 
             final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
-                    azimuthIndex, rangeIndex, bandUnit, sourceTile, sourceTile2);
+                    azimuthIndex, rangeIndex, sourceTile, sourceTile2);
 
         } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
 
             final Tile sourceTile = getSrcTile(sourceBand1, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
-                    bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
+                    sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
 
         } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
 
@@ -482,7 +479,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
             final Tile sourceTile2 = getSrcTile(sourceBand2, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
-                    bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
+                    sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
         } else {
             throw new OperatorException("Unknown interpolation method");
         }
@@ -500,19 +497,18 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Get source image pixel value using nearest neighbot interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandUnit The source band unit.
      * @param sourceTile  i
      * @param sourceTile2 q
      * @return The pixel value.
      */
     private static double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
-            final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2) {
+            final Tile sourceTile, final Tile sourceTile2) {
 
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (sourceTile2 != null) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
@@ -529,7 +525,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Get source image pixel value using bilinear interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandUnit The source band unit.
      * @param sceneRasterWidth the product width
      * @param sceneRasterHeight the product height
      * @param sourceTile  i
@@ -537,7 +532,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The pixel value.
      */
     private static double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
-                                                    final Unit.UnitType bandUnit,
                                                     final int sceneRasterWidth, final int sceneRasterHeight,
                                                     final Tile sourceTile, final Tile sourceTile2) {
 
@@ -551,7 +545,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (sourceTile2 != null) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
@@ -585,7 +579,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Get source image pixel value using bicubic interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandUnit The source band unit.
      * @param sceneRasterWidth the product width
      * @param sceneRasterHeight the product height
      * @param sourceTile  i
@@ -593,7 +586,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The pixel value.
      */
     private static double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
-                                                   final Unit.UnitType bandUnit,
                                                    final int sceneRasterWidth, final int sceneRasterHeight,
                                                    final Tile sourceTile, final Tile sourceTile2) {
 
@@ -612,7 +604,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (sourceTile2 != null) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {

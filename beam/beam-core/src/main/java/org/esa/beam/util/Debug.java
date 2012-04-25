@@ -38,7 +38,7 @@ import org.esa.beam.util.logging.BeamLogManager;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see AssertionFailure
  */
 public class Debug {

@@ -37,11 +37,11 @@ public class CreateLandMaskOpUI extends BaseOperatorUI {
     private final JList bandList = new JList();
     private final JComboBox geometries = new JComboBox();
 
-    private final JRadioButton landMask = new JRadioButton("Mask the Land");
-    private final JRadioButton seaMask = new JRadioButton("Mask the Sea");
+    private final JRadioButton landMask = new JRadioButton("Mask out the Land");
+    private final JRadioButton seaMask = new JRadioButton("Mask out the Sea");
     private final JCheckBox useSRTMCheckBox = new JCheckBox("Use SRTM 3sec");
-    private final JRadioButton geometryMask = new JRadioButton("Use Geometry as Mask");
-    private final JCheckBox invertGeometryCheckBox = new JCheckBox("Invert Geometry");
+    private final JRadioButton geometryMask = new JRadioButton("Use Vector as Mask");
+    private final JCheckBox invertGeometryCheckBox = new JCheckBox("Invert Vector");
     private final JCheckBox byPassCheckBox = new JCheckBox("Bypass");
     private boolean byPass = false;
     private boolean invertGeometry = false;

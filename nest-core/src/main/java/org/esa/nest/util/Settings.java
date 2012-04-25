@@ -17,7 +17,6 @@ package org.esa.nest.util;
 
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.db.AOIManager;
 import org.jdom.Attribute;
 import org.jdom.Element;
 

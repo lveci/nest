@@ -16,10 +16,9 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
-import org.esa.nest.dataio.ceos.FilePointerRecord;
+import org.esa.nest.dataio.binary.BinaryRecord;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
@@ -51,15 +50,15 @@ public class CEOSVolumeDirectoryFile {
         final String mission = constants.getMission();
         if(volDescXML == null)
             volDescXML = BinaryDBReader.loadDefinitionFile(mission, volume_desc_recordDefinitionFile);
-        volumeDescriptorRecord = new BinaryRecord(binaryReader, -1, volDescXML);
+        volumeDescriptorRecord = new BinaryRecord(binaryReader, -1, volDescXML, volume_desc_recordDefinitionFile);
 
         if(filePointerXML == null)
             filePointerXML = BinaryDBReader.loadDefinitionFile(mission, filePointerDefinitionFile);
-        filePointerRecords = CeosHelper.readFilePointers(volumeDescriptorRecord, filePointerXML);
+        filePointerRecords = CeosHelper.readFilePointers(volumeDescriptorRecord, filePointerXML, filePointerDefinitionFile);
 
         if(textRecXML == null)
             textRecXML = BinaryDBReader.loadDefinitionFile(mission, text_recordDefinitionFile);
-        textRecord = new BinaryRecord(binaryReader, -1, textRecXML);
+        textRecord = new BinaryRecord(binaryReader, -1, textRecXML, text_recordDefinitionFile);
 
         binaryReader.close();
     }

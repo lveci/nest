@@ -36,6 +36,8 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
 
     private int productLevel = -1;
 
+    private final static String facility_record1_5DefinitionFile = "facility_record1_5.xml";
+
     private final static Document leaderXML = BinaryDBReader.loadDefinitionFile(mission, leader_recordDefinitionFile);
     private final static Document sceneXML = BinaryDBReader.loadDefinitionFile(mission, scene_recordDefinitionFile);
     private final static Document mapProjXML = BinaryDBReader.loadDefinitionFile(mission, mapproj_recordDefinitionFile);
@@ -44,6 +46,7 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
     private final static Document radiometricXML = BinaryDBReader.loadDefinitionFile(mission, radiometric_recordDefinitionFile);
     private final static Document dataQualityXML = BinaryDBReader.loadDefinitionFile(mission, dataQuality_recordDefinitionFile);
     private final static Document facilityXML = BinaryDBReader.loadDefinitionFile(mission, facility_recordDefinitionFile);
+    private final static Document facility1_5XML = BinaryDBReader.loadDefinitionFile(mission, facility_record1_5DefinitionFile);
 
     public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException {
         this(stream, leaderXML);
@@ -102,7 +105,7 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
                     _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
                     header.seekToEnd();
                 } else {
-                    _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
+                    _facilityRecord = new BinaryRecord(reader, -1, facility1_5XML, facility_record1_5DefinitionFile);
                     header.seekToEnd();
                 }
             } catch(Exception e) {

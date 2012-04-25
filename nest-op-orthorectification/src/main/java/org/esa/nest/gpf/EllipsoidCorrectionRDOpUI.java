@@ -15,7 +15,6 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.ui.AppContext;
 
 import javax.swing.*;

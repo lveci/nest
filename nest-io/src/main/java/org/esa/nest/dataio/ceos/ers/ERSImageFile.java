@@ -15,9 +15,9 @@
  */
 package org.esa.nest.dataio.ceos.ers;
 
+import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
-import org.esa.nest.dataio.binary.*;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 
@@ -40,7 +40,7 @@ class ERSImageFile extends CEOSImageFile {
 
     public ERSImageFile(final ImageInputStream imageStream) throws IOException, IllegalBinaryFormatException {
         binaryReader = new BinaryFileReader(imageStream);
-        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML);
+        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new BinaryRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
         _imageRecords[0] = createNewImageRecord(0);
@@ -52,6 +52,6 @@ class ERSImageFile extends CEOSImageFile {
 
     protected BinaryRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
-        return new BinaryRecord(binaryReader, pos, imgRecordXML);
+        return new BinaryRecord(binaryReader, pos, imgRecordXML, image_recordDefinition);
     }
 }

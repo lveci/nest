@@ -34,11 +34,15 @@ public class IDProvider implements DataProvider {
 
     public TableColumn getTableColumn() {
         if(column == null) {
-            column = new TableColumn();
-            column.setHeaderValue("ID");
-            column.setPreferredWidth(34);
-            column.setResizable(true);
-            column.setCellRenderer(new IDCellRenderer());
+            try {
+                column = new TableColumn();
+                column.setHeaderValue("ID");
+                column.setPreferredWidth(34);
+                column.setResizable(true);
+                column.setCellRenderer(new IDCellRenderer());
+            } catch(Throwable e) {
+                System.out.println("IDProvider: "+e.getMessage());
+            }
         }
         return column;
     }
@@ -64,7 +68,7 @@ public class IDProvider implements DataProvider {
                     return jlabel;
                 }
             } catch(Throwable e) {
-                e.printStackTrace();
+                System.out.println("IDCellRenderer: "+e.getMessage());
             }
             return null;
         }

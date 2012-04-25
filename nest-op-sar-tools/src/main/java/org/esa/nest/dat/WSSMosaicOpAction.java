@@ -16,8 +16,8 @@
 package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
 import java.io.File;

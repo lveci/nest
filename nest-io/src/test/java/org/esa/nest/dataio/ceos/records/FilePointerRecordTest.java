@@ -49,7 +49,7 @@ public class FilePointerRecordTest extends TestCase {
 
     public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _ios.seek(_prefix.length());
-        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML);
+        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML, filePointerDefinitionFile);
 
         assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
@@ -57,7 +57,7 @@ public class FilePointerRecordTest extends TestCase {
     }
 
     public void testInit() throws IOException, IllegalBinaryFormatException {
-        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML, _prefix.length());
+        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML, _prefix.length(), filePointerDefinitionFile);
 
         assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
@@ -65,7 +65,7 @@ public class FilePointerRecordTest extends TestCase {
     }
 
     public void testAssignMetadataTo() throws IOException, IllegalBinaryFormatException {
-        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML, _prefix.length());
+        final FilePointerRecord record = new FilePointerRecord(_reader, filePointerXML, _prefix.length(), filePointerDefinitionFile);
         final MetadataElement elem = new MetadataElement("elem");
 
         record.assignMetadataTo(elem, "suffix");

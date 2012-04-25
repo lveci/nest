@@ -15,6 +15,8 @@
  */
 package org.esa.nest.dat.toolviews.nestwwview;
 
+import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.grender.ViewportListener;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
@@ -28,10 +30,12 @@ import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.FlatOrbitView;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
@@ -39,12 +43,6 @@ import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
-
-import com.bc.ceres.grender.ViewportListener;
-import com.bc.ceres.grender.Viewport;
-import com.bc.ceres.grender.support.DefaultViewport;
-import com.bc.ceres.glayer.swing.LayerCanvasModel;
-import com.bc.ceres.glayer.swing.DefaultLayerCanvasModel;
 
 /**
  * The window displaying the world map.

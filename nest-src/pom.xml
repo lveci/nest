@@ -113,25 +113,6 @@
 						  </resources>              
 						</configuration>            
 					  </execution>
-					  <execution>
-						<id>copy-libs</id>
-						<phase>validate</phase>
-						<goals>
-						  <goal>copy-resources</goal>
-						</goals>
-						<configuration>
-						  <outputDirectory>${outputdir}/lib</outputDirectory>
-						  <resources>          
-							<resource>
-							  <directory>${osFolder}</directory>
-							  <includes>
-								<include>**/*.dll</include>
-								<include>**/*.so</include>
-							  </includes>
-							</resource>
-						  </resources>              
-						</configuration>            
-					  </execution>
 					</executions>
 				</plugin>
 			</plugins>

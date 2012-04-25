@@ -10,4 +10,6 @@ public interface ElevationTile {
     public void dispose();
 
     public float getSample(int pixelX, int pixelY) throws IOException;
+
+    public void clearCache();
 }

@@ -59,6 +59,14 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
         return DATUM;
     }
 
+    public int getNumXTiles() {
+        return NUM_X_TILES;
+    }
+
+    public int getNumYTiles() {
+        return NUM_Y_TILES;
+    }
+
     public float getNoDataValue() {
         return NO_DATA_VALUE;
     }
@@ -98,8 +106,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
     }
 
     public boolean isDemInstalled() {
-        final File file = getTileFile(-180, -90);   // todo (nf) - check all tiles
-        return file.canRead();
+        return true;
     }
 
     public URL getDemArchiveUrl() {
@@ -125,11 +132,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
         return new ACE2_5MinElevationModel(this, resamplingMethod);
     }
 
-    public File getTileFile(int minLon, int minLat) {
-        return new File(getDemInstallDir(), createTileFilename(minLat, minLon));
-    }
-
-    private static String createTileFilename(int minLat, int minLon) {
+    public String createTileFilename(int minLat, int minLon) {
         String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
         while (latString.length() < 3) {
             latString = '0' + latString;

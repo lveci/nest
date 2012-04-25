@@ -17,9 +17,9 @@ package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
-import org.esa.nest.dataio.binary.*;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosTestHelper;
 

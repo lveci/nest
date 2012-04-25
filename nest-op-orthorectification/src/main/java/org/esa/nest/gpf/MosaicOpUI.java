@@ -27,7 +27,10 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Map;
 
 /**
@@ -54,8 +57,8 @@ public class MosaicOpUI extends BaseOperatorUI {
     private double pixelSizeHeightRatio = 1;
     private final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
 
-    protected final JButton crsButton = new JButton();
-    private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
+    //protected final JButton crsButton = new JButton();
+    //private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -77,12 +80,13 @@ public class MosaicOpUI extends BaseOperatorUI {
                 }
         });
 
+        /*
         crsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 mapProjHandler.promptForFeatureCrs(sourceProducts);
                 crsButton.setText(mapProjHandler.getCRSName());
             }
-        });
+        });     */
 
         pixelSize.addKeyListener(new TextAreaKeyListener());
         sceneWidth.addKeyListener(new TextAreaKeyListener());
@@ -98,9 +102,11 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
 
+        /*
         final String mapProjection = (String)paramMap.get("mapProjection");
         mapProjHandler.initParameters(mapProjection, sourceProducts);
         crsButton.setText(mapProjHandler.getCRSName());
+          */
 
         Double pixSize = (Double)paramMap.get("pixelSize");
         if(pixSize == null) pixSize = 0.0;
@@ -165,9 +171,11 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
 
+        /*
         if(mapProjHandler.getCRS() != null) {
             paramMap.put("mapProjection", mapProjHandler.getCRS().toWKT());
         }
+          */
 
         paramMap.put("pixelSize", Double.parseDouble(pixelSize.getText()));
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
@@ -193,8 +201,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
+        //gbc.gridy++;
+        //DialogUtils.addComponent(contentPane, gbc, "Map Projection:", crsButton);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Size (m):", pixelSize);
         gbc.gridy++;

@@ -35,13 +35,13 @@ import java.util.List;
 
 /**
  * @author Marco Peters
-
+ * @version $ Revision $ Date $
  * @since BEAM 4.7
  */
 public class PredefinedCrsForm extends CrsForm {
 
     private CrsInfo selectedCrsInfo;
-    private final static List<CrsInfo> crsList = CrsInfo.generateCRSList();
+    private final static List<CrsInfo> crsList = CrsInfo.generateCRSList();   //NESTMOD
 
     public PredefinedCrsForm(AppContext appContext) {
         super(appContext);

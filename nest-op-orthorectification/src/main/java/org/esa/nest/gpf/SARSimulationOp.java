@@ -151,6 +151,7 @@ public final class SARSimulationOp extends Operator {
     private static String SIMULATED_BAND_NAME = "Simulated_Intensity";
 
     private boolean nearRangeOnLeft = true;
+    private boolean isPolsar = false;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -227,10 +228,9 @@ public final class SARSimulationOp extends Operator {
         }
 
         final String mission = RangeDopplerGeocodingOp.getMissionType(absRoot);
-        final String pass = absRoot.getAttributeString("PASS");
-        if (mission.equals("RS2") && pass.contains("DESCENDING")) {
-            nearRangeOnLeft = false;
-        }
+        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(mission, absRoot);
+
+        isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
 
     /**
@@ -385,14 +385,14 @@ public final class SARSimulationOp extends Operator {
         }
 
         for (Band srcBand : sourceBands) {
-            final String unit = srcBand.getUnit();
+            String unit = srcBand.getUnit();
             if(unit == null) {
-                throw new OperatorException("band " + srcBand.getName() + " requires a unit");
+                unit = Unit.AMPLITUDE;
             }
 
-            if (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE)) {
+            if (!isPolsar && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE))) {
                 if (bandSlected) {
-                    throw new OperatorException("Please select amplitude or intensity band for co-registration");
+                    throw new OperatorException("Please select amplitude or intensity band");
                 } else {
                     continue;
                 }

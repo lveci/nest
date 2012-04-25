@@ -177,7 +177,7 @@
         <module>beam-scripting</module>
         <module>beam-cluster-analysis</module>
         <module>beam-alos-reader</module>
-        <!--module>beam-netcdf</module-->
+        <module>beam-netcdf</module>
         <module>beam-envisat-reader</module>
         <module>beam-modis-reader</module>
         <module>beam-landsat-reader</module>
@@ -186,8 +186,10 @@
 
         <module>lib-hdf</module>
         <module>blue-marble-worldmap</module>
-	<module>beam-envi-reader</module>
-
+		
+		<module>beam-envi-reader</module>
+		<module>beam-arcbingrid-reader</module>
+		
     </modules>
 
     <dependencyManagement>
@@ -324,6 +326,18 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
                     </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -334,6 +348,14 @@
 					<exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -354,6 +376,18 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
                     </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -365,6 +399,18 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
                     </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -374,11 +420,15 @@
 				<exclusions>
 					<exclusion>
                         <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-					<exclusion>
-                        <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
                     </exclusion>
 				</exclusions>
             </dependency>
@@ -395,6 +445,14 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
                     </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
 				</exclusions>
             </dependency>
             <dependency>
@@ -406,16 +464,32 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
                     </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
+			<dependency>
+				<groupId>org.geotools</groupId>
                 <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
 				<exclusions>
 					<exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_core</artifactId>
+                    </exclusion>
+					<exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -667,7 +741,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.8</version>
+                    <version>2.12</version>
                     <configuration>
                         <!-- TODO
                              If enabled some assertions in GeoTools fail.
@@ -712,7 +786,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>2.8.1</version>
+                    <version>2.12</version>
                 </plugin>
 
                 <plugin>
@@ -730,6 +804,14 @@
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>2.4.1</version>
+                </plugin>
+				<plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.7</version>
                 </plugin>
             </plugins>
         </pluginManagement>

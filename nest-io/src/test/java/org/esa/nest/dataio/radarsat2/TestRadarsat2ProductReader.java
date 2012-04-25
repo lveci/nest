@@ -15,23 +15,20 @@
  */
 package org.esa.nest.dataio.radarsat2;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.util.TestUtils;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.imageio.ImageIOFile;
-import org.geotools.gce.geotiff.GeoTiffReader;
+import org.esa.nest.util.TestUtils;
 
 import javax.imageio.ImageReader;
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * Test Product Reader.

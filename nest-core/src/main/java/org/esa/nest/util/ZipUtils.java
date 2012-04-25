@@ -2,13 +2,9 @@ package org.esa.nest.util;
 
 import net.sf.sevenzipjbinding.*;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
+import org.esa.beam.util.io.FileUtils;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-
-import org.esa.beam.util.io.FileUtils;
 
 /**
  * For zipping and unzipping compressed files

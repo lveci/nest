@@ -17,8 +17,8 @@ package org.esa.nest.dataio.binary;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**

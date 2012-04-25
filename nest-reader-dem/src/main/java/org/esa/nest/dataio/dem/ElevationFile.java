@@ -19,8 +19,8 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.gpf.StatusProgressMonitor;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.ftpUtils;
 
 import java.io.*;
@@ -265,10 +265,13 @@ public abstract class ElevationFile {
                 zipFile = new ZipFile(dataFile);
                 fileoutputstream = new FileOutputStream(newFile);
 
-                final ZipEntry zipEntry = zipFile.getEntry(baseName);
+                ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {
-                    localFileExists = false;
-                    throw new IOException("Entry '" + baseName + "' not found in zip file.");
+                    zipEntry = zipFile.getEntry(baseName.toLowerCase());
+                    if (zipEntry == null) {
+                        localFileExists = false;
+                        throw new IOException("Entry '" + baseName + "' not found in zip file.");
+                    }
                 }
 
                 final int size = 8192;

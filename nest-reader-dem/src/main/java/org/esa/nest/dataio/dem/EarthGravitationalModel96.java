@@ -13,8 +13,11 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dataio.dem.srtm3_geotiff;
+package org.esa.nest.dataio.dem;
 
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.Settings;
@@ -151,5 +154,28 @@ public class EarthGravitationalModel96 {
         final double dCol = c - c0;
 
         return (float)MathUtils.interpolationBiLinear(n00, n01, n10, n11, dCol, dRow);
+    }
+
+    public float[][] computeEGMArray(final GeoCoding geoCoding,
+                                             final int numEGMSamplesInRow, final int numEGMSamplesInCol) {
+
+        final float[][] egmArray = new float[numEGMSamplesInRow][numEGMSamplesInCol]; // 5 deg / 15 min
+
+        if(geoCoding == null) {
+            throw new OperatorException("Product does not contain a geocoding");
+        }
+        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+        final double lat0 = geoPosFirstNear.getLat() + 0.125; // + half of 15 min
+        final double lon0 = geoPosFirstNear.getLon() + 0.125; // + half of 15 min
+
+        final double delLat = 0.25; // 15 min
+        final double delLon = 0.25; // 15 min
+        for (int r = 0; r < numEGMSamplesInCol; r++) {
+            final double lat = lat0 - delLat*r;
+            for (int c = 0; c < numEGMSamplesInRow; c++) {
+                egmArray[r][c] = getEGM(lat, lon0 + delLon*c);
+            }
+        }
+        return egmArray;
     }
 }

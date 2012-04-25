@@ -28,15 +28,13 @@ import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.gpf.operators.standard.ReadOp;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.gpf.ProductSetReaderOp;
 import org.esa.nest.gpf.GPFProcessor;
+import org.esa.nest.gpf.ProductSetReaderOp;
 import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
 public class GraphExecuter extends Observable {
@@ -286,7 +284,7 @@ public class GraphExecuter extends Observable {
         graphContext.cancel();
     }
 
-    void saveGraph() throws GraphException {
+    File saveGraph() throws GraphException {
 
         String filename = "myGraph";
         if(lastLoadedGraphFile != null)
@@ -295,6 +293,7 @@ public class GraphExecuter extends Observable {
                 LAST_GRAPH_PATH, ResourceUtils.getGraphFolder("").getAbsolutePath());
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
+        return filePath;
     }
 
     private void writeGraph(final String filePath) throws GraphException {

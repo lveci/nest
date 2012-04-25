@@ -3,8 +3,8 @@ package org.esa.nest.util;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.SystemUtils;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * loads the nest.config file

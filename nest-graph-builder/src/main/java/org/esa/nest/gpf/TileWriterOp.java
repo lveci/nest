@@ -118,6 +118,7 @@ public class TileWriterOp extends Operator implements Output {
                         throw new OperatorException("No data product writer for the '" + formatName + "' format available");
                     }
                     subsetInfo[n].productWriter.setIncrementalMode(false);
+                    subsetInfo[n].productWriter.setFormatName(formatName);
                     subsetInfo[n].product.setProductWriter(subsetInfo[n].productWriter);
 
                     final Band[] bands = subsetInfo[n].product.getBands();

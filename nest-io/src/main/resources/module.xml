@@ -97,7 +97,7 @@
         <action>
             <id>importImageIO</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>ImageIO</formatName>
+            <formatName>jp2</formatName>
             <text>Import ImageIO (bmp, jpg, png) Product...</text>
             <readerPlugin>org.esa.nest.dataio.imageio.ImageIOReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
@@ -185,22 +185,6 @@
             <shortDescr>Export PolSARPro</shortDescr>
             <helpId>exportPolsarPro</helpId>
         </action>
-        <!--action>
-            <id>exportImageIO</id>
-            <text>Export ImageIO</text>
-            <class>org.esa.beam.visat.actions.ProductExportAction</class>
-            <formatName>ImageIO</formatName>
-            <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Export ImageIO</shortDescr>
-        </action-->
-        <!--action>
-            <id>exportJPEG2000</id>
-            <text>Export JPEG2000</text>
-            <class>org.esa.beam.visat.actions.ProductExportAction</class>
-            <writerPlugin>org.esa.nest.dataio.imageio.ImageIOWriterPlugIn</writerPlugin>
-            <formatName>JPEG2000</formatName>
-            <shortDescr>Export to JPEG2000</shortDescr>
-        </action-->
 
         <action>
             <id>importRadarsat2Product</id>

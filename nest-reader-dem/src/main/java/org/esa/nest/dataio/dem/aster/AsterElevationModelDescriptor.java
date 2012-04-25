@@ -29,18 +29,18 @@ import java.net.URL;
 
 public class AsterElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "ASTER 1sec GDEM";
-    public static final String DB_FILE_SUFFIX = ".TIF";
-    public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
-    public static final int NUM_X_TILES = 360;
-    public static final int NUM_Y_TILES = 166;
-    public static final int DEGREE_RES = 1;
-    public static final int PIXEL_RES = 3600;
-    public static final int NO_DATA_VALUE = -9999;
-    public static final GeoPos RASTER_ORIGIN = new GeoPos(83, 180);
-    public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
-    public static final Datum DATUM = Datum.WGS_84;
+    private static final String NAME = "ASTER 1sec GDEM";
+    private static final String DB_FILE_SUFFIX = ".TIF";
+    private static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
+    private static final int NUM_X_TILES = 360;
+    private static final int NUM_Y_TILES = 166;
+    private static final int DEGREE_RES = 1;
+    private static final int PIXEL_RES = 3600;
+    private static final int NO_DATA_VALUE = -9999;
+    private static final GeoPos RASTER_ORIGIN = new GeoPos(83, 180);
+    private static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
+    private static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
+    private static final Datum DATUM = Datum.WGS_84;
 
     private File demInstallDir = null;
 
@@ -49,6 +49,14 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
 
     public String getName() {
         return NAME;
+    }
+
+    public int getNumXTiles() {
+        return NUM_X_TILES;
+    }
+
+    public int getNumYTiles() {
+        return NUM_Y_TILES;
     }
 
     public Datum getDatum() {
@@ -124,7 +132,7 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
         }
     }
 
-    public static String createTileFilename(int minLat, int minLon) {
+    public String createTileFilename(int minLat, int minLon) {
         String name = "ASTGTM_";
         name += minLon < 0 ? "S" : "N";
         String lonString = String.valueOf(Math.abs(minLon));

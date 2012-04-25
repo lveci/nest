@@ -1170,7 +1170,7 @@ public class VisatApp extends BasicApp implements AppContext {
                 //Save Products in reverse order is neccessary because derived products must be saved first
                 for (int i = modifiedProducts.length - 1; i >= 0; i--) {
                     final Product modifiedProduct = modifiedProducts[i];
-                    saveProduct(modifiedProduct);
+                    saveProductBlocked(modifiedProduct);
                 }
                 super.shutDown();
             } else if (result == JOptionPane.NO_OPTION) {
@@ -1241,7 +1241,7 @@ public class VisatApp extends BasicApp implements AppContext {
      * @param product the product to be saved
      */
     public synchronized void saveProductAs(final Product product) {
-        saveProductAsImpl(product);
+        saveProductAsImpl(product, false);
     }
 
     /**
@@ -1252,6 +1252,26 @@ public class VisatApp extends BasicApp implements AppContext {
         final Product product = getSelectedProductChecked();
         if (product != null) {
             saveProduct(product);
+        }
+    }
+
+    /**
+     * Saves the given product using its current file path. If it does not have a file name the method call is
+     * equivalent to a call to the <code>{@link #saveSelectedProductAs}</code> method.
+     *
+     * @param product the product to be saved
+     */
+    public synchronized void saveProductBlocked(final Product product) {
+        setStatusBarMessage("Saving product "+product.getName()+" please wait...");
+        if (!(product.getProductReader() instanceof DimapProductReader) || product.getFileLocation() == null) {
+            saveProductAsImpl(product, true);
+            return;
+        }
+        boolean incremental = getPreferences().getPropertyBool(PROPERTY_KEY_SAVE_INCREMENTAL,
+                DEFAULT_VALUE_SAVE_INCREMENTAL);
+        boolean success = saveProductImpl(product, incremental, true);
+        if (success) {
+            product.setModified(false);
         }
     }
 
@@ -1274,7 +1294,7 @@ public class VisatApp extends BasicApp implements AppContext {
                 try {
                     boolean incremental = getPreferences().getPropertyBool(PROPERTY_KEY_SAVE_INCREMENTAL,
                                                                            DEFAULT_VALUE_SAVE_INCREMENTAL);
-                    success = saveProductImpl(product, incremental);
+                    success = saveProductImpl(product, incremental, false);
                 } finally {
                     if (success) {
                         product.setModified(false);
@@ -1291,7 +1311,7 @@ public class VisatApp extends BasicApp implements AppContext {
 
             @Override
             protected Object doInBackground() throws Exception {
-                if (!writeProductImpl(product, file, formatName, false)) {
+                if (!writeProductImpl(product, file, formatName, false, false)) {
                     // @todo 1 nf/nf - end thread and return false
                 }
                 return null;
@@ -1475,7 +1495,7 @@ public class VisatApp extends BasicApp implements AppContext {
         }
     }
 
-    private synchronized boolean saveProductImpl(final Product product, final boolean incremental) {
+    private synchronized boolean saveProductImpl(final Product product, final boolean incremental, final boolean block) {
         final File file = product.getFileLocation();
         if (file.isFile() && !file.canWrite()) {
             showWarningDialog("The product\n" +
@@ -1526,7 +1546,7 @@ public class VisatApp extends BasicApp implements AppContext {
 
         final boolean saveOk = writeProductImpl(product, file,
                                                 DimapProductConstants.DIMAP_FORMAT_NAME,
-                                                incremental);
+                                                incremental, block);
         if (saveOk) {
             product.setModified(false);
             historyPush(file);
@@ -1543,7 +1563,7 @@ public class VisatApp extends BasicApp implements AppContext {
     }
 
     private boolean writeProductImpl(final Product product, final File file, final String formatName,
-                                     final boolean incremental) {
+                                     final boolean incremental, final boolean block) {
         Debug.assertNotNull(product);
 
         boolean status = false;
@@ -1565,6 +1585,9 @@ public class VisatApp extends BasicApp implements AppContext {
             }
         };
         try {
+            if(block) {
+                pm = ProgressMonitor.NULL;
+            }
             ProductIO.writeProduct(product,
                                    file,
                                    formatName,
@@ -1606,7 +1629,7 @@ public class VisatApp extends BasicApp implements AppContext {
         }
     }
 
-    private void saveProductAsImpl(final Product product) {
+    private void saveProductAsImpl(final Product product, boolean block) {
         final ProductReader reader = product.getProductReader();
         if (reader != null && !(reader instanceof DimapProductReader)) {
             final int answer = showQuestionDialog("Save Product As",
@@ -1649,12 +1672,17 @@ public class VisatApp extends BasicApp implements AppContext {
 
         product.setFileLocation(newFile);
 
+        if(block) {          // do not run in a tread
+            saveProductImpl(product, false, true);
+            return;
+        }
+
         final SwingWorker worker = new SwingWorker() {
 
             @Override
             protected Object doInBackground() throws Exception {
                 final boolean incremental = false;
-                final boolean successfullySaved = saveProductImpl(product, incremental);
+                final boolean successfullySaved = saveProductImpl(product, incremental, false);
                 if (successfullySaved) {
                     if (!isVisatExitConfirmed()) {
                         reopenProduct(product, newFile);
@@ -2049,11 +2077,11 @@ public class VisatApp extends BasicApp implements AppContext {
         position.setToolTip("Displays pixel position");
         statusBar.add(position, JideBoxLayout.FLEXIBLE);
 
-        final TimeStatusBarItem time = new TimeStatusBarItem();
-        time.setPreferredWidth(80);
-        time.setUpdateInterval(1000);
-        time.setAlignment(JLabel.CENTER);
-        statusBar.add(time, JideBoxLayout.FLEXIBLE);
+        //final TimeStatusBarItem time = new TimeStatusBarItem();
+        //time.setPreferredWidth(80);
+        //time.setUpdateInterval(1000);
+        //time.setAlignment(JLabel.CENTER);
+        //statusBar.add(time, JideBoxLayout.FLEXIBLE);
 
         final MemoryStatusBarItem gc = new MemoryStatusBarItem();
         gc.setPreferredWidth(100);

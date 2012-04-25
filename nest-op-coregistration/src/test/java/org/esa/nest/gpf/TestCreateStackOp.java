@@ -22,7 +22,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.Unit;
 
 /**

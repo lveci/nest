@@ -58,15 +58,15 @@ public class ConvertDataTypeOp extends Operator {
                             ProductData.TYPESTRING_UINT32,
                             ProductData.TYPESTRING_FLOAT32,
                             ProductData.TYPESTRING_FLOAT64
-            }, defaultValue = ProductData.TYPESTRING_FLOAT32 , label="Target Data Type")
-    private String targetDataType = ProductData.TYPESTRING_FLOAT32;
-    private int dataType = ProductData.TYPE_FLOAT32;
+            }, defaultValue = ProductData.TYPESTRING_UINT8 , label="Target Data Type")
+    private String targetDataType = ProductData.TYPESTRING_UINT8;
+    private int dataType = ProductData.TYPE_UINT8;
 
     @Parameter(valueSet = { SCALING_TRUNCATE, SCALING_LINEAR,
                             SCALING_LINEAR_CLIPPED, SCALING_LINEAR_PEAK_CLIPPED,
                             SCALING_LOGARITHMIC },
-                            defaultValue = SCALING_LINEAR, label="Scaling")
-    private String targetScalingStr = SCALING_LINEAR;
+                            defaultValue = SCALING_LINEAR_CLIPPED, label="Scaling")
+    private String targetScalingStr = SCALING_LINEAR_CLIPPED;
 
     protected final static String SCALING_TRUNCATE = "Truncate";
     protected final static String SCALING_LINEAR = "Linear (slope and intercept)";
@@ -75,7 +75,7 @@ public class ConvertDataTypeOp extends Operator {
     protected final static String SCALING_LOGARITHMIC = "Logarithmic";
 
     private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR_CLIPPED, LINEAR_PEAK_CLIPPED, LOGARITHMIC }
-    private ScalingType targetScaling = ScalingType.LINEAR;
+    private ScalingType targetScaling = ScalingType.LINEAR_CLIPPED;
 
     /**
      * Initializes this operator and sets the one and only target product.

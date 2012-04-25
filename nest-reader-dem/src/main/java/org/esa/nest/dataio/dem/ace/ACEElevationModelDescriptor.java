@@ -57,6 +57,14 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
         return DATUM;
     }
 
+    public int getNumXTiles() {
+        return NUM_X_TILES;
+    }
+
+    public int getNumYTiles() {
+        return NUM_Y_TILES;
+    }
+
     public float getNoDataValue() {
         return NO_DATA_VALUE;
     }
@@ -127,7 +135,7 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
         return new File(getDemInstallDir(), createTileFilename(minLat, minLon));
     }
 
-    public static String createTileFilename(int minLat, int minLon) {
+    public String createTileFilename(int minLat, int minLon) {
         String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
         while (latString.length() < 3) {
             latString = '0' + latString;

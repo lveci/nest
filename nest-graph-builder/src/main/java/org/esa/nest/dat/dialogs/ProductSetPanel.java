@@ -15,10 +15,10 @@
  */
 package org.esa.nest.dat.dialogs;
 
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
@@ -28,10 +28,10 @@ import org.esa.nest.util.ProductFunctions;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * NEST IO Panel to handle source and target selection

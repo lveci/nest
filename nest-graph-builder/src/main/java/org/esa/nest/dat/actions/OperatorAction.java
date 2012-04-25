@@ -1,11 +1,11 @@
 package org.esa.nest.dat.actions;
 
-import org.esa.beam.visat.actions.DefaultOperatorAction;
+import com.bc.ceres.core.CoreException;
+import com.bc.ceres.core.runtime.ConfigurationElement;
 import org.esa.beam.framework.ui.ModelessDialog;
+import org.esa.beam.visat.actions.DefaultOperatorAction;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.util.ResourceUtils;
-import com.bc.ceres.core.runtime.ConfigurationElement;
-import com.bc.ceres.core.CoreException;
 
 import javax.swing.*;
 
@@ -28,24 +28,31 @@ public class OperatorAction extends DefaultOperatorAction {
 
     @Override
     protected ModelessDialog createOperatorDialog() {
-        final NestSingleTargetProductDialog productDialog = new NestSingleTargetProductDialog(operatorName,
+        final NestSingleTargetProductDialog dialog = new NestSingleTargetProductDialog(operatorName,
                                                     getAppContext(),  dialogTitle, getHelpId());
         if (targetProductNameSuffix != null) {
-            productDialog.setTargetProductNameSuffix(targetProductNameSuffix);
+            dialog.setTargetProductNameSuffix(targetProductNameSuffix);
         }
-        addIcon(productDialog);
-        return productDialog;
+        addIcon(dialog);
+        return dialog;
     }
 
-    protected void addIcon(final NestSingleTargetProductDialog productDialog) {
+    protected void addIcon(final ModelessDialog dlg) {
         if(iconName == null) {
-            productDialog.setIcon(ResourceUtils.nestIcon);
+            setIcon(dlg, ResourceUtils.nestIcon);
+        } else if(iconName.equals("esaIcon")) {
+            setIcon(dlg, ResourceUtils.esaPlanetIcon);
         } else if(iconName.equals("rstbIcon")) {
-            productDialog.setIcon(ResourceUtils.rstbIcon); 
+            setIcon(dlg, ResourceUtils.rstbIcon);
         } else {
             final ImageIcon icon = ResourceUtils.LoadIcon(iconName);
             if(icon != null)
-                productDialog.setIcon(icon);
+                setIcon(dlg, icon);
         }
+    }
+
+    private static void setIcon(final ModelessDialog dlg, final ImageIcon ico) {
+        if(ico == null) return;
+        dlg.getJDialog().setIconImage(ico.getImage());
     }
 }

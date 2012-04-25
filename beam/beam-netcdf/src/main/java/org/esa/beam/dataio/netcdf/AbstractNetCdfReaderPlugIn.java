@@ -32,6 +32,7 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
 
     ///////////////////////////////////////////////
     // ProductReaderPlugIn related methods
+    final static String[] NETCDF_FORMAT_FILE_EXTENSIONS = { "nc", "nc3", "hdf", "h5", "h4", "h5eos" };
 
     @Override
     public final Class[] getInputTypes() {
@@ -42,6 +43,16 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
     public final DecodeQualification getDecodeQualification(Object input) {
         NetcdfFile netcdfFile = null;
         try {
+            final String name = input.toString().toLowerCase();
+            boolean extOK = false;
+            for(String ext : NETCDF_FORMAT_FILE_EXTENSIONS) {
+                if(name.endsWith(ext)) {
+                    extOK = true;
+                    break;
+                }
+            }
+            if(!extOK)
+                return DecodeQualification.UNABLE;
             netcdfFile = NetcdfFile.open(input.toString());
             return getDecodeQualification(netcdfFile);
         } catch (Throwable ignored) {

@@ -64,8 +64,8 @@ public class MosaicOp extends Operator {
             label = "Resampling Type")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
-    @Parameter(description = "The coordinate reference system in well known text format", defaultValue="WGS84(DD)")
-    private String mapProjection = "WGS84(DD)";
+    //@Parameter(description = "The coordinate reference system in well known text format", defaultValue="WGS84(DD)")
+    //private String mapProjection = "WGS84(DD)";
 
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
     private boolean average = true;
@@ -89,11 +89,17 @@ public class MosaicOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
+            GeoCoding srcGeocoding = null;
             for (final Product prod : sourceProduct) {
                 if (prod.getGeoCoding() == null) {
                     throw new OperatorException(
                             MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
                 }
+                if(srcGeocoding == null) {
+                    srcGeocoding = prod.getGeoCoding();
+                }
+                // check that all source products have same geocoding
+
             }
 
             final Band[] srcBands = getSourceBands();
@@ -130,7 +136,8 @@ public class MosaicOp extends Operator {
 
             targetProduct = new Product("mosiac", "mosiac", sceneWidth, sceneHeight);
 
-            CoordinateReferenceSystem targetCRS = MapProjectionHandler.getCRS(mapProjection);
+            //CoordinateReferenceSystem targetCRS = MapProjectionHandler.getCRS(mapProjection);
+            final CoordinateReferenceSystem targetCRS = srcGeocoding.getGeoCRS();
 
             double pixSize = pixelSize;
             if (targetCRS.getName().getCode().equals("WGS84(DD)")) {

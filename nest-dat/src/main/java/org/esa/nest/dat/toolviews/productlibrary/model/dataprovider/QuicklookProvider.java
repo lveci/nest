@@ -46,12 +46,16 @@ public class QuicklookProvider implements DataProvider {
 
     public TableColumn getTableColumn() {
         if (quickLookColumn == null) {
-            quickLookColumn = new TableColumn();
-            quickLookColumn.setHeaderValue("Quick Look");        /*I18N*/
-            quickLookColumn.setPreferredWidth(preferredWidth);
-            quickLookColumn.setResizable(true);
-            quickLookColumn.setCellRenderer(new QuickLookRenderer(preferredHeight));
-            quickLookColumn.setCellEditor(new QuickLookEditor());
+            try {
+                quickLookColumn = new TableColumn();
+                quickLookColumn.setHeaderValue("Quick Look");        /*I18N*/
+                quickLookColumn.setPreferredWidth(preferredWidth);
+                quickLookColumn.setResizable(true);
+                quickLookColumn.setCellRenderer(new QuickLookRenderer(preferredHeight));
+                quickLookColumn.setCellEditor(new QuickLookEditor());
+            } catch(Throwable e) {
+                System.out.println("QuicklookProvider: "+e.getMessage());
+            }
         }
         return quickLookColumn;
     }
@@ -113,10 +117,10 @@ public class QuicklookProvider implements DataProvider {
                     }
                 } else {
                     tableComponent.setIcon(null);
-                    tableComponent.setText("Not available!");
+                    //tableComponent.setText("Not available!");
                 }
             } catch(Throwable e) {
-                e.printStackTrace();
+                System.out.println("QuicklookRenderer: "+e.getMessage());
             }
             return tableComponent;
         }
@@ -156,19 +160,22 @@ public class QuicklookProvider implements DataProvider {
                                                      final boolean isSelected,
                                                      final int row,
                                                      final int column) {
-            if (!(value instanceof ProductEntry)) {
-                return null;
+            try {
+                if (!(value instanceof ProductEntry)) {
+                    return scrollPane;
+                }
+                final BufferedImage image = ((ProductEntry) value).getQuickLook();
+                if (image == null) {
+                    return scrollPane;
+                }
+                scrollPane.setViewportView(
+                        new JLabel(new ImageIcon(image.getScaledInstance(-1, -1, BufferedImage.SCALE_AREA_AVERAGING))));
+                final Color backgroundColor = table.getSelectionBackground();
+                scrollPane.setBackground(backgroundColor);
+                scrollPane.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));
+            } catch(Throwable e) {
+                System.out.println("QuicklookEditor: "+e.getMessage());   
             }
-            final BufferedImage image = ((ProductEntry) value).getQuickLook();
-            if (image == null) {
-                return null;
-            }
-            scrollPane.setViewportView(
-                    new JLabel(new ImageIcon(image.getScaledInstance(-1, -1, BufferedImage.SCALE_AREA_AVERAGING))));
-            final Color backgroundColor = table.getSelectionBackground();
-            scrollPane.setBackground(backgroundColor);
-            scrollPane.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));
-
             return scrollPane;
         }
 

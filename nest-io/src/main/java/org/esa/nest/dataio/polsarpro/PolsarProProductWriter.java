@@ -1,22 +1,16 @@
 
 package org.esa.nest.dataio.polsarpro;
 
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.dimap.*;
 import org.esa.beam.dataio.envi.EnviProductWriter;
-import org.esa.beam.framework.dataio.AbstractProductWriter;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.Debug;
-import org.esa.beam.util.Guardian;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.dataio.FileImageOutputStreamExtImpl;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 
-import javax.imageio.stream.ImageOutputStream;
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * The product writer for PolSARPro products.

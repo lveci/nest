@@ -17,8 +17,7 @@ package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.Assert;
 
-import java.awt.Color;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
@@ -28,7 +27,7 @@ import java.awt.image.IndexColorModel;
  * This class contains information about how a product's raster data node is displayed as an image.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ImageInfo implements Cloneable {
 
@@ -58,11 +57,12 @@ public class ImageInfo implements Cloneable {
     private RGBChannelDef rgbChannelDef;
     private Color noDataColor;
     private HistogramMatching histogramMatching;
-    private double gain = 1.0;
-    private double bias = 0.0;
-    private double exponent = 1.0;
-    private boolean log10Scaling = false;
-
+    // todo - save in DIMAP   (nf - 13.03.2012)
+    private boolean logScaled;
+	private double gain = 1.0;    
+	private double bias = 0.0;    
+	private double exponent = 1.0;    
+	private boolean log10Scaling = false;
     /**
      * Constructs a new image information instance.
      *
@@ -125,6 +125,14 @@ public class ImageInfo implements Cloneable {
     public void setHistogramMatching(HistogramMatching histogramMatching) {
         Assert.notNull(histogramMatching, "histogramMatching");
         this.histogramMatching = histogramMatching;
+    }
+
+    public boolean isLogScaled() {
+        return logScaled;
+    }
+
+    public void setLogScaled(boolean logScaled) {
+        this.logScaled = logScaled;
     }
 
     public Color[] getColors() {
@@ -310,7 +318,6 @@ public class ImageInfo implements Cloneable {
      * Converts a string to a histogram matching.
      *
      * @param mode the histogram matching string
-     *
      * @return the histogram matching. {@link ImageInfo.HistogramMatching#None} if {@code maode} is not "Equalize" or "Normalize".
      */
     public static ImageInfo.HistogramMatching getHistogramMatching(String mode) {

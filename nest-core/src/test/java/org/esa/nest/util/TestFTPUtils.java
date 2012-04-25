@@ -18,7 +18,6 @@ package org.esa.nest.util;
 import junit.framework.TestCase;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 

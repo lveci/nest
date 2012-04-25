@@ -42,14 +42,16 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
             final String ext = FileUtils.getExtension(file);
             if(ext.equalsIgnoreCase(".tif") || ext.equalsIgnoreCase(".tiff"))
                 return DecodeQualification.INTENDED;
+            else
+                return DecodeQualification.UNABLE;
 
-            final ImageInputStream stream = ImageIO.createImageInputStream(file);
+           /* final ImageInputStream stream = ImageIO.createImageInputStream(file);
 
             try {
                 return getDecodeQualificationImpl(stream);
             } finally {
                 stream.close();
-            }
+            }       */
         } catch (Exception ignore) {
             // nothing to do, return value is already UNABLE
         }

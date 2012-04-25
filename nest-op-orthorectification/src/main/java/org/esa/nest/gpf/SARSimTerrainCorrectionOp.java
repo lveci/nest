@@ -20,8 +20,8 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -32,7 +32,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
@@ -42,13 +41,9 @@ import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -223,7 +218,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean processingStarted = false;
     private boolean isPolsar = false;
 
-    private boolean flipIndex = false; // temp fix for descending Radarsat2
+    private boolean nearRangeOnLeft = true; // temp fix for descending Radarsat2
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -391,13 +386,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
 
-        // temp fix for descending Radarsat2
-        if (mission.equals("RS2")) {
-            final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
-            if (pass.contains("DESCENDING")) {
-                flipIndex = true;
-            }
-        }
+        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(mission, absRoot);
 
         isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
@@ -530,7 +519,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final Band[] sourceBands = sourceProduct.getBands();
         if (sourceBands.length == 1) {
-            throw new OperatorException("Source product should have more than one band. Only "+sourceBands[0].getName()+" found");
+            throw new OperatorException("Source product should include a simulated intensity band. Only "+sourceBands[0].getName()+" found");
         }
 
         String targetBandName;
@@ -548,7 +537,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
             }
 
-            if (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY)) {
+            if (!isPolsar && (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY))) {
                 throw new OperatorException("Only amplitude or intensity band should be used for orthorectification");
             }
 
@@ -896,12 +885,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTimeWithoutBias, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    /*final*/ double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
+                    double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
                             zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     // temp fix for descending Radarsat2
-                    if (flipIndex) {
+                    if (!nearRangeOnLeft) {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
@@ -999,6 +988,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
      * @throws Exception from DEM
+     * @return true if valid
      */
     private boolean getLocalDEM(final int x0, final int y0, final int tileWidth,
                                 final int tileHeight, final float[][] localDEM) throws Exception {

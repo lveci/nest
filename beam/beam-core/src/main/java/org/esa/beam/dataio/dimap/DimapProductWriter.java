@@ -42,7 +42,7 @@ import java.util.Map;
  * The BEAM-DIMAP version history is provided in the API doc of the {@link DimapProductWriterPlugIn}.
  *
  * @author Sabine Embacher
-
+ * @version $Revision$ $Date$
  * @see DimapProductWriterPlugIn
  * @see DimapProductReaderPlugIn
  */

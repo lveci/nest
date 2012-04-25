@@ -45,16 +45,23 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         final List<String> extList = new ArrayList<String>(20);
         extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
+        exludeExtensions(extList);
+
         // BEST extensions
+        //addAllBestExtensions(extList);
+
+        return extList.toArray(new String[extList.size()]);
+    }
+
+    private static void addAllBestExtensions(final List<String> extList) {
         addBESTExt(extList, "XT");
         addBESTExt(extList, "AP"); addBESTExt(extList, "PA");
         addBESTExt(extList, "CA"); addBESTExt(extList, "IF"); addBESTExt(extList, "FI");
         addBESTExt(extList, "DB"); addBESTExt(extList, "SG"); addBESTExt(extList, "OP");
         addBESTExt(extList, "GC"); addBESTExt(extList, "OV"); addBESTExt(extList, "UN");
         addBESTExt(extList, "CR"); addBESTExt(extList, "SF");
-        addBESTExt(extList, "BS"); addBESTExt(extList, "GA"); addBESTExt(extList, "AD");
-
-        return extList.toArray(new String[extList.size()]);
+        addBESTExt(extList, "BS"); addBESTExt(extList, "GA");
+        //addBESTExt(extList, "AD");
     }
 
     private static void addBESTExt(final List<String> extList, final String ext) {
@@ -62,19 +69,21 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         extList.add(ext+'s'); extList.add(ext+'t'); extList.add(ext+'r');
     }
 
+    private static void exludeExtensions(final List<String> extList) {
+        extList.remove("jpeg");
+        extList.remove("jls");
+        extList.remove("jfif");
+        extList.remove("tiff");
+        extList.remove("tif");
+        extList.remove("n1");
+    }
+
     private static String[] getPrunedImageIOExtensions() {
         final List<String> extList = new ArrayList<String>(20);
      /*   extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
-        extList.remove("jpeg");
-        extList.remove("jls");
-        extList.remove("jfif");
-        extList.remove("wbmp");
-        extList.remove("pgm");
-        extList.remove("ppm");
-        extList.remove("tiff");
-        extList.remove("tif");
-        extList.remove("n1");  */
+        excludeExtensions(extList);
+          */
 
         extList.add("bmp");
         extList.add("gif");

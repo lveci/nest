@@ -69,6 +69,7 @@
             <shortDescr>Import a NetCDF data product or product subset.</shortDescr>
             <description>Import a NetCDF data product or product subset.</description>
             <helpId>importNetCdfProduct</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>importNetCdfCFProduct</id>
@@ -80,6 +81,7 @@
             <shortDescr>Import a NetCDF/CF data product or product subset.</shortDescr>
             <description>Import a NetCDF/CF data product or product subset.</description>
             <helpId>importNetCdfProduct</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>importNetCdfBEAMProduct</id>
@@ -91,6 +93,7 @@
             <shortDescr>Import a NetCDF/BEAM data product or product subset.</shortDescr>
             <description>Import a NetCDF/BEAM data product or product subset.</description>
             <helpId>importNetCdfProduct</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>importHdfEosProduct</id>
@@ -102,6 +105,7 @@
             <shortDescr>Import a gridded HDF-EOS data product or product subset.</shortDescr>
             <description>Import a gridded HDF-EOS data product or product subset.</description>
             <helpId>importNetCdfProduct</helpId>
+            <parent>importFileFormats</parent>
         </action>
         <action>
             <id>exportNetCdfCFProduct</id>

@@ -18,6 +18,8 @@ package org.esa.nest.dataio.dem.aster;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.dem.BaseElevationTile;
+import org.esa.nest.dataio.dem.ElevationFile;
 import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
@@ -30,18 +32,19 @@ import java.util.zip.ZipFile;
 /**
  * Holds information about a dem file.
  */
-public final class AsterFile {
+public final class AsterFile extends ElevationFile {
 
     private final AsterElevationModel demModel;
     private File localFile;
     private final ProductReader productReader;
     private boolean localFileExists = false;
     private boolean errorInLocalFile = false;
-    private AsterElevationTile tile = null;
+    private BaseElevationTile tile = null;
     private final static boolean unrecoverableError = false;
     private final static File appTmpDir = ResourceUtils.getApplicationUserTempDataDir();
 
-    public AsterFile(AsterElevationModel model, File localFile, ProductReader reader) {
+    public AsterFile(final AsterElevationModel model, final File localFile, final ProductReader reader) {
+        super(localFile, reader);
         this.demModel = model;
         this.localFile = localFile;
         this.productReader = reader;
@@ -56,11 +59,23 @@ public final class AsterFile {
         }
     }
 
+    protected String getRemoteFTP() {
+        return null;
+    }
+
+    protected String getRemotePath() {
+        return null;    
+    }
+
+    protected boolean getRemoteFile() throws IOException {
+        return false;
+    }
+
     public String getFileName() {
         return localFile.getName();
     }
 
-    public AsterElevationTile getTile() throws IOException {
+    public BaseElevationTile getTile() throws IOException {
         if(tile == null) {
             getFile();
         }
@@ -102,7 +117,7 @@ public final class AsterFile {
                 if(dataFile != null) {
                     final Product product = productReader.readProductNodes(dataFile, null);
                     if(product != null) {
-                        tile = new AsterElevationTile(demModel, product);
+                        tile = new BaseElevationTile(demModel, product);
                     }
                 }
             }

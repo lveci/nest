@@ -36,7 +36,7 @@ import java.util.Locale;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @see org.esa.beam.dataio.dimap.DimapProductReader
  */
 public class DimapProductReaderPlugIn implements ProductReaderPlugIn {

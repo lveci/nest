@@ -198,7 +198,7 @@ public class MetadataTable implements TableInterface {
         return null;
     }
 
-    private MetadataElement createMetadataRoot(final ResultSet results) {
+    private static MetadataElement createMetadataRoot(final ResultSet results) {
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(null);
         final MetadataAttribute[] attribList = emptyMetadata.getAttributes();
         for(MetadataAttribute attrib : attribList) {
@@ -223,7 +223,7 @@ public class MetadataTable implements TableInterface {
         return absRoot;
     }
 
-    public String[] getAllMetadataNames() {
+    public static String[] getAllMetadataNames() {
         return metadataNamesList.toArray(new String[metadataNamesList.size()]);
     }
 }

@@ -23,7 +23,6 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CeosHelper;
@@ -31,16 +30,17 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.text.DateFormat;
 
 /**
  * This class represents a product directory.
@@ -140,11 +140,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             if(isProductSLC) {
                 final Band bandI = createBand(product, "i_" + pol, Unit.REAL, imageFile);
                 final Band bandQ = createBand(product, "q_" + pol, Unit.IMAGINARY, imageFile);
-                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+pol);
-                ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "_"+pol);
+                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, '_' +pol);
+                ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, '_' +pol);
             } else {                
                 final Band band = createBand(product, "Amplitude_" + pol, Unit.AMPLITUDE, imageFile);
-                ReaderUtils.createVirtualIntensityBand(product, band, "_"+pol);
+                ReaderUtils.createVirtualIntensityBand(product, band, '_' +pol);
             }
         }
 
@@ -161,7 +161,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         if (product.getGeoCoding() == null) {
-            addTPGGeoCoding(product, _leaderFile.getSceneRecord());
+            double refLat = _leaderFile.getSceneRecord().getAttributeDouble("scene centre geodetic latitude");
+            double refLon = _leaderFile.getSceneRecord().getAttributeDouble("scene centre geodetic longitude");
+            if(refLat==0 || refLon==0) {
+                refLat = _leaderFile.getFacilityRecord().getAttributeDouble("Origin Latitude");
+                refLon = _leaderFile.getFacilityRecord().getAttributeDouble("Origin Longitude");
+            }
+            addTPGGeoCoding(product, refLat, refLon);
         }
          
         return product;
@@ -645,10 +651,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     /**
      * Update target product GEOCoding. A new tie point grid is generated.
      * @param product The product.
-     * @param sceneRec The scene record.
+     * @param refLat reference latitude
+     * @param refLon reference longitude
      * @throws IOException The exceptions.
      */
-    private static void addTPGGeoCoding(final Product product, final BinaryRecord sceneRec) throws IOException {
+    private static void addTPGGeoCoding(final Product product, final double refLat, final double refLon) throws IOException {
 
         final int gridWidth = 11;
         final int gridHeight = 11;
@@ -666,8 +673,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
         final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
-        final double latMid = sceneRec.getAttributeDouble("scene centre geodetic latitude");
-        final double lonMid = sceneRec.getAttributeDouble("scene centre geodetic longitude");
 
         AbstractMetadata.OrbitStateVector[] orbitStateVectors;
         try {
@@ -745,7 +750,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
-                final GeoPos geoPos = computeLatLon(latMid, lonMid, slrgTime, data);
+                final GeoPos geoPos = computeLatLon(refLat, refLon, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon;
                 ++k;
@@ -767,16 +772,16 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     /**
      * Compute accurate target geo position.
-     * @param latMid The scene latitude.
-     * @param lonMid The scene longitude.
+     * @param refLat The scene latitude.
+     * @param refLon The scene longitude.
      * @param slrgTime The slant range time of the given pixel.
      * @param data The orbit data.
      * @return The geo position of the target.
      */
-    private static GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, Orbits.OrbitData data) {
+    private static GeoPos computeLatLon(final double refLat, final double refLon, double slrgTime, Orbits.OrbitData data) {
 
         final double[] xyz = new double[3];
-        final GeoPos geoPos = new GeoPos((float)latMid, (float)lonMid);
+        final GeoPos geoPos = new GeoPos((float)refLat, (float)refLon);
 
         // compute initial (x,y,z) coordinate from lat/lon
         GeoUtils.geo2xyz(geoPos, xyz);

@@ -49,7 +49,8 @@
 	        <id>createLandMaskOp</id>
 	        <helpId>CreateLandMask</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>oceanTools</parent>
+            <icon>esaIcon</icon>
+            <parent>oceanTools</parent>
 	        <text>Create Land/Sea Mask</text>
             <shortDescr>This isCreates a Land/Sea Mask</shortDescr>
             <dialogTitle>Create a Land/Sea Mask</dialogTitle>
@@ -61,7 +62,8 @@
 	        <id>ObjectDetection</id>
 	        <helpId>ObjectDetection</helpId>
 	        <class>org.esa.nest.dat.actions.GraphAction</class>
-	        <parent>oceanTools</parent>
+            <icon>esaIcon</icon>
+            <parent>oceanTools</parent>
 	        <text>Object Detection</text>
             <shortDescr>Ocean Object Detection</shortDescr>
 	        <dialogTitle>Ocean Object Detection</dialogTitle>
@@ -73,7 +75,8 @@
 	        <id>OilSpillDetectionOp</id>
 	        <helpId>OilSpillDetection</helpId>
 	        <class>org.esa.nest.dat.actions.GraphAction</class>
-	        <parent>oceanTools</parent>
+            <icon>esaIcon</icon>
+            <parent>oceanTools</parent>
 	        <text>Oil Spill Detection</text>
             <shortDescr>Oil Spill Detection</shortDescr>
 	        <dialogTitle>Oil Spill Detection</dialogTitle>
@@ -86,7 +89,8 @@
 	        <id>WindFieldEstimation</id>
 	        <helpId>WindFieldEstimation</helpId>
 	        <class>org.esa.nest.dat.actions.GraphAction</class>
-	        <parent>oceanTools</parent>
+            <icon>esaIcon</icon>
+            <parent>oceanTools</parent>
 	        <text>Wind Field Estimation</text>
             <shortDescr>Wind Field Estimation</shortDescr>
 	        <dialogTitle>Wind Field Estimation</dialogTitle>

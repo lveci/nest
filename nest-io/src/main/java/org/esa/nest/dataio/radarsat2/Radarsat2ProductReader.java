@@ -21,8 +21,8 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.StringUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.dataio.imageio.ImageIOFile;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 

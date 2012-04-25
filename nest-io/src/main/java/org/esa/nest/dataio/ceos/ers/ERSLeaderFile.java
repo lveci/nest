@@ -16,9 +16,9 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
+import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.ceos.CeosHelper;
 
 import javax.imageio.stream.ImageInputStream;
@@ -56,18 +56,18 @@ class ERSLeaderFile {
             throws IOException {
 
         final BinaryFileReader reader = new BinaryFileReader(leaderStream);
-        _leaderFDR = new BinaryRecord(reader, -1, leaderXML);
+        _leaderFDR = new BinaryRecord(reader, -1, leaderXML, leader_recordDefinitionFile);
         reader.seek(_leaderFDR.getRecordEndPosition());
-        _sceneHeaderRecord = new BinaryRecord(reader, -1, sceneXML);
+        _sceneHeaderRecord = new BinaryRecord(reader, -1, sceneXML, scene_recordDefinitionFile);
         reader.seek(_sceneHeaderRecord.getRecordEndPosition());
-        _mapProjRecord = new BinaryRecord(reader, -1, mapProjXML);
+        _mapProjRecord = new BinaryRecord(reader, -1, mapProjXML, mapproj_recordDefinitionFile);
         reader.seek(_mapProjRecord.getRecordEndPosition());
-        _platformPositionRecord = new BinaryRecord(reader, -1, platformXML);
+        _platformPositionRecord = new BinaryRecord(reader, -1, platformXML, platform_recordDefinitionFile);
         reader.seek(_platformPositionRecord.getRecordEndPosition());
-        _facilityRecord = new BinaryRecord(reader, -1, facilityXML);
+        _facilityRecord = new BinaryRecord(reader, -1, facilityXML, facility_recordDefinitionFile);
         reader.seek(_facilityRecord.getRecordEndPosition());
         if(reader.getCurrentPos() + 4000 < reader.getLength()) {
-            _facilityRelatedPCSRecord = new BinaryRecord(reader, -1, facilityRelXML);
+            _facilityRelatedPCSRecord = new BinaryRecord(reader, -1, facilityRelXML, facilityRelatedPCS_recordDefinitionFile);
             reader.seek(_facilityRelatedPCSRecord.getRecordEndPosition());
         } else {
             _facilityRelatedPCSRecord = null;

@@ -5,7 +5,6 @@ import org.esa.nest.db.ProductEntry;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import java.io.File;
-import java.util.List;
 
 /**
  * Interfrace for FileModel
