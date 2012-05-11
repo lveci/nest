@@ -148,7 +148,7 @@ public abstract class CEOSImageFile {
         for (File file : fileList) {
             final String name = file.getName().toUpperCase();
             for(String prefix : prefixList) {
-                if (name.startsWith(prefix) || name.endsWith("."+prefix)) {
+                if (name.startsWith(prefix) || name.endsWith('.'+prefix)) {
                     list.add(file.getName());
                 }
             }
@@ -340,14 +340,12 @@ public abstract class CEOSImageFile {
                                       final int destWidth, final ProductData destBuffer, boolean oneOf2,
                                       ProgressMonitor pm) throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX * 4;
+        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
-            //short[] srcLine;
             final short[] srcLine = new short[sourceWidth * 2];
-            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -386,15 +384,14 @@ public abstract class CEOSImageFile {
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
                 if (oneOf2)
-                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                    copyLine1Of2(srcLine, destBuffer, currentLineIndex, sourceStepX);
                 else
-                    copyLine2Of2(srcLine, destLine, sourceStepX);
-
-                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                    copyLine2Of2(srcLine, destBuffer, currentLineIndex, sourceStepX);
 
                 pm.worked(1);
             }
-
+        } catch(Throwable e) {
+            System.out.println(e.getMessage());
         } finally {
             pm.done();
         }
@@ -412,7 +409,6 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final float[] srcLine = new float[sourceWidth * 2];
-            final float[] destLine = new float[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -427,11 +423,9 @@ public abstract class CEOSImageFile {
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
                 if (oneOf2)
-                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                    copyLine1Of2(srcLine, destBuffer, currentLineIndex, sourceStepX);
                 else
-                    copyLine2Of2(srcLine, destLine, sourceStepX);
-
-                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                    copyLine2Of2(srcLine, destBuffer, currentLineIndex, sourceStepX);
 
                 pm.worked(1);
             }
@@ -510,6 +504,15 @@ public abstract class CEOSImageFile {
         }
     }
 
+    private static void copyLine1Of2(final short[] srcLine, final ProductData destBuffer,
+                          final int currentLineIndex, final int sourceStepX) {
+        final int destLength = destBuffer.getNumElems();
+        final int srcLength = srcLine.length/2;
+        for (int x = currentLineIndex, i = 0; x < destLength && i < srcLength; ++x, i += sourceStepX) {
+            destBuffer.setElemDoubleAt(x, srcLine[i << 1]);
+        }
+    }
+
     private static void copyLine1Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
@@ -524,10 +527,28 @@ public abstract class CEOSImageFile {
         }
     }
 
+    private static void copyLine1Of2(final float[] srcLine, final ProductData destBuffer,
+                          final int currentLineIndex, final int sourceStepX) {
+        final int destLength = destBuffer.getNumElems();
+        final int srcLength = srcLine.length/2;
+        for (int x = currentLineIndex, i = 0; x < destLength && i < srcLength; ++x, i += sourceStepX) {
+            destBuffer.setElemDoubleAt(x, srcLine[i << 1]);
+        }
+    }
+
     private static void copyLine1Of2(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = (int)srcLine[i << 1];
+        }
+    }
+
+    private static void copyLine2Of2(final short[] srcLine, final ProductData destBuffer,
+                          final int currentLineIndex, final int sourceStepX) {
+        final int destLength = destBuffer.getNumElems();
+        final int srcLength = srcLine.length/2;
+        for (int x = currentLineIndex, i = 0; x < destLength && i < srcLength; ++x, i += sourceStepX) {
+            destBuffer.setElemDoubleAt(x, srcLine[(i << 1) + 1]);
         }
     }
 
@@ -544,6 +565,15 @@ public abstract class CEOSImageFile {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
+        }
+    }
+
+    private static void copyLine2Of2(final float[] srcLine, final ProductData destBuffer,
+                          final int currentLineIndex, final int sourceStepX) {
+        final int destLength = destBuffer.getNumElems();
+        final int srcLength = srcLine.length/2;
+        for (int x = currentLineIndex, i = 0; x < destLength && i < srcLength; ++x, i += sourceStepX) {
+            destBuffer.setElemDoubleAt(x, srcLine[(i << 1) + 1]);
         }
     }
 

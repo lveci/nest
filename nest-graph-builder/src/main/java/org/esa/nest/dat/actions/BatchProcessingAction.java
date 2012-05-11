@@ -26,7 +26,7 @@ public class BatchProcessingAction extends AbstractVisatAction {
     public void actionPerformed(final CommandEvent event) {
         final BatchGraphDialog dialog = new BatchGraphDialog(getAppContext(),
                                                             "Batch Processing", "batchProcessing", false);
-        dialog.getJDialog().setIconImage(ResourceUtils.nestIcon.getImage());
+        dialog.getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
         dialog.show();
     }
 

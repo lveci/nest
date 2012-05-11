@@ -541,7 +541,7 @@ public class Project extends Observable {
         SaveProject();
     }
 
-    void SaveProject() {
+    public void SaveProject() {
         if(projectSubFolders == null)
             return;
 

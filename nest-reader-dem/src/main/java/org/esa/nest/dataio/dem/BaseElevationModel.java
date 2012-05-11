@@ -64,7 +64,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
         RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
-        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f / NUM_PIXELS_PER_TILE);
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (float)NUM_PIXELS_PER_TILE;
 
         elevationFiles = createElevationFiles();    // must be last
     }
@@ -77,20 +77,17 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return descriptor;
     }
 
-    protected void setMaxCacheSize(int size) {
+    protected void setMaxCacheSize(final int size) {
         maxCacheSize = size;
     }
 
-    public synchronized float getElevation(final GeoPos geoPos) throws Exception {
+    public final synchronized float getElevation(final GeoPos geoPos) throws Exception {
         final PixelPos pixel = getIndex(geoPos);
         if (pixel.y < 0) {
             return NO_DATA_VALUE;
         }
 
-        resampling.computeIndex(pixel.x, pixel.y,
-                RASTER_WIDTH,
-                RASTER_HEIGHT,
-                resamplingIndex);
+        resampling.computeIndex(pixel.x, pixel.y, RASTER_WIDTH, RASTER_HEIGHT, resamplingIndex);
 
         final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
         if (Float.isNaN(elevation)) {
@@ -123,16 +120,15 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return RASTER_HEIGHT;
     }
 
-    public float getSample(int pixelX, int pixelY) throws IOException {
+    public final float getSample(final int pixelX, final int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
         final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if (tile == null) {
             return Float.NaN;
         }
-        final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
-        final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
-        final float sample = tile.getSample(tileX, tileY);
+        final float sample = tile.getSample(pixelX - tileXIndex * NUM_PIXELS_PER_TILE, 
+                                            pixelY - tileYIndex * NUM_PIXELS_PER_TILE);
         if (sample == NO_DATA_VALUE)
             return Float.NaN;
         return sample;

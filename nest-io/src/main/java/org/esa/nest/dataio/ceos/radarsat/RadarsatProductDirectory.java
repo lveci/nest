@@ -49,12 +49,9 @@ import java.util.Map;
  */
 class RadarsatProductDirectory extends CEOSProductDirectory {
 
-    private RadarsatImageFile[] _imageFiles = null;
-    private RadarsatLeaderFile _leaderFile = null;
-    private RadarsatTrailerFile _trailerFile = null;
-
-    private int _sceneWidth = 0;
-    private int _sceneHeight = 0;
+    private RadarsatImageFile[] imageFiles = null;
+    private RadarsatLeaderFile leaderFile = null;
+    private RadarsatTrailerFile trailerFile = null;
 
     private final transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
 
@@ -62,40 +59,40 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         Guardian.assertNotNull("dir", dir);
 
         constants = new RadarsatConstants();
-        _baseDir = dir;
+        baseDir = dir;
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
 
-        _leaderFile = new RadarsatLeaderFile(
-                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
-        final File trlFile = CeosHelper.getCEOSFile(_baseDir, constants.getTrailerFilePrefix());
+        leaderFile = new RadarsatLeaderFile(
+                createInputStream(CeosHelper.getCEOSFile(baseDir, constants.getLeaderFilePrefix())));
+        final File trlFile = CeosHelper.getCEOSFile(baseDir, constants.getTrailerFilePrefix());
         if(trlFile != null) {
-            _trailerFile = new RadarsatTrailerFile(createInputStream(trlFile));
+            trailerFile = new RadarsatTrailerFile(createInputStream(trlFile));
         }
 
-        BinaryRecord histogramRec = _leaderFile.getHistogramRecord();
+        BinaryRecord histogramRec = leaderFile.getHistogramRecord();
         if(histogramRec == null)
-            histogramRec = _trailerFile.getHistogramRecord();
+            histogramRec = trailerFile.getHistogramRecord();
 
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(baseDir, constants.getImageFilePrefix());
         final List<RadarsatImageFile> imgArray = new ArrayList<RadarsatImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
-                final RadarsatImageFile imgFile = new RadarsatImageFile(createInputStream(new File(_baseDir, fileName)), histogramRec);
+                final RadarsatImageFile imgFile = new RadarsatImageFile(createInputStream(new File(baseDir, fileName)), histogramRec);
                 imgArray.add(imgFile);
             } catch (Exception e) {
                 e.printStackTrace();
                 // continue
             }
         }
-        _imageFiles = imgArray.toArray(new RadarsatImageFile[imgArray.size()]);
+        imageFiles = imgArray.toArray(new RadarsatImageFile[imgArray.size()]);
 
-        _sceneWidth = _imageFiles[0].getRasterWidth();
-        _sceneHeight = _imageFiles[0].getRasterHeight();
-        assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
+        sceneWidth = imageFiles[0].getRasterWidth();
+        sceneHeight = imageFiles[0].getRasterHeight();
+        assertSameWidthAndHeightForAllImages(imageFiles, sceneWidth, sceneHeight);
     }
 
     @Override
@@ -103,11 +100,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         assert(productType != null);
         productType = extractProductType(productType);
 
-        final Product product = new Product(getProductName(), productType, _sceneWidth, _sceneHeight);
+        final Product product = new Product(getProductName(), productType, sceneWidth, sceneHeight);
 
-        if(_imageFiles.length > 1) {
+        if(imageFiles.length > 1) {
             int index = 1;
-            for (final RadarsatImageFile imageFile : _imageFiles) {
+            for (final RadarsatImageFile imageFile : imageFiles) {
 
                 if(isProductSLC) {
                     final Band bandI = createBand(product, "i_" + index, Unit.REAL, imageFile);
@@ -121,7 +118,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 ++index;
             }
         } else {
-            final RadarsatImageFile imageFile = _imageFiles[0];
+            final RadarsatImageFile imageFile = imageFiles[0];
             if(isProductSLC) {
                 final Band bandI = createBand(product, "i", Unit.REAL, imageFile);
                 final Band bandQ = createBand(product, "q", Unit.IMAGINARY, imageFile);
@@ -133,18 +130,18 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        BinaryRecord facilityRec = _leaderFile.getFacilityRecord();
+        BinaryRecord facilityRec = leaderFile.getFacilityRecord();
         if(facilityRec == null)
-            facilityRec = _trailerFile.getFacilityRecord();
-        BinaryRecord sceneRec = _leaderFile.getSceneRecord();
+            facilityRec = trailerFile.getFacilityRecord();
+        BinaryRecord sceneRec = leaderFile.getSceneRecord();
         if(sceneRec == null)
-            sceneRec = _trailerFile.getSceneRecord();
-        BinaryRecord detProcRec = _leaderFile.getDetailedProcessingRecord();
+            sceneRec = trailerFile.getSceneRecord();
+        BinaryRecord detProcRec = leaderFile.getDetailedProcessingRecord();
         if(detProcRec == null)
-            detProcRec = _trailerFile.getDetailedProcessingRecord();
-        BinaryRecord mapProjRec = _leaderFile.getMapProjRecord();
+            detProcRec = trailerFile.getDetailedProcessingRecord();
+        BinaryRecord mapProjRec = leaderFile.getMapProjRecord();
         if(mapProjRec == null)
-            mapProjRec = _trailerFile.getMapProjRecord();
+            mapProjRec = trailerFile.getMapProjRecord();
 
         product.setStartTime(getUTCScanStartTime(sceneRec, detProcRec));
         product.setEndTime(getUTCScanStopTime(sceneRec, detProcRec));
@@ -164,11 +161,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     slantRangeTime*Constants.halfLightSpeed);
         }
 
-        float[] latCorners = _leaderFile.getLatCorners();
-        float[] lonCorners = _leaderFile.getLonCorners();
+        float[] latCorners = leaderFile.getLatCorners();
+        float[] lonCorners = leaderFile.getLonCorners();
         if(latCorners == null || lonCorners == null) {
-            latCorners = _imageFiles[0].getLatCorners();
-            lonCorners = _imageFiles[0].getLonCorners();
+            latCorners = imageFiles[0].getLatCorners();
+            lonCorners = imageFiles[0].getLonCorners();
         }
         if(latCorners != null && lonCorners != null) {
             ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
@@ -207,9 +204,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     }
 
     public boolean isRadarsat() throws IOException {
-        if(productType == null || _volumeDirectoryFile == null)
-            readVolumeDirectoryFile();
-        return (productType.contains("RSAT") || productType.contains("RADARSAT")) && !productType.contains("RAW");
+        final String volumeId = getVolumeId().toUpperCase();
+        final String logicalVolumeId = getLogicalVolumeId().toUpperCase();
+        return (volumeId.contains("RSAT") ||  volumeId.contains("RADARSAT") ||
+                logicalVolumeId.contains("RSAT") || logicalVolumeId.contains("RADARSAT"));
     }
 
     @Override
@@ -219,29 +217,16 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     @Override
     public void close() throws IOException {
-        for (int i = 0; i < _imageFiles.length; i++) {
-            _imageFiles[i].close();
-            _imageFiles[i] = null;
+        for (int i = 0; i < imageFiles.length; i++) {
+            imageFiles[i].close();
+            imageFiles[i] = null;
         }
-        _imageFiles = null;
+        imageFiles = null;
     }
 
     private Band createBand(final Product product, final String name, final String unit, final RadarsatImageFile imageFile) {
 
-        int dataType = ProductData.TYPE_UINT16;
-        if(isSLC()) {
-            dataType = ProductData.TYPE_INT16;
-        }
-        if(imageFile.getBitsPerSample() == 8) {
-            dataType = ProductData.TYPE_UINT8;
-            if(isSLC()) {
-                dataType = ProductData.TYPE_INT8;
-            }
-        }
-        final Band band = new Band(name, dataType,  _sceneWidth, _sceneHeight);
-        band.setDescription(name);
-        band.setUnit(unit);
-        product.addBand(band);
+        final Band band = createBand(product, name, unit, imageFile.getBitsPerSample());
         bandImageFileMap.put(name, imageFile);
 
         return band;
@@ -252,28 +237,28 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addMetadata(leadMetadata);
+        leaderFile.addMetadata(leadMetadata);
         root.addElement(leadMetadata);
 
         final MetadataElement trailMetadata = new MetadataElement("Trailer");
-        _trailerFile.addMetadata(trailMetadata);
+        trailerFile.addMetadata(trailMetadata);
         root.addElement(trailMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
-        _volumeDirectoryFile.assignMetadataTo(volMetadata);
+        volumeDirectoryFile.assignMetadataTo(volMetadata);
         root.addElement(volMetadata);
 
         int c = 1;
-        for (final RadarsatImageFile imageFile : _imageFiles) {
+        for (final RadarsatImageFile imageFile : imageFiles) {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
-        addSummaryMetadata(new File(_baseDir, RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
-        addSummaryMetadata(new File(_baseDir.getParentFile(), RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
+        addSummaryMetadata(new File(baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
+        addSummaryMetadata(new File(baseDir, RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
+        addSummaryMetadata(new File(baseDir.getParentFile(), RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
 
         // try txt summary file
-        final File volFile = CeosHelper.getCEOSFile(_baseDir, constants.getVolumeFilePrefix());
+        final File volFile = CeosHelper.getCEOSFile(baseDir, constants.getVolumeFilePrefix());
         final File txtFile = FileUtils.exchangeExtension(volFile, ".txt");
         addSummaryMetadata(txtFile, "Scene Description", root);
 
@@ -284,19 +269,19 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        BinaryRecord mapProjRec = _leaderFile.getMapProjRecord();
+        BinaryRecord mapProjRec = leaderFile.getMapProjRecord();
         if(mapProjRec == null)
-            mapProjRec = _trailerFile.getMapProjRecord();   
-        BinaryRecord sceneRec = _leaderFile.getSceneRecord();
+            mapProjRec = trailerFile.getMapProjRecord();
+        BinaryRecord sceneRec = leaderFile.getSceneRecord();
         if(sceneRec == null)
-            sceneRec = _trailerFile.getSceneRecord();
-        final BinaryRecord radiometricRec = _leaderFile.getRadiometricRecord();
-        BinaryRecord facilityRec = _leaderFile.getFacilityRecord();
+            sceneRec = trailerFile.getSceneRecord();
+        final BinaryRecord radiometricRec = leaderFile.getRadiometricRecord();
+        BinaryRecord facilityRec = leaderFile.getFacilityRecord();
         if(facilityRec == null)
-            facilityRec = _trailerFile.getFacilityRecord();
-        BinaryRecord detProcRec = _leaderFile.getDetailedProcessingRecord();
+            facilityRec = trailerFile.getFacilityRecord();
+        BinaryRecord detProcRec = leaderFile.getDetailedProcessingRecord();
         if(detProcRec == null)
-            detProcRec = _trailerFile.getDetailedProcessingRecord();
+            detProcRec = trailerFile.getDetailedProcessingRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -306,7 +291,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "RS1");
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
-                getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
+                getProcTime(volumeDirectoryFile.getVolumeDescriptorRecord()));
 
         final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, detProcRec);
         final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, detProcRec);
@@ -391,7 +376,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
+                ReaderUtils.getLineTimeInterval(startTime, endTime, sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -421,7 +406,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
 
-        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
+        addOrbitStateVectors(absRoot, leaderFile.getPlatformPositionRecord());
         if(facilityRec != null)
             addSRGRCoefficients(absRoot, facilityRec);
         else
@@ -436,13 +421,13 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductName() {
-        return _volumeDirectoryFile.getProductName();
+        return volumeDirectoryFile.getProductName();
     }
 
     private String getProductDescription() {
-        BinaryRecord sceneRecord = _leaderFile.getSceneRecord();
+        BinaryRecord sceneRecord = leaderFile.getSceneRecord();
         if(sceneRecord == null)
-            sceneRecord = _trailerFile.getSceneRecord();
+            sceneRecord = trailerFile.getSceneRecord();
 
         String level = "";
         if(sceneRecord != null) {
@@ -605,9 +590,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
             final int y = Math.min(j*subSamplingY, sceneHeight-1);
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(y); // meters
-            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(y);
-            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(y);
+            final int slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(y); // meters
+            final int slantRangeToMidPixel = imageFiles[0].getSlantRangeToMidPixel(y);
+            final int slantRangeToLastPixel = imageFiles[0].getSlantRangeToLastPixel(y);
             final double[] polyCoef = computePolynomialCoefficients(slantRangeToFirstPixel,
                     slantRangeToMidPixel,
                     slantRangeToLastPixel,

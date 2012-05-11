@@ -193,7 +193,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @throws IllegalArgumentException if one of the arguments is invalid
      */
-    public static ProductData createInstance(int type, int numElems) {
+    public final static ProductData createInstance(int type, int numElems) {
         if (numElems < 1 && type != TYPE_UTC) {
             throw new IllegalArgumentException("numElems is less than one");
         }

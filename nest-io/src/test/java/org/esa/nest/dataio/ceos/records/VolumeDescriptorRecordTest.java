@@ -51,19 +51,19 @@ public class VolumeDescriptorRecordTest extends TestCase {
 
     public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _reader.seek(_prefix.length());
-        final BinaryRecord record = new BinaryRecord(_reader, -1, volDescXML);
+        final BinaryRecord record = new BinaryRecord(_reader, -1, volDescXML, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
     public void testInit() throws IOException, IllegalBinaryFormatException {
-        final BinaryRecord record = new BinaryRecord(_reader, _prefix.length(), volDescXML);
+        final BinaryRecord record = new BinaryRecord(_reader, _prefix.length(), volDescXML, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
     public void testAssignMetadata() throws IOException, IllegalBinaryFormatException {
-        final BinaryRecord record = new BinaryRecord(_reader, _prefix.length(), volDescXML);
+        final BinaryRecord record = new BinaryRecord(_reader, _prefix.length(), volDescXML, volume_desc_recordDefinitionFile);
         final MetadataElement volumeMetadata = new MetadataElement("VOLUME_DESCRIPTOR");
 
         record.assignMetadataTo(volumeMetadata);

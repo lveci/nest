@@ -24,14 +24,14 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.dem.BaseElevationModel;
 import org.esa.nest.dataio.dem.ElevationFile;
 
-import java.awt.*;
 import java.io.File;
+import java.awt.*;
 
 public final class AsterElevationModel extends BaseElevationModel {
 
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn("GeoTIFF");
 
-    public AsterElevationModel(AsterElevationModelDescriptor descriptor, Resampling resamplingMethod) {
+    public AsterElevationModel(final AsterElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
 
         unpackTileBundles();
@@ -40,24 +40,24 @@ public final class AsterElevationModel extends BaseElevationModel {
     }
 
     @Override
-    public PixelPos getIndex(GeoPos geoPos) {
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 83.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
+    public PixelPos getIndex(final GeoPos geoPos) {
+        final float pixelY = RASTER_HEIGHT - (geoPos.lat + 83.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        final float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; 
         return new PixelPos(pixelX, pixelY);
     }
 
     @Override
-    public GeoPos getGeoPos(PixelPos pixelPos) {
-        float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 83.0f;
-        float pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+    public GeoPos getGeoPos(final PixelPos pixelPos) {
+        final float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 83.0f;
+        final float pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
         return new GeoPos(pixelLat, pixelLon);
     }
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
                                        final int x, final int y, final File demInstallDir) {
-        final int minLon = x - 180;
-        final int minLat = (y+7) - 90;
+        final int minLon = x * DEGREE_RES - 180;
+        final int minLat = y * DEGREE_RES - 83;
         final String fileName = descriptor.createTileFilename(minLat, minLon);
         final File localFile = new File(demInstallDir, fileName);
         elevationFiles[x][NUM_Y_TILES - 1 - y] = new AsterFile(this, localFile, productReaderPlugIn.createReaderInstance());
@@ -70,7 +70,8 @@ public final class AsterElevationModel extends BaseElevationModel {
 
         try {
             for(File f : files) {
-                if(f.getName().startsWith("Tiles_") && f.getName().endsWith(".zip")) {
+                final String name = f.getName().toLowerCase();
+                if(name.startsWith("tiles_") && name.endsWith(".zip")) {
                     Component component = null;
                     if(VisatApp.getApp() != null) {
                         component = VisatApp.getApp().getApplicationWindow();

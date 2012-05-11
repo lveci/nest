@@ -41,7 +41,7 @@ class RadarsatImageFile extends CEOSImageFile {
     public RadarsatImageFile(final ImageInputStream imageStream, final BinaryRecord histogramRecord)
             throws IOException, IllegalBinaryFormatException {
         binaryReader = new BinaryFileReader(imageStream);
-        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML);
+        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML, image_recordDefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         if(getRasterHeight() == 0) {
             final int height = histogramRecord.getAttributeInt("Data samples in line");
@@ -57,6 +57,6 @@ class RadarsatImageFile extends CEOSImageFile {
 
     protected BinaryRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
-        return new BinaryRecord(binaryReader, pos, imgRecordXML);
+        return new BinaryRecord(binaryReader, pos, imgRecordXML, image_recordDefinition);
     }
 }

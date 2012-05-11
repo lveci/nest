@@ -201,7 +201,7 @@ public final class GeoUtils
 
             X = X.minus(J.inverse().times(F));
 
-            if (FastMath.abs(F.get(0,0)) <= del && FastMath.abs(F.get(1,0)) <= del && FastMath.abs(F.get(2,0)) <= del)  {
+            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
                 break;
             }
         }

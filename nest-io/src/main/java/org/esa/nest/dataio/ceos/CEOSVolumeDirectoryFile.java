@@ -20,8 +20,6 @@ import org.esa.nest.dataio.binary.BinaryDBReader;
 import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
 import java.io.IOException;
 
 
@@ -43,24 +41,28 @@ public class CEOSVolumeDirectoryFile {
     private static org.jdom.Document filePointerXML;
     private static org.jdom.Document textRecXML;
 
-    public CEOSVolumeDirectoryFile(final File baseDir, CEOSConstants constants)
-            throws IOException {
-        final File volumeFile = CeosHelper.getVolumeFile(baseDir, constants);
-        final BinaryFileReader binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
-        final String mission = constants.getMission();
+    public CEOSVolumeDirectoryFile(final BinaryFileReader binaryReader, final String mission) throws IOException {
         if(volDescXML == null)
             volDescXML = BinaryDBReader.loadDefinitionFile(mission, volume_desc_recordDefinitionFile);
         volumeDescriptorRecord = new BinaryRecord(binaryReader, -1, volDescXML, volume_desc_recordDefinitionFile);
+    }
 
-        if(filePointerXML == null)
-            filePointerXML = BinaryDBReader.loadDefinitionFile(mission, filePointerDefinitionFile);
-        filePointerRecords = CeosHelper.readFilePointers(volumeDescriptorRecord, filePointerXML, filePointerDefinitionFile);
+    public void readFilePointersAndTextRecords(final BinaryFileReader binaryReader, final String mission) throws IOException {
+        try {
+            if(filePointerXML == null)
+                filePointerXML = BinaryDBReader.loadDefinitionFile(mission, filePointerDefinitionFile);
+            filePointerRecords = CeosHelper.readFilePointers(volumeDescriptorRecord, filePointerXML, filePointerDefinitionFile);
+        } catch(Exception e) {
+            System.out.println("Error reading file pointer record: "+e.getMessage());
+        }
 
-        if(textRecXML == null)
-            textRecXML = BinaryDBReader.loadDefinitionFile(mission, text_recordDefinitionFile);
-        textRecord = new BinaryRecord(binaryReader, -1, textRecXML, text_recordDefinitionFile);
-
-        binaryReader.close();
+        try {
+            if(textRecXML == null)
+                textRecXML = BinaryDBReader.loadDefinitionFile(mission, text_recordDefinitionFile);
+            textRecord = new BinaryRecord(binaryReader, -1, textRecXML, text_recordDefinitionFile);
+        } catch(Exception e) {
+            System.out.println("Error reading text record: "+e.getMessage());
+        }
     }
 
     public BinaryRecord getTextRecord() {

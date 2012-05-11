@@ -25,10 +25,7 @@ import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +77,7 @@ public final class ftpUtils {
     }
 
     public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws Exception {
-        FileOutputStream fos = null;
+        BufferedOutputStream fos = null;
         InputStream fis = null;
         try {
             System.out.println("ftp retrieving "+remotePath);
@@ -99,7 +96,7 @@ public final class ftpUtils {
             if(!parentFolder.exists()) {
                 parentFolder.mkdirs();
             }
-            fos = new FileOutputStream(localFile.getAbsolutePath());
+            fos = new BufferedOutputStream(new FileOutputStream(localFile.getAbsolutePath()));
 
             final StatusProgressMonitor status = new StatusProgressMonitor(fileSize,
                     "Downloading "+localFile.getName()+"... ");

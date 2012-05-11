@@ -132,6 +132,7 @@ public final class CreateElevationOp extends Operator {
 
     /**
      * Create target product.
+     * @param demDescriptor dem
      */
     void createTargetProduct(final ElevationModelDescriptor demDescriptor) {
 
@@ -182,43 +183,41 @@ public final class CreateElevationOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
         try {
-            final Rectangle targetRectangle = targetTile.getRectangle();
-            final int x0 = targetRectangle.x;
-            final int y0 = targetRectangle.y;
-            final int w = targetRectangle.width;
-            final int h = targetRectangle.height;
-
             if(targetBand == elevationBand) {
-                final GeoCoding geoCoding = targetProduct.getGeoCoding();
+                final Rectangle targetRectangle = targetTile.getRectangle();
+                final int x0 = targetRectangle.x;
+                final int y0 = targetRectangle.y;
+                final int w = targetRectangle.width;
+                final int h = targetRectangle.height;
                 final ProductData trgData = targetTile.getDataBuffer();
 
                 pm.beginTask("Computing elevations from " + demName + "...", h);
-                try {
-                    final GeoPos geoPos = new GeoPos();
-                    final PixelPos pixelPos = new PixelPos();
-                    float elevation;
+                final GeoPos geoPos = new GeoPos();
+                float elevation;
 
-                    for (int y = y0; y < y0 + h; ++y) {
-                        for (int x = x0; x < x0 + w; ++x) {
+                final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
 
-                            pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                            geoCoding.getGeoPos(pixelPos, geoPos);
-                            try {
-                                if(fileElevationModel != null) {
-                                    elevation = fileElevationModel.getElevation(geoPos);
-                                } else {
-                                    elevation = dem.getElevation(geoPos);
-                                }
-                            } catch (Exception e) {
-                                elevation = noDataValue;
+                final int maxX = x0 + w;
+                final int maxY = y0 + h;
+                for (int y = y0; y < maxY; ++y) {
+                    for (int x = x0; x < maxX; ++x) {
+
+                        //pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                        //geoCoding.getGeoPos(pixelPos, geoPos);
+                        tileGeoRef.getGeoPos(x, y, geoPos);
+                        try {
+                            if(fileElevationModel != null) {
+                                elevation = fileElevationModel.getElevation(geoPos);
+                            } else {
+                                elevation = dem.getElevation(geoPos);
                             }
-
-                            trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                        } catch (Exception e) {
+                            elevation = noDataValue;
                         }
-                        pm.worked(1);
+
+                        trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
                     }
-                } finally {
-                    pm.done();
+                    pm.worked(1);
                 }
             }
         } catch(Throwable e) {

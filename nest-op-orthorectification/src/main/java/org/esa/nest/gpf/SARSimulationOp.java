@@ -36,6 +36,7 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 
+import javax.media.jai.JAI;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -100,7 +101,9 @@ public final class SARSimulationOp extends Operator {
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                           ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+                           ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                           ResamplingFactory.BICUBIC_INTERPOLATION_NAME,
+                           ResamplingFactory.BISINC_INTERPOLATION_NAME},
                defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                label="DEM Resampling Method")
     private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
@@ -117,9 +120,7 @@ public final class SARSimulationOp extends Operator {
     public final static String layoverShadowMaskBandName = "layover_shadow_mask";
 
     private ElevationModel dem = null;
-    private FileElevationModel fileElevationModel = null;
-    private TiePointGrid latitudeTPG = null;
-    private TiePointGrid longitudeTPG = null;
+    private GeoCoding targetGeoCoding = null;
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
@@ -176,8 +177,6 @@ public final class SARSimulationOp extends Operator {
 
             getMetadata();
 
-            getTiePointGrid();
-
             getSourceImageDimension();
 
             computeSensorPositionsAndVelocities();
@@ -185,10 +184,10 @@ public final class SARSimulationOp extends Operator {
             createTargetProduct();
 
             if(externalDEMFile == null) {
-                RangeDopplerGeocodingOp.checkIfDEMInstalled(demName);
+                DEMFactory.checkIfDEMInstalled(demName);
             }
 
-            RangeDopplerGeocodingOp.validateDEM(demName, sourceProduct);
+            DEMFactory.validateDEM(demName, sourceProduct);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -200,9 +199,6 @@ public final class SARSimulationOp extends Operator {
             dem.dispose();
             dem = null;
         }
-        if(fileElevationModel != null) {
-            fileElevationModel.dispose();
-        }
     }
 
     /**
@@ -213,7 +209,7 @@ public final class SARSimulationOp extends Operator {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-        wavelength = RangeDopplerGeocodingOp.getRadarFrequency(absRoot);
+        wavelength = OperatorUtils.getRadarFrequency(absRoot);
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
@@ -248,51 +244,20 @@ public final class SARSimulationOp extends Operator {
     private synchronized void getElevationModel() throws Exception {
 
         if(isElevationModelAvailable) return;
-        if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
+        if(externalDEMFile != null) { // if external DEM file is specified by user
 
-            fileElevationModel = new FileElevationModel(externalDEMFile,
-                                                        ResamplingFactory.createResampling(demResamplingMethod),
-                                                        (float)externalDEMNoDataValue);
+            dem = new FileElevationModel(externalDEMFile,
+                                         ResamplingFactory.createResampling(demResamplingMethod),
+                                         (float)externalDEMNoDataValue);
 
             demNoDataValue = (float) externalDEMNoDataValue;
             demName = externalDEMFile.getPath();
 
         } else {
-
-            final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-            final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
-            if (demDescriptor == null) {
-                throw new OperatorException("The DEM '" + demName + "' is not supported.");
-            }
-
-            if (demDescriptor.isInstallingDem()) {
-                throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
-            }
-
-            dem = demDescriptor.createDem(ResamplingFactory.createResampling(demResamplingMethod));
-            if(dem == null) {
-                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
-            }
-
+            dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
         isElevationModelAvailable = true;
-    }
-
-    /**
-     * Get incidence angle and slant range time tie point grids.
-     */
-    private void getTiePointGrid() {
-        latitudeTPG = OperatorUtils.getLatitude(sourceProduct);
-        if (latitudeTPG == null) {
-            throw new OperatorException("Product without latitude tie point grid");
-        }
-
-        longitudeTPG = OperatorUtils.getLongitude(sourceProduct);
-        if (longitudeTPG == null) {
-            throw new OperatorException("Product without longitude tie point grid");
-        }
-
     }
 
     /**
@@ -330,7 +295,7 @@ public final class SARSimulationOp extends Operator {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
-        if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
+        if(externalDEMFile != null) { // if external DEM file is specified by user
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
         } else {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
@@ -342,8 +307,12 @@ public final class SARSimulationOp extends Operator {
             absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
         }
 
+        targetGeoCoding = targetProduct.getGeoCoding();
+        
         // set the tile width to be the image width to reduce tiling effect
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), tileSize);
+        if (saveLayoverShadowMask) {
+            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), tileSize);
+        }
     }
 
     private void addSelectedBands() {
@@ -423,29 +392,29 @@ public final class SARSimulationOp extends Operator {
         final int x = sourceImageWidth/2;
         final double[] earthPoint = new double[3];
         final double[] sensorPos = new double[3];
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos pixPos = new PixelPos();
+
         int y;
         double alt = 0.0;
         for (y = tileSize - 1; y < sourceImageHeight; y++) {
-            final GeoPos geoPos = new GeoPos(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y));
+            pixPos.setLocation(x,y);
+            targetGeoCoding.getGeoPos(pixPos, geoPos);
 
-            if(externalDEMFile == null) {
-                alt = dem.getElevation(geoPos);
-            } else {
-                alt = fileElevationModel.getElevation(geoPos);
-            }
-
+            alt = dem.getElevation(geoPos);
             if (alt != demNoDataValue) {
                 break;
             }
         }
 
-        GeoUtils.geo2xyz(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y), alt,
-                         earthPoint, GeoUtils.EarthModel.WGS84);
+        pixPos.setLocation(x,y);
+        targetGeoCoding.getGeoPos(pixPos, geoPos);
+        GeoUtils.geo2xyz(geoPos.getLat(), geoPos.getLon(), alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
         final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
                 firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
-        double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+        final double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                 zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
         final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
@@ -458,9 +427,9 @@ public final class SARSimulationOp extends Operator {
         } else {
             tileOverlapPercentage -= 0.05;
         }
+
         overlapComputed = true;
     }
-
 
     /**
      * Called by the framework in order to compute the stack of tiles for the given target bands.
@@ -474,74 +443,84 @@ public final class SARSimulationOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-        try {
-            if (!isElevationModelAvailable) {
-                getElevationModel();
-            }
-            if(!overlapComputed) {
-                computeTileOverlapPercentage(tileSize);
-            }
-        } catch(Exception e) {
-            throw new OperatorException(e);
-        }
-
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
         final int w  = targetRectangle.width;
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        try {
+            if (!isElevationModelAvailable) {
+                getElevationModel();
+            }
+            if(!overlapComputed) {
+                computeTileOverlapPercentage(h);
+            }
+        } catch(Exception e) {
+            throw new OperatorException(e);
+        }
+
         final Tile targetTile = targetTiles.get(targetProduct.getBand(SIMULATED_BAND_NAME));
-        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand(SIMULATED_BAND_NAME)).getDataBuffer();
+        final ProductData masterBuffer = targetTile.getDataBuffer();
         ProductData layoverShadowMaskBuffer = null;
         if (saveLayoverShadowMask) {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
         }
 
-        int ymin = 0;
-        int ymax = 0;
-        int nh = 0;
+        int ymin, ymax;
         if (tileOverlapPercentage >= 0.0f) {
             ymin = Math.max(y0 - (int)(h*tileOverlapPercentage), 0);
-            nh = h + (int)(h*tileOverlapPercentage);
             ymax = y0 + h;
         } else {
             ymin = y0;
-            nh = h + (int)(h*Math.abs(tileOverlapPercentage));
-            ymax = y0 + nh;
+            ymax = y0 + h + (int)(h*Math.abs(tileOverlapPercentage));
         }
+        final int xmax = x0 + w;
 
-        final float[][] localDEM = new float[nh+2][w+2];
+        final float[][] localDEM = new float[ymax-ymin+2][w+2];
         try {
-            final boolean valid = getLocalDEM(x0, ymin, w, nh, localDEM);
+            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, ymin, w, ymax-ymin);
+
+            final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, x0, ymin, w, ymax-ymin, localDEM);
             if(!valid)
                 return;
 
+            final GeoPos geoPos = new GeoPos();
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
             for (int y = ymin; y < ymax; y++) {
-
                 final double[] slrs = new double[w];
                 final double[] elev = new double[w];
                 final int[] index = new int[w];
                 final boolean[] savePixel = new boolean[w];
 
-                for (int x = x0; x < x0 + w; x++) {
-                    final double alt = localDEM[y-ymin+1][x-x0+1];
+                for (int x = x0; x < xmax; x++) {
+                    final int xx = x - x0;
+                    final double alt = localDEM[y-ymin+1][xx+1];
                     if (alt == demNoDataValue) {
-                        savePixel[x - x0] = false;
+                        savePixel[xx] = false;
                         continue;
                     }
 
-                    GeoUtils.geo2xyz(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y), alt,
-                                     earthPoint, GeoUtils.EarthModel.WGS84);
+                    tileGeoRef.getGeoPos(x, y, geoPos);
+                    if(!geoPos.isValid()) {
+                        savePixel[xx] = false;
+                        continue;  
+                    }
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
+                    if (lon >= 180.0) {
+                        lon -= 360.0;
+                    }
+
+                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
                     final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
                             sourceImageHeight, firstLineUTC, lineTimeInterval, wavelength, earthPoint,
                             sensorPosition, sensorVelocity);
 
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
-                            zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+                            zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
                     final double zeroDopplerTimeWithoutBias =
                             zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
@@ -565,12 +544,17 @@ public final class SARSimulationOp extends Operator {
 
                     rangeIndex = (int)(rangeIndex + 0.5);
 
-                    slrs[x - x0] = slantRange;
+                    if (!(rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h)) {
+                        savePixel[xx] = false;
+                        continue;   
+                    }
 
-                    elev[x - x0] = computeElevationAngle(slantRange, earthPoint, sensorPos);
+                    slrs[xx] = slantRange;
+
+                    elev[xx] = computeElevationAngle(slantRange, earthPoint, sensorPos);
 
                     final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
-                    setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
+                    RangeDopplerGeocodingOp.setLocalGeometry(x, y, tileGeoRef, earthPoint, sensorPos, localGeometry);
 
                     final double[] localIncidenceAngles = {RangeDopplerGeocodingOp.NonValidIncidenceAngle,
                                                            RangeDopplerGeocodingOp.NonValidIncidenceAngle};
@@ -580,19 +564,19 @@ public final class SARSimulationOp extends Operator {
                             localIncidenceAngles); // in degrees
 
                     if (localIncidenceAngles[0] == RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
-                        savePixel[x - x0] = false;
+                        savePixel[xx] = false;
                         continue;
                     }
 
                     final double v = computeBackscatteredPower(localIncidenceAngles[0]);
 
-                    index[x - x0] = targetTile.getDataBufferIndex((int)rangeIndex, azimuthIndex);
+                    index[xx] = targetTile.getDataBufferIndex((int)rangeIndex, azimuthIndex);
 
                     if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
-                        masterBuffer.setElemDoubleAt(index[x - x0], v + masterBuffer.getElemDoubleAt(index[x - x0]));
-                        savePixel[x - x0] = true;
+                        masterBuffer.setElemDoubleAt(index[xx], v + masterBuffer.getElemDoubleAt(index[xx]));
+                        savePixel[xx] = true;
                     } else {
-                        savePixel[x - x0] = false;
+                        savePixel[xx] = false;
                     }
                 }
 
@@ -690,62 +674,6 @@ public final class SARSimulationOp extends Operator {
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
-    }
-
-    /**
-     * Read DEM for current tile.
-     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
-     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
-     * @param tileHeight The tile height.
-     * @param tileWidth The tile width.
-     * @param localDEM The DEM for the tile.
-     * @return false if all values are no data
-     * @throws Exception from dem
-     */
-    private boolean getLocalDEM(final int x0, final int y0, final int tileWidth, final int tileHeight,
-                             final float[][] localDEM) throws Exception {
-
-        // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
-        //       the left and 1 extra column to the right of the tile.
-        final GeoPos geoPos = new GeoPos();
-        final int maxY = y0 + tileHeight + 1;
-        final int maxX = x0 + tileWidth + 1;
-        float alt;
-        boolean valid = false;
-        for (int y = y0 - 1; y < maxY; y++) {
-            final int yy = y - y0 + 1;
-            for (int x = x0 - 1; x < maxX; x++) {
-                geoPos.setLocation(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y));
-                if(externalDEMFile == null) {
-                    alt = dem.getElevation(geoPos);
-                } else {
-                    alt = fileElevationModel.getElevation(geoPos);
-                }
-                localDEM[yy][x - x0 + 1] = alt;
-                if(alt != demNoDataValue)
-                    valid = true;
-            }
-        }
-        if(fileElevationModel != null) {
-            //fileElevationModel.clearCache();
-        }
-
-        return valid;
-    }
-
-    private void setLocalGeometry(final int x, final int y, final double[] earthPoint, final double[] sensorPos,
-                                  final RangeDopplerGeocodingOp.LocalGeometry localGeometry) {
-
-        localGeometry.leftPointLat  = latitudeTPG.getPixelFloat(x-1, y);
-        localGeometry.leftPointLon  = longitudeTPG.getPixelFloat(x-1, y);
-        localGeometry.rightPointLat = latitudeTPG.getPixelFloat(x+1, y);
-        localGeometry.rightPointLon = longitudeTPG.getPixelFloat(x+1, y);
-        localGeometry.upPointLat    = latitudeTPG.getPixelFloat(x, y-1);
-        localGeometry.upPointLon    = longitudeTPG.getPixelFloat(x, y-1);
-        localGeometry.downPointLat  = latitudeTPG.getPixelFloat(x, y+1);
-        localGeometry.downPointLon  = longitudeTPG.getPixelFloat(x, y+1);
-        localGeometry.centrePoint   = earthPoint;
-        localGeometry.sensorPos     = sensorPos;
     }
 
     /**

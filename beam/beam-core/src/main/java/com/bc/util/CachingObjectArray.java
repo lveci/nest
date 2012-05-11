@@ -54,14 +54,13 @@ public class CachingObjectArray {
     public final Object getObject(final int index) throws Exception {
         if (index < minIndex || index > maxIndex) {
             return _objectFactory.createObject(index);
-        } else {
-            Object object = _objectArray.getObject(index);
-            if (object == null) {
-                object = _objectFactory.createObject(index);
-                _objectArray.setObject(index, object);
-            }
-            return object;
         }
+        Object object = _objectArray.getObject(index);
+        if (object == null) {
+            object = _objectFactory.createObject(index);
+            _objectArray.setObject(index, object);
+        }
+        return object;
     }
 
     public final void setObject(final int index, final Object o) {

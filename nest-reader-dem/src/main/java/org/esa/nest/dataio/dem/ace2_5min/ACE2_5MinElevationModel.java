@@ -28,21 +28,21 @@ public class ACE2_5MinElevationModel extends BaseElevationModel {
 
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn(ACE2_5MinReaderPlugIn.FORMAT_NAME);
 
-    public ACE2_5MinElevationModel(ACE2_5MinElevationModelDescriptor descriptor, Resampling resamplingMethod) {
+    public ACE2_5MinElevationModel(final ACE2_5MinElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
     }
 
     @Override
-    public PixelPos getIndex(GeoPos geoPos) {
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    public PixelPos getIndex(final GeoPos geoPos) {
+        final float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+        final float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
         return new PixelPos(pixelX, pixelY);
     }
 
     @Override
-    public synchronized GeoPos getGeoPos(PixelPos pixelPos) {
-        float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0f;
-        float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+    public GeoPos getGeoPos(final PixelPos pixelPos) {
+        final float pixelLat = (RASTER_HEIGHT - pixelPos.y) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 90.0f;
+        final float pixelLon = pixelPos.x / DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
         return new GeoPos(pixelLat, pixelLon);
     }
 

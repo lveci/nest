@@ -18,40 +18,38 @@ import com.bc.ceres.core.runtime.RuntimeContext;
  */
 public class ProductFunctions {
 
-    private static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5"};
-    final static String[] xmlPrefix = { "product", "tsx1_sar", "tsx2_sar", "tdx1_sar", "tdx2_sar" };
+    private final static String[] validExtensions = {".dim",".n1",".e1",".e2",".h5"};
+    private final static String[] xmlPrefix = { "product", "tsx1_sar", "tsx2_sar", "tdx1_sar", "tdx2_sar" };
 
     private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw","gif","jpg","jgw", "hdr", "self", "report", "raw", "tgz",
                                                    "log","html","htm","png","bmp","ps","aux","ovr","brs","kml", "kmz",
                                                    "sav","7z","zip","rrd","lbl","z","gz","exe","so","dll","bat","sh","rtf",
-                                                   "prj","dbf","shx","shp","ace","ace2","tar","tooldes"};
-    private static final String[] nonValidprefixes = { "led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart",
-                                                 "dfas", "dfdn", "lut",
+                                                   "prj","dbf","shx","shp","ace","ace2","tar","tooldes", "metadata.xml"};
+    private static final String[] nonValidprefixes = { "led","trl","tra_","nul","lea","dat","img","imop","sarl","sart","par_",
+                                                 "dfas","dfdn","lut",
                                                  "readme", "l1b_iif", "dor_vor", "imagery_", "browse" };
 
     public static boolean isValidProduct(final File file) {
-        final String ext = FileUtils.getExtension(file).toLowerCase();
+        final String name = file.getName().toLowerCase();
         for(String str : validExtensions) {
-            if(ext.equals(str)) {
+            if(name.endsWith(str)) {
                 return true;
             }
         }
-        if(ext.equals("xml")) {
-            final String name = file.getName().toLowerCase();
+        if(name.endsWith("xml")) {
+
             for(String str : xmlPrefix) {
                 if(name.startsWith(str)) {
                     return true;
                 }
             }
+            return false;
         }
 
         // test with readers
         final ProductReader reader = ProductIO.getProductReaderForFile(file);
-        if(reader != null)
-            return true;
-
-        return false;
+        return reader != null;
     }
 
     /**

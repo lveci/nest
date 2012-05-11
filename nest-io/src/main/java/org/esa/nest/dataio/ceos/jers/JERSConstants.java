@@ -28,7 +28,7 @@ public class JERSConstants implements CEOSConstants {
 
     private final static String[] VOLUME_FILE_PREFIX = { "VDF", "VOL" };
     private static final String[] LEADER_FILE_PREFIX = { "LEA", "SARL" };
-    private static final String[] IMAGE_FILE_PREFIX = { "DAT", "IM" };
+    private static final String[] IMAGE_FILE_PREFIX = { "DAT_", "IM" };
     private static final String[] TRAILER_FILE_PREFIX = { "TR", "SART" };
 
     private final static String MISSION = "jers";

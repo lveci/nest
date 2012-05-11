@@ -108,7 +108,8 @@ public abstract class CEOSProductReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
         try {
             final CEOSImageFile imageFile = _dataDir.getImageFile(destBand);
-            if(imageFile.getBitsPerSample() == 8) {
+            final int bitsPerSample = imageFile.getBitsPerSample();
+            if(bitsPerSample == 8) {
                 if(_dataDir.isSLC()) {
                     boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
 

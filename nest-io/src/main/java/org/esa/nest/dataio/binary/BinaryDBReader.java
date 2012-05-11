@@ -289,7 +289,7 @@ public final class BinaryDBReader {
 
     private Object get(final String name) {
         final Object obj = metaMap.get(name);
-        if(obj == null) {
+        if(obj == null && DEBUG_MODE) {
             System.out.println("metadata "+name+" is null");
         }
         return obj;

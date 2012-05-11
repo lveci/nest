@@ -22,10 +22,7 @@ import org.esa.nest.dataio.dem.BaseElevationTile;
 import org.esa.nest.dataio.dem.ElevationFile;
 import org.esa.nest.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -153,10 +150,10 @@ public final class AsterFile extends ElevationFile {
                 return newFile;
 
             ZipFile zipFile = null;
-            FileOutputStream fileoutputstream = null;
+            BufferedOutputStream fileoutputstream = null;
             try {
                 zipFile = new ZipFile(dataFile);
-                fileoutputstream = new FileOutputStream(newFile);
+                fileoutputstream = new BufferedOutputStream(new FileOutputStream(newFile));
 
                 zipFile.entries();
                 final ZipEntry zipEntry = zipFile.getEntry(baseName +'/'+ newFileName);

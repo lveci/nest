@@ -36,7 +36,8 @@
 	        <id>SlantRangeGroundRangeOp</id>
 	        <helpId>SRGROp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>geometry</parent>
+            <icon>esaIcon</icon>
+            <parent>geometry</parent>
 	        <text>Slant Range to Ground Range</text>
 	        <operatorName>SRGR</operatorName>
 	        <dialogTitle>Converts from slant range to ground range</dialogTitle>
@@ -45,13 +46,17 @@
         </action>
 
         <action>
-            <id>MultilookOp</id>
-            <class>org.esa.nest.dat.MultilookOpAction</class>
-            <text>Multilooking</text>
-            <shortDescr>Multilook an image</shortDescr>
+	        <id>MultilookOp</id>
+	        <helpId>MultilookOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+            <icon>esaIcon</icon>
             <parent>sartools</parent>
-            <helpId>MultilookOp</helpId>
-        </action>
+	        <text>Multilooking</text>
+	        <operatorName>Multilook</operatorName>
+	        <dialogTitle>Multilook</dialogTitle>
+            <shortDescr>Multilook an image</shortDescr>
+            <targetProductNameSuffix>_ML</targetProductNameSuffix>
+	    </action>
 
         <action>
             <id>Resampling</id>
@@ -65,41 +70,25 @@
 	        <id>OverSamplingOp</id>
 	        <helpId>OverSamplingOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>Resampling</parent>
+            <icon>esaIcon</icon>
+            <parent>Resampling</parent>
 	        <text>Oversample</text>
 	        <operatorName>Oversample</operatorName>
 	        <dialogTitle>Oversample an image</dialogTitle>
             <targetProductNameSuffix>_OvrS</targetProductNameSuffix>
         </action>
 
-        <!--action>
-            <id>OverSamplingOp</id>
-            <class>org.esa.nest.dat.OverSamplingOpAction</class>
-            <text>OverSample</text>
-            <shortDescr>Oversample an image</shortDescr>
-            <parent>Resampling</parent>
-            <helpId>OverSampleOp</helpId>
-        </action-->
-
         <action>
 	        <id>UnderSampleOp</id>
 	        <helpId>UnderSampleOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>Resampling</parent>
+            <icon>esaIcon</icon>
+            <parent>Resampling</parent>
 	        <text>Undersample</text>
 	        <operatorName>Undersample</operatorName>
 	        <dialogTitle>Undersample an image</dialogTitle>
             <targetProductNameSuffix>_UndS</targetProductNameSuffix>
         </action>
-
-        <!--action>
-            <id>UnderSamplingOp</id>
-            <class>org.esa.nest.dat.UnderSamplingOpAction</class>
-            <text>Undersample</text>
-            <shortDescr>Undersample an image</shortDescr>
-            <parent>Resampling</parent>
-            <helpId>UnderSampleOp</helpId>
-        </action-->
 
         <action>
             <id>DatasetConversion</id>
@@ -113,7 +102,8 @@
 	        <id>ConvertDatatypeOp</id>
 	        <helpId>ConvertDatatypeOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>DatasetConversion</parent>
+            <icon>esaIcon</icon>
+            <parent>DatasetConversion</parent>
 	        <text>Convert Datatype</text>
 	        <operatorName>Convert-Datatype</operatorName>
 	        <dialogTitle>Change the datatype of the product</dialogTitle>
@@ -121,12 +111,15 @@
 	    </action>
 
         <action>
-            <id>SLCtoPRI</id>
-            <class>org.esa.nest.dat.SLCtoPRIAction</class>
-            <text>Complex to Detected GR</text>
-            <shortDescr>Convert a SLC product to a detected ground range product</shortDescr>
+	        <id>SLCtoPRI</id>
+	        <helpId>SLCtoPRI</helpId>
+	        <class>org.esa.nest.dat.actions.GraphAction</class>
+            <icon>esaIcon</icon>
             <parent>DatasetConversion</parent>
-            <helpId>SLCtoPRI</helpId>
+	        <text>Complex to Detected GR</text>
+            <shortDescr>Convert a SLC product to a detected ground range product</shortDescr>
+	        <dialogTitle>Complex to Detected Ground Range</dialogTitle>
+            <graphFile>SLCtoPRIGraph.xml</graphFile>
         </action>
 
         <action>
@@ -171,28 +164,34 @@
 	        <id>WSSDeBurstOp</id>
 	        <helpId>WSSDeBurstOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>ASARWSS</parent>
+            <icon>esaIcon</icon>
+            <parent>ASARWSS</parent>
 	        <text>ASAR WSS Deburst</text>
 	        <operatorName>DeburstWSS</operatorName>
 	        <dialogTitle>ASAR WSS Deburst operator</dialogTitle>
+            <shortDescr>Deburst an ASAR WSS product</shortDescr>
             <targetProductNameSuffix>_Deburst</targetProductNameSuffix>
         </action>
 
         <action>
-            <id>WSSMosaicOp</id>
-            <class>org.esa.nest.dat.WSSMosaicOpAction</class>
-            <text>WSS Deburst, Calibrate and Detect</text>
-            <shortDescr>Graph to deburst and detect a WSS product. Run Mosaic afterwards to combine</shortDescr>
+	        <id>WSSMosaicOp</id>
+	        <helpId>WSSMosaicOp</helpId>
+	        <class>org.esa.nest.dat.actions.GraphAction</class>
+            <icon>esaIcon</icon>
             <parent>ASARWSS</parent>
+	        <text>WSS Deburst, Calibrate and Detect</text>
+            <shortDescr>Graph to deburst and detect a WSS product. Run Mosaic afterwards to combine</shortDescr>
+	        <dialogTitle>WSS Deburst, Calibrate and Detect</dialogTitle>
+            <graphFile>WSSDetectGraph.xml</graphFile>
             <placeAfter>WSSDeBurstOp</placeAfter>
-            <helpId>WSSMosiacOp</helpId>
         </action>
 
         <action>
 	        <id>applyOrbitFile</id>
 	        <helpId>ApplyOrbitFileOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>tools</parent>
+            <icon>esaIcon</icon>
+            <parent>tools</parent>
 	        <text>Apply Orbit File</text>
 	        <operatorName>Apply-Orbit-File</operatorName>
 	        <dialogTitle>Apply Orbit File to Product</dialogTitle>
@@ -208,7 +207,7 @@
             <shortDescr>Replace product metadata with that of another product</shortDescr>
             <description>Replace product metadata with that of another product</description>
             <parent>MetadataTools</parent>
-            <context>metadata</context>
+            <context>metadataNode</context>
         </action>
 
         <action>
@@ -220,22 +219,28 @@
         </action>
 
         <action>
-            <id>SpeckleFilterOp</id>
-            <class>org.esa.nest.dat.SpeckleFilterOpAction</class>
-            <text>Single Product</text>
-            <shortDescr>Invoke the Speckle Filter operator on a single product.</shortDescr>
+	        <id>SpeckleFilterOp</id>
+	        <helpId>SpeckleFilterOp</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+            <icon>esaIcon</icon>
             <parent>SpeckleFilteringGroup</parent>
-            <helpId>SpeckleFilterOp</helpId>
-        </action>
+	        <text>Single Product Speckle Filter</text>
+	        <operatorName>Speckle-Filter</operatorName>
+	        <dialogTitle>Speckle filtering</dialogTitle>
+            <shortDescr>Invoke the Speckle Filter operator on a single product</shortDescr>
+            <targetProductNameSuffix>_Spk</targetProductNameSuffix>
+	    </action>
 
         <action>
 	        <id>MultiTemporalSpeckleFilterOp</id>
 	        <helpId>MultiTemporalSpeckleFilterOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>SpeckleFilteringGroup</parent>
-	        <text>Multi-temporal Product</text>
+            <icon>esaIcon</icon>
+            <parent>SpeckleFilteringGroup</parent>
+	        <text>Multi-temporal Product Speckle Filter</text>
 	        <operatorName>Multi-Temporal-Speckle-Filter</operatorName>
-	        <dialogTitle>Multi-temporal Speckle filtering</dialogTitle>
+            <shortDescr>Speckle filter a stack</shortDescr>
+            <dialogTitle>Multi-temporal Speckle filtering</dialogTitle>
             <targetProductNameSuffix>_Spk</targetProductNameSuffix>
 	    </action>
 
@@ -243,21 +248,27 @@
 	        <id>FillHoleOp</id>
 	        <helpId>FillHoleOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>DEMTools</parent>
+            <icon>esaIcon</icon>
+            <parent>DEMTools</parent>
 	        <text>Fill DEM Hole</text>
 	        <operatorName>Fill-Hole</operatorName>
 	        <dialogTitle>Fill holes in DEM product</dialogTitle>
+            <shortDescr>Fill holes in a DEM product</shortDescr>
             <targetProductNameSuffix>_Filled</targetProductNameSuffix>
 	    </action>
 
         <action>
-            <id>ImageFilterOp</id>
-            <class>org.esa.nest.dat.FilterOperatorAction</class>
-            <text>Image Filtering</text>
-            <shortDescr>Image filtering</shortDescr>
+	        <id>ImageFilterOp</id>
+	        <helpId>FilterOperator</helpId>
+	        <class>org.esa.nest.dat.actions.OperatorAction</class>
+            <icon>esaIcon</icon>
             <parent>tools</parent>
-            <helpId>FilterOperator</helpId>
-        </action>
+	        <text>Image Filtering</text>
+	        <operatorName>Image-Filter</operatorName>
+	        <dialogTitle>Image filtering</dialogTitle>
+            <shortDescr>Apply an image filter</shortDescr>
+            <targetProductNameSuffix>_Filt</targetProductNameSuffix>
+	    </action>
 
     </extension>
 

@@ -15,6 +15,7 @@
 		<ace2_5MinDEMDataPath value="${demPath}/ACE2/5M_HEIGHTS" />
 		<gtopo30DEMDataPath value="${demPath}/GTOPO30/dem"/>
 		<srtm3GeoTiffDEMDataPath value="${demPath}/SRTM_DEM/tiff"/>
+		<srtm1GridDEMDataPath value="/nas/cds/internal/physiography/topographic_relief/elevation/data/nationaldatasets/1seconddem/1secSRTM-DSMv1/Data"/>
 		<AsterDEMDataPath value="${demPath}/ASTER"/>
 		<Getasse30DEMDataPath value="${demPath}/GETASSE30"/>
 		

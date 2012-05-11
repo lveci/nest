@@ -29,7 +29,7 @@ import java.awt.Rectangle;
  * A geo-coding based on two tie-point grids. One grid stores the latitude tie-points, the other stores the longitude
  * tie-points.
  */
-public class TiePointGeoCoding extends AbstractGeoCoding {
+public final class TiePointGeoCoding extends AbstractGeoCoding {
 
     private static final double ABS_ERROR_LIMIT = 0.5; // pixels
     private static final int MAX_NUM_POINTS_PER_TILE = 1000;
@@ -209,13 +209,13 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         if (geoPos == null) {
             geoPos = new GeoPos();
         }
-        if (pixelPos.x < 0 || pixelPos.x > latGrid.getSceneRasterWidth()
-            || pixelPos.y < 0 || pixelPos.y > latGrid.getSceneRasterHeight()) {
-            geoPos.setInvalid();
-        } else {
+        //if (pixelPos.x < 0 || pixelPos.y < 0
+        //    || pixelPos.x > latGrid.getSceneRasterWidth() || pixelPos.y > latGrid.getSceneRasterHeight()) {
+        //    geoPos.setInvalid();
+        //} else {
             geoPos.lat = latGrid.getPixelFloat(pixelPos.x, pixelPos.y);
             geoPos.lon = lonGrid.getPixelFloat(pixelPos.x, pixelPos.y);
-        }
+        //}
         return geoPos;
     }
 

@@ -160,11 +160,23 @@
       </action>
 
       <action>
+            <id>saveProject</id>
+            <class>org.esa.nest.dat.actions.SaveProjectAction</class>
+            <parent>file</parent>
+            <text>Save Project</text>
+            <placeAfter>loadProject</placeAfter>
+            <shortDescr>Save current project</shortDescr>
+            <description>Save current project</description>
+            <smallIcon>icons/Save16.gif</smallIcon>
+            <largeIcon>icons/Save24.gif</largeIcon>
+      </action>
+
+      <action>
             <id>saveProjectAs</id>
             <class>org.esa.nest.dat.actions.SaveProjectAsAction</class>
             <parent>file</parent>
             <text>Save Project As...</text>
-            <placeAfter>loadProject</placeAfter>
+            <placeAfter>saveProject</placeAfter>
             <shortDescr>Save current project to a new location</shortDescr>
             <description>Save current project to a new location</description>
             <smallIcon>icons/Save16.gif</smallIcon>
@@ -517,7 +529,7 @@
             <helpId>editMetadata</helpId>
             <parent>MetadataTools</parent>
             <placeBefore>searchMetadata</placeBefore>
-            <context>metadata</context>
+            <context>metadataNode</context>
             <largeIcon>/org/esa/nest/icons/metadata_edit.png</largeIcon>
         </action>
 
@@ -529,7 +541,7 @@
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
             <parent>MetadataTools</parent>
-            <context>metadata</context>
+            <context>metadataNode</context>
         </action>
 
         <action>
@@ -541,7 +553,7 @@
             <helpId>searchMetadata</helpId>
             <parent>MetadataTools</parent>
             <placeAfter>searchMetadata</placeAfter>
-            <context>metadata</context>
+            <context>metadataNode</context>
         </action>
 
         <action>

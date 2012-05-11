@@ -40,17 +40,14 @@ import org.esa.beam.framework.ui.command.CommandEvent;
  */
 public class DefaultOperatorAction extends AbstractVisatAction {
 
-    protected ModelessDialog dialog;
     protected String operatorName;
     protected String dialogTitle;
     protected String targetProductNameSuffix;
 
     @Override
     public void actionPerformed(CommandEvent event) {
-      if (dialog == null) {
-            dialog = createOperatorDialog();
-        }
-        dialog.show();
+      final ModelessDialog dialog = createOperatorDialog();
+      dialog.show();
     }
     
     @Override

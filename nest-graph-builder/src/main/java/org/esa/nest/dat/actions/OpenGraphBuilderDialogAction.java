@@ -27,7 +27,7 @@ public class OpenGraphBuilderDialogAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(final CommandEvent event) {
         final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Graph Builder", "graph_builder");
-        dialog.getJDialog().setIconImage(ResourceUtils.nestIcon.getImage());
+        dialog.getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
         dialog.show();
         
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

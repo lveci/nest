@@ -31,6 +31,7 @@ import java.awt.image.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.BufferedInputStream;
 
 /**
  Generates Quicklooks
@@ -73,7 +74,7 @@ public class QuickLookGenerator {
         BufferedImage bufferedImage = null;
         if (file.canRead()) {
             try {
-                final FileInputStream fis = new FileInputStream(file);
+                final BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
                 try {
                     bufferedImage = ImageIO.read(fis);
                 } finally {

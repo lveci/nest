@@ -124,7 +124,7 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
         }
     }
 
-    public ElevationModel createDem(Resampling resamplingMethod) {
+    public ElevationModel createDem(final Resampling resamplingMethod) {
         try {
             return new AsterElevationModel(this, resamplingMethod);
         } catch (Exception e) {
@@ -133,21 +133,23 @@ public class AsterElevationModelDescriptor extends AbstractElevationModelDescrip
     }
 
     public String createTileFilename(int minLat, int minLon) {
-        String name = "ASTGTM_";
-        name += minLon < 0 ? "S" : "N";
-        String lonString = String.valueOf(Math.abs(minLon));
-        while (lonString.length() < 2) {
-            lonString = '0' + lonString;
-        }
-        name += lonString;
-        name += minLat < 0 ? "W" : "E";
+        final StringBuilder name = new StringBuilder("ASTGTM_");
+        name.append(minLat < 0 ? "S" : "N");
         String latString = String.valueOf(Math.abs(minLat));
-        while (latString.length() < 3) {
+        while (latString.length() < 2) {
             latString = '0' + latString;
         }
-        name += latString;
+        name.append(latString);
 
-        return name + ".zip";
+        name.append(minLon < 0 ? "W" : "E");
+        String lonString = String.valueOf(Math.abs(minLon));
+        while (lonString.length() < 3) {
+            lonString = '0' + lonString;
+        }
+        name.append(lonString);
+        name.append(".zip");
+
+        return name.toString();
     }
 
 }

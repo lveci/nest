@@ -48,23 +48,27 @@ final class BilinearInterpolationResampling implements Resampling {
 
         final int iMax = width - 1;
         if (di >= 0) {
-            index.i[0] = Index.crop(i0 + 0, iMax);
-            index.i[1] = Index.crop(i0 + 1, iMax);
+            final int i1 = i0 + 1;
+            index.i[0] = (i0 < 0) ? 0 : (i0 > iMax) ? iMax : i0; //Index.crop(i0, iMax);
+            index.i[1] = (i1 < 0) ? 0 : (i1 > iMax) ? iMax : i1; //Index.crop(i0 + 1, iMax);
             index.ki[0] = di;
         } else {
-            index.i[0] = Index.crop(i0 - 1, iMax);
-            index.i[1] = Index.crop(i0 + 0, iMax);
+            final int i1 = i0 - 1;
+            index.i[0] = (i1 < 0) ? 0 : (i1 > iMax) ? iMax : i1; //Index.crop(i0 - 1, iMax);
+            index.i[1] = (i0 < 0) ? 0 : (i0 > iMax) ? iMax : i0; //Index.crop(i0, iMax);
             index.ki[0] = di + 1;
         }
 
         final int jMax = height - 1;
         if (dj >= 0) {
-            index.j[0] = Index.crop(j0 + 0, jMax);
-            index.j[1] = Index.crop(j0 + 1, jMax);
+            final int j1 = j0 + 1;
+            index.j[0] = (j0 < 0) ? 0 : (j0 > jMax) ? jMax : j0; //Index.crop(j0, jMax);
+            index.j[1] = (j1 < 0) ? 0 : (j1 > jMax) ? jMax : j1; //Index.crop(j0 + 1, jMax);
             index.kj[0] = dj;
         } else {
-            index.j[0] = Index.crop(j0 - 1, jMax);
-            index.j[1] = Index.crop(j0 + 0, jMax);
+            final int j1 = j0 - 1;
+            index.j[0] = (j1 < 0) ? 0 : (j1 > jMax) ? jMax : j1; //Index.crop(j0 - 1, jMax);
+            index.j[1] = (j0 < 0) ? 0 : (j0 > jMax) ? jMax : j0; //Index.crop(j0, jMax);
             index.kj[0] = dj + 1;
         }
     }

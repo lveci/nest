@@ -67,7 +67,7 @@ import java.text.MessageFormat;
 
 public class CreateDemRelatedBandsAction extends ExecCommand {
 
-    public static final String DIALOG_TITLE = "Create DEM-related Bands";
+    public static final String DIALOG_TITLE = "Create Elevation Band";
     public static final String DEFAULT_ELEVATION_BAND_NAME = "elevation";
     public static final String DEFAULT_LATITUDE_BAND_NAME = "corr_latitude";
     public static final String DEFAULT_LONGITUDE_BAND_NAME = "corr_longitude";
@@ -206,10 +206,11 @@ public class CreateDemRelatedBandsAction extends ExecCommand {
         final BindingContext ctx = new BindingContext(propertySet);
 
         JList demList = new JList();
-        demList.setVisibleRowCount(3);
+        demList.setVisibleRowCount(7);
         ctx.bind("demName", new SingleSelectionListComponentAdapter(demList));
 
         JTextField elevationBandNameField = new JTextField();
+        elevationBandNameField.setColumns(10);
         ctx.bind("elevationBandName", elevationBandNameField);
 
         JCheckBox outputDemCorrectedBandsChecker = new JCheckBox("Output DEM-corrected bands");

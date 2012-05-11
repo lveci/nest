@@ -44,7 +44,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
     private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                       ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME });
+                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME,
+                                                                      ResamplingFactory.BICUBIC_INTERPOLATION_NAME,
+                                                                      ResamplingFactory.BISINC_INTERPOLATION_NAME});
 
     private final JTextField externalDEMFile = new JTextField("");
     private final JTextField externalDEMNoDataValue = new JTextField("");
@@ -65,7 +67,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         final ElevationModelDescriptor[] demDesciptors = elevationModelRegistry.getAllDescriptors();
         for(ElevationModelDescriptor dem : demDesciptors) {
-            demName.addItem(RangeDopplerGeocodingOpUI.appendAutoDEM(dem.getName()));
+            demName.addItem(DEMFactory.appendAutoDEM(dem.getName()));
         }
         demName.addItem(externalDEMStr);
 
@@ -76,7 +78,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         demName.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                final String item = ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, "");
+                final String item = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
                 if(item.equals(externalDEMStr)) {
                     enableExternalDEM(true);
                 } else {
@@ -86,7 +88,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(30);
-        final String demItem = ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, "");
+        final String demItem = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
         enableExternalDEM(demItem.equals(externalDEMStr));
 
         externalDEMBrowseButton.addActionListener(new ActionListener() {
@@ -117,7 +119,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         final String demNameParam = (String)paramMap.get("demName");
         if(demNameParam != null)
-            demName.setSelectedItem(RangeDopplerGeocodingOpUI.appendAutoDEM(demNameParam));
+            demName.setSelectedItem(DEMFactory.appendAutoDEM(demNameParam));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
 
         final File extFile = (File)paramMap.get("externalDEMFile");
@@ -144,7 +146,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
-        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(RangeDopplerGeocodingOpUI.AUTODEM, ""));
+        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, ""));
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
 
         final String extFileStr = externalDEMFile.getText();

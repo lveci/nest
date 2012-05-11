@@ -46,27 +46,33 @@
     <extension point="beam-ui:actions">
 
         <action>
-            <id>CreateStack</id>
-            <class>org.esa.nest.dat.CreateStackAction</class>
-            <text>Create Stack</text>
-            <shortDescr>Stacks together several products without coregistering</shortDescr>
+	        <id>CreateStack</id>
+	        <helpId>CreateStack</helpId>
+	        <class>org.esa.nest.dat.actions.GraphAction</class>
+            <icon>esaIcon</icon>
             <parent>tools</parent>
-            <helpId>CreateStack</helpId>
+	        <text>Create Stack</text>
+	        <dialogTitle>Create Stack</dialogTitle>
+            <shortDescr>Stacks together several products without coregistering</shortDescr>
+            <graphFile>CreateStackGraph.xml</graphFile>
         </action>
 
         <action>
-            <id>CoregistrationGraph</id>
-            <class>org.esa.nest.dat.CoregistrationGraphAction</class>
-            <text>Automatic Coregistration</text>
-            <shortDescr>Perform Automatic Coregistration</shortDescr>
+	        <id>CoregistrationGraph</id>
+	        <helpId>Coregistration</helpId>
+	        <class>org.esa.nest.dat.actions.GraphAction</class>
+            <icon>esaIcon</icon>
             <parent>sartools</parent>
-            <separatorBefore>true</separatorBefore>
-            <helpId>Coregistration</helpId>
+	        <text>Automatic Coregistration</text>
+            <shortDescr>Perform Automatic Coregistration</shortDescr>
+	        <dialogTitle>Automatic Coregistration</dialogTitle>
+            <graphFile>CoregistrationGraph.xml</graphFile>
         </action>
 
         <action>
             <id>PCAStatistic</id>
             <class>org.esa.nest.dat.actions.OperatorAction</class>
+            <icon>esaIcon</icon>
             <text>Principal Component Analysis</text>
             <operatorName>PCA</operatorName>
 	        <dialogTitle>Principal Component Analysis</dialogTitle>

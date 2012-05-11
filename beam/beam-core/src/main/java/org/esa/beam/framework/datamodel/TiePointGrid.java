@@ -31,7 +31,6 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.util.math.Range;
 import org.apache.commons.math.util.FastMath;
 
-import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 
@@ -65,21 +64,21 @@ public class TiePointGrid extends RasterDataNode {
      */
     public static int DISCONT_AT_360 = 360;
 
-    private final float _offsetX;
-    private final float _offsetY;
-    private final float _subSamplingX;
-    private final float _subSamplingY;
-    private final int _rasterWidth;
-    private final int _rasterWidthMinus2;
-    private final int _rasterHeightMinus2;
+    private final float offsetX;
+    private final float offsetY;
+    private final float subSamplingX;
+    private final float subSamplingY;
+    private final int rasterWidth;
+    private final int rasterWidthMinus2;
+    private final int rasterHeightMinus2;
 
-    private int _discontinuity;
-    private TiePointGrid _sinGrid;
-    private TiePointGrid _cosGrid;
-    private float[] _tiePoints = null;
+    private int discontinuity;
+    private TiePointGrid sinGrid;
+    private TiePointGrid cosGrid;
+    private float[] tiePoints = null;
 
-    private double[][] _quadraticInterpCoeffs = null; // 2 order quadratic polynomial coefficients
-    private double[] _biquadraticInterpCoeffs = null; // 2 order biquadratic polynomial coefficients
+    private double[][] quadraticInterpCoeffs = null; // 2 order quadratic polynomial coefficients
+    private double[] biquadraticInterpCoeffs = null; // 2 order biquadratic polynomial coefficients
 
     public enum InterpMode { BILINEAR, QUADRATIC, BIQUADRATIC }
 
@@ -139,7 +138,7 @@ public class TiePointGrid extends RasterDataNode {
         if (discontinuity != DISCONT_NONE && discontinuity != DISCONT_AT_180 && discontinuity != DISCONT_AT_360) {
             throw new IllegalArgumentException("unsupported discontinuity mode");
         }
-        _discontinuity = discontinuity;
+        this.discontinuity = discontinuity;
 
         if (tiePoints.length != gridWidth * gridHeight) {
             throw new IllegalArgumentException("data array size does not match 'gridWidth' x 'gridHeight'");
@@ -150,15 +149,17 @@ public class TiePointGrid extends RasterDataNode {
         if (subSamplingY <= 0.0F) {
             throw new IllegalArgumentException("'subSamplingY' is less or equal zero");
         }
-        _offsetX = offsetX;
-        _offsetY = offsetY;
-        _subSamplingX = subSamplingX;
-        _subSamplingY = subSamplingY;
-        _rasterWidth = gridWidth;
-        _rasterWidthMinus2 = gridWidth - 2;
-        _rasterHeightMinus2 = gridHeight - 2;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.subSamplingX = subSamplingX;
+        this.subSamplingY = subSamplingY;
+        rasterWidth = gridWidth;
+        rasterWidthMinus2 = gridWidth - 2;
+        rasterHeightMinus2 = gridHeight - 2;
 
         setData(ProductData.createInstance(tiePoints));
+
+        prefetchTiePoints();
     }
 
     /**
@@ -211,7 +212,7 @@ public class TiePointGrid extends RasterDataNode {
      *         {@link #DISCONT_AT_360}
      */
     public int getDiscontinuity() {
-        return _discontinuity;
+        return discontinuity;
     }
 
     /**
@@ -224,7 +225,7 @@ public class TiePointGrid extends RasterDataNode {
         if (discontinuity != DISCONT_NONE && discontinuity != DISCONT_AT_180 && discontinuity != DISCONT_AT_360) {
             throw new IllegalArgumentException("unsupported discontinuity mode");
         }
-        _discontinuity = discontinuity;
+        this.discontinuity = discontinuity;
     }
 
     /**
@@ -310,14 +311,14 @@ public class TiePointGrid extends RasterDataNode {
      * Retrieves the x co-ordinate of the first (upper-left) tie-point in pixels.
      */
     public float getOffsetX() {
-        return _offsetX;
+        return offsetX;
     }
 
     /**
      * Retrieves the y co-ordinate of the first (upper-left) tie-point in pixels.
      */
     public float getOffsetY() {
-        return _offsetY;
+        return offsetY;
     }
 
     /**
@@ -327,7 +328,7 @@ public class TiePointGrid extends RasterDataNode {
      * @return the sub-sampling in X-direction, never less than one.
      */
     public float getSubSamplingX() {
-        return _subSamplingX;
+        return subSamplingX;
     }
 
     /**
@@ -337,7 +338,7 @@ public class TiePointGrid extends RasterDataNode {
      * @return the sub-sampling in Y-direction, never less than one.
      */
     public float getSubSamplingY() {
-        return _subSamplingY;
+        return subSamplingY;
     }
 
     /**
@@ -368,13 +369,13 @@ public class TiePointGrid extends RasterDataNode {
 
     @Override
     public void dispose() {
-        if (_cosGrid != null) {
-            _cosGrid.dispose();
-            _cosGrid = null;
+        if (cosGrid != null) {
+            cosGrid.dispose();
+            cosGrid = null;
         }
-        if (_sinGrid != null) {
-            _sinGrid.dispose();
-            _sinGrid = null;
+        if (sinGrid != null) {
+            sinGrid.dispose();
+            sinGrid = null;
         }
         super.dispose();
     }
@@ -392,7 +393,7 @@ public class TiePointGrid extends RasterDataNode {
      * @throws ArrayIndexOutOfBoundsException if the co-ordinates are not in bounds
      */
     @Override
-    public final float getPixelFloat(int x, int y) {
+    public final float getPixelFloat(final int x, final int y) {
         return getPixelFloat(x + 0.5f, y + 0.5f);
     }
 
@@ -408,47 +409,39 @@ public class TiePointGrid extends RasterDataNode {
      *
      * @throws ArrayIndexOutOfBoundsException if the co-ordinates are not in bounds
      */
-    public final float getPixelFloat(float x, float y) {
-        if (_discontinuity != DISCONT_NONE) {
+    public final float getPixelFloat(final float x, final float y) {
+        if (discontinuity != DISCONT_NONE) {
             if (isDiscontNotInit()) {
                 initDiscont();
             }
-            final float sinAngle = _sinGrid.getPixelFloat(x, y);
-            final float cosAngle = _cosGrid.getPixelFloat(x, y);
-            final float v = (float) (MathUtils.RTOD * FastMath.atan2(sinAngle, cosAngle));
-            if (_discontinuity == DISCONT_AT_360 && v < 0.0) {
-                return 360.0F + v;  // = 180 + (180 - abs(v))
-            }
-            return v;
+            final float v = (float) (MathUtils.RTOD * Math.atan2(sinGrid.getPixelFloat(x, y),
+                                                                     cosGrid.getPixelFloat(x, y)));
+            return (v < 0.0 && discontinuity == DISCONT_AT_360) ? 360.0F + v : v;          // = 180 + (180 - abs(v))
         }
-        final float fi = (x - _offsetX) / _subSamplingX;
-        final float fj = (y - _offsetY) / _subSamplingY;
-        final int i = MathUtils.crop((int) FastMath.floor(fi), 0, _rasterWidthMinus2);
-        final int j = MathUtils.crop((int) FastMath.floor(fj), 0, _rasterHeightMinus2);
+        final float fi = (x - offsetX) / subSamplingX;
+        final float fj = (y - offsetY) / subSamplingY;
+        final int i = MathUtils.crop((int)fi, 0, rasterWidthMinus2);
+        final int j = MathUtils.crop((int)fj, 0, rasterHeightMinus2);
         return interpolate(fi - i, fj - j, i, j);
     }
 
     public final float getPixelFloat(final InterpInput in) {
-        if (_discontinuity != DISCONT_NONE) {
+        if (discontinuity != DISCONT_NONE) {
             if (isDiscontNotInit()) {
                 initDiscont();
             }
-            final float sinAngle = _sinGrid.getPixelFloat(in);
-            final float cosAngle = _cosGrid.getPixelFloat(in);
-            final float v = (float) (MathUtils.RTOD * Math.atan2(sinAngle, cosAngle));
-            if (_discontinuity == DISCONT_AT_360 && v < 0.0) {
-                return 360.0F + v;  // = 180 + (180 - abs(v))
-            }
-            return v;
+            final float v = (float) (MathUtils.RTOD * Math.atan2(sinGrid.getPixelFloat(in),
+                                                                 cosGrid.getPixelFloat(in)));
+            return (v < 0.0 && discontinuity == DISCONT_AT_360) ? 360.0F + v : v;          // = 180 + (180 - abs(v))
         }
         return interpolate(in.wi, in.wj, in.i0, in.j0);
     }
 
     public InterpInput calcInterp(final float x, final float y) {
-        final float fi = (x - _offsetX) / _subSamplingX;
-        final float fj = (y - _offsetY) / _subSamplingY;
-        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, _rasterWidthMinus2);
-        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, _rasterHeightMinus2);
+        final float fi = (x - offsetX) / subSamplingX;
+        final float fj = (y - offsetY) / subSamplingY;
+        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, rasterWidthMinus2);
+        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, rasterHeightMinus2);
         return new InterpInput(fi - i, fj - j, i, j);
     }
 
@@ -543,8 +536,8 @@ public class TiePointGrid extends RasterDataNode {
      * Retrieves an array of tie point data interpolated to the product width and height as float array. If the given
      * array is <code>null</code> a new one is created and returned.
      *
-     * @param x      the x coordinate of the array to be read
-     * @param y      the y coordinate of the array to be read
+     * @param x1      the x coordinate of the array to be read
+     * @param y1      the y coordinate of the array to be read
      * @param w      the width of the array to be read
      * @param h      the height of the array to be read
      * @param pixels the float array to be filled with data
@@ -553,62 +546,56 @@ public class TiePointGrid extends RasterDataNode {
      * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
      */
     @Override
-    public float[] getPixels(int x, int y, int w, int h, float[] pixels, ProgressMonitor pm) {
+    public synchronized float[] getPixels(int x1, int y1, int w, int h, float[] pixels, ProgressMonitor pm) {
         pixels = ensureMinLengthArray(pixels, w * h);
-        if (_discontinuity != DISCONT_NONE) {
+        final int x2 = x1 + w;
+        final int y2 = y1 + h;
+        if (discontinuity != DISCONT_NONE) {
             if (isDiscontNotInit()) {
                 initDiscont();
             }
             int i = 0;
-            for (int yCoordinate = y; yCoordinate < y + h; yCoordinate++) {
-                for (int xCoordinate = x; xCoordinate < x + w; xCoordinate++) {
-                    pixels[i] = getPixelFloat(xCoordinate + 0.5f, yCoordinate + 0.5f);
-                    i++;
+            for (int y = y1; y < y2; ++y) {
+                for (int x = x1; x < x2; ++x) {
+                    //pixels[i++] = getPixelFloat(x + 0.5f, y + 0.5f);
+
+                    final float v = (float) (MathUtils.RTOD * Math.atan2(sinGrid.getPixelFloat(x+ 0.5f, y+ 0.5f),
+                                                                         cosGrid.getPixelFloat(x+ 0.5f, y+ 0.5f)));
+                    pixels[i++] = (v < 0.0 && discontinuity == DISCONT_AT_360) ? 360.0F + v : v;
                 }
             }
         } else {
-            final float x0 = 0.5f - _offsetX;
-            final float y0 = 0.5f - _offsetY;
-            final int x1 = x;
-            final int y1 = y;
-            final int x2 = x + w - 1;
-            final int y2 = y + h - 1;
-            final int rw = _rasterWidth;
-            final int ni = rw-2;
-            final int nj = _rasterHeightMinus2;
+            final float x0 = 0.5f - offsetX;
+            final float y0 = 0.5f - offsetY;
             int i, j;
             float fi, fj;
             float wj;
             int i1, j1, jrw, j1rw;
 
-            float subSamplingY = 1f / _subSamplingY;
-            float subSamplingX = 1f / _subSamplingX;
+            float subSamplingY = 1f / this.subSamplingY;
+            float subSamplingX = 1f / this.subSamplingX;
             int pos = 0;
-            prefetchTiePoints();
-            for (y = y1; y <= y2; ++y) {
+
+            for (int y = y1; y < y2; ++y) {
                 fj = (y + y0) * subSamplingY;
-                //j = MathUtils.crop((int) StrictMath.floor(fj), 0, nj);
-                j = (int) fj;
-                if(j < 0) j = 0;
-                else if(j > nj) j = nj;
+                //j = MathUtils.crop((int) StrictMath.floor(fj), 0, rasterHeightMinus2);
+                j = MathUtils.crop((int)fj, 0, rasterHeightMinus2);
 
                 wj = fj - j;
                 j1 = j + 1;
-                jrw = j * rw;
-                j1rw = j1 * rw;
-                for (x = x1; x <= x2; ++x) {
+                jrw = j * rasterWidth;
+                j1rw = j1 * rasterWidth;
+                for (int x = x1; x < x2; ++x) {
                     fi = (x + x0) * subSamplingX;
-                    //i = MathUtils.crop((int) StrictMath.floor(fi), 0, ni);
-                    i = (int) fi;
-                    if(i < 0) i = 0;
-                    else if(i > ni) i = ni;
+                    //i = MathUtils.crop((int) StrictMath.floor(fi), 0, rasterWidthMinus2);
+                    i = MathUtils.crop((int) (int)fi, 0, rasterWidthMinus2);
 
                     i1 = i + 1;
                     pixels[pos++] = MathUtils.interpolate2D(fi - i, wj,
-                                                   _tiePoints[i + jrw],
-                                                   _tiePoints[i1 + jrw],
-                                                   _tiePoints[i + j1rw],
-                                                   _tiePoints[i1 + j1rw]);
+                                                   tiePoints[i + jrw],
+                                                   tiePoints[i1 + jrw],
+                                                   tiePoints[i + j1rw],
+                                                   tiePoints[i1 + j1rw]);
                 }
             }
         }
@@ -907,25 +894,23 @@ public class TiePointGrid extends RasterDataNode {
      * it will be faster to prefetch the tiepoints once outside of your loop
      */
     public void prefetchTiePoints() {
-        _tiePoints = getTiePoints();
+        tiePoints = getTiePoints();
     }
 
-    private final float interpolate(float wi, float wj, int i0, int j0) {
-        if(_tiePoints == null)
-            _tiePoints = getTiePoints();
+    private float interpolate(float wi, float wj, int i0, int j0) {
         final int i1 = i0 + 1;
         final int j1 = j0 + 1;
         return MathUtils.interpolate2D(wi,
                                        wj,
-                                       _tiePoints[i0 + j0 * _rasterWidth],
-                                       _tiePoints[i1 + j0 * _rasterWidth],
-                                       _tiePoints[i0 + j1 * _rasterWidth],
-                                       _tiePoints[i1 + j1 * _rasterWidth]);
+                                       tiePoints[i0 + j0 * rasterWidth],
+                                       tiePoints[i1 + j0 * rasterWidth],
+                                       tiePoints[i0 + j1 * rasterWidth],
+                                       tiePoints[i1 + j1 * rasterWidth]);
 
     }
 
     private boolean isDiscontNotInit() {
-        return _sinGrid == null;
+        return sinGrid == null;
     }
 
     private void initDiscont() {
@@ -938,7 +923,7 @@ public class TiePointGrid extends RasterDataNode {
             sinTiePoints[i] = (float) Math.sin(MathUtils.DTOR * tiePoint);
             cosTiePoints[i] = (float) Math.cos(MathUtils.DTOR * tiePoint);
         }
-        _sinGrid = new TiePointGrid(base.getName(),
+        sinGrid = new TiePointGrid(base.getName(),
                                     base.getRasterWidth(),
                                     base.getRasterHeight(),
                                     base.getOffsetX(),
@@ -946,7 +931,7 @@ public class TiePointGrid extends RasterDataNode {
                                     base.getSubSamplingX(),
                                     base.getSubSamplingY(),
                                     sinTiePoints);
-        _cosGrid = new TiePointGrid(base.getName(),
+        cosGrid = new TiePointGrid(base.getName(),
                                     base.getRasterWidth(),
                                     base.getRasterHeight(),
                                     base.getOffsetX(),
@@ -1093,36 +1078,36 @@ public class TiePointGrid extends RasterDataNode {
      */
     private synchronized void computeQuadraticInterpCoeffs() {
 
-        if (_quadraticInterpCoeffs != null) return;
+        if (quadraticInterpCoeffs != null) return;
 
         final int numCoeff = 3;
         final int width = getRasterWidth();
         final int height = getRasterHeight();
 
-        if(_tiePoints == null) {
-            _tiePoints = getTiePoints();
+        if(tiePoints == null) {
+            tiePoints = getTiePoints();
         }
 
         final double[][] sampleIndexArray = new double[width][numCoeff];
         for (int c = 0; c < width; c++) {
-//            final int x = Math.min((int)(c*_subSamplingX), getSceneRasterWidth() - 1);
-            final int x = (int)(_offsetX + c*_subSamplingX);
+//            final int x = Math.min((int)(c*subSamplingX), getSceneRasterWidth() - 1);
+            final int x = (int)(offsetX + c* subSamplingX);
             sampleIndexArray[c][0] = 1.0;
             sampleIndexArray[c][1] = (double)(x);
             sampleIndexArray[c][2] = (double)(x*x);
         }
         final Matrix A = new Matrix(sampleIndexArray);
 
-        _quadraticInterpCoeffs = new double[height][numCoeff];
+        quadraticInterpCoeffs = new double[height][numCoeff];
         final double[] tiePointArray = new double[width];
         for (int r = 0; r < height; r++) {
             final int rwidth = r*width;
             for (int c = 0; c < width; c++) {
-                tiePointArray[c] = (double)(_tiePoints[rwidth + c]);
+                tiePointArray[c] = (double)(tiePoints[rwidth + c]);
             }
             final Matrix b = new Matrix(tiePointArray, width);
             final Matrix x = A.solve(b);
-            _quadraticInterpCoeffs[r] = x.getColumnPackedCopy();
+            quadraticInterpCoeffs[r] = x.getColumnPackedCopy();
         }
     }
 
@@ -1134,7 +1119,7 @@ public class TiePointGrid extends RasterDataNode {
      */
     private synchronized void computeBiquadraticInterpCoeffs() {
 
-        if (_biquadraticInterpCoeffs != null) return;
+        if (biquadraticInterpCoeffs != null) return;
 
         final int numCoeff = 6;
         final int w = getRasterWidth();
@@ -1144,14 +1129,14 @@ public class TiePointGrid extends RasterDataNode {
         // prepare matrix A
         final double[][] sampleIndexArray = new double[n][numCoeff];
         for (int i = 0; i < h; i++) {
-            final int y = (int)(i*_subSamplingY);
+            final int y = (int)(i* subSamplingY);
             final double yy = y*y;
             final int iw = i*w;
             for (int j = 0; j < w; j++) {
                 final int k = iw + j;
-//                final int x = Math.min((int)(j*_subSamplingX), getSceneRasterWidth() - 1);
-//                final int y = Math.min((int)(i*_subSamplingY), getSceneRasterHeight() - 1);
-                final int x = (int)(j*_subSamplingX);
+//                final int x = Math.min((int)(j*subSamplingX), getSceneRasterWidth() - 1);
+//                final int y = Math.min((int)(i*subSamplingY), getSceneRasterHeight() - 1);
+                final int x = (int)(j* subSamplingX);
                 sampleIndexArray[k][0] = 1.0;
                 sampleIndexArray[k][1] = (double)(x);
                 sampleIndexArray[k][2] = (double)(y);
@@ -1163,18 +1148,18 @@ public class TiePointGrid extends RasterDataNode {
         final Matrix A = new Matrix(sampleIndexArray);
 
         // prepare matrix b
-        if(_tiePoints == null) {
-            _tiePoints = getTiePoints();
+        if(tiePoints == null) {
+            tiePoints = getTiePoints();
         }
         final double[] tiePointArray = new double[n];
         for (int i = 0; i < n; i++) {
-            tiePointArray[i] = (double)(_tiePoints[i]);
+            tiePointArray[i] = (double)(tiePoints[i]);
         }
         final Matrix b = new Matrix(tiePointArray, n);
 
         // comoute coefficients
         final Matrix x = A.solve(b);
-        _biquadraticInterpCoeffs = x.getColumnPackedCopy();
+        biquadraticInterpCoeffs = x.getColumnPackedCopy();
     }
 
 
@@ -1199,22 +1184,22 @@ public class TiePointGrid extends RasterDataNode {
 
         } else if (interpMethod == InterpMode.QUADRATIC) {
 
-            if (_quadraticInterpCoeffs == null) {
+            if (quadraticInterpCoeffs == null) {
                 computeQuadraticInterpCoeffs();
             }
-            int r = (int) ((y - _offsetY) / _subSamplingY);
-            if (r >= _quadraticInterpCoeffs.length) {
-                r = _quadraticInterpCoeffs.length - 1;
+            int r = (int) ((y - offsetY) / subSamplingY);
+            if (r >= quadraticInterpCoeffs.length) {
+                r = quadraticInterpCoeffs.length - 1;
             }
-            return (float)(_quadraticInterpCoeffs[r][0] + _quadraticInterpCoeffs[r][1]*x + _quadraticInterpCoeffs[r][2]*x*x);
+            return (float)(quadraticInterpCoeffs[r][0] + quadraticInterpCoeffs[r][1]*x + quadraticInterpCoeffs[r][2]*x*x);
 
         } else if (interpMethod == InterpMode.BIQUADRATIC) {
 
-            if (_biquadraticInterpCoeffs == null) {
+            if (biquadraticInterpCoeffs == null) {
                 computeBiquadraticInterpCoeffs();
             }
-            return (float)(_biquadraticInterpCoeffs[0] + _biquadraticInterpCoeffs[1]*x + _biquadraticInterpCoeffs[2]*y
-                    + _biquadraticInterpCoeffs[3]*x*x + _biquadraticInterpCoeffs[4]*x*y + _biquadraticInterpCoeffs[5]*y*y);
+            return (float)(biquadraticInterpCoeffs[0] + biquadraticInterpCoeffs[1]*x + biquadraticInterpCoeffs[2]*y
+                    + biquadraticInterpCoeffs[3]*x*x + biquadraticInterpCoeffs[4]*x*y + biquadraticInterpCoeffs[5]*y*y);
 
         } else {
             throw new IllegalArgumentException("unsupported interpolation method");

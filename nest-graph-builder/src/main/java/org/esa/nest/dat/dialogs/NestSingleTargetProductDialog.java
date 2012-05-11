@@ -72,7 +72,7 @@ public class NestSingleTargetProductDialog extends DefaultSingleTargetProductDia
         addParameters(operatorSpi, appContext, helpID);
 
         getJDialog().setMinimumSize(new Dimension(450, 450));
-        getJDialog().setIconImage(ResourceUtils.nestIcon.getImage());
+        getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
 
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255,0,0));

@@ -46,11 +46,9 @@ import java.util.Map;
  */
 class JERSProductDirectory extends CEOSProductDirectory {
 
-    private JERSImageFile[] _imageFiles = null;
-    private JERSLeaderFile _leaderFile = null;
-
-    private int _sceneWidth = 0;
-    private int _sceneHeight = 0;
+    private JERSImageFile[] imageFiles = null;
+    private JERSLeaderFile leaderFile = null;
+    private JERSTrailerFile trailerFile = null;
 
     private final transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
@@ -58,43 +56,43 @@ class JERSProductDirectory extends CEOSProductDirectory {
         Guardian.assertNotNull("dir", dir);
 
         constants = new JERSConstants();
-        _baseDir = dir;
+        baseDir = dir;
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new JERSLeaderFile(
-                createInputStream(CeosHelper.getCEOSFile(_baseDir, constants.getLeaderFilePrefix())));
-
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, constants.getImageFilePrefix());
+        leaderFile = new JERSLeaderFile(
+                createInputStream(CeosHelper.getCEOSFile(baseDir, constants.getLeaderFilePrefix())));
+        
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(baseDir, constants.getImageFilePrefix());
         final List<JERSImageFile> imgArray = new ArrayList<JERSImageFile>(imageFileNames.length);
         for (String fileName : imageFileNames) {
             try {
-                final JERSImageFile imgFile = new JERSImageFile(createInputStream(new File(_baseDir, fileName)));
+                final JERSImageFile imgFile = new JERSImageFile(createInputStream(new File(baseDir, fileName)));
                 imgArray.add(imgFile);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
                 // continue
             }
         }
-        _imageFiles = imgArray.toArray(new JERSImageFile[imgArray.size()]);
+        imageFiles = imgArray.toArray(new JERSImageFile[imgArray.size()]);
 
-        productType = _volumeDirectoryFile.getProductType();
-        _sceneWidth = _imageFiles[0].getRasterWidth();
-        _sceneHeight = _imageFiles[0].getRasterHeight();
-        assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
+        productType = leaderFile.getSceneRecord().getAttributeString("Product type descriptor");
+        sceneWidth = imageFiles[0].getRasterWidth();
+        sceneHeight = imageFiles[0].getRasterHeight();
+        assertSameWidthAndHeightForAllImages(imageFiles, sceneWidth, sceneHeight);
     }
 
     @Override
     public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             productType,
-                                            _sceneWidth, _sceneHeight);
+                sceneWidth, sceneHeight);
 
-        if(_imageFiles.length > 1) {
+        if(imageFiles.length > 1) {
             int index = 1;
-            for (final JERSImageFile imageFile : _imageFiles) {
+            for (final JERSImageFile imageFile : imageFiles) {
 
                 if(isProductSLC) {
                     final Band bandI = createBand(product, "i_" + index, Unit.REAL, imageFile);
@@ -108,7 +106,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 ++index;
             }
         } else {
-            final JERSImageFile imageFile = _imageFiles[0];
+            final JERSImageFile imageFile = imageFiles[0];
             if(isProductSLC) {
                 final Band bandI = createBand(product, "i", Unit.REAL, imageFile);
                 final Band bandQ = createBand(product, "q", Unit.IMAGINARY, imageFile);
@@ -120,21 +118,22 @@ class JERSProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord(), null));
-        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord(), null));
+        product.setStartTime(getUTCScanStartTime(leaderFile.getSceneRecord(), null));
+        product.setEndTime(getUTCScanStopTime(leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
-        ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-        addTiePointGrids(product, _leaderFile.getFacilityRecord(), _leaderFile.getSceneRecord());
+        ReaderUtils.addGeoCoding(product, leaderFile.getLatCorners(), leaderFile.getLonCorners());
+        addTiePointGrids(product, leaderFile.getFacilityRecord(), leaderFile.getSceneRecord());
         addMetaData(product);
 
         return product;
     }
 
     public boolean isJERS() throws IOException {
-        if(productType == null || _volumeDirectoryFile == null)
-            readVolumeDirectoryFile();
-        return (productType.contains("JERS"));
+        final String volumeId = getVolumeId().toUpperCase();
+        final String logicalVolumeId = getLogicalVolumeId().toUpperCase();
+        return (volumeId.contains("JERS") || volumeId.contains("J1") || volumeId.contains("JE1") ||
+                logicalVolumeId.contains("JERS") || logicalVolumeId.contains("J1") || logicalVolumeId.contains("JE1"));
     }
 
     @Override
@@ -144,22 +143,16 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     @Override
     public void close() throws IOException {
-        for (int i = 0; i < _imageFiles.length; i++) {
-            _imageFiles[i].close();
-            _imageFiles[i] = null;
+        for (int i = 0; i < imageFiles.length; i++) {
+            imageFiles[i].close();
+            imageFiles[i] = null;
         }
-        _imageFiles = null;
+        imageFiles = null;
     }
 
     private Band createBand(final Product product, final String name, final String unit, final JERSImageFile imageFile) {
-        int dataType = ProductData.TYPE_UINT16;
-        if(isSLC()) {
-            dataType = ProductData.TYPE_INT16;
-        }
-        final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
-        band.setDescription(name);
-        band.setUnit(unit);
-        product.addBand(band);
+
+        final Band band = createBand(product, name, unit, imageFile.getBitsPerSample());
         bandImageFileMap.put(name, imageFile);
 
         return band;
@@ -169,19 +162,25 @@ class JERSProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addMetadata(leadMetadata);
+        leaderFile.addMetadata(leadMetadata);
         root.addElement(leadMetadata);
 
+        if(trailerFile != null) {
+            final MetadataElement trailMetadata = new MetadataElement("Trailer");
+            trailerFile.addMetadata(trailMetadata);
+            root.addElement(trailMetadata);
+        }
+
         final MetadataElement volMetadata = new MetadataElement("Volume");
-        _volumeDirectoryFile.assignMetadataTo(volMetadata);
+        volumeDirectoryFile.assignMetadataTo(volMetadata);
         root.addElement(volMetadata);
 
         int c = 1;
-        for (final JERSImageFile imageFile : _imageFiles) {
+        for (final JERSImageFile imageFile : imageFiles) {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(new File(_baseDir, JERSConstants.SUMMARY_FILE_NAME), "Summary Information", root);
+        addSummaryMetadata(new File(baseDir, JERSConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addAbstractedMetadataHeader(product, root);
     }
 
@@ -189,9 +188,9 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        final BinaryRecord sceneRec = _leaderFile.getSceneRecord();
-        final BinaryRecord mapProjRec = _leaderFile.getMapProjRecord();
-        final BinaryRecord facilityRec = _leaderFile.getFacilityRecord();
+        final BinaryRecord sceneRec = leaderFile.getSceneRecord();
+        final BinaryRecord mapProjRec = leaderFile.getMapProjRecord();
+        final BinaryRecord facilityRec = leaderFile.getFacilityRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -202,7 +201,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, "Stripmap");
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
-                getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
+                getProcTime(volumeDirectoryFile.getVolumeDescriptorRecord()));
 
         final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, null);
         final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, null);
@@ -269,11 +268,17 @@ class JERSProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                     sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
-                    sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
-            final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                    slantRangeTime* Constants.lightSpeed*0.5);
+            double radarFreq = sceneRec.getAttributeDouble("Radar frequency") * 1000.0;
+            if(radarFreq == 0) {
+                radarFreq = getRadarFrequency(sceneRec);
+            }
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency, radarFreq);
+            Double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel");
+            if(slantRangeTime != null) {
+                slantRangeTime *= 0.001; //s
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                    slantRangeTime* Constants.halfLightSpeed);
+            }
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                     sceneRec.getAttributeDouble("Range sampling rate"));
@@ -288,7 +293,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
+                ReaderUtils.getLineTimeInterval(startTime, endTime, sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -310,7 +315,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
         }
 
-        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
+        addOrbitStateVectors(absRoot, leaderFile.getPlatformPositionRecord());
         //addSRGRCoefficients(absRoot, facilityRec);
     }
 
@@ -322,11 +327,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductName() {
-        return _volumeDirectoryFile.getProductName();
+        return volumeDirectoryFile.getProductName();
     }
 
     private String getProductDescription() {
-        BinaryRecord sceneRecord = _leaderFile.getSceneRecord();
+        BinaryRecord sceneRecord = leaderFile.getSceneRecord();
         
         String level = "";
         if(sceneRecord != null) {

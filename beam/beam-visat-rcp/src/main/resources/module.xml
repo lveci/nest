@@ -853,7 +853,7 @@
             <mnemonic>M</mnemonic>
             <shortDescr>Export the currently displayed metadata.</shortDescr>
             <description>Export the currently displayed metadata as tab-separated text.</description>
-            <context>metadata</context>
+            <context>metadataNode</context>
             <helpId>exportMetadata</helpId>
         </action>
 

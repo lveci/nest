@@ -13,27 +13,20 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dat;
+package org.esa.nest.dataio.ceos.jers;
 
-import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
+import java.io.IOException;
 
-public class SARSimTerrainCorrectionAction extends AbstractVisatAction {
 
-    @Override
-    public void actionPerformed(final CommandEvent event) {
+class JERSTrailerFile extends CEOSLeaderFile {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(),
-                "SAR Sim Terrain Correction", getHelpId(), false);
-        dialog.show();
+    private final static String mission = "jers";
+    private final static String trailer_recordDefinitionFile = "trailer_file.xml";
 
-        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
-        final File graphFile =  new File(graphPath, "SARSimTCGraph.xml");
-
-        dialog.LoadGraph(graphFile);
+    public JERSTrailerFile(final ImageInputStream stream) throws IOException {
+        super(stream, mission, trailer_recordDefinitionFile);
     }
-
 }

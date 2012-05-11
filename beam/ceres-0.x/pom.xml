@@ -75,6 +75,17 @@
                 <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
+		<pluginRepository>
+            <id>apache.org</id>
+            <name>Maven Plugin Snapshots</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
 	</pluginRepositories>
 	
     <licenses>
@@ -163,7 +174,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>2.4</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>

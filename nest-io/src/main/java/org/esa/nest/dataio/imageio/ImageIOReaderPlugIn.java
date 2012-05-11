@@ -34,11 +34,18 @@ import java.util.Locale;
  */
 public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
-	private final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
+	private final static String[] FORMAT_NAMES = getFormatNamesList();
 	private final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
     private final static String[] IMAGEIO_FILE_EXTENSIONS = getPrunedImageIOExtensions();
     private final static String PLUGIN_DESCRIPTION = "ImageIO Products";
     private final Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+
+    private static String[] getFormatNamesList() {
+        final List<String> names = new ArrayList<String>(20);
+        names.add("ImageIO");
+        names.addAll(Arrays.asList(ImageIO.getReaderFormatNames()));
+        return names.toArray(new String[names.size()]);
+    }
 
     private static String[] getFormatFileExtensions() {
 

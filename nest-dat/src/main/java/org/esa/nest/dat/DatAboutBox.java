@@ -189,10 +189,8 @@ class DatAboutBox extends ModalDialog {
                 "</td></tr>" +
                 "</table>" +
                 "<br><hr>The NEST developers would also like to say thank you to" +
-                "<br>&nbsp;&nbsp;<b>Sun</b> for the beautiful programming language they have invented," +
                 "<br>&nbsp;&nbsp;<b>NASA</b> for the wonderful WorldWind Java SDK," +        
                 "<br>&nbsp;&nbsp;<b>IntelliJ</b> for the best IDE in the world," +
-                "<br>&nbsp;&nbsp;<b>Eclipse.org</b> for the second best IDE in the world," +
                 "<br>&nbsp;&nbsp;<b>JIDE Software</b> for a great docking framework," +
                 "<br>&nbsp;&nbsp;all companies and organisations supporting the open-source idea." +
                 "<br><br><hr>" +

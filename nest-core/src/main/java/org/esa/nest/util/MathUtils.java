@@ -271,4 +271,15 @@ public final class MathUtils
         return v + coeff[0];
     }
 
+    public static void normalizeVector(final double[] v) {
+        final double norm = Math.sqrt(innerProduct(v, v));
+        v[0] /= norm;
+        v[1] /= norm;
+        v[2] /= norm;
+    }
+
+    public static double innerProduct(final double[] a, final double[] b) {
+        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    }
+
 }

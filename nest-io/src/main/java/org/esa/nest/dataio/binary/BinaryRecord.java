@@ -13,11 +13,6 @@ public class BinaryRecord {
     private final Integer recordLength;
 
     public BinaryRecord(final BinaryFileReader reader, final long startPos,
-                        final org.jdom.Document recordDefinitionXML) throws IOException {
-        this(reader, startPos, recordDefinitionXML, "unknown");
-    }
-
-    public BinaryRecord(final BinaryFileReader reader, final long startPos,
                         final org.jdom.Document recordDefinitionXML, final String recName) throws IOException {
         this.reader = reader;
         // reposition start if needed

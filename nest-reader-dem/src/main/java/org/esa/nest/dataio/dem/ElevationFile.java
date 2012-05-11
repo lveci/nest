@@ -20,6 +20,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.gpf.StatusProgressMonitor;
+import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.ftpUtils;
 
@@ -125,6 +126,9 @@ public abstract class ElevationFile {
         if(dataFile != null) {
             final Product product = productReader.readProductNodes(dataFile, null);
             if(product != null) {
+                if(product.getGeoCoding() == null) {
+                    //ReaderUtils.addGeoCoding(product, );
+                }
                 tile = createTile(product);
             }
         }
@@ -260,10 +264,10 @@ public abstract class ElevationFile {
                 return newFile;
 
             ZipFile zipFile = null;
-            FileOutputStream fileoutputstream = null;
+            BufferedOutputStream fileoutputstream = null;
             try {
                 zipFile = new ZipFile(dataFile);
-                fileoutputstream = new FileOutputStream(newFile);
+                fileoutputstream = new BufferedOutputStream(new FileOutputStream(newFile));
 
                 ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {

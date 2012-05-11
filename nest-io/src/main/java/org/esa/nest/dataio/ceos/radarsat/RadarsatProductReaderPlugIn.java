@@ -45,7 +45,7 @@ public class RadarsatProductReaderPlugIn extends CEOSProductReaderPlugIn {
     protected DecodeQualification checkProductQualification(final File file) {
         final String name = file.getName().toUpperCase();
         for(String prefix : constants.getVolumeFilePrefix()) {
-            if(name.startsWith(prefix) || name.endsWith("."+prefix)) {
+            if(name.startsWith(prefix) || name.endsWith('.'+prefix)) {
                 final RadarsatProductReader reader = new RadarsatProductReader(this);
                 return reader.checkProductQualification(file);
             }

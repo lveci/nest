@@ -28,19 +28,19 @@ public class GETASSE30ElevationModel extends BaseElevationModel {
 
     private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn(GETASSE30ReaderPlugIn.FORMAT_NAME);
 
-    public GETASSE30ElevationModel(GETASSE30ElevationModelDescriptor descriptor, Resampling resamplingMethod) {
+    public GETASSE30ElevationModel(final GETASSE30ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
     }
 
     @Override
-    public PixelPos getIndex(GeoPos geoPos) {
+    public PixelPos getIndex(final GeoPos geoPos) {
         final float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE;
         final float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE;
         return new PixelPos(pixelX, pixelY);
     }
 
     @Override
-    public GeoPos getGeoPos(PixelPos pixelPos) {
+    public GeoPos getGeoPos(final PixelPos pixelPos) {
         final float pixelLat = (RASTER_HEIGHT - pixelPos.y) / (DEGREE_RES * NUM_PIXELS_PER_TILE) - 90.0f;
         final float pixelLon = pixelPos.x / (DEGREE_RES * NUM_PIXELS_PER_TILE) - 180.0f;
         return new GeoPos(pixelLat, pixelLon);

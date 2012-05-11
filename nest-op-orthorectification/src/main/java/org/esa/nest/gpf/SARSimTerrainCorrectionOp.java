@@ -156,7 +156,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private ProductNodeGroup<Placemark> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
-    private FileElevationModel fileElevationModel = null;
     private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
@@ -280,7 +279,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             updateTargetProductMetadata();
 
-            RangeDopplerGeocodingOp.validateDEM(demName, sourceProduct);
+            DEMFactory.validateDEM(demName, sourceProduct);
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -292,10 +291,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             dem.dispose();
             dem = null;
         }
-        if(fileElevationModel != null) {
-            fileElevationModel.dispose();
-        }
-
         if(!orthoDataProduced && processingStarted) {
             final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM";
             System.out.println(errMsg);
@@ -349,7 +344,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
-        wavelength = RangeDopplerGeocodingOp.getRadarFrequency(absRoot);
+        wavelength = OperatorUtils.getRadarFrequency(absRoot);
 
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
@@ -403,27 +398,16 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final String demResamplingMethod = absRoot.getAttributeString("DEM resampling method");
         final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
         final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
+        if (demDescriptor == null) {
 
-        if (demDescriptor != null) {
-
-            if (demDescriptor.isInstallingDem()) {
-                throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
-            }
-
-            dem = demDescriptor.createDem(ResamplingFactory.createResampling(demResamplingMethod));
-            if(dem == null) {
-                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
-            }
-
-            demNoDataValue = dem.getDescriptor().getNoDataValue();
-
-        } else { // then demName is user selected DEM file name
-
-            demNoDataValue = (float)absRoot.getAttributeDouble("external DEM no data value");
             final File externalDemFile = new File(demName);
-            fileElevationModel = new FileElevationModel(externalDemFile, 
+            dem = new FileElevationModel(externalDemFile,
 		    ResamplingFactory.createResampling(demResamplingMethod), demNoDataValue);
             demName = externalDemFile.getName();
+            demNoDataValue = (float)absRoot.getAttributeDouble("external DEM no data value");
+        } else {
+            dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
+            demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
         isElevationModelAvailable = true;
     }
@@ -837,9 +821,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         try {
             final float[][] localDEM = new float[h+2][w+2];
-            final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
-            if(!valid && !useAvgSceneHeight)
-                return;
+            if(useAvgSceneHeight) {
+                DEMFactory.fillDEM(localDEM, (float) avgSceneHeight);
+            } else {
+                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, targetGeoCoding, x0, y0, w, h, localDEM);
+                if(!valid)
+                    return;
+            }
 
             for (int y = y0; y < y0 + h; y++) {
                 final int yy = y-y0+1;
@@ -978,56 +966,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
         }
-    }
-
-    /**
-     * Read DEM for current tile.
-     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
-     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
-     * @param tileHeight The tile height.
-     * @param tileWidth The tile width.
-     * @param localDEM The DEM for the tile.
-     * @throws Exception from DEM
-     * @return true if valid
-     */
-    private boolean getLocalDEM(final int x0, final int y0, final int tileWidth,
-                                final int tileHeight, final float[][] localDEM) throws Exception {
-
-        // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
-        //       the left and 1 extra column to the right of the tile.
-        float alt = (float)avgSceneHeight;
-        if(useAvgSceneHeight) {
-            for (float[] row : localDEM) {
-                Arrays.fill(row, alt);
-            }
-            return true;
-        }
-
-        final int maxY = y0 + tileHeight + 1;
-        final int maxX = x0 + tileWidth + 1;
-
-        final GeoPos geoPos = new GeoPos();
-        final PixelPos pixPos = new PixelPos();
-
-        boolean useDEM = fileElevationModel == null;
-
-        boolean valid = false;
-        for (int y = y0 - 1; y < maxY; y++) {
-            final int yy = y - y0 + 1;
-            for (int x = x0 - 1; x < maxX; x++) {
-                pixPos.setLocation(x,y);
-                targetGeoCoding.getGeoPos(pixPos, geoPos);
-                if(useDEM) {
-                    alt = dem.getElevation(geoPos);
-                } else {
-                    alt = fileElevationModel.getElevation(geoPos);
-                }
-                if(alt != demNoDataValue)
-                    valid = true;
-                localDEM[yy][x - x0 + 1] = alt;
-            }
-        }
-        return valid;
     }
 
     /**

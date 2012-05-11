@@ -699,61 +699,65 @@ public class GCPSelectionOp extends Operator {
     }
 
     private boolean getSlaveGCPShift(final double[] shift, final double[] mI, final double[] sI) {
+        try {
+            // perform cross correlation
+            final PlanarImage crossCorrelatedImage = computeCrossCorrelatedImage(mI, sI);
 
-        // perform cross correlation
-        final PlanarImage crossCorrelatedImage = computeCrossCorrelatedImage(mI, sI);
+            // check peak validity
+            /*
+            final double mean = getMean(crossCorrelatedImage);
+            if (Double.compare(mean, 0.0) == 0) {
+                return false;
+            }
 
-        // check peak validity
-        /*
-        final double mean = getMean(crossCorrelatedImage);
-        if (Double.compare(mean, 0.0) == 0) {
-            return false;
-        }
-        
-        double max = getMax(crossCorrelatedImage);
-        double qualityParam = max / mean;
-        if (qualityParam <= qualityThreshold) {
-            return false;
-        }
-        */
+            double max = getMax(crossCorrelatedImage);
+            double qualityParam = max / mean;
+            if (qualityParam <= qualityThreshold) {
+                return false;
+            }
+            */
 
-        // get peak shift: row and col
-        final int w = crossCorrelatedImage.getWidth();
-        final int h = crossCorrelatedImage.getHeight();
+            // get peak shift: row and col
+            final int w = crossCorrelatedImage.getWidth();
+            final int h = crossCorrelatedImage.getHeight();
 
-        final Raster idftData = crossCorrelatedImage.getData();
-        final double[] real = idftData.getSamples(0, 0, w, h, 0, (double[])null);
-        //System.out.println("Cross correlated imagette:");
-        //outputRealImage(real);
+            final Raster idftData = crossCorrelatedImage.getData();
+            final double[] real = idftData.getSamples(0, 0, w, h, 0, (double[])null);
+            //System.out.println("Cross correlated imagette:");
+            //outputRealImage(real);
 
-        int peakRow = 0;
-        int peakCol = 0;
-        double peak = real[0];
-        for (int r = 0; r < h; r++) {
-            for (int c = 0; c < w; c++) {
-                final int k = r*h + c;
-                if (real[k] > peak) {
-                    peak = real[k];
-                    peakRow = r;
-                    peakCol = c;
+            int peakRow = 0;
+            int peakCol = 0;
+            double peak = real[0];
+            for (int r = 0; r < h; r++) {
+                for (int c = 0; c < w; c++) {
+                    final int k = r*w + c;
+                    if (real[k] > peak) {
+                        peak = real[k];
+                        peakRow = r;
+                        peakCol = c;
+                    }
                 }
             }
-        }
-        //System.out.println("peak = " + peak + " at (" + peakRow + ", " + peakCol + ")");
+            //System.out.println("peak = " + peak + " at (" + peakRow + ", " + peakCol + ")");
 
-        if (peakRow <= w/2) {
-            shift[0] = (double)(-peakRow) / (double)rowUpSamplingFactor;
-        } else {
-            shift[0] = (double)(w - peakRow) / (double)rowUpSamplingFactor;
-        }
+            if (peakRow <= w/2) {
+                shift[0] = (double)(-peakRow) / (double)rowUpSamplingFactor;
+            } else {
+                shift[0] = (double)(w - peakRow) / (double)rowUpSamplingFactor;
+            }
 
-        if (peakCol <= h/2) {
-            shift[1] = (double)(-peakCol) / (double)colUpSamplingFactor;
-        } else {
-            shift[1] = (double)(h - peakCol) / (double)colUpSamplingFactor;
+            if (peakCol <= h/2) {
+                shift[1] = (double)(-peakCol) / (double)colUpSamplingFactor;
+            } else {
+                shift[1] = (double)(h - peakCol) / (double)colUpSamplingFactor;
+            }
+    
+            return true;
+        } catch(Throwable t) {
+            System.out.println("getSlaveGCPShift failed "+t.getMessage());
+            return false;
         }
-
-        return true;
     }
 
     private PlanarImage computeCrossCorrelatedImage(final double[] mI, final double[] sI) {

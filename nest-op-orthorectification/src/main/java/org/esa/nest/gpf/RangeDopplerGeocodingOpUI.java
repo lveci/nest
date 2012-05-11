@@ -103,7 +103,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     protected boolean useAvgSceneHeight = false;
     protected final JButton crsButton = new JButton();
     private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
-    public final static String AUTODEM = " (Auto Download)";
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -112,7 +111,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         final ElevationModelDescriptor[] demDesciptors = elevationModelRegistry.getAllDescriptors();
         for(ElevationModelDescriptor dem : demDesciptors) {
-            demName.addItem(appendAutoDEM(dem.getName()));
+            demName.addItem(DEMFactory.appendAutoDEM(dem.getName()));
         }
         demName.addItem(externalDEMStr);
 
@@ -123,7 +122,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         demName.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                final String item = ((String)demName.getSelectedItem()).replace(AUTODEM, "");
+                final String item = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
                 if(item.equals(externalDEMStr)) {
                     enableExternalDEM(true);
                 } else {
@@ -133,7 +132,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(24);
-        final String demItem = ((String)demName.getSelectedItem()).replace(AUTODEM, "");
+        final String demItem = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
         enableExternalDEM(demItem.equals(externalDEMStr));
 
         auxFile.addItemListener(new ItemListener() {
@@ -273,21 +272,13 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         return panel;
     }
 
-    // todo move into DEM
-    public static String appendAutoDEM(String demName) {
-        if(demName.equals("GETASSE30") || demName.equals("SRTM 3Sec") || demName.equals("ACE2_5Min")
-           || demName.equals("ACE30"))
-            demName += AUTODEM;
-        return demName;
-    }
-
     @Override
     public void initParameters() {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         final String demNameParam = (String)paramMap.get("demName");
         if(demNameParam != null)
-            demName.setSelectedItem(appendAutoDEM(demNameParam));
+            demName.setSelectedItem(DEMFactory.appendAutoDEM(demNameParam));
 
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
@@ -478,7 +469,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
-        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(AUTODEM, ""));
+        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, ""));
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("incidenceAngleForGamma0", incidenceAngleForGamma0.getSelectedItem());

@@ -57,7 +57,7 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
         final BinaryFileReader reader = new BinaryFileReader(stream);
 
         CeosRecordHeader header = new CeosRecordHeader(reader);
-        _leaderFDR = new BinaryRecord(reader, -1, fdrXML);
+        _leaderFDR = new BinaryRecord(reader, -1, fdrXML, leader_recordDefinitionFile);
         header.seekToEnd();
 
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of data set summary records"); ++i) {

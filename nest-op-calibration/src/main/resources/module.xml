@@ -36,7 +36,8 @@
 	        <id>CalibrationOp</id>
 	        <helpId>CalibrationOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>Calibration</parent>
+            <icon>esaIcon</icon>
+            <parent>Calibration</parent>
 	        <text>Calibrate</text>
 	        <dialogTitle>Calibration</dialogTitle>
             <shortDescr>Invoke the Calibration operator</shortDescr>
@@ -48,7 +49,8 @@
 	        <id>RemoveAntennaPatternOp</id>
 	        <helpId>RemoveAntennaPatternOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
-	        <parent>Calibration</parent>
+            <icon>esaIcon</icon>
+            <parent>Calibration</parent>
 	        <text>Remove Antenna Pattern</text>
 	        <dialogTitle>Remove Antenna Pattern</dialogTitle>
             <shortDescr>Remove the Antenna Pattern for ASAR and ERS products</shortDescr>

@@ -111,6 +111,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         } else {
             super.getJDialog().setMinimumSize(new Dimension(600, 500));
         }
+        super.getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
 
         final JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 

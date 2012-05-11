@@ -18,13 +18,16 @@ package org.esa.nest.dataio.ceos;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
+import org.esa.nest.dataio.binary.BinaryFileReader;
 import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
+import org.esa.nest.util.Constants;
 
+import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,10 +42,12 @@ import java.util.*;
 public abstract class CEOSProductDirectory {
 
     protected CEOSConstants constants = null;
-    protected File _baseDir = null;
-    protected CEOSVolumeDirectoryFile _volumeDirectoryFile = null;
+    protected File baseDir = null;
+    protected CEOSVolumeDirectoryFile volumeDirectoryFile = null;
     protected boolean isProductSLC = false;
     protected String productType = null;
+    protected int sceneWidth = 0;
+    protected int sceneHeight = 0;
 
     public static final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyy-DDD-HH:mm:ss");
 
@@ -54,15 +59,35 @@ public abstract class CEOSProductDirectory {
 
     public abstract void close() throws IOException;
 
-    protected void readVolumeDirectoryFile() throws IOException {
-        Guardian.assertNotNull("_baseDir", _baseDir);
+    protected final void readVolumeDirectoryFile() throws IOException {
+        Guardian.assertNotNull("baseDir", baseDir);
         Guardian.assertNotNull("constants", constants);
 
-        if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new CEOSVolumeDirectoryFile(_baseDir, constants);
+        final File volumeFile = CeosHelper.getVolumeFile(baseDir, constants);
+        final BinaryFileReader binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
+        final String mission = constants.getMission();
 
-        productType = _volumeDirectoryFile.getProductType();
+        volumeDirectoryFile = new CEOSVolumeDirectoryFile(binaryReader, mission);
+        volumeDirectoryFile.readFilePointersAndTextRecords(binaryReader, mission);
+
+        binaryReader.close();
+
+        productType = volumeDirectoryFile.getProductType();
+        if(productType == null || productType.equals("unknown"))
+            throw new IOException("Unable to read level 0 product");
+
         isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
+    }
+
+    private void readVolumeDiscriptor() throws IOException {
+        final File volumeFile = CeosHelper.getVolumeFile(baseDir, constants);
+        final BinaryFileReader binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
+        final String mission = constants.getMission();
+
+        if(volumeDirectoryFile == null) {
+            volumeDirectoryFile = new CEOSVolumeDirectoryFile(binaryReader, mission);
+        }
+        binaryReader.close();
     }
 
     public boolean isSLC() {
@@ -74,6 +99,18 @@ public abstract class CEOSProductDirectory {
             return "COMPLEX";
         else
             return "DETECTED";
+    }
+
+    protected final String getVolumeId() throws IOException {
+        if(volumeDirectoryFile == null)
+            readVolumeDiscriptor();
+        return volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Volume set ID");
+    }
+
+    protected final String getLogicalVolumeId() throws IOException {
+        if(volumeDirectoryFile == null)
+            readVolumeDiscriptor();
+        return volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume ID");
     }
 
     protected String getProductType() {
@@ -127,6 +164,24 @@ public abstract class CEOSProductDirectory {
         } catch(Exception e) {
 
         }
+    }
+
+    protected Band createBand(final Product product, final String name, final String unit, final int bitsPerSample){
+
+        int dataType = ProductData.TYPE_UINT16;
+        if(bitsPerSample == 16) {
+            dataType = isProductSLC ? ProductData.TYPE_INT16 : ProductData.TYPE_UINT16;
+        } else if(bitsPerSample == 32) {
+            dataType = ProductData.TYPE_FLOAT32;
+        } else if(bitsPerSample == 8) {
+            dataType = isProductSLC ? ProductData.TYPE_INT8 : ProductData.TYPE_UINT8;
+        }
+        final Band band = new Band(name, dataType, sceneWidth, sceneHeight);
+        band.setDescription(name);
+        band.setUnit(unit);
+        product.addBand(band);
+
+        return band;
     }
 
     protected static ProductData.UTC getProcTime(BinaryRecord volDescRec) {
@@ -229,6 +284,11 @@ public abstract class CEOSProductDirectory {
             Guardian.assertTrue("_sceneHeight == imageFile[" + i + "].getRasterHeight()",
                                 height == imageFile.getRasterHeight());
         }
+    }
+
+    protected static double getRadarFrequency(BinaryRecord sceneRec) {
+        final double wavelength = sceneRec.getAttributeDouble("Radar wavelength");
+        return (Constants.lightSpeed / wavelength) / Constants.oneMillion; // MHz
     }
 
     protected static int isGroundRange(final BinaryRecord mapProjRec) {

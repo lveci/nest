@@ -36,7 +36,7 @@ class JERSImageFile extends CEOSImageFile {
 
     public JERSImageFile(final ImageInputStream imageStream) throws IOException, IllegalBinaryFormatException {
         binaryReader = new BinaryFileReader(imageStream);
-        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML);
+        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         final int numLines = _imageFDR.getAttributeInt("Number of lines per data set");
         if(numLines == 0) {
@@ -47,12 +47,11 @@ class JERSImageFile extends CEOSImageFile {
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
-
-        _imageHeaderLength = 12;
+        _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");
     }
 
     protected BinaryRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
-        return new BinaryRecord(binaryReader, pos, imgRecordXML);
+        return new BinaryRecord(binaryReader, pos, imgRecordXML, image_recordDefinition);
     }
 }

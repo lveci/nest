@@ -22,15 +22,17 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
+import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 
 import java.io.File;
 import java.io.IOException;
 
-public class FileElevationModel implements Resampling.Raster {
+public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
-    private Resampling _resampling;
-    private Resampling.Index _resamplingIndex;
-    private final Resampling.Raster _resamplingRaster;
+    private Resampling resampling;
+    private Resampling.Index resamplingIndex;
+    private final Resampling.Raster resamplingRaster;
     private final GeoCoding tileGeocoding;
 
     private final FileElevationTile fileElevationTile;
@@ -38,7 +40,6 @@ public class FileElevationModel implements Resampling.Raster {
     private final int RASTER_WIDTH;
     private final int RASTER_HEIGHT;
     private float noDataValue = 0;
-    private final PixelPos pix = new PixelPos();
 
     public FileElevationModel(File file, Resampling resamplingMethod) throws IOException {
 
@@ -50,9 +51,13 @@ public class FileElevationModel implements Resampling.Raster {
         tileGeocoding = product.getGeoCoding();
         noDataValue = (float)product.getBandAt(0).getNoDataValue();
 
-        _resampling = resamplingMethod;
-        _resamplingIndex = _resampling.createIndex();
-        _resamplingRaster = this;
+        resampling = resamplingMethod;
+        resamplingIndex = resampling.createIndex();
+        resamplingRaster = this;
+    }
+
+    public ElevationModelDescriptor getDescriptor() {
+        return null;
     }
 
     public FileElevationModel(File file, Resampling resamplingMethod, float demNoDataValue) throws IOException {
@@ -74,26 +79,19 @@ public class FileElevationModel implements Resampling.Raster {
         return noDataValue;
     }
 
-    /**
-     * @return The resampling method used.
-     * @since BEAM 4.6
-     */
     public Resampling getResampling() {
-        return _resampling;
+        return resampling;
     }
 
     public synchronized float getElevation(GeoPos geoPos) throws Exception {
         try {
-            tileGeocoding.getPixelPos(geoPos, pix);
+            final PixelPos pix = tileGeocoding.getPixelPos(geoPos, null);
             if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x >= RASTER_WIDTH || pix.y >= RASTER_HEIGHT)
                return noDataValue;
 
-            _resampling.computeIndex(pix.x, pix.y,
-                                     RASTER_WIDTH,
-                                     RASTER_HEIGHT,
-                                    _resamplingIndex);
+            resampling.computeIndex(pix.x, pix.y, RASTER_WIDTH, RASTER_HEIGHT, resamplingIndex);
 
-            final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
+            final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
             if (Float.isNaN(elevation)) {
                 return noDataValue;
             }
@@ -101,6 +99,14 @@ public class FileElevationModel implements Resampling.Raster {
         } catch(Exception e) {
             throw new Exception("Problem reading DEM: "+e.getMessage());
         }
+    }
+
+    public PixelPos getIndex(final GeoPos geoPos) {
+        return tileGeocoding.getPixelPos(geoPos, null);
+    }
+
+    public GeoPos getGeoPos(final PixelPos pixelPos) {
+        return tileGeocoding.getGeoPos(pixelPos, null);
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {

@@ -43,7 +43,7 @@ class AlosPalsarImageFile extends CEOSImageFile {
         imageFileName = fileName.toUpperCase();
 
         binaryReader = new BinaryFileReader(imageStream);
-        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML);
+        _imageFDR = new BinaryRecord(binaryReader, -1, imgDefXML, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new BinaryRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
         _imageRecords[0] = createNewImageRecord(0);
@@ -56,9 +56,9 @@ class AlosPalsarImageFile extends CEOSImageFile {
     protected BinaryRecord createNewImageRecord(final int line) throws IOException {
         final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
         if(productLevel == AlosPalsarConstants.LEVEL1_5)
-            return new BinaryRecord(binaryReader, pos, procDataXML);
+            return new BinaryRecord(binaryReader, pos, procDataXML, processedData_recordDefinition);
         else
-            return new BinaryRecord(binaryReader, pos, imgRecordXML);
+            return new BinaryRecord(binaryReader, pos, imgRecordXML, image_recordDefinition);
     }
 
     public String getPolarization() {

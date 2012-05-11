@@ -13,28 +13,28 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.nest.dat;
+package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
+import org.esa.beam.framework.ui.command.ExecCommand;
+import org.esa.nest.dat.toolviews.Projects.Project;
 
 /**
- * Speckle Filter action.
+ * This action opens a project.
  *
+ * @author lveci
+ * @version $Revision: 1.3 $ $Date: 2011-04-08 18:23:59 $
  */
-public class SpeckleFilterOpAction extends AbstractVisatAction {
-
-    private NestSingleTargetProductDialog dialog;
+public class SaveProjectAction extends ExecCommand {
 
     @Override
-    public void actionPerformed(CommandEvent event) {
+    public void actionPerformed(final CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Speckle-Filter", getAppContext(), "Speckle Filter", getHelpId());
-            dialog.setTargetProductNameSuffix("_Spk");
-        }
-        dialog.show();
+        Project.instance().SaveProject();
+    }
 
+    @Override
+    public void updateState(final CommandEvent event) {
+        setEnabled(Project.instance().IsProjectOpen());
     }
 }

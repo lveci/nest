@@ -137,19 +137,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
             final int dataBufferType = dataBuffer.getDataType();
             if(dataBufferType == DataBuffer.TYPE_FLOAT &&
                destBuffer.getElems() instanceof float[]) {
-                //final float[] dArray = new float[destSize];
                 sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (float[])destBuffer.getElems(), dataBuffer);
-                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
-            } else if(dataBufferType == DataBuffer.TYPE_INT &&
+            } else if((dataBufferType == DataBuffer.TYPE_INT || dataBufferType == DataBuffer.TYPE_SHORT || dataBufferType == DataBuffer.TYPE_USHORT)&&
                destBuffer.getElems() instanceof int[]) {
-                //final int[] dArray = new int[destSize];
                 sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (int[])destBuffer.getElems(), dataBuffer);
-                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
-             } else if(dataBufferType == DataBuffer.TYPE_SHORT &&
-                destBuffer.getElems() instanceof int[]) {
-                //final int[] dArray = new int[destSize];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIdx, (int[])destBuffer.getElems(), dataBuffer);
-                //System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else {
 
                 final double[] dArray = new double[destSize];
@@ -290,7 +281,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         TIFFRenderedImage baseImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
         SampleModel sampleModel = baseImage.getSampleModel();
         final int numBands = sampleModel.getNumBands();
-        final int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());
+        final int productDataType = getProductDataType(sampleModel.getDataType());
         bandMap = new HashMap<Band, Integer>(numBands);
         for (int i = 0; i < numBands; i++) {
             final String bandName = String.format("band_%d", i + 1);
@@ -301,6 +292,26 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 band.setImageInfo(createIndexedImageInfo(product, baseImage, band));
             }
             bandMap.put(band, i);
+        }
+    }
+
+    //NESTMOD use INT instead of short so the read is a system copy
+    public static int getProductDataType(int dataBufferType) {
+        switch (dataBufferType) {
+            case DataBuffer.TYPE_BYTE:
+                return ProductData.TYPE_UINT8;
+            case DataBuffer.TYPE_SHORT:
+                return ProductData.TYPE_INT32;
+            case DataBuffer.TYPE_USHORT:
+                return ProductData.TYPE_INT32;
+            case DataBuffer.TYPE_INT:
+                return ProductData.TYPE_INT32;
+            case DataBuffer.TYPE_FLOAT:
+                return ProductData.TYPE_FLOAT32;
+            case DataBuffer.TYPE_DOUBLE:
+                return ProductData.TYPE_FLOAT64;
+            default:
+                throw new IllegalArgumentException("dataBufferType");
         }
     }
 

@@ -32,6 +32,8 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.TileIndex;
+import org.esa.nest.gpf.TileGeoreferencing;
+import org.esa.nest.gpf.DEMFactory;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -155,28 +157,28 @@ public class CreateLandMaskOp extends Operator {
                 createDEM();
             }
 
-            final GeoPos geoPos = new GeoPos();
-            final PixelPos pixelPos = new PixelPos();
-            final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
-
             final TileData[] trgTiles = getTargetTiles(targetTiles, targetRectangle, sourceProduct);
 
-            final int maxX = targetRectangle.x + targetRectangle.width - 1;
-            final int maxY = targetRectangle.y + targetRectangle.height - 1;
+            final int minX = targetRectangle.x;
+            final int minY = targetRectangle.y;
+            final int maxX = targetRectangle.x + targetRectangle.width;
+            final int maxY = targetRectangle.y + targetRectangle.height;
             boolean valid;
 
             final TileIndex tileIndex = new TileIndex(trgTiles[0].srcTile);        
             final float demNoDataValue = dem.getDescriptor().getNoDataValue();
 
-            for (int y = targetRectangle.y; y <= maxY; ++y) {
-                pixelPos.y = y + 0.5f;
+            final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, minX, minY, maxX-minX, maxY-minY);
+            final float[][] localDEM = new float[maxY-minY+2][maxX-minX+2];
+            DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, minX, minY, maxX-minX, maxY-minY, localDEM);
+
+            for (int y = minY; y < maxY; ++y) {
                 tileIndex.calculateStride(y);
-                for (int x = targetRectangle.x; x <= maxX; ++x) {
-                    pixelPos.x = x + 0.5f;                    
-                    targetGeoCoding.getGeoPos(pixelPos, geoPos);
+                final int yy = y-minY;
+                for (int x = minX; x < maxX; ++x) {
 
                     final int index = tileIndex.getIndex(x);
-                    float elev = dem.getElevation(geoPos);
+                    final float elev = localDEM[yy][x-minX];
 
                     if(landMask) {
                         if(useSRTM)

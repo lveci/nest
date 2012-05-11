@@ -140,9 +140,9 @@ public class MosaicOp extends Operator {
             final CoordinateReferenceSystem targetCRS = srcGeocoding.getGeoCRS();
 
             double pixSize = pixelSize;
-            if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
+           // if (targetCRS.getName().getCode().contains("WGS84")) {
                 pixSize = pixelSize / Constants.semiMajorAxis * org.esa.beam.util.math.MathUtils.RTOD;
-            }
+           // }
 
             final Rectangle2D bounds = new Rectangle2D.Double();
             bounds.setFrameFromDiagonal(scnProp.lonMin, scnProp.latMin, scnProp.lonMax, scnProp.latMax);
@@ -434,7 +434,7 @@ public class MosaicOp extends Operator {
                 if(!validSourceData.isEmpty()) {
                     collocateSourceBand(validSourceData, resampling, targetTiles.get(trgBand));
                 }
-            }
+            }                   
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
@@ -478,6 +478,7 @@ public class MosaicOp extends Operator {
                         if(sourcePixelPos == null) {
                             continue;
                         }
+
                         resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
                                 srcDat.srcRasterWidth-feather, srcDat.srcRasterHeight-feather, srcDat.resamplingIndex);
                         sample = resampling.resample(srcDat.resamplingRaster, srcDat.resamplingIndex);

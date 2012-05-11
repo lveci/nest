@@ -38,7 +38,7 @@ public class BaseElevationTile implements ElevationTile {
         //System.out.println("Dem Tile "+product.getName());
     }
 
-    public float getSample(int pixelX, int pixelY) throws IOException {
+    public final float getSample(int pixelX, int pixelY) throws IOException {
         try {
             final float[] line = (float[]) linesCache.getObject(pixelY);
             return line[pixelX];

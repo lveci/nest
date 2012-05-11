@@ -24,7 +24,7 @@ import org.esa.beam.util.ObjectUtils;
  * @author Norman Fomferra
 
  */
-public class MetadataAttribute extends DataNode {
+public final class MetadataAttribute extends DataNode {
 
     public MetadataAttribute(String name, int type) {
         this(name, type, 1);

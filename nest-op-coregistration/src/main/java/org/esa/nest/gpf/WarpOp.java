@@ -477,13 +477,9 @@ public class WarpOp extends Operator {
         //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         try {
-            //final Set<Band> keySet = targetTileMap.keySet();
-
             if(!warpDataAvailable) {
                 getWarpData(targetRectangle);
             }
-
-            //for (Band targetBand : keySet) {
 
                 final Band srcBand = sourceRasterMap.get(targetBand);
                 if (srcBand == null)
@@ -510,11 +506,8 @@ public class WarpOp extends Operator {
                 // copy warped image data to target
                 final float[] dataArray = warpedImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
 
-               // final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
-                //sourceRaster.getDataBuffer().dispose();
-           // }
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {

@@ -52,7 +52,7 @@
             <icon>esaIcon</icon>
             <parent>oceanTools</parent>
 	        <text>Create Land/Sea Mask</text>
-            <shortDescr>This isCreates a Land/Sea Mask</shortDescr>
+            <shortDescr>Create a Land/Sea Mask</shortDescr>
             <dialogTitle>Create a Land/Sea Mask</dialogTitle>
             <operatorName>Create-LandMask</operatorName>
             <targetProductNameSuffix>_msk</targetProductNameSuffix>

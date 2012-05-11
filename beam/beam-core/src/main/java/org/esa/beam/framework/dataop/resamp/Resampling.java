@@ -120,7 +120,7 @@ public interface Resampling {
     /**
      * An index is used to provide resampling information at a given raster position x,y.
      */
-    class Index {
+    final class Index {
 
         //used as archieve to recompute the index for an other resampling method
         public float x;

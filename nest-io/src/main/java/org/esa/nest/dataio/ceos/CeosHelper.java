@@ -75,12 +75,14 @@ public class CeosHelper {
     }
 
     public static String getProductName(final BinaryRecord textRecord) {
+        if(textRecord == null) return "unknown";
         final String name = textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "")
                 + '-' + textRecord.getAttributeString("Scene identification").trim();
         return StringUtils.createValidName(name.trim(), new char[]{'_', '-'}, '_');
     }
 
     public static String getProductType(final BinaryRecord textRecord) {
+        if(textRecord == null) return "unknown";
         String type = textRecord.getAttributeString("Product type specifier").trim();
         type = type.replace("PRODUCT:", "");
         type = type.replace("JERS-1", "JERS1");

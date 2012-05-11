@@ -42,7 +42,7 @@ public class ERSProductReaderPlugIn extends CEOSProductReaderPlugIn {
     }
 
     @Override
-    protected DecodeQualification checkProductQualification(File file) {
+    protected DecodeQualification checkProductQualification(final File file) {
         final String name = file.getName().toUpperCase();
         for(String prefix : constants.getVolumeFilePrefix()) {
             if(name.startsWith(prefix)) {

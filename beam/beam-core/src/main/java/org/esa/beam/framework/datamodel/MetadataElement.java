@@ -594,7 +594,7 @@ public class MetadataElement extends ProductNode {
         return size;
     }
 
-    public MetadataElement createDeepClone() {
+    public final MetadataElement createDeepClone() {
         final MetadataElement clone = new MetadataElement(getName());
         clone.setDescription(getDescription());
         final MetadataAttribute[] attributes = getAttributes();

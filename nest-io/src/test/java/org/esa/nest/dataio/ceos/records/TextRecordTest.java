@@ -54,13 +54,13 @@ public class TextRecordTest extends TestCase {
 
     public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _reader.seek(_prefix.length());
-        final BinaryRecord textRecord = new BinaryRecord(_reader, -1, textRecXML);
+        final BinaryRecord textRecord = new BinaryRecord(_reader, -1, textRecXML, text_recordDefinitionFile);
 
         assertRecord(textRecord);
     }
 
     public void testInit() throws IOException, IllegalBinaryFormatException {
-        final BinaryRecord textRecord = new BinaryRecord(_reader, _prefix.length(), textRecXML);
+        final BinaryRecord textRecord = new BinaryRecord(_reader, _prefix.length(), textRecXML, text_recordDefinitionFile);
 
         assertRecord(textRecord);
     }
