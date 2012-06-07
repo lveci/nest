@@ -37,6 +37,23 @@ public class TileUtilsDoris {
         return result;
     }
 
+    // see javadoc for org.esa.beam.framework.gpf.Tile (interface)
+    public static DoubleMatrix pullDoubleMatrix(Tile tile) {
+
+        final int height = tile.getHeight();
+        final int width = tile.getWidth();
+        DoubleMatrix result = new DoubleMatrix(height, width);
+
+        ProductData samples = tile.getRawSamples();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                result.put(y, x, samples.getElemDoubleAt(y * width + x));
+            }
+        }
+        return result;
+    }
+
     public static void pushFloatMatrix(FloatMatrix data, Tile tile, Rectangle rect) {
         ProductData samples = tile.getRawSamples(); // checkout
         final int tileWidth = tile.getWidth();

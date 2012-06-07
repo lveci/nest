@@ -8,7 +8,8 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.dialogs.ProductSetPanel;
+import org.esa.nest.dat.dialogs.FileModel;
+import org.esa.nest.dat.dialogs.ProductListPanel;
 import org.esa.nest.dat.util.ProductOpener;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.DialogUtils;
@@ -37,8 +38,8 @@ public class InSARMasterDialog extends ModelessDialog {
     private boolean ok = false;
 
     private final InSARFileModel outputFileModel = new InSARFileModel();
-    private final ProductSetPanel inputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Input");
-    private final ProductSetPanel outputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Results", outputFileModel);
+    private final ProductListPanel inputProductListPanel = new ProductListPanel("Input", new FileModel());
+    private final ProductListPanel outputProductListPanel = new ProductListPanel("Results", outputFileModel);
 
     private final Map<SLCImage, File> slcFileMap = new HashMap<SLCImage, File>(10);
 
@@ -94,8 +95,7 @@ public class InSARMasterDialog extends ModelessDialog {
         gbc.gridy++;
         DialogUtils.addComponent(optionsPane, gbc, "", searchDBCheckBox);
         gbc.gridy++;
-        // not yet working
-        //contentPane.add(optionsPane, BorderLayout.CENTER);
+        contentPane.add(optionsPane, BorderLayout.CENTER);
 
         final JPanel buttonPanel2 = new JPanel(new GridLayout(10, 1));
         openBtn = DialogUtils.CreateButton("openButton", "     Open     ", null, buttonPanel2);

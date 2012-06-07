@@ -29,6 +29,8 @@ public final class Unit {
     public static final String AMPLITUDE = "amplitude";
     public static final String INTENSITY = "intensity";
     public static final String PHASE = "phase";
+    public static final String ABS_PHASE = "abs_phase";
+    public static final String COHERENCE = "coherence";
 
     public static final String REAL = "real";
     public static final String IMAGINARY = "imaginary";
@@ -40,7 +42,7 @@ public final class Unit {
 
     public static final String METERS = "meters";
 
-    public enum UnitType { AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, INTENSITY_DB, AMPLITUDE_DB, METERS, UNKNOWN }
+    public enum UnitType { AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, ABS_PHASE, COHERENCE, INTENSITY_DB, AMPLITUDE_DB, METERS, UNKNOWN }
 
     public static UnitType getUnitType(Band sourceBand) {
 
@@ -59,12 +61,16 @@ public final class Unit {
                 return UnitType.INTENSITY;
         } else if (unit.contains(PHASE)) {
             return UnitType.PHASE;
+        } else if (unit.contains(ABS_PHASE)) {
+            return UnitType.ABS_PHASE;
         } else if (unit.contains(REAL)) {
              return UnitType.REAL;
         } else if (unit.contains(IMAGINARY)) {
              return UnitType.IMAGINARY;
         } else if (unit.contains(METERS)) {
              return UnitType.METERS;
+        } else if (unit.contains(COHERENCE)) {
+            return UnitType.COHERENCE;
         } else {
             return UnitType.UNKNOWN;
         }

@@ -299,7 +299,7 @@ public class Baseline {
                     // Height ambiguity: [h] = -lambda/4pi * (r1sin(theta)/bPerp) * phi==2pi
                     final double hAmbiguity = (bPerp == 0) ? Double.POSITIVE_INFINITY : -master.getRadarWavelength() * (pointOnMasterOrb.min(pointOnEllips)).norm() * Math.sin(theta) / (2.0 * bPerp);
 
-                    // Some extra info if in DEBUG mode
+                    // Some extra info if in DEBUG unwrapMode
                     logger.debug("The baseline parameters for (l,p,h) = " + line + ", " + pixel + ", " + height);
                     logger.debug("\talpha (deg), BASELINE: \t" + rad2deg(alpha) + " \t" + b);
                     logger.debug("\tbPar, bPerp:      \t" + bPar + " \t" + bPerp);
@@ -454,7 +454,7 @@ public class Baseline {
         return getBpar(line, pixel, 0);
     }
 
-    public double getBar(final Point p) throws Exception {
+    public double getBpar(final Point p) throws Exception {
         return getBpar(p.y, p.x, p.z);
     }
 
@@ -500,6 +500,15 @@ public class Baseline {
         final double Bperp = getBperp(line, pixel, height);
         final double Bpar = getBpar(line, pixel, height);
         final double theta = getTheta(line, pixel, height);
+        final double alpha = (Bpar == 0 && Bperp == 0) ? Double.NaN : theta - Math.atan2(Bpar, Bperp); // sign ok atan2
+        return alpha;// sign ok
+    }
+
+    // Return alpha baseline orientation
+    public double getAlpha(final Point p) throws Exception {
+        final double Bperp = getBperp(p);
+        final double Bpar = getBpar(p);
+        final double theta = getTheta(p);
         final double alpha = (Bpar == 0 && Bperp == 0) ? Double.NaN : theta - Math.atan2(Bpar, Bperp); // sign ok atan2
         return alpha;// sign ok
     }

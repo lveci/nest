@@ -62,7 +62,7 @@ public class Ellipsoid {
     *  - void (returned double[] lam<-pi,pi>, phi<-pi,pi>, hei)
     *
     */
-    public static double[] xyz2ell(final Point xyz) {
+    public synchronized static double[] xyz2ell(final Point xyz) {
 
 //        double[] phi_lambda_height = new double[3];
         final double r = Math.sqrt(Math.pow(xyz.x, 2) + Math.pow(xyz.y, 2));
