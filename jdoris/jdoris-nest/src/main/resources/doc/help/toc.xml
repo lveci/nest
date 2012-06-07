@@ -8,11 +8,14 @@
         <tocitem text="InSAR">
 			<tocitem text="InSAR Functionality" target="InSAR"/>
 			<tocitem text="Interferogram Formation" target="InterferogramOp"/>
-            <tocitem text="Estimation and Subtraction of Topographic Phase" target="SubtRefDemOp"/>
+            <tocitem text="Subtraction of Topography" target="SubtRefDemOp"/>
             <tocitem text="Coherence Estimation" target="CoherenceOp"/>
             <tocitem text="Azimuth Filtering" target="AzimuthFilterOp"/>
             <tocitem text="Range Filtering" target="RangeFilterOp"/>
             <tocitem text="Phase Filtering" target="PhaseFilterOp"/>
+            <tocitem text="Three-Pass DInSAR" target="DInSAROp"/>
+            <tocitem text="Slant to Height" target="Slant2HeightOp"/>
+            <tocitem text="Unwrapping in NEST" target="Unwrap"/>
 		</tocitem>
     </tocitem>
     

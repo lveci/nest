@@ -6,14 +6,15 @@
     <parent>
         <groupId>org.jdoris</groupId>
         <artifactId>jdoris</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>jDoris Core Libs</name>
     <groupId>org.jdoris</groupId>
     <artifactId>jdoris-core</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
+    <!-- <version>${jdoris.version}</version> -->
 
     <dependencies>
         <dependency>
@@ -50,8 +51,8 @@
         </dependency>
         <dependency>
             <groupId>hirondelle</groupId>
-	    <artifactId>date4j</artifactId>
-	    <version>1.0.0</version>
+            <artifactId>date4j</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -63,6 +64,16 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>12.0</version>
         </dependency>
     </dependencies>
 </project>

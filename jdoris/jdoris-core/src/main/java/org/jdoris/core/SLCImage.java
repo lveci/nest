@@ -66,8 +66,8 @@ public final class SLCImage {
     private int ovsRg;                 // oversampling of SLC
 
     // multilooking factors
-    private int mlAz;                 // multilooking of SLC
-    private int mlRg;                 // multilooking of SLC
+    private int mlAz = 1;                 // multilooking of SLC
+    private int mlRg = 1;                 // multilooking of SLC
 
     // relative to master geometry, or
     // absolute timing error of master
@@ -88,7 +88,6 @@ public final class SLCImage {
     Window currentWindow;        // position and size of the subset
     Window slaveMasterOffsets;   // overlapping slave window in master coordinates
     public Doppler doppler;
-
 
     public SLCImage() {
 
@@ -253,7 +252,7 @@ public final class SLCImage {
 
         // range annotations
         this.rsr2x = resFile.parseDoubleValue("Range_sampling_rate \\(computed, MHz\\)") * 2 * MEGA;
-        this.rangeBandwidth = resFile.parseDoubleValue("Total_range_band_width \\(MHz\\)"); // put it already in Hz!
+        this.rangeBandwidth = resFile.parseDoubleValue("Total_range_band_width \\(MHz\\)") * MEGA;
         this.tRange1 = resFile.parseDoubleValue("Range_time_to_first_pixel \\(2way\\) \\(ms\\)") / 2 / 1000;
         this.rangeWeightingWindow = resFile.parseStringValue("Weighting_range");
 
@@ -308,6 +307,10 @@ public final class SLCImage {
     // Convert azimuth time to line number (1 is first line)
     public double ta2line(double azitime) {
         return 1.0 + PRF * (azitime - tAzi1);
+    }
+
+    public Point lp2t(Point p) {
+        return new Point(pix2tr(p.x), line2ta(p.y));
     }
 
     /*--- Getters and setters for Encapsulation ----*/
@@ -484,4 +487,21 @@ public final class SLCImage {
 
     }
 
+    // methods to compute range resolution
+    // -----
+    public double computeDeltaRange(double pixel) {
+        return mlRg * (pix2range(pixel + 1) - pix2range(pixel));
+    }
+
+    public double computeDeltaRange(Point sarPixel) {
+        return computeDeltaRange(sarPixel.x);
+    }
+
+    public double computeRangeResolution(double pixel) {
+         return ((rsr2x / 2.) / rangeBandwidth) * (computeDeltaRange(pixel) / mlRg);
+    }
+
+    public double computeRangeResolution(Point sarPixel) {
+        return computeRangeResolution(sarPixel.x);
+    }
 }

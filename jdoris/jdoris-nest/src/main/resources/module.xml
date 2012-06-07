@@ -7,7 +7,7 @@
     <description>NEST-DORIS InSAR operators</description>
 
     <vendor>PPO.labs</vendor>
-    <copyright>(C) 2011 by PPO.labs</copyright>
+    <copyright>(C) 2012 by PPO.labs</copyright>
     <url>https://github.com/ppolabs/jdoris</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
     <funding>European Space Agency</funding>
@@ -37,16 +37,8 @@
 
     <extension point="beam-ui:actions">
 
-        <!-- action>
-            <id>coregistration</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>Coregistration (coming soon)</text>
-            <placeBefore>products</placeBefore>
-            <parent>insar</parent>
-        </action -->
-
         <action>
-            <id>insar_products</id>
+            <id>products</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Products</text>
             <placeBefore>insar_tools</placeBefore>
@@ -57,7 +49,7 @@
             <id>insar_tools</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Tools</text>
-            <placeAfter>insar_products</placeAfter>
+             <placeAfter>Products</placeAfter>
             <separatorAfter>true</separatorAfter>
             <parent>insar</parent>
         </action>
@@ -69,12 +61,13 @@
             <parent>insar_tools</parent>
         </action>
 
-        <!--action>
-            <id>graphs</id>
-            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
-            <text>Processing Graphs</text>
+        <action>
+            <id>unwrapping</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Unwrapping</text>
+            <placeAfter>insar_tools</placeAfter>
             <parent>insar</parent>
-        </action-->
+        </action>
 
         <!--/// PRODUCTS ///-->
 
@@ -84,16 +77,17 @@
             <text>Interferogram Formation</text>
             <shortDescr>Interferograms from stack with optional subtraction of 'flat earth' phase</shortDescr>
             <placeBefore>SubtRefDemOp</placeBefore>
-            <parent>insar_products</parent>
+            <parent>products</parent>
         </action>
 
         <action>
             <id>SubtRefDemOp</id>
+            <helpId>SubtRefDemOp</helpId>
             <class>org.jdoris.nest.dat.SubtRefDemAction</class>
             <text>Topo Phase Removal</text>
             <shortDescr>Compute and subtract topographic phase</shortDescr>
             <placeBefore>CoherenceOp</placeBefore>
-            <parent>insar_products</parent>
+            <parent>products</parent>
         </action>
 
         <action>
@@ -101,16 +95,24 @@
             <class>org.jdoris.nest.dat.CoherenceAction</class>
             <text>Coherence Estimation</text>
             <shortDescr>Estimate coherence of stack of images</shortDescr>
-            <parent>insar_products</parent>
+            <parent>products</parent>
         </action>
 
         <action>
-            <id>PhaseFilterOp</id>
-            <class>org.jdoris.nest.dat.PhaseFilterAction</class>
-            <text>Phase Filtering</text>
-            <shortDescr>Phase filter stack of interferograms</shortDescr>
-            <!--<placeAfter>CoherenceOp</placeAfter>-->
-            <parent>insar_products</parent>
+            <id>DInSAROp</id>
+            <class>org.jdoris.nest.dat.DInSARAction</class>
+            <text>Differential InSAR</text>
+            <shortDescr>Three-Pass differential InSAR</shortDescr>
+            <placeAfter>CoherenceOp</placeAfter>
+            <parent>products</parent>
+        </action>
+        <action>
+            <id>Slant2HeightOp</id>
+            <class>org.jdoris.nest.dat.Slant2HeightAction</class>
+            <text>Slant to height conversion</text>
+            <shortDescr>Slant to height conversion</shortDescr>
+            <placeAfter>DInSAROp</placeAfter>
+            <parent>products</parent>
         </action>
 
         <!--/// FILTERING ///-->
@@ -118,7 +120,7 @@
         <action>
             <id>RangeFilterOp</id>
             <class>org.jdoris.nest.dat.RangeFilterAction</class>
-            <text>Range Filtering</text>
+            <text>Range Filtering...</text>
             <shortDescr>Filter stack of SAR images in RANGE direction</shortDescr>
             <placeBefore>org.jdoris.nest.dat.AzimuthFilterAction</placeBefore>
             <parent>spectral_filtering</parent>
@@ -132,13 +134,61 @@
             <parent>spectral_filtering</parent>
         </action>
 
-         <action>
-	        <id>InSARMaster</id>
-	        <helpId>InSARMaster</helpId>
-	        <class>org.jdoris.nest.dat.InSARMasterAction</class>
-	        <parent>insar</parent>
-	        <text>Find Optimal Master</text>
-	    </action>
+        <action>
+            <id>PhaseFilterOp</id>
+            <class>org.jdoris.nest.dat.PhaseFilterAction</class>
+            <text>Phase Filtering</text>
+            <shortDescr>Phase filter stack of interferograms</shortDescr>
+            <placeAfter>spectral_filtering</placeAfter>
+            <parent>insar_tools</parent>
+        </action>
+
+        <action>
+            <id>InSARMaster</id>
+            <helpId>InSARMaster</helpId>
+            <class>org.jdoris.nest.dat.InSARMasterAction</class>
+            <parent>insar</parent>
+            <text>Find Optimal Master</text>
+        </action>
+
+        <!--/// UNWRAPPING ///-->
+        <!--<action>-->
+            <!--<id>SnaphuExportOp</id>-->
+            <!--<class>org.jdoris.nest.dat.snaphu.SnaphuExportAction</class>-->
+            <!--<text>Snaphu data export</text>-->
+            <!--<shortDescr>Export data and construct conf file for SNAPHU unwrapping</shortDescr>-->
+            <!--<parent>unwrapping</parent>-->
+        <!--</action>-->
+        <action>
+            <id>SnaphuExport</id>
+            <class>org.esa.nest.dat.actions.GraphAction</class>
+            <helpId>Unwrap</helpId>
+            <text>Snaphu data export</text>
+            <dialogTitle>Export data for SNAPHU unwrapping</dialogTitle>
+            <graphFile>SnaphuExportGraph.xml</graphFile>
+            <targetProductNameSuffix>_snaphu</targetProductNameSuffix>
+            <shortDescr>Export data and construct conf file for SNAPHU unwrapping</shortDescr>
+            <parent>unwrapping</parent>
+        </action>
+
+        <action>
+            <id>SnaphuImportOp</id>
+            <helpId>Unwrap</helpId>
+            <class>org.jdoris.nest.dat.snaphu.SnaphuImportAction</class>
+            <text>Snaphu data import</text>
+            <shortDescr>Import result of Snaphu to InSAR product</shortDescr>
+            <parent>unwrapping</parent>
+        </action>
+
+        <action>
+            <id>exportSnaphuProduct</id>
+            <text>Export Snaphu Product</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>Snaphu</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Export Snaphu Product</shortDescr>
+            <helpId>exportSnaphuProduct</helpId>
+        </action>
 
     </extension>
 
@@ -153,7 +203,7 @@
     <!-- LEFTOVERS -->
 
     <!--<action>-->
-        <!--<id>unwrapping</id>-->
+        <!--<id>snaphu</id>-->
         <!--<class>org.esa.nest.dat.actions.ComingSoonAction</class>-->
         <!--<text>Unwrapping (coming soon)</text>-->
         <!--<placeAfter>filtering</placeAfter>-->
@@ -165,7 +215,7 @@
         <!--<id>sarTools</id>-->
         <!--<class>org.esa.nest.dat.actions.ComingSoonAction</class>-->
         <!--<text>SAR Tools</text>-->
-        <!--<placeAfter>unwrapping</placeAfter>-->
+        <!--<placeAfter>snaphu</placeAfter>-->
         <!--<parent>insar</parent>-->
     <!--</action>-->
 

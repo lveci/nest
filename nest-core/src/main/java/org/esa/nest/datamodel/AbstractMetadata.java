@@ -172,6 +172,12 @@ public final class AbstractMetadata {
     public static final String range_bandwidth = "range_bandwidth";
     public static final String azimuth_bandwidth = "azimuth_bandwidth";
 
+    // help fields for parsing arguments to writers
+    public static final String temp_1 = "temp_1";
+    public static final String temp_2 = "temp_2";
+    public static final String temp_3 = "temp_3";
+    public static final String temp_4 = "temp_3";
+
     public static final String abstracted_metadata_version = "metadata_version";
 
     public static final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -281,6 +287,12 @@ public final class AbstractMetadata {
 
         // Multilook
         addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");
+
+        // Temp / helper entries
+        addAbstractedAttribute(absRoot, temp_1, ProductData.TYPE_ASCII, "", "Temp entry");
+        addAbstractedAttribute(absRoot, temp_2, ProductData.TYPE_ASCII, "", "Temp entry");
+        addAbstractedAttribute(absRoot, temp_3, ProductData.TYPE_ASCII, "", "Temp entry");
+        addAbstractedAttribute(absRoot, temp_4, ProductData.TYPE_ASCII, "", "Temp entry");
 
         // coregistration
         addAbstractedAttribute(absRoot, coregistered_stack, ProductData.TYPE_UINT8, "flag", "Coregistration applied");
