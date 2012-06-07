@@ -35,39 +35,38 @@ public class MathUtils {
 
     public static int[][] distributePoints(final int numOfPoints, final Window window) {
 
-        final double lines = window.lines();
-        final double pixels = window.pixels();
+        final float lines = window.lines();
+        final float pixels = window.pixels();
 
         int[][] result = new int[numOfPoints][2];
 
         // Distribution for dl=dp
-        double winP = sqrt(numOfPoints / (lines / pixels));   // wl: #windows in line direction
-        double winL = numOfPoints / winP;                     // wp: #windows in pixel direction
+        float winP = (float) Math.sqrt(numOfPoints / (lines / pixels));   // wl: #windows in line direction
+        float winL = numOfPoints / winP;                     // wp: #windows in pixel direction
         if (winL < winP) {
             // switch wl,wp : later back
             winL = winP;
         }
 
-        final double winL_int = Math.ceil(winL); // round largest
-        final double deltaLin = (lines - 1) / (winL_int - 1);
-        final double totalPix = Math.ceil(pixels * winL_int);
-        final double deltaPix = (totalPix - 1) / (numOfPoints - 1);
+        final int winL_int = (int) Math.floor(winL); // round
+        final float deltaLin = (lines - 1) / (float) (winL_int - 1);
+        final int totalPix = (int) Math.floor(pixels * winL_int);
+        final float deltaPix = (float) (totalPix - 1) / (float) (numOfPoints - 1);
 
-        double pix = -deltaPix;
-        double lin;
-        double lCounter = 0;
+        float pix = -deltaPix;
+        float lin;
+        int lCounter = 0;
         for (int i = 0; i < numOfPoints; i++) {
             pix += deltaPix;
-            while (Math.ceil(pix) >= pixels) // ceil
-            {
+            while (Math.floor(pix) >= pixels) {
                 pix -= pixels;
                 lCounter++;
             }
             lin = lCounter * deltaLin;
 
             // also correct distribution to window
-            result[i][0] = (int) (Math.ceil(lin) + window.linelo);
-            result[i][1] = (int) (Math.ceil(pix) + window.pixlo);
+            result[i][0] = (int) (Math.floor(lin) + window.linelo);
+            result[i][1] = (int) (Math.floor(pix) + window.pixlo);
         }
         return result;
     }

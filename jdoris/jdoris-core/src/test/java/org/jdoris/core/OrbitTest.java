@@ -1,33 +1,25 @@
 package org.jdoris.core;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 public class OrbitTest {
 
-    // TODO: check between lp2ell and lph2ell if height == 0
+    static Logger logger = (Logger) LoggerFactory.getLogger(OrbitTest.class.getName());
 
-    //    private static final File resFile = new File("/d2/delft_cr_asar.res");
-    private static final File resFile = new File("test/test_cr.res");
+    private static final File resFile = new File("/d2/unit_test_data/test_cr.res");
+//    private static final File resFile = new File("test/test_cr.res");
 
     private static Orbit orbit_ACTUAL;
 
-    public static Logger initLog() {
-        String filePathToLog4JProperties = "log4j.properties";
-        Logger logger = Logger.getLogger(Orbit.class);
-        PropertyConfigurator.configure(filePathToLog4JProperties);
-        return logger;
-    }
-
-
     private static final SLCImage slcimage = new SLCImage();
-
 
     private static final double[] crGEO_EXPECTED = new double[]{51.9903894167, 4.3896355000, 41.670};
     //    private static final double[] crXYZ_EXPECTED = {3.92428342070434e+06, 3.01243077763538e+05, 5.00217775318444e+06};
@@ -35,6 +27,8 @@ public class OrbitTest {
 
     private static final Point pixelXYZ_EXPECTED = new Point(3924267.875114853, 301323.1099883879, 5002132.192287684);
     private static final Point pixel_EXPECTED = new Point(3615, 18094);
+    private static final Point subPixel_EXPECTED = new Point(3614.52218889146, 18093.3381301418, crGEO_EXPECTED[2]); // for crGEO_EXPECTED
+
     private static final Point pixelTime_EXPECTED = new Point(0.002864458452552312, 36487.95443126317);
 
     private static final Point satellitePos_EXPECTED = new Point(4440791.472772267, 685252.6420443446, 5570675.151783929);
@@ -48,6 +42,13 @@ public class OrbitTest {
     double eq2Range_EXPECTED = -6403789.885986328;
     double eq3Ellipsoid_EXPECTED = 1.309374277047581e-05;
 
+    // for radius of orbit and earth
+    private double earthRadius_EXPECTED = 6364903.80517952;
+    private double orbitRadius_EXPECTED = 7156998.09505499;
+
+    // for resolution
+    private double azimuthDelta_EXPECTED = 4.56746375292234;
+    private double azimuthResolution_EXPECTED = 5.73506731122275;
 
     // state vectors
     private static final double[][] stateVectors_EXPECTED =
@@ -78,6 +79,7 @@ public class OrbitTest {
     private static final double eps_01 = 2E-01;
     private static final double eps_03 = 1E-03;
     private static final double eps_04 = 1E-04;
+    private static final double eps_05 = 1E-05;
     private static final double eps_06 = 1E-06;
 
     // expected CR values
@@ -86,7 +88,7 @@ public class OrbitTest {
     @BeforeClass
     public static void setUpTestData() throws Exception {
 
-        initLog();
+        logger.setLevel(Level.DEBUG);
 
         slcimage.parseResFile(resFile);
 
@@ -104,17 +106,17 @@ public class OrbitTest {
 
     @Test
     public void testGetNumStateVectors() throws Exception {
-        Assert.assertEquals(stateVectors_EXPECTED.length, orbit_ACTUAL.getNumStateVectors());
+        Assert.assertEquals(orbit_ACTUAL.getNumStateVectors(), stateVectors_EXPECTED.length);
     }
 
     @Test
     public void testOrbitStateVectors() throws Exception {
 
         for (int i = 0; i < orbit_ACTUAL.getNumStateVectors(); i++) {
-            Assert.assertEquals(stateVectors_EXPECTED[i][0], orbit_ACTUAL.getTime()[i], eps_06);
-            Assert.assertEquals(stateVectors_EXPECTED[i][1], orbit_ACTUAL.getData_X()[i], eps_06);
-            Assert.assertEquals(stateVectors_EXPECTED[i][2], orbit_ACTUAL.getData_Y()[i], eps_06);
-            Assert.assertEquals(stateVectors_EXPECTED[i][3], orbit_ACTUAL.getData_Z()[i], eps_06);
+            Assert.assertEquals(orbit_ACTUAL.getTime()[i], stateVectors_EXPECTED[i][0], eps_06);
+            Assert.assertEquals(orbit_ACTUAL.getData_X()[i], stateVectors_EXPECTED[i][1], eps_06);
+            Assert.assertEquals(orbit_ACTUAL.getData_Y()[i], stateVectors_EXPECTED[i][2], eps_06);
+            Assert.assertEquals(orbit_ACTUAL.getData_Z()[i], stateVectors_EXPECTED[i][3], eps_06);
         }
 
     }
@@ -207,7 +209,7 @@ public class OrbitTest {
     }
 
     @Test
-    public void testPointByReference_lp2xyz() throws Exception{
+    public void testPointByReference_lp2xyz() throws Exception {
         Point t1 = orbit_ACTUAL.lp2xyz(1, 1, slcimage);
         Point t2 = orbit_ACTUAL.lp2xyz(2, 2, slcimage);
         Assert.assertFalse(t1 == t2);
@@ -218,28 +220,28 @@ public class OrbitTest {
     }
 
     @Test
-    public void testPointByReference_lph2xyz() throws Exception{
+    public void testPointByReference_lph2xyz() throws Exception {
         Point t1 = orbit_ACTUAL.lph2xyz(1, 1, 0, slcimage);
         Point t2 = orbit_ACTUAL.lph2xyz(1, 1, 1, slcimage);
         Assert.assertFalse(t1 == t2);
     }
 
     @Test
-    public void testPointByReference_getXYZ() throws Exception{
+    public void testPointByReference_getXYZ() throws Exception {
         Point t1 = orbit_ACTUAL.getXYZ(1);
         Point t2 = orbit_ACTUAL.getXYZ(2);
         Assert.assertFalse(t1 == t2);
     }
 
     @Test
-    public void testPointByReference_getXYZDot() throws Exception{
+    public void testPointByReference_getXYZDot() throws Exception {
         Point t1 = orbit_ACTUAL.getXYZDot(1);
         Point t2 = orbit_ACTUAL.getXYZDot(2);
         Assert.assertFalse(t1 == t2);
     }
 
     @Test
-    public void testPointByReference_getXYZDotDot() throws Exception{
+    public void testPointByReference_getXYZDotDot() throws Exception {
         Point t1 = orbit_ACTUAL.getXYZDotDot(1);
         Point t2 = orbit_ACTUAL.getXYZDotDot(2);
         Assert.assertFalse(t1 == t2);
@@ -252,20 +254,10 @@ public class OrbitTest {
         Assert.assertFalse(t1 == t2);
     }
 
-
-//    @Before
-//    public void setUpCrTestData() throws Exception {
-//
-//        crSAR_EXPECTED = new Point(100,100);
-//
-//    }
-
-    //
     @Test
     public void crLoop_Run1() throws Exception {
 
         final double[] crGEO_EXPECTED_RADIANS = {crGEO_EXPECTED[0] * Constants.DTOR, crGEO_EXPECTED[1] * Constants.DTOR, crGEO_EXPECTED[2]};
-//        final Point xyz_ACTUAL = Ellipsoid.ell2xyz(Math.toRadians(crGEO_EXPECTED[0]), Math.toRadians(crGEO_EXPECTED[1]), crGEO_EXPECTED[2]);
         final Point xyz_ACTUAL = Ellipsoid.ell2xyz(crGEO_EXPECTED_RADIANS);
         final Point time_ACTUAL = orbit_ACTUAL.xyz2t(xyz_ACTUAL, slcimage);
         final double line_ACTUAL = slcimage.ta2line(time_ACTUAL.y);
@@ -275,25 +267,52 @@ public class OrbitTest {
         Assert.assertArrayEquals(xyz_ACTUAL.toArray(), xyz_ACTUAL_2.toArray(), eps_03);
 
         double[] philamheight_ACTUAL = orbit_ACTUAL.lph2ell(line_ACTUAL, pixel_ACTUAL, crGEO_EXPECTED[2], slcimage);
-        Assert.assertEquals(philamheight_ACTUAL[0], crGEO_EXPECTED_RADIANS[0], eps_06);
-        Assert.assertEquals(philamheight_ACTUAL[1], crGEO_EXPECTED_RADIANS[1], eps_06);
-        Assert.assertEquals(philamheight_ACTUAL[2], crGEO_EXPECTED_RADIANS[2], eps_03);
+        Assert.assertEquals(crGEO_EXPECTED_RADIANS[0], philamheight_ACTUAL[0], eps_06);
+        Assert.assertEquals(crGEO_EXPECTED_RADIANS[1], philamheight_ACTUAL[1], eps_06);
+        Assert.assertEquals(crGEO_EXPECTED_RADIANS[2], philamheight_ACTUAL[2], eps_03);
 
 
     }
 
     @Test
     public void testEll2lp() throws Exception {
-
-
+        double[] phi_lam_height = new double[]{crGEO_EXPECTED[0] * Constants.DTOR, crGEO_EXPECTED[1] * Constants.DTOR, crGEO_EXPECTED[2]};
+        final Point lp_ACTUAL = orbit_ACTUAL.ell2lp(phi_lam_height, slcimage);
+        Assert.assertEquals(subPixel_EXPECTED.y,lp_ACTUAL.y,  eps_03);
+        Assert.assertEquals(subPixel_EXPECTED.x,lp_ACTUAL.x,  eps_03);
     }
 
     @Test
-    public void testLp2ell() throws Exception {
-
+    public void testLph2ell() throws Exception {
+        final double[] crGEO_ACTUAL = orbit_ACTUAL.lph2ell(subPixel_EXPECTED.y, subPixel_EXPECTED.x, subPixel_EXPECTED.z, slcimage);
+        Assert.assertEquals(crGEO_EXPECTED[0], crGEO_ACTUAL[0] * Constants.RTOD, eps_05);
+        Assert.assertEquals(crGEO_EXPECTED[1], crGEO_ACTUAL[1] * Constants.RTOD, eps_05);
+        Assert.assertEquals(crGEO_EXPECTED[2], crGEO_ACTUAL[2], eps_03);
     }
 
+    @Test
+    public void testComputeEarthRadius() throws Exception {
+        final double earthRadius_ACTUAL = orbit_ACTUAL.computeEarthRadius(pixel_EXPECTED, slcimage);
+        Assert.assertEquals(earthRadius_EXPECTED, earthRadius_ACTUAL, eps_03);
+    }
 
+    @Test
+    public void testComputeOrbitRadius() throws Exception {
+        final double orbitRadius_ACTUAL = orbit_ACTUAL.computeOrbitRadius(pixel_EXPECTED, slcimage);
+        Assert.assertEquals(orbitRadius_EXPECTED, orbitRadius_ACTUAL, eps_03);
+    }
+
+    @Test
+    public void testComputeAzimuthDelta() throws Exception {
+        final double azimuthDelta_COMPUTED = orbit_ACTUAL.computeAzimuthDelta(pixel_EXPECTED, slcimage);
+        Assert.assertEquals(azimuthDelta_EXPECTED, azimuthDelta_COMPUTED, eps_06);
+    }
+
+    @Test
+    public void testComputeAzimuthResolution() throws Exception {
+        final double azimuthResolution_COMPUTED = orbit_ACTUAL.computeAzimuthResolution(pixel_EXPECTED, slcimage);
+        Assert.assertEquals(azimuthResolution_COMPUTED, azimuthResolution_EXPECTED, eps_06);
+    }
 
 }
 

@@ -1,6 +1,8 @@
 package org.jdoris.core;
 
-import org.apache.log4j.Logger;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import org.apache.commons.lang.ArrayUtils;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.jblas.DoubleMatrix;
@@ -8,13 +10,13 @@ import org.jdoris.core.io.ResFile;
 import org.jdoris.core.utils.DateUtils;
 import org.jdoris.core.utils.LinearAlgebraUtils;
 import org.jdoris.core.utils.PolyUtils;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-
 public final class Orbit {
 
-    static Logger logger = Logger.getLogger(Orbit.class.getName());
+    static Logger logger = (Logger) LoggerFactory.getLogger(Orbit.class.getName());
 
     private String interpMethod;
 
@@ -47,9 +49,12 @@ public final class Orbit {
     private final static double SOL = Constants.SOL;
 
     public Orbit() {
+        logger.setLevel(Level.OFF);
     }
 
     public Orbit(double[] timeVector, double[] xVector, double[] yVector, double[] zVector, int degree) throws Exception {
+
+        logger.setLevel(Level.OFF);
 
         numStateVectors = time.length;
 
@@ -65,6 +70,9 @@ public final class Orbit {
     }
 
     public Orbit(double[][] stateVectors, int degree) throws Exception {
+
+        logger.setLevel(Level.OFF);
+
         setOrbit(stateVectors);
 
         this.poly_degree = degree;
@@ -191,22 +199,21 @@ public final class Orbit {
             ellipsoidPosition.y += ellipsoidPositionSolution[1];
             ellipsoidPosition.z += ellipsoidPositionSolution[2];
 
-            //logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
-            //logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
-            //logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
+            logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
+            logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
+            logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
 
             // check convergence
             if (Math.abs(ellipsoidPositionSolution[0]) < CRITERPOS &&
                     Math.abs(ellipsoidPositionSolution[1]) < CRITERPOS &&
                     Math.abs(ellipsoidPositionSolution[2]) < CRITERPOS) {
-                logger.info("INFO: ellipsoidPosition (converged) = " + ellipsoidPosition);
+                logger.info("INFO: ellipsoidPosition (converged): {} ", ellipsoidPosition);
                 break;
 
             } else if (iter >= MAXITER) {
 //                MAXITER = MAXITER + 1;
-                logger.warn("line, pix -> x,y,z: maximum iterations (" + MAXITER + ") reached. ");
-                logger.warn("Criterium (m): " + CRITERPOS + " dx,dy,dz = "
-                        + ellipsoidPositionSolution[0] + ", " + ellipsoidPositionSolution[1] + ", " + ellipsoidPositionSolution[2]);
+                logger.warn("line, pix -> x,y,z: maximum iterations ( {} ) reached.", MAXITER);
+                logger.warn("Criterium (m): {}  dx,dy,dz = {}", CRITERPOS, ArrayUtils.toString(ellipsoidPositionSolution));
 
                 if (MAXITER > 10) {
                     logger.error("lp2xyz : MAXITER limit reached! lp2xyz() estimation is diverging?!");
@@ -231,6 +238,11 @@ public final class Orbit {
         // return satellite position
         // Point pointTime = xyz2t(pointOnEllips,slcimage);
         return getXYZ(xyz2t(pointOnEllips, slcimage).y); // inlined
+    }
+
+    public synchronized Point lp2orb(final Point sarPixel, final SLCImage slcimage) throws Exception {
+        // return satellite position
+        return getXYZ(xyz2t(lp2xyz(sarPixel, slcimage), slcimage).y); // inlined
     }
 
     public synchronized Point xyz2t(final Point pointOnEllips, final SLCImage slcimage) {
@@ -259,7 +271,8 @@ public final class Orbit {
 
         // Check number of iterations
         if (iter >= MAXITER) {
-            logger.warn("x,y,z -> line, pix: maximum iterations (" + MAXITER + ") reached. " + "Criterium (s):" + CRITERTIM + "dta (s)=" + solution);
+            logger.warn("x,y,z -> line, pix: maximum iterations ( {} ) reached. ", MAXITER);
+            logger.warn("Criterium (s): {} dta (s)= {}", CRITERTIM, solution);
         }
 
         // Compute range time
@@ -504,5 +517,23 @@ public final class Orbit {
         return isInterpolated;
     }
 
+    public double computeEarthRadius(Point p, SLCImage metadata) throws Exception {
+        return this.lp2xyz(p, metadata).norm();
+    }
+
+    public double computeOrbitRadius(Point p, SLCImage metadata) throws Exception {
+        double azimuthTime = metadata.line2ta(p.y);
+        return this.getXYZ(azimuthTime).norm();
+    }
+
+    public double computeAzimuthDelta(Point sarPixel, SLCImage metadata) throws Exception {
+        Point pointOnOrbit = this.getXYZ(metadata.line2ta(sarPixel.y));
+        Point pointOnOrbitPlusOne = this.getXYZ(metadata.line2ta(sarPixel.y + 1));
+        return Math.abs(metadata.getMlAz() * pointOnOrbit.distance(pointOnOrbitPlusOne));
+    }
+
+    public double computeAzimuthResolution(Point sarPixel, SLCImage metadata) throws Exception {
+        return (metadata.getPRF() / metadata.getAzimuthBandwidth()) * (this.computeAzimuthDelta(sarPixel, metadata) / metadata.getMlAz());
+    }
 }
 

@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.jblas.ComplexDouble;
 import org.jblas.ComplexDoubleMatrix;
@@ -140,7 +141,6 @@ public class CoherenceOp extends Operator {
         Band bandReal = null;
         Band bandImag = null;
 
-        // TODO: boy this is one ugly construction!?
         // loop through all band names(!) : and pull out only one that matches criteria
         for (int i = 0; i < numOfBands; i++) {
             String bandName = bandNames[i];
@@ -202,23 +202,12 @@ public class CoherenceOp extends Operator {
         }
 
         for (String key : targetMap.keySet()) {
-            targetProduct.addBand(targetMap.get(key).targetBandName_I, ProductData.TYPE_FLOAT64);
+            String bandName = targetMap.get(key).targetBandName_I;
+            targetProduct.addBand(bandName, ProductData.TYPE_FLOAT32);
+            targetProduct.getBand(bandName).setUnit(Unit.COHERENCE);
         }
 
     }
-
-//    /**
-//     * Called by the framework in order to compute a tile for the given target band.
-//     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-//     *
-//     * @param targetTileMap   The target tiles associated with all target bands to be computed.
-//     * @param targetRectangle The rectangle of target tile.
-//     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
-//     * @throws org.esa.beam.framework.gpf.OperatorException
-//     *          If an error occurs during computation of the target raster.
-//     */
-//    @Override
-//    public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
     /**
      * Called by the framework in order to compute a tile for the given target band.

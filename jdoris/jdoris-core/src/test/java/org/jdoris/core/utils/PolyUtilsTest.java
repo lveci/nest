@@ -188,7 +188,8 @@ public class PolyUtilsTest {
             System.arraycopy(coeffsArrayTemplate, 0, coeffs, 0, numCoefs);
 
             DoubleMatrix coeff = new DoubleMatrix(coeffs);
-            DoubleMatrix valueMatrix_ACTUAL = PolyUtils.polyval(xMatrix, yMatrix, coeff, degree);
+            double[][] polyval = PolyUtils.polyval(xMatrix.toArray(), yMatrix.toArray(), coeff.toArray(), degree);
+            DoubleMatrix valueMatrix_ACTUAL = new DoubleMatrix(polyval);
 
             //// construct _EXPECTED_ MATRIX ////
             for (int i = 0; i < xMatrix.rows; i++) {
