@@ -22,6 +22,7 @@ import org.jdoris.core.unwrapping.snaphu.SnaphuParameters;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.io.*;
+import java.lang.Exception;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class SnaphuWriter extends AbstractProductWriter {
      * @throws java.io.IOException      if an I/O error occurs
      */
     @Override
-    protected void writeProductNodesImpl() throws Exception {
+    protected void writeProductNodesImpl() throws IOException {
         final Object output = getOutput();
 
         File outputFile = null;
@@ -79,11 +80,7 @@ public class SnaphuWriter extends AbstractProductWriter {
         deleteRemovedNodes();
 
         // dump snaphu config file
-	try {
 	    createSnaphuConfFile();
-	} catch (IOexception e) {
-	    System.out.println(e.getMessage());
-	}
 
     }
 
@@ -378,7 +375,7 @@ public class SnaphuWriter extends AbstractProductWriter {
         return _outputDir;
     }
 
-    private void createSnaphuConfFile() throws Exception {
+    private void createSnaphuConfFile() throws IOException {
 
         final Product sourceProduct = getSourceProduct();
 
@@ -427,9 +424,12 @@ public class SnaphuWriter extends AbstractProductWriter {
         Window dataWindow = new Window(masterMetadata.getCurrentWindow());
 
         /// initiate snaphuconfig
-        snaphuConfigFile = new SnaphuConfigFile(masterMetadata, slaveMetadata, masterOrbit, slaveOrbit, dataWindow, parameters);
-
-        snaphuConfigFile.buildConfFile();
+        try {
+            snaphuConfigFile = new SnaphuConfigFile(masterMetadata, slaveMetadata, masterOrbit, slaveOrbit, dataWindow, parameters);
+            snaphuConfigFile.buildConfFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // write snaphu.conf file to the target directory
         try {
