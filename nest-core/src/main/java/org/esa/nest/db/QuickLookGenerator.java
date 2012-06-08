@@ -192,10 +192,21 @@ public class QuickLookGenerator {
         final File parentFolder = productFile.getParentFile();
         // try TerraSAR-X
         File browseFile = new File(parentFolder, "PREVIEW"+File.separator+"BROWSE.tif");
-        if(browseFile.exists()) return browseFile;
+        if(browseFile.exists())
+            return browseFile;
         // try Radarsat-2
         browseFile = new File(parentFolder, "BrowseImage.tif");
-        if(browseFile.exists()) return browseFile;
+        if(browseFile.exists())
+            return browseFile;
+        // try browse images
+        final File[] files = parentFolder.listFiles();
+        if(files != null) {
+            for(File f : files) {
+                final String name = f.getName().toLowerCase();
+                if(name.contains("browse") && (name.endsWith("jpg") || name.endsWith("png") || name.endsWith("tif")))
+                    return f;
+            }
+        }
 
         return productFile;
     }

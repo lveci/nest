@@ -209,9 +209,12 @@ public final class SLCImage {
         final String t_azi_original = dopplersArray[0].time.toString();
         this.tAzi_original = DateUtils.dateTimeToSecOfDay(t_azi_original);
 
-        this.doppler.f_DC_a0 = dopplersArray[0].coefficients[0];
-        this.doppler.f_DC_a1 = dopplersArray[0].coefficients[1];
-        this.doppler.f_DC_a2 = dopplersArray[0].coefficients[2];
+        if(dopplersArray[0].coefficients.length > 0)
+            this.doppler.f_DC_a0 = dopplersArray[0].coefficients[0];
+        if(dopplersArray[0].coefficients.length > 1)
+            this.doppler.f_DC_a1 = dopplersArray[0].coefficients[1];
+        if(dopplersArray[0].coefficients.length > 2)
+            this.doppler.f_DC_a2 = dopplersArray[0].coefficients[2];
         this.doppler.checkConstant();
 
         this.mlAz = (int) element.getAttributeDouble(AbstractMetadata.azimuth_looks);

@@ -106,14 +106,14 @@ class DatAboutBox extends ModalDialog {
         final String pattern =
                 "<html>" +
                 "<b>NEST  Version "+ver+"</b>" +
-                "<br>(c) Copyright 2007-2011 by Array Systems Computing Inc. and contributors. All rights reserved." +
+                "<br>(c) Copyright 2007-2012 by Array Systems Computing Inc. and contributors. All rights reserved." +
                 "<br>Visit http://www.array.ca/nest" +
                 "<br>" +
-                "<b>NEST-DORIS</b>" +
-                "<br>(c) Copyright 2009-2011 by PPO.labs. All rights reserved." +
+                "<b>JDORIS</b>" +
+                "<br>(c) Copyright 2009-2012 by PPO.labs and contributors. All rights reserved." +
                 "<br>" +
                 "<b>BEAM </b>" +
-                "<br>(c) Copyright 2002-2011 by Brockmann Consult and contributors. All rights reserved." +
+                "<br>(c) Copyright 2002-2012 by Brockmann Consult and contributors. All rights reserved." +
                 "<br>Visit http://www.brockmann-consult.de/beam/" +
                 "<br>" +
                 "<br>This program has been developed under contract to ESA (ESRIN)." +
@@ -149,7 +149,7 @@ class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b></b> <br>" +
                 "</td></tr>" +
                 "</table>" +
-                "<br><hr>The NEST-DORIS team at PPO.Labs/TU Delft is:" +
+                "<br><hr>The JDORIS team at PPO.Labs/TU Delft is:" +
                 "<table border=0>" +
                 "<tr><td>" +
                 "&nbsp;&nbsp;<b>Ramon Hanssen</b> (project manager)<br>" +

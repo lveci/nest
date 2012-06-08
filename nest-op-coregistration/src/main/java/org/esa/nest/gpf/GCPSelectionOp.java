@@ -633,6 +633,8 @@ public class GCPSelectionOp extends Operator {
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 3, cWindowHeight + 3);
         int k = 0;
 
+        final double nodataValue = slaveBand.getNoDataValue();
+
         try {
             final Tile slaveImagetteRaster1 = getSourceTile(slaveBand, slaveImagetteRectangle);
             final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
@@ -677,14 +679,18 @@ public class GCPSelectionOp extends Operator {
                                                                   slaveData2.getElemDoubleAt(x10),
                                                                   slaveData2.getElemDoubleAt(x11));
 
-                        sI[k++] = v1*v1 + v2*v2;
+                        sI[k] = v1*v1 + v2*v2;
                     } else {
 
-                        sI[k++] = MathUtils.interpolate2D(wy, wx, slaveData1.getElemDoubleAt(x00),
+                        sI[k] = MathUtils.interpolate2D(wy, wx, slaveData1.getElemDoubleAt(x00),
                                                                   slaveData1.getElemDoubleAt(x01),
                                                                   slaveData1.getElemDoubleAt(x10),
                                                                   slaveData1.getElemDoubleAt(x11));
                     }
+                    if(sI[k] == nodataValue) {
+                        //System.out.print("nodata value");
+                    }
+                    ++k;
                 }
             }
             slaveData1.dispose();
@@ -741,16 +747,16 @@ public class GCPSelectionOp extends Operator {
             }
             //System.out.println("peak = " + peak + " at (" + peakRow + ", " + peakCol + ")");
 
-            if (peakRow <= w/2) {
+            if (peakRow <= h/2) {
                 shift[0] = (double)(-peakRow) / (double)rowUpSamplingFactor;
             } else {
-                shift[0] = (double)(w - peakRow) / (double)rowUpSamplingFactor;
+                shift[0] = (double)(h - peakRow) / (double)rowUpSamplingFactor;
             }
 
-            if (peakCol <= h/2) {
+            if (peakCol <= w/2) {
                 shift[1] = (double)(-peakCol) / (double)colUpSamplingFactor;
             } else {
-                shift[1] = (double)(h - peakCol) / (double)colUpSamplingFactor;
+                shift[1] = (double)(w - peakCol) / (double)colUpSamplingFactor;
             }
     
             return true;

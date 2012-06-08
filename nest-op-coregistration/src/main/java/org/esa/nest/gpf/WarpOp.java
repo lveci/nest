@@ -669,6 +669,10 @@ public class WarpOp extends Operator {
     public static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
 
         final List<Placemark> pinList = new ArrayList<Placemark>();
+        if(warpData.slaveGCPList.size() < warpData.rms.length) {
+            warpData.notEnoughGCPs = true;
+            return true;
+        }
         for (int i = 0; i < warpData.rms.length; i++) {
             if (warpData.rms[i] >= threshold) {
                 pinList.add(warpData.slaveGCPList.get(i));
@@ -763,7 +767,7 @@ public class WarpOp extends Operator {
      * @param bandName            the band name
      * @throws OperatorException The exceptions.
      */
-    private static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
+    public static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
                                                  final WarpData warpData, final boolean appendFlag,
                                                  final float threshold, final int parseIndex, final String bandName)
             throws OperatorException {
@@ -929,6 +933,7 @@ public class WarpOp extends Operator {
             final WarpData warpData = warpDataMap.get(srcBand);
             if(warpData != null && warpData.notEnoughGCPs) {
                 msg += srcBand.getName() +" does not have enough valid GCPs for the warp\n";
+                openResidualsFile = true;
             }
         }
         if(!msg.isEmpty()) {

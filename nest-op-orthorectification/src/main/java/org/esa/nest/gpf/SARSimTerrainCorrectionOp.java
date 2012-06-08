@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dat.dialogs.AutoCloseOptionPane;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
@@ -153,10 +154,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "Show range and azimuth shifts file in a text viewer", defaultValue = "false", label="Show Range and Azimuth Shifts")
     private boolean openShiftsFile = false;
 
+    @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "false", label = "Show Residuals")
+    private boolean openResidualsFile = false;
+
     private ProductNodeGroup<Placemark> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
-    private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
     private boolean saveLayoverShadowMask = false;
@@ -164,6 +167,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
     private boolean warpDataAvailable = false;
+    private boolean fileOutput = false;
 
     private String demName = null;
 
@@ -216,6 +220,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
     private boolean isPolsar = false;
+    private String mission = null;
 
     private boolean nearRangeOnLeft = true; // temp fix for descending Radarsat2
 
@@ -244,9 +249,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             checkUserInput();
 
-            getMetadata();
-
             getSourceImageDimension();
+
+            getMetadata();
 
             getTiePointGrid();
 
@@ -328,9 +333,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             saveLocalIncidenceAngle = true;
         }
 
-        if (saveIncidenceAngleFromEllipsoid) {
-            incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        }
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
     }
 
     /**
@@ -340,7 +343,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private void getMetadata() throws Exception {
         absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-        final String mission = RangeDopplerGeocodingOp.getMissionType(absRoot);
+        mission = RangeDopplerGeocodingOp.getMissionType(absRoot);
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -381,7 +384,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
 
-        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(mission, absRoot);
+        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
 
         isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
@@ -459,8 +462,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         targetImageHeight = targetProduct.getSceneRasterHeight();
 
         addSelectedBands();
-
-        targetGeoCoding = targetProduct.getGeoCoding();
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
@@ -620,6 +621,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
 
+        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
         final GeoPos geoPosFirstNear = targetGeoCoding.getGeoPos(new PixelPos(0,0), null);
         final GeoPos geoPosFirstFar = targetGeoCoding.getGeoPos(new PixelPos(targetImageWidth-1, 0), null);
         final GeoPos geoPosLastNear = targetGeoCoding.getGeoPos(new PixelPos(0,targetImageHeight-1), null);
@@ -689,24 +691,93 @@ public class SARSimTerrainCorrectionOp extends Operator {
             final WarpOp.WarpData warpData = new WarpOp.WarpData(slaveGCPGroup);
             warpDataMap.put(srcBand, warpData);
 
+            int parseIdex = 0;
+            float threshold = 0.0f;
             WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
+            WarpOp.outputCoRegistrationInfo(
+                    sourceProduct, warpPolynomialOrder, warpData, i != 1, threshold, ++parseIdex, srcBand.getName());
 
-            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
+            threshold = (float)warpData.rmsMean;
+            if (threshold > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, threshold)) {
                 WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
+                if(warpData.notEnoughGCPs) continue;
+                WarpOp.outputCoRegistrationInfo(
+                        sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
             }
 
-            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
+            threshold = (float)warpData.rmsMean;
+            if (threshold > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, threshold)) {
                 WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
+                if(warpData.notEnoughGCPs) continue;
+                WarpOp.outputCoRegistrationInfo(
+                        sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
             }
 
-            WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
+            threshold = rmsThreshold;
+            WarpOp.eliminateGCPsBasedOnRMS(warpData, threshold);
             WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
-            outputCoRegistrationInfo(warpData, srcBand.getName(), appendFlag);
+            if(warpData.notEnoughGCPs) continue;
+            WarpOp.outputCoRegistrationInfo(
+                    sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
+
+            outputGCPShifts(warpData, srcBand.getName(), appendFlag);
             if (!appendFlag) {
                 appendFlag = true;
             }
         }
+
+        announceGCPWarning();
+
         warpDataAvailable = true;
+    }
+
+    private void announceGCPWarning() {
+        String msg = "";
+        for(Band srcBand : sourceProduct.getBands()) {
+            final WarpOp.WarpData warpData = warpDataMap.get(srcBand);
+            if(warpData != null && warpData.notEnoughGCPs) {
+                msg += srcBand.getName() +" does not have enough valid GCPs for the warp\n";
+                openResidualsFile = true;
+            }
+        }
+        if(!msg.isEmpty()) {
+            System.out.println(msg);
+            if(VisatApp.getApp() != null) {
+                AutoCloseOptionPane.showWarningDialog("Some bands did not coregister", msg);
+            }
+        }
+    }
+
+    private synchronized void outputResidualAndShiftFiles() {
+        if (fileOutput) {
+            return;
+        }
+
+        if(openShiftsFile) {
+            final File shiftsFile = getFile(sourceProduct, "_shift.txt");
+            if(Desktop.isDesktopSupported() && shiftsFile.exists()) {
+                try {
+                    Desktop.getDesktop().open(shiftsFile);
+                } catch(Exception e) {
+                    System.out.println(e.getMessage());
+                    // do nothing
+                }
+            }
+        }
+
+        if (openResidualsFile) {
+            final File residualsFile = getFile(sourceProduct, "_residual.txt");
+            if(Desktop.isDesktopSupported() && residualsFile.exists()) {
+                try {
+                    Desktop.getDesktop().open(residualsFile);
+                } catch(Exception e) {
+                    System.out.println(e.getMessage());
+                    // do nothing
+                }
+            }
+        }
+
+        fileOutput = true;
     }
 
     /**
@@ -744,6 +815,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final int y0 = targetRectangle.y;
         final int w  = targetRectangle.width;
         final int h  = targetRectangle.height;
+        final int ymax = y0 + h;
+        final int xmax = x0 + w;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final GeoPos geoPos = new GeoPos();
@@ -757,24 +830,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
         ProductData layoverShadowingMasksBuffer = null;
         ProductData incidenceAngleFromEllipsoidBuffer = null;
 
-        final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
-
         final Set<Band> keySet = targetTiles.keySet();
 
         if(!warpDataAvailable) {
             getWarpData(keySet, targetRectangle);
-
-            if(openShiftsFile) {
-                final File shiftsFile = getShiftsFile(sourceProduct);
-                if(Desktop.isDesktopSupported() && shiftsFile.exists()) {
-                    try {
-                        Desktop.getDesktop().open(shiftsFile);
-                    } catch(Exception e) {
-                        System.out.println(e.getMessage());
-                        // do nothing
-                    }
-                }
-            }
+            outputResidualAndShiftFiles();
         }
 
         final List<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
@@ -818,21 +878,22 @@ public class SARSimTerrainCorrectionOp extends Operator {
             trgTileList.add(td);
         }
         final RangeDopplerGeocodingOp.TileData[] trgTiles = trgTileList.toArray(new RangeDopplerGeocodingOp.TileData[trgTileList.size()]);
+        final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
 
         try {
             final float[][] localDEM = new float[h+2][w+2];
             if(useAvgSceneHeight) {
                 DEMFactory.fillDEM(localDEM, (float) avgSceneHeight);
             } else {
-                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, targetGeoCoding, x0, y0, w, h, localDEM);
+                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, x0, y0, w, h, localDEM);
                 if(!valid)
                     return;
             }
 
-            for (int y = y0; y < y0 + h; y++) {
+            for (int y = y0; y < ymax; y++) {
                 final int yy = y-y0+1;
 
-                for (int x = x0; x < x0 + w; x++) {
+                for (int x = x0; x < xmax; x++) {
 
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
@@ -847,14 +908,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         continue;
                     }
 
-                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
+                    tileGeoRef.getGeoPos(x, y, geoPos);
+                    if(!geoPos.isValid()) {
+                        continue;
+                    }
                     final double lat = geoPos.lat;
                     double lon = geoPos.lon;
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
 
-                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
+                    GeoUtils.geo2xyzWGS84(lat, lon, alt, earthPoint);
 
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
 
@@ -866,23 +930,28 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / lightSpeedInMetersPerDay;
+                    double azimuthIndex = 0.0;
+                    double rangeIndex = 0.0;
+                    double zeroDoppler = zeroDopplerTime;
+                    if (!mission.contains("CSKS") && !mission.contains("TSX") && !mission.equals("RS2")) {
+                        // skip bistatic correction for COSMO, TerraSAR-X and RadarSAT-2
+                        zeroDoppler = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
+                    }
 
-                    final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+                    azimuthIndex = (zeroDoppler - firstLineUTC) / lineTimeInterval;
 
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(
-                            zeroDopplerTimeWithoutBias, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+                            zeroDoppler, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
-                            srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
-                            zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+                    rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                            rangeSpacing, zeroDoppler, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     // temp fix for descending Radarsat2
                     if (!nearRangeOnLeft) {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!RangeDopplerGeocodingOp.isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
+                    if (!RangeDopplerGeocodingOp.isValidCell(rangeIndex, azimuthIndex, lat, lon, tileGeoRef,
                             srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
@@ -895,7 +964,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                     new RangeDopplerGeocodingOp.LocalGeometry();
 
                             RangeDopplerGeocodingOp.setLocalGeometry(
-                                    x, y, targetGeoCoding, earthPoint, sensorPos, localGeometry);
+                                    x, y, tileGeoRef, earthPoint, sensorPos, localGeometry);
 
                             RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
                                     localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
@@ -1349,15 +1418,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private void outputCoRegistrationInfo(
+    private void outputGCPShifts(
             final WarpOp.WarpData warpData, final String bandName, boolean appendFlag)
             throws OperatorException {
 
-        final File residualFile = getShiftsFile(sourceProduct);
+        final File shiftsFile = getFile(sourceProduct, "_shift.txt");
         PrintStream p = null; // declare a print stream object
 
         try {
-            final FileOutputStream out = new FileOutputStream(residualFile.getAbsolutePath(), appendFlag);
+            final FileOutputStream out = new FileOutputStream(shiftsFile.getAbsolutePath(), appendFlag);
 
             // Connect print stream to the output stream
             p = new PrintStream(out);
@@ -1397,8 +1466,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 p.println();
             }
 
-            meanRangeShift /= warpData.numValidGCPs;
-            meanAzimuthShift /= warpData.numValidGCPs;
+            if (warpData.numValidGCPs > 0) {
+                meanRangeShift /= warpData.numValidGCPs;
+                meanAzimuthShift /= warpData.numValidGCPs;
+            } else {
+                p.println("No valid GCP is available.");
+            }
 
             p.println();
             p.format("Mean Range Shift = %8.3f", meanRangeShift);
@@ -1414,8 +1487,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private static File getShiftsFile(final Product sourceProduct) {
-        String fileName = sourceProduct.getName() + "_shift.txt";
+    private static File getFile(final Product sourceProduct, final String name) {
+        String fileName = sourceProduct.getName() + name;
         final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {
             appUserDir.mkdirs();

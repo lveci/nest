@@ -125,7 +125,7 @@ public class DEMFactory {
                 }
                 if (geoPos.lon > 180) {
                     geoPos.lon -= 360;
-                } else if (geoPos.lon < - 180) {
+                } else if (geoPos.lon < -180) {
                     geoPos.lon += 360;
                 }
 
@@ -162,26 +162,27 @@ public class DEMFactory {
 
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
-
         final GeoPos geoPos = new GeoPos();
+
         float alt;
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
+
             for (int x = x0 - 1; x < maxX; x++) {
                 tileGeoRef.getGeoPos(x, y, geoPos);
-         /*       if(!geoPos.isValid()) {
+                /*if(!geoPos.isValid()) {
                     localDEM[yy][x - x0 + 1] = demNoDataValue;
                     continue;
                 }
                 if (geoPos.lon > 180) {
                     geoPos.lon -= 360;
-                } else if (geoPos.lon < - 180) {
+                } else if (geoPos.lon < -180) {
                     geoPos.lon += 360;
                 }    */
 
                 alt = dem.getElevation(geoPos);
-                if(alt != demNoDataValue)
+                if(!valid && alt != demNoDataValue)
                     valid = true;
                 localDEM[yy][x - x0 + 1] = alt;
             }

@@ -1135,6 +1135,7 @@ public class Product extends ProductNode {
             vectorDataNode = new VectorDataNode(GCP_GROUP_NAME, Placemark.createGcpFeatureType());
             vectorDataNode.setDefaultCSS("symbol:plus; stroke:#ff8800; stroke-opacity:0.8; stroke-width:1.0");
             this.vectorDataGroup.add(vectorDataNode);
+            setModified(false);
             return vectorDataNode.getPlacemarkGroup();
         }
         return null;

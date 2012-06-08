@@ -75,6 +75,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
         }
 
         outputFile = FileUtils.ensureExtension(file, GeoTiffProductWriterPlugIn.GEOTIFF_FILE_EXTENSION[0]);
+        outputFile.getParentFile().mkdirs();
         deleteOutput();
 
         ensureNamingConvention();

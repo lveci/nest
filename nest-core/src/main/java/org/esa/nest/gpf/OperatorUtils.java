@@ -223,7 +223,8 @@ public final class OperatorUtils {
             final Band[] trgBands = targetProduct.getBands();
 
             for(int i=0; i < trgBands.length; ++i) {
-                if(srcBands[i].getName().equals(trgBands[i].getName())) {
+                if(srcBands[i].getName().equals(trgBands[i].getName()) &&
+                   srcBands[i].getSampleCoding() != null) {
                     final String srcSampleCoding = srcBands[i].getSampleCoding().getName();
                     final IndexCoding trgIndexCoding = targetProduct.getIndexCodingGroup().get(srcSampleCoding);
                     if(trgIndexCoding != null) {

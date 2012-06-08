@@ -12,7 +12,7 @@ fi
 $NEST_HOME/jre/bin/java \
 	-server -Xms512M -Xmx3000M -XX:PermSize=512m -XX:MaxPermSize=512m -Xverify:none \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000 \
-    -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache -XX:+UseCompressedStrings \
+    -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache \
     -Dceres.context=nest \
     "-Dnest.mainClass=org.esa.beam.framework.gpf.main.Main" \
     "-Dnest.home=$NEST_HOME" \

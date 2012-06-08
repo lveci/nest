@@ -24,6 +24,10 @@
 	</DEM>
 	<OrbitFiles label="Orbit Files">
 		<dorisFTP value="diss-nas-fp.eo.esa.int"/>
+		<dorisFTP_user value="dorisusr"/>
+		<dorisFTP_pass value="env_data"/>
+		<dorisFTP_por_remotePath value="/por"/>
+		<dorisFTP_vor_remotePath value="/vor_gdr_d"/>
 		<dorisVOROrbitPath value="${AuxDataPath}/Orbits/Doris/vor"/>
 		<dorisPOROrbitPath value="${AuxDataPath}/Orbits/Doris/por"/>
 		
@@ -37,6 +41,10 @@
 		<delftFTP_ERS2_precise_remotePath value="/pub/orbits/ODR.ERS-2/dgm-e04/"/>		
 		
 		<prareFTP value="esaftp.dfd.dlr.de"/>
+		<prareFTP_user value="dpafftp"/>
+		<prareFTP_pass value="sunshine"/>
+		<prareFTP_ERS1_remotePath value="/orbprc/ERS1"/>
+		<prareFTP_ERS2_remotePath value="/orbprc/ERS2"/>
 		<prareERS1OrbitPath value="${AuxDataPath}/Orbits/ers_precise_orb/ERS1"/>
 		<prareERS2OrbitPath value="${AuxDataPath}/Orbits/ers_precise_orb/ERS2"/>
 	</OrbitFiles>

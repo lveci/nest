@@ -3,30 +3,14 @@
   <node id="1-Read">
     <operator>Read</operator>
     <sources/>
-    <parameters>
-      <file></file>
-    </parameters>
-  </node>
-  <node id="2-Calibration">
-    <operator>Calibration</operator>
-    <sources>
-      <sourceProduct refid="1-Read"/>
-    </sources>
-    <parameters>
-      <sourceBands>
-      </sourceBands>
-      <externalAuxFile/>
-      <outputImageScaleInDb>false</outputImageScaleInDb>
-      <createGammaBand>false</createGammaBand>
-      <createBetaBand>false</createBetaBand>
-    </parameters>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement"/>
   </node>
   <node id="3-Write">
     <operator>Write</operator>
     <sources>
-      <sourceProduct refid="2-Calibration"/>
+      <sourceProduct refid="1-Read"/>
     </sources>
-    <parameters>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <formatName>BEAM-DIMAP</formatName>
       <file>target.dim</file>
     </parameters>
@@ -35,9 +19,6 @@
     <Description/>
     <node id="1-Read">
       <displayPosition y="134.0" x="37.0"/>
-    </node>
-	<node id="2-Calibration">
-      <displayPosition y="132.0" x="169.0"/>
     </node>
     <node id="3-Write">
       <displayPosition y="135.0" x="455.0"/>

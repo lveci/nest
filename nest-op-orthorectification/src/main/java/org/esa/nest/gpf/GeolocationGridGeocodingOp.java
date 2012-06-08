@@ -173,7 +173,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
             unBiasedZeroDoppler = true;
         }
 
-        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(mission, absRoot);
+        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
 
         isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }

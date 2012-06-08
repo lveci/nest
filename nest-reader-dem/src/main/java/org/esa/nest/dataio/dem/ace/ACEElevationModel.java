@@ -34,10 +34,13 @@ public class ACEElevationModel extends BaseElevationModel {
     }
 
     @Override
-    public PixelPos getIndex(GeoPos geoPos) {
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; 
-        return new PixelPos(pixelX, pixelY);
+    public float getIndexX(final GeoPos geoPos) {
+        return (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    }
+
+    @Override
+    public float getIndexY(final GeoPos geoPos) {
+        return RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
     }
 
     @Override

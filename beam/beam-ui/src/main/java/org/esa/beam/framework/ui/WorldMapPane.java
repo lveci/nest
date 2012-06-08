@@ -351,14 +351,14 @@ public class WorldMapPane extends JPanel {
     }
 
     private class BoundaryOverlay implements LayerCanvas.Overlay {
+        final Color transWhiteColor = new Color(255, 255, 255, 10);
+        final Color transRedColor = new Color(255, 0, 0, 30);
+
+        final Color selectionFillColor = new Color(255, 255, 0, 70);
+        final Color selectionBorderColor = new Color(255, 255, 0, 255);
 
         @Override
         public void paintOverlay(LayerCanvas canvas, Rendering rendering) {
-            final Color transWhiteColor = new Color(255, 255, 255, 20);
-            final Color transRedColor = new Color(255, 0, 0, 30);
-
-            final Color selectionFillColor = new Color(255, 255, 0, 70);
-            final Color selectionBorderColor = new Color(255, 255, 0, 255);
 
             for (final GeoPos[] extraGeoBoundary : dataModel.getAdditionalGeoBoundaries()) {
                 drawGeoBoundary(rendering.getGraphics(), extraGeoBoundary, null, null,

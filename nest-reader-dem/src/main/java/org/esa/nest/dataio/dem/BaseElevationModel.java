@@ -34,11 +34,13 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     protected final int NUM_X_TILES;
     protected final int NUM_Y_TILES;
     protected final int NUM_PIXELS_PER_TILE;
+    private final float NUM_PIXELS_PER_TILEinv;
     protected final float NO_DATA_VALUE;
     protected final int DEGREE_RES;
     protected final int RASTER_WIDTH;
     protected final int RASTER_HEIGHT;
     protected final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
+    protected final float DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
 
     protected final ElevationModelDescriptor descriptor;
     private final ElevationFile[][] elevationFiles;
@@ -59,12 +61,14 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         NUM_Y_TILES = descriptor.getNumYTiles();
         NO_DATA_VALUE = descriptor.getNoDataValue();
         NUM_PIXELS_PER_TILE = descriptor.getPixelRes();
+        NUM_PIXELS_PER_TILEinv = 1.0f / (float)NUM_PIXELS_PER_TILE;
         DEGREE_RES = descriptor.getDegreeRes();
 
         RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
         RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
         DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES / (float)NUM_PIXELS_PER_TILE;
+        DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv = 1.0f / DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
 
         elevationFiles = createElevationFiles();    // must be last
     }
@@ -82,12 +86,12 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public final synchronized float getElevation(final GeoPos geoPos) throws Exception {
-        final PixelPos pixel = getIndex(geoPos);
-        if (pixel.y < 0) {
+        final float pixelY = getIndexY(geoPos);
+        if (pixelY < 0) {
             return NO_DATA_VALUE;
         }
 
-        resampling.computeIndex(pixel.x, pixel.y, RASTER_WIDTH, RASTER_HEIGHT, resamplingIndex);
+        resampling.computeIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, resamplingIndex);
 
         final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
         if (Float.isNaN(elevation)) {
@@ -96,9 +100,15 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return elevation;
     }
 
-    public abstract PixelPos getIndex(final GeoPos geoPos);
+    public abstract float getIndexX(final GeoPos geoPos);
+
+    public abstract float getIndexY(final GeoPos geoPos);
 
     public abstract GeoPos getGeoPos(final PixelPos pixelPos);
+
+    public PixelPos getIndex(final GeoPos geoPos) {
+        return new PixelPos(getIndexX(geoPos), getIndexY(geoPos));
+    }
 
     public void dispose() {
         for (ElevationTile tile : elevationTileCache) {
@@ -120,9 +130,9 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return RASTER_HEIGHT;
     }
 
-    public final float getSample(final int pixelX, final int pixelY) throws IOException {
-        final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
-        final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
+    public final float getSample(final int pixelX, final int pixelY) throws Exception {
+        final int tileXIndex = (int)(pixelX * NUM_PIXELS_PER_TILEinv);
+        final int tileYIndex = (int)(pixelY * NUM_PIXELS_PER_TILEinv);
         final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if (tile == null) {
             return Float.NaN;

@@ -513,6 +513,7 @@ public class ProductSceneView extends BasicView
     public void setImageInfo(ImageInfo imageInfo) {
         final ImageInfo oldImageInfo = getImageInfo();
         getSceneImage().setImageInfo(imageInfo);
+        updateImage();
         firePropertyChange(PROPERTY_NAME_IMAGE_INFO, oldImageInfo, imageInfo);
     }
 
@@ -996,7 +997,9 @@ public class ProductSceneView extends BasicView
     }
 
     public void zoom(double x, double y, double viewScale) {
-        layerCanvas.getViewport().setZoomFactor(viewScale, x, y);
+        if (viewScale > 0) {
+            layerCanvas.getViewport().setZoomFactor(viewScale, x, y);
+        }
     }
 
     public void synchronizeViewport(ProductSceneView view) {

@@ -202,7 +202,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             // todo ALOS
                             // todo move this into calibrator.canRadiometricallyNormalize(mission)
                             if (isCalibrated==0 && (mission.equals("ENVISAT") || mission.contains("ERS") ||
-                                mission.equals("RS2") || mission.contains("TSX") || mission.contains("TDX") || mission.contains("CSKS"))) {
+                                mission.equals("RS2") || mission.contains("TSX") || mission.contains("TDX") ||
+                                mission.contains("ALOS") || mission.contains("CSKS"))) {
 
                                 enableRadiometricNormalization(true);
 
@@ -453,7 +454,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
 
                 if (!mission.equals("RS2") && !mission.contains("TSX") && !mission.contains("TDX") && !mission.equals("ENVISAT") &&
-                    !mission.contains("ERS") && !mission.contains("CSK") && !mission.equals(" ") &&
+                    !mission.contains("ERS") && !mission.contains("CSK") && !mission.contains("ALOS") && !mission.equals(" ") &&
                         applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +

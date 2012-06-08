@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +74,12 @@ public final class XMLSupport {
             w3cDocument = builder.parse(filePath);
 
             return domBuilder.build(w3cDocument);
+        } catch(MalformedURLException e) {
+            final String msg = "Cannot parse xml file path : " + e.getMessage()+
+                    '\n'+filePath+
+                    "\n\nPlease check the characters being used and if your operating system locale is set correctly";
+            System.out.println(msg);
+            throw new IOException(msg);
         } catch (IOException e) {
             System.out.println("Path to xml is not valid: " + e.getMessage());
             throw e;

@@ -817,4 +817,14 @@ public final class StringUtils {
         return true;
     }
 
+   /**
+     * Turns the first letter of the given string to upper case.
+     *
+     * @param string the string to change
+     * @return a changed string
+     */
+    public static String firstLetterUp(String string) {
+        String firstChar = string.substring(0, 1).toUpperCase();
+        return firstChar + string.substring(1);
+    }
 }

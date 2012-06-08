@@ -176,7 +176,7 @@ public final class AbstractMetadata {
     public static final String temp_1 = "temp_1";
     public static final String temp_2 = "temp_2";
     public static final String temp_3 = "temp_3";
-    public static final String temp_4 = "temp_3";
+    public static final String temp_4 = "temp_4";
 
     public static final String abstracted_metadata_version = "metadata_version";
 

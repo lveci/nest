@@ -44,7 +44,7 @@ import java.awt.Dimension;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class WorldMapToolView extends AbstractToolView {
 
@@ -102,7 +102,7 @@ public class WorldMapToolView extends AbstractToolView {
         getPaneWindow().pack();
     }
 
-    protected class WorldMapPTL extends ProductTreeListenerAdapter {
+    public class WorldMapPTL extends ProductTreeListenerAdapter {
 
         public WorldMapPTL() {
         }

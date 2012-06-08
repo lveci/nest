@@ -1,15 +1,10 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>4C-0.4</version>
+    <version>4C-0.7</version>
     <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
-    <initializationActionList>
-        <showWarning>
-            <text>Please uninstall any previous version of NEST before continuing</text>
-        </showWarning>
-    </initializationActionList>
     <preInstallationActionList>
         <deleteEnvironmentVariable>
             <abortOnError>0</abortOnError>
@@ -148,37 +143,37 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/auxdata</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/bin</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/commandline</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/graphs</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/images</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/lib</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/licenses</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/modules</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/res</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-4C-0.1-bin.dir/config</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/res</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4C-0.1-bin.dir/readme.txt</origin>
+                            <origin>target/nest-4C-0.1-bin-win64.dir/readme.txt</origin>
                         </distributionFile>
                     </distributionFileList>
                     <shortcutList>

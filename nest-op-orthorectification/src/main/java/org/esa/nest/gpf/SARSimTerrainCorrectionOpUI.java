@@ -33,6 +33,8 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
     private final JTextField warpPolynomialOrder = new JTextField("");
     private final JCheckBox openShiftsFileCheckBox = new JCheckBox("Show Range and Azimuth Shifts");
     private boolean openShiftsFile = false;
+    private final JCheckBox openResidualsFileCheckBox = new JCheckBox("Show Residuals");
+    private boolean openResidualsFile = false;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -43,7 +45,13 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
                     openShiftsFile = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
-                
+
+        openResidualsFileCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    openResidualsFile = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+
         return new JScrollPane(pane);
     }
 
@@ -59,6 +67,9 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
         openShiftsFile = (Boolean)paramMap.get("openShiftsFile");
         openShiftsFileCheckBox.getModel().setPressed(openShiftsFile);
+
+        openResidualsFile = (Boolean)paramMap.get("openResidualsFile");
+        openResidualsFileCheckBox.getModel().setPressed(openResidualsFile);
     }
 
     @Override
@@ -68,6 +79,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         paramMap.put("rmsThreshold", Float.parseFloat(rmsThreshold.getText()));
         paramMap.put("warpPolynomialOrder", Integer.parseInt(warpPolynomialOrder.getText()));
         paramMap.put("openShiftsFile", openShiftsFile);
+        paramMap.put("openResidualsFile", openResidualsFile);
     }
 
     @Override
@@ -80,7 +92,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "RMS Threshold:", rmsThreshold);
+        DialogUtils.addComponent(contentPane, gbc, "RMS Threshold (pixel accuracy):", rmsThreshold);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "WARP Polynomial Order:", warpPolynomialOrder);
         gbc.gridy++;
@@ -142,6 +154,8 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridx = 0;
         gbc.insets.left = 1;
         contentPane.add(openShiftsFileCheckBox, gbc);
+        gbc.gridy++;
+        contentPane.add(openResidualsFileCheckBox, gbc);
 
         return contentPane;
     }

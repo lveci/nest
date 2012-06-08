@@ -554,7 +554,7 @@ public class TiePointGrid extends RasterDataNode {
             if (isDiscontNotInit()) {
                 initDiscont();
             }
-            int i = 0;
+          /*  int i = 0;
             for (int y = y1; y < y2; ++y) {
                 for (int x = x1; x < x2; ++x) {
                     //pixels[i++] = getPixelFloat(x + 0.5f, y + 0.5f);
@@ -563,6 +563,15 @@ public class TiePointGrid extends RasterDataNode {
                                                                          cosGrid.getPixelFloat(x+ 0.5f, y+ 0.5f)));
                     pixels[i++] = (v < 0.0 && discontinuity == DISCONT_AT_360) ? 360.0F + v : v;
                 }
+            }  */
+            float[] sinPixels = new float[pixels.length];
+            float[] cosPixels = new float[pixels.length];
+            sinGrid.getPixels(x1, y1, w, h, sinPixels, pm);
+            cosGrid.getPixels(x1, y1, w, h, cosPixels, pm);
+            int j=0;
+            for(float sin : sinPixels) {
+                final float v = (float) (MathUtils.RTOD * Math.atan2(sin, cosPixels[j]));
+                pixels[j++] = (v < 0.0 && discontinuity == DISCONT_AT_360) ? 360.0F + v : v;
             }
         } else {
             final float x0 = 0.5f - offsetX;
@@ -578,7 +587,6 @@ public class TiePointGrid extends RasterDataNode {
 
             for (int y = y1; y < y2; ++y) {
                 fj = (y + y0) * subSamplingY;
-                //j = MathUtils.crop((int) StrictMath.floor(fj), 0, rasterHeightMinus2);
                 j = MathUtils.crop((int)fj, 0, rasterHeightMinus2);
 
                 wj = fj - j;
@@ -587,8 +595,7 @@ public class TiePointGrid extends RasterDataNode {
                 j1rw = j1 * rasterWidth;
                 for (int x = x1; x < x2; ++x) {
                     fi = (x + x0) * subSamplingX;
-                    //i = MathUtils.crop((int) StrictMath.floor(fi), 0, rasterWidthMinus2);
-                    i = MathUtils.crop((int) (int)fi, 0, rasterWidthMinus2);
+                    i = (int)fi < 0 ? 0 : (int)fi > rasterWidthMinus2 ? rasterWidthMinus2 : (int)fi;
 
                     i1 = i + 1;
                     pixels[pos++] = MathUtils.interpolate2D(fi - i, wj,
