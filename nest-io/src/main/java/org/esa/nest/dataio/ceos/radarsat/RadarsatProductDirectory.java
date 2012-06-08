@@ -258,9 +258,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         addSummaryMetadata(new File(baseDir.getParentFile(), RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
 
         // try txt summary file
-        final File volFile = CeosHelper.getCEOSFile(baseDir, constants.getVolumeFilePrefix());
-        final File txtFile = FileUtils.exchangeExtension(volFile, ".txt");
-        addSummaryMetadata(txtFile, "Scene Description", root);
+        // removed because it is not in the property name value format
+        //final File volFile = CeosHelper.getCEOSFile(baseDir, constants.getVolumeFilePrefix());
+        //final File txtFile = FileUtils.exchangeExtension(volFile, ".txt");
+        //addSummaryMetadata(txtFile, "Scene Description", root);
 
         addAbstractedMetadataHeader(product, root);
     }

@@ -26,7 +26,7 @@ import java.util.List;
  * A type-safe list for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public final class ProductNodeList<T extends ProductNode> {
 
@@ -221,8 +221,11 @@ public final class ProductNodeList<T extends ProductNode> {
     public final boolean remove(T node) {
         if (node != null) {
             synchronized (this) {
-                removedNodes.add(node);
-                return nodes.remove(node);
+                if (nodes.remove(node)) {
+                    removedNodes.add(node);
+                    return true;
+                }
+                return false;
             }
         }
         return false;

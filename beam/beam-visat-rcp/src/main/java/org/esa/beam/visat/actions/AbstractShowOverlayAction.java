@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract action for toggling the display of overlays.
  *
  * @author Ralf Quast
-
+ * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
 public abstract class AbstractShowOverlayAction extends ExecCommand {

@@ -38,6 +38,7 @@
       <coherenceWindowSize>3</coherenceWindowSize>
       <coherenceThreshold>0.4</coherenceThreshold>
       <useSlidingWindow>true</useSlidingWindow>
+	  <computeOffset>false</computeOffset>
     </parameters>
   </node>
   <node id="4-Warp">

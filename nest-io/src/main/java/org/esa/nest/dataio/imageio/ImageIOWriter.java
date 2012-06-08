@@ -122,7 +122,7 @@ public class ImageIOWriter extends AbstractProductWriter {
                     dataArray[pos++] = (short)sourceBuffer.getElemIntAt(i);
                 } */
 
-                if(sourceOffsetY == sourceBand.getRasterHeight()-1) {
+                if(sourceHeight == sourceBand.getRasterHeight() || sourceOffsetY == sourceBand.getRasterHeight()-1) {
                     
                 /*    RenderedImage img = createRenderedImage(dataArray,
                                                             sourceBand.getRasterWidth(), sourceBand.getRasterHeight());

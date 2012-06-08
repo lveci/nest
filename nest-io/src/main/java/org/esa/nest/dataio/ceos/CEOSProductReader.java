@@ -128,13 +128,15 @@ public abstract class CEOSProductReader extends AbstractProductReader {
                 }
             } else {
                 if(_dataDir.isSLC()) {
-                    boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
+                    final boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
+                    final int samplesPerGroup = imageFile.getSamplesPerDataGroup();
+                    final int elemSize = (samplesPerGroup * ProductData.getElemSize(destBuffer.getType()));
 
                     imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
                                                     sourceWidth, sourceHeight,
                                                     sourceStepX, sourceStepY,
                                                     destWidth,
-                                                    destBuffer, oneOf2, pm);
+                                                    destBuffer, oneOf2, elemSize);
 
                 } else {
                     imageFile.readBandRasterDataShort(sourceOffsetX, sourceOffsetY,

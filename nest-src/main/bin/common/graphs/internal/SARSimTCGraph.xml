@@ -52,6 +52,7 @@
       <coherenceWindowSize>3</coherenceWindowSize>
       <coherenceThreshold>0.6</coherenceThreshold>
       <useSlidingWindow>false</useSlidingWindow>
+      <computeOffset>false</computeOffset>
     </parameters>
   </node>
   <node id="5-SARSim-Terrain-Correction">
@@ -79,6 +80,7 @@
       <auxFile>Latest Auxiliary File</auxFile>
       <externalAuxFile/>
       <openShiftsFile>false</openShiftsFile>
+      <openResidualsFile>false</openResidualsFile>
     </parameters>
   </node>
   <applicationData id="Presentation">

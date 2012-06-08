@@ -25,6 +25,10 @@ public final class TileIndex {
         offset = tileMinX - (((ty - tileMinY) * tileStride) + tileOffset);
     }
 
+    public int getOffset() {
+        return offset;
+    }
+
     public int getIndex(final int tx) {
         return tx - offset;
     }

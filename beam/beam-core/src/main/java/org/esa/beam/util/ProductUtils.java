@@ -1195,7 +1195,9 @@ public class ProductUtils {
         targetRaster.setLog10Scaled(sourceRaster.isLog10Scaled());
         targetRaster.setNoDataValueUsed(sourceRaster.isNoDataValueUsed());
         targetRaster.setNoDataValue(sourceRaster.getNoDataValue());
-        targetRaster.setValidPixelExpression(sourceRaster.getValidPixelExpression());
+        if(targetRaster instanceof VirtualBand && sourceRaster instanceof VirtualBand) {
+            targetRaster.setValidPixelExpression(sourceRaster.getValidPixelExpression());
+        }
         if (sourceRaster instanceof Band && targetRaster instanceof Band) {
             Band sourceBand = (Band) sourceRaster;
             Band targetBand = (Band) targetRaster;
@@ -1310,6 +1312,7 @@ public class ProductUtils {
             CoordinateReferenceSystem targetModelCrs = ImageManager.getModelCrs(targetProduct.getGeoCoding());
 
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
+                try {
                 VectorDataNode sourceVDN = vectorDataGroup.get(i);
                 String name = sourceVDN.getName();
                 FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = sourceVDN.getFeatureCollection();
@@ -1320,6 +1323,9 @@ public class ProductUtils {
                 targetVDN.setDefaultCSS(sourceVDN.getDefaultCSS());
                 targetVDN.setDescription(sourceVDN.getDescription());
                 targetProduct.getVectorDataGroup().add(targetVDN);
+                } catch (Exception e) {
+                    continue;
+                }
             }
         }
     }

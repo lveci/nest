@@ -31,6 +31,10 @@ class TargetFolderSelector extends TargetProductSelector {
 
     public JPanel createPanel() {
 
+        final JPanel subPanel2 = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        subPanel2.add(new JLabel("Save as:  "));
+        subPanel2.add(getFormatNameComboBox());
+
         final JPanel subPanel3 = new JPanel(new BorderLayout(3, 3));
         subPanel3.add(getProductDirLabel(), BorderLayout.NORTH);
         subPanel3.add(getProductDirTextField(), BorderLayout.CENTER);
@@ -48,6 +52,7 @@ class TargetFolderSelector extends TargetProductSelector {
 
         final JPanel panel = new JPanel(tableLayout);
         panel.setBorder(BorderFactory.createTitledBorder("Target Folder"));
+        panel.add(subPanel2);
         panel.add(subPanel3);
         panel.add(getOpenInAppCheckBox());
 

@@ -287,12 +287,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                     sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
-            Double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel");
-            if(slantRangeTime != null) {
-                slantRangeTime *= 0.001; //s
-                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                    slantRangeTime* Constants.halfLightSpeed);
-            }
+            final double slantRangeTimeToFirstPixel = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel");
+            final double slantRangeTimeToLastPixel  = sceneRec.getAttributeDouble("Zero-doppler range time of last range pixel");
+            final double slantRangeTime = Math.min(slantRangeTimeToFirstPixel, slantRangeTimeToLastPixel)*0.001; //s
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                slantRangeTime* Constants.halfLightSpeed);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
@@ -336,14 +335,14 @@ class ERSProductDirectory extends CEOSProductDirectory {
         if (!psID.contains("PGS")) { // VMP
 
             final double Fr = sceneRec.getAttributeDouble("Range sampling rate")*1000000; // MHz to Hz
-            final double T0 = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")/1000; // ms to s
+            final double R0 = absRoot.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel);
 
             final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
             final MetadataElement srgrListElem = srgrCoefficientsElem.getElement(AbstractMetadata.srgr_coef_list);
 
             MetadataElement coefElem = srgrListElem.getElementAt(0);
             double c0 = coefElem.getAttributeDouble(AbstractMetadata.srgr_coef);
-            c0 = (c0/Fr + T0)* Constants.halfLightSpeed;
+            c0 = c0/Fr*Constants.halfLightSpeed + R0;
             AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c0);
 
             coefElem = srgrListElem.getElementAt(1);

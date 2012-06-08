@@ -247,9 +247,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             checkUserInput();
 
-            getMetadata();
-
             getSourceImageDimension();
+
+            getMetadata();
 
             getTiePointGrid();
 
@@ -334,9 +334,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             saveLocalIncidenceAngle = true;
         }
 
-        if (saveIncidenceAngleFromEllipsoid) {
-            incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        }
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
     }
 
     private void getTiePointGrid() {
@@ -414,20 +412,15 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        nearRangeOnLeft = isNearRangeOnLeft(mission, absRoot);
+        nearRangeOnLeft = isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
 
         isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
 
-    public static boolean isNearRangeOnLeft(final String mission, final MetadataElement absRoot) {
-        // temp fix for descending Radarsat2
-        if (mission.equals("RS2")) {
-            final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
-            if (pass.contains("DESCENDING")) {
-                return false;
-            }
-        }
-        return true;
+    public static boolean isNearRangeOnLeft(final TiePointGrid incidenceAngle, final int sourceImageWidth) {
+        final double incidenceAngleToFirstPixel = incidenceAngle.getPixelDouble(0, 0);
+        final double incidenceAngleToLastPixel = incidenceAngle.getPixelDouble(sourceImageWidth-1, 0);
+        return (incidenceAngleToFirstPixel < incidenceAngleToLastPixel);
     }
 
     /**
@@ -437,12 +430,14 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static String getMissionType(final MetadataElement absRoot) {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        final String sample = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-        if (mission.equals("ALOS") && !(sample.equals("COMPLEX"))) {
-            throw new OperatorException("Detected ALOS PALSAR products are currently not supported");
+        if (mission.equals("ALOS")) {
+            final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE).toUpperCase();
+            if(!productType.contains("1.1"))
+                throw new OperatorException("Detected ALOS PALSAR products are currently not supported");
         }
 
         if (mission.contains("TSX") || mission.contains("TDX")) {
+            final String sample = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
             final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE).toUpperCase();
             if(!(sample.equals("COMPLEX") || productType.contains("SSC"))) {
                  throw new OperatorException("Only TerraSAR-X (SSC) products are currently supported");
@@ -865,12 +860,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
+
         try {
             float[][] localDEM = new float[h+2][w+2];
             if(useAvgSceneHeight) {
                 DEMFactory.fillDEM(localDEM, (float)avgSceneHeight);
             } else {
-                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, targetGeoCoding, x0, y0, w, h, localDEM);
+                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, x0, y0, w, h, localDEM);
                 if(!valid && nodataValueAtSea)
                     return;
             }
@@ -921,10 +918,11 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.bandPolar = OperatorUtils.getBandPolarization(srcBands[0].getName(), absRoot);
                 trgTileList.add(td);
             }
-            final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
             final int maxY = y0 + h;
             final int maxX = x0 + w;
+            final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
+
             for (int y = y0; y < maxY; y++) {
                 final int yy = y-y0+1;
 
@@ -957,7 +955,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         alt = EarthGravitationalModel96.instance().getEGM(lat, lon);
                     }
 
-                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
+                    GeoUtils.geo2xyzWGS84(lat, lon, alt, earthPoint);
 
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(sourceImageHeight, firstLineUTC,
                             lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
@@ -972,40 +970,33 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     double azimuthIndex = 0.0;
                     double rangeIndex = 0.0;
-                    if (mission.contains("CSKS") || mission.contains("TSX") || mission.equals("RS2")) {
-
+                    double zeroDoppler = zeroDopplerTime;
+                    if (!mission.contains("CSKS") && !mission.contains("TSX") && !mission.equals("RS2")) {
                         // skip bistatic correction for COSMO, TerraSAR-X and RadarSAT-2
-                        azimuthIndex = (zeroDopplerTime - firstLineUTC) / lineTimeInterval;
-                        rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
-                                rangeSpacing, zeroDopplerTime, slantRange, nearEdgeSlantRange, srgrConvParams);
-
-                    } else {
-
-                        final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
-
-                        azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
-
-                        slantRange = computeSlantRange(
-                                zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
-
-                        rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
-                                rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+                        zeroDoppler = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
                     }
+
+                    azimuthIndex = (zeroDoppler - firstLineUTC) / lineTimeInterval;
+
+                    slantRange = computeSlantRange(
+                            zeroDoppler, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
+                    rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                            rangeSpacing, zeroDoppler, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     // temp fix for descending Radarsat2
                     if (!nearRangeOnLeft) {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
-                            srcMaxRange, srcMaxAzimuth, sensorPos)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, tileGeoRef, srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
                         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
 
                             final LocalGeometry localGeometry = new LocalGeometry();
-                            setLocalGeometry(x, y, targetGeoCoding, earthPoint, sensorPos, localGeometry);
+                            setLocalGeometry(x, y, tileGeoRef, earthPoint, sensorPos, localGeometry);
 
                             computeLocalIncidenceAngle(
                                     localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
@@ -1065,8 +1056,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     public static boolean isValidCell(final double rangeIndex, final double azimuthIndex,
-                                final double lat, final double lon,
-                                final TiePointGrid latitude, final TiePointGrid longitude,
+                                final double lat, final double lon, final TileGeoreferencing tileGeoRef,
                                 final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
         if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
@@ -1074,7 +1064,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         final GeoPos sensorGeoPos = new GeoPos();
-        GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
+        GeoUtils.xyz2geoWGS84(sensorPos, sensorGeoPos);
         final double delLatMax = Math.abs(lat - sensorGeoPos.lat);
         double delLonMax;
         if (lon < 0 && sensorGeoPos.lon > 0) {
@@ -1085,8 +1075,13 @@ public class RangeDopplerGeocodingOp extends Operator {
             delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
 
-        final double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        final double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
+        final GeoPos geoPos = new GeoPos();
+        tileGeoRef.getGeoPos((int)rangeIndex, (int)azimuthIndex, geoPos);
+
+        //final double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        //final double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
+        final double delLat = Math.abs(lat - geoPos.getLat());
+        final double srcLon = geoPos.getLon();
         double delLon;
         if (lon < 0 && srcLon > 0) {
             delLon = Math.min(Math.abs(360 + lon - srcLon), srcLon - lon);
@@ -1148,16 +1143,18 @@ public class RangeDopplerGeocodingOp extends Operator {
         while(upperBound - lowerBound > 1) {
 
             final int mid = (int)((lowerBound + upperBound)/2.0);
-            midFreq = getDopplerFrequency(
-                    mid, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
-            if (Double.compare(midFreq, 0.0) == 0) {
-                return firstLineUTC + mid*lineTimeInterval;
-            } else if (midFreq*lowerBoundFreq > 0.0) {
+            midFreq = sensorVelocity[mid][0]*(earthPoint[0] - sensorPosition[mid][0]) +
+                      sensorVelocity[mid][1]*(earthPoint[1] - sensorPosition[mid][1]) +
+                      sensorVelocity[mid][2]*(earthPoint[2] - sensorPosition[mid][2]);
+
+            if (midFreq*lowerBoundFreq > 0.0) {
                 lowerBound = mid;
                 lowerBoundFreq = midFreq;
             } else if (midFreq*upperBoundFreq > 0.0) {
                 upperBound = mid;
                 upperBoundFreq = midFreq;
+            } else if (Double.compare(midFreq, 0.0) == 0) {
+                return firstLineUTC + mid*lineTimeInterval;
             }
         }
 
@@ -1182,7 +1179,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         //if (y < 0 || y > sourceImageHeight - 1) {
         //    throw new OperatorException("Invalid range line index: " + y);
         //}
-        
+
         final double xDiff = earthPoint[0] - sensorPosition[y][0];
         final double yDiff = earthPoint[1] - sensorPosition[y][1];
         final double zDiff = earthPoint[2] - sensorPosition[y][2];
@@ -1610,36 +1607,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
-    public static void setLocalGeometry(final int x, final int y, final GeoCoding targetGeoCoding,
-                                        final double[] earthPoint, final double[] sensorPos,
-                                        final LocalGeometry localGeometry) {
-
-        final GeoPos geo = new GeoPos();
-        final PixelPos pix = new PixelPos();
-
-        pix.setLocation(x-1, y);
-        targetGeoCoding.getGeoPos(pix, geo);
-        localGeometry.leftPointLat  = geo.lat;
-        localGeometry.leftPointLon  = geo.lon;
-
-        pix.setLocation(x+1, y);
-        targetGeoCoding.getGeoPos(pix, geo);
-        localGeometry.rightPointLat = geo.lat;
-        localGeometry.rightPointLon = geo.lon;
-
-        pix.setLocation(x, y-1);
-        targetGeoCoding.getGeoPos(pix, geo);
-        localGeometry.upPointLat    = geo.lat;
-        localGeometry.upPointLon    = geo.lon;
-
-        pix.setLocation(x, y+1);
-        targetGeoCoding.getGeoPos(pix, geo);
-        localGeometry.downPointLat  = geo.lat;
-        localGeometry.downPointLon  = geo.lon;
-        localGeometry.centrePoint   = earthPoint;
-        localGeometry.sensorPos     = sensorPos;
-    }
-
     public static void setLocalGeometry(final int x, final int y, final TileGeoreferencing tileGeoRef,
                                         final double[] earthPoint, final double[] sensorPos,
                                         final LocalGeometry localGeometry) {
@@ -1720,10 +1687,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         final double[] upPoint = new double[3];
         final double[] downPoint = new double[3];
 
-        GeoUtils.geo2xyz(lg.rightPointLat, lg.rightPointLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lg.leftPointLat, lg.leftPointLon, leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lg.upPointLat, lg.upPointLon, upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lg.downPointLat, lg.downPointLon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyzWGS84(lg.rightPointLat, lg.rightPointLon, rightPointHeight, rightPoint);
+        GeoUtils.geo2xyzWGS84(lg.leftPointLat, lg.leftPointLon, leftPointHeight, leftPoint);
+        GeoUtils.geo2xyzWGS84(lg.upPointLat, lg.upPointLon, upPointHeight, upPoint);
+        GeoUtils.geo2xyzWGS84(lg.downPointLat, lg.downPointLon, downPointHeight, downPoint);
 
         final double[] a = {rightPoint[0] - leftPoint[0], rightPoint[1] - leftPoint[1], rightPoint[2] - leftPoint[2]};
         final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};

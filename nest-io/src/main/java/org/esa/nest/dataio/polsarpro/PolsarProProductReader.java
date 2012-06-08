@@ -86,9 +86,13 @@ public class PolsarProProductReader extends NestEnviProductReader {
         if(mainHeader == null)
             throw new IOException("Unable to read files");
 
-        final String productName;
+        String productName;
         if(inputFile.isDirectory()) {
             productName = inputFile.getName();
+            if(productName.equalsIgnoreCase("T3") || productName.equalsIgnoreCase("C3") ||
+               productName.equalsIgnoreCase("T4") || productName.equalsIgnoreCase("C4")) {
+                productName = inputFile.getParentFile().getName() + "_"+productName;
+            }
         } else {
             final String headerFileName = mainHeaderFile.getName();
             productName = headerFileName.substring(0, headerFileName.indexOf('.'));

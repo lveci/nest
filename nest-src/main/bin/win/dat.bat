@@ -10,7 +10,7 @@ IF [%NEST_HOME:~-1%]==[\] set NEST_HOME=%NEST_HOME:~0,-1%
 "%NEST_HOME%\jre\bin\java.exe" ^
     -server -Xmx850M -Xverify:none ^
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000 ^
-    -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache -XX:+UseCompressedStrings ^
+    -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache ^
     -Dceres.context=nest ^
     -Dnest.debug=false ^
     -Dnest.consoleLog=true ^

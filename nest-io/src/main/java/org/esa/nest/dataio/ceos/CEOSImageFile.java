@@ -62,6 +62,10 @@ public abstract class CEOSImageFile {
         return _imageFDR.getAttributeInt("Number of bits per sample");
     }
 
+    public int getSamplesPerDataGroup() {
+        return _imageFDR.getAttributeInt("Number of samples per data group");
+    }
+
     protected abstract BinaryRecord createNewImageRecord(final int line) throws IOException;
 
     BinaryRecord getImageRecord(int line) throws IOException {
@@ -338,18 +342,14 @@ public abstract class CEOSImageFile {
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
                                       final int destWidth, final ProductData destBuffer, boolean oneOf2,
-                                      ProgressMonitor pm) throws IOException {
+                                      final int elemSize) throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
+        final int x = sourceOffsetX * elemSize;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
-        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth * 2];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
-                if (pm.isCanceled()) {
-                    break;
-                }
 
                 /*
                 synchronized (binaryReader) {
@@ -388,12 +388,9 @@ public abstract class CEOSImageFile {
                 else
                     copyLine2Of2(srcLine, destBuffer, currentLineIndex, sourceStepX);
 
-                pm.worked(1);
             }
         } catch(Throwable e) {
             System.out.println(e.getMessage());
-        } finally {
-            pm.done();
         }
     }
 

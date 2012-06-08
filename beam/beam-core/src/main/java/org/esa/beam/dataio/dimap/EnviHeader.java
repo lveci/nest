@@ -86,7 +86,31 @@ public class EnviHeader {
         writeFileType(out);
         writeDataType(out, rasterDataNode.getDataType());
         writeInterleave(out);
-        writeByteOrder(out);
+        writeByteOrder(out, _enviMSFOrder);
+        writeBandNames(out, rasterDataNode);
+        writeMapProjectionInfo(out, rasterDataNode);
+        writeWavelength(out, rasterDataNode);
+        writeScalingFactor(out, rasterDataNode);
+        writeScalingOffset(out, rasterDataNode);
+        out.close();
+    }
+
+    public static void createPhysicalFile(File headerFile,
+                                          RasterDataNode rasterDataNode,
+                                          int width,
+                                          int height,
+                                          int byteorder) throws IOException {
+        FileWriter fileWriter = new FileWriter(headerFile);
+        PrintWriter out = new PrintWriter(fileWriter);
+        writeFileMagic(out);
+        writedescription(out, rasterDataNode);
+        writeBandSize(out, width, height);
+        writeNumBands(out);
+        writeHeaderOffset(out);
+        writeFileType(out);
+        writeDataType(out, rasterDataNode.getDataType());
+        writeInterleave(out);
+        writeByteOrder(out, byteorder);
         writeBandNames(out, rasterDataNode);
         writeMapProjectionInfo(out, rasterDataNode);
         writeWavelength(out, rasterDataNode);
@@ -262,10 +286,10 @@ public class EnviHeader {
      *
      * @param out the stream to write to
      */
-    private static void writeByteOrder(PrintWriter out) {
+    private static void writeByteOrder(PrintWriter out, int order) {
         out.print(_enviByteOrderTag);
         out.print(" = ");
-        out.println(_enviMSFOrder);
+        out.println(order);
     }
 
     /**
@@ -305,6 +329,9 @@ public class EnviHeader {
             } else if(crsName.contains("UTM")) {
                 mapProjectionName = "UTM";
                 String zoneStr = crsName.substring(crsName.indexOf("Zone")+5, crsName.indexOf('/')).trim();
+                if(zoneStr.contains(",")) {
+                    zoneStr = zoneStr.substring(0, zoneStr.indexOf(','));
+                }
                 utmZone = Integer.parseInt(zoneStr);
 
                 GeoPos centrePos = crsGeoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth()/2,

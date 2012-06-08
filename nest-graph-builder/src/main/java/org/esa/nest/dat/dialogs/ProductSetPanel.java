@@ -258,6 +258,14 @@ public class ProductSetPanel extends JPanel {
         return null;
     }
 
+    public String getTargetFormat() {
+        if(targetProductSelector != null) {
+            final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
+            return targetProductSelectorModel.getFormatName();
+        }
+        return null;
+    }
+
     public void setTargetFolder(final File path) {
         if(targetProductSelector != null) {
             final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();

@@ -43,16 +43,6 @@ public final class GeoUtils
 
     /**
      * Convert geodetic coordinate into cartesian XYZ coordinate with specified geodetic system.
-     * @param geoPos The geodetic coordinate of a given pixel.
-     * @param xyz The xyz coordinates of the given pixel.
-     * @param geoSystem The geodetic system.
-     */
-    public static void geo2xyz(final GeoPos geoPos, final double xyz[], final EarthModel geoSystem) {
-        geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, geoSystem);
-    }
-
-    /**
-     * Convert geodetic coordinate into cartesian XYZ coordinate with specified geodetic system.
      * @param latitude The latitude of a given pixel (in degree).
      * @param longitude The longitude of the given pixel (in degree).
      * @param altitude The altitude of the given pixel (in m)
@@ -92,12 +82,35 @@ public final class GeoUtils
     }
 
     /**
+     * Convert geodetic coordinate into cartesian XYZ coordinate with specified geodetic system.
+     * @param latitude The latitude of a given pixel (in degree).
+     * @param longitude The longitude of the given pixel (in degree).
+     * @param altitude The altitude of the given pixel (in m)
+     * @param xyz The xyz coordinates of the given pixel.
+     */
+    public static void geo2xyzWGS84(final double latitude, final double longitude, final double altitude,
+                                    final double xyz[]) {
+
+        final double lat = latitude * org.esa.beam.util.math.MathUtils.DTOR;
+        final double lon = longitude * org.esa.beam.util.math.MathUtils.DTOR;
+
+        final double sinLat = FastMath.sin(lat);
+        final double cosLat = FastMath.cos(lat);
+        final double N = (WGS84.a / Math.sqrt(1 - WGS84.e2*sinLat*sinLat)) + altitude;
+        final double NcosLat = N * cosLat;
+
+        xyz[0] = NcosLat * FastMath.cos(lon); // in m
+        xyz[1] = NcosLat * FastMath.sin(lon); // in m
+        xyz[2] = WGS84.e2inv * N * sinLat;    // in m
+    }
+
+    /**
      * Convert cartesian XYZ coordinate into geodetic coordinate (WGS84 geodetic system is used).
      * @param xyz The xyz coordinate of the given pixel.
      * @param geoPos The geodetic coordinate of the given pixel.
      */
     public static void xyz2geo(final double xyz[], final GeoPos geoPos) {
-        xyz2geo(xyz, geoPos, EarthModel.WGS84);
+        xyz2geoWGS84(xyz, geoPos);
     }
 
     /**
@@ -148,6 +161,32 @@ public final class GeoUtils
         geoPos.lat = (float)(FastMath.atan((z + ep2*b*FastMath.pow(FastMath.sin(theta), 3)) /
                                        (s - e2*a*FastMath.pow(FastMath.cos(theta), 3))) *
                                        org.esa.beam.util.math.MathUtils.RTOD);
+    }
+
+    /**
+     * Convert cartesian XYZ coordinate into geodetic coordinate with specified geodetic system.
+     * @param xyz The xyz coordinate of the given pixel.
+     * @param geoPos The geodetic coordinate of the given pixel.
+     */
+    public static void xyz2geoWGS84(final double xyz[], final GeoPos geoPos) {
+
+        final double x = xyz[0];
+        final double y = xyz[1];
+        final double z = xyz[2];
+        final double s = Math.sqrt(x*x + y*y);
+        final double theta = FastMath.atan(z*WGS84.a/(s*WGS84.b));
+
+        geoPos.lon = (float)(FastMath.atan(y/x) * org.esa.beam.util.math.MathUtils.RTOD);
+
+        if (geoPos.lon < 0.0 && y >= 0.0) {
+            geoPos.lon += 180.0;
+        } else if (geoPos.lon > 0.0 && y < 0.0) {
+            geoPos.lon -= 180.0;
+        }
+
+        geoPos.lat = (float)(FastMath.atan((z + WGS84.ep2*WGS84.b*FastMath.pow(FastMath.sin(theta), 3)) /
+                (s - WGS84.e2*WGS84.a*FastMath.pow(FastMath.cos(theta), 3))) *
+                org.esa.beam.util.math.MathUtils.RTOD);
     }
 
     /**
@@ -414,6 +453,7 @@ public final class GeoUtils
         public static final double b = 6356752.314245; // m
         public static final double earthFlatCoef = 298.257223563;
         public static final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
+        public static final double e2inv = 1 - WGS84.e2;
         public static final double ep2 = e2 / (1 - e2);
     }
 

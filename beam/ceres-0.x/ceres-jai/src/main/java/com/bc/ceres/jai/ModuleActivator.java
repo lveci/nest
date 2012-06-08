@@ -48,13 +48,13 @@ public class ModuleActivator implements Activator {
     }
 
     private void register(String descriptorName, RegistryElementDescriptor descriptor, RenderedImageFactory rif) {
-        try {
-            final OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
-            registry.registerDescriptor(descriptor);
-            registry.registerFactory(RenderedRegistryMode.MODE_NAME, descriptorName, "com.bc.ceres.jai", rif);
-        } catch(Throwable t) {
-            //System.out.println(t.getMessage());
+        final OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
+        final RegistryElementDescriptor oldOne = registry.getDescriptor(RenderedRegistryMode.MODE_NAME, descriptorName);
+        if (oldOne != null) {
+            registry.unregisterDescriptor(oldOne);
         }
+        registry.registerDescriptor(descriptor);
+        registry.registerFactory(RenderedRegistryMode.MODE_NAME, descriptorName, "com.bc.ceres.jai", rif);
     }
 
     @Override

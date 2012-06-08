@@ -64,10 +64,13 @@ public class PrareOrbitFile extends BaseOrbitFile {
         
         // construct path to the orbit file folder
         String orbitPath = "";
+        String remoteBaseFolder = "";
         if(mission.equals("ERS1")) {
             orbitPath = Settings.instance().get("OrbitFiles/prareERS1OrbitPath");
+            remoteBaseFolder = Settings.instance().get("OrbitFiles/prareFTP_ERS1_remotePath");
         } else if(mission.equals("ERS2")) {
             orbitPath = Settings.instance().get("OrbitFiles/prareERS2OrbitPath");
+            remoteBaseFolder = Settings.instance().get("OrbitFiles/prareFTP_ERS2_remotePath");
         }
 
         // get product start time
@@ -83,7 +86,7 @@ public class PrareOrbitFile extends BaseOrbitFile {
         // find orbit file in the folder
         orbitFile = FindPrareOrbitFile(prareReader, localPath, startMJD);
         if(orbitFile == null) {
-            final String remotePath = "/orbprc/"+mission + '/' + folder;
+            final String remotePath = remoteBaseFolder +'/'+ folder;
             getRemotePrareFiles(remotePath, localPath, getPrefix(year, month));
             // find again in newly downloaded folder
             orbitFile = FindPrareOrbitFile(prareReader, localPath, startMJD);
@@ -95,7 +98,7 @@ public class PrareOrbitFile extends BaseOrbitFile {
         }
 
         if(orbitFile == null) {
-            throw new IOException("Unable to find suitable orbit file \n"+orbitPath);
+            throw new IOException("Unable to find suitable orbit file \n"+orbitPath+"\nPlease check your firewall settings");
         }
     }
 
@@ -115,7 +118,9 @@ public class PrareOrbitFile extends BaseOrbitFile {
         final String prareFTP = Settings.instance().get("OrbitFiles/prareFTP");
         try {
             if(ftp == null) {
-                ftp = new ftpUtils(prareFTP, "dpafftp", "sunshine");
+                final String user = Settings.instance().get("OrbitFiles/prareFTP_user");
+                final String pass = Settings.instance().get("OrbitFiles/prareFTP_pass");
+                ftp = new ftpUtils(prareFTP, user, pass);
                 final Map<String, Long> allfileSizeMap = ftpUtils.readRemoteFileList(ftp, prareFTP, remotePath);
                 fileSizeMap = new HashMap<String, Long>(10);
 

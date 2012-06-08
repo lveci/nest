@@ -23,8 +23,8 @@ import java.util.Map;
  */
 public class EnviProductWriter extends AbstractProductWriter {
 
-    private File _outputDir;
-    private File _outputFile;
+    protected File _outputDir;
+    protected File _outputFile;
     private Map _bandOutputStreams;
     private boolean _incremental = true;
 
@@ -70,7 +70,7 @@ public class EnviProductWriter extends AbstractProductWriter {
      *
      * @param outputFile the dimap header file location.
      */
-    void initDirs(final File outputFile) {
+    protected void initDirs(final File outputFile) {
         final String name = FileUtils.getFilenameWithoutExtension(outputFile);          
         _outputDir = outputFile.getParentFile();
         if (_outputDir == null) {
@@ -81,7 +81,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         _outputFile = new File(_outputDir, outputFile.getName());
     }
 
-    private void ensureNamingConvention() {
+    protected void ensureNamingConvention() {
         if (_outputFile != null) {
             getSourceProduct().setName(FileUtils.getFilenameWithoutExtension(_outputFile));
         }
@@ -202,7 +202,7 @@ public class EnviProductWriter extends AbstractProductWriter {
      * right size. Also ensures a recreate if the file not exists or the file have a different file size. A new envi
      * header file was written every call.
      */
-    private File getValidImageFile(Band band) throws IOException {
+    protected File getValidImageFile(Band band) throws IOException {
         writeEnviHeader(band); // always (re-)write ENVI header
         final File file = getImageFile(band);
         if (file.exists()) {
@@ -219,14 +219,14 @@ public class EnviProductWriter extends AbstractProductWriter {
         createPhysicalFile(file, getImageFileSize(band));
     }
 
-    private void writeEnviHeader(Band band) throws IOException {
+    protected void writeEnviHeader(Band band) throws IOException {
         EnviHeader.createPhysicalFile(getEnviHeaderFile(band),
                                       band,
                                       band.getRasterWidth(),
                                       band.getRasterHeight());
     }
 
-    private ImageOutputStream createImageOutputStream(Band band) throws IOException {
+    protected ImageOutputStream createImageOutputStream(Band band) throws IOException {
         return new FileImageOutputStreamExtImpl(getValidImageFile(band));
     }
 
@@ -236,11 +236,11 @@ public class EnviProductWriter extends AbstractProductWriter {
                 (long) band.getRasterHeight();
     }
 
-    private File getEnviHeaderFile(Band band) {
+    protected File getEnviHeaderFile(Band band) {
         return new File(_outputDir, createEnviHeaderFilename(band));
     }
 
-    private static String createEnviHeaderFilename(Band band) {
+    protected String createEnviHeaderFilename(Band band) {
         return band.getName() + EnviHeader.FILE_EXTENSION;
     }
 

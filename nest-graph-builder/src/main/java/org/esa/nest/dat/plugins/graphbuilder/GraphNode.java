@@ -95,10 +95,12 @@ public class GraphNode {
                 if(child.getChildCount() == 0) {
                     final Converter converter = getConverter(valueContainer, name);
                     if(converter == null) {
-                        throw new IllegalArgumentException("Graph parameter "+name+
-                                " not found for Operator "+operatorSpi.getOperatorAlias());
+                        final String msg = "Graph parameter "+name+" not found for Operator "+operatorSpi.getOperatorAlias();
+                        //throw new IllegalArgumentException(msg);
+                        System.out.println(msg);
+                    } else {
+                        parameterMap.put(name, converter.parse(value));
                     }
-                    parameterMap.put(name, converter.parse(value));
                 } else {
                     final Converter converter = getConverter(valueContainer, name);
                     final Object[] objArray = new Object[child.getChildCount()];
