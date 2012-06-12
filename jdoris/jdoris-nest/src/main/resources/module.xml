@@ -2,7 +2,7 @@
 
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>jdoris-nest</symbolicName>
-    <version>0.2</version>
+    <version>0.3</version>
     <name>NEST-DORIS Operators</name>
     <description>NEST-DORIS InSAR operators</description>
 
@@ -109,8 +109,8 @@
         <action>
             <id>Slant2HeightOp</id>
             <class>org.jdoris.nest.dat.Slant2HeightAction</class>
-            <text>Slant to height conversion</text>
-            <shortDescr>Slant to height conversion</shortDescr>
+            <text>Phase to height conversion</text>
+            <shortDescr>Phase to height conversion</shortDescr>
             <placeAfter>DInSAROp</placeAfter>
             <parent>products</parent>
         </action>
@@ -148,7 +148,8 @@
             <helpId>InSARMaster</helpId>
             <class>org.jdoris.nest.dat.InSARMasterAction</class>
             <parent>insar</parent>
-            <text>Find Optimal Master</text>
+            <text>InSAR Stack Overview</text>
+            <separatorAfter>true</separatorAfter>
         </action>
 
         <!--/// UNWRAPPING ///-->

@@ -14,10 +14,11 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.nest.gpf.ReaderUtils;
+import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.jblas.ComplexDoubleMatrix;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
@@ -36,6 +37,7 @@ import org.jdoris.nest.utils.ProductContainer;
 import org.jdoris.nest.utils.TileUtilsDoris;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,23 +67,23 @@ public final class SubtRefDemOp extends Operator {
             label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(label = "External DEM")
+    private File externalDEMFile = null;
+
+    @Parameter(label = "DEM No Data Value", defaultValue = "0")
+    private double externalDEMNoDataValue = 0;
+
     @Parameter(description = "The topographic phase band name.",
             defaultValue = "topo_phase",
             label = "Topo Phase Band Name")
     private String topoPhaseBandName = "topo_phase";
 
-    // TODO: support for external DEMs
-    // @Parameter(description = "The external DEM file.", defaultValue = " ", label = "External DEM")
-    // private String externalDEM = " ";
-
-    // private FileElevationModel fileElevationModel = null;
     private ElevationModel dem = null;
     private float demNoDataValue = 0;
     private double demSampling;
 
     // source maps
     private HashMap<Integer, CplxContainer> masterMap = new HashMap<Integer, CplxContainer>();
-
     private HashMap<Integer, CplxContainer> slaveMap = new HashMap<Integer, CplxContainer>();
 
     // target maps
@@ -137,13 +139,22 @@ public final class SubtRefDemOp extends Operator {
         }
 
         Resampling resampling = Resampling.BILINEAR_INTERPOLATION;
-        dem = demDescriptor.createDem(resampling);
 
-        if (dem == null)
-            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+        if (externalDEMFile != null) { // if external DEM file is specified by user
+            dem = new FileElevationModel(externalDEMFile, resampling, (float) externalDEMNoDataValue);
 
-        demNoDataValue = demDescriptor.getNoDataValue();
-        demSampling = demDescriptor.getDegreeRes() * (1.0f / demDescriptor.getPixelRes()) * Constants.DTOR;
+            demNoDataValue = (float) externalDEMNoDataValue;
+            demName = externalDEMFile.getPath();
+
+        } else {
+            dem = demDescriptor.createDem(resampling);
+            if (dem == null)
+                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+
+            demNoDataValue = demDescriptor.getNoDataValue();
+            demSampling = demDescriptor.getDegreeRes() * (1.0f / demDescriptor.getPixelRes()) * Constants.DTOR;
+        }
+
 
     }
 
@@ -357,8 +368,8 @@ public final class SubtRefDemOp extends Operator {
 
                 // compute tile geo-corners ~ work on ellipsoid
                 GeoPos[] geoCorners = GeoUtils.computeCorners(product.sourceMaster.metaData,
-                                                              product.sourceMaster.orbit,
-                                                              tileWindow);
+                        product.sourceMaster.orbit,
+                        tileWindow);
 
                 // get corners as DEM indices
                 PixelPos[] pixelCorners = new PixelPos[2];
@@ -369,7 +380,7 @@ public final class SubtRefDemOp extends Operator {
                 double[] tileHeights = computeMaxHeight(pixelCorners, targetRectangle);
 
                 // compute extra lat/lon for dem tile
-                GeoPos geoExtent = GeoUtils.defineExtraPhiLam(tileHeights[0],tileHeights[1],
+                GeoPos geoExtent = GeoUtils.defineExtraPhiLam(tileHeights[0], tileHeights[1],
                         tileWindow, product.sourceMaster.metaData, product.sourceMaster.orbit);
 
                 // extend corners
@@ -397,7 +408,7 @@ public final class SubtRefDemOp extends Operator {
                     for (int x = startX, j = 0; x < endX; x++, j++) {
                         try {
                             float elev = dem.getSample(x, y);
-                            if(Float.isNaN(elev))
+                            if (Float.isNaN(elev))
                                 elev = demNoDataValue;
                             elevation[i][j] = elev;
                         } catch (Exception e) {

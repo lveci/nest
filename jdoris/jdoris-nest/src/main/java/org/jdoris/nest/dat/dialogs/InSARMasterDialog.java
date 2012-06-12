@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,21 +35,24 @@ import java.util.Map;
  */
 public class InSARMasterDialog extends ModelessDialog {
 
+    DecimalFormat df = new DecimalFormat("0.00");
+
     private boolean ok = false;
 
     private final InSARFileModel outputFileModel = new InSARFileModel();
-    private final ProductSetPanel inputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Input");
-    private final ProductSetPanel outputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Results", outputFileModel);
+    private final ProductSetPanel inputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Input stack");
+    private final ProductSetPanel outputProductListPanel = new ProductSetPanel(VisatApp.getApp(), "Overview", outputFileModel);
 
     private final Map<SLCImage, File> slcFileMap = new HashMap<SLCImage, File>(10);
 
     private JButton openBtn;
     private final JCheckBox searchDBCheckBox = new JCheckBox("Search Product Library");
 
-    public InSARMasterDialog() {
-        super(VisatApp.getApp().getMainFrame(), "Find Optimal InSAR Master", ModalDialog.ID_OK_CANCEL_HELP, null);
+    public InSARMasterDialog(String helpId) {
+//        super(VisatApp.getApp().getMainFrame(), "Stack Overview and Optimal InSAR Master Selection", ModalDialog.ID_OK_CANCEL_HELP, null);
+        super(VisatApp.getApp().getMainFrame(), "Stack Overview and Optimal InSAR Master Selection", ModalDialog.ID_OK_CANCEL_HELP, helpId);
 
-        getButton(ID_OK).setText("Search");
+        getButton(ID_OK).setText("Overview");
         getButton(ID_CANCEL).setText("Close");
 
         initContent();
@@ -64,9 +68,9 @@ public class InSARMasterDialog extends ModelessDialog {
             public void actionPerformed(final ActionEvent e) {
                 final Product[] products = VisatApp.getApp().getProductManager().getProducts();
                 final List<File> fileList = new ArrayList<File>(products.length);
-                for(Product prod : products) {
+                for (Product prod : products) {
                     final File file = prod.getFileLocation();
-                    if(file != null && file.exists()) {
+                    if (file != null && file.exists()) {
                         fileList.add(file);
                     }
                 }
@@ -79,7 +83,7 @@ public class InSARMasterDialog extends ModelessDialog {
         clearBtn.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                inputProductListPanel.setProductFileList(new File[] {});
+                inputProductListPanel.setProductFileList(new File[]{});
             }
         });
         buttonPanel1.add(clearBtn);
@@ -104,7 +108,7 @@ public class InSARMasterDialog extends ModelessDialog {
 
             public void actionPerformed(final ActionEvent e) {
                 File[] files = outputProductListPanel.getSelectedFiles();
-                if(files.length == 0)                      // default to get all files
+                if (files.length == 0)                      // default to get all files
                     files = outputProductListPanel.getFileList();
                 final ProductOpener opener = new ProductOpener(VisatApp.getApp());
                 opener.openProducts(files);
@@ -119,7 +123,7 @@ public class InSARMasterDialog extends ModelessDialog {
 
     private void validate() throws Exception {
         final File[] inputFiles = inputProductListPanel.getFileList();
-        if(inputFiles.length < 2) {
+        if (inputFiles.length < 2) {
             throw new Exception("Please select at least two SLC products");
         }
     }
@@ -132,7 +136,7 @@ public class InSARMasterDialog extends ModelessDialog {
 
             final MasterSelection.IfgStack[] ifgStack = findInSARProducts(inputFiles);
 
-            if(ifgStack == null) {
+            if (ifgStack == null) {
                 openBtn.setEnabled(false);
                 VisatApp.getApp().showWarningDialog("Optimal master not found");
             } else {
@@ -145,8 +149,8 @@ public class InSARMasterDialog extends ModelessDialog {
                 openBtn.setEnabled(true);
                 ok = true;
             }
-        } catch(Exception e) {
-            VisatApp.getApp().showErrorDialog("Error: "+e.getMessage());
+        } catch (Exception e) {
+            VisatApp.getApp().showErrorDialog("Error: " + e.getMessage());
         }
     }
 
@@ -157,46 +161,47 @@ public class InSARMasterDialog extends ModelessDialog {
     private void updateData(final MasterSelection.IfgPair[] slaveList, final int masterIndex) {
         outputFileModel.clear();
         final File mstFile = slcFileMap.get(slaveList[masterIndex].getMasterMetadata());
+        String test = df.format(slaveList[masterIndex].getCoherence());
         try {
             final Product productMst = ProductIO.readProduct(mstFile);
             final MetadataElement absRootMst = AbstractMetadata.getAbstractedMetadata(productMst);
-            final String[] mstValues = new String[] {
+            final String[] mstValues = new String[]{
                     productMst.getName(),
                     "Master",
                     OperatorUtils.getAcquisitionDate(absRootMst),
                     String.valueOf(absRootMst.getAttributeInt(AbstractMetadata.REL_ORBIT, 0)),
                     String.valueOf(absRootMst.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0)),
-                    String.valueOf(slaveList[masterIndex].getCoherence()),
-                    String.valueOf(slaveList[masterIndex].getPerpendicularBaseline()),
-                    String.valueOf(slaveList[masterIndex].getTemporalBaseline())
+                    String.valueOf(df.format(slaveList[masterIndex].getPerpendicularBaseline())),
+                    String.valueOf(df.format(slaveList[masterIndex].getTemporalBaseline())),
+                    String.valueOf(df.format(slaveList[masterIndex].getCoherence()))
             };
             outputFileModel.addFile(mstFile, mstValues);
-        } catch(Exception e) {
-            VisatApp.getApp().showErrorDialog("Unable to read "+mstFile.getName()+'\n'+e.getMessage());
+        } catch (Exception e) {
+            VisatApp.getApp().showErrorDialog("Unable to read " + mstFile.getName() + '\n' + e.getMessage());
         }
 
-        for(MasterSelection.IfgPair slave : slaveList) {
+        for (MasterSelection.IfgPair slave : slaveList) {
             final File slvFile = slcFileMap.get(slave.getSlaveMetadata());
-            if(!slvFile.equals(mstFile)) {
+            if (!slvFile.equals(mstFile)) {
                 try {
                     final Product product = ProductIO.readProduct(slvFile);
                     final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
 
-                    final String[] slvValues = new String[] {
+                    final String[] slvValues = new String[]{
                             product.getName(),
                             "Slave",
                             OperatorUtils.getAcquisitionDate(absRoot),
                             String.valueOf(absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0)),
                             String.valueOf(absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0)),
-                            String.valueOf(slave.getCoherence()),
-                            String.valueOf(slave.getPerpendicularBaseline()),
-                            String.valueOf(slave.getTemporalBaseline())
+                            String.valueOf(df.format(slave.getPerpendicularBaseline())),
+                            String.valueOf(df.format(slave.getTemporalBaseline())),
+                            String.valueOf(df.format(slave.getCoherence()))
                     };
                     outputFileModel.addFile(slvFile, slvValues);
-                } catch(Exception e) {
-                    VisatApp.getApp().showErrorDialog("Unable to read "+slvFile.getName()+'\n'+e.getMessage());
+                } catch (Exception e) {
+                    VisatApp.getApp().showErrorDialog("Unable to read " + slvFile.getName() + '\n' + e.getMessage());
                 }
-            } 
+            }
         }
     }
 
@@ -205,7 +210,7 @@ public class InSARMasterDialog extends ModelessDialog {
         final List<SLCImage> imgList = new ArrayList<SLCImage>(size);
         final List<Orbit> orbList = new ArrayList<Orbit>(size);
 
-        for(File file : inputFiles) {
+        for (File file : inputFiles) {
             try {
                 final Product product = ProductIO.readProduct(file);
                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
@@ -216,10 +221,10 @@ public class InSARMasterDialog extends ModelessDialog {
 
                 imgList.add(img);
                 orbList.add(orb);
-            } catch(IOException e) {
-                VisatApp.getApp().showErrorDialog("Error: unable to read "+file.getPath()+'\n'+e.getMessage());
-            } catch(Exception e) {
-                VisatApp.getApp().showErrorDialog("Error: "+file.getPath()+'\n'+e.getMessage());
+            } catch (IOException e) {
+                VisatApp.getApp().showErrorDialog("Error: unable to read " + file.getPath() + '\n' + e.getMessage());
+            } catch (Exception e) {
+                VisatApp.getApp().showErrorDialog("Error: " + file.getPath() + '\n' + e.getMessage());
             }
         }
 
@@ -231,16 +236,17 @@ public class InSARMasterDialog extends ModelessDialog {
                     dataStack);
             worker.executeWithBlocking();
 
-            return (MasterSelection.IfgStack[])worker.get();
+            return (MasterSelection.IfgStack[]) worker.get();
 
-        } catch(Throwable t) {
-            VisatApp.getApp().showErrorDialog("Error:"+t.getMessage());
+        } catch (Throwable t) {
+            VisatApp.getApp().showErrorDialog("Error:" + t.getMessage());
             return null;
         }
     }
 
     private static class Worker extends ProgressMonitorSwingWorker {
         private final OptimalMaster dataStack;
+
         Worker(final Component component, final String title,
                final OptimalMaster optimalMaster) {
             super(component, title);

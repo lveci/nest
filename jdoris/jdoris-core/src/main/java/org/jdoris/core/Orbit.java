@@ -151,6 +151,8 @@ public final class Orbit {
     // TODO: make generic so it can work with arrays of lines as well: see matlab implementation
     public Point lph2xyz(final double line, final double pixel, final double height, final SLCImage slcimage) throws Exception {
 
+        logger.setLevel(Level.OFF);
+
         Point satellitePosition;
         Point satelliteVelocity;
         Point ellipsoidPosition; // returned
@@ -199,9 +201,9 @@ public final class Orbit {
             ellipsoidPosition.y += ellipsoidPositionSolution[1];
             ellipsoidPosition.z += ellipsoidPositionSolution[2];
 
-            //logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
-            //logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
-            //logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
+            logger.debug("ellipsoidPosition.x = " + ellipsoidPosition.x);
+            logger.debug("ellipsoidPosition.y = " + ellipsoidPosition.y);
+            logger.debug("ellipsoidPosition.z = " + ellipsoidPosition.z);
 
             // check convergence
             if (Math.abs(ellipsoidPositionSolution[0]) < CRITERPOS &&
