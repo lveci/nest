@@ -16,6 +16,9 @@
             <tocitem text="Three-Pass DInSAR" target="DInSAROp"/>
             <tocitem text="Slant to Height" target="Slant2HeightOp"/>
             <tocitem text="Unwrapping in NEST" target="Unwrap"/>
+            <tocitem text="Snaphu Data Export" target="SnaphuExportOp"/>
+            <tocitem text="Snaphu Data Import" target="SnaphuImportOp"/>
+            <tocitem text="InSAR Stack Overview" target="InSARMaster"/>
 		</tocitem>
     </tocitem>
     

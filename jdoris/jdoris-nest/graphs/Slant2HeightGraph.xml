@@ -7,8 +7,8 @@
             <file>unwrapped_phase</file>
         </parameters>
     </node>
-    <node id="2-Slant2Height">
-        <operator>Slant2Height</operator>
+    <node id="2-Phase2Height">
+        <operator>Phase2Height</operator>
         <sources>
             <sourceProduct refid="1-Read"/>
         </sources>
@@ -23,7 +23,7 @@
     <node id="3-Write">
         <operator>Write</operator>
         <sources>
-            <sourceProduct refid="2-Slant2Height"/>
+            <sourceProduct refid="2-Phase2Height"/>
         </sources>
         <parameters>
             <formatName>BEAM-DIMAP</formatName>
@@ -35,7 +35,7 @@
         <node id="1-Read">
             <displayPosition y="133.0" x="70.0"/>
         </node>
-        <node id="2-Slant2Height">
+        <node id="2-Phase2Height">
             <displayPosition y="133.0" x="239.0"/>
         </node>
         <node id="3-Write">

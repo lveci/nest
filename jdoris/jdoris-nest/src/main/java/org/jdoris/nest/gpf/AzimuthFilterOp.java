@@ -14,9 +14,9 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.jblas.ComplexDoubleMatrix;
 import org.jdoris.core.Orbit;
 import org.jdoris.core.SLCImage;
@@ -31,6 +31,7 @@ import org.jdoris.nest.utils.TileUtilsDoris;
 import javax.media.jai.BorderExtender;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "AzimuthFilter",
@@ -63,19 +64,14 @@ public class AzimuthFilterOp extends Operator {
     private float alphaHamming = (float) 0.75;
 
     // source
-    private HashMap<Integer, CplxContainer> masterMap = new HashMap<Integer, CplxContainer>();
-    private HashMap<Integer, CplxContainer> slaveMap = new HashMap<Integer, CplxContainer>();
+    private LinkedHashMap<Integer, CplxContainer> masterMap = new LinkedHashMap<Integer, CplxContainer>();
+    private LinkedHashMap<Integer, CplxContainer> slaveMap = new LinkedHashMap<Integer, CplxContainer>();
 
     // target
-    private HashMap<String, ProductContainer> targetMap = new HashMap<String, ProductContainer>();
+    private LinkedHashMap<String, ProductContainer> targetMap = new LinkedHashMap<String, ProductContainer>();
 
     private static final int ORBIT_DEGREE = 3; // hardcoded
     private static final boolean CREATE_VIRTUAL_BAND = true;
-
-    private static int TILE_OVERLAP_X;
-    private static int TILE_OVERLAP_Y;
-    private static int TILE_EXTENT_X;
-    private static int TILE_EXTENT_Y;
 
     private static boolean doFilterMaster = true;
 
@@ -266,7 +262,6 @@ public class AzimuthFilterOp extends Operator {
         targetProduct.setPreferredTileSize(128,128);
         tileSizeX = targetProduct.getPreferredTileSize().width;
         tileSizeY = targetProduct.getPreferredTileSize().height;
-
 //        tileSizeX = sourceProduct.getPreferredTileSize().width;
 //        tileSizeY = sourceProduct.getPreferredTileSize().height;
 
@@ -366,10 +361,7 @@ public class AzimuthFilterOp extends Operator {
             final BorderExtender border = BorderExtender.createInstance(BorderExtender.BORDER_ZERO);
 
             // loop over ifg(product)Container : both master and slave defined in container
-            for (String ifgTag : targetMap.keySet()) {
-
-                // get ifgContainer from pool
-                final ProductContainer product = targetMap.get(ifgTag);
+            for (ProductContainer product : targetMap.values()) {
 
                 // check out from source
                 Tile tileRealMaster = getSourceTile(product.sourceMaster.realBand, rect, border);

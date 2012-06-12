@@ -47,7 +47,7 @@ public class InterferogramOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+    @Parameter(valueSet = {"1", "2", "3", "4", "5", "6", "7", "8"},
             description = "Order of 'Flat earth phase' polynomial",
             defaultValue = "5",
             label = "Degree of \"Flat Earth\" polynomial")
@@ -66,6 +66,9 @@ public class InterferogramOp extends Operator {
             label = "Orbit interpolation degree")
     private int orbitDegree = 3;
 
+    @Parameter(defaultValue="false", label="Do NOT subtract flat-earth phase from interferogram.")
+    private boolean doNotSubtract = false;
+
     // flat_earth_polynomial container
     private HashMap<String, DoubleMatrix> flatEarthPolyMap = new HashMap<String, DoubleMatrix>();
 
@@ -78,8 +81,8 @@ public class InterferogramOp extends Operator {
 
     // operator tags
     private static final boolean CREATE_VIRTUAL_BAND = true;
-    private static final String PRODUCT_NAME = "srp_ifgs";
-    public static final String PRODUCT_TAG = "ifg_srp";
+    private String productName;
+    public String productTag;
     private int sourceImageWidth;
     private int sourceImageHeight;
 
@@ -99,6 +102,15 @@ public class InterferogramOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
+
+            // rename product if no subtraction of the flat-earth phase
+            if (doNotSubtract) {
+                productName = "ifgs";
+                productTag = "ifg";
+            } else {
+                productName = "srp_ifgs";
+                productTag = "ifg_srp";
+            }
 
             checkUserInput();
 
@@ -121,7 +133,9 @@ public class InterferogramOp extends Operator {
 
             getSourceImageDimension();
 
-            constructFlatEarthPolynomials();
+            if (!doNotSubtract) {
+                constructFlatEarthPolynomials();
+            }
 
         } catch (Exception e) {
             throw new OperatorException(e);
@@ -166,8 +180,8 @@ public class InterferogramOp extends Operator {
                 final CplxContainer slave = slaveMap.get(keySlave);
                 final ProductContainer product = new ProductContainer(productName, master, slave, true);
 
-                product.targetBandName_I = "i_" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
-                product.targetBandName_Q = "q_" + PRODUCT_TAG + "_" + master.date + "_" + slave.date;
+                product.targetBandName_I = "i_" + productTag + "_" + master.date + "_" + slave.date;
+                product.targetBandName_Q = "q_" + productTag + "_" + master.date + "_" + slave.date;
 
                 // put ifg-product bands into map
                 targetMap.put(productName, product);
@@ -243,7 +257,7 @@ public class InterferogramOp extends Operator {
     private void createTargetProduct() {
 
         // construct target product
-        targetProduct = new Product(PRODUCT_NAME,
+        targetProduct = new Product(productName,
                 sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(),
                 sourceProduct.getSceneRasterHeight());
@@ -267,7 +281,7 @@ public class InterferogramOp extends Operator {
             final String tag0 = targetMap.get(key).sourceMaster.date;
             final String tag1 = targetMap.get(key).sourceSlave.date;
             if (CREATE_VIRTUAL_BAND) {
-                String countStr = "_" + PRODUCT_TAG + "_" + tag0 + "_" + tag1;
+                String countStr = "_" + productTag + "_" + tag0 + "_" + tag1;
                 ReaderUtils.createVirtualIntensityBand(targetProduct, targetProduct.getBand(targetBandName_I), targetProduct.getBand(targetBandName_Q), countStr);
                 ReaderUtils.createVirtualPhaseBand(targetProduct, targetProduct.getBand(targetBandName_I), targetProduct.getBand(targetBandName_Q), countStr);
             }
@@ -394,7 +408,8 @@ public class InterferogramOp extends Operator {
                 tileImag = getSourceTile(product.sourceSlave.imagBand, targetRectangle);
                 ComplexDoubleMatrix complexSlave = TileUtilsDoris.pullComplexDoubleMatrix(tileReal, tileImag);
 
-                if (srpPolynomialDegree > 0) {
+//                if (srpPolynomialDegree > 0) {
+                if (!doNotSubtract) {
 
                     // normalize range and azimuth axis
                     DoubleMatrix rangeAxisNormalized = DoubleMatrix.linspace(x0, xN, complexMaster.columns);

@@ -16,7 +16,8 @@
     <mapID target="DInSAROp" url="operators/DInSAROp.html"/>
     <mapID target="Slant2HeightOp" url="operators/Slant2HeightOp.html"/>
     <mapID target="Unwrap" url="operators/Unwrap.html"/>
-    <mapID target="SnaphuExportOp" url="operators/Unwrap.html"/>
-    <mapID target="SnaphuImportOp" url="operators/Unwrap.html"/>
+    <mapID target="SnaphuExportOp" url="operators/SnaphuExportOp.html"/>
+    <mapID target="SnaphuImportOp" url="operators/SnaphuImportOp.html"/>
+    <mapID target="InSARMaster" url="operators/InSARMaster.html"/>
 
 </map>
