@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
 import org.jblas.ComplexDoubleMatrix;
@@ -228,12 +229,18 @@ public class PhaseFilterOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
+        for (final Band band : targetProduct.getBands()) {
+            targetProduct.removeBand(band);
+        }
+
         for (String key : targetMap.keySet()) {
 
             String targetBandName_I = targetMap.get(key).targetBandName_I;
             String targetBandName_Q = targetMap.get(key).targetBandName_Q;
             targetProduct.addBand(targetBandName_I, ProductData.TYPE_FLOAT64);
+            targetProduct.getBand(targetBandName_I).setUnit(Unit.REAL);
             targetProduct.addBand(targetBandName_Q, ProductData.TYPE_FLOAT64);
+            targetProduct.getBand(targetBandName_Q).setUnit(Unit.IMAGINARY);
 
             final String tag0 = targetMap.get(key).sourceMaster.date;
             final String tag1 = targetMap.get(key).sourceSlave.date;
