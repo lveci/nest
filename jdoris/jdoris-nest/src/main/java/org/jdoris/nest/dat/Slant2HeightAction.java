@@ -13,7 +13,7 @@ public class Slant2HeightAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         final GraphBuilderDialog dialog = new GraphBuilderDialog(VisatApp.getApp(),
-                "Slant to height conversion", "Slant2HeightOp", false);
+                "Phase to height conversion", "Slant2HeightOp", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

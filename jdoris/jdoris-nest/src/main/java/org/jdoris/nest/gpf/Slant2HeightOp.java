@@ -29,9 +29,9 @@ import org.jdoris.nest.utils.TileUtilsDoris;
 import java.awt.*;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "Slant2Height",
+@OperatorMetadata(alias = "Phase2Height",//"Slant2Height",
         category = "InSAR\\Products",
-        description = "Slant to Height conversion",
+        description = "Phase to Height conversion",
         internal = false)
 public class Slant2HeightOp extends Operator {
 

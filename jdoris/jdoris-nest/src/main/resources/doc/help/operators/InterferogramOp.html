@@ -1,14 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>Help - Interferogram formation</title>
+<html>
+<head><title>Help - Interferogram formation</title>
 
-    <link rel="stylesheet" href="../style.css"></head>
+    <link rel="stylesheet" href="../style.css">
+</head>
 
 <body>
 <table class="header">
     <tbody>
     <tr class="header">
         <td class="header">&nbsp; Interferogram formation (InSAR operator)</td>
-        <td class="header" align="right"><a href="../general/Overview.html"><img src="../images/HeaderLogo.jpg" border="0"></a></td>
+        <td class="header" align="right"><a href="../general/Overview.html"><img src="../images/HeaderLogo.jpg"
+                                                                                 border="0"></a></td>
     </tr>
     </tbody>
 </table>
@@ -17,8 +20,7 @@
 <p>
     This operator computes (complex) interferogram, with or without subtraction
     of the flat-earth (reference) phase. The reference phase is subtracted using a
-    2d-polynomial that is also estimated in this operator. It is
-    not subtracted if the number of coefficients for the flat-earth polynomial is set to 0.
+    2d-polynomial that is also estimated in this operator.
 </p>
 
 <p>
@@ -54,6 +56,14 @@
     Of course the resolution decreases if multilooking is applied.
 </p>
 
+<p>
+    <b>Note:</b> The reference phase polynomial is not estimated nor subtracted from the computed interferogram, if the
+    flag for NOT performing the reference-phase estimation/subtraction is being marked. Note that if the subtraction of
+    the flat-earth is being skipped the formed interferogram will still have the fringes caused by the earth curvature,
+    and could hamper further interferometric processing and analysis. The intention of computing interferogram without
+    the reference-phase being subtracted is only for demonstration and educational purposes.
+</p>
+
 <h4>Operator parameters:</h4>&nbsp;&nbsp;
 The following parameters are used by this operator:
 <ol>
@@ -73,7 +83,10 @@ The following parameters are used by this operator:
         NOTE: It is not recommended to use a degree smaller
         than the maximum possible, except if it gets too large to avoid oscillations. However, depending on
         the temporal posting of the state vectors and their accuracy different interpolation strategies can
-        give better results.  
+        give better results.
+    </li>
+    <li>
+        Flag for skipping estimation and subtraction of the reference-phase.
     </li>
 </ol>
 
@@ -86,4 +99,5 @@ The following parameters are used by this operator:
 <br>
 <br>
 <hr>
-</body></html>
+</body>
+</html>
