@@ -50,6 +50,7 @@
 	<mapID target="importNetCDF" url="readers/ImportNetCDF.html"/>
 	<mapID target="importHDF" url="readers/ImportHDF.html"/>
 	<mapID target="importGenericBinary" url="readers/ImportGenericBinary.html"/>
+	<mapID target="importComplexGenericBinary" url="readers/ImportComplexGenericBinary.html"/>
 	<mapID target="importDimapProduct" url="readers/BeamDimapFormat.html"/>
 	<mapID target="ImportEnvi" url="readers/ImportEnvi.html"/>
 	<!-- Multispectral -->
