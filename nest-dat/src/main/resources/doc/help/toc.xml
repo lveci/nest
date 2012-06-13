@@ -54,6 +54,7 @@
 				<tocitem text="Open NetCDF Data Product" target="importNetCDF"/>
 				<tocitem text="Open HDF Data Product" target="importHDF"/>
 				<tocitem text="Open Generic Binary" target="importGenericBinary"/>
+				<tocitem text="Open Complex Generic Binary" target="importComplexGenericBinary"/>
 				<tocitem text="Open ENVI Data Product" target="ImportEnvi"/>
 				<tocitem text="Open GeoTIFF Data Product" target="ImportGeoTIFF"/>
 				<tocitem text="Open ImageIO Data Product" target="ImportImageIO"/>
