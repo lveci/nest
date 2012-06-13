@@ -148,7 +148,7 @@
         <action>
             <id>importGenericBinary</id>
             <class>org.esa.nest.dat.actions.GenericReaderAction</class>
-            <text>Open Generic Binary... (work in progress)</text>
+            <text>Open Generic Binary...</text>
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
@@ -159,7 +159,7 @@
         <action>
             <id>importComplexGenericBinary</id>
             <class>org.esa.nest.dat.actions.GenericComplexReaderAction</class>
-            <text>Open Complex Generic Binary... (totally work in progress)</text>
+            <text>Open Complex Generic Binary...</text>
             <formatName>Complex Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Complex Generic Binary</shortDescr>
