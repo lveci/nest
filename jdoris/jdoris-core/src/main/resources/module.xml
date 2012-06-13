@@ -2,7 +2,7 @@
 
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>jdoris-core</symbolicName>
-    <version>0.2</version>
+    <version>0.3</version>
     <name>jDoris Core Libs</name>
     <description>jDoris Core Libs</description>
 

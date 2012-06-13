@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,7 @@ import org.esa.beam.framework.ui.PixelPositionListener;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.AbstractVisatPlugIn;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.GraphicsUtils;
 
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -127,8 +128,9 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
                 if(prodNode != null) {
                     final String selectedNodeName = prodNode.getName();
                     final Band band = prod.getBand(selectedNodeName);
-                    if(band != null)
-                        valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
+                    if(band != null) {
+                        valueStatusBarItem.setText(GraphicsUtils.padString(band.getPixelString(pixelX, pixelY), 15));
+                    }
                 }
             } else {
                 dimensionStatusBarItem.setText(_EMPTYSTR);

@@ -10,7 +10,7 @@ if [ -z "$NEST_HOME" ]; then
 fi
 
 $NEST_HOME/jre/bin/java \
-    -server -Xms512M -Xmx1024M -Xverify:none \
+    -server -Xms512M -Xmx800M -Xverify:none \
     -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -XX:CompileThreshold=10000 \
     -XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLoopPredicate -XX:+UseStringCache \
     -Dceres.context=nest \

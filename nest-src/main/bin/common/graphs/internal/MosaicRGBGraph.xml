@@ -17,7 +17,7 @@
       </sourceBands>
       <resamplingMethod>BILINEAR_INTERPOLATION</resamplingMethod>
 	  <average>true</average>
-	  <normalizeByMean>false</normalizeByMean>
+	  <normalizeByMean>true</normalizeByMean>
 	  <gradientDomainMosaic>false</gradientDomainMosaic>
 	  <pixelSize>0</pixelSize>
       <sceneWidth>0</sceneWidth>

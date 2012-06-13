@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -47,7 +47,7 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField sceneHeight = new JTextField("");
     private final JTextField feather = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Weighted Average of Overlap");
-    private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalize By Mean");
+    private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalizer");
 
     private boolean changedByUser = false;
     private boolean average = false;
@@ -152,10 +152,10 @@ public class MosaicOpUI extends BaseOperatorUI {
         feather.setText(String.valueOf(featherVal));
 
         average = (Boolean)paramMap.get("average");
-        averageCheckBox.getModel().setPressed(average);
+        averageCheckBox.getModel().setSelected(average);
 
         normalizeByMean = (Boolean)paramMap.get("normalizeByMean");
-        normalizeByMeanCheckBox.getModel().setPressed(normalizeByMean);
+        normalizeByMeanCheckBox.getModel().setSelected(normalizeByMean);
 
     }
 

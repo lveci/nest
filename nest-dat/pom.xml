@@ -8,13 +8,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>4C-0.1</version>
+        <version>4C-1.0</version>
     </parent>
 
     <name>NEST Display and Analysis Tool</name>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-dat</artifactId>
-    <version>4C-0.1</version>
+    <version>4C-1.0</version>
 
     <packaging>jar</packaging>
 

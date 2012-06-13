@@ -1,10 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>Help - Mosaic</title>
 
+
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" href="../style.css">
-</head>
-<body>
+<link rel="stylesheet" href="../style.css"></head><body>
 <table class="header">
 <tbody>
 <tr class="header">
@@ -20,23 +19,29 @@ products therefore the geocoding needs to be very accurate. It is
 recommended that the source products be Terrain Corrected and
 Radiometric Corrected first.</p>
 <p></p>
-<div style="text-align: left;"><img style="width: 600px; height: 414px;" alt="" src="images/mosaic_dlg.jpg"><br>
+<div style="text-align: left;"><img style="width: 600px; height: 500px;" alt="" src="images/mosaic_dlg.jpg"><br>
 </div>
 <br>
 <br>
 <p>The following
-parameters are used by the Operator:
+parameters are used by the Operator:<br>
 </p>
+
 <ol>
-<li>
-<p> Source Bands: All bands (real or virtual) of the source
+  <li>Source Bands: All bands (real or virtual) of the source
 product. You may
 select one or more bands. If no bands are
-selected, then by default all bands will be processed.</p></li><li><p>Resampling Method: Choice of Nearest Neighbour, Bilinear or Cubic resampling.</p></li><li><p>Map Projection: You can select one of the supported map
-projections here. For
-a description of the available map-projections, please refer to the
-chapter Available Map Projections.</p></li><li>The output Scene Width and Height in pixels</li><li>Averaging and normalization options to blend overlapping pixels.</li>
-
+selected, then by default all bands will be processed.</li>
+  <li>Resampling Method: Choice of Nearest Neighbour, Bilinear, Cubic, Bi-Sinc or Bi-Cubic resampling.</li>
+  <li>Pixel Size (m): The output scene pixel spacing in meters.<br>
+  </li>
+  <li>Scene Width (pixels): The output scene width in pixels.</li>
+  <li>Scene Height (pixels): The output scene height in pixels.</li>
+  <li>Feather (pixels): The number of pixels skipped on the boundary of the source images.<br>
+  </li>
+  <li>Weight Average of Overlap: Averaging option to blend overlapping pixels. To achieve better mosaic result, the Normalizer checkbox below should be selected as well.<br>
+  </li>
+  <li>Normalizer: Normalization option to remove mean and normalize standard deviation.&nbsp;</li>
 </ol>
 <br><p>Below is an example of a mosaic of ASA_GM1 products that have
 been Terrain Corrected and Radiometric Corrected. Overlapping areas

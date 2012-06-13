@@ -30,7 +30,7 @@
     <name>BEAM-NEST Common API</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-nest-common</artifactId>
-	<version>4C-0.1</version>
+	<version>4C-1.0</version>
 
     <packaging>jar</packaging>
     <dependencies>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.esa.nest</groupId>
             <artifactId>nest-core</artifactId>
-			<version>4C-0.1</version>
+			<version>4C-1.0</version>
         </dependency>
     </dependencies>
 

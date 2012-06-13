@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -37,7 +37,7 @@ public final class AbstractMetadata {
     /**
      * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
      */
-    private static final String METADATA_VERSION = "4C-0.1";
+    private static final String METADATA_VERSION = "4C-1.0";
 
     public static final int NO_METADATA = 99999;
     //public static final short NO_METADATA_BYTE = 99;

@@ -43,4 +43,18 @@ public class GraphicsUtils {
         g.setColor(col);
         g.drawString(text, x, y);
     }
+
+    public static String padString(final String text, final int width) {
+        if(text.length() >= width)
+            return text;
+        final StringBuilder newText = new StringBuilder(width);
+        final int firstPos = width - text.length();
+        int i=0;
+        while(i <= firstPos) {
+            newText.append('0');
+            ++i;
+        }
+        newText.append(text);
+        return newText.toString();
+    }
 }

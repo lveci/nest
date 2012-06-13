@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -67,10 +67,10 @@ public class MosaicOp extends Operator {
     //@Parameter(description = "The coordinate reference system in well known text format", defaultValue="WGS84(DD)")
     //private String mapProjection = "WGS84(DD)";
 
-    @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
+    @Parameter(defaultValue = "true", description = "Average the overlapping areas", label = "Average Overlap")
     private boolean average = true;
-    @Parameter(defaultValue = "false", description = "Normalize by Mean", label = "Normalize by Mean")
-    private boolean normalizeByMean = false;
+    @Parameter(defaultValue = "true", description = "Normalize by Mean", label = "Normalize by Mean")
+    private boolean normalizeByMean = true;
 
     @Parameter(defaultValue = "0", description = "Pixel Size (m)", label = "Pixel Size (m)")
     private double pixelSize = 0;
@@ -410,13 +410,14 @@ public class MosaicOp extends Operator {
 
                     if (sourceRectangle != null) {
                         final Band srcBand = srcBandMap.get(srcProduct);
-                        double min = 0, max = 0, mean = 0;
+                        double min = 0, max = 0, mean = 0, std = 0;
                         if(normalizeByMean) {                  // get stat values
                             try {
                                 final Stx stats = srcBand.getStx();
                                 mean = stats.getMean();
                                 min = stats.getMin();
                                 max = stats.getMax();
+                                std = stats.getStandardDeviation();
                             } catch (Throwable e) {
                                 //OperatorUtils.catchOperatorException(getId(), e);
                                 normalizeByMean = false; // temporary disable
@@ -425,7 +426,7 @@ public class MosaicOp extends Operator {
 
                         final Tile srcTile = getSourceTile(srcBand, sourceRectangle);
                         if(srcTile != null) {
-                            validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean));
+                            validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean, std));
                         }
                     }
                     ++index;
@@ -451,18 +452,6 @@ public class MosaicOp extends Operator {
             float sample;
             final int maxY = targetRectangle.y + targetRectangle.height;
             final int maxX = targetRectangle.x + targetRectangle.width;
-
-            int cnt = 0;
-            double overalMean = 0;
-            if (normalizeByMean) {
-                double sum = 0;
-                for(SourceData srcDat : validSourceData) {
-                    sum += srcDat.srcMean;
-                    ++cnt;
-                }
-                overalMean = sum / cnt;
-            }
-
             final TileIndex trgIndex = new TileIndex(targetTile);
             final float[] sampleList = new float[validSourceData.size()];
             final int[] sampleDistanceList = new int[validSourceData.size()];
@@ -486,18 +475,23 @@ public class MosaicOp extends Operator {
                         if (!Float.isNaN(sample) && sample != srcDat.nodataValue && !MathUtils.equalValues(sample, 0.0F, 1e-4F)) {
 
                             if (normalizeByMean) {
-                                sample /= srcDat.srcMean;
+                                sample -= srcDat.srcMean;
+                                sample /= srcDat.srcStd;
                             }
 
                             targetVal = sample;
+
                             if (average) {
                                 sampleList[numSamples] = sample;
-                                sampleDistanceList[numSamples] = (int)Math.min(sourcePixelPos.x + 1,
-                                                                          srcDat.srcRasterWidth - sourcePixelPos.x);
+                                sampleDistanceList[numSamples] = (int)(Math.min(sourcePixelPos.x + 1,
+                                                                          srcDat.srcRasterWidth - sourcePixelPos.x)*
+                                                                       Math.min(sourcePixelPos.y + 1,
+                                                                          srcDat.srcRasterHeight - sourcePixelPos.y));
                                 numSamples++;
                             }
                         }
                     }
+
                     if(targetVal != 0) {
                         if (average && numSamples > 1) {
                             double sum = 0;
@@ -506,29 +500,9 @@ public class MosaicOp extends Operator {
                                 sum += sampleList[i]*sampleDistanceList[i];
                                 totalWeight += sampleDistanceList[i];
                             }
-                            /*
-                            final double localMean = sum / numSamples;
-
-                            double varSum = 0;
-                            for(Float f : sampleList) {
-                                final double diff = f-localMean;
-                                varSum += diff*diff;
-                            }
-
-                            final double stdDev = Math.sqrt(varSum/(numSamples-1));
-                            for(Float f : sampleList) {
-                                final double var = (f-localMean)*(f-localMean);
-                                if(var > stdDev && numSamples > 1) {
-                                    sum -= f;
-                                    --numSamples;
-                                }
-                            }
-                            */
                             targetVal = sum / totalWeight;
                         }
-                        if(normalizeByMean) {
-                            targetVal *= overalMean;
-                        }
+
                         trgBuffer.setElemDoubleAt(trgIndex.getIndex(x), targetVal);
                     }
                 }
@@ -598,10 +572,11 @@ public class MosaicOp extends Operator {
         final double srcMean;
         final double srcMax;
         final double srcMin;
+        final double srcStd;
 
         public SourceData(final Tile tile,
                           final PixelPos[] pixPos, final Resampling resampling,
-                          final double min, final double max, final double mean) {
+                          final double min, final double max, final double mean, final double std) {
             srcTile = tile;
             resamplingRaster = new ResamplingRaster(srcTile);
             resamplingIndex = resampling.createIndex();
@@ -614,6 +589,7 @@ public class MosaicOp extends Operator {
             srcMin = min;
             srcMax = max;
             srcMean = mean;
+            srcStd = std;
         }
     }
 

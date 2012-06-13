@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>4C-0.1</version>
+        <version>4C-1.0</version>
     </parent>
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-io</artifactId>
     <name>NEST Readers and Writers</name>
-    <version>4C-0.1</version>
+    <version>4C-1.0</version>
 
     <packaging>jar</packaging>
 
@@ -37,6 +37,11 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-netcdf</artifactId>
+            <version>4C-1.1</version>
         </dependency>
         <!--dependency>
             <groupId>org.geotools</groupId>

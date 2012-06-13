@@ -34,7 +34,7 @@ public final class AsarAbstractMetadata {
     /**
      * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
      */
-    private static final String METADATA_VERSION = "4C-0.1";
+    private static final String METADATA_VERSION = "4C-1.0";
     
     private final String _productType;
     private final String _version;

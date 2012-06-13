@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-world-wind-view</symbolicName>
-    <version>4C-0.1</version>
+    <version>4C-1.0</version>
     <name>NEST World Wind View</name>
 
     <description>
@@ -10,7 +10,7 @@
 
     <vendor>Array Systems Computing Inc</vendor>
     <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
-    <copyright>(C) 2011 by Array Systems Computing Inc</copyright>
+    <copyright>(C) 2012 by Array Systems Computing Inc</copyright>
     <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 	<funding>European Space Agency</funding>
