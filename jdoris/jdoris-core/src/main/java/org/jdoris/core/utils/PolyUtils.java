@@ -222,9 +222,11 @@ public class PolyUtils {
             logger.warn("polyValGrid: degree < -1 ????");
         }
 
+/*
         if (x.length > y.length) {
             logger.warn("polValGrid: x larger than y, while optimized for y larger x");
         }
+*/
 
         if (degree == -1) {
             degree = degreeFromCoefficients(coeff.length);
@@ -463,9 +465,11 @@ public class PolyUtils {
             logger.warn("polyValGrid: degree < -1 ????");
         }
 
+/*
         if (x.length > y.length) {
             logger.warn("polValGrid: x larger than y, while optimized for y larger x");
         }
+*/
 
         if (degree == -1) {
             degree = degreeFromCoefficients(coeff.length);
