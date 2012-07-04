@@ -14,9 +14,9 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.ReaderUtils;
 import org.jblas.ComplexDoubleMatrix;
 import org.jdoris.core.Orbit;
 import org.jdoris.core.SLCImage;
@@ -27,7 +27,6 @@ import org.jdoris.nest.utils.CplxContainer;
 import org.jdoris.nest.utils.ProductContainer;
 import org.jdoris.nest.utils.TileUtilsDoris;
 
-import javax.media.jai.BorderExtender;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class RangeFilterOp extends Operator {
 
     @Parameter(valueSet = {"8", "16", "32", "64", "128", "256", "512", "1024"},
             description = "Length of filtering window",
-            defaultValue = "5",
+            defaultValue = "64",
             label = "FFT Window Length")
     private int fftLength = 64;
 
@@ -95,10 +94,8 @@ public class RangeFilterOp extends Operator {
     private static final int ORBIT_DEGREE = 3; // hardcoded
     private static final boolean CREATE_VIRTUAL_BAND = true;
 
-    private static int TILE_OVERLAP_X;
-    private static int TILE_OVERLAP_Y;
-    private static int TILE_EXTENT_X;
-    private static int TILE_EXTENT_Y;
+    private static final int TILE_OVERLAP_X = 0;
+    private static final int TILE_OVERLAP_Y = 0;
 
     private static final String PRODUCT_NAME = "range_filter";
     private static final String PRODUCT_TAG = "rngfilt";
@@ -297,12 +294,11 @@ public class RangeFilterOp extends Operator {
     }
 
     private void checkUserInput() throws OperatorException {
-//        TILE_OVERLAP_X = rangeTileOverlap;
         // check for the logic in input paramaters
 
         final MetadataElement masterMeta = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         final int isCoregStack = masterMeta.getAttributeInt(AbstractMetadata.coregistered_stack);
-        if(isCoregStack != 1) {
+        if (isCoregStack != 1) {
             throw new OperatorException("Input should be a coregistered SLC stack");
         }
     }
@@ -322,31 +318,20 @@ public class RangeFilterOp extends Operator {
             throws OperatorException {
         try {
 
-            int w = targetRectangle.width;
-//            int x0 = targetRectangle.x;
-//            int y0 = targetRectangle.y;
-//            int h = targetRectangle.height;
-//            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            final Rectangle rectIn = new Rectangle(targetRectangle);
 
-            int extraRange = 0;
+            final int overlap_X = 0;
+            final int overlap_Y = (nlMean - 1) / 2;
 
-            if (!MathUtils.isPower2(w)) {
+            rectIn.y -= overlap_Y;
+            rectIn.height += 2 * overlap_Y;
 
-                double nextPow2 = Math.ceil(Math.log(w) / Math.log(2));
-                int value = (int) Math.pow(2, nextPow2);
-                extraRange = value - w;
-//                targetRectangle.width = value;
+            if (!MathUtils.isPower2(rectIn.width)) {
+                double nextPow2 = Math.ceil(Math.log(rectIn.width) / Math.log(2));
+                rectIn.width = (int) Math.pow(2, nextPow2);
             }
 
-            // target
             Band targetBand;
-
-            final BorderExtender border = BorderExtender.createInstance(BorderExtender.BORDER_ZERO);
-
-            final Rectangle rect = new Rectangle(targetRectangle);
-            rect.width += (TILE_OVERLAP_X + extraRange);
-            rect.height += TILE_OVERLAP_Y;
-            //System.out.println("x0 = " + rect.x + ", y0 = " + rect.y + ", w = " + rect.width + ", h = " + rect.height);
 
             boolean doFilterMaster = true;
             if (masterMap.keySet().toArray().length > 1) {
@@ -369,13 +354,13 @@ public class RangeFilterOp extends Operator {
                 final ProductContainer ifg = targetMap.get(ifgTag);
 
                 // check out from source
-                Tile tileRealMaster = getSourceTile(ifg.sourceMaster.realBand, rect, border);
-                Tile tileImagMaster = getSourceTile(ifg.sourceMaster.imagBand, rect, border);
+                Tile tileRealMaster = getSourceTile(ifg.sourceMaster.realBand, rectIn);
+                Tile tileImagMaster = getSourceTile(ifg.sourceMaster.imagBand, rectIn);
                 final ComplexDoubleMatrix masterMatrix = TileUtilsDoris.pullComplexDoubleMatrix(tileRealMaster, tileImagMaster);
 
                 // check out from source
-                Tile tileRealSlave = getSourceTile(ifg.sourceSlave.realBand, rect, border);
-                Tile tileImagSlave = getSourceTile(ifg.sourceSlave.imagBand, rect, border);
+                Tile tileRealSlave = getSourceTile(ifg.sourceSlave.realBand, rectIn);
+                Tile tileImagSlave = getSourceTile(ifg.sourceSlave.imagBand, rectIn);
                 final ComplexDoubleMatrix slaveMatrix = TileUtilsDoris.pullComplexDoubleMatrix(tileRealSlave, tileImagSlave);
 
                 rangeFilter.setMetadata(ifg.sourceMaster.metaData);
@@ -406,24 +391,24 @@ public class RangeFilterOp extends Operator {
                 // commit real() to target
                 targetBand = targetProduct.getBand(ifg.masterSubProduct.targetBandName_I);
                 tileRealMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredMaster.real(), tileRealMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredMaster.real(), tileRealMaster, targetRectangle, overlap_Y, overlap_X);
 
                 // commit imag() to target
                 targetBand = targetProduct.getBand(ifg.masterSubProduct.targetBandName_Q);
                 tileImagMaster = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredMaster.imag(), tileImagMaster, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredMaster.imag(), tileImagMaster, targetRectangle, overlap_Y, overlap_X);
 
                 /// SLAVE
                 final ComplexDoubleMatrix filteredSlave = rangeFilter.getData1();
                 // commit real() to target
                 targetBand = targetProduct.getBand(ifg.slaveSubProduct.targetBandName_I);
                 tileRealSlave = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredSlave.real(), tileRealSlave, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredSlave.real(), tileRealSlave, targetRectangle, overlap_Y, overlap_X);
 
                 // commit imag() to target
                 targetBand = targetProduct.getBand(ifg.slaveSubProduct.targetBandName_Q);
                 tileImagSlave = targetTileMap.get(targetBand);
-                TileUtilsDoris.pushFloatMatrix(filteredSlave.imag(), tileImagSlave, targetRectangle);
+                TileUtilsDoris.pushFloatMatrix(filteredSlave.imag(), tileImagSlave, targetRectangle, overlap_Y, overlap_X);
 
 //                // save imag band of computation : this is somehow too slow?
 //                targetBand = targetProduct.getBand(ifg.targetBandName_Q);

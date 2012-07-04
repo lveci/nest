@@ -465,9 +465,12 @@ public final class SubtRefDemOp extends Operator {
         // double square root : scales with the size of tile
         final int numberOfPoints = (int) (10 * Math.sqrt(Math.sqrt(rectangle.width * rectangle.height)));
 
-        // work with 1.5x size of tile
-        int offsetX = (int) (1.5 * rectangle.width);
-        int offsetY = (int) (1.5 * rectangle.height);
+        System.out.println("numberOfPoints = " + numberOfPoints);
+
+        // work with 1.75x size of tile
+        double extendTimes = 1.75;
+        int offsetX = (int) (extendTimes * rectangle.width);
+        int offsetY = (int) (extendTimes * rectangle.height);
 
         // define window
         final Window window = new Window((long) (corners[0].y - offsetY), (long) (corners[1].y + offsetY),
@@ -485,10 +488,11 @@ public final class SubtRefDemOp extends Operator {
             }
         }
 
-        // get max/min and add extra 25% to max height ~ just to be sure
+        // get max/min and add extra 30% to max height ~ just to be sure
         if (heights.size() > 2) {
-            heightArray[0] = Collections.min(heights);
-            heightArray[1] = Collections.max(heights) * 1.25;
+            heightArray[0] = Collections.min(heights) * 0.70;
+//            heightArray[1] = Collections.max(heights) * 1.25;
+            heightArray[1] = Collections.max(heights) * 1.30;
         } else { // if nodatavalues return 0s ~ tile in the sea
             heightArray[0] = 0;
             heightArray[1] = 0;
