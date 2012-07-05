@@ -118,19 +118,6 @@ public class InterferogramOp extends Operator {
             constructTargetMetadata();
             createTargetProduct();
 
-//            final String[] masterBandNames = sourceProduct.getBandNames();
-//            for (int i = 0; i < masterBandNames.length; i++) {
-//                if (masterBandNames[i].contains("mst")) {
-//                    masterBand1 = sourceProduct.getBand(masterBandNames[i]);
-//                    if (masterBand1.getUnit() != null && masterBand1.getUnit().equals(Unit.REAL)) {
-//                        masterBand2 = sourceProduct.getBand(masterBandNames[i + 1]);
-//                    }
-//                    break;
-//                }
-//            }
-//
-//            getMetadata();
-
             getSourceImageDimension();
 
             if (!doNotSubtract) {
@@ -159,7 +146,8 @@ public class InterferogramOp extends Operator {
 
                 CplxContainer slave = slaveMap.get(keySlave);
 
-                flatEarthPolyMap.put(slave.name, estimateFlatEarthPolynomial(master.metaData, master.orbit, slave.metaData, slave.orbit));
+                DoubleMatrix polynomial = estimateFlatEarthPolynomial(master.metaData, master.orbit, slave.metaData, slave.orbit);
+                flatEarthPolyMap.put(slave.name, polynomial);
 
             }
         }
@@ -304,11 +292,8 @@ public class InterferogramOp extends Operator {
     }
 
     private DoubleMatrix estimateFlatEarthPolynomial(SLCImage masterMetadata, Orbit masterOrbit, SLCImage slaveMetadata, Orbit slaveOrbit) throws Exception {
+
         // estimation window : this works only for NEST "crop" logic
-//        long minLine = masterMetadata.getCurrentWindow().linelo;
-//        long maxLine = masterMetadata.getCurrentWindow().linehi;
-//        long minPixel = masterMetadata.getCurrentWindow().pixlo;
-//        long maxPixel = masterMetadata.getCurrentWindow().pixhi;
         long minLine = 0;
         long maxLine = sourceImageHeight;
         long minPixel = 0;
@@ -388,9 +373,7 @@ public class InterferogramOp extends Operator {
             int yN = y0 + targetRectangle.height - 1;
             int x0 = targetRectangle.x;
             int xN = targetRectangle.x + targetRectangle.width - 1;
-            final Window tileWindow = new Window(y0, yN, x0, xN);
 
-//            Band flatPhaseBand;
             Band targetBand_I;
             Band targetBand_Q;
 
@@ -408,15 +391,15 @@ public class InterferogramOp extends Operator {
                 tileImag = getSourceTile(product.sourceSlave.imagBand, targetRectangle);
                 ComplexDoubleMatrix complexSlave = TileUtilsDoris.pullComplexDoubleMatrix(tileReal, tileImag);
 
-//                if (srpPolynomialDegree > 0) {
+                ComplexDoubleMatrix complexReferencePhase;
                 if (!doNotSubtract) {
 
                     // normalize range and azimuth axis
                     DoubleMatrix rangeAxisNormalized = DoubleMatrix.linspace(x0, xN, complexMaster.columns);
-                    rangeAxisNormalized = normalizeDoubleMatrix(rangeAxisNormalized);
+                    rangeAxisNormalized = normalizeDoubleMatrix(rangeAxisNormalized, sourceImageWidth);
 
                     DoubleMatrix azimuthAxisNormalized = DoubleMatrix.linspace(y0, yN, complexMaster.rows);
-                    azimuthAxisNormalized = normalizeDoubleMatrix(azimuthAxisNormalized);
+                    azimuthAxisNormalized = normalizeDoubleMatrix(azimuthAxisNormalized, sourceImageHeight);
 
                     // pull polynomial from the map
                     DoubleMatrix polyCoeffs = flatEarthPolyMap.get(product.sourceSlave.name);
@@ -427,9 +410,8 @@ public class InterferogramOp extends Operator {
                                     polyCoeffs, PolyUtils.degreeFromCoefficients(polyCoeffs.length));
 
                     // compute the reference phase
-                    ComplexDoubleMatrix complexReferencePhase =
-                            new ComplexDoubleMatrix(MatrixFunctions.cos(realReferencePhase),
-                                    MatrixFunctions.sin(realReferencePhase));
+                    complexReferencePhase = new ComplexDoubleMatrix(MatrixFunctions.cos(realReferencePhase),
+                            MatrixFunctions.sin(realReferencePhase));
 
 
                     complexSlave.muli(complexReferencePhase); // no conjugate here!
@@ -455,9 +437,9 @@ public class InterferogramOp extends Operator {
         }
     }
 
-    private DoubleMatrix normalizeDoubleMatrix(DoubleMatrix matrix) {
-        matrix.subi(0.5 * (1 + sourceImageWidth));
-        matrix.divi(0.25 * (sourceImageWidth - 1));
+    private DoubleMatrix normalizeDoubleMatrix(DoubleMatrix matrix, final int extent) {
+        matrix.subi(0.5 * (1 + extent));
+        matrix.divi(0.25 * (extent - 1));
         return matrix;
     }
 
