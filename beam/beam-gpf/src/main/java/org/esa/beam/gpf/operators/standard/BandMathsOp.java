@@ -198,7 +198,9 @@ public class BandMathsOp extends Operator {
             final int bandNum = Integer.parseInt(placeHolder.substring(5, placeHolder.length()));
 
             final Product prod0 = srcProducts[0];
-            final Band band = prod0.getBandAt(bandNum);
+            Band band = null;
+            if(bandNum < prod0.getNumBands())
+                band = prod0.getBandAt(bandNum);
             if(band == null) {
                 throw new OperatorException(placeHolder+" not found in product "+prod0.getName());
             }

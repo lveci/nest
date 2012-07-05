@@ -202,9 +202,12 @@ public class ProductTable implements TableInterface {
         stmtSaveNewRecord.setDouble(i++, record.getLastModified());
         stmtSaveNewRecord.setString(i++, record.getFileFormat());
         final String geoStr = record.formatGeoBoundayString();
-        if(geoStr.length() > 1200)
-            throw new SQLException("geoBoundary exceeds 1200");
-        stmtSaveNewRecord.setString(i++, geoStr);
+        if(geoStr.length() > 1200) {
+            System.out.println("Geoboundary string exceeds 1200");
+            stmtSaveNewRecord.setString(i++, "");
+        } else {
+            stmtSaveNewRecord.setString(i++, geoStr);
+        }
 
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         return stmtSaveNewRecord.getGeneratedKeys();
@@ -235,6 +238,8 @@ public class ProductTable implements TableInterface {
     }
 
     public boolean pathExists(final File path) throws SQLException {
+        if(path == null)
+            return false;
         stmtGetProductWithPath.clearParameters();
         stmtGetProductWithPath.setString(1, path.getAbsolutePath());
         final ResultSet results = stmtGetProductWithPath.executeQuery();

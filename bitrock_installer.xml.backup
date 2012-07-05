@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>4C-1.0</version>
-    <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
     <initializationActionList>
@@ -63,30 +62,20 @@ This installer will optionally remove the older version before installing a new 
     </initializationActionList>
     <preInstallationActionList>
         <deleteEnvironmentVariable>
+            <abortOnError>0</abortOnError>
             <name>NEST_HOME</name>
             <scope>user</scope>
+            <show>0</show>
+            <showMessageOnError>0</showMessageOnError>
         </deleteEnvironmentVariable>
         <runProgram>
             <abortOnError>0</abortOnError>
-            <program>C:\Program Files\NEST4B-1.1\uninstall.exe</program>
+            <program>C:\Program Files (x86)\NEST4C-1.0\uninstall.exe</program>
             <programArguments></programArguments>
             <showMessageOnError>0</showMessageOnError>
             <ruleList>
                 <fileExists>
-                    <path>C:\Program Files\NEST4B-1.1\uninstall.exe</path>
-                </fileExists>
-            </ruleList>
-        </runProgram>
-        <runProgram>
-            <abortOnError>0</abortOnError>
-            <explanation>Removing previous version</explanation>
-            <program>C:\Program Files\NEST4B-1.0\uninstall.exe</program>
-            <programArguments></programArguments>
-            <progressText>Removing previous version</progressText>
-            <showMessageOnError>0</showMessageOnError>
-            <ruleList>
-                <fileExists>
-                    <path>C:\Program Files\NEST4B-1.0\uninstall.exe</path>
+                    <path>C:\Program Files (x86)\NEST4C-1.0\uninstall.exe</path>
                 </fileExists>
             </ruleList>
         </runProgram>
@@ -108,7 +97,7 @@ This installer will optionally remove the older version before installing a new 
             <showMessageOnError>0</showMessageOnError>
             <ruleList>
                 <fileExists>
-                    <path>C:\Program Files (x86)\NEST4B-1.1\uninstall.exe</path>
+                    <path>C:\Program Files\NEST4B-1.1\uninstall.exe</path>
                 </fileExists>
             </ruleList>
         </runProgram>
@@ -125,14 +114,12 @@ This installer will optionally remove the older version before installing a new 
         </runProgram>
         <runProgram>
             <abortOnError>0</abortOnError>
-            <explanation>removing previous version</explanation>
-            <program>C:\Program Files (x86)\NEST4C-1.0\uninstall.exe</program>
+            <program>C:\Program Files\NEST4B-1.0\uninstall.exe</program>
             <programArguments></programArguments>
-            <progressText>removing previous version</progressText>
             <showMessageOnError>0</showMessageOnError>
             <ruleList>
                 <fileExists>
-                    <path>C:\Program Files (x86)\NEST4C-1.0\uninstall.exe</path>
+                    <path>C:\Program Files\NEST4B-1.0\uninstall.exe</path>
                 </fileExists>
             </ruleList>
         </runProgram>
@@ -148,23 +135,67 @@ This installer will optionally remove the older version before installing a new 
         </associateWindowsFileExtension>
         <addEnvironmentVariable>
             <name>NEST_HOME</name>
-            <scope>system</scope>
+            <scope>user</scope>
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;${InstallDir}/dat.sh;${InstallDir}/gpt.sh</files>
+            <files>*/*.sh;*/*.bin;*/*.command;${installdir}/*.command;${installdir}/dat.sh;${installdir}/gpt.sh;${installdir}/jre/bin/*;${installdir}/*.so;${installdir}/*.jnilib</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
             <insertAt>end</insertAt>
             <path>${installdir}</path>
+            <scope>user</scope>
         </addDirectoryToPath>
+        <createSymLink>
+            <linkName>~/Desktop/NEST_DAT</linkName>
+            <target>${installdir}/dat.command</target>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </createSymLink>
+        <substitute>
+            <files>${installdir}/dat.command</files>
+            <type>regexp</type>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+            <substitutionList>
+                <substitution>
+                    <pattern>@@INSTALL_DIR@@</pattern>
+                    <value>${installdir}</value>
+                </substitution>
+            </substitutionList>
+        </substitute>
+        <substitute>
+            <files>${installdir}/gpt.command</files>
+            <type>regexp</type>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+            <substitutionList>
+                <substitution>
+                    <pattern>@@INSTALL_DIR@@</pattern>
+                    <value>${installdir}</value>
+                </substitution>
+            </substitutionList>
+        </substitute>
         <deleteFile>
             <abortOnError>0</abortOnError>
             <path>"%USERPROFILE%\.nest"</path>
             <show>0</show>
             <showMessageOnError>0</showMessageOnError>
         </deleteFile>
+        <setEnvironmentVariable>
+            <name>NEST_HOME</name>
+            <value>${installdir}</value>
+        </setEnvironmentVariable>
     </postInstallationActionList>
     <postUninstallationActionList>
         <runConsoleProgram>
@@ -174,6 +205,13 @@ This installer will optionally remove the older version before installing a new 
             <show>0</show>
             <showMessageOnError>0</showMessageOnError>
         </runConsoleProgram>
+        <removeDirectoryFromPath>
+            <abortOnError>0</abortOnError>
+            <path>${InstallDir}</path>
+            <scope>user</scope>
+            <show>0</show>
+            <showMessageOnError>0</showMessageOnError>
+        </removeDirectoryFromPath>
         <deleteEnvironmentVariable>
             <abortOnError>0</abortOnError>
             <name>NEST_HOME</name>
@@ -181,10 +219,6 @@ This installer will optionally remove the older version before installing a new 
             <show>0</show>
             <showMessageOnError>0</showMessageOnError>
         </deleteEnvironmentVariable>
-        <removeDirectoryFromPath>
-            <path>${InstallDir}</path>
-            <scope>user</scope>
-        </removeDirectoryFromPath>
     </postUninstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
@@ -195,21 +229,21 @@ This installer will optionally remove the older version before installing a new 
     <vendor>ESA</vendor>
     <componentList>
         <component>
-            <name>NEST64</name>
-            <description>Next ESA SAR Toolbox</description>
+            <name>default</name>
+            <description>Default Component</description>
             <canBeEdited>1</canBeEdited>
             <selected>1</selected>
             <show>1</show>
             <desktopShortcutList>
                 <shortcut>
                     <comment>NEST Display and Analysis Tool</comment>
-                    <exec> ${installdir}/dat.sh</exec>
-                    <icon> ${installdir}/res/dat.png</icon>
+                    <exec>${installdir}/dat.sh</exec>
+                    <icon>${installdir}/res/dat.png</icon>
                     <name>NEST 4C</name>
-                    <path> ${installdir}</path>
+                    <path>.</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
                     <windowsPath>${installdir}</windowsPath>
@@ -252,6 +286,9 @@ This installer will optionally remove the older version before installing a new 
                         <distributionDirectory>
                             <origin>target/nest-4C-1.0-bin-win64.dir/res</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-win64.dir/readme.txt</origin>
+                        </distributionFile>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>
@@ -272,75 +309,159 @@ This installer will optionally remove the older version before installing a new 
                 <folder>
                     <description>Program Files</description>
                     <destination>${installdir}</destination>
+                    <name>programfileslinux</name>
+                    <platforms>linux</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/dat.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/gpt.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/libgluegen-rt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/libjogl.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/libjogl_awt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/libjogl_cg.so</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>target/nest-4C-1.0-bin-linux.dir/jre</origin>
+                        </distributionDirectory>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
                     <name>programfileswindows</name>
                     <platforms>windows</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/cli.bat</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/cli.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/clib_jiio.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/clib_jiio.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/clib_jiio_sse2.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/clib_jiio_sse2.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/clib_jiio_util.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/clib_jiio_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/dat.bat</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/dat.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/gluegen-rt.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/gluegen-rt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/gpt.bat</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/gpt.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jogl.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jhdf5.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jogl_awt.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jogl_cg.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jogl.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/nest-dat64.exe</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jogl_awt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/post-uninstall.bat</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jhdf5.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/nest-dat.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jhdf.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/jre</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/jre</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/nest-dat64.l4j.ini</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/nest-dat.l4j.ini</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/nest-clean.bat</origin>
+                            <origin>target/nest-4C-1.0-bin-win.dir/nest-clean.bat</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileslinux64</name>
+                    <platforms>linux-x64</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/LIBGFORTRAN-3.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/gpt.sh</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/jre</origin>
+                        </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/libclib_jiio.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/CYGGCC_S-1.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/IESHIMS.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/libjogl.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/LIBGCC_S_SJLJ-1.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/libjogl_awt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-4C-1.0-bin-win64.dir/CYGWIN1.dll</origin>
+                            <origin>target/nest-4C-1.0-bin-linux64.dir/libjogl_cg.so</origin>
                         </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfilesmacOSX</name>
+                    <platforms>osx</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/dat.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/gpt.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libgluegen-rt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libjhdf.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libjhdf5.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libjogl.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libjogl_awt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/libjogl_cg.jnilib</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/NEST.app</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-4C-1.0-bin-mac.dir/__MACOSX</origin>
+                        </distributionDirectory>
                     </distributionFileList>
                 </folder>
             </folderList>
@@ -358,7 +479,7 @@ This installer will optionally remove the older version before installing a new 
                     <comment>Next ESA SAR Toolbox</comment>
                     <name>NEST 4C</name>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
                     <windowsPath>${installdir}</windowsPath>

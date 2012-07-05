@@ -97,6 +97,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private Double extNoDataValue = 0.0;
     private Double azimuthPixelSpacing = 0.0;
     private Double rangePixelSpacing = 0.0;
+    private double pixMSaved = 0.0;
+    private double pixDSaved = 0.0;
 
     private String savedProductName = null;
 
@@ -291,12 +293,16 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         crsButton.setText(mapProjHandler.getCRSName());
 
         final Double pixelSpacingInMeterVal = (Double)paramMap.get("pixelSpacingInMeter");
-        if(pixelSpacingInMeterVal != null && pixelSpacingInMeterVal != 0.0)
+        if(pixelSpacingInMeterVal != null && pixelSpacingInMeterVal != 0.0) {
             pixelSpacingInMeter.setText(String.valueOf(pixelSpacingInMeterVal));
+            pixMSaved = pixelSpacingInMeterVal;
+        }
 
         final Double pixelSpacingInDegreeVal = (Double)paramMap.get("pixelSpacingInDegree");
-        if(pixelSpacingInDegreeVal != null && pixelSpacingInDegreeVal != 0.0)
+        if(pixelSpacingInDegreeVal != null && pixelSpacingInDegreeVal != 0.0) {
             pixelSpacingInDegree.setText(String.valueOf(pixelSpacingInDegreeVal));
+            pixDSaved = pixelSpacingInDegreeVal;
+        }
 
         Boolean productChanged = false;
         if (sourceProducts != null) {
@@ -331,6 +337,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 }
                 pixelSpacingInMeter.setText(String.valueOf(pixM));
                 pixelSpacingInDegree.setText(String.valueOf(pixD));
+                pixMSaved = pixM;
+                pixDSaved = pixD;
             }
         }
 
@@ -627,14 +635,18 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         public void focusGained(final FocusEvent e) {
         }
         public void focusLost(final FocusEvent e) {
-            Double pixM, pixD;
+            Double pixM = 0.0, pixD = 0.0;
             try {
                 pixM = Double.parseDouble(pixelSpacingInMeter.getText());
-                pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                if (pixM != pixMSaved) {
+                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                    pixelSpacingInDegree.setText(String.valueOf(pixD));
+                    pixMSaved = pixM;
+                    pixDSaved = pixD;
+                }
             } catch (Exception ec) {
                 pixD = 0.0;
             }
-            pixelSpacingInDegree.setText(String.valueOf(pixD));
         }
     }
 
@@ -643,14 +655,18 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         public void focusGained(final FocusEvent e) {
         }
         public void focusLost(final FocusEvent e) {
-            Double pixM, pixD;
+            Double pixM = 0.0, pixD = 0.0;
             try {
                 pixD = Double.parseDouble(pixelSpacingInDegree.getText());
-                pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+                if (pixD != pixDSaved) {
+                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+                    pixelSpacingInMeter.setText(String.valueOf(pixM));
+                    pixMSaved = pixM;
+                    pixDSaved = pixD;
+                }
             } catch (Exception ec) {
                 pixM = 0.0;
             }
-            pixelSpacingInMeter.setText(String.valueOf(pixM));
         }
     }
 }

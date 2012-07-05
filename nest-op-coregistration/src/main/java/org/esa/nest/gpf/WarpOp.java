@@ -322,6 +322,8 @@ public class WarpOp extends Operator {
         int inc = 1;
         if (complexCoregistration)
             inc = 2;
+
+        boolean appendFlag = false;
         for (int i = 0; i < numSrcBands; i += inc) {
 
             final Band srcBand = sourceProduct.getBandAt(i);
@@ -360,14 +362,15 @@ public class WarpOp extends Operator {
             computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
             if(warpData.notEnoughGCPs) continue;
             outputCoRegistrationInfo(
-                    sourceProduct, warpPolynomialOrder, warpData, i != 1, 0.0f, parseIdex, srcBand.getName());
+                    sourceProduct, warpPolynomialOrder, warpData, appendFlag, 0.0f, parseIdex, srcBand.getName());
 
+            appendFlag = true;
             if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
                 final float threshold = (float) warpData.rmsMean;
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
                 if(warpData.notEnoughGCPs) continue;
                 outputCoRegistrationInfo(
-                        sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
+                        sourceProduct, warpPolynomialOrder, warpData, appendFlag, threshold, ++parseIdex, srcBand.getName());
             }
 
             if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float) warpData.rmsMean)) {
@@ -375,14 +378,14 @@ public class WarpOp extends Operator {
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
                 if(warpData.notEnoughGCPs) continue;
                 outputCoRegistrationInfo(
-                        sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
+                        sourceProduct, warpPolynomialOrder, warpData, appendFlag, threshold, ++parseIdex, srcBand.getName());
             }
 
             eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
             computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
             if(warpData.notEnoughGCPs) continue;
             outputCoRegistrationInfo(
-                    sourceProduct, warpPolynomialOrder, warpData, true, rmsThreshold, ++parseIdex, srcBand.getName());
+                    sourceProduct, warpPolynomialOrder, warpData, appendFlag, rmsThreshold, ++parseIdex, srcBand.getName());
 
             addSlaveGCPs(warpData, srcBand.getName());
         }

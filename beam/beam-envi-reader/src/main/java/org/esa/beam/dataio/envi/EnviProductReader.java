@@ -96,7 +96,6 @@ public class EnviProductReader extends AbstractProductReader {
             final Product product = new Product(productName, header.getSensorType(), header.getNumSamples(),
                                                 header.getNumLines());
             product.setProductReader(this);
-            product.setFileLocation(inputFile);
             product.setDescription(header.getDescription());
 
             initGeoCoding(product, header);
@@ -107,7 +106,8 @@ public class EnviProductReader extends AbstractProductReader {
             // imageInputStream must be initialized last
             initializeInputStreamForBandData(inputFile, header.getJavaByteOrder());
 	        initMetadata(product, inputFile);
-
+            product.setFileLocation(inputFile);
+            
             return product;
         } finally {
             if (headerReader != null) {

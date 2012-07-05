@@ -15,11 +15,14 @@
  */
 package org.esa.nest.dataio.polsarpro;
 
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.esa.beam.dataio.envi.EnviConstants;
 import org.esa.beam.dataio.envi.EnviProductReaderPlugIn;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.Locale;
 
 public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
@@ -46,13 +49,13 @@ public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
         if (input instanceof File) {
             final File folder = (File) input;
             if(folder.isDirectory()) {
-                DecodeQualification folderQualification = DecodeQualification.UNABLE;
-                for(File file : folder.listFiles()) {
+                final FileFilter filter = new SuffixFileFilter(EnviConstants.HDR_EXTENSION);
+                for(File file : folder.listFiles(filter)) {
                     final DecodeQualification fileQualification = super.getDecodeQualification(file);
                     if(fileQualification != DecodeQualification.UNABLE)
                         return fileQualification;
                 }
-                return folderQualification;
+                return DecodeQualification.UNABLE;
             } 
         } 
 

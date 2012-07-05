@@ -53,7 +53,7 @@ public class OversamplingOpUI extends BaseOperatorUI {
     private final JLabel outputImageByLabel = new JLabel("Output Image By:     ");
 
     private final JCheckBox usePRFTileSizeCheckBox = new JCheckBox("Use PRF Tile Size");
-    private Boolean usePRFTileSize = true;
+    private Boolean usePRFTileSize = false;
 
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 

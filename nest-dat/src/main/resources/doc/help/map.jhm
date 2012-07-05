@@ -6,7 +6,6 @@
 <map version="2.0">
 
 	<mapID target="Definitions" url="general/Definitions.html"/>
-	<mapID target="DataSources" url="general/DataSources.html"/>
 	<mapID target="AbstractedMetadata" url="general/AbstractedMetadata.html"/>
 
     <mapID target="visat" url="visat/dat.html"/>

@@ -56,8 +56,10 @@ public class CosmoSkymedCalibrator implements Calibrator {
     
     private boolean applyRangeSpreadingLossCorrection = false;
     private boolean applyIncidenceAngleCorrection = false;
+    private boolean applyConstantCorrection = false;
     private boolean incAngleCompFlag = false;
     private boolean rangeSpreadCompFlag = false;
+    private boolean constantCompFlag = false;
 
     private static final double underFlowFloat = 1.0e-30;
 
@@ -167,14 +169,22 @@ public class CosmoSkymedCalibrator implements Calibrator {
 
         incAngleCompFlag = 
         	AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.inc_angle_comp_flag);
-        if (incAngleCompFlag)
+        if (incAngleCompFlag) {
         	applyIncidenceAngleCorrection = true;
+        }
         
         rangeSpreadCompFlag = 
         	AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
-        if (rangeSpreadCompFlag)
+        if (rangeSpreadCompFlag) {
         	applyRangeSpreadingLossCorrection = true;
-        
+        }
+
+        final MetadataElement root = sourceProduct.getMetadataRoot();
+        final MetadataElement globalElem = root.getElement("Global_Attributes");
+        constantCompFlag = AbstractMetadata.getAttributeBoolean(globalElem, "Calibration Constant Compensation Flag");
+        if (!constantCompFlag) {
+            applyConstantCorrection = true;
+        }
     }
 
     /**
@@ -241,7 +251,10 @@ public class CosmoSkymedCalibrator implements Calibrator {
             final double satelliteHeight, final double sceneToEarthCentre, final double localIncidenceAngle,
             final String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
-        final double Ks = calibrationFactor.get(bandPolar.toUpperCase());
+        double Ks = 1.0;
+        if (applyConstantCorrection) {
+            Ks = calibrationFactor.get(bandPolar.toUpperCase());
+        }
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -315,8 +328,8 @@ public class CosmoSkymedCalibrator implements Calibrator {
         }
 
         final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot).toUpperCase();
-        double Ks = 0.0;
-        if (pol != null) {
+        double Ks = 1.0;
+        if (pol != null && applyConstantCorrection) {
             Ks = calibrationFactor.get(pol);
         }
 

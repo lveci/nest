@@ -275,7 +275,7 @@ public class Diagram {
     }
 
     public Rectangle getGraphArea() {
-        return new Rectangle(graphArea);
+        return graphArea == null ? null : new Rectangle(graphArea);
     }
 
     public void render(Graphics2D g2d, int x, int y, int width, int height) {

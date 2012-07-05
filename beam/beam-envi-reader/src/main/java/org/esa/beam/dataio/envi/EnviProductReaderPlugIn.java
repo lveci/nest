@@ -111,7 +111,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
 
-    private DecodeQualification checkDecodeQualificationOnFile(File inputFile) {
+    private static DecodeQualification checkDecodeQualificationOnFile(File inputFile) {
         try {
             final String fileName = inputFile.getName().toLowerCase();
             boolean validExt = false;

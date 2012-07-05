@@ -101,7 +101,6 @@ public class PolsarProProductReader extends NestEnviProductReader {
         final Product product = new Product(productName, mainHeader.getSensorType(),
                 mainHeader.getNumSamples(), mainHeader.getNumLines());
         product.setProductReader(this);
-        product.setFileLocation(inputFile);
         product.setDescription(mainHeader.getDescription());
 
         initGeoCoding(product, mainHeader);
@@ -113,7 +112,8 @@ public class PolsarProProductReader extends NestEnviProductReader {
         applyBeamProperties(product, mainHeader.getBeamProperties());
 
         initMetadata(product, mainHeaderFile);
-
+        product.setFileLocation(inputFile);
+        
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         absRoot.setAttributeInt(AbstractMetadata.polsarData, 1);
         // polsarpro data automatically calibrated for Radarsat2 only

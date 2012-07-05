@@ -24,7 +24,7 @@ public class ProductFunctions {
     private static final String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
                                                    "tfw","gif","jpg","jgw", "hdr", "self", "report", "raw", "tgz",
                                                    "log","html","htm","png","bmp","ps","aux","ovr","brs","kml", "kmz",
-                                                   "sav","7z","zip","rrd","lbl","z","gz","exe","so","dll","bat","sh","rtf",
+                                                   "sav","7z","rrd","lbl","z","gz","exe","so","dll","bat","sh","rtf",
                                                    "prj","dbf","shx","shp","ace","ace2","tar","tooldes", "metadata.xml"};
     private static final String[] nonValidprefixes = { "led","trl","tra_","nul","lea","dat","img","imop","sarl","sart","par_",
                                                  "dfas","dfdn","lut",
@@ -148,6 +148,10 @@ public class ProductFunctions {
             } catch(IOException e) {
                 return ProductIO.readProduct(file, "RADARSAT-2 NITF");
             }
+        } else if(filename.endsWith("tif")) {
+            return ProductIO.readProduct(file, "GeoTIFF");
+        } else if(file.isDirectory()) {
+            return ProductIO.readProduct(file, "PolSARPro");
         }
         return null;
     }

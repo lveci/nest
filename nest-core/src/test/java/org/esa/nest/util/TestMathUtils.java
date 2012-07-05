@@ -26,7 +26,7 @@ import org.apache.commons.math.util.FastMath;
  */
 public class TestMathUtils extends TestCase {
 
-    final int numItr = 20000000;
+    final int numItr = 80000000;
 
     public TestMathUtils(String name) {
         super(name);
@@ -69,169 +69,181 @@ public class TestMathUtils extends TestCase {
     }
 
      public void testMathCos() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.cos(i);
         }
     }
 
     public void testFastMathCos() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.cos(i);
         }
     }
 
+    public void testStrictMathCos() {
+        for(double i=0; i < numItr; ++i) {
+            double val = StrictMath.cos(i);
+        }
+    }
+
     public void testMathSin() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.sin(i);
         }
     }
 
     public void testFastMathSin() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.sin(i);
         }
     }
 
     public void testMathTan() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.tan(i);
         }
     }
 
     public void testFastMathTan() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.tan(i);
         }
     }
 
     public void testMathATan2() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.atan2(i, i);
         }
     }
 
     public void testFastMathATan2() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.atan2(i, i);
         }
     }
 
     public void testMathMin() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.min(i, 500);
         }
     }
 
     public void testFastMathMin() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.min(i, 500);
         }
     }
 
     public void testMathCeil() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.ceil(i);
         }
     }
 
     public void testFastMathCeil() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.ceil(i);
         }
     }
 
     public void testMathFloor() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.floor(i);
         }
     }
 
     public void testFastMathFloor() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.floor(i);
         }
     }
 
     public void testMathAbs() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.abs(i);
         }
     }
 
     public void testFastMathAbs() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.abs(i);
         }
     }
 
+    public void testStrictMathAbs() {
+        for(double i=0; i < numItr; ++i) {
+            double val = StrictMath.abs(i);
+        }
+    }
+
     public void testMathRound() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.round(i);
         }
     }
 
     public void testFastMathRound() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.round(i);
         }
     }
 
     public void testMathPow() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.pow(i, i);
         }
     }
 
     public void testFastMathPow() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.pow(i, i);
         }
     }
 
     public void testMathLog() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.log(i);
         }
     }
 
     public void testFastMathLog() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.log(i);
         }
     }
 
     public void testMathLog10() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.log10(i);
         }
     }
 
     public void testFastMathLog10() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.log10(i);
         }
     }
 
     public void testMathExp() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.exp(i);
         }
     }
 
     public void testFastMathExp() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.exp(i);
         }
     }
 
     public void testMathSqrt() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = Math.sqrt(i);
         }
     }
 
     public void testFastMathSqrt() {
-        for(int i=0; i < numItr; ++i) {
+        for(double i=0; i < numItr; ++i) {
             double val = FastMath.sqrt(i);
         }
     }

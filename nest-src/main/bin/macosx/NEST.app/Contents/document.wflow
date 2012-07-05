@@ -55,7 +55,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>cd /Applications/NEST*/bin; java -Xmx1024M -Dceres.context=nest -jar ceres-launcher.jar</string>
+					<string>cd /Applications/NEST*; java -Xmx1024M -XX:CompileThreshold=10000 -Xverify:none -XX:+UseParallelGC -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio -Dceres.context=nest -Dnest.debug=false -jar bin/ceres-launcher.jar</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

@@ -67,7 +67,7 @@
         </action>
 
         <action>
-	        <id>OverSamplingOp</id>
+	        <id>OverSampleOp</id>
 	        <helpId>OverSamplingOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
             <icon>esaIcon</icon>
@@ -161,8 +161,8 @@
         </action>
 
         <action>
-	        <id>WSSDeBurstOp</id>
-	        <helpId>WSSDeBurstOp</helpId>
+	        <id>WSSDeburstOp</id>
+	        <helpId>WSSDeburstOp</helpId>
 	        <class>org.esa.nest.dat.actions.OperatorAction</class>
             <icon>esaIcon</icon>
             <parent>ASARWSS</parent>
@@ -183,7 +183,7 @@
             <shortDescr>Graph to deburst and detect a WSS product. Run Mosaic afterwards to combine</shortDescr>
 	        <dialogTitle>WSS Deburst, Calibrate and Detect</dialogTitle>
             <graphFile>WSSDetectGraph.xml</graphFile>
-            <placeAfter>WSSDeBurstOp</placeAfter>
+            <placeAfter>WSSDeburstOp</placeAfter>
         </action>
 
         <action>

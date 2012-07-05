@@ -69,6 +69,7 @@ public class InsertFigureInteractorInterceptor extends AbstractInteractorInterce
         if (layers.isEmpty()) {
             VectorDataNode vectorDataNode = CreateVectorDataNodeAction.createDefaultVectorDataNode(productSceneView.getProduct());
             LayerFilter nodeFilter = VectorDataLayerFilterFactory.createNodeFilter(vectorDataNode);
+            productSceneView.getVectorDataCollectionLayer(true);
             vectorDataLayer = (VectorDataLayer) LayerUtils.getChildLayer(productSceneView.getRootLayer(),
                                                                          LayerUtils.SEARCH_DEEP, nodeFilter);
         } else if (layers.size() == 1) {

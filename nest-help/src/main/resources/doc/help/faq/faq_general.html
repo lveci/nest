@@ -23,7 +23,13 @@ not able to read the product, then it could be that the file is corrupt
 or compressed.&nbsp;</p><p>Some
 users have had difficulty when decompressing files using Winzip.
 Deactivate the CR/LF translation option in winzip (this option is
-activated by default).</p><h4>What method is used for Oil Spill Detection?</h4><p>The
+activated by default).</p><h4>When I open a RADARSAT-2 image I don't get any metadata</h4><p>A
+RADARSAT-2 product should be opened through it's product.xml file to
+ensure that the RADARSAT-2 product reader will recognize all files and
+import the whole product.</p><h4>How do I import a PolSARPro result?</h4><p>Use
+the PolSARPro reader and select the folder containing all the indivual
+band files. When imported, all individual bands will show up within one
+product.</p><h4>What method is used for Oil Spill Detection?</h4><p>The
 method currently implemented in NEST for oil spill detection is an
 adaptive thresholding dark spots detection algorithm. It first
 estimates the mean backscatter level in a large window, then set a
@@ -57,6 +63,22 @@ the satellite position, backscattering element position and the earth
 center.</p><p>For
 more information on the definitions, derivations and calculations of
 the angles please see section 14.3.4 in "SAR Geocoding: Data and
-Systems" by Gunter Schreier.</p><h4></h4><h4></h4><p></p>
+Systems" by Gunter Schreier.</p><h4>In coregistration I get "Not enough valid GCPs in slave". How can I fix this?</h4><p>Some
+products can have a significant error in their georeferencing. You may
+need to set the coarse registration window in the GCP Selection tab to
+something larger such as 512 or 1024. Also, increasing the number of
+GCPs will give you a better chance of having more surviving. For fine
+registration, you could reduce the coherence threshold. In the warp,
+check 'show residuals' to see a summary of where GCPs are being shifted
+to and what their RMS values are. Set the RMS threshold to a value where you can get lots of representative GCPs at the smallest RMS.</p><h4>I've closed my tool views (world map, layer manager, navigation, etc). How can I get them back?</h4><p>In the top menu go to View -&gt; Manage Layout and select <span style="font-weight: bold;">Reset Layout</span> or <span style="font-weight: bold;">Load Tabbed Layout</span>.</p><h4>Why can I not orthorectify my image over the Arctic?</h4><p>It
+will depend on the DEM and output map projection. The default SRTM DEM
+is only available from +60 to -60 deg latitude. At the polar regions
+you will need to use either the low resolution GETASSE30, ASTER GDEM up
+to 83 deg or your own external DEM. Also, for the polar regions, using
+a polar map projection will give you a better result.</p><h4>Is training and support available for NEST?</h4><p>ESA
+provides introductory training at some conference workshops and support
+for technical problems through the NEST website forum. Personalized
+training courses and technical support subscriptions are available by
+contacting <a href="mailto:nest_pr@array.ca?Subject=NEST_Support">Array</a>.</p>
 <hr>
 </body></html>

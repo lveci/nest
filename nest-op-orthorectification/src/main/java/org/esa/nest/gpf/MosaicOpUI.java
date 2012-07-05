@@ -47,7 +47,7 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField sceneHeight = new JTextField("");
     private final JTextField feather = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Weighted Average of Overlap");
-    private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalizer");
+    private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalize");
 
     private boolean changedByUser = false;
     private boolean average = false;

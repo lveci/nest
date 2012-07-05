@@ -117,7 +117,7 @@
         <toolView>
             <id>org.esa.nest.dat.toolviews.productlibrary.ProductLibraryToolView</id>
             <class>org.esa.nest.dat.toolviews.productlibrary.ProductLibraryToolView</class>
-            <title>Product Library</title>
+            <title>Product Library - Local Catalogue</title>
             <tabTitle>Product Library</tabTitle>
             <mnemonic>D</mnemonic>
             <accelerator>ctrl alt D</accelerator>

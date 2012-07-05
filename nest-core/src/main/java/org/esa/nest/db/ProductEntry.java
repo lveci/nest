@@ -27,9 +27,12 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import com.bc.ceres.core.ProgressMonitor;
 
 /**
 
@@ -74,7 +77,8 @@ public class ProductEntry {
 
     public ProductEntry(final Product product) {
         file = product.getFileLocation();
-        lastModified = file.lastModified();
+        if(file != null)
+            lastModified = file.lastModified();
         fileSize = product.getRawStorageSize();
         fileFormat = product.getProductReader().getReaderPlugIn().getFormatNames()[0];
       
@@ -100,7 +104,11 @@ public class ProductEntry {
 
         getCornerPoints(product);
 
-        geoboundary = getGeoBoundary(product);
+        if(mission.equals("SMOS")) {
+            geoboundary = getSMOSGeoBoundary(product);
+        } else {
+            geoboundary = getGeoBoundary(product);
+        }
 
         this.id = -1;
     }
@@ -157,6 +165,78 @@ public class ProductEntry {
         geoCoding.getGeoPos(new PixelPos(w,h), lastFar);
     }
 
+    private static GeoPos[] getSMOSGeoBoundary(final Product product) {
+        final GeoCoding gc = product.getGeoCoding();
+        if (gc == null)
+            return new GeoPos[0];
+
+    /*    final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement absRoot = root.getElement("Abstracted_Metadata");
+        final MetadataElement hdr = root.getElement("Variable_Header");
+        final MetadataElement specificHdr = hdr.getElement("Specific_Product_Header");
+        MetadataElement productLocation = specificHdr.getElement("L2_Product_Location");
+        if(productLocation == null) {
+            productLocation = specificHdr.getElement("Product_Location");   
+        }
+        final String pass = absRoot.getAttributeString("PASS");
+
+        final double midLat = productLocation.getAttributeDouble("Mid_Lat");
+        final double midLon = productLocation.getAttributeDouble("Mid_Lon");   */
+
+        Band band = product.getBand("Latitude");
+        if(band == null)
+            band = product.getBandAt(0);   
+        final int width = band.getRasterWidth();
+        final int height = band.getRasterHeight();
+        final float[] line = new float[width];
+        final double nodata = band.getNoDataValue();
+        final PixelPos pix = new PixelPos();
+        final int stepX = 20;
+        final int stepY = 300;
+
+        final int min = 1500;
+        final int max = Math.min(height, 6000);
+
+        final int size = 2*(max-min)/stepY;
+        final List<GeoPos> geoPoints = new ArrayList<GeoPos>(size);
+        final List<GeoPos> geoPoints2 = new ArrayList<GeoPos>(size);
+        try {
+            for(int y=min; y < max; y += stepY) {
+                band.readPixels(0, y, width, 1, line, ProgressMonitor.NULL);
+
+                int x1=stepX;
+                int x2=width-stepX;
+                boolean haveX1 = false;
+                boolean haveX2 = false;
+                while(x1 < width && x2 > 0 && !(haveX1 && haveX2)) {
+                    if(!haveX1) {
+                        if(line[x1] != nodata)
+                            haveX1 = true;
+                        x1 += stepX;
+                    }
+                    if(!haveX2) {
+                        if(line[x2] != nodata)
+                            haveX2 = true;
+                        x2 -= stepX;
+                    }
+                }
+                if(haveX1 && haveX2 && x2 - x1 > 200) {
+                    pix.setLocation(x1, y);
+                    geoPoints.add(gc.getGeoPos(pix, null));
+                    pix.setLocation(x2, y);
+                    geoPoints2.add(gc.getGeoPos(pix, null));
+                }
+            }
+            // add x2 in reverse
+            for(int i=geoPoints2.size()-1; i >= 0; --i) {
+                geoPoints.add(geoPoints2.get(i));
+            }
+        } catch(Exception e) {
+            System.out.println("Error reading SMOS "+e.getMessage());
+        }    
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
     private static GeoPos[] getGeoBoundary(final Product product) {
         final GeoCoding gc = product.getGeoCoding();
         if (gc == null)
@@ -168,14 +248,23 @@ public class ProductEntry {
     }
 
     public String formatGeoBoundayString() {
-        final StringBuilder str = new StringBuilder(geoboundary.length*4);
-        for(GeoPos geo : geoboundary) {
-            str.append(geo.getLat());
-            str.append(',');
-            str.append(geo.getLon());
-            str.append(',');
+        final StringBuilder str = new StringBuilder(geoboundary.length*20);
+        if(geoboundary.length > 50) {
+            final DecimalFormat df = new DecimalFormat("0.000");
+            for(GeoPos geo : geoboundary) {
+                str.append(df.format(geo.getLat()));
+                str.append(',');
+                str.append(df.format(geo.getLon()));
+                str.append(',');
+            }
+        } else {
+            for(GeoPos geo : geoboundary) {
+                str.append(geo.getLat());
+                str.append(',');
+                str.append(geo.getLon());
+                str.append(',');
+            }
         }
-
         return str.toString();
     }
 

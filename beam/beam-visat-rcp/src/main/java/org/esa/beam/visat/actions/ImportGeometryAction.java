@@ -110,12 +110,15 @@ public class ImportGeometryAction extends ExecCommand {
         fileChooser.addChoosableFileFilter(shapefileFilter);
         fileChooser.setFileFilter(shapefileFilter);/*I18N*/
         fileChooser.setCurrentDirectory(getIODir(propertyMap));
+        fileChooser.setMultiSelectionEnabled(true);
         final int result = fileChooser.showOpenDialog(visatApp.getMainFrame());
         if (result == JFileChooser.APPROVE_OPTION) {
-            final File file = fileChooser.getSelectedFile();
-            if (file != null) {
-                setIODir(propertyMap, file.getAbsoluteFile().getParentFile());
-                loadGeometry(visatApp, file);
+            final File[] files = fileChooser.getSelectedFiles();
+            if (files != null) {
+                for(File file : files) {
+                    setIODir(propertyMap, file.getAbsoluteFile().getParentFile());
+                    loadGeometry(visatApp, file);
+                }
             }
         }
     }

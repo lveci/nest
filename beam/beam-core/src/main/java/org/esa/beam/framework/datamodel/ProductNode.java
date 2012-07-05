@@ -122,7 +122,7 @@ public abstract class ProductNode extends ExtensibleObject {
      * @return a description or <code>null</code>
      */
     public String getDescription() {
-        return description;
+        return description == null ? "" : description;
     }
 
     /**

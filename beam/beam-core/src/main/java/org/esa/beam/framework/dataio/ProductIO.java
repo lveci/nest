@@ -168,7 +168,7 @@ public class ProductIO {
             }
         }
 
-        return readProductImpl(file, null);
+        return null;
     }
 
     /**

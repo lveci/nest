@@ -9,7 +9,6 @@
 
     <tocitem text="General">
 		<tocitem text="Definitions" target="Definitions"/>
-		<tocitem text="Data Sources" target="DataSources"/>
 		<tocitem text="Abstracted Metadata" target="AbstractedMetadata"/>
     </tocitem>
 

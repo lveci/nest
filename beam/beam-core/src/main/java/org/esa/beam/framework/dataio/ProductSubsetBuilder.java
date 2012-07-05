@@ -62,10 +62,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if(absRoot == null) return;
 
             final String mission = absRoot.getAttributeString("MISSION");
-            final String pass = absRoot.getAttributeString("PASS");
             boolean nearRangeOnLeft = true;
-            if (mission.equals("RS2") && pass.contains("DESCENDING")) {
-                nearRangeOnLeft = false;
+            if (mission.equals("RS2")) {
+                final String pass = absRoot.getAttributeString("PASS");
+                if(pass.contains("DESCENDING")) {
+                    nearRangeOnLeft = false;
+                }
             }
 
             final MetadataAttribute firstLineTime = absRoot.getAttribute("first_line_time");

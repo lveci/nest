@@ -418,12 +418,17 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         final StringBuilder errorMsg = new StringBuilder(100);
         final StringBuilder warningMsg = new StringBuilder(100);
         for(GraphNode n : graphEx.GetGraphNodes()) {
-            final UIValidation validation = n.validateParameterMap();
-            if(validation.getState() == UIValidation.State.ERROR) {
+            try {
+                final UIValidation validation = n.validateParameterMap();
+                if(validation.getState() == UIValidation.State.ERROR) {
+                    isValid = false;
+                    errorMsg.append(validation.getMsg()).append('\n');
+                } else if(validation.getState() == UIValidation.State.WARNING) {
+                    warningMsg.append(validation.getMsg()).append('\n');
+                }
+            } catch (Exception e) {
                 isValid = false;
-                errorMsg.append(validation.getMsg()).append('\n');
-            } else if(validation.getState() == UIValidation.State.WARNING) {
-                warningMsg.append(validation.getMsg()).append('\n');
+                errorMsg.append(e.getMessage()).append('\n');
             }
         }
 

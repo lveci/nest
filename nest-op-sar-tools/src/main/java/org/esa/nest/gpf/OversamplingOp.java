@@ -29,6 +29,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -71,9 +72,9 @@ public class OversamplingOp extends Operator {
     @Parameter(description = "The azimuth pixel spacing", defaultValue = "12.5", label="Azimuth Spacing")
     private float azimuthSpacing = 12.5f;
 
-    @Parameter(description = "use PRF as azimuth tile size and range line as range tile size", defaultValue = "true",
+    @Parameter(description = "use PRF as azimuth tile size and range line as range tile size", defaultValue = "false",
                 label="Use PRF Tile Size")
-    private boolean usePRFTileSize = true;
+    private boolean usePRFTileSize = false;
 
     private MetadataElement abs; // root of the abstracted metadata
     private String productFormat;
@@ -90,7 +91,7 @@ public class OversamplingOp extends Operator {
     private double[] dopplerCentroidFreq; // Doppler centroid frequencies for all columns in a range line
     private double widthRatioByHeightRatio;
 
-    private static final double nsTOs = 1.0 / 1000000000.0; // ns to s
+    private static final double nsTOs = Constants.oneBillionth; // ns to s
     private static final String CEOS = "CEOS";
     private static final String ENVISAT = "ENVISAT";
     private static final String OTHER = "OTHER";

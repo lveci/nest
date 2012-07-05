@@ -17,6 +17,7 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
@@ -45,8 +46,7 @@ public class CreateElevationOpUI extends BaseOperatorUI {
     private final JTextField elevationBandName = new JTextField("");
     private final JTextField externalDEM = new JTextField("");
 
-    private final JComboBox resamplingMethod = new JComboBox(
-            new String[] { CreateElevationOp.NEAREST_NEIGHBOUR, CreateElevationOp.BILINEAR, CreateElevationOp.CUBIC } );
+    private final JComboBox resamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {

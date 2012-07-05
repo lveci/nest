@@ -75,7 +75,7 @@ public final class DBScanner extends SwingWorker {
             dirList.addAll(Arrays.asList(subDirs));
         }
 
-        final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter();
+        final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(true);
         final List<File> fileList = new ArrayList<File>(dirList.size());
         for(File file : dirList) {
             fileList.addAll(Arrays.asList(file.listFiles(fileFilter)));
@@ -124,7 +124,7 @@ public final class DBScanner extends SwingWorker {
                         }
                         sourceProduct.dispose();
                         entry.dispose();
-                    } else {
+                    } else if(!file.isDirectory()) {
                         System.out.println("No reader for "+file.getAbsolutePath());
                     }
                 } catch(Throwable e) {

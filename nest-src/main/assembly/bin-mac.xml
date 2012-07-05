@@ -20,6 +20,14 @@
     <fileSets>
 
 		<fileSet>
+            <directory>nest-src/main/bin/macosx/__MACOSX</directory>
+            <outputDirectory>__MACOSX</outputDirectory>
+        </fileSet>
+		<fileSet>
+            <directory>nest-src/main/bin/macosx/NEST.app</directory>
+            <outputDirectory>NEST.app</outputDirectory>
+        </fileSet>
+		<fileSet>
             <directory>nest-src/main/bin/common/</directory>
             <outputDirectory></outputDirectory>
         </fileSet>

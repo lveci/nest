@@ -45,13 +45,13 @@ public class GraphicsUtils {
     }
 
     public static String padString(final String text, final int width) {
-        if(text.length() >= width)
+        if(text.length() >= width || text.equalsIgnoreCase("NaN"))
             return text;
         final StringBuilder newText = new StringBuilder(width);
         final int firstPos = width - text.length();
         int i=0;
         while(i <= firstPos) {
-            newText.append('0');
+            newText.append(' ');
             ++i;
         }
         newText.append(text);

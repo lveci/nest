@@ -465,7 +465,7 @@ public final class SubtRefDemOp extends Operator {
         // double square root : scales with the size of tile
         final int numberOfPoints = (int) (10 * Math.sqrt(Math.sqrt(rectangle.width * rectangle.height)));
 
-        System.out.println("numberOfPoints = " + numberOfPoints);
+        //System.out.println("numberOfPoints = " + numberOfPoints);
 
         // work with 1.75x size of tile
         double extendTimes = 1.75;

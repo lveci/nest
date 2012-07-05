@@ -1,12 +1,7 @@
 #! /bin/sh
 
 if [ -z "$NEST_HOME" ]; then
-    echo
-    echo Error: NEST_HOME not found in your environment.
-    echo Please set the NEST_HOME variable in your environment to match the
-    echo location of the NEST installation
-    echo
-    exit 2
+    export NEST_HOME=$PWD
 fi
 
 $NEST_HOME/jre/bin/java \

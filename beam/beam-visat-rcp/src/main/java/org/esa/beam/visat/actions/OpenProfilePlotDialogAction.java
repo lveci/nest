@@ -31,6 +31,6 @@ public class OpenProfilePlotDialogAction extends ExecCommand {
 
     @Override
     public void updateState(final CommandEvent event) {
-        StatisticDialogHelper.enableCommandIfShapeSelected(VisatApp.getApp(), event);
+        StatisticDialogHelper.enableCommandIfProductSelected(VisatApp.getApp(), event);
     }
 }

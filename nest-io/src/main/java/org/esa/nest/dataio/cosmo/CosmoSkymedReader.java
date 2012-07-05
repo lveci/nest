@@ -283,8 +283,10 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
 
         // Global calibration attributes
+        /*
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag,
         		globalElem.getAttributeInt("Calibration Constant Compensation Flag"));
+        */
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 0);
 
         final String rngSpreadComp = globalElem.getAttributeString(

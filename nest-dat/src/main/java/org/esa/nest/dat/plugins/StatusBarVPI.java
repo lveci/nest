@@ -18,6 +18,7 @@ package org.esa.nest.dat.plugins;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.jidesoft.status.LabelStatusBarItem;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.ui.PixelPositionListener;
@@ -30,6 +31,8 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 public class StatusBarVPI extends AbstractVisatPlugIn {
@@ -38,6 +41,7 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
     private LabelStatusBarItem _dimensionStatusBarItem;
     private LabelStatusBarItem _valueStatusBarItem;
     private HashMap<Product, PixelPositionListener> _pixelPosListeners;
+    private static final Font monoFont = new Font("Courier New",Font.PLAIN,12);
 
     public void start(final VisatApp visatApp) {
         _visatApp = visatApp;
@@ -90,6 +94,7 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
     private LabelStatusBarItem getValueStatusBarItem() {
         if (_valueStatusBarItem == null) {
             _valueStatusBarItem = (LabelStatusBarItem) _visatApp.getStatusBar().getItemByName("STATUS_BAR_VALUE_ITEM");
+            _valueStatusBarItem.setFont(monoFont);
         }
         return _valueStatusBarItem;
     }
@@ -126,15 +131,30 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
 
                 final ProductNode prodNode = _visatApp.getSelectedProductNode();
                 if(prodNode != null) {
-                    final String selectedNodeName = prodNode.getName();
-                    final Band band = prod.getBand(selectedNodeName);
+                    final Band band = prod.getBand(prodNode.getName());
                     if(band != null) {
-                        valueStatusBarItem.setText(GraphicsUtils.padString(band.getPixelString(pixelX, pixelY), 15));
+                        PixelPos pixelPos = computeLevelZeroPixelPos(imageLayer, pixelX, pixelY, currentLevel);
+
+                        valueStatusBarItem.setText(GraphicsUtils.padString(
+                                band.getPixelString((int)pixelPos.getX(), (int)pixelPos.getY()), 15));
                     }
                 }
             } else {
                 dimensionStatusBarItem.setText(_EMPTYSTR);
                 valueStatusBarItem.setText(_EMPTYSTR);
+            }
+        }
+
+        private PixelPos computeLevelZeroPixelPos(ImageLayer imageLayer, int pixelX, int pixelY, int currentLevel) {
+            if (currentLevel != 0) {
+                AffineTransform i2mTransform = imageLayer.getImageToModelTransform(currentLevel);
+                Point2D modelP = i2mTransform.transform(new Point2D.Double(pixelX, pixelY), null);
+                AffineTransform m2iTransform = imageLayer.getModelToImageTransform();
+                Point2D imageP = m2iTransform.transform(modelP, null);
+
+                return new PixelPos(new Float(imageP.getX()), new Float(imageP.getY()));
+            } else {
+                return new PixelPos(pixelX + 0.5f, pixelY + 0.5f);
             }
         }
 

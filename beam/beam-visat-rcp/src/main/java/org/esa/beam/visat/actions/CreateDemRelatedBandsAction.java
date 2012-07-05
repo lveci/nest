@@ -416,7 +416,7 @@ public class CreateDemRelatedBandsAction extends ExecCommand {
 
         @Override
         protected double computeSample(int sourceX, int sourceY) {
-            GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(sourceX + 0.5f, sourceY + 0.5f), null);
+            GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(sourceX, sourceY), null);
             try {
                 return dem.getElevation(geoPos);
             } catch (Exception e) {

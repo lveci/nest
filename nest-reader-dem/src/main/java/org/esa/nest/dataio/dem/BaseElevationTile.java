@@ -20,54 +20,41 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 
+import java.util.Arrays;
+
 public class BaseElevationTile implements ElevationTile {
 
     private Product product;
     protected final float noDataValue;
-    private LineArray.LineFactory objectFactory;
-    private LineArray objectArray;
-    //private int minIndex, maxIndex;
+    private final float[][] objectArray;
+    private final boolean useDEMGravitationalModel;
 
     public BaseElevationTile(final ElevationModel dem, final Product product) {
         this.product = product;
         noDataValue = dem.getDescriptor().getNoDataValue();
-        objectFactory = getLineFactory();
-        setCachedRange(0, product.getSceneRasterHeight());
-
+        objectArray = new float[product.getSceneRasterHeight() + 1][];
+        final String prop = System.getProperty("useDEMGravitationalModel");
+        useDEMGravitationalModel = prop != null && prop.equalsIgnoreCase("true");
         //System.out.println("Dem Tile "+product.getName());
     }
 
-    private void setCachedRange(final int indexMin, final int indexMax) {
-        if (indexMax < indexMin) {
-            throw new IllegalArgumentException("indexMin < indexMax");
-        }
-        final LineArray objArray = new LineArray(indexMin, indexMax);
-        final LineArray objArrayOld = objectArray;
-        if (objArrayOld != null) {
-            objArray.set(objArrayOld);
-            objArrayOld.clear();
-        }
-        objectArray = objArray;
-        //minIndex = objArray.getMinIndex();
-        //maxIndex = objArray.getMaxIndex();
-    }
-
-    public void clearCache() {
+    public final void clearCache() {
         if (objectArray != null) {
-            objectArray.clear();
+            Arrays.fill(objectArray, 0, objectArray.length, null);
         }
     }
 
     public final float getSample(final int pixelX, final int pixelY) throws Exception {
 
-        //if (pixelY < minIndex || pixelY > maxIndex) {
-        //    final float[] line = objectFactory.createObject(pixelY);
-        //    return line[pixelX];
-        //}
-        float[] line = objectArray.getObject(pixelY);
+        float[] line = objectArray[pixelY];
         if (line == null) {
-            line = objectFactory.createObject(pixelY);
-            objectArray.setObject(pixelY, line);
+            final Band band = product.getBandAt(0);
+            final int width = product.getSceneRasterWidth();
+            line = band.readPixels(0, pixelY, width, 1, new float[width], ProgressMonitor.NULL);
+            if(useDEMGravitationalModel) {
+                addGravitationalModel(pixelY, line);
+            }
+            objectArray[pixelY] = line;
         }
         return line[pixelX];
     }
@@ -78,18 +65,6 @@ public class BaseElevationTile implements ElevationTile {
             product.dispose();
             product = null;
         }
-    }
-
-    private LineArray.LineFactory getLineFactory() {
-        final Band band = product.getBandAt(0);
-        final int width = product.getSceneRasterWidth();
-        return new LineArray.LineFactory() {
-            public float[] createObject(final int index) throws Exception {
-                final float[] line = band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
-                addGravitationalModel(index, line);
-                return line;
-            }
-        };
     }
 
     protected void addGravitationalModel(final int index, final float[] line) {

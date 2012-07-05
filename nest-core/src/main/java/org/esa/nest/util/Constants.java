@@ -28,6 +28,7 @@ public final class Constants
 
     public static final double oneMillion = 1000000.0;
     public static final double oneBillion = 1000000000.0;
+    public static final double oneBillionth = 1.0 / oneBillion;
 
     public static final double TWO_PI = 2.0*Math.PI;
 

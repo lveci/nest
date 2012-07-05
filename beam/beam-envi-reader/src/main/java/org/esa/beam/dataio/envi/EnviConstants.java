@@ -1,6 +1,6 @@
 package org.esa.beam.dataio.envi;
 
-class EnviConstants {
+public class EnviConstants {
 
     public static final String HEADER_KEY_SAMPLES = "samples";
     public static final String HEADER_KEY_LINES = "lines";

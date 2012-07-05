@@ -6,7 +6,7 @@
 
     <tocitem text="Graph Processing">
 		<tocitem text="Analysis Operators">
-			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
+			<tocitem text="Principle Component Analysis" target="PCA"/>	
 		</tocitem>
 		<tocitem text="Utility Operators">
 			<tocitem text="Create Stack" target="CreateStackOp"/>

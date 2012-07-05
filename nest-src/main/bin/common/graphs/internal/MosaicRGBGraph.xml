@@ -23,6 +23,8 @@
       <sceneWidth>0</sceneWidth>
       <sceneHeight>0</sceneHeight>
 	  <feather>5</feather>
+	  <maxIterations>5000</maxIterations>
+	  <convergenceThreshold>1e-4</convergenceThreshold>
     </parameters>
   </node>
   <node id="3-Write">
