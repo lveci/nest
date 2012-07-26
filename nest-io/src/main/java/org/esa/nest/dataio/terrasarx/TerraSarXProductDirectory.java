@@ -131,6 +131,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             setStartStopTime(product, absRoot, sceneInfo);
 
             getCornerCoords(sceneInfo, geocodedImageInfo);
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.avg_scene_height,
+                    sceneInfo.getAttributeDouble("sceneAverageHeight", defInt));
         } else if(acquisitionInfo != null) {
             setStartStopTime(product, absRoot, acquisitionInfo);   
         }

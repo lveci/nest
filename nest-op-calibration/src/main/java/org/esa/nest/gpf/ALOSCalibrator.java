@@ -22,6 +22,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
@@ -33,21 +34,12 @@ import java.util.HashMap;
  * Calibration for ALOS PALSAR data products.
  */
 
-public class ALOSCalibrator implements Calibrator {
+public class ALOSCalibrator extends BaseCalibrator implements Calibrator {
 
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
-
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
-    private MetadataElement abstractedMetadata = null;
     private String sampleType = null;
     private double calibrationFactor = 0;
     private TiePointGrid incidenceAngle = null;
-    private String incidenceAngleSelection = null;
 
-    private static final double underFlowFloat = 1.0e-30;
     private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
 
     /**
@@ -55,20 +47,6 @@ public class ALOSCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public ALOSCalibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    public void setOutputImageIndB(boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -87,10 +65,6 @@ public class ALOSCalibrator implements Calibrator {
     public void setAuxFileFlag(String file) {
     }
     
-    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
-    }
-    
     /**
 
      */
@@ -102,17 +76,17 @@ public class ALOSCalibrator implements Calibrator {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
 
-            abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            final String mission = abstractedMetadata.getAttributeString(AbstractMetadata.MISSION);
+            final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
             if(!mission.equals("ALOS"))
                 throw new OperatorException(mission + " is not a valid mission for ALOS Calibration");
 
-            if (abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
+            if (absRoot.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
                 throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
             }
 
-            sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+            sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
 
             getCalibrationFactor();
 
@@ -129,11 +103,10 @@ public class ALOSCalibrator implements Calibrator {
 
     /**
      * Get calibration factor.
-     * @throws Exception for missing metadata
      */
     private void getCalibrationFactor() {
 
-        calibrationFactor = abstractedMetadata.getAttributeDouble(AbstractMetadata.calibration_factor);
+        calibrationFactor = absRoot.getAttributeDouble(AbstractMetadata.calibration_factor);
 
         if (sampleType.contains("COMPLEX")) {
             calibrationFactor -= 32.0; // calibration factor offset is 32 dB
@@ -157,10 +130,6 @@ public class ALOSCalibrator implements Calibrator {
     private void updateTargetProductMetadata() {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (sampleType.contains("COMPLEX")) {
-            abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
     }

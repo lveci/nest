@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>4C-1.0</version>
+        <version>4C-1.1</version>
     </parent>
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-io</artifactId>
     <name>NEST Readers and Writers</name>
-    <version>4C-1.0</version>
+    <version>4C-1.1</version>
 
     <packaging>jar</packaging>
 

@@ -165,7 +165,7 @@ public class BandChooser extends ModalDialog {
                 boolean checked = false;
                 for (int j = 0; j < _selectedBands.length; j++) {
                     Band selectedBand = _selectedBands[j];
-                    if (band == selectedBand) {
+                    if (band.getName().equalsIgnoreCase(selectedBand.getName())) {
                         checked = true;
                         _numSelected++;
                         break;

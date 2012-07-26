@@ -18,8 +18,12 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Helper methods for working with Stack products
@@ -108,6 +112,39 @@ public final class StackUtils {
             }
         }
         return null;
+    }
+
+    public static ProductData.UTC getSlaveTime(final Product sourceProduct, final Band slvBand) {
+        final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
+                                                        AbstractMetadata.SLAVE_METADATA_ROOT);
+        if(slaveMetadataRoot != null) {
+            final String slvBandName = slvBand.getName();
+            for(MetadataElement elem : slaveMetadataRoot.getElements()) {
+                final String slvBandNames = elem.getAttributeString(AbstractMetadata.SLAVE_BANDS, "");
+                if(slvBandNames.contains(slvBandName))
+                    return elem.getAttributeUTC(AbstractMetadata.first_line_time);
+            }
+        }
+        return null;
+    }
+
+    public static ProductData.UTC[] getProductTimes(final Product sourceProduct) {
+        final List<ProductData.UTC> utcList = new ArrayList<ProductData.UTC>();
+        // add master time
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        if(absRoot != null) {
+            utcList.add(absRoot.getAttributeUTC(AbstractMetadata.first_line_time));
+
+            // add slave times
+            final MetadataElement slaveMetadataRoot = sourceProduct.getMetadataRoot().getElement(
+                                                            AbstractMetadata.SLAVE_METADATA_ROOT);
+            if(slaveMetadataRoot != null) {
+                for(MetadataElement elem : slaveMetadataRoot.getElements()) {
+                    utcList.add(elem.getAttributeUTC(AbstractMetadata.first_line_time));
+                }
+            }
+        }
+        return utcList.toArray(new ProductData.UTC[utcList.size()]);
     }
 
     public static String[] bandsToStringArray(final Band[] bands) {

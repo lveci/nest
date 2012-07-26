@@ -34,10 +34,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.dialogs.AutoCloseOptionPane;
 import org.esa.nest.dataio.dem.FileElevationModel;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.CalibrationFactory;
-import org.esa.nest.datamodel.Calibrator;
-import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.*;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
@@ -951,7 +948,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!RangeDopplerGeocodingOp.isValidCell(rangeIndex, azimuthIndex, lat, lon, tileGeoRef,
+                    if (!RangeDopplerGeocodingOp.isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
                             srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {

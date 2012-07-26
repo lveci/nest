@@ -1,4 +1,4 @@
-package org.esa.nest.gpf;
+package org.esa.nest.datamodel;
 
 import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.datamodel.GeoPos;

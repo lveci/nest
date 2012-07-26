@@ -21,6 +21,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -62,13 +63,11 @@ public final class CreateElevationOp extends Operator {
     @Parameter(description = "The external DEM file.", defaultValue=" ", label="External DEM")
     private String externalDEM = " ";
 
-    @Parameter(valueSet = { NEAREST_NEIGHBOUR, BILINEAR, CUBIC }, defaultValue = BILINEAR,
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME, ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+            ResamplingFactory.CUBIC_CONVOLUTION_NAME, ResamplingFactory.BISINC_INTERPOLATION_NAME,
+            ResamplingFactory.BICUBIC_INTERPOLATION_NAME}, defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                 label="Resampling Method")
-    private String resamplingMethod = BILINEAR;
-
-    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    static final String BILINEAR = "Bilinear Interpolation";
-    static final String CUBIC = "Cubic Convolution";
+    private String resamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
     private FileElevationModel fileElevationModel = null;
     private ElevationModel dem = null;
@@ -102,24 +101,14 @@ public final class CreateElevationOp extends Operator {
             if (demDescriptor.isInstallingDem())
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
 
-            Resampling resampling = Resampling.BILINEAR_INTERPOLATION;
-            if(resamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-                resampling = Resampling.NEAREST_NEIGHBOUR;
-            } else if(resamplingMethod.equals(BILINEAR)) {
-                resampling = Resampling.BILINEAR_INTERPOLATION;
-            } else if(resamplingMethod.equals(CUBIC)) {
-                resampling = Resampling.CUBIC_CONVOLUTION;
-            }
-
             if(externalDEM != null && !externalDEM.trim().isEmpty()) {
 
-                fileElevationModel = new FileElevationModel(new File(externalDEM), resampling);
+                fileElevationModel = new FileElevationModel(new File(externalDEM),
+                        ResamplingFactory.createResampling(resamplingMethod));
                 noDataValue = fileElevationModel.getNoDataValue();
             } else {
 
-                dem = demDescriptor.createDem(resampling);
-                if(dem == null)
-                    throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+                dem = DEMFactory.createElevationModel(demName, resamplingMethod);
                 noDataValue = dem.getDescriptor().getNoDataValue();
             }
             

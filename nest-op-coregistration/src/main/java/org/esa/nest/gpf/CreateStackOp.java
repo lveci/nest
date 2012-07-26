@@ -392,9 +392,7 @@ public class CreateStackOp extends Operator {
                 if(bandUnit != null) {
                     if (bandUnit.contains(Unit.PHASE)) {
                         throw new OperatorException("Phase band should not be selected for co-registration");
-                    } else if (bandUnit.contains(Unit.IMAGINARY)) {
-                        throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                    } else if (bandUnit.contains(Unit.REAL)) {
+                    } else if (bandUnit.contains(Unit.REAL) || bandUnit.contains(Unit.IMAGINARY)) {
                         if (slaveBandNames.length < 2) {
                             throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
                         }
@@ -404,7 +402,8 @@ public class CreateStackOp extends Operator {
                             throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
                         }
                         final Band nextBand = prod.getBand(nextBandName);
-                        if (!nextBand.getUnit().contains(Unit.IMAGINARY)) {
+                        if ((bandUnit.contains(Unit.REAL) && !nextBand.getUnit().contains(Unit.IMAGINARY) ||
+                            (bandUnit.contains(Unit.IMAGINARY) && !nextBand.getUnit().contains(Unit.REAL)))) {
                             throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
                         }
                         bandList.add(band);

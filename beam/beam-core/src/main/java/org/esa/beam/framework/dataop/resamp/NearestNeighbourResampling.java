@@ -41,9 +41,9 @@ final class NearestNeighbourResampling implements Resampling {
         index.width = width;
         index.height = height;
 
+        index.i0 = Index.crop((int) Math.floor(x), width - 1);
+        index.j0 = Index.crop((int) Math.floor(y), height - 1);
 
-        index.i0 = Index.crop((int) Math.floor(x + 0.5f), width - 1);
-        index.j0 = Index.crop((int) Math.floor(y + 0.5f), height - 1);
     }
 
     public final float resample(final Raster raster,

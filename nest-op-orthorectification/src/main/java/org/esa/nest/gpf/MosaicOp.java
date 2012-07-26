@@ -29,9 +29,11 @@ import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.MapProjectionHandler;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
@@ -134,28 +136,8 @@ public class MosaicOp extends Operator {
                 }
             }
 
-            targetProduct = new Product("mosiac", "mosiac", sceneWidth, sceneHeight);
-
-            //CoordinateReferenceSystem targetCRS = MapProjectionHandler.getCRS(mapProjection);
-            final CoordinateReferenceSystem targetCRS = srcGeocoding.getGeoCRS();
-
-            double pixSize = pixelSize;
-           // if (targetCRS.getName().getCode().contains("WGS84")) {
-                pixSize = pixelSize / Constants.semiMajorAxis * org.esa.beam.util.math.MathUtils.RTOD;
-           // }
-
-            final Rectangle2D bounds = new Rectangle2D.Double();
-            bounds.setFrameFromDiagonal(scnProp.lonMin, scnProp.latMin, scnProp.lonMax, scnProp.latMax);
-            final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, targetCRS);
-            final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
-            final CrsGeoCoding geoCoding = new CrsGeoCoding(targetCRS,
-                                                            sceneWidth,
-                                                            sceneHeight,
-                                                            targetEnvelope.getMinimum(0),
-                                                            targetEnvelope.getMaximum(1),
-                                                            pixSize, pixSize);
-
-            targetProduct.setGeoCoding(geoCoding);
+            targetProduct = new Product("mosaic", "mosaic", sceneWidth, sceneHeight);
+            targetProduct.setGeoCoding(createCRSGeoCoding(srcGeocoding));
             
             final Band targetBand = new Band("mosaic", ProductData.TYPE_FLOAT32, sceneWidth, sceneHeight);
 
@@ -176,6 +158,30 @@ public class MosaicOp extends Operator {
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
+
+    private CrsGeoCoding createCRSGeoCoding(GeoCoding srcGeocoding) throws Exception {
+        final CoordinateReferenceSystem srcCRS = srcGeocoding.getMapCRS();
+        final CoordinateReferenceSystem targetCRS = MapProjectionHandler.getCRS(srcCRS.toWKT());
+        final double pixelSpacingInDegree = pixelSize / Constants.semiMajorAxis * MathUtils.RTOD;
+
+        double pixelSizeX = pixelSize;
+        double pixelSizeY = pixelSize;
+        if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
+            pixelSizeX = pixelSpacingInDegree;
+            pixelSizeY = pixelSpacingInDegree;
+        }
+
+        final Rectangle2D bounds = new Rectangle2D.Double();
+        bounds.setFrameFromDiagonal(scnProp.lonMin, scnProp.latMin, scnProp.lonMax, scnProp.latMax);
+        final ReferencedEnvelope boundsEnvelope = new ReferencedEnvelope(bounds, DefaultGeographicCRS.WGS84);
+        final ReferencedEnvelope targetEnvelope = boundsEnvelope.transform(targetCRS, true);
+        return new CrsGeoCoding(targetCRS,
+                sceneWidth,
+                sceneHeight,
+                targetEnvelope.getMinimum(0),
+                targetEnvelope.getMaximum(1),
+                pixelSizeX, pixelSizeY);
     }
 
     /**

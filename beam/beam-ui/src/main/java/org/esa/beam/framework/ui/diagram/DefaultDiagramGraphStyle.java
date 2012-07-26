@@ -29,12 +29,14 @@ public class DefaultDiagramGraphStyle implements DiagramGraphStyle {
     private boolean showingPoints;
     private Paint fillPaint;
     private Stroke outlineStroke;
+    private int pointSize;
 
     public DefaultDiagramGraphStyle() {
         outlineColor = Color.BLACK;
         fillPaint = Color.WHITE;
         showingPoints = true;
         outlineStroke = new BasicStroke(1.0f);
+        pointSize = 5;
     }
 
     public Color getOutlineColor() {
@@ -55,6 +57,14 @@ public class DefaultDiagramGraphStyle implements DiagramGraphStyle {
 
     public boolean isShowingPoints() {
         return showingPoints;
+    }
+
+    public int getPointSize() {
+        return pointSize;
+    }
+
+    public void setPointSize(final int size) {
+        pointSize = size;
     }
 
     public void setShowingPoints(boolean showingPoints) {

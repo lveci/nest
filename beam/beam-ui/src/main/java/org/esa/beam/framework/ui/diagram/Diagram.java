@@ -361,9 +361,10 @@ public class Diagram {
                     double ya = graph.getYValueAt(i);
                     a.setLocation(xa, ya);
                     transform.transformA2B(a, b1);
-                    Rectangle2D.Double r = new Rectangle2D.Double(b1.getX() - 1.5,
-                                                                  b1.getY() - 1.5,
-                                                                  3.0, 3.0);
+                    int size = graph.getStyle().getPointSize();
+                    Rectangle2D.Double r = new Rectangle2D.Double(b1.getX() - size*0.5,
+                                                                  b1.getY() - size*0.5,
+                                                                  size, size);
                     g2d.setPaint(graph.getStyle().getFillPaint());
                     g2d.fill(r);
                     g2d.setColor(graph.getStyle().getOutlineColor());
@@ -406,7 +407,7 @@ public class Diagram {
             x0 = xMin + (i * (xMax - xMin)) / (n - 1);
             if (i % (n2 + 1) == 0) {
                 y2 = y1 + majorTickLength;
-                text = xTickTexts[i / (n2 + 1)];
+                text = xTickTexts[Math.min(xTickTexts.length-1, i / (n2 + 1))];
                 tw = fontMetrics.stringWidth(text);
                 g2d.setColor(textColor);
                 g2d.drawString(text, x0 - tw / 2, y2 + textGap + fontMetrics.getAscent());
@@ -542,7 +543,7 @@ public class Diagram {
             boolean xRangeValid = xMaxAccum > xMinAccum;
             if (xRangeValid) {
                 xAxis.setValueRange(xMinAccum, xMaxAccum);
-                xAxis.setOptimalSubDivision(4, 6, 5);
+                xAxis.setOptimalSubDivision(4, 20, 3);
             }
 
             final DiagramAxis yAxis = getYAxis();

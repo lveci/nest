@@ -7,7 +7,7 @@
     <parent>
         <artifactId>nest</artifactId>
         <groupId>org.esa.nest</groupId>
-        <version>4C-1.0</version>
+        <version>4C-1.1</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -16,7 +16,7 @@
     <artifactId>nest-bootstrap</artifactId>
     <name>NEST Bootstrap Classpath</name>
     <description>Provides the bootstrap classpath to launch DAT from your favourite IDE.</description>
-    <version>4C-1.0</version>
+    <version>4C-1.1</version>
 
     <dependencies>
         <dependency>

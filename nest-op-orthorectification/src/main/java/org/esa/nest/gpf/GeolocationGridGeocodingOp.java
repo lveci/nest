@@ -29,6 +29,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.CRSGeoCodingHandler;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.MathUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -133,9 +134,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            getMetadata();
-
             getSourceImageDimension();
+
+            getMetadata();
 
             imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
             
@@ -224,7 +225,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 OperatorUtils.copyIndexCodings(sourceProduct, targetProduct);
             } catch(Exception e) {
                 if(!imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
-                    throw new OperatorException("Use Nearest Neighbour with Classificaitons: "+e.getMessage());
+                    throw new OperatorException("Use Nearest Neighbour with Classifications: "+e.getMessage());
                 }
             }
 
@@ -262,7 +263,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 0);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, targetCRS.getName().getCode());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
     }

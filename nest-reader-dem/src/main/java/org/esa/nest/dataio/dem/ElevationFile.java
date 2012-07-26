@@ -37,11 +37,11 @@ import java.util.zip.ZipFile;
  */
 public abstract class ElevationFile {
 
-    private final File localFile;
+    protected File localFile;
     private final File localZipFile;
     private final ProductReader productReader;
-    private boolean localFileExists = false;
-    private boolean remoteFileExists = true;
+    protected boolean localFileExists = false;
+    protected boolean remoteFileExists = true;
     private boolean errorInLocalFile = false;
     private ElevationTile tile = null;
     private ftpUtils ftp = null;
@@ -84,13 +84,18 @@ public abstract class ElevationFile {
         return null;
     }
 
+    protected boolean findLocalFile() {
+        if ((localFile.exists() && localFile.isFile()) || (localZipFile.exists() && localZipFile.isFile())) {
+            return true;
+        }
+        return false;
+    }
+
     private synchronized void getFile() throws IOException {
         try {
             if(tile != null) return;
             if(!localFileExists && !errorInLocalFile) {
-                if ((localFile.exists() && localFile.isFile()) || (localZipFile.exists() && localZipFile.isFile())) {
-                    localFileExists = true;
-                }
+                localFileExists = findLocalFile();
             }
             if(localFileExists) {
                 getLocalFile();
@@ -126,9 +131,6 @@ public abstract class ElevationFile {
         if(dataFile != null) {
             final Product product = productReader.readProductNodes(dataFile, null);
             if(product != null) {
-                if(product.getGeoCoding() == null) {
-                    //ReaderUtils.addGeoCoding(product, );
-                }
                 tile = createTile(product);
             }
         }
@@ -255,7 +257,7 @@ public abstract class ElevationFile {
         return false;
     }
 
-    private File getFileFromZip(final File dataFile) throws IOException {
+    protected File getFileFromZip(final File dataFile) throws IOException {
         final String ext = FileUtils.getExtension(dataFile.getName());
         if (ext.equalsIgnoreCase(".zip")) {
             final String baseName = localFile.getName();
@@ -273,8 +275,12 @@ public abstract class ElevationFile {
                 if (zipEntry == null) {
                     zipEntry = zipFile.getEntry(baseName.toLowerCase());
                     if (zipEntry == null) {
-                        localFileExists = false;
-                        throw new IOException("Entry '" + baseName + "' not found in zip file.");
+                        final String folderName = FileUtils.getFilenameWithoutExtension(dataFile.getName());
+                        zipEntry = zipFile.getEntry(folderName +'/'+ localFile.getName());
+                        if (zipEntry == null) {
+                            localFileExists = false;
+                            throw new IOException("Entry '" + baseName + "' not found in zip file.");
+                        }
                     }
                 }
 

@@ -20,6 +20,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.Unit.UnitType;
@@ -32,16 +33,8 @@ import java.util.HashMap;
  * Calibration for Cosmo-Skymed data products.
  */
 
-public class CosmoSkymedCalibrator implements Calibrator {
+public class CosmoSkymedCalibrator extends BaseCalibrator implements Calibrator {
 
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
-
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
-
-    private MetadataElement absRoot = null;
     private String sampleType = null;
     private double referenceSlantRange = 0.;
     private double referenceSlantRangeExp = 0.;
@@ -52,7 +45,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid slantRangeTime = null;
     private TiePointGrid latitude = null;
-    private String incidenceAngleSelection = null;
     
     private boolean applyRangeSpreadingLossCorrection = false;
     private boolean applyIncidenceAngleCorrection = false;
@@ -61,27 +53,11 @@ public class CosmoSkymedCalibrator implements Calibrator {
     private boolean rangeSpreadCompFlag = false;
     private boolean constantCompFlag = false;
 
-    private static final double underFlowFloat = 1.0e-30;
-
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
     public CosmoSkymedCalibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    public void setOutputImageIndB(boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -99,10 +75,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
     @Override
     public void setAuxFileFlag(String file) {
     }
-    
-	public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
-	}
 	
 	public void initialize(final Operator op, final Product srcProduct, final Product tgtProduct,
 			final boolean mustPerformRetroCalibration, final boolean mustUpdateMetadata)
@@ -140,7 +112,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
         } catch(Exception e) {
             throw new OperatorException(e);
         }
-		
 	}
 
     /**
@@ -149,10 +120,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
     private void updateTargetProductMetadata() {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (sampleType.contains("COMPLEX")) {
-            abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
     }
@@ -222,7 +189,6 @@ public class CosmoSkymedCalibrator implements Calibrator {
         //System.out.println("Calibration factor is " + calibrationFactor);
     }
 
-    
     /**
      * Get incidence angle and slant range time tie point grids.
      * @param sourceProduct the source
@@ -394,5 +360,4 @@ public class CosmoSkymedCalibrator implements Calibrator {
         targetTile.setRawSamples(sourceTile.getRawSamples());
 		
 	}
-
 }

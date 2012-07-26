@@ -492,10 +492,15 @@ public final class SARSimulationOp extends Operator {
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
             for (int y = ymin; y < ymax; y++) {
-                final double[] slrs = new double[w];
-                final double[] elev = new double[w];
-                final int[] index = new int[w];
+                double[] slrs = null;
+                double[] elev = null;
+                int[] index = null;
                 final boolean[] savePixel = new boolean[w];
+                if (saveLayoverShadowMask) {
+                    slrs = new double[w];
+                    elev = new double[w];
+                    index = new int[w];
+                }
 
                 for (int x = x0; x < xmax; x++) {
                     final int xx = x - x0;
@@ -536,7 +541,7 @@ public final class SARSimulationOp extends Operator {
                     final double zeroDopplerTimeWithoutBias =
                             zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
 
-                    final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+                    double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
 
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(zeroDopplerTimeWithoutBias,
                             timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
@@ -558,9 +563,10 @@ public final class SARSimulationOp extends Operator {
                         continue;   
                     }
 
-                    slrs[xx] = slantRange;
-
-                    elev[xx] = computeElevationAngle(slantRange, earthPoint, sensorPos);
+                    if (saveLayoverShadowMask) {
+                        slrs[xx] = slantRange;
+                        elev[xx] = computeElevationAngle(slantRange, earthPoint, sensorPos);
+                    }
 
                     final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
                     RangeDopplerGeocodingOp.setLocalGeometry(x, y, tileGeoRef, earthPoint, sensorPos, localGeometry);
@@ -581,9 +587,16 @@ public final class SARSimulationOp extends Operator {
 
                     saveSimulatedData(azimuthIndex, rangeIndex, v, x0, y0, w, h, targetTile, masterBuffer);
 
-                    index[xx] = targetTile.getDataBufferIndex((int)Math.round(rangeIndex), (int)Math.round(azimuthIndex));
-
-                    savePixel[xx] = true;
+                    if (saveLayoverShadowMask) {
+                        rangeIndex = Math.round(rangeIndex);
+                        azimuthIndex = Math.round(azimuthIndex);
+                        if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
+                            index[xx] = targetTile.getDataBufferIndex((int)rangeIndex, (int)azimuthIndex);
+                            savePixel[xx] = true;
+                        } else {
+                            savePixel[xx] = false;
+                        }
+                    }
                 }
 
                 if (!saveLayoverShadowMask) {
@@ -682,7 +695,7 @@ public final class SARSimulationOp extends Operator {
         }
     }
 
-    private void saveSimulatedData(final double azimuthIndex, final double rangeIndex, final double v,
+    private static void saveSimulatedData(final double azimuthIndex, final double rangeIndex, final double v,
                                    final int x0, final int y0, final int w, final int h, final Tile targetTile,
                                    final ProductData masterBuffer) {
         final int ia0 = (int)azimuthIndex;

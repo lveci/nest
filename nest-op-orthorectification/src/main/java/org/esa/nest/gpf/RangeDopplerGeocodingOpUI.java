@@ -24,6 +24,7 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.MapProjectionHandler;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;

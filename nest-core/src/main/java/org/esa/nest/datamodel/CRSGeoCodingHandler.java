@@ -1,7 +1,8 @@
-package org.esa.nest.gpf;
+package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.gpf.OperatorUtils;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -25,14 +26,11 @@ public class CRSGeoCodingHandler {
 
         final OperatorUtils.ImageGeoBoundary imageGeoBoundary = OperatorUtils.computeImageGeoBoundary(sourceProduct);
 
-        double pixelSizeX;
-        double pixelSizeY;
+        double pixelSizeX = pixelSpacingInMeter;
+        double pixelSizeY = pixelSpacingInMeter;
         if (targetCRS.getName().getCode().equals("WGS84(DD)")) {
             pixelSizeX = pixelSpacingInDegree;
             pixelSizeY = pixelSpacingInDegree;
-        } else {
-            pixelSizeX = pixelSpacingInMeter;
-            pixelSizeY = pixelSpacingInMeter;
         }
 
         final Rectangle2D bounds = new Rectangle2D.Double();

@@ -70,7 +70,7 @@ public class MultilookOpUI extends BaseOperatorUI {
             outputIntensityCheckBox.setSelected(outputIntensity);
             outputIntensityCheckBox.getModel().setPressed(outputIntensity);
         }
-        // outputIntensityCheckBox.setVisible(isComplexSrcProduct());
+        outputIntensityCheckBox.setVisible(isComplexSrcProduct());
 
         setAzimuthLooks();
     }

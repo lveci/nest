@@ -41,7 +41,7 @@ public final class SRTM3GeoTiffElevationModel extends BaseElevationModel {
 
     @Override
     public float getIndexY(final GeoPos geoPos) {
-        return RASTER_HEIGHT - (geoPos.lat + 60.0f) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+        return (60.0f - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
     }
 
     @Override

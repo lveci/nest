@@ -18,7 +18,7 @@
 		<jide.version>3.3.7</jide.version>
 		<hdf.version>2.7</hdf.version>
         <netcdf.version>4.2.20</netcdf.version>
-		<nest.version>4C-1.0</nest.version>
+		<nest.version>4C-1.1</nest.version>
 		<jdoris.version>0.3</jdoris.version>
 		<outputdir>../output</outputdir>
     </properties>
@@ -27,7 +27,7 @@
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest</artifactId>
-    <version>4C-1.0</version>
+    <version>4C-1.1</version>
 
     <packaging>pom</packaging>
 

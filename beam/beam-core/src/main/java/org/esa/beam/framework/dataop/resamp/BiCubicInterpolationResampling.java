@@ -60,6 +60,41 @@ final class BiCubicInterpolationResampling implements Resampling {
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
 
+
+        final float di = x - (i0 + 0.5f);
+        final float dj = y - (j0 + 0.5f);
+
+        index.i0 = i0;
+        index.j0 = j0;
+
+        final int iMax = width - 1;
+        final int jMax = height - 1;
+
+        if (di >= 0) {
+            final int i1 = i0 + 1;
+            index.i[0] = (i0 < 0) ? 0 : (i0 > iMax) ? iMax : i0; //Index.crop(i0, iMax);
+            index.i[1] = (i1 < 0) ? 0 : (i1 > iMax) ? iMax : i1; //Index.crop(i0 + 1, iMax);
+            index.ki[0] = di;
+        } else {
+            final int i1 = i0 - 1;
+            index.i[0] = (i1 < 0) ? 0 : (i1 > iMax) ? iMax : i1; //Index.crop(i0 - 1, iMax);
+            index.i[1] = (i0 < 0) ? 0 : (i0 > iMax) ? iMax : i0; //Index.crop(i0, iMax);
+            index.ki[0] = di + 1;
+        }
+
+        if (dj >= 0) {
+            final int j1 = j0 + 1;
+            index.j[0] = (j0 < 0) ? 0 : (j0 > jMax) ? jMax : j0; //Index.crop(j0, jMax);
+            index.j[1] = (j1 < 0) ? 0 : (j1 > jMax) ? jMax : j1; //Index.crop(j0 + 1, jMax);
+            index.kj[0] = dj;
+        } else {
+            final int j1 = j0 - 1;
+            index.j[0] = (j1 < 0) ? 0 : (j1 > jMax) ? jMax : j1; //Index.crop(j0 - 1, jMax);
+            index.j[1] = (j0 < 0) ? 0 : (j0 > jMax) ? jMax : j0; //Index.crop(j0, jMax);
+            index.kj[0] = dj + 1;
+        }
+
+        /*
         final float di = x - i0;
         final float dj = y - j0;
 
@@ -76,14 +111,15 @@ final class BiCubicInterpolationResampling implements Resampling {
         index.j[0] = Index.crop(j0, jMax);
         index.j[1] = Index.crop(j0 + 1, jMax);
         index.kj[0] = dj;
+        */
     }
 
     public final float resample(final Raster raster,
                                 final Index index) throws Exception {
 
         final float[][] v = new float[4][4];
-        final int x0 = index.i0 - 1;
-        final int y0 = index.j0 - 1;
+        final int x0 = index.i[0] - 1;
+        final int y0 = index.j[0] - 1;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 final int x = Index.crop(x0 + i, index.width-1);

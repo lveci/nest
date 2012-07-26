@@ -23,7 +23,11 @@ public class PolBandUtils {
         public final Band[] srcBands;
         public final String suffix;
         public Band[] targetBands;
-        
+
+        public double spanMin = 1e+30;
+        public double spanMax = -1e+30;
+        public boolean spanMinMaxSet = false;
+
         public QuadSourceBand(final String productName, final Band[] bands, final String suffix) {
             this.productName = productName;
             this.srcBands = bands;

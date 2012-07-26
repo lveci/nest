@@ -22,6 +22,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
@@ -33,50 +34,25 @@ import java.util.HashMap;
  * Calibration for Radarsat2 data products.
  */
 
-public class Radarsat2Calibrator implements Calibrator {
+public class Radarsat2Calibrator extends BaseCalibrator implements Calibrator {
 
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
-
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
-    private boolean isComplex = false;
-    private TiePointGrid incidenceAngle = null;
-    private String incidenceAngleSelection = null;
-
-    private static final double underFlowFloat = 1.0e-30;
     private static final String lutsigma = "lutSigma";
     private static final String lutgamma = "lutGamma";
     private static final String lutbeta = "lutBeta";
     private static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
 
+    private TiePointGrid incidenceAngle = null;
     private double offset = 0.0;
     private double[] gains = null;
 
     private int subsetOffsetX = 0;
     private int subsetOffsetY = 0;
-    private MetadataElement absRoot = null;
 
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
     public Radarsat2Calibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    public void setOutputImageIndB(boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -93,10 +69,6 @@ public class Radarsat2Calibrator implements Calibrator {
      */
     @Override
     public void setAuxFileFlag(String file) {
-    }
-
-    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
     }
 
     /**
@@ -140,25 +112,6 @@ public class Radarsat2Calibrator implements Calibrator {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if(!mission.equals("RS2")) {
             throw new OperatorException(mission + " is not a valid mission for Radarsat2 Calibration");
-        }
-    }
-
-    /**
-     * Get calibration flag from abstract metadata.
-     */
-    private void getCalibrationFlag() {
-        if (absRoot.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
-            throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
-        }
-    }
-
-    /**
-     * Get sample type from abstract metadata.
-     */
-    private void getSampleType() {
-        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-        if(sampleType.equals("COMPLEX")) {
-            isComplex = true;
         }
     }
 
@@ -207,10 +160,6 @@ public class Radarsat2Calibrator implements Calibrator {
     private void updateTargetProductMetadata() {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (isComplex) {
-            abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
 

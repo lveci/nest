@@ -308,7 +308,7 @@
 			<dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-core</artifactId>
-                <version>4C-0.1</version>
+                <version>4C-1.1</version>
             </dependency>
 			
             <!-- GeoTools Libraries ############################################# -->

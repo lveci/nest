@@ -52,9 +52,6 @@ public class SourceUI extends BaseOperatorUI {
      private static void initSourceProductSelectors(java.util.List<SourceProductSelector> sourceProductSelectorList) {
         for (SourceProductSelector sourceProductSelector : sourceProductSelectorList) {
             sourceProductSelector.initProducts();
-            if (sourceProductSelector.getProductCount() > 0) {
-                sourceProductSelector.setSelectedIndex(0);
-            }
         }
     }
 

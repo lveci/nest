@@ -23,6 +23,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
@@ -62,16 +63,8 @@ import java.util.*;
  * 3. replica pulse power variations correction
  * 4. analogue to digital converter non-linearity correction
  */
-public final class ERSCalibrator implements Calibrator {
+public final class ERSCalibrator extends BaseCalibrator implements Calibrator {
 
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
-
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
-
-    private MetadataElement absRoot = null;
     private String pafID; // processing facility identifier
     private String psID;  // processing system identifier
     private String pvID;  // processing version identifier
@@ -89,7 +82,6 @@ public final class ERSCalibrator implements Calibrator {
     private boolean applyReplicaPowerCorrection = false;
     private boolean applyADCSaturationCorrection = false;
     private boolean isERS1Mission = false;
-    private boolean isDetectedSampleType = false;
     private boolean isCEOSFormat = false;
     private boolean isAntPattAvailable = false;
     private boolean adcHasBeenTestedFlag = false;
@@ -146,7 +138,6 @@ public final class ERSCalibrator implements Calibrator {
     private static final double aWGS84 = Constants.semiMajorAxis; // WGS 84: equatorial Earth radius in m (for PGS CEOS)
     private static final double bWGS84 = Constants.semiMinorAxis; // WGS 84: polar Earth radius in m (for PGS CEOS)
     private static final double referenceSlantRange = 847000; //  m
-    private static final double underFlowFloat = 1.0e-30;
     private static final double windowDimInRange = 15000.0; //  m
     private static final double windowDimInAzimuth = 5000.0; //  m
     private static final double downSampleBlockSize = 100.0; // m
@@ -159,28 +150,11 @@ public final class ERSCalibrator implements Calibrator {
     private static final String ESRIN = "ES";
     private static final String VMP = "VMP";
 
-    private String incidenceAngleSelection = null;
-
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
     public ERSCalibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    @Override
-    public void setOutputImageIndB(final boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -198,10 +172,6 @@ public final class ERSCalibrator implements Calibrator {
      */
     @Override
     public void setAuxFileFlag(String file) {
-    }
-    
-    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
     }
     
     /**
@@ -521,17 +491,6 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     /**
-     * Get the sample type.
-     */
-    private void getSampleType() {
-
-        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-        if(sampleType.contains("DETECTED"))
-            isDetectedSampleType = true;
-        //System.out.println("Sample type is " + sampleType);
-    }
-
-    /**
      * Get Product type.
      */
     private void getProductType() {
@@ -695,7 +654,7 @@ public final class ERSCalibrator implements Calibrator {
 
         if (isERS1Mission) { // ERS-1
 
-            if (isDetectedSampleType) { // detected
+            if (!isComplex) { // detected
 
                 if (psID.contains(VMP) &&
                     processingTime.compareTo(time19910801) >= 0 && processingTime.compareTo(time19950716) < 0) {
@@ -718,7 +677,7 @@ public final class ERSCalibrator implements Calibrator {
 
         } else { // ERS-2
 
-            if (isDetectedSampleType) { // detected
+            if (!isComplex) { // detected
 
                 applyADCSaturationCorrection = true;
 
@@ -1140,7 +1099,7 @@ public final class ERSCalibrator implements Calibrator {
             final double theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
             final double psi1 = alpha1 - theta1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                if (isDetectedSampleType) {
+                if (!isComplex) {
                     psi = psi1 + i*deltaPsi;
                     ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
                 } else { // see Andrea's email dataed June 9, 2010
@@ -1169,7 +1128,7 @@ public final class ERSCalibrator implements Calibrator {
             final double theta1 = Math.asin(Math.sin(alpha1)*rt/rtPlusH);
             final double psi1 = alpha1 - theta1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                if (isDetectedSampleType) {
+                if (!isComplex) {
                     psi = psi1 + Math.asin(i*deltaPsi);
                     ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
                 } else { // see Andrea's email dataed June 9, 2010
@@ -1359,10 +1318,6 @@ public final class ERSCalibrator implements Calibrator {
     private void updateTargetProductMetadata() {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (!isDetectedSampleType) {
-            AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         if (applyAntennaPatternCorrection) {
             AbstractMetadata.setAttribute(abs, AbstractMetadata.ant_elev_corr_flag, 1);
@@ -2584,7 +2539,7 @@ public final class ERSCalibrator implements Calibrator {
         for (int x = tx0; x < tx0 + tw; x++) {
 
             double antennaPatternByRangeSpreadingLoss = 0.0;
-            if (isDetectedSampleType) {
+            if (!isComplex) {
                 antennaPatternByRangeSpreadingLoss = antennaPatternGain[x] / rangeSpreadingLoss[x];
             }
 
@@ -2608,7 +2563,7 @@ public final class ERSCalibrator implements Calibrator {
                     throw new OperatorException("ERSCalibrator: Unknown band unit");
                 }
 
-                if (isDetectedSampleType) { // ground range
+                if (!isComplex) { // ground range
                     sigma *= antennaPatternByRangeSpreadingLoss;
                 }
 

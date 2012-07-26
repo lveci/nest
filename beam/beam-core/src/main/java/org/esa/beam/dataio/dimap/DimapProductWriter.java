@@ -153,21 +153,22 @@ public class DimapProductWriter extends AbstractProductWriter {
         Guardian.assertNotNull("sourceBand", sourceBand);
         Guardian.assertNotNull("sourceBuffer", sourceBuffer);
         checkBufferSize(sourceWidth, sourceHeight, sourceBuffer);
-        final int sourceBandWidth = sourceBand.getSceneRasterWidth();
-        final int sourceBandHeight = sourceBand.getSceneRasterHeight();
-        checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
+        final long sourceBandWidth = sourceBand.getSceneRasterWidth();
+        final long sourceBandHeight = sourceBand.getSceneRasterHeight();
+        checkSourceRegionInsideBandRegion(sourceWidth, (int)sourceBandWidth, sourceHeight, (int)sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+        long outputPos = (long)sourceOffsetY * sourceBandWidth + (long)sourceOffsetX;
+        //pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
-            for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+            final int sourceSize = sourceHeight * sourceWidth;
+            for (int sourcePos = 0; sourcePos < sourceSize; sourcePos += sourceWidth) {
                 sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
                 outputPos += sourceBandWidth;
-                pm.worked(1);
-                if (pm.isCanceled()) {
-                    break;
-                }
+                //pm.worked(1);
+                //if (pm.isCanceled()) {
+                //    break;
+                //}
             }
         } finally {
             pm.done();

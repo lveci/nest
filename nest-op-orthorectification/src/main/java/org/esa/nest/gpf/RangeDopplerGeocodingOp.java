@@ -32,10 +32,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.dem.EarthGravitationalModel96;
 import org.esa.nest.dataio.dem.FileElevationModel;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.CalibrationFactory;
-import org.esa.nest.datamodel.Calibrator;
-import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.*;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
@@ -989,7 +986,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                         rangeIndex = srcMaxRange - rangeIndex;
                     }
 
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, tileGeoRef, srcMaxRange, srcMaxAzimuth, sensorPos)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, latitude, longitude,
+                            srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
@@ -1056,6 +1054,41 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     public static boolean isValidCell(final double rangeIndex, final double azimuthIndex,
+                                final double lat, final double lon,
+                                final TiePointGrid latitude, final TiePointGrid longitude,
+                                final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
+
+        if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
+            return  false;
+        }
+
+        final GeoPos sensorGeoPos = new GeoPos();
+        GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
+        final double delLatMax = Math.abs(lat - sensorGeoPos.lat);
+        double delLonMax;
+        if (lon < 0 && sensorGeoPos.lon > 0) {
+            delLonMax = Math.min(Math.abs(360 + lon - sensorGeoPos.lon), sensorGeoPos.lon - lon);
+        } else if (lon > 0 && sensorGeoPos.lon < 0) {
+            delLonMax = Math.min(Math.abs(360 + sensorGeoPos.lon - lon), lon - sensorGeoPos.lon);
+        } else {
+            delLonMax = Math.abs(lon - sensorGeoPos.lon);
+        }
+
+        final double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        final double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
+        double delLon;
+        if (lon < 0 && srcLon > 0) {
+            delLon = Math.min(Math.abs(360 + lon - srcLon), srcLon - lon);
+        } else if (lon > 0 && srcLon < 0) {
+            delLon = Math.min(Math.abs(360 + srcLon - lon), lon - srcLon);
+        } else {
+            delLon = Math.abs(lon - srcLon);
+        }
+
+        return (delLat + delLon <= delLatMax + delLonMax);
+    }
+    /*
+    public static boolean isValidCell(final double rangeIndex, final double azimuthIndex,
                                 final double lat, final double lon, final TileGeoreferencing tileGeoRef,
                                 final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
@@ -1093,7 +1126,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         return (delLat + delLon <= delLatMax + delLonMax);
     }
-
+    */
     /**
      * Save noDataValue to target pixel with given index.
      * @param index The pixel index in target image.

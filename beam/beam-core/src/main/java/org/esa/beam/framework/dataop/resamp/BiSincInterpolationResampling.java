@@ -41,11 +41,11 @@ final class BiSincInterpolationResampling implements Resampling {
         index.width = width;
         index.height = height;
 
-        final int i0 = (int) Math.floor(x + 0.5f);
-        final int j0 = (int) Math.floor(y + 0.5f);
+        final int i0 = (int) Math.floor(x);
+        final int j0 = (int) Math.floor(y);
 
-        final float di = x - i0;
-        final float dj = y - j0;
+        final float di = x - (i0 + 0.5f);
+        final float dj = y - (j0 + 0.5f);
 
         index.i0 = i0;
         index.j0 = j0;

@@ -143,7 +143,7 @@ public final class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
     public void seek(long pos) throws IOException {
         //checkClosed();
         if (pos < flushedPos) {
-            throw new IndexOutOfBoundsException("IndexOutOfBounds pos < flushedPos!");
+            throw new IndexOutOfBoundsException("IndexOutOfBounds pos < flushedPos! " + pos + " < "+ flushedPos);
         }
         bitOffset = 0;
         streamPos = eraf.seek(pos);

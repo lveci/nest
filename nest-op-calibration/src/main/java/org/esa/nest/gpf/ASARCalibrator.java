@@ -23,6 +23,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
@@ -39,17 +40,10 @@ import java.util.HashMap;
 /**
  * Calibration for ASAR data products.
  */
-public class ASARCalibrator implements Calibrator {
-
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
+public class ASARCalibrator extends BaseCalibrator implements Calibrator {
 
     private File externalAuxFile = null;
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
 
-    private MetadataElement absRoot = null;
     private String auxFile = null;
     private String productType = null;
     private String oldXCAFileName = null; // the old XCA file
@@ -100,27 +94,9 @@ public class ASARCalibrator implements Calibrator {
 //    private double refSlantRange = 800000.0; //  m
 //    private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
     private static final double refSlantRange800km = 800000.0; //  m
-    private static final double underFlowFloat = 1.0e-30;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
-    private String incidenceAngleSelection = null;
-
     public ASARCalibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    @Override
-    public void setOutputImageIndB(boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -137,10 +113,6 @@ public class ASARCalibrator implements Calibrator {
     @Override
     public void setAuxFileFlag(String file) {
         auxFile = file;
-    }
-
-    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
     }
     
     /**
@@ -270,7 +242,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get product swath.
-     * @throws Exception The exceptions.
      */
     private void getProductSwath() {
         swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
@@ -301,7 +272,6 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Get SRGR conversion parameters.
-     * @throws Exception The exceptions.
      */
     private void getSrgrCoeff() {
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
@@ -319,7 +289,6 @@ public class ASARCalibrator implements Calibrator {
     /**
      * Get XCA file used for the original radiometric calibration.
      * @return The complete path to the XCA file.
-     * @throws Exception The exceptions.
      */
     private String getOldXCAFile() {
         oldXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
@@ -826,10 +795,6 @@ public class ASARCalibrator implements Calibrator {
     public void updateTargetProductMetadata() {
 
         final MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (!srgrFlag) {
-            AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         if (applyAntennaPatternCorr) {
             AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.ant_elev_corr_flag, 1);

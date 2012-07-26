@@ -294,7 +294,7 @@ public class DimapProductReader extends AbstractProductReader {
 
         int destPos = 0;
 
-        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
+        //pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
         // For each scan in the data source
         try {
             synchronized (inputStream) {
@@ -302,7 +302,7 @@ public class DimapProductReader extends AbstractProductReader {
                     if (pm.isCanceled()) {
                         break;
                     }
-                    final int sourcePosY = sourceY * sourceRasterWidth;
+                    final long sourcePosY = (long)sourceY * (long)sourceRasterWidth;
                     if (sourceStepX == 1) {
                         destBuffer.readFrom(destPos, destWidth, inputStream, sourcePosY + sourceMinX);
                         destPos += destWidth;
@@ -313,7 +313,7 @@ public class DimapProductReader extends AbstractProductReader {
                         }
                     }
                 }
-                pm.worked(1);
+                //pm.worked(1);
             }
         } finally {
             pm.done();

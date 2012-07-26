@@ -22,6 +22,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
@@ -35,48 +36,23 @@ import java.util.Set;
  * Calibration for TerraSAR-X data products.
  */
 
-public class TerraSARXCalibrator implements Calibrator {
+public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
 
-    private Operator calibrationOp;
-    private Product sourceProduct;
-    private Product targetProduct;
-
-    private MetadataElement absRoot = null;
-    private boolean outputImageInComplex = false;
-    private boolean outputImageScaleInDb = false;
-    private boolean isComplex = false;
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private int sourceImageWidth = 0;
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid slantRangeTime = null;
-    private String incidenceAngleSelection = null;
     private final HashMap<String, Double> calibrationFactor = new HashMap<String, Double>(2);
     private final HashMap<String, NoiseRecord[]> noiseRecord = new HashMap<String, NoiseRecord[]>(2);
     private final HashMap<String, int[]> rangeLineIndex = new HashMap<String, int[]>(2); // y indices of noise records
     private final HashMap<String, double[][]> rangeLineNoise = new HashMap<String, double[][]>(2);
-
-    private static final double underFlowFloat = 1.0e-30;
 
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
     public TerraSARXCalibrator() {
-    }
-
-    /**
-     * Set flag indicating if target image is output in complex.
-     */
-    public void setOutputImageInComplex(boolean flag) {
-        outputImageInComplex = flag;
-    }
-
-    /**
-     * Set flag indicating if target image is output in dB scale.
-     */
-    public void setOutputImageIndB(boolean flag) {
-        outputImageScaleInDb = flag;
     }
 
     /**
@@ -93,10 +69,6 @@ public class TerraSARXCalibrator implements Calibrator {
      */
     @Override
     public void setAuxFileFlag(String file) {
-    }
-    
-    public void setIncidenceAngleForSigma0(String incidenceAngleForSigma0) {
-        incidenceAngleSelection = incidenceAngleForSigma0;
     }
 
     /**
@@ -139,27 +111,6 @@ public class TerraSARXCalibrator implements Calibrator {
         if(!(mission.contains("TSX") || mission.contains("TDX")))
             throw new OperatorException("TerraSARXCalibrator: " + mission +
                     " is not a valid mission for TerraSAT-X Calibration");
-    }
-
-    /**
-     * Get calibration flag.
-     */
-    private void getCalibrationFlag() {
-        if (absRoot.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
-            throw new OperatorException(
-                    "TerraSARXCalibrator: Absolute radiometric calibration has already been applied to the product");
-        }
-
-    }
-
-    /**
-     * Get sample type.
-     */
-    private void getSampleType() {
-        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-        if(sampleType.equals("COMPLEX")) {
-            isComplex = true;
-        }
     }
 
     /**
@@ -271,10 +222,6 @@ public class TerraSARXCalibrator implements Calibrator {
     private void updateTargetProductMetadata() {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
-
-        if (isComplex) {
-            abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-        }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
     }
@@ -429,7 +376,6 @@ public class TerraSARXCalibrator implements Calibrator {
             }
         }
     }
-
 
     public double applyCalibration(
             final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-coregistration</symbolicName>
-    <version>4C-1.0</version>
+    <version>4C-1.1</version>
     <name>NEST Coregistration</name>
     <description>NEST Coregistration</description>
 	

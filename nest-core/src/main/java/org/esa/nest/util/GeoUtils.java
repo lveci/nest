@@ -96,12 +96,12 @@ public final class GeoUtils
 
         final double sinLat = FastMath.sin(lat);
         final double cosLat = FastMath.cos(lat);
-        final double N = (WGS84.a / Math.sqrt(1 - WGS84.e2*sinLat*sinLat)) + altitude;
-        final double NcosLat = N * cosLat;
+        final double N = (WGS84.a / Math.sqrt(1 - WGS84.e2*sinLat*sinLat));
+        final double NcosLat = (N + altitude) * cosLat;
 
         xyz[0] = NcosLat * FastMath.cos(lon); // in m
         xyz[1] = NcosLat * FastMath.sin(lon); // in m
-        xyz[2] = WGS84.e2inv * N * sinLat;    // in m
+        xyz[2] = (WGS84.e2inv * N  + altitude) * sinLat;    // in m
     }
 
     /**
