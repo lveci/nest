@@ -47,8 +47,8 @@ final class BiCubicInterpolationResampling implements Resampling {
         return new Index(2, 1);
     }
 
-    public final void computeIndex(final float x,
-                                   final float y,
+    public final void computeIndex(final double x,
+                                   final double y,
                                    final int width,
                                    final int height,
                                    final Index index) {
@@ -61,8 +61,8 @@ final class BiCubicInterpolationResampling implements Resampling {
         final int j0 = (int) Math.floor(y);
 
 
-        final float di = x - (i0 + 0.5f);
-        final float dj = y - (j0 + 0.5f);
+        final double di = x - (i0 + 0.5);
+        final double dj = y - (j0 + 0.5);
 
         index.i0 = i0;
         index.j0 = j0;
@@ -117,7 +117,7 @@ final class BiCubicInterpolationResampling implements Resampling {
     public final float resample(final Raster raster,
                                 final Index index) throws Exception {
 
-        final float[][] v = new float[4][4];
+        final double[][] v = new double[4][4];
         final int x0 = index.i[0] - 1;
         final int y0 = index.j[0] - 1;
         for (int i = 0; i < 4; i++) {
@@ -136,42 +136,42 @@ final class BiCubicInterpolationResampling implements Resampling {
         //
         // p3    p4
 
-        final float[] z = new float[4];     // function values
-        final float[] z1 = new float[4];    // 1st order derivative in y direction
-        final float[] z2 = new float[4];    // 1st order derivative in x direction
-        final float[] z12 = new float[4];   // cross derivative
+        final double[] z = new double[4];     // function values
+        final double[] z1 = new double[4];    // 1st order derivative in y direction
+        final double[] z2 = new double[4];    // 1st order derivative in x direction
+        final double[] z12 = new double[4];   // cross derivative
 
         z[0] = v[1][1];
         z[1] = v[1][2];
         z[2] = v[2][1];
         z[3] = v[2][2];
 
-        z1[0] = (v[1][2] - v[1][0]) / 2.0f;
-        z1[1] = (v[1][3] - v[1][1]) / 2.0f;
-        z1[2] = (v[2][2] - v[2][0]) / 2.0f;
-        z1[3] = (v[2][3] - v[2][1]) / 2.0f;
+        z1[0] = (v[1][2] - v[1][0]) / 2.0;
+        z1[1] = (v[1][3] - v[1][1]) / 2.0;
+        z1[2] = (v[2][2] - v[2][0]) / 2.0;
+        z1[3] = (v[2][3] - v[2][1]) / 2.0;
 
-        z2[0] = (v[2][1] - v[0][1]) / 2.0f;
-        z2[1] = (v[2][2] - v[0][2]) / 2.0f;
-        z2[2] = (v[3][1] - v[1][1]) / 2.0f;
-        z2[3] = (v[3][2] - v[1][2]) / 2.0f;
+        z2[0] = (v[2][1] - v[0][1]) / 2.0;
+        z2[1] = (v[2][2] - v[0][2]) / 2.0;
+        z2[2] = (v[3][1] - v[1][1]) / 2.0;
+        z2[3] = (v[3][2] - v[1][2]) / 2.0;
 
-        z12[0] = (v[2][2] - v[2][0] - v[0][2] + v[0][0]) / 4.0f;
-        z12[1] = (v[2][3] - v[2][1] - v[0][3] + v[0][1]) / 4.0f;
-        z12[2] = (v[3][2] - v[3][0] - v[1][2] + v[1][0]) / 4.0f;
-        z12[3] = (v[3][3] - v[3][1] - v[1][3] + v[1][1]) / 4.0f;
+        z12[0] = (v[2][2] - v[2][0] - v[0][2] + v[0][0]) / 4.0;
+        z12[1] = (v[2][3] - v[2][1] - v[0][3] + v[0][1]) / 4.0;
+        z12[2] = (v[3][2] - v[3][0] - v[1][2] + v[1][0]) / 4.0;
+        z12[3] = (v[3][3] - v[3][1] - v[1][3] + v[1][1]) / 4.0;
 
         return bcuint(z, z1, z2, z12, index.ki[0], index.kj[0]);
     }
 
-	private static float bcuint(final float z[], final float z1[], final float z2[],
-                         final float z12[], final float t, final float u) {
+	private static float bcuint(final double z[], final double z1[], final double z2[],
+                         final double z12[], final double t, final double u) {
 
         // alpha = [a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33]
-		final float[][] a = new float[4][4];
+		final double[][] a = new double[4][4];
 		bcucof(z, z1, z2, z12, a);
 
-		float ansy = 0.0f;
+        double ansy = 0.0f;
 		for (int i = 3; i >= 0; i--) {
 			ansy = t*ansy + ((a[i][3]*u + a[i][2])*u + a[i][1])*u + a[i][0];
 		}
@@ -188,17 +188,17 @@ final class BiCubicInterpolationResampling implements Resampling {
                   a[2][0]*t2 + a[2][1]*t2*u + a[2][2]*t2*u2 + a[2][3]*t2*u3 +
                   a[3][0]*t3 + a[3][1]*t3*u + a[3][2]*t3*u2 + a[3][3]*t3*u3;
         */
-		return ansy;
+		return (float)ansy;
 	}
 
-	private static void bcucof(final float z[], final float z1[], final float z2[], final float z12[],
-                               final float[][] a) {
+	private static void bcucof(final double z[], final double z1[], final double z2[], final double z12[],
+                               final double[][] a) {
 
         // x = [f(0,0) f(1,0) f(0,1) f(1,1) fx(0,0) fx(1,0) fx(0,1) fx(1,1) fy(0,0) fy(1,0) fy(0,1) fy(1,1) fxy(0,0) fxy(1,0) fxy(0,1) fxy(1,1)]
         // alpha = [a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33]
         // alpha = invA*x
 
-        final float[] x = new float[16];
+        final double[] x = new double[16];
         for (int i = 0; i < 4; i++) {
             x[i] = z[i];
             x[i+4] = z1[i];
@@ -206,9 +206,9 @@ final class BiCubicInterpolationResampling implements Resampling {
             x[i+12] = z12[i];
         }
 
-		final float[] cl = new float[16];
+		final double[] cl = new double[16];
 		for (int i = 0; i < 16; i++) {
-			float xx = 0.0f;
+            double xx = 0.0;
 			for (int k = 0; k < 16; k++) {
                 xx += invA[i][k]*x[k];
 			}

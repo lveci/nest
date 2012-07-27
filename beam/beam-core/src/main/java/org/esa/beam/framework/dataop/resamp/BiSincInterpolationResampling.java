@@ -31,8 +31,8 @@ final class BiSincInterpolationResampling implements Resampling {
         return new Index(5, 1);
     }
 
-    public final void computeIndex(final float x,
-                                   final float y,
+    public final void computeIndex(final double x,
+                                   final double y,
                                    final int width,
                                    final int height,
                                    final Index index) {
@@ -44,8 +44,8 @@ final class BiSincInterpolationResampling implements Resampling {
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
 
-        final float di = x - (i0 + 0.5f);
-        final float dj = y - (j0 + 0.5f);
+        final double di = x - (i0 + 0.5);
+        final double dj = y - (j0 + 0.5);
 
         index.i0 = i0;
         index.j0 = j0;

@@ -33,8 +33,8 @@ final class NearestNeighbourResampling implements Resampling {
         return new Index(0, 0);
     }
 
-    public final void computeIndex(final float x,
-                                   final float y,
+    public final void computeIndex(final double x,
+                                   final double y,
                                    int width, int height, final Index index) {
         index.x = x;
         index.y = y;

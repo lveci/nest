@@ -35,19 +35,19 @@ public final class SRTM3GeoTiffElevationModel extends BaseElevationModel {
     }
 
     @Override
-    public float getIndexX(final GeoPos geoPos) {
-        return (geoPos.lon + 180.0f) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+    public double getIndexX(final GeoPos geoPos) {
+        return (geoPos.lon + 180.0) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
     }
 
     @Override
-    public float getIndexY(final GeoPos geoPos) {
-        return (60.0f - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
+    public double getIndexY(final GeoPos geoPos) {
+        return (60.0 - geoPos.lat) * DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
     }
 
     @Override
     public GeoPos getGeoPos(final PixelPos pixelPos) {
-        final float pixelLat = (RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 60.0f;
-        final float pixelLon = pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0f;
+        final float pixelLat = (float)((RASTER_HEIGHT - pixelPos.y) * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 60.0);
+        final float pixelLon = (float)(pixelPos.x * DEGREE_RES_BY_NUM_PIXELS_PER_TILE - 180.0);
         return new GeoPos(pixelLat, pixelLon);
     }
 

@@ -171,6 +171,8 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
             final CoordinateReferenceSystem crs2 = ImageManager.getModelCrs(geoCoding);   //NESTMOD
             if (geoCoding != null && crs.toWKT().equalsIgnoreCase(crs2.toWKT())) {
                 rasterDataNodes.add(node);
+            } else if (CRS.equalsIgnoreMetadata(crs, ImageManager.getModelCrs(node.getGeoCoding()))) {
+                rasterDataNodes.add(node);
             }
         }
     }

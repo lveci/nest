@@ -152,7 +152,7 @@ public class CreateDemRelatedBandsAction extends ExecCommand {
         final GeoCoding geoCoding = product.getGeoCoding();
         ElevationModelDescriptor demDescriptor = dem.getDescriptor();
         final float noDataValue = dem.getDescriptor().getNoDataValue();
-        final Band elevationBand = product.addBand(elevationBandName, ProductData.TYPE_INT16);
+        final Band elevationBand = product.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
         elevationBand.setSynthetic(true);
         elevationBand.setNoDataValue(noDataValue);
         elevationBand.setUnit("m");
@@ -450,7 +450,7 @@ public class CreateDemRelatedBandsAction extends ExecCommand {
 
         @Override
         protected double computeSample(int sourceX, int sourceY) {
-            GeoPos geoPos = orthorectifier.getGeoPos(new PixelPos(sourceX + 0.5f, sourceY + 0.5f), null);
+            GeoPos geoPos = orthorectifier.getGeoPos(new PixelPos(sourceX, sourceY), null);
             return geoPos.lon;
         }
     }
@@ -465,7 +465,7 @@ public class CreateDemRelatedBandsAction extends ExecCommand {
 
         @Override
         protected double computeSample(int sourceX, int sourceY) {
-            GeoPos geoPos = orthorectifier.getGeoPos(new PixelPos(sourceX + 0.5f, sourceY + 0.5f), null);
+            GeoPos geoPos = orthorectifier.getGeoPos(new PixelPos(sourceX, sourceY), null);
             return geoPos.lat;
         }
     }

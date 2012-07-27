@@ -69,7 +69,7 @@ public interface Resampling {
      * @param height the raster's height
      * @param index  the index object to which the results are to be assigned
      */
-    void computeIndex(float x, float y, int width, int height, Index index);
+    void computeIndex(double x, double y, int width, int height, Index index);
 
     /**
      * Performs the actual resampling operation.
@@ -123,8 +123,8 @@ public interface Resampling {
     final class Index {
 
         //used as archieve to recompute the index for an other resampling method
-        public float x;
-        public float y;
+        public double x;
+        public double y;
         public int width;
         public int height;
 
@@ -133,8 +133,8 @@ public interface Resampling {
         public int j0;
         public final int[] i;
         public final int[] j;
-        public final float[] ki;
-        public final float[] kj;
+        public final double[] ki;
+        public final double[] kj;
 
         /**
          * Creates a new index.
@@ -145,8 +145,8 @@ public interface Resampling {
         public Index(int m, int n) {
             i = new int[m];
             j = new int[m];
-            ki = new float[n];
-            kj = new float[n];
+            ki = new double[n];
+            kj = new double[n];
         }
 
         public static int crop(int i, int max) {

@@ -27,8 +27,8 @@ final class BilinearInterpolationResampling implements Resampling {
         return new Index(2, 1);
     }
 
-    public final void computeIndex(final float x,
-                                   final float y,
+    public final void computeIndex(final double x,
+                                   final double y,
                                    final int width,
                                    final int height,
                                    final Index index) {
@@ -40,8 +40,8 @@ final class BilinearInterpolationResampling implements Resampling {
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
 
-        final float di = x - (i0 + .5f);
-        final float dj = y - (j0 + .5f);
+        final double di = x - (i0 + 0.5);
+        final double dj = y - (j0 + 0.5);
 
         index.i0 = i0;
         index.j0 = j0;
@@ -81,26 +81,26 @@ final class BilinearInterpolationResampling implements Resampling {
         final int j1 = index.j[0];
         final int j2 = index.j[1];
 
-        final float z11 = raster.getSample(i1, j1);
-        if(Float.isNaN(z11))
+        final double z11 = raster.getSample(i1, j1);
+        if(Double.isNaN(z11))
             return raster.getSample(index.i0, index.j0);
-        final float z12 = raster.getSample(i2, j1);
-        if(Float.isNaN(z12))
+        final double z12 = raster.getSample(i2, j1);
+        if(Double.isNaN(z12))
             return raster.getSample(index.i0, index.j0);
-        final float z21 = raster.getSample(i1, j2);
-        if(Float.isNaN(z21))
+        final double z21 = raster.getSample(i1, j2);
+        if(Double.isNaN(z21))
             return raster.getSample(index.i0, index.j0);
-        final float z22 = raster.getSample(i2, j2);
-        if(Float.isNaN(z22))
+        final double z22 = raster.getSample(i2, j2);
+        if(Double.isNaN(z22))
             return raster.getSample(index.i0, index.j0);
 
-        final float ki = index.ki[0];
-        final float kj = index.kj[0];
+        final double ki = index.ki[0];
+        final double kj = index.kj[0];
 
-        return z11 * (1f - ki) * (1f - kj) +
+        return (float)(z11 * (1f - ki) * (1f - kj) +
                 z12 * ki * (1f - kj) +
                 z21 * (1f - ki) * kj +
-                z22 * ki * kj;
+                z22 * ki * kj);
     }
 
     @Override

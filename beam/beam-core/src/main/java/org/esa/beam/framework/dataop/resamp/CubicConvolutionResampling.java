@@ -29,8 +29,8 @@ final class CubicConvolutionResampling implements Resampling {
         return new Index(4, 1);
     }
 
-    public final void computeIndex(final float x,
-                                   final float y,
+    public final void computeIndex(final double x,
+                                   final double y,
                                    final int width,
                                    final int height,
                                    final Index index) {
@@ -65,8 +65,8 @@ final class CubicConvolutionResampling implements Resampling {
         index.kj[0] = dj;
         */
 
-        final float di = x - (i0 + 0.5f);
-        final float dj = y - (j0 + 0.5f);
+        final double di = x - (i0 + 0.5);
+        final double dj = y - (j0 + 0.5);
 
         final int iMax = width - 1;
         if (di >= 0) {

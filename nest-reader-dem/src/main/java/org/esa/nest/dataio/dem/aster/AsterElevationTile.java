@@ -31,7 +31,7 @@ public final class AsterElevationTile extends BaseElevationTile {
 
     protected void addGravitationalModel(final int index, final float[] line) {
         final int rowIdxInEGMArray = index / 900; // tile_height / numEGMSamplesInCol = 3600 / 4 = 900
-        for (int i = 0; i < line.length-2; i++) {
+        for (int i = 0; i < 3600; i++) {
             try {
             if (line[i] != noDataValue) {
                 line[i] += egmArray[rowIdxInEGMArray][i/900];
