@@ -679,10 +679,16 @@ public class SARSimTerrainCorrectionOp extends Operator {
             if(unit != null && unit.contains(Unit.BIT)) // skip layover_shadow_mask band
                 continue;
 
-            final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+            ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
             if(slaveGCPGroup.getNodeCount() < 3) {
-                throw new OperatorException(slaveGCPGroup.getNodeCount() +
-                        " GCPs survived. Try using more GCPs or a larger window");
+                // find others for same slave product
+                for(Band band : sourceProduct.getBands()) {
+                    if(band != srcBand && band != masterBand) {
+                        slaveGCPGroup = sourceProduct.getGcpGroup(band);
+                        if (slaveGCPGroup.getNodeCount() >= 3)        // only one band should have GCPs
+                            break;
+                    }
+                }
             }
 
             final WarpOp.WarpData warpData = new WarpOp.WarpData(slaveGCPGroup);
@@ -877,6 +883,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final RangeDopplerGeocodingOp.TileData[] trgTiles = trgTileList.toArray(new RangeDopplerGeocodingOp.TileData[trgTileList.size()]);
         final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
 
+        boolean applyBiStaticCorrection = false;
+        if (!mission.contains("CSKS") && !mission.contains("TSX") && !mission.equals("RS2")) {
+            applyBiStaticCorrection = true;
+        }
+
         try {
             final float[][] localDEM = new float[h+2][w+2];
             if(useAvgSceneHeight) {
@@ -927,20 +938,18 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double azimuthIndex = 0.0;
-                    double rangeIndex = 0.0;
                     double zeroDoppler = zeroDopplerTime;
-                    if (!mission.contains("CSKS") && !mission.contains("TSX") && !mission.equals("RS2")) {
+                    if (applyBiStaticCorrection) {
                         // skip bistatic correction for COSMO, TerraSAR-X and RadarSAT-2
                         zeroDoppler = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
+
+                        slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                            zeroDoppler, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
                     }
 
-                    azimuthIndex = (zeroDoppler - firstLineUTC) / lineTimeInterval;
+                    final double azimuthIndex = (zeroDoppler - firstLineUTC) / lineTimeInterval;
 
-                    slantRange = RangeDopplerGeocodingOp.computeSlantRange(
-                            zeroDoppler, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
-
-                    rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                    double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
                             rangeSpacing, zeroDoppler, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     // temp fix for descending Radarsat2
@@ -952,7 +961,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
-                        double[] localIncidenceAngles =
+                        final double[] localIncidenceAngles =
                                 {RangeDopplerGeocodingOp.NonValidIncidenceAngle, RangeDopplerGeocodingOp.NonValidIncidenceAngle};
 
                         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
@@ -994,15 +1003,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
                             final String[] srcBandName = targetBandNameToSourceBandName.get(tileData.bandName);
                             final Band srcBand = sourceProduct.getBand(srcBandName[0]);
-                            final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
-                            WarpOp.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
-                                    (float) rangeIndex, (float) azimuthIndex, pixelPos);
+                            final PixelPos pixelPos = new PixelPos();
+                            WarpOp.getWarpedCoords(warpDataMap.get(srcBand), warpPolynomialOrder,
+                                                   rangeIndex, azimuthIndex, pixelPos);
                             if (pixelPos.x < 0.0 || pixelPos.x >= srcMaxRange || pixelPos.y < 0.0 || pixelPos.y >= srcMaxAzimuth) {
                                 tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
                                 continue;
                             }
 
-                            int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
+                            final int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
                             if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {

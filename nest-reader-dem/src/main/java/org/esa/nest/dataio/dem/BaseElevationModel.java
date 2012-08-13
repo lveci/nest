@@ -31,13 +31,13 @@ import java.util.List;
 
 public abstract class BaseElevationModel implements ElevationModel, Resampling.Raster {
 
-    protected final int NUM_X_TILES;
+    private final int NUM_X_TILES;
     protected final int NUM_Y_TILES;
     protected final int NUM_PIXELS_PER_TILE;
     private final double NUM_PIXELS_PER_TILEinv;
-    protected final float NO_DATA_VALUE;
+    private final float NO_DATA_VALUE;
     protected final int DEGREE_RES;
-    protected final int RASTER_WIDTH;
+    private final int RASTER_WIDTH;
     protected final int RASTER_HEIGHT;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILE;
     protected final double DEGREE_RES_BY_NUM_PIXELS_PER_TILEinv;
@@ -94,10 +94,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         resampling.computeIndex(getIndexX(geoPos), pixelY, RASTER_WIDTH, RASTER_HEIGHT, resamplingIndex);
 
         final float elevation = resampling.resample(resamplingRaster, resamplingIndex);
-        if (Float.isNaN(elevation)) {
-            return NO_DATA_VALUE;
-        }
-        return elevation;
+        return Float.isNaN(elevation) ? NO_DATA_VALUE : elevation;
     }
 
     public abstract double getIndexX(final GeoPos geoPos);
@@ -130,18 +127,17 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return RASTER_HEIGHT;
     }
 
-    public final float getSample(final int pixelX, final int pixelY) throws Exception {
+    public final float getSample(final double pixelX, final double pixelY) throws Exception {
         final int tileXIndex = (int)(pixelX * NUM_PIXELS_PER_TILEinv);
         final int tileYIndex = (int)(pixelY * NUM_PIXELS_PER_TILEinv);
         final ElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if (tile == null) {
             return Float.NaN;
         }
-        final float sample = tile.getSample(pixelX - tileXIndex * NUM_PIXELS_PER_TILE, 
-                                            pixelY - tileYIndex * NUM_PIXELS_PER_TILE);
-        if (sample == NO_DATA_VALUE)
-            return Float.NaN;
-        return sample;
+        final float sample = tile.getSample((int)(pixelX - tileXIndex * NUM_PIXELS_PER_TILE),
+                                            (int)(pixelY - tileYIndex * NUM_PIXELS_PER_TILE));
+
+        return sample == NO_DATA_VALUE ? Float.NaN : sample;
     }
 
     private ElevationFile[][] createElevationFiles() {

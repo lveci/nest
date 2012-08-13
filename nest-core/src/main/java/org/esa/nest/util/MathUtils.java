@@ -192,14 +192,15 @@ public final class MathUtils
      */
     public static double lagrangeInterpolatingPolynomial (final double pos[], final double val[], final double desiredPos)  {
 
-        if (pos.length != val.length) {
-            throw new OperatorException("Incorrect array length");
-        }
+        //if (pos.length != val.length) {
+        //    throw new OperatorException("Incorrect array length");
+        //}
 
         double retVal = 0;
-        for (int i = 0; i < pos.length; ++i) {
+        final int length = pos.length;
+        for (int i = 0; i < length; ++i) {
             double weight = 1;
-            for (int j = 0; j < pos.length; ++j) {
+            for (int j = 0; j < length; ++j) {
                 if (j != i) {
                     weight *= (desiredPos - pos[j]) / (pos[i] - pos[j]);
                 }

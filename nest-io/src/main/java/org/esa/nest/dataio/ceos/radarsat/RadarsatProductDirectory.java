@@ -591,9 +591,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
             final int y = Math.min(j*subSamplingY, sceneHeight-1);
-            final int slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(y); // meters
-            final int slantRangeToMidPixel = imageFiles[0].getSlantRangeToMidPixel(y);
-            final int slantRangeToLastPixel = imageFiles[0].getSlantRangeToLastPixel(y);
+            final double slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(y); // meters
+            final double slantRangeToMidPixel = imageFiles[0].getSlantRangeToMidPixel(y);
+            final double slantRangeToLastPixel = imageFiles[0].getSlantRangeToLastPixel(y);
             final double[] polyCoef = computePolynomialCoefficients(slantRangeToFirstPixel,
                     slantRangeToMidPixel,
                     slantRangeToLastPixel,
@@ -644,7 +644,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     }
 
     private static double[] computePolynomialCoefficients(
-                    int slantRangeToFirstPixel, int slantRangeToMidPixel, int slantRangeToLastPixel, int imageWidth) {
+                    double slantRangeToFirstPixel, double slantRangeToMidPixel, double slantRangeToLastPixel, int imageWidth) {
 
         final int firstPixel = 0;
         final int midPixel = imageWidth/2;

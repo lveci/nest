@@ -170,8 +170,8 @@ public class L3ToL1Op extends MerisBasisOp {
             return tile.getHeight();
         }
 
-        public final float getSample(int x, int y) {
-            final double sample = tile.getSampleDouble(x, y);
+        public final float getSample(double x, double y) {
+            final double sample = tile.getSampleDouble((int)x, (int)y);
             return (float) sample;
         }
     }

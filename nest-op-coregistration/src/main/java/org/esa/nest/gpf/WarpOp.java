@@ -504,7 +504,7 @@ public class WarpOp extends Operator {
                 final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
                 // get warped image
-                final RenderedOp warpedImage = createWarpImage(warpData.warp, srcImage);
+                final RenderedOp warpedImage = createWarpImage(warpData.jaiWarp, srcImage);
 
                 // copy warped image data to target
                 final float[] dataArray = warpedImage.getData(targetRectangle).getSamples(x0, y0, w, h, 0, (float[]) null);
@@ -533,7 +533,7 @@ public class WarpOp extends Operator {
 
         getMasterAndSlaveGCPCoordinates(warpData, masterGCPGroup);
 
-        computeWARP(warpData, warpPolynomialOrder);
+        warpData.computeWARP(warpPolynomialOrder);
 
         computeRMS(warpData, warpPolynomialOrder);
     }
@@ -588,26 +588,6 @@ public class WarpOp extends Operator {
     }
 
     /**
-     * Compute WARP function using master and slave GCPs.
-     *
-     * @param warpData            Stores the warp information per band.
-     * @param warpPolynomialOrder The WARP polynimal order.
-     */
-    private static void computeWARP(final WarpData warpData, final int warpPolynomialOrder) {
-
-        warpData.warp = WarpPolynomial.createWarp(warpData.slaveGCPCoords, //source
-                0,
-                warpData.masterGCPCoords, // destination
-                0,
-                2 * warpData.numValidGCPs,
-                1.0F,
-                1.0F,
-                1.0F,
-                1.0F,
-                warpPolynomialOrder);
-    }
-
-    /**
      * Compute root mean square error of the warped GCPs for given WARP function and given GCPs.
      *
      * @param warpData            Stores the warp information per band.
@@ -622,7 +602,7 @@ public class WarpOp extends Operator {
         final PixelPos slavePos = new PixelPos(0.0f, 0.0f);
         for (int i = 0; i < warpData.rms.length; i++) {
             final int i2 = 2 * i;
-            getWarpedCoords(warpData.warp,
+            getWarpedCoords(warpData,
                     warpPolynomialOrder,
                     warpData.masterGCPCoords[i2],
                     warpData.masterGCPCoords[i2 + 1],
@@ -693,19 +673,19 @@ public class WarpOp extends Operator {
     /**
      * Compute warped GCPs.
      *
-     * @param warp                The WARP polynomial.
+     * @param warpData            The WARP polynomial.
      * @param warpPolynomialOrder The WARP polynomial order.
      * @param mX                  The x coordinate of master GCP.
      * @param mY                  The y coordinate of master GCP.
      * @param slavePos            The warped GCP position.
      * @throws OperatorException The exceptions.
      */
-    public static void getWarpedCoords(final WarpPolynomial warp, final int warpPolynomialOrder,
-                                       final float mX, final float mY, final PixelPos slavePos)
+    public static void getWarpedCoords(final WarpData warpData, final int warpPolynomialOrder,
+                                       final double mX, final double mY, final PixelPos slavePos)
             throws OperatorException {
 
-        final float[] xCoeffs = warp.getXCoeffs();
-        final float[] yCoeffs = warp.getYCoeffs();
+        final double[] xCoeffs = warpData.xCoef;
+        final double[] yCoeffs = warpData.yCoef;
         if (xCoeffs.length != yCoeffs.length) {
             throw new OperatorException("WARP has different number of coefficients for X and Y");
         }
@@ -716,41 +696,41 @@ public class WarpOp extends Operator {
                 if (numOfCoeffs != 3) {
                     throw new OperatorException("Number of WARP coefficients do not match WARP degree");
                 }
-                slavePos.x = xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY;
+                slavePos.x = (float)(xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY);
 
-                slavePos.y = yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY;
+                slavePos.y = (float)(yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY);
                 break;
             }
             case 2: {
                 if (numOfCoeffs != 6) {
                     throw new OperatorException("Number of WARP coefficients do not match WARP degree");
                 }
-                final float mXmX = mX * mX;
-                final float mXmY = mX * mY;
-                final float mYmY = mY * mY;
+                final double mXmX = mX * mX;
+                final double mXmY = mX * mY;
+                final double mYmY = mY * mY;
 
-                slavePos.x = xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY +
-                        xCoeffs[3] * mXmX + xCoeffs[4] * mXmY + xCoeffs[5] * mYmY;
+                slavePos.x = (float)(xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY +
+                        xCoeffs[3] * mXmX + xCoeffs[4] * mXmY + xCoeffs[5] * mYmY);
 
-                slavePos.y = yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY +
-                        yCoeffs[3] * mXmX + yCoeffs[4] * mXmY + yCoeffs[5] * mYmY;
+                slavePos.y = (float)(yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY +
+                        yCoeffs[3] * mXmX + yCoeffs[4] * mXmY + yCoeffs[5] * mYmY);
                 break;
             }
             case 3: {
                 if (numOfCoeffs != 10) {
                     throw new OperatorException("Number of WARP coefficients do not match WARP degree");
                 }
-                final float mXmX = mX * mX;
-                final float mXmY = mX * mY;
-                final float mYmY = mY * mY;
+                final double mXmX = mX * mX;
+                final double mXmY = mX * mY;
+                final double mYmY = mY * mY;
 
-                slavePos.x = xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY +
+                slavePos.x = (float)(xCoeffs[0] + xCoeffs[1] * mX + xCoeffs[2] * mY +
                         xCoeffs[3] * mXmX + xCoeffs[4] * mXmY + xCoeffs[5] * mYmY +
-                        xCoeffs[6] * mXmX * mX + xCoeffs[7] * mX * mXmY + xCoeffs[8] * mXmY * mY + xCoeffs[9] * mYmY * mY;
+                        xCoeffs[6] * mXmX * mX + xCoeffs[7] * mX * mXmY + xCoeffs[8] * mXmY * mY + xCoeffs[9] * mYmY * mY);
 
-                slavePos.y = yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY +
+                slavePos.y = (float)(yCoeffs[0] + yCoeffs[1] * mX + yCoeffs[2] * mY +
                         yCoeffs[3] * mXmX + yCoeffs[4] * mXmY + yCoeffs[5] * mYmY +
-                        yCoeffs[6] * mXmX * mX + yCoeffs[7] * mX * mXmY + yCoeffs[8] * mXmY * mY + yCoeffs[9] * mYmY * mY;
+                        yCoeffs[6] * mXmX * mX + yCoeffs[7] * mX * mXmY + yCoeffs[8] * mXmY * mY + yCoeffs[9] * mYmY * mY);
                 break;
             }
             default:
@@ -775,8 +755,8 @@ public class WarpOp extends Operator {
                                                  final float threshold, final int parseIndex, final String bandName)
             throws OperatorException {
 
-        final float[] xCoeffs = warpData.warp.getXCoeffs();
-        final float[] yCoeffs = warpData.warp.getYCoeffs();
+        final float[] xCoeffs = warpData.jaiWarp.getXCoeffs();
+        final float[] yCoeffs = warpData.jaiWarp.getYCoeffs();
 
         final File residualFile = getResidualsFile(sourceProduct);
         PrintStream p = null; // declare a print stream object
@@ -906,7 +886,9 @@ public class WarpOp extends Operator {
 
     public static class WarpData {
         public final List<Placemark> slaveGCPList = new ArrayList<Placemark>();
-        public WarpPolynomial warp = null;
+        private WarpPolynomial jaiWarp = null;
+        public double[] xCoef = null;
+        public double[] yCoef = null;
 
         public int numValidGCPs = 0;
         public boolean notEnoughGCPs = false;
@@ -926,6 +908,36 @@ public class WarpOp extends Operator {
         public WarpData(ProductNodeGroup<Placemark> slaveGCPGroup) {
             for (int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
                 slaveGCPList.add(slaveGCPGroup.get(i));
+            }
+        }
+
+        /**
+         * Compute WARP function using master and slave GCPs.
+         *
+         * @param warpPolynomialOrder The WARP polynimal order.
+         */
+        public void computeWARP(final int warpPolynomialOrder) {
+
+            jaiWarp = WarpPolynomial.createWarp(slaveGCPCoords, //source
+                    0,
+                    masterGCPCoords, // destination
+                    0,
+                    2 * numValidGCPs,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    warpPolynomialOrder);
+
+
+            final float[] jaiXCoefs = jaiWarp.getXCoeffs();
+            final float[] jaiYCoefs = jaiWarp.getYCoeffs();
+            final int size = jaiXCoefs.length;
+            xCoef = new double[size];
+            yCoef = new double[size];
+            for(int i=0; i < size; ++i) {
+                xCoef[i] = jaiXCoefs[i];
+                yCoef[i] = jaiYCoefs[i];
             }
         }
     }

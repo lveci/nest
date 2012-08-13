@@ -650,12 +650,12 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
             return _height;
         }
 
-        public float getSample(int x, int y) throws Exception {
-            if (!_lineCache.getSourceBand().isPixelValid(x, y)) {
+        public float getSample(double x, double y) throws Exception {
+            if (!_lineCache.getSourceBand().isPixelValid((int)x, (int)y)) {
                 return Float.NaN;
             }
-            float[] lineSamples = (float[]) _lineCache.getObject(y);
-            return lineSamples[x];
+            float[] lineSamples = (float[]) _lineCache.getObject((int)y);
+            return lineSamples[(int)x];
         }
     }
 

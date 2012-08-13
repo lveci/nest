@@ -33,7 +33,7 @@ class TestRaster implements Resampling.Raster {
         return array.length;
     }
 
-    public float getSample(int x, int y) {
-        return array[y][x];
+    public float getSample(double x, double y) {
+        return array[(int)y][(int)x];
     }
 }

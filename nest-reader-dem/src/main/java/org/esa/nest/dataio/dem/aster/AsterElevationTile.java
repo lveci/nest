@@ -15,12 +15,15 @@
  */
 package org.esa.nest.dataio.dem.aster;
 
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.dem.BaseElevationTile;
 import org.esa.nest.dataio.dem.EarthGravitationalModel96;
 
 public final class AsterElevationTile extends BaseElevationTile {
-
+    /*
     private final float[][] egmArray;
 
     public AsterElevationTile(final AsterElevationModel dem, final Product product) {
@@ -41,5 +44,25 @@ public final class AsterElevationTile extends BaseElevationTile {
             }
         }
     }
+    */
 
+    private GeoCoding geoCoding = null;
+
+    public AsterElevationTile(final AsterElevationModel dem, final Product product) {
+        super(dem, product);
+        geoCoding = product.getGeoCoding();
+    }
+
+    protected void addGravitationalModel(final int index, final float[] line) {
+        for (int i = 0; i < 3600; i++) {
+            try {
+            if (line[i] != noDataValue) {
+                final GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(i,index), null);
+                line[i] += EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon);
+            }
+            } catch(Exception e) {
+                System.out.print(e.getMessage());
+            }
+        }
+    }
 }

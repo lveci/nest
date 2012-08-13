@@ -88,60 +88,6 @@ public class DEMFactory {
      * Read DEM for current tile.
      * @param dem the model
      * @param demNoDataValue the no data value of the dem
-     * @param targetGeoCoding the geocoding of the target product
-     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
-     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
-     * @param tileHeight The tile height.
-     * @param tileWidth The tile width.
-     * @param localDEM The DEM for the tile.
-     * @return true if all dem values are valid
-     * @throws Exception from DEM
-     */
-    public static boolean getLocalDEM(final ElevationModel dem, final float demNoDataValue, 
-                                       final GeoCoding targetGeoCoding,
-                                       final int x0, final int y0,
-                                       final int tileWidth, final int tileHeight,
-                                       final float[][] localDEM) throws Exception {
-
-        // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
-        //       the left and 1 extra column to the right of the tile.
-
-        final int maxY = y0 + tileHeight + 1;
-        final int maxX = x0 + tileWidth + 1;
-
-        final GeoPos geoPos = new GeoPos();
-        final PixelPos pixPos = new PixelPos();
-
-        float alt;
-        boolean valid = false;
-        for (int y = y0 - 1; y < maxY; y++) {
-            final int yy = y - y0 + 1;
-            for (int x = x0 - 1; x < maxX; x++) {
-                pixPos.setLocation(x,y);
-                targetGeoCoding.getGeoPos(pixPos, geoPos);
-                if(!geoPos.isValid()) {
-                    localDEM[yy][x - x0 + 1] = demNoDataValue;
-                    continue;
-                }
-                if (geoPos.lon > 180) {
-                    geoPos.lon -= 360;
-                } else if (geoPos.lon < -180) {
-                    geoPos.lon += 360;
-                }
-
-                alt = dem.getElevation(geoPos);
-                if(alt != demNoDataValue)
-                    valid = true;
-                localDEM[yy][x - x0 + 1] = alt;
-            }
-        }
-        return valid;
-    }
-
-    /**
-     * Read DEM for current tile.
-     * @param dem the model
-     * @param demNoDataValue the no data value of the dem
      * @param tileGeoRef the georeferencing of the target product
      * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
      * @param y0 The y coordinate of the pixel at the upper left corner of current tile.

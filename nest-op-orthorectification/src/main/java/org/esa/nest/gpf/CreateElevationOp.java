@@ -180,39 +180,27 @@ public final class CreateElevationOp extends Operator {
                 final int h = targetRectangle.height;
                 final ProductData trgData = targetTile.getDataBuffer();
 
-                pm.beginTask("Computing elevations from " + demName + "...", h);
-                final GeoPos geoPos = new GeoPos();
-                float elevation;
-
                 final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
+
+                final float demNoDataValue = dem.getDescriptor().getNoDataValue();
+                final float[][] localDEM = new float[h+2][w+2];
+                DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, x0, y0, w, h, localDEM);
+
+                final TileIndex trgIndex = new TileIndex(targetTile);
 
                 final int maxX = x0 + w;
                 final int maxY = y0 + h;
                 for (int y = y0; y < maxY; ++y) {
+                    final int yy = y-y0+1;
+                    trgIndex.calculateStride(y);
                     for (int x = x0; x < maxX; ++x) {
 
-                        //pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                        //geoCoding.getGeoPos(pixelPos, geoPos);
-                        tileGeoRef.getGeoPos(x, y, geoPos);
-                        try {
-                            if(fileElevationModel != null) {
-                                elevation = fileElevationModel.getElevation(geoPos);
-                            } else {
-                                elevation = dem.getElevation(geoPos);
-                            }
-                        } catch (Exception e) {
-                            elevation = noDataValue;
-                        }
-
-                        trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                        trgData.setElemDoubleAt(trgIndex.getIndex(x), localDEM[yy][x-x0+1]);
                     }
-                    pm.worked(1);
                 }
             }
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
-        } finally {
-            pm.done();
         }
     }
 

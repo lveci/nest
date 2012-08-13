@@ -85,11 +85,18 @@ final class BiSincInterpolationResampling implements Resampling {
         final double muX = index.ki[0];
         final double muY = index.kj[0];
 
-        final double tmpV0 = interpolationSinc(v[0][0], v[0][1], v[0][2], v[0][3], v[0][4], muX);
-        final double tmpV1 = interpolationSinc(v[1][0], v[1][1], v[1][2], v[1][3], v[1][4], muX);
-        final double tmpV2 = interpolationSinc(v[2][0], v[2][1], v[2][2], v[2][3], v[2][4], muX);
-        final double tmpV3 = interpolationSinc(v[3][0], v[3][1], v[3][2], v[3][3], v[3][4], muX);
-        final double tmpV4 = interpolationSinc(v[4][0], v[4][1], v[4][2], v[4][3], v[4][4], muX);
+        final double f0 = sinc(muX + 2.0) * hanning(muX + 2.0);
+        final double f1 = sinc(muX + 1.0) * hanning(muX + 1.0);
+        final double f2 = sinc(muX + 0.0) * hanning(muX + 0.0);
+        final double f3 = sinc(muX - 1.0) * hanning(muX - 1.0);
+        final double f4 = sinc(muX - 2.0) * hanning(muX - 2.0);
+        final double sum = f0 + f1 + f2 + f3 + f4;
+
+        final double tmpV0 = (f0*v[0][0] + f1*v[0][1] + f2*v[0][2] + f3*v[0][3] + f4*v[0][4]) / sum;
+        final double tmpV1 = (f0*v[1][0] + f1*v[1][1] + f2*v[1][2] + f3*v[1][3] + f4*v[1][4]) / sum;
+        final double tmpV2 = (f0*v[2][0] + f1*v[2][1] + f2*v[2][2] + f3*v[2][3] + f4*v[2][4]) / sum;
+        final double tmpV3 = (f0*v[3][0] + f1*v[3][1] + f2*v[3][2] + f3*v[3][3] + f4*v[3][4]) / sum;
+        final double tmpV4 = (f0*v[4][0] + f1*v[4][1] + f2*v[4][2] + f3*v[4][3] + f4*v[4][4]) / sum;
         return (float)interpolationSinc(tmpV0, tmpV1, tmpV2, tmpV3, tmpV4, muY);
     }
 
@@ -110,12 +117,8 @@ final class BiSincInterpolationResampling implements Resampling {
     }
 
     public static double hanning(final double x) {
-
-        if (x >= -halfFilterLength && x <= halfFilterLength) {
-            return 0.5*(1.0 + Math.cos(DoublePI*x/(filterLength + 1)));
-        } else {
-            return 0.0;
-        }
+        return (x >= -halfFilterLength && x <= halfFilterLength) ?
+             0.5*(1.0 + Math.cos(DoublePI*x/(filterLength + 1))) : 0.0;
     }
 
     @Override

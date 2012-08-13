@@ -48,9 +48,8 @@ public class BaseElevationTile implements ElevationTile {
 
         float[] line = objectArray[pixelY];
         if (line == null) {
-            final Band band = product.getBandAt(0);
             final int width = product.getSceneRasterWidth();
-            line = band.readPixels(0, pixelY, width, 1, new float[width], ProgressMonitor.NULL);
+            line = product.getBandAt(0).readPixels(0, pixelY, width, 1, new float[width], ProgressMonitor.NULL);
             if(useDEMGravitationalModel) {
                 addGravitationalModel(pixelY, line);
             }

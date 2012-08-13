@@ -16,6 +16,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.apache.commons.math.util.FastMath;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
@@ -400,7 +401,7 @@ public final class SARSimulationOp extends Operator {
         int y;
         double alt = 0.0;
         for (y = tileSize - 1; y < sourceImageHeight; y++) {
-            pixPos.setLocation(x,y);
+            pixPos.setLocation(x+0.5f,y+0.5f);
             targetGeoCoding.getGeoPos(pixPos, geoPos);
 
             alt = dem.getElevation(geoPos);
@@ -413,7 +414,7 @@ public final class SARSimulationOp extends Operator {
         targetGeoCoding.getGeoPos(pixPos, geoPos);
         GeoUtils.geo2xyzWGS84(geoPos.getLat(), geoPos.getLon(), alt, earthPoint);
 
-        final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
+        final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
                 firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
         final double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
@@ -505,6 +506,7 @@ public final class SARSimulationOp extends Operator {
                 for (int x = x0; x < xmax; x++) {
                     final int xx = x - x0;
                     final double alt = localDEM[y-ymin+1][xx+1];
+
                     if (alt == demNoDataValue) {
                         savePixel[xx] = false;
                         continue;
@@ -522,18 +524,18 @@ public final class SARSimulationOp extends Operator {
                     }
 
                     GeoUtils.geo2xyzWGS84(lat, lon, alt, earthPoint);
-                    /*
-                    final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
-                            sourceImageHeight, firstLineUTC, lineTimeInterval, wavelength, earthPoint,
-                            sensorPosition, sensorVelocity);
-                    */
+
                     Double zeroDopplerTime = zeroDopplerTimeMap.get(y);
                     if(zeroDopplerTime == null) {
                         zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
-                            sourceImageHeight, firstLineUTC, lineTimeInterval, wavelength, earthPoint,
+                            firstLineUTC, lineTimeInterval, wavelength, earthPoint,
                             sensorPosition, sensorVelocity);
                         zeroDopplerTimeMap.put(y, zeroDopplerTime);
                     }
+
+                 /*   Double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
+                            firstLineUTC, lineTimeInterval, wavelength, earthPoint,
+                            sensorPosition, sensorVelocity);     */
 
                     double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
@@ -558,6 +560,10 @@ public final class SARSimulationOp extends Operator {
                         rangeIndex = sourceImageWidth - 1 - rangeIndex;
                     }
 
+                    // fudge
+                    //azimuthIndex -= 2;
+                    //rangeIndex -= 2;
+
                     if (!(rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex > y0-1 && azimuthIndex < y0+h)) {
                         savePixel[xx] = false;
                         continue;   
@@ -575,7 +581,7 @@ public final class SARSimulationOp extends Operator {
                                                            RangeDopplerGeocodingOp.NonValidIncidenceAngle};
 
                     RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
-                            localGeometry, demNoDataValue, true, false, false, x0, ymin, x, y, localDEM,
+                            localGeometry, demNoDataValue, true, true, false, x0, ymin, x, y, localDEM,
                             localIncidenceAngles); // in degrees
 
                     if (localIncidenceAngles[0] == RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
@@ -583,7 +589,7 @@ public final class SARSimulationOp extends Operator {
                         continue;
                     }
 
-                    final double v = computeBackscatteredPower(localIncidenceAngles[0]);
+                    final double v = computeBackscatteredPower(localIncidenceAngles[1]);
 
                     saveSimulatedData(azimuthIndex, rangeIndex, v, x0, y0, w, h, targetTile, masterBuffer);
 
@@ -696,8 +702,8 @@ public final class SARSimulationOp extends Operator {
     }
 
     private static void saveSimulatedData(final double azimuthIndex, final double rangeIndex, final double v,
-                                   final int x0, final int y0, final int w, final int h, final Tile targetTile,
-                                   final ProductData masterBuffer) {
+                                          final int x0, final int y0, final int w, final int h, final Tile targetTile,
+                                          final ProductData masterBuffer) {
         final int ia0 = (int)azimuthIndex;
         final int ia1 = ia0 + 1;
         final int ir0 = (int)rangeIndex;
@@ -737,8 +743,8 @@ public final class SARSimulationOp extends Operator {
      */
     private static double computeBackscatteredPower(final double localIncidenceAngle) {
         final double alpha = localIncidenceAngle*org.esa.beam.util.math.MathUtils.DTOR;
-        final double cosAlpha = Math.cos(alpha);
-        return (0.0118*cosAlpha / Math.pow(Math.sin(alpha) + 0.111*cosAlpha, 3));
+        final double cosAlpha = FastMath.cos(alpha);
+        return (0.0118*cosAlpha / Math.pow(FastMath.sin(alpha) + 0.111*cosAlpha, 3));
     }
 
     /**

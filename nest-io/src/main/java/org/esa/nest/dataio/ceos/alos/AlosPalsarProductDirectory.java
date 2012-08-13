@@ -198,19 +198,22 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             }
         }
 
+        a[24] = facilityRecord.getAttributeDouble("Origin Latitude");
+        b[24] = facilityRecord.getAttributeDouble("Origin Longitude");
+
         // create geocoding grid
-        final int gridWidth = 11;
-        final int gridHeight = 11;
+        final int gridWidth = 4;
+        final int gridHeight = 4;
         final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
         final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
         final int sourceImageWidth = product.getSceneRasterWidth();
         final int sourceImageHeight = product.getSceneRasterHeight();
 
-        final int subSamplingX = sourceImageWidth / (gridWidth - 1);
-        final int subSamplingY = sourceImageHeight / (gridHeight - 1);
+        final double subSamplingX = sourceImageWidth / (double)(gridWidth - 1);
+        final double subSamplingY = sourceImageHeight / (double)(gridHeight - 1);
 
         double lat, lon;
-        int x, x2, x3, x4, y, y2, y3, y4;
+        double x, x2, x3, x4, y, y2, y3, y4;
         int k = 0;
         for (int r = 0; r < gridHeight; r++) {
             y = r*subSamplingY - originLine;
@@ -243,10 +246,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight,
-                0.0f, 0.0f, subSamplingX, subSamplingY, targetLatTiePoints);
+                0.0f, 0.0f, (int)subSamplingX, (int)subSamplingY, targetLatTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight,
-                0.0f, 0.0f, subSamplingX, subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+                0.0f, 0.0f, (int)subSamplingX, (int)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
@@ -301,7 +304,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             final double tmp = subSamplingX * Constants.halfLightSpeed / samplingRate;
             int k = 0;
             for(int j = 0; j < gridHeight; j++) {
-                final int slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(j*subSamplingY);
+                final double slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(j*subSamplingY);
                 for (int i = 0; i < gridWidth; i++) {
                     rangeDist[k++] = (float)(slantRangeToFirstPixel + i*tmp);
                 }
@@ -312,9 +315,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             int k = 0;
             for (int j = 0; j < gridHeight; j++) {
                 final int y = Math.min(j*subSamplingY, sceneHeight-1);
-                final int slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(y); // meters
-                final int slantRangeToMidPixel = imageFiles[0].getSlantRangeToMidPixel(y);
-                final int slantRangeToLastPixel = imageFiles[0].getSlantRangeToLastPixel(y);
+                final double slantRangeToFirstPixel = imageFiles[0].getSlantRangeToFirstPixel(y); // meters
+                final double slantRangeToMidPixel = imageFiles[0].getSlantRangeToMidPixel(y);
+                final double slantRangeToLastPixel = imageFiles[0].getSlantRangeToLastPixel(y);
                 final double[] polyCoef = computePolynomialCoefficients(slantRangeToFirstPixel,
                                                                         slantRangeToMidPixel,
                                                                         slantRangeToLastPixel,
@@ -366,7 +369,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private static double[] computePolynomialCoefficients(
-                    int slantRangeToFirstPixel, int slantRangeToMidPixel, int slantRangeToLastPixel, int imageWidth) {
+                    double slantRangeToFirstPixel, double slantRangeToMidPixel, double slantRangeToLastPixel, int imageWidth) {
 
         final int firstPixel = 0;
         final int midPixel = imageWidth/2;

@@ -1006,7 +1006,7 @@ public class ProductSceneView extends BasicView
         final Product currentProduct = getRaster().getProduct();
         final Product otherProduct = view.getRaster().getProduct();
         if (otherProduct == currentProduct ||
-                otherProduct.isCompatibleProduct(currentProduct, 1.0e-3f)) {
+                otherProduct.isCompatibleProduct(currentProduct, 1)) {
 
             Viewport viewPortToChange = view.layerCanvas.getViewport();
             Viewport myViewPort = layerCanvas.getViewport();

@@ -21,6 +21,7 @@ import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.Settings;
+import org.apache.commons.math.util.FastMath;
 
 import java.io.*;
 import java.util.StringTokenizer;
@@ -61,6 +62,9 @@ public class EarthGravitationalModel96 {
     private static final int NUM_CHAR_PER_EMPTY_LINE = 1;
     private static final int BLOCK_HEIGHT = 20;
     private static final int NUM_OF_BLOCKS_PER_LAT = 9;
+
+    private static final int MAX_LATS = NUM_LATS - 1;
+    private static final int MAX_LONS = NUM_LONS - 1;
 
     private final float[][] egm = new float[NUM_LATS][NUM_LONS];
     private static EarthGravitationalModel96 theInstance = null;
@@ -135,11 +139,12 @@ public class EarthGravitationalModel96 {
         }
     }
 
-    public float getEGM(double lat, double lon) {
+    public float getEGM(final double lat, final double lon) {
 
         final double r = (90 - lat) / 0.25;
         final double c = (lon < 0? lon + 360 : lon)/ 0.25;
 
+        /*
         final int r0 = (int)r;
         final int c0 = (int)c;
         final int r1 = Math.min(r0 + 1, NUM_LATS - 1);
@@ -154,6 +159,28 @@ public class EarthGravitationalModel96 {
         final double dCol = c - c0;
 
         return (float)MathUtils.interpolationBiLinear(n00, n01, n10, n11, dCol, dRow);
+        */
+        final double[][] v = new double[4][4];
+        final int r0 = ((int)r-1);
+        final int c0 = ((int)c-1);
+        final double dRow = r - (r0+1);
+        final double dCol = c - (c0+1);
+        for (int i = 0; i < 4; i++) {
+            final int ri = FastMath.min(FastMath.max(r0 + i, 0), MAX_LATS);
+            //for (int j = 0; j < 4; j++) {
+            //    final int cj = Math.min(Math.max(c0 + j, 0), MAX_LONS);
+            //    v[i][j] = egm[ri][cj];
+            //}
+
+            //unrolled loop
+            v[i][0] = egm[ri][FastMath.min(FastMath.max(c0    , 0), MAX_LONS)];
+            v[i][1] = egm[ri][FastMath.min(FastMath.max(c0 + 1, 0), MAX_LONS)];
+            v[i][2] = egm[ri][FastMath.min(FastMath.max(c0 + 2, 0), MAX_LONS)];
+            v[i][3] = egm[ri][FastMath.min(FastMath.max(c0 + 3, 0), MAX_LONS)];
+        }
+
+        return (float)MathUtils.interpolationBiCubic(v, dCol, dRow);
+
     }
 
     public float[][] computeEGMArray(final GeoCoding geoCoding,

@@ -62,7 +62,7 @@ public class TileGeoreferencing {
                 return;
             }
         }
-        geocoding.getGeoPos(new PixelPos(x,y), geo);
+        geocoding.getGeoPos(new PixelPos(x+0.5f,y+0.5f), geo);
     }
 
     public void getGeoPos(final PixelPos pix, final GeoPos geo) {

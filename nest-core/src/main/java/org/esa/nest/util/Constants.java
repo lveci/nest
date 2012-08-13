@@ -21,8 +21,8 @@ public final class Constants
     public static final double halfLightSpeed = lightSpeed / 2.0;
     public static final double lightSpeedInMetersPerDay = Constants.lightSpeed * 86400.0;
 
-    public static final double semiMajorAxis = 6378137.0;      // in m, WGS84 semi-major axis of Earth
-    public static final double semiMinorAxis = 6356752.314245; // in m, WGS84 semi-minor axis of Earth
+    public static final double semiMajorAxis = GeoUtils.WGS84.a; // in m, WGS84 semi-major axis of Earth
+    public static final double semiMinorAxis = GeoUtils.WGS84.b; // in m, WGS84 semi-minor axis of Earth
 
     public static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 

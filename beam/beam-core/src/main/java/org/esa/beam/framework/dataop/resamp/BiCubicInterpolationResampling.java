@@ -16,9 +16,6 @@
 
 package org.esa.beam.framework.dataop.resamp;
 
-
-import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-
 final class BiCubicInterpolationResampling implements Resampling {
 
     private final static float[][] invA = {
@@ -59,7 +56,6 @@ final class BiCubicInterpolationResampling implements Resampling {
 
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
-
 
         final double di = x - (i0 + 0.5);
         final double dj = y - (j0 + 0.5);
@@ -118,12 +114,12 @@ final class BiCubicInterpolationResampling implements Resampling {
                                 final Index index) throws Exception {
 
         final double[][] v = new double[4][4];
-        final int x0 = index.i[0] - 1;
-        final int y0 = index.j[0] - 1;
+        final double x0 = index.i[0] - 1;
+        final double y0 = index.j[0] - 1;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                final int x = Index.crop(x0 + i, index.width-1);
-                final int y = Index.crop(y0 + j, index.height-1);
+                final double x = Index.crop(x0 + i, index.width-1);
+                final double y = Index.crop(y0 + j, index.height-1);
                 v[j][i] = raster.getSample(x, y);
                 if(Double.isNaN(v[j][i])) {
                     return raster.getSample(index.i0, index.j0);

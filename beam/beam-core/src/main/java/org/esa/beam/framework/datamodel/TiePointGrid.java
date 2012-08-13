@@ -546,7 +546,7 @@ public class TiePointGrid extends RasterDataNode {
      * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
      */
     @Override
-    public synchronized float[] getPixels(int x1, int y1, int w, int h, float[] pixels, ProgressMonitor pm) {
+    public float[] getPixels(int x1, int y1, int w, int h, float[] pixels, ProgressMonitor pm) {
         pixels = ensureMinLengthArray(pixels, w * h);
         final int x2 = x1 + w;
         final int y2 = y1 + h;
@@ -920,7 +920,7 @@ public class TiePointGrid extends RasterDataNode {
         return sinGrid == null;
     }
 
-    private void initDiscont() {
+    private synchronized void initDiscont() {
         TiePointGrid base = this;
         final float[] tiePoints = base.getTiePoints();
         final float[] sinTiePoints = new float[tiePoints.length];

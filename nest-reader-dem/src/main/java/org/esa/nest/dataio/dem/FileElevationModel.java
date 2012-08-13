@@ -109,9 +109,9 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         return tileGeocoding.getGeoPos(pixelPos, null);
     }
 
-    public float getSample(int pixelX, int pixelY) throws IOException {
+    public float getSample(double pixelX, double pixelY) throws IOException {
 
-        final float sample = fileElevationTile.getSample(pixelX, pixelY);
+        final float sample = fileElevationTile.getSample((int)pixelX, (int)pixelY);
         if (sample == noDataValue) {
             return Float.NaN;
         }

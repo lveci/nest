@@ -188,9 +188,9 @@ public final class ReaderUtils {
     }
 
     public static double getLineTimeInterval(ProductData.UTC startUTC, ProductData.UTC endUTC, int sceneHeight) {
-        final double startTime = startUTC.getMJD() * 24 * 3600;
-        final double stopTime = endUTC.getMJD() * 24 * 3600;
-        return (stopTime-startTime) / (sceneHeight-1);
+        final double startTime = startUTC.getMJD() * 24.0 * 3600.0;
+        final double stopTime = endUTC.getMJD() * 24.0 * 3600.0;
+        return (stopTime-startTime) / (double)(sceneHeight-1);
     }
 
     public static int getTotalSize(Product product) {

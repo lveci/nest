@@ -260,7 +260,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
 
             imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
-            
+
             createTargetProduct();
 
             computeSensorPositionsAndVelocities();
@@ -940,7 +940,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         }
                     }
 
-                    targetGeoCoding.getGeoPos(new PixelPos(x,y), geoPos);
+                    tileGeoRef.getGeoPos(x, y, geoPos);
                     final double lat = geoPos.lat;
                     double lon = geoPos.lon;
                     if (lon >= 180.0) {
@@ -954,7 +954,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     GeoUtils.geo2xyzWGS84(lat, lon, alt, earthPoint);
 
-                    final double zeroDopplerTime = getEarthPointZeroDopplerTime(sourceImageHeight, firstLineUTC,
+                    final double zeroDopplerTime = getEarthPointZeroDopplerTime(firstLineUTC,
                             lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
@@ -1087,46 +1087,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         return (delLat + delLon <= delLatMax + delLonMax);
     }
-    /*
-    public static boolean isValidCell(final double rangeIndex, final double azimuthIndex,
-                                final double lat, final double lon, final TileGeoreferencing tileGeoRef,
-                                final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
-        if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
-            return  false;
-        }
-
-        final GeoPos sensorGeoPos = new GeoPos();
-        GeoUtils.xyz2geoWGS84(sensorPos, sensorGeoPos);
-        final double delLatMax = Math.abs(lat - sensorGeoPos.lat);
-        double delLonMax;
-        if (lon < 0 && sensorGeoPos.lon > 0) {
-            delLonMax = Math.min(Math.abs(360 + lon - sensorGeoPos.lon), sensorGeoPos.lon - lon);
-        } else if (lon > 0 && sensorGeoPos.lon < 0) {
-            delLonMax = Math.min(Math.abs(360 + sensorGeoPos.lon - lon), lon - sensorGeoPos.lon);
-        } else {
-            delLonMax = Math.abs(lon - sensorGeoPos.lon);
-        }
-
-        final GeoPos geoPos = new GeoPos();
-        tileGeoRef.getGeoPos((int)rangeIndex, (int)azimuthIndex, geoPos);
-
-        //final double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        //final double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
-        final double delLat = Math.abs(lat - geoPos.getLat());
-        final double srcLon = geoPos.getLon();
-        double delLon;
-        if (lon < 0 && srcLon > 0) {
-            delLon = Math.min(Math.abs(360 + lon - srcLon), srcLon - lon);
-        } else if (lon > 0 && srcLon < 0) {
-            delLon = Math.min(Math.abs(360 + srcLon - lon), lon - srcLon);
-        } else {
-            delLon = Math.abs(lon - srcLon);
-        }
-
-        return (delLat + delLon <= delLatMax + delLonMax);
-    }
-    */
     /**
      * Save noDataValue to target pixel with given index.
      * @param index The pixel index in target image.
@@ -1140,7 +1101,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Compute zero Doppler time for given erath point.
-     * @param sourceImageHeight The source image height.
      * @param firstLineUTC The zero Doppler time for the first range line.
      * @param lineTimeInterval The line time interval.
      * @param wavelength The ragar wavelength.
@@ -1150,7 +1110,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The zero Doppler time in days if it is found, -1 otherwise.
      * @throws OperatorException The operator exception.
      */
-    public static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
+    public static double getEarthPointZeroDopplerTime(final double firstLineUTC,
                                                       final double lineTimeInterval, final double wavelength,
                                                       final double[] earthPoint, final double[][] sensorPosition,
                                                       final double[][] sensorVelocity) throws OperatorException {
@@ -1159,9 +1119,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         int lowerBound = 0;
         int upperBound = sensorPosition.length - 1;
         double lowerBoundFreq = getDopplerFrequency(
-                lowerBound, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
+                lowerBound, earthPoint, sensorPosition, sensorVelocity, wavelength);
         double upperBoundFreq = getDopplerFrequency(
-                upperBound, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
+                upperBound, earthPoint, sensorPosition, sensorVelocity, wavelength);
 
         if (Double.compare(lowerBoundFreq, 0.0) == 0) {
             return firstLineUTC + lowerBound*lineTimeInterval;
@@ -1198,7 +1158,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     /**
      * Compute Doppler frequency for given earthPoint and sensor position.
      * @param y The index for given range line.
-     * @param sourceImageHeight The source image height.
      * @param earthPoint The earth point in xyz coordinate.
      * @param sensorPosition Array of sensor positions for all range lines.
      * @param sensorVelocity Array of sensor velocities for all range lines.
@@ -1206,17 +1165,13 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The Doppler frequency in Hz.
      */
     private static double getDopplerFrequency(
-            final int y, final int sourceImageHeight, final double[] earthPoint, final double[][] sensorPosition,
+            final int y, final double[] earthPoint, final double[][] sensorPosition,
             final double[][] sensorVelocity, final double wavelength) {
-
-        //if (y < 0 || y > sourceImageHeight - 1) {
-        //    throw new OperatorException("Invalid range line index: " + y);
-        //}
 
         final double xDiff = earthPoint[0] - sensorPosition[y][0];
         final double yDiff = earthPoint[1] - sensorPosition[y][1];
         final double zDiff = earthPoint[2] - sensorPosition[y][2];
-        final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
+        final double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
 
         return 2.0 * (sensorVelocity[y][0]*xDiff + sensorVelocity[y][1]*yDiff + sensorVelocity[y][2]*zDiff) / (distance*wavelength);
     }
@@ -1411,7 +1366,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Get source image pixel value using nearest neighbot interpolation.
+     * Get source image pixel value using nearest neighbor interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
      * @param tileData The source tile information.

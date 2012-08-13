@@ -297,8 +297,6 @@ public class BasicApp {
 
         try {
             pm.beginTask("Starting " + getAppName(), 6);
-
-            initMainFrame();
             
             pm.setSubTaskName("Loading preferences...");
             initLogger();
@@ -313,7 +311,7 @@ public class BasicApp {
             pm.setSubTaskName("Creating main frame...");
             initCommandManager();
             //logger.info("Creating MainFrame...");
-            //initMainFrame();
+            initMainFrame();
             initShutdownHook();
             logger.info("Init Look and Feel...");
             initLookAndFeel();
@@ -348,6 +346,8 @@ public class BasicApp {
         try {
             getMainFrame().setVisible(true);
             updateState();
+        } catch(Throwable t) {
+            System.out.println(t.getMessage());
         } finally {
             startedUp = true;
             startingUp = false;
@@ -397,6 +397,8 @@ public class BasicApp {
             menuBar.getContext().setInitIndex(1);
             getMainFrame().getDockableBarManager().addDockableBar(menuBar);
 
+            insertCommandMenuItems();
+            /*
             final SwingWorker worker = new SwingWorker() {
                 @Override
                 protected Object doInBackground() throws Exception {
@@ -404,7 +406,7 @@ public class BasicApp {
                     return null;
                 }
             };
-            worker.execute();
+            worker.execute();     */
         }
     }
 

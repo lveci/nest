@@ -29,12 +29,19 @@ public final class StatusProgressMonitor {
     private int lastPct = 0;
     private boolean allowStdOut = true;
 
+    private int workInc = 0;
+
     public StatusProgressMonitor(final float max, final String msg) {
         this.max = max;
         this.msg = msg;
     }
 
-    public void worked(final int i) {
+    public synchronized void workedOne() {
+        ++workInc;
+        worked(workInc);
+    }
+
+    public synchronized void worked(final int i) {
 
         if(visatApp != null) {
             final int pct = (int)((i/max) * 100);

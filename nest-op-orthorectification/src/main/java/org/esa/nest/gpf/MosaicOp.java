@@ -551,11 +551,11 @@ public class MosaicOp extends Operator {
             return tile.getHeight();
         }
 
-        public final float getSample(final int x, final int y) throws Exception {
+        public final float getSample(final double x, final double y) throws Exception {
             if(x < minX || y < minY || x > maxX || y > maxY)
                 return Float.NaN;
             
-            final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
+            final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex((int)x, (int)y));
 
             if (usesNoData) {
                 if (scalingApplied && geophysicalNoDataValue == sample)

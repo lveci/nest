@@ -114,7 +114,7 @@ public interface Resampling {
          *
          * @throws Exception if a non-runtime error occurs, e.g I/O error
          */
-        float getSample(int x, int y) throws Exception;
+        float getSample(double x, double y) throws Exception;
     }
 
     /**
@@ -129,10 +129,10 @@ public interface Resampling {
         public int height;
 
         // the index fields
-        public int i0;
-        public int j0;
-        public final int[] i;
-        public final int[] j;
+        public double i0;
+        public double j0;
+        public final double[] i;
+        public final double[] j;
         public final double[] ki;
         public final double[] kj;
 
@@ -143,13 +143,13 @@ public interface Resampling {
          * @param n the maximum number of polynomial coefficients required to perform a resampling
          */
         public Index(int m, int n) {
-            i = new int[m];
-            j = new int[m];
+            i = new double[m];
+            j = new double[m];
             ki = new double[n];
             kj = new double[n];
         }
 
-        public static int crop(int i, int max) {
+        public static double crop(double i, double max) {
             return (i < 0) ? 0 : (i > max) ? max : i;
         }
     }

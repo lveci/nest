@@ -1207,12 +1207,12 @@ public class Product extends ProductNode {
         if (this == product) {
             return true;
         }
-        if (getSceneRasterWidth() != product.getSceneRasterWidth()) {
+   /*     if (getSceneRasterWidth() != product.getSceneRasterWidth()) {
             return false;
         }
         if (getSceneRasterHeight() != product.getSceneRasterHeight()) {
             return false;
-        }
+        }     */
         if (getGeoCoding() == null && product.getGeoCoding() != null) {
             return false;
         }

@@ -77,7 +77,7 @@ public abstract class CEOSImageFile {
         return _imageRecords[line];
     }
 
-    public int getSlantRangeToFirstPixel(int line) {
+    public double getSlantRangeToFirstPixel(int line) {
         try {
             final BinaryRecord imgRec = getImageRecord(line);
             return imgRec.getAttributeInt("Slant range to 1st pixel");
@@ -86,7 +86,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public int getSlantRangeToMidPixel(int line) {
+    public double getSlantRangeToMidPixel(int line) {
         try {
             final BinaryRecord imgRec = getImageRecord(line);
             return imgRec.getAttributeInt("Slant range to mid-pixel");
@@ -95,7 +95,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public int getSlantRangeToLastPixel(int line) {
+    public double getSlantRangeToLastPixel(int line) {
         try {
             final BinaryRecord imgRec = getImageRecord(line);
             return imgRec.getAttributeInt("Slant range to last pixel");

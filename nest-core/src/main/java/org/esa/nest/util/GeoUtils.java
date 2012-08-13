@@ -449,9 +449,9 @@ public final class GeoUtils
     }
 
     public static interface WGS84 {
-        public static final double a = 6378137; // m
-        public static final double b = 6356752.314245; // m
-        public static final double earthFlatCoef = 298.257223563;
+        public static final double a = 6378137.0; // m
+        public static final double b = 6356752.3142451794975639665996337; //6356752.31424518; // m
+        public static final double earthFlatCoef = 1.0 / ((a-b)/ a); //298.257223563;
         public static final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
         public static final double e2inv = 1 - WGS84.e2;
         public static final double ep2 = e2 / (1 - e2);
@@ -460,7 +460,7 @@ public final class GeoUtils
     public static interface GRS80 {
         public static final double a = 6378137; // m
         public static final double b = 6356752.314140 ; // m
-        public static final double earthFlatCoef = 298.257222101;
+        public static final double earthFlatCoef = 1.0 / ((a-b)/ a); //298.257222101;
         public static final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
         public static final double ep2 = e2 / (1 - e2);
     }

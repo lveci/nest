@@ -853,8 +853,8 @@ public class CreateStackOp extends Operator {
             return tile.getHeight();
         }
 
-        public final float getSample(final int x, final int y) throws Exception {
-            final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
+        public final float getSample(final double x, final double y) throws Exception {
+            final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex((int)x, (int)y));
 
             if (usesNoData) {
                 if(scalingApplied && geophysicalNoDataValue == sample)
