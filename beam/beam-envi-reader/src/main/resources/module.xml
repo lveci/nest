@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-envi-reader</symbolicName>
-    <version>4C-1.2</version>
+    <version>5.0-1.2</version>
     <name>ENVI Product Reader</name>
 
     <description>
@@ -36,9 +36,9 @@
 
         <action>
             <id>exportENVI</id>
-            <text>Export ENVI product</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <formatName>ENVI</formatName>
+            <text>ENVI</text>
             <shortDescr>Export ENVI product</shortDescr>
             <helpId>exportENVI</helpId>
         </action>

@@ -21,17 +21,16 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.ProductUtils;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import javax.media.jai.Histogram;
+import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -50,7 +49,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
     public static Product createProductSubset(Product sourceProduct, boolean sourceProductOwner,
                                               ProductSubsetDef subsetDef, String name, String desc) throws IOException {
-        final ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
+        ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
         return productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
     }
 
@@ -251,7 +250,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
      * @param destOffsetY   the Y-offset in the band's raster co-ordinates
      * @param destWidth     the width of region to be read given in the band's raster co-ordinates
      * @param destHeight    the height of region to be read given in the band's raster co-ordinates
-     *
      * @throws IOException if an I/O error occurs
      * @see #getSubsetDef
      */
@@ -269,7 +267,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (sourceBand.getRasterData() != null) {
             // if the destination region equals the entire raster
             if (sourceBand.getSceneRasterWidth() == destWidth
-                && sourceBand.getSceneRasterHeight() == destHeight) {
+                    && sourceBand.getSceneRasterHeight() == destHeight) {
                 copyBandRasterDataFully(sourceBand,
                                         destBuffer,
                                         destWidth, destHeight);
@@ -285,7 +283,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         } else {
             // if the desired destination region equals the source raster
             if (sourceWidth == destWidth
-                && sourceHeight == destHeight) {
+                    && sourceHeight == destHeight) {
                 readBandRasterDataRegion(sourceBand,
                                          sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
@@ -472,59 +470,11 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         ProductUtils.copyVectorData(sourceProduct, product);
         ProductUtils.copyMasks(sourceProduct, product);
         ProductUtils.copyOverlayMasks(sourceProduct, product);
-        ProductUtils.copyRoiMasks(sourceProduct, product);
         ProductUtils.copyPreferredTileSize(sourceProduct, product);
         setSceneRasterStartAndStopTime(product);
         addSubsetInfoMetadata(product);
-        addPlacemarks(product);
 
         return product;
-    }
-
-    private void addPlacemarks(Product product) {
-        copyPlacemarks(getSourceProduct().getPinGroup(), product.getPinGroup(), false);
-        copyPlacemarks(getSourceProduct().getGcpGroup(), product.getGcpGroup(), true);
-    }
-
-    private void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
-                                ProductNodeGroup<Placemark> targetPlacemarkGroup,
-                                boolean copyAll) {
-        final Placemark[] placemarks = new Placemark[sourcePlacemarkGroup.getNodeCount()];
-        sourcePlacemarkGroup.toArray(placemarks);
-
-        final int offsetX;
-        final int offsetY;
-        if (getSubsetDef() != null && getSubsetDef().getRegion() != null) {
-            offsetX = getSubsetDef().getRegion().x;
-            offsetY = getSubsetDef().getRegion().y;
-        } else {
-            offsetX = 0;
-            offsetY = 0;
-        }
-
-        final int subSamplingX;
-        final int subSamplingY;
-        if (getSubsetDef() != null) {
-            subSamplingX = getSubsetDef().getSubSamplingY();
-            subSamplingY = getSubsetDef().getSubSamplingX();
-        } else {
-            subSamplingX = 1;
-            subSamplingY = 1;
-        }
-
-        for (final Placemark placemark : placemarks) {
-            final float x = (placemark.getPixelPos().x - offsetX) / subSamplingX;
-            final float y = (placemark.getPixelPos().y - offsetY) / subSamplingY;
-
-            if (x >= 0 && x < getSceneRasterWidth() && y >= 0 && y < getSceneRasterHeight() || copyAll) {
-                targetPlacemarkGroup.add(Placemark.createPointPlacemark(placemark.getDescriptor(), placemark.getName(),
-                                                                        placemark.getLabel(),
-                                                                        placemark.getDescription(),
-                                                                        new PixelPos(x, y),
-                                                                        placemark.getGeoPos(),
-                                                                        targetPlacemarkGroup.getProduct().getGeoCoding()));
-            }
-        }
     }
 
     private void setSceneRasterStartAndStopTime(Product product) {
@@ -684,11 +634,25 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
     private void copyStx(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
         final Stx sourceStx = sourceRaster.getStx();
-        final Stx targetStx = new Stx(sourceStx.getMin(), sourceStx.getMax(),
-                                      sourceStx.getMean(), sourceStx.getStandardDeviation(),
-                                      ProductData.isIntType(sourceRaster.getDataType()),
-                                      Arrays.copyOf(sourceStx.getHistogramBins(), sourceStx.getHistogramBins().length),
+        final Histogram sourceHistogram = sourceStx.getHistogram();
+        final Histogram targetHistogram = new Histogram(sourceStx.getHistogramBinCount(),
+                                                        sourceHistogram.getLowValue(0),
+                                                        sourceHistogram.getHighValue(0),
+                                                        1);
+
+        System.arraycopy(sourceHistogram.getBins(0), 0, targetHistogram.getBins(0), 0, sourceStx.getHistogramBinCount());
+
+        final Stx targetStx = new Stx(sourceStx.getMinimum(),
+                                      sourceStx.getMaximum(),
+                                      sourceStx.getMean(),
+                                      sourceStx.getStandardDeviation(),
+                                      sourceStx.getCoefficientOfVariation(),
+                                      sourceStx.getEquivalentNumberOfLooks(),
+                                      sourceStx.isLogHistogram(),
+                                      sourceStx.isIntHistogram(),
+                                      targetHistogram,
                                       sourceStx.getResolutionLevel());
+
         targetRaster.setStx(targetStx);
     }
 
@@ -706,9 +670,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         }
         final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
         return subsetDef.getRegion() == null
-               || subsetDef.getRegion().equals(sourceRegion)
-                  && subsetDef.getSubSamplingX() == 1
-                  && subsetDef.getSubSamplingY() == 1;
+                || subsetDef.getRegion().equals(sourceRegion)
+                && subsetDef.getSubSamplingX() == 1
+                && subsetDef.getSubSamplingY() == 1;
     }
 
     protected void addGeoCodingToProduct(final Product product) {

@@ -152,7 +152,6 @@ public final class CreateElevationOp extends Operator {
         }
 
         elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
-        elevationBand.setSynthetic(true);
         elevationBand.setNoDataValue(noDataValue);
         elevationBand.setUnit(Unit.METERS);
         elevationBand.setDescription(demDescriptor.getName());

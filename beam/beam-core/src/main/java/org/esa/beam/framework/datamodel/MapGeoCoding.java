@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
  * A geo-coding based on a cartographic map.
  *
  * @author Norman Fomferra
-
+ * @version $Revision$ $Date$
  * @deprecated since BEAM 4.8, use {@link CrsGeoCoding} instead.
  */
 public class MapGeoCoding extends AbstractGeoCoding {
@@ -150,7 +150,9 @@ public class MapGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public final PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        return mapToPixel(geoToMap(normGeoPos(geoPos, new GeoPos()), new Point2D.Double()), pixelPos);
+        final GeoPos geoPosNorm = normGeoPos(geoPos, new GeoPos());
+        final Point2D mapPos = geoToMap(geoPosNorm, new Point2D.Double());
+        return mapToPixel(mapPos, pixelPos);
     }
 
     /**
@@ -164,8 +166,9 @@ public class MapGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public final GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
-        geoPos = denormGeoPos(mapToGeo(pixelToMap(pixelPos, new Point2D.Double()), geoPos));
-        return geoPos;
+        final Point2D mapPos = pixelToMap(pixelPos, new Point2D.Double());
+        final GeoPos geoPosNorm = mapToGeo(mapPos, new GeoPos());
+        return denormGeoPos(geoPosNorm, geoPos);
     }
 
     /**
@@ -230,22 +233,12 @@ public class MapGeoCoding extends AbstractGeoCoding {
         return geoPosNorm;
     }
 
-    private static GeoPos denormGeoPos(final GeoPos geoPosNorm, GeoPos geoPos) {
+    private GeoPos denormGeoPos(final GeoPos geoPosNorm, GeoPos geoPos) {
         if (geoPos == null) {
             geoPos = new GeoPos();
         }
         geoPos.lat = geoPosNorm.lat;
         geoPos.lon = geoPosNorm.lon;
-        while (geoPos.lon > 180.0f) {
-            geoPos.lon -= 360.0f;
-        }
-        while (geoPos.lon < -180.0f) {
-            geoPos.lon += 360.0f;
-        }
-        return geoPos;
-    }
-
-    private static GeoPos denormGeoPos(final GeoPos geoPos) {
         while (geoPos.lon > 180.0f) {
             geoPos.lon -= 360.0f;
         }

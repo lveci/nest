@@ -60,7 +60,7 @@ import java.util.Iterator;
  * This action imports a product of the associated format.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ProductImportAction extends ExecCommand {
 
@@ -136,22 +136,16 @@ public class ProductImportAction extends ExecCommand {
 
         final Boolean useFilesAndFoldersObj = getConfigBoolean(config, "useFilesAndFolders");
         useFilesAndFolders = useFilesAndFoldersObj != null ? useFilesAndFoldersObj : false;
-
         String text = getText();
         if (text == null) {
-            setText("Open " + getFormatName() + " Product...");
-        } else
-            setText(text.replace("Import", "Open"));
+            setText(getFormatName());
+        }
 
         String parent = getParent();
         if (parent == null) {
-            setParent("import");
+            setParent("importRasterData");
         }
 
-        String placeAfter = getPlaceAfter();
-        if (placeAfter == null) {
-            setPlaceAfter("importGeometry");
-        }
     }
 
     private String getMessage(String msg) {
@@ -230,11 +224,9 @@ public class ProductImportAction extends ExecCommand {
         if (fileChooser == null) {
             fileChooser = new ProductFileChooser();
             fileChooser.setAcceptAllFileFilterUsed(useAllFileFilter);
-            if(!useFilesAndFolders) {
-                BeamFileFilter fileFilter = readerPlugIn.getProductFileFilter();
-                if (fileFilter != null) {
-                    fileChooser.setFileFilter(fileFilter);
-                }
+            BeamFileFilter fileFilter = readerPlugIn.getProductFileFilter();
+            if (fileFilter != null) {
+                fileChooser.setFileFilter(fileFilter);
             }
             HelpSys.enableHelpKey(fileChooser, getHelpId());
         }

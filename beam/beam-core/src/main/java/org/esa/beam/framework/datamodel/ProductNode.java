@@ -57,10 +57,10 @@ public abstract class ProductNode extends ExtensibleObject {
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
     protected ProductNode(String name, String description) {
-        //Guardian.assertNotNull("name", name);
-        //name = name.trim();
-        //Guardian.assertNotNullOrEmpty("name", name);
-        this.name = name.trim();
+        Guardian.assertNotNull("name", name);
+        name = name.trim();
+        Guardian.assertNotNullOrEmpty("name", name);
+        this.name = name;
         this.description = description;
     }
 
@@ -81,7 +81,7 @@ public abstract class ProductNode extends ExtensibleObject {
     /**
      * @return The owner node of this node.
      */
-    public final ProductNode getOwner() {
+    public ProductNode getOwner() {
         return owner;
     }
 

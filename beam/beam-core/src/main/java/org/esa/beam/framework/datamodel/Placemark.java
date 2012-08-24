@@ -45,6 +45,7 @@ import java.util.List;
  * @since BEAM 2.0 (full revision since BEAM 4.10)
  */
 public class Placemark extends ProductNode {
+
     @Deprecated
     public static final String PLACEMARK_FEATURE_TYPE_NAME = "Placemark";
 
@@ -94,7 +95,8 @@ public class Placemark extends ProductNode {
         super(feature.getID(), getStringAttribute(feature, PROPERTY_NAME_TEXT));
         this.descriptor = descriptor;
         this.feature = feature;
-        //Debug.trace("Placemark created: descriptor=" + descriptor.getClass() + ", featureType=" + feature.getFeatureType().getTypeName() + ", feature=" + feature);
+        Debug.trace(
+                "Placemark created: descriptor=" + descriptor.getClass() + ", featureType=" + feature.getFeatureType().getTypeName() + ", feature=" + feature);
     }
 
     /**
@@ -130,8 +132,9 @@ public class Placemark extends ProductNode {
      * @param attributeValue The feature's attribute value, may be {@code null}.
      */
     public void setAttributeValue(String attributeName, Object attributeValue) {
-        if (!ObjectUtils.equalObjects(attributeValue, getAttributeValue(attributeName))) {
-            feature.setAttribute(attributeName, attributeValue);
+        final int index = feature.getFeatureType().indexOf(attributeName);
+        if (index != -1 && !ObjectUtils.equalObjects(attributeValue, getAttributeValue(attributeName))) {
+            feature.setAttribute(index, attributeValue);
             fireProductNodeChanged(attributeName);
         }
     }
@@ -228,17 +231,20 @@ public class Placemark extends ProductNode {
      * Updates pixel and geo position according to the current geometry (model coordinates).
      */
     public void updatePositions() {
-        final Point point = (Point) feature.getDefaultGeometry();
-        if (getProduct() != null) {
-            final GeoCoding geoCoding = getProduct().getGeoCoding();
-            final AffineTransform i2m = ImageManager.getImageToModelTransform(geoCoding);
-            PixelPos pixelPos = new PixelPos((float) point.getX(), (float) point.getY());
-            try {
-                i2m.inverseTransform(pixelPos, pixelPos);
-            } catch (NoninvertibleTransformException ignored) {
-                // ignore
+        final Object defaultGeometry = feature.getDefaultGeometry();
+        if (defaultGeometry instanceof Point) {
+            final Point point = (Point) defaultGeometry;
+            if (getProduct() != null) {
+                final GeoCoding geoCoding = getProduct().getGeoCoding();
+                final AffineTransform i2m = ImageManager.getImageToModelTransform(geoCoding);
+                PixelPos pixelPos = new PixelPos((float) point.getX(), (float) point.getY());
+                try {
+                    i2m.inverseTransform(pixelPos, pixelPos);
+                } catch (NoninvertibleTransformException ignored) {
+                    // ignore
+                }
+                setPixelPosAttribute(pixelPos, true, false);
             }
-            setPixelPosAttribute(pixelPos, true, false);
         }
     }
 
@@ -256,7 +262,7 @@ public class Placemark extends ProductNode {
         if (!ObjectUtils.equalObjects(oldCoordinate, newCoordinate)) {
             if (oldCoordinate == null) {
                 final GeometryFactory geometryFactory = new GeometryFactory();
-                feature.setAttribute(PROPERTY_NAME_PIXELPOS, geometryFactory.createPoint(newCoordinate));
+                setAttributeValue(PROPERTY_NAME_PIXELPOS, geometryFactory.createPoint(newCoordinate));
             } else {
                 final Point point = (Point) getAttributeValue(PROPERTY_NAME_PIXELPOS);
                 point.getCoordinate().setCoordinate(newCoordinate);
@@ -292,8 +298,8 @@ public class Placemark extends ProductNode {
         if (!ObjectUtils.equalObjects(oldCoordinate, newCoordinate)) {
             if (oldCoordinate == null) {
                 final GeometryFactory geometryFactory = new GeometryFactory();
-                feature.setAttribute(PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(newCoordinate));
-            } else {
+                setAttributeValue(PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(newCoordinate));
+            } else if (newCoordinate != null) {
                 final Point point = (Point) getAttributeValue(PROPERTY_NAME_GEOPOS);
                 point.getCoordinate().setCoordinate(newCoordinate);
                 point.geometryChanged();

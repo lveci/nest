@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.io.xml.XppDomWriter;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 
 /**
- * Represents the application data for graphs. 
+ * Represents the application data for graphs.
  *
  * @author marcoz
  */
@@ -35,8 +35,9 @@ public class ApplicationData {
     private final String appId;
     private final XppDom data;
 
-    /** Constructs an Application Data object from the given Id and data objects.
-     * 
+    /**
+     * Constructs an Application Data object from the given Id and data objects.
+     *
      * @param string
      * @param xpp3Dom
      */
@@ -44,33 +45,33 @@ public class ApplicationData {
         appId = string;
         data = xpp3Dom;
     }
-    
+
     /**
      * Returns the Application ID.
-     * 
+     *
      * @return the appId
      */
     public String getId() {
         return appId;
     }
-    
+
     /**
-     * Returns the Application data as Xpp3Dom
-     * 
+     * Returns the Application data as XppDom
+     *
      * @return the data
      */
     public XppDom getData() {
         return data;
     }
- 
+
     public static class AppConverter implements Converter {
 
         private static final String ID_ATTRIBUTE_NAME = "id";
 
         @Override
         public void marshal(Object source, HierarchicalStreamWriter writer,
-                MarshallingContext context) {
-            
+                            MarshallingContext context) {
+
             ApplicationData applicationData = (ApplicationData) source;
             writer.addAttribute(ID_ATTRIBUTE_NAME, applicationData.appId);
             XppDom[] children = applicationData.data.getChildren();
@@ -83,7 +84,7 @@ public class ApplicationData {
 
         @Override
         public Object unmarshal(HierarchicalStreamReader reader,
-                UnmarshallingContext context) {
+                                UnmarshallingContext context) {
             HierarchicalStreamCopier copier = new HierarchicalStreamCopier();
             XppDomWriter xppDomWriter = new XppDomWriter();
             String appId = reader.getAttribute(ID_ATTRIBUTE_NAME);

@@ -285,7 +285,8 @@ public final class AbstractMetadataIO {
         } else if(rootChildrenEmpty) {
             final MetadataElement metaElem = new MetadataElement(rootName);
 
-            addAttribute(metaElem, rootName, xmlRoot.getValue());
+            if(!xmlRoot.getValue().isEmpty())
+                addAttribute(metaElem, rootName, xmlRoot.getValue());
 
             final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
             for (Attribute aChild : xmlAttribs) {

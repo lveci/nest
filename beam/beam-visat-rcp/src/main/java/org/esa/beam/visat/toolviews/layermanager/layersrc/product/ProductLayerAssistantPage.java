@@ -62,7 +62,7 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
         tree.setShowsRootHandles(true);
         tree.setRootVisible(false);
         tree.setCellRenderer(new ProductNodeTreeCellRenderer());
-        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.getSelectionModel().addTreeSelectionListener(new ProductNodeSelectionListener());
 
         List<CompatibleNodeList> nodeLists = model.compatibleNodeLists;
@@ -95,10 +95,7 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
 
     @Override
     public boolean performFinish() {
-	// NESTMOD multiple selections
-        final TreePath[] selectionPaths = tree.getSelectionPaths();
-        for(TreePath treePath : selectionPaths) {        
-	final RasterDataNode rasterDataNode = (RasterDataNode) tree.getSelectionPath().getLastPathComponent();
+        final RasterDataNode rasterDataNode = (RasterDataNode) tree.getSelectionPath().getLastPathComponent();
 
         LayerType type = LayerTypeRegistry.getLayerType(RasterImageLayerType.class.getName());
         PropertySet configuration = type.createLayerConfig(getContext().getLayerContext());
@@ -117,7 +114,7 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
         final LayerDataHandler layerDataHandler = new LayerDataHandler(rasterDataNode, imageLayer);
         rasterDataNode.getProduct().addProductNodeListener(layerDataHandler);
         rootLayer.addListener(layerDataHandler);
-	}
+
         return true;
     }
 
@@ -145,20 +142,18 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
 
         RasterDataNode raster = ctx.getSelectedProductSceneView().getRaster();
         GeoCoding geoCoding = raster.getGeoCoding();
-        CoordinateReferenceSystem modelCRS = geoCoding != null ? ImageManager.getModelCrs(geoCoding) : null;
-        if (modelCRS != null) {
-            final ProductManager productManager = ctx.getProductManager();
-            final Product[] products = productManager.getProducts();
-            for (Product product : products) {
-                if (product == selectedProduct) {
-                    continue;
-                }
-                compatibleNodes = new ArrayList<RasterDataNode>();
-                collectCompatibleRasterDataNodes(product.getBands(), modelCRS, compatibleNodes);
-                collectCompatibleRasterDataNodes(product.getTiePointGrids(), modelCRS, compatibleNodes);
-                if (!compatibleNodes.isEmpty()) {
-                    compatibleNodeLists.add(new CompatibleNodeList(product.getDisplayName(), compatibleNodes));
-                }
+        CoordinateReferenceSystem modelCRS = ImageManager.getModelCrs(geoCoding);
+        final ProductManager productManager = ctx.getProductManager();
+        final Product[] products = productManager.getProducts();
+        for (Product product : products) {
+            if (product == selectedProduct) {
+                continue;
+            }
+            compatibleNodes = new ArrayList<RasterDataNode>();
+            collectCompatibleRasterDataNodes(product.getBands(), modelCRS, compatibleNodes);
+            collectCompatibleRasterDataNodes(product.getTiePointGrids(), modelCRS, compatibleNodes);
+            if (!compatibleNodes.isEmpty()) {
+                compatibleNodeLists.add(new CompatibleNodeList(product.getDisplayName(), compatibleNodes));
             }
         }
         return new ProductTreeModel(compatibleNodeLists);
@@ -167,9 +162,7 @@ class ProductLayerAssistantPage extends AbstractLayerSourceAssistantPage {
     private void collectCompatibleRasterDataNodes(RasterDataNode[] bands, CoordinateReferenceSystem crs,
                                                   Collection<RasterDataNode> rasterDataNodes) {
         for (RasterDataNode node : bands) {
-            GeoCoding geoCoding = node.getGeoCoding();
-            final CoordinateReferenceSystem crs2 = ImageManager.getModelCrs(geoCoding);   //NESTMOD
-            if (geoCoding != null && crs.toWKT().equalsIgnoreCase(crs2.toWKT())) {
+            if (CRS.equalsIgnoreMetadata(crs, ImageManager.getModelCrs(node.getGeoCoding()))) {
                 rasterDataNodes.add(node);
             } else if (CRS.equalsIgnoreMetadata(crs, ImageManager.getModelCrs(node.getGeoCoding()))) {
                 rasterDataNodes.add(node);

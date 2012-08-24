@@ -79,7 +79,6 @@ public class TestAmplitudeToIntensity extends TestCase {
         // create a Band: band1
         final Band band1 = testProduct.addBand(name, ProductData.TYPE_INT32);
         band1.setUnit(unit);
-        band1.setSynthetic(true);
         final int[] intValues = new int[w * h];
         for (int i = 0; i < w * h; i++) {
             intValues[i] = i + 1;

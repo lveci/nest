@@ -196,7 +196,6 @@ public class TestConvertDataTypeOperator extends TestCase {
         // create a Band: band1
         final Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT64);
         band1.setUnit(Unit.AMPLITUDE);
-        band1.setSynthetic(true);
         final int range = w*h;
         final double[] values = new double[range];
         final double slope = (max-min) / range;

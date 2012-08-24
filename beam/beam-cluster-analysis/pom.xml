@@ -24,13 +24,13 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <name>BEAM Cluster Analysis</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-cluster-analysis</artifactId>
-    <version>4C-1.1.1</version>
+    <version>5.0-1.1.1</version>
 
     <dependencies>
         <dependency>

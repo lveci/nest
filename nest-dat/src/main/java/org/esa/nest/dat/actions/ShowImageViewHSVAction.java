@@ -192,7 +192,6 @@ public class ShowImageViewHSVAction extends ExecCommand {
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
-        virtBand.setSynthetic(true);
         virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
         return virtBand;

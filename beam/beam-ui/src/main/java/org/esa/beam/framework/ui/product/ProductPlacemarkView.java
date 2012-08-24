@@ -22,12 +22,25 @@ import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.PopupMenuHandler;
+import org.esa.beam.framework.ui.io.TableModelCsvEncoder;
+import org.esa.beam.util.SystemUtils;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import java.awt.*;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Enumeration;
 
 /**
  * A view component used to display a product's metadata in tabular form.
@@ -43,12 +56,25 @@ public class ProductPlacemarkView extends BasicView implements ProductNodeView {
         this.vectorDataNode.getProduct().addProductNodeListener(new PNL());
         placemarkTable = new SortableTable();
         placemarkTable.addMouseListener(new PopupMenuHandler(this));
+        placemarkTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         tableModel = new PlacemarkTableModel();
         placemarkTable.setModel(tableModel);
 
+        final TableCellRenderer renderer = placemarkTable.getTableHeader().getDefaultRenderer();
+        final int margin = placemarkTable.getTableHeader().getColumnModel().getColumnMargin();
+
+        Enumeration<TableColumn> columns = placemarkTable.getColumnModel().getColumns();
+        while (columns.hasMoreElements()) {
+            TableColumn tableColumn = columns.nextElement();
+            final int width = getColumnMinWith(tableColumn, renderer, margin);
+            tableColumn.setMinWidth(width);
+        }
+
+        final JScrollPane scrollPane = new JScrollPane(placemarkTable);
+
         setLayout(new BorderLayout());
-        add(BorderLayout.CENTER, new JScrollPane(placemarkTable));
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     public VectorDataNode getVectorDataNode() {
@@ -69,13 +95,19 @@ public class ProductPlacemarkView extends BasicView implements ProductNodeView {
         if (getCommandUIFactory() != null) {
             getCommandUIFactory().addContextDependentMenuItems("placemark", popupMenu);
         }
-        popupMenu.add(new HelloAction());
+        popupMenu.add(new CopyToClipboardAction());
         return popupMenu;
     }
 
     @Override
     public JPopupMenu createPopupMenu(MouseEvent event) {
         return null;
+    }
+
+    private int getColumnMinWith(TableColumn column, TableCellRenderer renderer, int margin) {
+        final Object headerValue = column.getHeaderValue();
+        final JLabel label = (JLabel) renderer.getTableCellRendererComponent(null, headerValue, false, false, 0, 0);
+        return label.getPreferredSize().width + margin;
     }
 
     private void onNodeChange(ProductNodeEvent event) {
@@ -140,17 +172,39 @@ public class ProductPlacemarkView extends BasicView implements ProductNodeView {
         tableModel.fireTableDataChanged();
     }
 
-    private class HelloAction extends AbstractAction {
-
-        public HelloAction() {
-            super("Hello");
-            putValue(SHORT_DESCRIPTION, "Says hello.");
-        }
-
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
+    private void copyTextDataToClipboard() {
+        final Cursor oldCursor = getCursor();
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            final String dataAsText = getDataAsText();
+            if (dataAsText != null) {
+                SystemUtils.copyToClipboard(dataAsText);
+            }
+        } finally {
+            setCursor(oldCursor);
         }
     }
 
+    private String getDataAsText() {
+        final StringWriter writer = new StringWriter();
+        try {
+            new TableModelCsvEncoder(tableModel).encodeCsv(writer);
+            writer.close();
+        } catch (IOException ignore) {
+        }
+        return writer.toString();
+    }
+
+    private class CopyToClipboardAction extends AbstractAction {
+
+        public CopyToClipboardAction() {
+            super("Copy to clipboard");
+            putValue(SHORT_DESCRIPTION, "The entire table content will be copied to the clipboard.");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            copyTextDataToClipboard();
+        }
+    }
 }

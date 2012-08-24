@@ -16,26 +16,14 @@
 
 package org.esa.beam.framework.datamodel;
 
-import org.opengis.feature.simple.SimpleFeatureType;
-
-import java.awt.*;
-
-public class PinDescriptor extends AbstractPlacemarkDescriptor {
-
-    private static final SimpleFeatureType DEFAULT_FEATURE_TYPE = Placemark.createPointFeatureType("org.esa.beam.Pin");
+public class PinDescriptor extends PointPlacemarkDescriptor {
 
     public static PinDescriptor getInstance() {
         return (PinDescriptor) PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(PinDescriptor.class.getName());
     }
 
-    @Override
-    public boolean isCompatibleWith(SimpleFeatureType featureType) {
-        return featureType.getTypeName().equals("org.esa.beam.Pin");
-    }
-
-    @Override
-    public SimpleFeatureType getBaseFeatureType() {
-        return DEFAULT_FEATURE_TYPE;
+    public PinDescriptor() {
+        super("org.esa.beam.Pin");
     }
 
     @Override
@@ -55,19 +43,6 @@ public class PinDescriptor extends AbstractPlacemarkDescriptor {
     public String getRoleLabel() {
         return "pin";
     }
-
-    @Override
-    @Deprecated
-    public Image getCursorImage() {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public Point getCursorHotSpot() {
-        return new Point();
-    }
-
 
     @Override
     @Deprecated
@@ -91,6 +66,5 @@ public class PinDescriptor extends AbstractPlacemarkDescriptor {
             return geoPos;
         }
         return geoCoding.getGeoPos(pixelPos, geoPos);
-
     }
 }

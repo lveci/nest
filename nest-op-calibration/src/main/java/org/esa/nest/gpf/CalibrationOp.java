@@ -309,14 +309,14 @@ public class CalibrationOp extends Operator {
      * @param trgProduct The target product
      * @param outputImageScaleInDb flag if output is in dB
      */
-    public static void createGammaVirtualBand(Product trgProduct, boolean outputImageScaleInDb) {
+    public static void createGammaVirtualBand(final Product trgProduct, final boolean outputImageScaleInDb) {
 
         int count=1;
         final Band[] bands = trgProduct.getBands();
         for(Band trgBand : bands) {
 
             final String unit = trgBand.getUnit();
-            if (trgBand.isSynthetic() || (unit != null && unit.contains("phase"))) {
+            if (trgBand instanceof VirtualBand || (unit != null && unit.contains("phase"))) {
                 continue;
             }
 
@@ -352,10 +352,9 @@ public class CalibrationOp extends Operator {
 
             final VirtualBand band = new VirtualBand(gammeBandName,
                     ProductData.TYPE_FLOAT32,
-                    trgProduct.getSceneRasterWidth(),
-                    trgProduct.getSceneRasterHeight(),
+                    trgBand.getSceneRasterWidth(),
+                    trgBand.getSceneRasterHeight(),
                     expression);
-            band.setSynthetic(true);
             band.setUnit(unit);
             band.setDescription("Gamma0 image");
             trgProduct.addBand(band);
@@ -367,14 +366,14 @@ public class CalibrationOp extends Operator {
      * @param trgProduct The target product
      * @param outputImageScaleInDb flag if output is in dB
      */
-    public static void createBetaVirtualBand(Product trgProduct, boolean outputImageScaleInDb) {
+    public static void createBetaVirtualBand(final Product trgProduct, final boolean outputImageScaleInDb) {
 
         int count=1;
         final Band[] bands = trgProduct.getBands();
         for(Band trgBand : bands) {
 
             final String unit = trgBand.getUnit();
-            if (trgBand.isSynthetic() || (unit != null && unit.contains("phase"))) {
+            if (trgBand instanceof VirtualBand || (unit != null && unit.contains("phase"))) {
                 continue;
             }
 
@@ -410,10 +409,9 @@ public class CalibrationOp extends Operator {
 
             final VirtualBand band = new VirtualBand(betaBandName,
                     ProductData.TYPE_FLOAT32,
-                    trgProduct.getSceneRasterWidth(),
-                    trgProduct.getSceneRasterHeight(),
+                    trgBand.getSceneRasterWidth(),
+                    trgBand.getSceneRasterHeight(),
                     expression);
-            band.setSynthetic(true);
             band.setUnit(unit);
             band.setDescription("Beta0 image");
             trgProduct.addBand(band);

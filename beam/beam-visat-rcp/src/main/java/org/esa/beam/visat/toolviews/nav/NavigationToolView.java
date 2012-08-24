@@ -65,10 +65,18 @@ import java.awt.event.FocusEvent;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import static java.lang.Math.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+
+import static java.lang.Math.abs;
+import static java.lang.Math.floor;
+import static java.lang.Math.log;
+import static java.lang.Math.log10;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
 
 /**
  * A window which displays product spectra.
@@ -179,7 +187,7 @@ public class NavigationToolView extends AbstractToolView {
             }
         });
 
-        AbstractButton helpButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/Help24.gif"), false);
+        AbstractButton helpButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/Help22.png"), false);
         helpButton.setToolTipText("Help."); /*I18N*/
         helpButton.setName("helpButton");
 
@@ -452,7 +460,7 @@ public class NavigationToolView extends AbstractToolView {
 
     public void zoom(final double zoomFactor) {
         final ProductSceneView view = getCurrentView();
-        if (view != null) {
+        if (view != null && zoomFactor > 0) {
             view.getLayerCanvas().getViewport().setZoomFactor(zoomFactor);
             maybeSynchronizeCompatibleProductViews();
         }
@@ -490,7 +498,7 @@ public class NavigationToolView extends AbstractToolView {
             if (internalFrame.getContentPane() instanceof ProductSceneView) {
                 final ProductSceneView view = (ProductSceneView) internalFrame.getContentPane();
                 if (view != currentView) {
-                    currentView.synchronizeViewport(view);
+                    currentView.synchronizeViewportIfPossible(view);
                 }
             }
         }
@@ -684,14 +692,29 @@ public class NavigationToolView extends AbstractToolView {
         public void internalFrameOpened(InternalFrameEvent e) {
             final Container contentPane = e.getInternalFrame().getContentPane();
             if (contentPane instanceof ProductSceneView) {
-                PropertyMap preferences = VisatApp.getApp().getPreferences();
-                final boolean showWindow = preferences.getPropertyBool(VisatApp.PROPERTY_KEY_AUTO_SHOW_NAVIGATION,
-                                                                       true);
+                final PropertyMap preferences = VisatApp.getApp().getPreferences();
+                final boolean showWindow = preferences.getPropertyBool(VisatApp.PROPERTY_KEY_AUTO_SHOW_NAVIGATION, true);
                 if (showWindow) {
-                    ApplicationPage page = VisatApp.getApp().getApplicationPage();
-                    ToolView toolView = page.getToolView(NavigationToolView.ID);
+                    final ApplicationPage page = VisatApp.getApp().getApplicationPage();
+                    final ToolView toolView = page.getToolView(NavigationToolView.ID);
                     if (toolView != null) {
                         page.showToolView(NavigationToolView.ID);
+                    }
+                }
+                final ProductSceneView newSceneView = (ProductSceneView) contentPane;
+                if (syncViewsButton.isSelected()) {
+                    final JInternalFrame[] internalFrames = VisatApp.getApp().getAllInternalFrames();
+                    for (final JInternalFrame internalFrame : internalFrames) {
+                        if (internalFrame.getContentPane() instanceof ProductSceneView) {
+                            final ProductSceneView oldSceneView = (ProductSceneView) internalFrame.getContentPane();
+                            if (oldSceneView != newSceneView) {
+                                final boolean done = oldSceneView.synchronizeViewportIfPossible(newSceneView);
+                                if (done) {
+                                    newSceneView.getLayerCanvas().setInitiallyZoomingAll(false);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }

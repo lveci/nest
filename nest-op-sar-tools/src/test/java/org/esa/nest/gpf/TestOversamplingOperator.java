@@ -103,7 +103,6 @@ public class TestOversamplingOperator extends TestCase {
         // create a Band: band1
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
         band1.setUnit(Unit.AMPLITUDE);
-        band1.setSynthetic(true);
         float[] intValues = new float[w * h];
         for (int i = 0; i < w * h; i++) {
             intValues[i] = i + 1.0f;

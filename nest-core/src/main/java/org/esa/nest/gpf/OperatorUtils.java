@@ -40,6 +40,7 @@ public final class OperatorUtils {
 
     public static final String TPG_SLANT_RANGE_TIME = "slant_range_time";
     public static final String TPG_INCIDENT_ANGLE = "incident_angle";
+    public static final String TPG_ELEVATION_ANGLE = "elevation_angle";
     public static final String TPG_LATITUDE = "latitude";
     public static final String TPG_LONGITUDE = "longitude";
 
@@ -242,7 +243,6 @@ public final class OperatorUtils {
                 srcBand.getSceneRasterWidth(),
                 srcBand.getSceneRasterHeight(),
                 srcBand.getExpression());
-        virtBand.setSynthetic(true);
         virtBand.setUnit(srcBand.getUnit());
         virtBand.setDescription(srcBand.getDescription());
         virtBand.setNoDataValue(srcBand.getNoDataValue());

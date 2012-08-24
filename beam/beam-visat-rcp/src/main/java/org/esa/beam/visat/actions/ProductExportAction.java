@@ -42,7 +42,7 @@ import java.util.Iterator;
  * This action exports a product of the associated format.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ProductExportAction extends ExecCommand {
 
@@ -84,12 +84,12 @@ public class ProductExportAction extends ExecCommand {
 
         String text = getText();
         if (text == null) {
-            setText("Export " + getFormatName() + " Product...");
+            setText(getFormatName());
         }
 
         String parent = getParent();
         if (parent == null) {
-            setParent("export");
+            setParent("exportRasterData");
         }
     }
 

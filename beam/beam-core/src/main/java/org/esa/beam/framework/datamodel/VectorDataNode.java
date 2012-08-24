@@ -19,14 +19,16 @@ package org.esa.beam.framework.datamodel;
 import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.util.Debug;
-import org.geotools.feature.*;
+import org.esa.beam.util.ObjectUtils;
+import org.geotools.feature.CollectionEvent;
+import org.geotools.feature.CollectionListener;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
-
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * A container which allows to store vector data in the BEAM product model.
@@ -41,6 +43,8 @@ import java.util.List;
 public class VectorDataNode extends ProductNode {
 
     public static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
+    public static final String PROPERTY_NAME_STYLE_CSS = "styleCss";
+    public static final String PROPERTY_NAME_DEFAULT_STYLE_CSS = "defaultStyleCss";
 
     private static final String DEFAULT_STYLE_FORMAT = "fill:%s; fill-opacity:0.5; stroke:#ffffff; stroke-opacity:1.0; stroke-width:1.0; symbol:cross";
     private static final String[] FILL_COLORS = {
@@ -59,11 +63,13 @@ public class VectorDataNode extends ProductNode {
 
     private final SimpleFeatureType featureType;
     private final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
+    private final CollectionListener featureCollectionListener;
     private final PlacemarkDescriptor placemarkDescriptor;
     private PlacemarkGroup placemarkGroup;
-    private final CollectionListener featureCollectionListener;
     private String defaultStyleCss;
+    private String styleCss;
     private ReferencedEnvelope bounds;
+    private boolean permanent;
 
     /**
      * Constructs a new vector data node for the given feature collection.
@@ -95,7 +101,7 @@ public class VectorDataNode extends ProductNode {
      * @param placemarkDescriptor The placemark descriptor
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
-    private VectorDataNode(String name, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection, PlacemarkDescriptor placemarkDescriptor) {
+    public VectorDataNode(String name, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection, PlacemarkDescriptor placemarkDescriptor) {
         super(name, "");
         this.featureType = featureCollection.getSchema();
         this.featureCollection = featureCollection;
@@ -228,11 +234,16 @@ public class VectorDataNode extends ProductNode {
         if (bounds == null) {
             bounds = new ReferencedEnvelope(featureType.getCoordinateReferenceSystem());
 
-            for (Iterator<SimpleFeature> i = featureCollection.iterator(); i.hasNext(); ) {
-                BoundingBox geomBounds = i.next().getBounds();
-                if (!geomBounds.isEmpty()) {
-                    bounds.include(geomBounds);
+            FeatureIterator<SimpleFeature> iterator = featureCollection.features();
+            try {
+                while (iterator.hasNext()) {
+                    BoundingBox geomBounds = iterator.next().getBounds();
+                    if (!geomBounds.isEmpty()) {
+                        bounds.include(geomBounds);
+                    }
                 }
+            } finally {
+                iterator.close();
             }
         }
         return bounds;
@@ -249,8 +260,26 @@ public class VectorDataNode extends ProductNode {
     }
 
     public void setDefaultStyleCss(String defaultStyleCss) {
-        Assert.notNull(this.defaultStyleCss, "defaultStyleCss");
-        this.defaultStyleCss = defaultStyleCss;
+        Assert.notNull(this.defaultStyleCss, PROPERTY_NAME_DEFAULT_STYLE_CSS);
+        if (!ObjectUtils.equalObjects(this.defaultStyleCss, defaultStyleCss)) {
+            String oldValue = this.defaultStyleCss;
+            this.defaultStyleCss = defaultStyleCss;
+            fireProductNodeChanged(PROPERTY_NAME_DEFAULT_STYLE_CSS, oldValue, this.defaultStyleCss);
+        }
+    }
+
+    // preliminary API, better use Map<String, Object> getStyleProperties() ?
+    public String getStyleCss() {
+        return styleCss;
+    }
+
+    // preliminary API, better use setStyleProperties(Map<String, Object> props) ?
+    public void setStyleCss(String styleCss) {
+        if (!ObjectUtils.equalObjects(this.styleCss, styleCss)) {
+            String oldValue = this.styleCss;
+            this.styleCss = styleCss;
+            fireProductNodeChanged(PROPERTY_NAME_STYLE_CSS, oldValue, this.styleCss);
+        }
     }
 
     @Override
@@ -283,7 +312,7 @@ public class VectorDataNode extends ProductNode {
                 generatePlacemarkForFeature(iterator.next());
             }
         } finally {
-            featureCollection.close(iterator);
+            iterator.close();
         }
     }
 
@@ -294,14 +323,13 @@ public class VectorDataNode extends ProductNode {
         }
     }
 
-
-    // Note: This is a temporary method. Soon, VectorDataNodes will be able to support all suitable PlacemarkDescriptors
     private static PlacemarkDescriptor getPlacemarkDescriptor(final SimpleFeatureType featureType) {
-        List<PlacemarkDescriptor> placemarkDescriptors = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptors(featureType);
-        if (!placemarkDescriptors.isEmpty()) {
-            return placemarkDescriptors.get(0);
+        PlacemarkDescriptorRegistry registry = PlacemarkDescriptorRegistry.getInstance();
+        PlacemarkDescriptor placemarkDescriptor = registry.getPlacemarkDescriptor(featureType);
+        if (placemarkDescriptor == null) {
+            return new GenericPlacemarkDescriptor(featureType);
         }
-        return new GenericPlacemarkDescriptor(featureType);
+        return placemarkDescriptor;
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -335,5 +363,20 @@ public class VectorDataNode extends ProductNode {
         setDefaultStyleCss(defaultCSS);
     }
 
+    /**
+     * Internal API. Don't use.
+     * @return If true, prevents this node from being removed.
+     */
+    public boolean isPermanent() {
+        return permanent;
+    }
+
+    /**
+     * Internal API. Don't use.
+     * @param permanent If true, prevents this node from being removed.
+     */
+    public void setPermanent(boolean permanent) {
+        this.permanent = permanent;
+    }
 }
 

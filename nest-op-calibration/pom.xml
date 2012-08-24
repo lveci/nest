@@ -2,14 +2,14 @@
   <parent>
     <artifactId>nest</artifactId>
     <groupId>org.esa.nest</groupId>
-	<version>4C-1.1</version>
+	<version>5.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-op-calibration</artifactId>
   <name>NEST Calibration Operator</name>
-  <version>4C-1.1</version>
+  <version>5.0</version>
   <description>Calibrates ENVISAT ASAR, ERS 1/2, ALOS Palsar products</description>
   
   <dependencies>

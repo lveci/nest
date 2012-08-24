@@ -26,7 +26,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.10 $ $Date: 2010-12-23 14:35:08 $
+ * @version $Revision: 6651 $ $Date: 2009-10-27 12:59:39 +0100 (Di, 27 Okt 2009) $
  */
 public class MetadataElement extends ProductNode {
 
@@ -594,14 +594,14 @@ public class MetadataElement extends ProductNode {
         return size;
     }
 
-    public final MetadataElement createDeepClone() {
-        final MetadataElement clone = new MetadataElement(getName());
+    public MetadataElement createDeepClone() {
+        MetadataElement clone = new MetadataElement(getName());
         clone.setDescription(getDescription());
-        final MetadataAttribute[] attributes = getAttributes();
+        MetadataAttribute[] attributes = getAttributes();
         for (MetadataAttribute attribute : attributes) {
             clone.addAttribute(attribute.createDeepClone());
         }
-        final MetadataElement[] elements = getElements();
+        MetadataElement[] elements = getElements();
         for (MetadataElement element : elements) {
             clone.addElement(element.createDeepClone());
         }

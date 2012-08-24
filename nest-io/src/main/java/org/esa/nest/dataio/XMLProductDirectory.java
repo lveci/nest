@@ -42,14 +42,14 @@ import java.util.Set;
  */
 public class XMLProductDirectory {
 
-    private final File _xmlHeader;
-    private final File _baseDir;
+    private final File xmlHeader;
+    private final File baseDir;
     private final File imgFolder;
     private org.jdom.Document xmlDoc = null;
 
     private boolean isSLC = false;
-    private int _sceneWidth = 0;
-    private int _sceneHeight = 0;
+    private int sceneWidth = 0;
+    private int sceneHeight = 0;
 
     protected transient final Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
     protected transient final Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
@@ -57,14 +57,14 @@ public class XMLProductDirectory {
     protected XMLProductDirectory(final File headerFile, final File imageFolder) {
         Guardian.assertNotNull("headerFile", headerFile);
 
-        _xmlHeader = headerFile;
-        _baseDir = headerFile.getParentFile();
+        xmlHeader = headerFile;
+        baseDir = headerFile.getParentFile();
         imgFolder = imageFolder;
     }
 
     public void readProductDirectory() throws IOException {
 
-        xmlDoc = XMLSupport.LoadXML(_xmlHeader.getAbsolutePath());
+        xmlDoc = XMLSupport.LoadXML(xmlHeader.getAbsolutePath());
 
         final File[] fileList = imgFolder.listFiles();
         for (File file : fileList) {
@@ -78,13 +78,13 @@ public class XMLProductDirectory {
             final ImageIOFile img = new ImageIOFile(file, ImageIOFile.getTiffIIOReader(file));
             bandImageFileMap.put(img.getName(), img);
 
-           setSceneWidthHeight(img.getSceneWidth(), img.getSceneHeight());
+            setSceneWidthHeight(img.getSceneWidth(), img.getSceneHeight());
         }
     }
 
     protected void setSceneWidthHeight(final int width, final int height) {
-        _sceneWidth = width;
-        _sceneHeight = height;
+        sceneWidth = width;
+        sceneHeight = height;
     }
 
     protected boolean isSLC() {
@@ -98,13 +98,13 @@ public class XMLProductDirectory {
     public Product createProduct() throws IOException {
         final Product product = new Product(getProductName(),
                                             getProductType(),
-                                            _sceneWidth, _sceneHeight);
+                                            sceneWidth, sceneHeight);
 
         addMetaData(product);
         addGeoCoding(product);
         addTiePointGrids(product);
 
-        addBands(product, _sceneWidth, _sceneHeight);
+        addBands(product, sceneWidth, sceneHeight);
 
         product.setName(getProductName());
         product.setProductType(getProductType());
@@ -165,13 +165,17 @@ public class XMLProductDirectory {
         return xmlDoc.getRootElement();
     }
 
-    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException  {
+    protected File getBaseDir() {
+        return baseDir;
+    }
+
+    protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException  {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
     }
 
     protected String getProductName() {
-        return _xmlHeader.getName();
+        return xmlHeader.getName();
     }
 
     protected String getProductDescription() {

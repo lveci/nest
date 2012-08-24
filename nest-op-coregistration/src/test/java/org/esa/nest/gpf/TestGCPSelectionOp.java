@@ -80,7 +80,6 @@ public class TestGCPSelectionOp extends TestCase {
         // create a band: sinc function centre is at (19, 19)
         final Band band = product.addBand("amplitude_mst", ProductData.TYPE_FLOAT32);
         band.setUnit(Unit.AMPLITUDE);
-        band.setSynthetic(true);
         final float[] floatValues = new float[w * h];
         int i;
         for (int y = 0; y < h; y++) {
@@ -133,7 +132,6 @@ public class TestGCPSelectionOp extends TestCase {
         // create a band: sinc function centre is at (16, 21)
         final Band band = new Band("amplitude_slv", ProductData.TYPE_FLOAT32, w, h);
         band.setUnit(Unit.AMPLITUDE);
-        band.setSynthetic(true);
         float[] floatValues = new float[w * h];
         int i;
         for (int y = 0; y < h; y++) {

@@ -44,7 +44,7 @@
             <helpId>importArcBinGrid</helpId>
             <formatName>ARC_INFO_BIN_GRID</formatName>
             <useAllFileFilter>false</useAllFileFilter>
-            <text>Import Arc/Info Binary Grid...</text>
+            <text>ArcInfo Binary Grid</text>
             <mnemonic/>
             <shortDescr>Import a Arc/Info Binary Grids product or product subset.</shortDescr>
             <description>Import a Arc/Info Binary Grids product or product subset.</description>

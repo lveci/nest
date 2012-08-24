@@ -258,7 +258,7 @@ public class ExportPinPixelsAction extends ExecCommand {
     }
 
     /**
-     * Creates the export Data. Can be <code>null</code> if an error occures while reading the
+     * Creates the export Data. Can be <code>null</code> if an error occurs while reading the
      * product data or user input.
      *
      * @param product
@@ -285,7 +285,7 @@ public class ExportPinPixelsAction extends ExecCommand {
         try {
             return generateOutputData(regionSize, expression, exportPins, useExpressionAsFilter, product);
         } catch (IOException e) {
-            VisatApp.getApp().showErrorDialog("An I/O error occured:\n" + e.getMessage()); /* I18N */
+            VisatApp.getApp().showErrorDialog("An I/O error occurred:\n" + e.getMessage()); /* I18N */
             return null;
         } catch (ParseException e) {
             VisatApp.getApp().showErrorDialog(

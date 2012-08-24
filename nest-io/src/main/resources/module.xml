@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-io</symbolicName>
-    <version>4C-1.1</version>
+    <version>5.0</version>
     <name>NEST Readers and Writers</name>
 
     <description>
@@ -42,13 +42,13 @@
             <id>importFileFormats</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Common File Formats</text>
-            <parent>import</parent>
+            <parent>importRasterData</parent>
         </action>
         <action>
             <id>importOptical</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Multispectral</text>
-            <parent>import</parent>
+            <parent>importRasterData</parent>
         </action>
 
         <action>
@@ -56,7 +56,7 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <text>Import ERS1/2 CEOS Product...</text>
+            <text>ERS 1 / 2 CEOS</text>
             <shortDescr>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</shortDescr>
             <description>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
@@ -101,7 +101,7 @@
             <id>importImageIO</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>jp2</formatName>
-            <text>Import ImageIO (bmp, jpg, png) Product...</text>
+            <text>ImageIO (bmp, jpg, png)</text>
             <readerPlugin>org.esa.nest.dataio.imageio.ImageIOReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import an ImageIO supported file formats</shortDescr>
@@ -112,7 +112,6 @@
         </action>
         <action>
             <id>importNestEnvi</id>
-            <text>Import ENVI Product...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.envi.NestEnviProductReaderPlugIn</readerPlugin>
             <formatName>ENVI</formatName>
@@ -124,7 +123,6 @@
         </action>
         <action>
             <id>importPolsarPro</id>
-            <text>Import PolsarPro Product...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.polsarpro.PolsarProProductReaderPlugIn</readerPlugin>
             <formatName>PolSARPro</formatName>
@@ -141,7 +139,6 @@
             <formatName>GeoTIFF</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <mnemonic>O</mnemonic>
-            <text>Import GeoTIFF Product...</text>
             <shortDescr>Import a GeoTIFF data product or subset.</shortDescr>
             <description>Import a GeoTIFF data product or product subset.</description>
             <helpId>importGeoTIFFProduct</helpId>
@@ -151,7 +148,7 @@
         <action>
             <id>importGenericBinary</id>
             <class>org.esa.nest.dat.actions.GenericReaderAction</class>
-            <text>Open Generic Binary...</text>
+            <text>Generic Binary</text>
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
@@ -162,7 +159,7 @@
         <action>
             <id>importComplexGenericBinary</id>
             <class>org.esa.nest.dat.actions.GenericComplexReaderAction</class>
-            <text>Open Complex Generic Binary...</text>
+            <text>Complex Binary</text>
             <formatName>Complex Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Complex Generic Binary</shortDescr>
@@ -172,7 +169,7 @@
 
         <action>
             <id>exportGenericBinary</id>
-            <text>Export Generic Binary</text>
+            <text>Generic Binary</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
@@ -181,7 +178,6 @@
         </action>
         <action>
             <id>exportPolsarPro</id>
-            <text>Export PolSARPro</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <formatName>PolSARPro</formatName>
             <useAllFileFilter>true</useAllFileFilter>
@@ -203,6 +199,7 @@
             <id>importTerraSarXProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>TerraSarX</formatName>
+            <text>TerraSAR-X</text>
             <shortDescr>Import a TerraSarX data product or subset.</shortDescr>
             <description>Import a TerraSarX data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
@@ -214,6 +211,7 @@
             <id>importCosmoSkymed</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>CosmoSkymed</formatName>
+            <text>Cosmo-Skymed</text>
             <readerPlugin>org.esa.nest.dataio.cosmo.CosmoSkymedReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a CosmoSkymed file format</shortDescr>
@@ -226,7 +224,6 @@
         <!--action>
             <id>importNetCDF</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <text>Import NetCDF Product...</text>
             <formatName>NetCDF</formatName>
             <readerPlugin>org.esa.nest.dataio.netcdf.NetCDFReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
@@ -266,7 +263,7 @@
             <parent>importDEM</parent>
             <readerPlugin>org.esa.nest.dataio.gtopo30.GTOPO30ReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
-            <text>Import GTOPO30 DEM Tile...</text>
+            <text>GTOPO30 DEM Tile</text>
             <shortDescr>Import a GTOPO30 tile</shortDescr>
             <description>Import a GTOPO30 tile</description>
             <largeIcon>icons/Import24.gif</largeIcon>

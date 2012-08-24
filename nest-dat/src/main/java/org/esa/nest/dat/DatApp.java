@@ -31,7 +31,7 @@ import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.framework.ui.command.CommandManager;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
-import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
+import org.esa.beam.visat.toolviews.stat.*;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
@@ -51,6 +51,7 @@ import java.util.List;
 
 public class DatApp extends VisatApp {
 
+    public static final String PROCESSORS_TOOL_BAR_ID = "processorsToolBar";
     public static final String LABELS_TOOL_BAR_ID = "labelsToolBar";
 
     public DatApp(ApplicationDescriptor applicationDescriptor) {
@@ -85,11 +86,15 @@ public class DatApp extends VisatApp {
     protected void initClientUI(ProgressMonitor pm) {
         super.initClientUI(pm);
 
-        final CommandBar toolBar = createLabelToolBar();
+        final CommandBar processorToolBar = createProcessorToolBar();
+        processorToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
+        processorToolBar.getContext().setInitIndex(3);
+        getMainFrame().getDockableBarManager().addDockableBar(processorToolBar);
 
-        toolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
-        toolBar.getContext().setInitIndex(1);
-        getMainFrame().getDockableBarManager().addDockableBar(toolBar);
+        final CommandBar labelToolBar = createLabelToolBar();
+        labelToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_EAST);
+        labelToolBar.getContext().setInitIndex(4);
+        getMainFrame().getDockableBarManager().addDockableBar(labelToolBar);
 
         getMainFrame().setIconImage(ResourceUtils.nestIcon.getImage());
 
@@ -185,6 +190,8 @@ public class DatApp extends VisatApp {
         final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
 
         File[] fileList = tempFolder.listFiles();
+        if(fileList == null) return;
+
         for(File file : fileList) {
             if(file.getName().startsWith("tmp_")) {
                 ResourceUtils.deleteFile(file);
@@ -197,7 +204,7 @@ public class DatApp extends VisatApp {
             cutoff = 60;
 
         fileList = tempFolder.listFiles();
-        if(fileList.length > cutoff) {
+        if(fileList != null && fileList.length > cutoff) {
             final long[] dates = new long[fileList.length];
             int i = 0;
             for(File file : fileList) {
@@ -259,7 +266,13 @@ public class DatApp extends VisatApp {
         final HashSet<String> excludedIds = new HashSet<String>(8);
         // todo - remove bad forward dependencies to tool views (nf - 30.10.2008)
         excludedIds.add(TileCacheDiagnosisToolView.ID);
+        excludedIds.add(InformationToolView.ID);
+        excludedIds.add(GeoCodingToolView.ID);
         excludedIds.add(StatisticsToolView.ID);
+        excludedIds.add(HistogramPlotToolView.ID);
+        excludedIds.add(ScatterPlotToolView.ID);
+        excludedIds.add(DensityPlotToolView.ID);
+        excludedIds.add(ProfilePlotToolView.ID);
         excludedIds.add("org.esa.beam.scripting.visat.ScriptConsoleToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
@@ -329,25 +342,32 @@ public class DatApp extends VisatApp {
                 incWizards = true;
         }
 
-        menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
-        menuBar.add(createJMenu("edit", "Edit", 'E')); /*I18N*/
-        menuBar.add(createJMenu("view", "View", 'V'));  /*I18N*/
-        menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
-        menuBar.add(createJMenu("tools", "Utilities", 'U')); /*I18N*/
-        menuBar.add(createJMenu("sartools", "SAR Tools", 'S')); /*I18N*/
-        menuBar.add(createJMenu("geometry", "Geometry", 'G')); /*I18N*/
-        menuBar.add(createJMenu("insar", "InSAR", 'I')); /*I18N*/
-        menuBar.add(createJMenu("oceanTools", "Ocean Tools", 'O')); /*I18N*/
-        menuBar.add(createJMenu("polarimetrictools", "Polarimetric", 'P')); /*I18N*/
+        menuBar.add(createJMenu("file", "File", 'F'));
+        menuBar.add(createJMenu("edit", "Edit", 'E'));
+        menuBar.add(createJMenu("view", "View", 'V'));
+        menuBar.add(createJMenu("data", "Analysis", 'A',
+                InformationToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                GeoCodingToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                StatisticsToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                HistogramPlotToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                ScatterPlotToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                DensityPlotToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX,
+                ProfilePlotToolView.ID + SHOW_TOOLVIEW_CMD_POSTFIX));
+        menuBar.add(createJMenu("tools", "Utilities", 'U'));
+        menuBar.add(createJMenu("sartools", "SAR Tools", 'S'));
+        menuBar.add(createJMenu("geometry", "Geometry", 'G'));
+        menuBar.add(createJMenu("insar", "InSAR", 'I'));
+        menuBar.add(createJMenu("oceanTools", "Ocean Tools", 'O'));
+        menuBar.add(createJMenu("polarimetrictools", "Polarimetric", 'P'));
         if(incMultispectralTools)
-            menuBar.add(createJMenu("multispectraltools", "Multispectral Tools", 'M')); /*I18N*/
+            menuBar.add(createJMenu("multispectraltools", "Multispectral Tools", 'M'));
         if(incImageProcessing)
-            menuBar.add(createJMenu("Image Processing", "Image Processing", 'C')); /*I18N*/
-        menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
+            menuBar.add(createJMenu("Image Processing", "Image Processing", 'C'));
+        menuBar.add(createJMenu("graphs", "Graphs", 'R'));
         if(incWizards)
-            menuBar.add(createJMenu("Wizards", "Wizards", 'Z')); /*I18N*/
-        menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
-        menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
+            menuBar.add(createJMenu("Wizards", "Wizards", 'Z'));
+        menuBar.add(createJMenu("window", "Window", 'W'));
+        menuBar.add(createJMenu("help", "Help", 'H'));
 
         return menuBar;
     }
@@ -392,15 +412,22 @@ public class DatApp extends VisatApp {
 
     @Override
     protected CommandBar createAnalysisToolBar() {
+        final CommandBar toolBar = super.createAnalysisToolBar();
+
+        addCommandsToToolBar(toolBar, new String[]{
+                "editMetadata"
+        });
+        return toolBar;
+    }
+
+    protected CommandBar createProcessorToolBar() {
         // context of action in module.xml used as key
-        final CommandBar toolBar = new CommandBar("analysisToolBar");
-        toolBar.setTitle("Processors");
+        final CommandBar toolBar = new CommandBar(PROCESSORS_TOOL_BAR_ID, "Processors");
         toolBar.addDockableBarListener(new ToolBarListener());
 
         addCommandsToToolBar(toolBar, new String[]{
                 "openGraphBuilderDialog",
-                "editMetadata",
-                "openInformationDialog",
+                "batchProcessing"
         });
 
         return toolBar;
@@ -457,8 +484,9 @@ public class DatApp extends VisatApp {
                 "drawRectangleTool",
                 "drawEllipseTool",
                 "drawPolygonTool",
-                //"magicStickTool",
                 "createVectorDataNode",
+                // Magic Wand removed for 4.10 release
+                "true".equalsIgnoreCase(System.getProperty("beam.magicWandTool.enabled", "false")) ? "magicWandTool" : null,
         });
 
         return toolBar;

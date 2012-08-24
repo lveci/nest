@@ -2,14 +2,14 @@
   <parent>
     <artifactId>nest</artifactId>
     <groupId>org.esa.nest</groupId>
-    <version>4C-1.1</version>
+    <version>5.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-op-orthorectification</artifactId>
   <name>NEST Orthorectification</name>
-  <version>4C-1.1</version>
+  <version>5.0</version>
   <description>Provides for orthorectifying SAR data</description>
   
   <dependencies>

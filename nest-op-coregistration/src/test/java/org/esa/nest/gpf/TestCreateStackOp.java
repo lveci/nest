@@ -78,7 +78,6 @@ public class TestCreateStackOp extends TestCase {
 
         final Band band = product.addBand("amplitude", ProductData.TYPE_FLOAT32);
         band.setUnit(Unit.AMPLITUDE);
-        band.setSynthetic(true);
         float[] floatValues = new float[w * h];
         int i;
         for (int y = 0; y < h; y++) {

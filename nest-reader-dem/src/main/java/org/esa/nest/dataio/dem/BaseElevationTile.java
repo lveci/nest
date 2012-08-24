@@ -25,14 +25,18 @@ import java.util.Arrays;
 public class BaseElevationTile implements ElevationTile {
 
     private Product product;
+    private final Band band;
+    private final int bandWidth;
     protected final float noDataValue;
     private final float[][] objectArray;
     private final boolean useDEMGravitationalModel;
 
     public BaseElevationTile(final ElevationModel dem, final Product product) {
         this.product = product;
+        this.band = product.getBandAt(0);
+        this.bandWidth = band.getSceneRasterWidth();
         noDataValue = dem.getDescriptor().getNoDataValue();
-        objectArray = new float[product.getSceneRasterHeight() + 1][];
+        objectArray = new float[band.getSceneRasterHeight() + 1][];
         final String prop = System.getProperty("useDEMGravitationalModel");
         useDEMGravitationalModel = prop != null && prop.equalsIgnoreCase("true");
         //System.out.println("Dem Tile "+product.getName());
@@ -48,8 +52,7 @@ public class BaseElevationTile implements ElevationTile {
 
         float[] line = objectArray[pixelY];
         if (line == null) {
-            final int width = product.getSceneRasterWidth();
-            line = product.getBandAt(0).readPixels(0, pixelY, width, 1, new float[width], ProgressMonitor.NULL);
+            line = band.readPixels(0, pixelY, bandWidth, 1, new float[bandWidth], ProgressMonitor.NULL);
             if(useDEMGravitationalModel) {
                 addGravitationalModel(pixelY, line);
             }

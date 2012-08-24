@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,38 +16,20 @@
 
 package org.esa.beam.visat.toolviews.stat;
 
-import com.bc.ceres.swing.TableLayout;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProductNodeEvent;
-import org.esa.beam.framework.datamodel.ProductNodeListener;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.VectorDataNode;
+import javax.swing.table.TableModel;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.ToolView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.util.SystemUtils;
-import org.esa.beam.visat.VisatApp;
-import org.jfree.chart.ChartPanel;
 
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 
 /**
  * A general page within the statistics window.
@@ -56,323 +38,40 @@ import java.io.IOException;
  */
 abstract class PagePanel extends JPanel implements ProductNodeListener {
 
-    protected static final String ZOOM_TIP_MESSAGE = "TIP: To zoom within the chart, draw a rectangle\n" +
-                                                     "with the mouse or use the context menu.";
+    private final ToolView parentDialog;
+    private final String helpId;
+    private final String titlePrefix;
 
     private Product product;
     private boolean productChanged;
+
     private RasterDataNode raster;
     private boolean rasterChanged;
+
     private VectorDataNode vectorData;
     private boolean vectorDataChanged;
 
-    private final ToolView parentDialog;
-    private final String helpId;
+    private PagePanel alternativeView;
 
-    PagePanel(ToolView parentDialog, String helpId) {
+    PagePanel(ToolView parentDialog, String helpId, String titlePrefix) {
         super(new BorderLayout(4, 4));
         this.parentDialog = parentDialog;
         this.helpId = helpId;
+        this.titlePrefix = titlePrefix;
         setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         setPreferredSize(new Dimension(600, 320));
-        updateCurrentSelection();
-        initContent();
-        transferProductNodeListener(null, product);
-    }
-
-    protected Container getParentDialogContentPane() {
-        return getParentDialog().getContext().getPane().getControl();
-    }
-
-    public String getHelpId() {
-        return helpId;
-    }
-
-    void updateCurrentSelection() {
-        final ProductNode selectedNode = VisatApp.getApp().getSelectedProductNode();
-        if (selectedNode != null) {
-            setProduct(selectedNode.getProduct());
-        }
-
-        if (selectedNode instanceof RasterDataNode) {
-            setRaster((RasterDataNode) selectedNode);
-        } else if (selectedNode instanceof VectorDataNode) {
-            setVectorDataNode((VectorDataNode) selectedNode);
-        }
-    }
-
-    private void transferProductNodeListener(Product oldProduct, Product newProduct) {
-        if (oldProduct != newProduct) {
-            if (oldProduct != null) {
-                oldProduct.removeProductNodeListener(this);
-            }
-            if (newProduct != null) {
-                newProduct.addProductNodeListener(this);
-            }
-        }
     }
 
     public String getTitle() {
         return getTitlePrefix() + " - " + getProductNodeDisplayName();
     }
 
-    protected abstract String getTitlePrefix();
-
-    protected Product getProduct() {
-        return product;
-    }
-
-    private void setProduct(Product product) {
-        if (this.product != product) {
-            transferProductNodeListener(this.product, product);
-            this.product = product;
-            productChanged = true;
-        }
-    }
-
-    protected RasterDataNode getRaster() {
-        return raster;
-    }
-
-    protected void setRaster(RasterDataNode raster) {
-        if (this.raster != raster) {
-            this.raster = raster;
-            rasterChanged = true;
-        }
-    }
-
     public VectorDataNode getVectorDataNode() {
         return vectorData;
     }
 
-    protected void setVectorDataNode(VectorDataNode vectorDataNode) {
-        if (this.vectorData != vectorDataNode) {
-            this.vectorData = vectorDataNode;
-            vectorDataChanged = true;
-        }
-    }
-
-    protected boolean isRasterChanged() {
-        return rasterChanged;
-    }
-
-    protected boolean isProductChanged() {
-        return productChanged;
-    }
-
-    protected boolean isVectorDataNodeChanged() {
-        return vectorDataChanged;
-    }
-
     public ToolView getParentDialog() {
         return parentDialog;
-    }
-
-
-    /**
-     * Resets the UI property with a value from the current look and feel.
-     *
-     * @see javax.swing.JComponent#updateUI
-     */
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        if (mustUpdateContent()) {
-            updateContent();
-            rasterChanged = false;
-            productChanged = false;
-        }
-
-    }
-
-    protected boolean mustUpdateContent() {
-        return isRasterChanged() || isProductChanged();
-    }
-
-    protected abstract void initContent();
-
-    protected abstract void updateContent();
-
-    protected abstract String getDataAsText();
-
-    protected void handlePopupCreated(JPopupMenu popupMenu) {
-    }
-
-    protected boolean checkDataToClipboardCopy() {
-        return true;
-    }
-
-    protected AbstractButton getHelpButton() {
-        if (getHelpId() != null) {
-            final AbstractButton helpButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/Help24.gif"),
-                                                                             false);
-            helpButton.setToolTipText("Help.");
-            helpButton.setName("helpButton");
-            HelpSys.enableHelpOnButton(helpButton, getHelpId());
-            HelpSys.enableHelpKey(getParentDialogContentPane(), getHelpId());
-            return helpButton;
-        }
-
-        return null;
-    }
-
-    protected JMenuItem createCopyDataToClipboardMenuItem() {
-        final JMenuItem menuItem = new JMenuItem("Copy Data to Clipboard"); /*I18N*/
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (checkDataToClipboardCopy()) {
-                    copyTextDataToClipboard();
-                }
-            }
-        });
-        return menuItem;
-    }
-
-    private void maybeOpenPopup(MouseEvent mouseEvent) {
-        if (mouseEvent.isPopupTrigger()) {
-            final JPopupMenu popupMenu = new JPopupMenu();
-            popupMenu.add(createCopyDataToClipboardMenuItem());
-            handlePopupCreated(popupMenu);
-            final Point point = SwingUtilities.convertPoint(mouseEvent.getComponent(), mouseEvent.getPoint(), this);
-            popupMenu.show(this, point.x, point.y);
-        }
-    }
-
-    protected void copyTextDataToClipboard() {
-        final Cursor oldCursor = getCursor();
-        try {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            final String dataAsText = getDataAsText();
-            if (dataAsText != null) {
-                SystemUtils.copyToClipboard(dataAsText);
-            }
-        } finally {
-            setCursor(oldCursor);
-        }
-    }
-
-    protected static JPanel createChartButtonPanel(final ChartPanel chartPanel) {
-        final TableLayout tableLayout = new TableLayout(2);
-        JPanel buttonPane = new JPanel(tableLayout);
-        buttonPane.setBorder(BorderFactory.createTitledBorder("Plot"));
-        final AbstractButton zoomAllButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("icons/ZoomAll24.gif"),
-                false);
-        zoomAllButton.setToolTipText("Zoom all.");
-        zoomAllButton.setName("zoomAllButton.");
-        zoomAllButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chartPanel.restoreAutoBounds();
-            }
-        });
-
-        final AbstractButton propertiesButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("icons/Edit24.gif"),
-                false);
-        propertiesButton.setToolTipText("Edit properties.");
-        propertiesButton.setName("propertiesButton.");
-        propertiesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chartPanel.doEditChartProperties();
-            }
-        });
-
-        final AbstractButton saveButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("icons/Export24.gif"),
-                false);
-        saveButton.setToolTipText("Save chart as image.");
-        saveButton.setName("saveButton.");
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    chartPanel.doSaveAs();
-                } catch (IOException e1) {
-                    JOptionPane.showMessageDialog(chartPanel,
-                                                  "Could not save chart:\n" + e1.getMessage(),
-                                                  "Error",
-                                                  JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-        final AbstractButton printButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("icons/Print24.gif"),
-                false);
-        printButton.setToolTipText("Print chart.");
-        printButton.setName("printButton.");
-        printButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chartPanel.createChartPrintJob();
-            }
-        });
-
-        buttonPane.add(zoomAllButton);
-        buttonPane.add(propertiesButton);
-        buttonPane.add(saveButton);
-        buttonPane.add(printButton);
-        return buttonPane;
-    }
-
-    class PopupHandler extends MouseAdapter {
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            maybeOpenPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeOpenPopup(e);
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            maybeOpenPopup(e);
-        }
-    }
-
-    private String getProductNodeDisplayName() {
-        if (raster != null) {
-            return raster.getDisplayName();
-        } else {
-            if (product != null) {
-                return product.getDisplayName();
-            } else {
-                return "";
-            }
-        }
-    }
-
-    void selectionChanged(Product product, RasterDataNode raster, VectorDataNode vectorDataNode) {
-        if (raster != getRaster() || product != getProduct() || vectorDataNode != getVectorDataNode()) {
-            setRaster(raster);
-            setProduct(product);
-            setVectorDataNode(vectorDataNode);
-            invokeUpdateUI();
-        }
-    }
-
-    void invokeUpdateUI() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            updateUI();
-        } else {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    updateUI();
-                }
-            });
-        }
-    }
-
-    void handleLayerContentChanged() {
-    }
-
-    void handleViewSelectionChanged() {
     }
 
     /**
@@ -411,5 +110,222 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
     public void nodeRemoved(ProductNodeEvent event) {
     }
 
+    protected Container getParentDialogContentPane() {
+        return getParentDialog().getContext().getPane().getControl();
+    }
+
+    protected final String getTitlePrefix() {
+        return titlePrefix;
+    }
+
+    protected Product getProduct() {
+        return product;
+    }
+
+    protected RasterDataNode getRaster() {
+        return raster;
+    }
+
+    protected boolean isRasterChanged() {
+        return rasterChanged;
+    }
+
+    protected boolean isProductChanged() {
+        return productChanged;
+    }
+
+    protected boolean isVectorDataNodeChanged() {
+        return vectorDataChanged;
+    }
+
+    protected void setRaster(RasterDataNode raster) {
+        if (this.raster != raster) {
+            this.raster = raster;
+            rasterChanged = true;
+        }
+    }
+
+    protected void setVectorDataNode(VectorDataNode vectorDataNode) {
+        if (this.vectorData != vectorDataNode) {
+            this.vectorData = vectorDataNode;
+            vectorDataChanged = true;
+        }
+    }
+
+    /**
+     * @return {@code true} if {@link #handleNodeSelectionChanged} shall be called in a reaction to a node selection change.
+     */
+    protected boolean mustHandleSelectionChange() {
+        return isRasterChanged() || isProductChanged();
+    }
+
+    /**
+     * Called in reaction to a node selection change and if {@link #mustHandleSelectionChange()} returns {@code true}.
+     * The default implementation calls {@link #updateComponents}.
+     */
+    protected void handleNodeSelectionChanged() {
+        updateComponents();
+    }
+
+    /**
+     * Called in reaction to a layer content change.
+     * The default implementation does nothing.
+     */
+    protected void handleLayerContentChanged() {
+    }
+
+    /**
+     * Initialises the panel's sub-components.
+     */
+    protected abstract void initComponents();
+
+    /**
+     * Updates the panel's sub-components as a reaction to a product node selection change.
+     */
+    protected abstract void updateComponents();
+
+    protected abstract String getDataAsText();
+
+    protected void handlePopupCreated(JPopupMenu popupMenu) {
+    }
+
+    protected boolean checkDataToClipboardCopy() {
+        return true;
+    }
+
+    protected AbstractButton getHelpButton() {
+        if (helpId != null) {
+            final AbstractButton helpButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/Help22.png"),
+                                                                             false);
+            helpButton.setToolTipText("Help.");
+            helpButton.setName("helpButton");
+            HelpSys.enableHelpOnButton(helpButton, helpId);
+            HelpSys.enableHelpKey(getParentDialogContentPane(), helpId);
+            return helpButton;
+        }
+
+        return null;
+    }
+
+    protected JMenuItem createCopyDataToClipboardMenuItem() {
+        final JMenuItem menuItem = new JMenuItem("Copy Data to Clipboard"); /*I18N*/
+        menuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (checkDataToClipboardCopy()) {
+                    copyTextDataToClipboard();
+                }
+            }
+        });
+        return menuItem;
+    }
+
+    protected void copyTextDataToClipboard() {
+        final Cursor oldCursor = getCursor();
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            final String dataAsText = getDataAsText();
+            if (dataAsText != null) {
+                SystemUtils.copyToClipboard(dataAsText);
+            }
+        } finally {
+            setCursor(oldCursor);
+        }
+    }
+
+    protected boolean hasAlternativeView(){
+        return alternativeView != null;
+    }
+
+    protected void showAlternativeView() {
+        final JPanel parent = (JPanel) this.getParent();
+        parent.remove(this);
+        this.setVisible(false);
+        parent.add(alternativeView, BorderLayout.CENTER);
+        alternativeView.setVisible(true);
+        parent.revalidate();
+    }
+
+    protected void setAlternativeView(PagePanel alternativeView) {
+        this.alternativeView = alternativeView;
+    }
+
+    protected PagePanel getAlternativeView() {
+        return alternativeView;
+    }
+
+    void selectionChanged(Product product, RasterDataNode raster, VectorDataNode vectorDataNode) {
+        if (raster != getRaster() || product != getProduct() || vectorDataNode != getVectorDataNode()) {
+            setRaster(raster);
+            setProduct(product);
+            setVectorDataNode(vectorDataNode);
+            if (mustHandleSelectionChange()) {
+                handleNodeSelectionChanged();
+                rasterChanged = false;
+                productChanged = false;
+                vectorDataChanged = false;
+            }
+        }
+    }
+
+    private void maybeOpenPopup(MouseEvent mouseEvent) {
+        if (mouseEvent.isPopupTrigger()) {
+            final JPopupMenu popupMenu = new JPopupMenu();
+            popupMenu.add(createCopyDataToClipboardMenuItem());
+            handlePopupCreated(popupMenu);
+            final Point point = SwingUtilities.convertPoint(mouseEvent.getComponent(), mouseEvent.getPoint(), this);
+            popupMenu.show(this, point.x, point.y);
+        }
+    }
+
+    private String getProductNodeDisplayName() {
+        if (raster != null) {
+            return raster.getDisplayName();
+        } else {
+            if (product != null) {
+                return product.getDisplayName();
+            } else {
+                return "";
+            }
+        }
+    }
+
+
+    private void transferProductNodeListener(Product oldProduct, Product newProduct) {
+        if (oldProduct != newProduct) {
+            if (oldProduct != null) {
+                oldProduct.removeProductNodeListener(this);
+            }
+            if (newProduct != null) {
+                newProduct.addProductNodeListener(this);
+            }
+        }
+    }
+
+    private void setProduct(Product product) {
+        if (this.product != product) {
+            transferProductNodeListener(this.product, product);
+            this.product = product;
+            productChanged = true;
+        }
+    }
+
+    class PopupHandler extends MouseAdapter {
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            maybeOpenPopup(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            maybeOpenPopup(e);
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            maybeOpenPopup(e);
+        }
+    }
 }
 

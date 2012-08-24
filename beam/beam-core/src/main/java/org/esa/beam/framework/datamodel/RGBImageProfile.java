@@ -392,6 +392,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         storeRgbaExpressions(product, rgbaExpressions, RGBImageProfile.RGBA_BAND_NAMES);    
     }
 
+	//NESTMOD
     public static void storeRgbaExpressions(final Product product, final String[] rgbaExpressions, final String[] bandNames) {
         for (int i = 0; i < bandNames.length; i++) {
             final String rgbBandName = bandNames[i];

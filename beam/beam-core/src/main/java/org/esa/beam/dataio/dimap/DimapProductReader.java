@@ -22,21 +22,41 @@ import org.esa.beam.dataio.geometry.VectorDataNodeReader;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FilterBand;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeometryDescriptor;
+import org.esa.beam.framework.datamodel.PixelGeoCoding;
+import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
+import org.esa.beam.framework.datamodel.PlacemarkDescriptorRegistry;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VectorDataNode;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.FeatureUtils;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Hashtable;
 import java.util.Map;
@@ -132,11 +152,14 @@ public class DimapProductReader extends AbstractProductReader {
 
         bindBandsToFiles(dom);
         if (existingProduct == null) {
-            final CoordinateReferenceSystem crs = DimapProductHelpers.getCRS(dom);
-            readVectorData(crs);
+            readVectorData(ImageManager.DEFAULT_IMAGE_CRS, true);
+
+            // read GCPs and pins from DOM (old-style)
             DimapProductHelpers.addGcps(dom, this.product);
             DimapProductHelpers.addPins(dom, this.product);
+
             initGeoCodings(dom);
+            readVectorData(ImageManager.getModelCrs(product.getGeoCoding()), false);
             DimapProductHelpers.addMaskUsages(dom, this.product);
         }
         //ProductFunctions.discardUnusedMetadata(this.product);
@@ -372,7 +395,7 @@ public class DimapProductReader extends AbstractProductReader {
         return null;
     }
 
-    private void readVectorData(CoordinateReferenceSystem crs) {
+    private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) throws IOException {
         File dataDir = new File(inputDir, FileUtils.getFilenameWithoutExtension(
                 inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
         File vectorDataDir = new File(dataDir, "vector_data");
@@ -380,22 +403,61 @@ public class DimapProductReader extends AbstractProductReader {
             File[] vectorFiles = vectorDataDir.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION);
+                    if(name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
+                        if(onlyGCPs) {
+                            return name.equals("ground_control_points.csv");
+                        } else {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             });
-            CoordinateReferenceSystem modelCrs = product.getGeoCoding() != null ? ImageManager.getModelCrs(product.getGeoCoding()) : crs;
             for (File vectorFile : vectorFiles) {
+                FileReader reader = null;
                 try {
-                    VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile, modelCrs);
-                    final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
-                    final VectorDataNode existing = vectorDataGroup.get(vectorDataNode.getName());
-                    if (existing != null) {
-                        vectorDataGroup.remove(existing);
+                    reader = new FileReader(vectorFile);
+                    VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getName(), reader, product, new FeatureUtils.FeatureCrsProvider() {
+                        @Override
+                        public CoordinateReferenceSystem getFeatureCrs(Product product) {
+                            return modelCrs;
+                        }
+                    }, new OptimalPlacemarkDescriptorProvider(), modelCrs, VectorDataNodeIO.DEFAULT_DELIMITER_CHAR, ProgressMonitor.NULL);
+                    if (vectorDataNode != null) {
+                        final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+                        final VectorDataNode existing = vectorDataGroup.get(vectorDataNode.getName());
+                        if (existing != null) {
+                            vectorDataGroup.remove(existing);
+                        }
+                        vectorDataGroup.add(vectorDataNode);
                     }
-                    vectorDataGroup.add(vectorDataNode);
                 } catch (IOException e) {
                     BeamLogManager.getSystemLogger().log(Level.SEVERE, "Error reading '" + vectorFile + "'", e);
+                } finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
                 }
+            }
+        }
+    }
+
+    private static class OptimalPlacemarkDescriptorProvider implements VectorDataNodeReader.PlacemarkDescriptorProvider {
+        @Override
+        public PlacemarkDescriptor getPlacemarkDescriptor(SimpleFeatureType simpleFeatureType) {
+            PlacemarkDescriptorRegistry placemarkDescriptorRegistry = PlacemarkDescriptorRegistry.getInstance();
+            if (simpleFeatureType.getUserData().containsKey(PlacemarkDescriptorRegistry.PROPERTY_NAME_PLACEMARK_DESCRIPTOR)) {
+                String placemarkDescriptorClass = simpleFeatureType.getUserData().get(PlacemarkDescriptorRegistry.PROPERTY_NAME_PLACEMARK_DESCRIPTOR).toString();
+                PlacemarkDescriptor placemarkDescriptor = placemarkDescriptorRegistry.getPlacemarkDescriptor(placemarkDescriptorClass);
+                if (placemarkDescriptor != null) {
+                    return placemarkDescriptor;
+                }
+            }
+            final PlacemarkDescriptor placemarkDescriptor = placemarkDescriptorRegistry.getPlacemarkDescriptor(simpleFeatureType);
+            if (placemarkDescriptor != null) {
+                return placemarkDescriptor;
+            } else {
+                return placemarkDescriptorRegistry.getPlacemarkDescriptor(GeometryDescriptor.class);
             }
         }
     }

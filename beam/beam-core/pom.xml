@@ -24,12 +24,13 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam</artifactId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <name>BEAM Core API</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-core</artifactId>
+    <version>5.0-4.10.4</version>
 
     <packaging>jar</packaging>
     <dependencies>
@@ -73,6 +74,10 @@
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.bc.jnn</groupId>
+            <artifactId>jnn</artifactId>
         </dependency>
         <dependency>
             <groupId>Jama</groupId>

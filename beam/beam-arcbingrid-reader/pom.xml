@@ -5,13 +5,13 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 	
     <artifactId>beam-arcbingrid-reader</artifactId>
     <groupId>org.esa.beam</groupId>
     <name>Arc/Info Binary Grid Reader</name>
-    <version>4C-4.10</version>
+    <version>5.0-3.0</version>
 
     <dependencies>
         <dependency>

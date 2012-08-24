@@ -38,7 +38,7 @@ import java.awt.Cursor;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
-
+ * @version $Revision$ $Date$
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 
@@ -124,12 +124,13 @@ public class ShowImageViewRGBAction extends ExecCommand {
 
         final String title = createUniqueInternalFrameTitle(view.getSceneName());
         final Icon icon = UIUtils.loadImageIcon("icons/RsBandAsSwath16.gif");
-        final JInternalFrame internalFrame = visatApp.createInternalFrame(title, icon, view, getHelpId());
+        final JInternalFrame internalFrame = visatApp.createInternalFrame(title, icon, view, getHelpId(),true);
         visatApp.addPropertyMapChangeListener(view);
         updateState();
 
         return internalFrame;
     }
+
 
     public static class RGBBand {
 
@@ -142,7 +143,7 @@ public class ShowImageViewRGBAction extends ExecCommand {
         final VisatApp visatApp = VisatApp.getApp();
         UIUtils.setRootFrameWaitCursor(visatApp.getMainFrame());
         RGBBand[] rgbBands = null;
-        boolean errorOccured = false;
+        boolean errorOccurred = false;
         ProductSceneImage productSceneImage = null;
         try {
             pm.beginTask("Creating RGB image...", 2);
@@ -155,12 +156,12 @@ public class ShowImageViewRGBAction extends ExecCommand {
             productSceneImage.initVectorDataCollectionLayer();
             productSceneImage.initMaskCollectionLayer();
         } catch (Exception e) {
-            errorOccured = true;
+            errorOccurred = true;
             throw e;
         } finally {
             pm.done();
             if (rgbBands != null) {
-                releaseRgbBands(rgbBands, errorOccured);
+                releaseRgbBands(rgbBands, errorOccurred);
             }
         }
         return productSceneImage;
@@ -184,7 +185,7 @@ public class ShowImageViewRGBAction extends ExecCommand {
         return rgbBands;
     }
 
-    public static void releaseRgbBands(RGBBand[] rgbBands, boolean errorOccured) {
+    public static void releaseRgbBands(RGBBand[] rgbBands, boolean errorOccurred) {
         for (int i = 0; i < rgbBands.length; i++) {
             final RGBBand rgbBand = rgbBands[i];
             if (rgbBand != null && rgbBand.band != null) {
@@ -192,7 +193,7 @@ public class ShowImageViewRGBAction extends ExecCommand {
                     if (rgbBand.dataLoaded) {
                         rgbBand.band.unloadRasterData();
                     }
-                    if (errorOccured) {
+                    if (errorOccurred) {
                         rgbBand.band.dispose();
                     }
                 }

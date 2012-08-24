@@ -82,24 +82,23 @@ public class Radarsat2ProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
 
-        final Object input = getInput();
-        final File fileFromInput = ReaderUtils.getFileFromInput(input);
         Product product;
         try {
+            final File fileFromInput = ReaderUtils.getFileFromInput(getInput());
             dataDir = createDirectory(fileFromInput);
             dataDir.readProductDirectory();
             product = dataDir.createProduct();
             addCalibrationLUT(product, fileFromInput.getParentFile());
+            product.getGcpGroup();
+            product.setFileLocation(fileFromInput);
+            product.setProductReader(this);
+            product.setModified(false);
         } catch (Exception e) {
             Debug.trace(e.toString());
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
             throw ioException;
         }
-        product.getGcpGroup();
-        product.setFileLocation(fileFromInput);
-        product.setProductReader(this);
-        product.setModified(false);
 
         return product;
     }

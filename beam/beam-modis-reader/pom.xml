@@ -22,13 +22,13 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-modis-reader</artifactId>
     <name>BEAM MODIS (MOD,MXD,MYD) Product Reader</name>
-    <version>4C-1.2</version>
+    <version>5.0-1.2</version>
     <url>http://envisat.esa.int/beam/</url>
 
     <dependencies>

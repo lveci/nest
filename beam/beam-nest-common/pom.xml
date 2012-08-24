@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam</artifactId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <name>BEAM-NEST Common API</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-nest-common</artifactId>
-	<version>4C-1.1</version>
+	<version>5.0</version>
 
     <packaging>jar</packaging>
     <dependencies>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.esa.nest</groupId>
             <artifactId>nest-core</artifactId>
-			<version>4C-1.1</version>
+			<version>5.0</version>
         </dependency>
     </dependencies>
 

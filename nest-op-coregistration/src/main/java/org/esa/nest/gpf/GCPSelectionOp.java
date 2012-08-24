@@ -40,6 +40,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -118,6 +119,9 @@ public class GCPSelectionOp extends Operator {
 //                label="Coherence Value Tolerance")
     private final double coherenceValueToler = 1.e-2;
     // =========================================================================================
+    @Parameter(defaultValue="false", label="Estimate Coarse Offset")
+    private boolean computeOffset = false;
+
 
     private Band masterBand1 = null;
     private Band masterBand2 = null;
@@ -414,6 +418,11 @@ public class GCPSelectionOp extends Operator {
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
 
+        final int[] offset = new int[2]; // 0-x, 1-y
+        if (computeOffset) {
+            determiningImageOffset(slaveBand, slaveBand2, offset);
+        }
+
         final ThreadManager threadManager = new ThreadManager();
 
         //final ProcessTimeMonitor timeMonitor = new ProcessTimeMonitor();
@@ -432,7 +441,9 @@ public class GCPSelectionOp extends Operator {
             if (checkMasterGCPValidity(mGCPPixelPos)) {
 
                 final GeoPos mGCPGeoPos = mPin.getGeoPos();
-                final PixelPos sGCPPixelPos = mPin.getPixelPos();
+//                final PixelPos sGCPPixelPos = mPin.getPixelPos();
+                final PixelPos sGCPPixelPos = new PixelPos(mPin.getPixelPos().x + offset[0],
+                                                           mPin.getPixelPos().y + offset[1]);
                 if (!checkSlaveGCPValidity(sGCPPixelPos)) {
                     //System.out.println("GCP(" + i + ") is outside slave image.");
                     continue;
@@ -493,6 +504,197 @@ public class GCPSelectionOp extends Operator {
         OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      }
     }
+
+    private void determiningImageOffset(final Band slaveBand1, final Band slaveBand2, int[] offset) {
+
+        try {
+            // get master and slave imagettes
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            double groundRangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 1);
+            final double azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing, 1);
+            final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+            if (!srgrFlag) {
+                final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+                final double incidenceAngleAtCentreRangePixel =
+                        incidenceAngle.getPixelFloat((float)sourceImageWidth/2f, (float)sourceImageHeight/2f);
+                groundRangeSpacing /= Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
+            }
+            final int nRgLooks = Math.max(1, sourceImageWidth/2048);
+            final int nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
+            final int targetImageWidth = sourceImageWidth / nRgLooks;
+            final int targetImageHeight = sourceImageHeight / nAzLooks;
+            final int windowWidth = (int)Math.pow(2, (int)(Math.log10(targetImageWidth)/Math.log10(2)));
+            final int windowHeight = (int)Math.pow(2, (int)(Math.log10(targetImageHeight)/Math.log10(2)));
+            final double[] mI = new double[windowWidth*windowHeight];
+            final double[] sI = new double[windowWidth*windowHeight];
+
+            final int tileCountX = 4;
+            final int tileCountY = 4;
+            final int tileWidth = windowWidth/tileCountX;
+            final int tileHeight = windowHeight/tileCountY;
+            final Rectangle[] tileRectangles = new Rectangle[tileCountX*tileCountY];
+            int index = 0;
+            for (int tileY = 0; tileY < tileCountY; tileY++) {
+                final int ypos = tileY*tileHeight;
+                for (int tileX = 0; tileX < tileCountX; tileX++) {
+                    final Rectangle tileRectangle = new Rectangle(tileX*tileWidth, ypos,
+                                                                  tileWidth, tileHeight);
+                    tileRectangles[index++] = tileRectangle;
+                }
+            }
+
+            final StatusProgressMonitor status = new StatusProgressMonitor(tileRectangles.length, "Computing offset... ");
+            int tileCnt = 0;
+
+            final ThreadManager threadManager = new ThreadManager();
+            try {
+                for (final Rectangle rectangle : tileRectangles) {
+                    checkForCancellation();
+
+                    final Thread worker = new Thread() {
+
+                        @Override
+                        public void run() {
+                            final int x0 = rectangle.x;
+                            final int y0 = rectangle.y;
+                            final int w = rectangle.width;
+                            final int h = rectangle.height;
+                            final int xMax = x0 + w;
+                            final int yMax = y0 + h;
+
+                            final int xStart = x0 * nRgLooks;
+                            final int yStart = y0 * nAzLooks;
+                            final int xEnd = xMax * nRgLooks;
+                            final int yEnd = yMax * nAzLooks;
+
+                            final Rectangle srcRect = new Rectangle(xStart, yStart, xEnd-xStart, yEnd-yStart);
+                            final Tile mstTile1 = getSourceTile(masterBand1, srcRect);
+                            final ProductData mstData1 = mstTile1.getDataBuffer();
+                            final TileIndex mstIndex = new TileIndex(mstTile1);
+                            final Tile slvTile1 = getSourceTile(slaveBand1, srcRect);
+                            final ProductData slvData1 = slvTile1.getDataBuffer();
+                            final TileIndex slvIndex = new TileIndex(slvTile1);
+
+                            ProductData mstData2 = null;
+                            ProductData slvData2 = null;
+                            if (complexCoregistration) {
+                                mstData2 = getSourceTile(masterBand2, srcRect).getDataBuffer();
+                                slvData2 = getSourceTile(slaveBand2, srcRect).getDataBuffer();
+                            }
+
+                            final double rgAzLooks = nRgLooks * nAzLooks;
+
+                            for (int y = y0; y < yMax; y++) {
+                                final int yByWidth = y*windowWidth;
+                                final int y1 = y * nAzLooks;
+                                final int y2 = y1 + nAzLooks;
+                                for (int x = x0; x < xMax; x++) {
+                                    final int x1 = x * nRgLooks;
+                                    final int x2 = x1 + nRgLooks;
+                                    mI[yByWidth + x] = getMeanValue(x1, x2, y1, y2, mstData1, mstData2, mstIndex, rgAzLooks);
+                                    sI[yByWidth + x] = getMeanValue(x1, x2, y1, y2, slvData1, slvData2, slvIndex, rgAzLooks);
+                                }
+                            }
+
+                            status.workedOne();
+                        }
+                    };
+                    threadManager.add(worker);
+
+                   // status.worked(tileCnt++);
+                }
+                threadManager.finish();
+
+            } catch(Throwable e) {
+                OperatorUtils.catchOperatorException("GCPSelectionOp", e);
+            } finally {
+                status.done();
+            }
+
+            // correlate master and slave imagettes
+            final RenderedImage masterImage = createRenderedImage(mI, windowWidth, windowHeight);
+            final PlanarImage masterSpectrum = dft(masterImage);
+
+            final RenderedImage slaveImage = createRenderedImage(sI, windowWidth, windowHeight);
+            final PlanarImage slaveSpectrum = dft(slaveImage);
+            final PlanarImage conjugateSlaveSpectrum = conjugate(slaveSpectrum);
+
+            final PlanarImage crossSpectrum = multiplyComplex(masterSpectrum, conjugateSlaveSpectrum);
+            final PlanarImage correlatedImage = idft(crossSpectrum);
+            final PlanarImage crossCorrelatedImage = magnitude(correlatedImage);
+
+            // compute offset
+            final int w = crossCorrelatedImage.getWidth();
+            final int h = crossCorrelatedImage.getHeight();
+            final Raster idftData = crossCorrelatedImage.getData();
+            final double[] real = idftData.getSamples(0, 0, w, h, 0, (double[])null);
+
+            int peakRow = 0;
+            int peakCol = 0;
+            double peak = 0;
+            for (int r = 0; r < h; r++) {
+                for (int c = 0; c < w; c++) {
+                    if (r >= h/4 && r <= h*3/4 || c >= w/4 && c <= w*3/4) {
+                        continue;
+                    }
+                    final int s = r*w + c;
+                    if (peak < real[s]) {
+                        peak = real[s];
+                        peakRow = r;
+                        peakCol = c;
+                    }
+                }
+            }
+
+            // System.out.println("peakRow = " + peakRow + ", peakCol = " + peakCol);
+            if (peakRow <= h/2) {
+                offset[1] = -peakRow*nAzLooks;
+            } else {
+                offset[1] = (h - peakRow)*nAzLooks;
+            }
+
+            if (peakCol <= w/2) {
+                offset[0] = -peakCol*nRgLooks;
+            } else {
+                offset[0] = (w - peakCol)*nRgLooks;
+            }
+            System.out.println("offsetX = " + offset[0] + ", offsetY = " + offset[1]);
+
+        } catch(Throwable e) {
+            OperatorUtils.catchOperatorException(getId()+ " getCoarseSlaveGCPPosition ", e);
+        }
+    }
+
+    private double getMeanValue(final int xStart, final int xEnd, final int yStart, final int yEnd,
+                                final ProductData srcData1, final ProductData srcData2,
+                                final TileIndex srcIndex, final double rgAzLooks) {
+
+        double v1, v2;
+        double meanValue = 0.0;
+        if (complexCoregistration) {
+
+            for (int y = yStart; y < yEnd; y++) {
+                srcIndex.calculateStride(y);
+                for (int x = xStart; x < xEnd; x++) {
+                    v1 = srcData1.getElemDoubleAt(srcIndex.getIndex(x));
+                    v2 = srcData2.getElemDoubleAt(srcIndex.getIndex(x));
+                    meanValue += v1*v1 + v2*v2;
+                }
+            }
+
+        } else {
+
+            for (int y = yStart; y < yEnd; y++) {
+                srcIndex.calculateStride(y);
+                for (int x = xStart; x < xEnd; x++) {
+                    meanValue += srcData1.getElemDoubleAt(srcIndex.getIndex(x));
+                }
+            }
+        }
+
+        return meanValue / rgAzLooks;
+    }
+
 
     /**
      * Copy GCPs of the first target band to current target band.
@@ -758,7 +960,6 @@ public class GCPSelectionOp extends Operator {
             } else {
                 shift[1] = (double)(w - peakCol) / (double)colUpSamplingFactor;
             }
-    
             return true;
         } catch(Throwable t) {
             System.out.println("getSlaveGCPShift failed "+t.getMessage());

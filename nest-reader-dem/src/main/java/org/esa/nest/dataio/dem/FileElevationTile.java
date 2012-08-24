@@ -26,22 +26,22 @@ import java.util.List;
 
 class FileElevationTile {
 
-    private CachingObjectArray _linesCache;
-    private Product _product;
+    private CachingObjectArray linesCache;
+    private Product product;
     private static final int maxLines = 500;
     private final List<Integer> indexList = new ArrayList<Integer>(maxLines);
 
     public FileElevationTile(final Product product) {
-        _product = product;
+        this.product = product;
 
-        _linesCache = new CachingObjectArray(getLineFactory());
-        _linesCache.setCachedRange(0, product.getSceneRasterHeight());
+        linesCache = new CachingObjectArray(getLineFactory());
+        linesCache.setCachedRange(0, product.getBandAt(0).getSceneRasterHeight());
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
         final float[] line;
         try {
-            line = (float[]) _linesCache.getObject(pixelY);
+            line = (float[]) linesCache.getObject(pixelY);
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
@@ -50,22 +50,22 @@ class FileElevationTile {
 
     public void dispose() {
         clearCache();
-        _linesCache = null;
-        if (_product != null) {
-            _product.dispose();
-            _product = null;
+        linesCache = null;
+        if (product != null) {
+            product.dispose();
+            product = null;
         }
     }
 
     public void clearCache() {
-        _linesCache.clear();
+        linesCache.clear();
     }
 
     private CachingObjectArray.ObjectFactory getLineFactory() {
-        final Band band = _product.getBandAt(0);
-        final int width = _product.getSceneRasterWidth();
+        final Band band = product.getBandAt(0);
+        final int width = product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
-            public Object createObject(int index) throws Exception {
+            public Object createObject(final int index) throws Exception {
                 updateCache(index);
                 return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
             }
@@ -77,7 +77,7 @@ class FileElevationTile {
         indexList.add(0, index);
         if (indexList.size() > maxLines) {
             final int i = indexList.size() - 1;
-            _linesCache.setObject(i, null);
+            linesCache.setObject(i, null);
             indexList.remove(i);
         }
     }

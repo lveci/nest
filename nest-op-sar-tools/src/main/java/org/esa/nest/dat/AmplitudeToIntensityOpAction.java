@@ -102,7 +102,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
         return bandName;
     }
 
-    static void convert(Product product, Band band, boolean toAmplitude) {
+    static void convert(final Product product, final Band band, final boolean toAmplitude) {
         String bandName = band.getName();
         String unit;
 
@@ -119,10 +119,9 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
 
         final VirtualBand virtBand = new VirtualBand(bandName,
                 ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
+                band.getSceneRasterWidth(),
+                band.getSceneRasterHeight(),
                 expression);
-        virtBand.setSynthetic(true);
         virtBand.setUnit(unit);
         virtBand.setDescription(band.getDescription());
         virtBand.setNoDataValueUsed(true);

@@ -247,7 +247,6 @@ public class SpeckleFilterOperatorTest extends TestCase {
     private static Product createTestProduct(int w, int h) {
         final Product testProduct = TestUtils.createProduct("type", w, h);
         final Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
-        band1.setSynthetic(true);
         final int[] intValues = new int[w * h];
         for (int i = 0; i < w * h; i++) {
             intValues[i] = i + 1;
@@ -262,7 +261,6 @@ public class SpeckleFilterOperatorTest extends TestCase {
         int h = 7;
         final Product testProduct = TestUtils.createProduct("type", w, h);
         final Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
-        band1.setSynthetic(true);
         final int[] intValues = { 99, 105, 124, 138, 128, 34, 62,
                                  105,  91, 140,  98, 114, 63, 31,
                                  107,  94, 128, 138,  96, 61, 82,

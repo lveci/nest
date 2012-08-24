@@ -39,30 +39,28 @@ public final class ReaderUtils {
 
     private static String[] elemsToKeep = { "Abstracted_Metadata", "MAIN_PROCESSING_PARAMS_ADS", "DSD", "SPH", "lutSigma" };
     
-    public static void createVirtualPhaseBand(Product product, Band bandI, Band bandQ, String countStr) {
+    public static void createVirtualPhaseBand(final Product product, final Band bandI, final Band bandQ, final String countStr) {
         final String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
 
         final VirtualBand virtBand = new VirtualBand("Phase" + countStr,
                 ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
+                bandI.getSceneRasterWidth(),
+                bandI.getSceneRasterHeight(),
                 expression);
-        virtBand.setSynthetic(true);
         virtBand.setUnit(Unit.PHASE);
         virtBand.setDescription("Phase from complex data");
         product.addBand(virtBand);
     }
 
-    public static void createVirtualIntensityBand(Product product, Band bandI, Band bandQ, String countStr) {
+    public static void createVirtualIntensityBand(final Product product, final Band bandI, final Band bandQ, final String countStr) {
         final String expression = bandI.getName() + " * " + bandI.getName() + " + " +
                 bandQ.getName() + " * " + bandQ.getName();
 
         final VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
                 ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
+                bandI.getSceneRasterWidth(),
+                bandI.getSceneRasterHeight(),
                 expression);
-        virtBand.setSynthetic(true);
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
@@ -71,15 +69,14 @@ public final class ReaderUtils {
         product.setQuicklookBandName(virtBand.getName());
     }
 
-    public static void createVirtualIntensityBand(Product product, Band band, String countStr) {
+    public static void createVirtualIntensityBand(final Product product, final Band band, final String countStr) {
         final String expression = band.getName() + " * " + band.getName();
 
         final VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
                 ProductData.TYPE_FLOAT32,
-                product.getSceneRasterWidth(),
-                product.getSceneRasterHeight(),
+                band.getSceneRasterWidth(),
+                band.getSceneRasterHeight(),
                 expression);
-        virtBand.setSynthetic(true);
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
@@ -133,12 +130,12 @@ public final class ReaderUtils {
         product.setGeoCoding(tpGeoCoding);
     }
 
-    public static void createFineTiePointGrid(int coarseGridWidth,
-                                          int coarseGridHeight,
-                                          int fineGridWidth,
-                                          int fineGridHeight,
-                                          float[] coarseTiePoints,
-                                          float[] fineTiePoints) {
+    public static void createFineTiePointGrid(final int coarseGridWidth,
+                                              final int coarseGridHeight,
+                                              final int fineGridWidth,
+                                              final int fineGridHeight,
+                                              final float[] coarseTiePoints,
+                                              final float[] fineTiePoints) {
 
         if (coarseTiePoints == null || coarseTiePoints.length != coarseGridWidth*coarseGridHeight) {
             throw new IllegalArgumentException(
@@ -176,32 +173,21 @@ public final class ReaderUtils {
         }
     }
 
-    public static void createMapGeocoding(final Product targetProduct, final String projectionName, final double noDataValue) {
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
-                                                MapProjectionRegistry.getProjection(projectionName),
-                                                0.0,
-                                                noDataValue);
-        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
-        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
-
-        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
-    }
-
-    public static double getLineTimeInterval(ProductData.UTC startUTC, ProductData.UTC endUTC, int sceneHeight) {
+    public static double getLineTimeInterval(final ProductData.UTC startUTC, final ProductData.UTC endUTC, final int sceneHeight) {
         final double startTime = startUTC.getMJD() * 24.0 * 3600.0;
         final double stopTime = endUTC.getMJD() * 24.0 * 3600.0;
         return (stopTime-startTime) / (double)(sceneHeight-1);
     }
 
-    public static int getTotalSize(Product product) {
+    public static int getTotalSize(final Product product) {
         return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
     }
 
-    public static void verifyProduct(Product product, boolean verifyTimes) throws Exception {
+    public static void verifyProduct(final Product product, final boolean verifyTimes) throws Exception {
         verifyProduct(product, verifyTimes, true);    
     }
 
-    public static void verifyProduct(Product product, boolean verifyTimes, boolean verifyGeoCoding) throws Exception {
+    public static void verifyProduct(final Product product, final boolean verifyTimes, final boolean verifyGeoCoding) throws Exception {
         if(product == null)
             throw new Exception("product is null");
         if(verifyGeoCoding && product.getGeoCoding() == null)

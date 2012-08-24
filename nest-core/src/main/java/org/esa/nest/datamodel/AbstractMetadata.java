@@ -15,10 +15,7 @@
  */
 package org.esa.nest.datamodel;
 
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 
 import java.io.File;
@@ -37,10 +34,9 @@ public final class AbstractMetadata {
     /**
      * If AbstractedMetadata is modified by adding new attributes then this version number needs to be incremented
      */
-    private static final String METADATA_VERSION = "4C-1.0";
+    private static final String METADATA_VERSION = "5.0";
 
     public static final int NO_METADATA = 99999;
-    //public static final short NO_METADATA_BYTE = 99;
     private static final short NO_METADATA_BYTE = 0;
     public static final String NO_METADATA_STRING = " ";
     public static final ProductData.UTC NO_METADATA_UTC = new ProductData.UTC(0);
@@ -60,7 +56,10 @@ public final class AbstractMetadata {
     public static final String MISSION = "MISSION";
     public static final String ACQUISITION_MODE = "ACQUISITION_MODE";
     public static final String BEAMS = "BEAMS";
+    public static final String annotation = "annotation";
+    public static final String band_names = "band_names";
     public static final String SWATH = "SWATH";
+    public static final String swath = "swath";
     public static final String PROC_TIME = "PROC_TIME";
     public static final String ProcessingSystemIdentifier = "Processing_system_identifier";
     public static final String CYCLE = "orbit_cycle";
@@ -88,6 +87,7 @@ public final class AbstractMetadata {
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
     public static final String mds3_tx_rx_polar = "mds3_tx_rx_polar";
     public static final String mds4_tx_rx_polar = "mds4_tx_rx_polar";
+    public static final String polarization = "polarization";
     public static final String polsarData = "polsar_data";
     public static final String[] polarTags = { AbstractMetadata.mds1_tx_rx_polar,AbstractMetadata.mds2_tx_rx_polar,
                                                AbstractMetadata.mds3_tx_rx_polar,AbstractMetadata.mds4_tx_rx_polar };
@@ -311,6 +311,63 @@ public final class AbstractMetadata {
     }
 
     /**
+     * Abstract common metadata from products to be used uniformly by all operators
+     * name should be in the form swath_pol_date
+     * @param absRoot the abstracted metadata root
+     * @param name the name of the element
+     * @return abstracted metadata root
+     */
+    public static MetadataElement addBandAbstractedMetadata(final MetadataElement absRoot, final String name) {
+        MetadataElement bandRoot = absRoot.getElement(name);
+        if(bandRoot == null) {
+            bandRoot = new MetadataElement(name);
+            absRoot.addElement(bandRoot);
+        }
+
+        addAbstractedAttribute(bandRoot, swath, ProductData.TYPE_ASCII, "", "Swath name");
+        addAbstractedAttribute(bandRoot, polarization, ProductData.TYPE_ASCII, "", "Polarization");
+        addAbstractedAttribute(bandRoot, annotation, ProductData.TYPE_ASCII, "", "metadata file");
+        addAbstractedAttribute(bandRoot, band_names, ProductData.TYPE_ASCII, "", "corresponding bands");
+
+        addAbstractedAttribute(bandRoot, first_line_time, ProductData.TYPE_UTC, "utc", "First zero doppler azimuth time");
+        addAbstractedAttribute(bandRoot, last_line_time, ProductData.TYPE_UTC, "utc", "Last zero doppler azimuth time");
+        addAbstractedAttribute(bandRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
+
+        addAbstractedAttribute(bandRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, first_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, first_far_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, last_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, last_near_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, last_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(bandRoot, last_far_long, ProductData.TYPE_FLOAT64, "deg", "");
+
+        addAbstractedAttribute(bandRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
+        addAbstractedAttribute(bandRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
+        addAbstractedAttribute(bandRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
+        addAbstractedAttribute(bandRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");
+
+        addAbstractedAttribute(bandRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
+
+        return bandRoot;
+    }
+
+    public static MetadataElement getBandMetadata(MetadataElement absRoot, final String bandMetadataName) {
+        return absRoot.getElement(bandMetadataName);
+    }
+
+    public static MetadataElement getBandMetadata(MetadataElement absRoot, final Band band) {
+        final MetadataElement[] elems = absRoot.getElements();
+        for(MetadataElement elem : elems) {
+            if(elem.containsAttribute(band_names)) {
+                final String bandNames = elem.getAttributeString(band_names);
+               // if()
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adds an attribute into dest
      * @param dest the destination element
      * @param tag the name of the attribute
@@ -503,9 +560,19 @@ public final class AbstractMetadata {
         if(abstractedMetadata == null) {
             abstractedMetadata = addAbstractedMetadataHeader(root);
         } else {
+            migrateToCurrentVersion(abstractedMetadata);
             patchMissingMetadata(abstractedMetadata);
         }
         return abstractedMetadata;
+    }
+
+    private static void migrateToCurrentVersion(final MetadataElement abstractedMetadata) {
+        // check if version has changed
+        final String version = abstractedMetadata.getAttributeString(abstracted_metadata_version, "");
+        if(version.equals(METADATA_VERSION))
+            return;
+
+        //todo
     }
 
     private static void patchMissingMetadata(final MetadataElement abstractedMetadata) {

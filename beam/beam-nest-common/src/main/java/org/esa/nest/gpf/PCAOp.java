@@ -261,7 +261,6 @@ public class PCAOp extends Operator {
                                                  sourceProduct.getSceneRasterWidth(),
                                                  sourceProduct.getSceneRasterHeight(),
                                                  expression);
-        band.setSynthetic(true);
         band.setUnit(unit);
         band.setDescription("Mean image");
         sourceProduct.addBand(band);

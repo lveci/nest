@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam</artifactId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <groupId>org.esa.beam</groupId>
@@ -33,6 +33,10 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-csv-dataio</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>

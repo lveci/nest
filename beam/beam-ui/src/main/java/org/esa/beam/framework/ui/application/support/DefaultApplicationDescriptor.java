@@ -25,6 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.converters.SingleValueConverterWrapper;
 import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
+import org.esa.beam.util.SystemUtils;
 
 import java.util.ArrayList;
 
@@ -149,7 +150,7 @@ public class DefaultApplicationDescriptor implements ConfigurableExtension, Appl
      *
      * @param config The configuration data.
      * @throws com.bc.ceres.core.CoreException
-     *          if an error occured during configuration.
+     *          if an error occurred during configuration.
      */
     public void configure(ConfigurationElement config) throws CoreException {
 
@@ -167,11 +168,13 @@ public class DefaultApplicationDescriptor implements ConfigurableExtension, Appl
         if (version == null) {
             version = declaringModule.getVersion().toString();
         }
-        if (buildId == null || "${beam.build.id}".equals(buildId)) {
-            buildId = System.getProperty("beam.build.id");
+        final String buildIdKey = SystemUtils.getApplicationContextId() + ".build.id";
+        if (buildId == null || String.format("${%s}", buildIdKey).equals(buildId)) {
+            buildId = System.getProperty(buildIdKey);
         }
-        if (buildDate == null || "${beam.build.date}".equals(buildDate)) {
-            buildDate = System.getProperty("beam.build.date");
+        final String buildDateKey = SystemUtils.getApplicationContextId() + ".build.date";
+        if (buildDate == null || String.format("${%s}", buildDateKey).equals(buildDate)) {
+            buildDate = System.getProperty(buildDateKey);
         }
         if (copyright == null) {
             copyright = declaringModule.getCopyright();

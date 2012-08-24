@@ -45,7 +45,7 @@ Building NEST from the source
 9. Use the following configuration to run DAT:
 
     * Main class: com.bc.ceres.launcher.Launcher
-    * VM parameters: -Xmx1024M -Dceres.context=nest
+    * VM parameters: -server -Xmx1024M -Dceres.context=nest
     * Program parameters: none
     * Working directory: $MY_PROJECTS/nest/output
     * Use classpath of module: nest-bootstrap

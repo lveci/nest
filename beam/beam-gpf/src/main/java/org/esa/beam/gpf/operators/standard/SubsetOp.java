@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -83,9 +83,7 @@ public class SubsetOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter()
-    private Rectangle region;
-    @Parameter(label = "X", defaultValue="0")
+	@Parameter(label = "X", defaultValue="0")
     private int regionX = 0;
     @Parameter(label = "Y", defaultValue="0")
     private int regionY = 0;
@@ -93,27 +91,37 @@ public class SubsetOp extends Operator {
     private int width = 1000;
     @Parameter(label = "Height", defaultValue="1000")
     private int height = 1000;
-    @Parameter(defaultValue = "1")
+
+    @Parameter(description = "The subset region in pixel coordinates.\n" +
+                             "If not given, the entire scene is used. Either 'region' or 'geoRegion must be given.")
+    private Rectangle region;
+    @Parameter(converter = JtsGeometryConverter.class,
+               description = "The subset region in geographical coordinates using WKT-format,\n" +
+                             "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
+                             "(make sure to quote the option due to spaces in <geometry>).\n" +
+                             "If not given, the entire scene is used. Either 'region' or 'geoRegion must be given.")
+    private Geometry geoRegion;
+    @Parameter(defaultValue = "1",
+               description = "The pixel sub-sampling step in X (horizontal image direction)")
     private int subSamplingX;
+    @Parameter(defaultValue = "1",
+               description = "The pixel sub-sampling step in Y (vertical image direction)")
+    private int subSamplingY;
     @Parameter(defaultValue = "false",
                description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
-    @Parameter(converter = JtsGeometryConverter.class,
-               description = "The region in geographical coordinates using WKT-format,\n" +
-                             "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
-                             "(make sure to quote the option due to spaces in <geometry>)")
-    private Geometry geoRegion;
 
-    @Parameter(defaultValue = "1")
-    private int subSamplingY;
-    @Parameter
+    @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \n" +
+                             "If not given, all bands are copied.")
     private String[] tiePointGridNames;
-    @Parameter
+    @Parameter(description = "The comma-separated list of names of bands to be copied.\n" +
+                             "If not given, all bands are copied.")
     private String[] bandNames;
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false",
+               description = "Whether to copy the metadata of the source product.")
     private boolean copyMetadata;
 
-    private ProductReader subsetReader;
+    private transient ProductReader subsetReader;
 
     public SubsetOp() {
         subSamplingX = 1;
@@ -217,6 +225,9 @@ public class SubsetOp extends Operator {
 
     private void collectReferencedRasters(String nodeName, ArrayList<String> referencedNodeNames) {
         RasterDataNode rasterDataNode = sourceProduct.getRasterDataNode(nodeName);
+        if (rasterDataNode == null) {
+            throw new OperatorException(String.format("Source product does not contain a raster named '%s'.", nodeName));
+        }
         final String validPixelExpression = rasterDataNode.getValidPixelExpression();
         collectReferencedRastersInExpression(validPixelExpression, referencedNodeNames);
         if (rasterDataNode instanceof VirtualBand) {

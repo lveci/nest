@@ -41,12 +41,12 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
     private final int RASTER_HEIGHT;
     private float noDataValue = 0;
 
-    public FileElevationModel(File file, Resampling resamplingMethod) throws IOException {
+    public FileElevationModel(final File file, final Resampling resamplingMethod) throws IOException {
 
         final ProductReader productReader = ProductIO.getProductReaderForFile(file);
         final Product product = productReader.readProductNodes(file, null);
-        RASTER_WIDTH = product.getSceneRasterWidth();
-        RASTER_HEIGHT = product.getSceneRasterHeight();
+        RASTER_WIDTH = product.getBandAt(0).getSceneRasterWidth();
+        RASTER_HEIGHT = product.getBandAt(0).getSceneRasterHeight();
         fileElevationTile = new FileElevationTile(product);
         tileGeocoding = product.getGeoCoding();
         noDataValue = (float)product.getBandAt(0).getNoDataValue();
@@ -60,7 +60,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         return null;
     }
 
-    public FileElevationModel(File file, Resampling resamplingMethod, float demNoDataValue) throws IOException {
+    public FileElevationModel(final File file, final Resampling resamplingMethod, final float demNoDataValue) throws IOException {
 
         this(file, resamplingMethod);
 
@@ -71,10 +71,6 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         fileElevationTile.dispose();
     }
 
-    public void clearCache() {
-        fileElevationTile.clearCache();   
-    }
-
     public float getNoDataValue() {
         return noDataValue;
     }
@@ -83,7 +79,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         return resampling;
     }
 
-    public synchronized float getElevation(GeoPos geoPos) throws Exception {
+    public synchronized float getElevation(final GeoPos geoPos) throws Exception {
         try {
             final PixelPos pix = tileGeocoding.getPixelPos(geoPos, null);
             if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x >= RASTER_WIDTH || pix.y >= RASTER_HEIGHT)

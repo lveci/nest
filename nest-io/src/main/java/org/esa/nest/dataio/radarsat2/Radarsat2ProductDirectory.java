@@ -106,7 +106,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException {
+    protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 

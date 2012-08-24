@@ -115,10 +115,9 @@ public class QuickLookGenerator {
             final String expression = quicklookBandName + "==0 ? 0 : 10 * log10(abs("+quicklookBandName+"))";
             final VirtualBand virtBand = new VirtualBand("QuickLook",
                     ProductData.TYPE_FLOAT32,
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(),
+                    srcBand.getSceneRasterWidth(),
+                    srcBand.getSceneRasterHeight(),
                     expression);
-            virtBand.setSynthetic(true);
             product.addBand(virtBand);
             srcBandName = virtBand.getName();
         } else {

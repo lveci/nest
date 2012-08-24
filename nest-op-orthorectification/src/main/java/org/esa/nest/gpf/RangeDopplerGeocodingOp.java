@@ -1834,7 +1834,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         for(Band trgBand : bands) {
 
             final String trgBandName = trgBand.getName();
-            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+            if (trgBand instanceof VirtualBand || !trgBandName.contains("Sigma0")) {
                 continue;
             }
 
@@ -1867,10 +1867,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final VirtualBand band = new VirtualBand(sigmaNoughtVirtualBandName,
                                                      ProductData.TYPE_FLOAT32,
-                                                     targetProduct.getSceneRasterWidth(),
-                                                     targetProduct.getSceneRasterHeight(),
+                                                     trgBand.getSceneRasterWidth(),
+                                                     trgBand.getSceneRasterHeight(),
                                                      expression);
-            band.setSynthetic(true);
             band.setUnit(trgBand.getUnit());
             band.setDescription(description);
             targetProduct.addBand(band);
@@ -1886,7 +1885,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         for(Band trgBand : bands) {
 
             final String trgBandName = trgBand.getName();
-            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+            if (trgBand instanceof VirtualBand || !trgBandName.contains("Sigma0")) {
                 continue;
             }
 
@@ -1931,10 +1930,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final VirtualBand band = new VirtualBand(gammaNoughtVirtualBandName,
                                                      ProductData.TYPE_FLOAT32,
-                                                     targetProduct.getSceneRasterWidth(),
-                                                     targetProduct.getSceneRasterHeight(),
+                                                     trgBand.getSceneRasterWidth(),
+                                                     trgBand.getSceneRasterHeight(),
                                                      expression);
-            band.setSynthetic(true);
             band.setUnit(trgBand.getUnit());
             band.setDescription(description);
             targetProduct.addBand(band);
@@ -1944,13 +1942,13 @@ public class RangeDopplerGeocodingOp extends Operator {
     /**
      * Create Beta0 image as a virtual band.
      */
-    public static void createBetaNoughtVirtualBand(Product targetProduct) {
+    public static void createBetaNoughtVirtualBand(final Product targetProduct) {
 
         final Band[] bands = targetProduct.getBands();
         for(Band trgBand : bands) {
 
             final String trgBandName = trgBand.getName();
-            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+            if (trgBand instanceof VirtualBand || !trgBandName.contains("Sigma0")) {
                 continue;
             }
 
@@ -1961,10 +1959,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             String betaNoughtVirtualBandName = "Beta0";
             final VirtualBand band = new VirtualBand(betaNoughtVirtualBandName,
                                                      ProductData.TYPE_FLOAT32,
-                                                     targetProduct.getSceneRasterWidth(),
-                                                     targetProduct.getSceneRasterHeight(),
+                                                     trgBand.getSceneRasterWidth(),
+                                                     trgBand.getSceneRasterHeight(),
                                                      expression);
-            band.setSynthetic(true);
             band.setUnit(trgBand.getUnit());
             band.setDescription("Beta0 image");
             targetProduct.addBand(band);

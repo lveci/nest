@@ -495,9 +495,8 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
-                //System.out.println(i);
 
-                if (targetBands[i].isSynthetic()) {
+                if (targetBands[i] instanceof VirtualBand) {
                     continue;
                 }
 

@@ -38,7 +38,7 @@ class ModisDaacUtils {
         for (int i = 0; i < hdfGlobalAttributes.getNumAttributes(); i++) {
             final HdfAttributeContainer attributeAt = hdfGlobalAttributes.getAttributeAt(i);
             final String name = attributeAt.getName();
-            if (name.startsWith(coreString) ) {//&& name.length() == coreKey.length()) {
+            if (name.startsWith(coreString) && name.length() == coreKey.length()) {
                 resultMap.put(name, attributeAt);
             }
         }
@@ -105,17 +105,11 @@ class ModisDaacUtils {
     private static ArrayList<String> extractProductTypeBySeparatorChar(String s, ModisProductDb db, String delim) throws ProductIOException {
         final ArrayList<String> prodType = new ArrayList<String>();
         final StringTokenizer tokenizer = new StringTokenizer(s, delim);
-        final String[] supportedTypes = db.getSupportetProductTypes();
         while (tokenizer.hasMoreTokens()) {
             final String token = tokenizer.nextToken();
-            for(String supportedType : supportedTypes) {
-                if(token.startsWith(supportedType)) {
-                    prodType.add(supportedType);
-                }
+            if (db.isSupportedProduct(token)) {
+                prodType.add(token);
             }
-            //if (db.isSupportedProduct(token)) {
-            //    prodType.add(token);
-            //}
         } 
         return prodType;
     }

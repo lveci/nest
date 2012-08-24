@@ -61,6 +61,9 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     private boolean isComplex = false;
     private boolean applyFineRegistration = true;
 
+    final JCheckBox computeOffsetCheckBox = new JCheckBox("Estimate Coarse Offset");
+    private boolean computeOffset = false;
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
@@ -72,6 +75,12 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
                 public void itemStateChanged(ItemEvent e) {
                     applyFineRegistration = (e.getStateChange() == ItemEvent.SELECTED);
                     enableComplexFields();
+                }
+        });
+
+        computeOffsetCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    computeOffset = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
 
@@ -104,6 +113,10 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
             coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
         }
         enableComplexFields();
+
+        computeOffset = (Boolean)paramMap.get("computeOffset");
+        //computeOffsetCheckBox.getModel().setPressed(computeOffset);
+        computeOffsetCheckBox.setSelected(computeOffset);
     }
 
     @Override
@@ -138,6 +151,8 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
                 }
             }
         }
+
+        paramMap.put("computeOffset", computeOffset);
     }
 
     private JComponent createPanel() {
@@ -183,6 +198,9 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         useSlidingWindow.setActionCommand("Use Sliding Window:");
         RadioListener myListener = new RadioListener();
         useSlidingWindow.addActionListener(myListener);
+
+        gbc.gridy++;
+        contentPane.add(computeOffsetCheckBox, gbc);
 
         DialogUtils.fillPanel(contentPane, gbc);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,14 +31,25 @@ import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.ViewportAware;
 import com.bc.ceres.grender.support.DefaultViewport;
-import com.bc.ceres.swing.figure.*;
+import com.bc.ceres.swing.figure.Figure;
+import com.bc.ceres.swing.figure.FigureChangeListener;
+import com.bc.ceres.swing.figure.FigureCollection;
+import com.bc.ceres.swing.figure.FigureEditor;
+import com.bc.ceres.swing.figure.FigureEditorAware;
+import com.bc.ceres.swing.figure.FigureSelection;
+import com.bc.ceres.swing.figure.FigureStyle;
+import com.bc.ceres.swing.figure.Handle;
+import com.bc.ceres.swing.figure.ShapeFigure;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.undo.UndoContext;
 import com.bc.ceres.swing.undo.support.DefaultUndoContext;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PlacemarkGroup;
 import org.esa.beam.framework.datamodel.Product;
@@ -95,6 +106,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -109,7 +121,7 @@ import java.util.Vector;
  */
 public class ProductSceneView extends BasicView
         implements FigureEditorAware, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, ProductLayerContext,
-        ViewportAware {
+                   ViewportAware {
 
     public static final String BASE_IMAGE_LAYER_ID = "org.esa.beam.layers.baseImage";
     public static final String NO_DATA_LAYER_ID = "org.esa.beam.layers.noData";
@@ -270,7 +282,7 @@ public class ProductSceneView extends BasicView
         figureEditor.addSelectionChangeListener(new PinSelectionChangeListener());
 
         this.scrollBarsShown = sceneImage.getConfiguration().getPropertyBool(PROPERTY_KEY_IMAGE_SCROLL_BARS_SHOWN,
-                false);
+                                                                             false);
         if (scrollBarsShown) {
             this.scrollPane = createScrollPane();
             add(scrollPane, BorderLayout.CENTER);
@@ -314,7 +326,7 @@ public class ProductSceneView extends BasicView
 
     private AdjustableViewScrollPane createScrollPane() {
         AbstractButton zoomAllButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/ZoomAll13.gif"),
-                false);
+                                                                      false);
         zoomAllButton.setFocusable(false);
         zoomAllButton.setFocusPainted(false);
         zoomAllButton.addActionListener(new ActionListener() {
@@ -339,6 +351,7 @@ public class ProductSceneView extends BasicView
      * Gets the current selection context, if any.
      *
      * @return The current selection context, or {@code null} if none exists.
+     *
      * @since BEAM 4.7
      */
     @Override
@@ -381,7 +394,7 @@ public class ProductSceneView extends BasicView
     @Override
     public ProductNode getVisibleProductNode() {
         if (isRGB()) {
-            return null;
+            return getProduct();
         }
         return getRaster();
     }
@@ -392,6 +405,7 @@ public class ProductSceneView extends BasicView
      *
      * @param pixelX the pixel X co-ordinate
      * @param pixelY the pixel Y co-ordinate
+     *
      * @return the info string at the given position
      */
     @Override
@@ -415,6 +429,7 @@ public class ProductSceneView extends BasicView
      * otherwise defer to the component's layout manager.
      *
      * @return the value of the <code>preferredSize</code> property
+     *
      * @see #setPreferredSize
      * @see javax.swing.plaf.ComponentUI
      */
@@ -531,6 +546,7 @@ public class ProductSceneView extends BasicView
      * Gets the product raster with the specified index.
      *
      * @param index the zero-based product raster index
+     *
      * @return the product raster with the given index
      */
     public RasterDataNode getRaster(int index) {
@@ -626,6 +642,23 @@ public class ProductSceneView extends BasicView
         }
     }
 
+    /**
+     * @param vectorDataNodes The vector data nodes whose layer shall be made visible.
+     *
+     * @since BEAM 4.10
+     */
+    public void setLayersVisible(VectorDataNode... vectorDataNodes) {
+        for (VectorDataNode vectorDataNode : vectorDataNodes) {
+            final LayerFilter nodeFilter = VectorDataLayerFilterFactory.createNodeFilter(vectorDataNode);
+            Layer vectorDataLayer = LayerUtils.getChildLayer(getRootLayer(),
+                                                             LayerUtils.SEARCH_DEEP,
+                                                             nodeFilter);
+            if (vectorDataLayer != null) {
+                vectorDataLayer.setVisible(true);
+            }
+        }
+    }
+
     public ShapeFigure getCurrentShapeFigure() {
         FigureSelection figureSelection = getFigureEditor().getFigureSelection();
         if (figureSelection.getFigureCount() > 0) {
@@ -648,7 +681,7 @@ public class ProductSceneView extends BasicView
 
             if (layer == null) {
                 layer = LayerUtils.getChildLayer(getRootLayer(), LayerUtils.SearchMode.DEEP,
-                        VectorDataLayerFilterFactory.createGeometryFilter());
+                                                 VectorDataLayerFilterFactory.createGeometryFilter());
             }
             if (layer != null) {
                 final VectorDataLayer vectorDataLayer = (VectorDataLayer) layer;
@@ -760,14 +793,16 @@ public class ProductSceneView extends BasicView
 
     /**
      * @param vectorDataNode The vector data node, whose layer shall be selected.
+     *
      * @return The layer, or {@code null}.
+     *
      * @since BEAM 4.7
      */
     public VectorDataLayer selectVectorDataLayer(VectorDataNode vectorDataNode) {
         LayerFilter layerFilter = new VectorDataLayerFilter(vectorDataNode);
         VectorDataLayer layer = (VectorDataLayer) LayerUtils.getChildLayer(getRootLayer(),
-                LayerUtils.SEARCH_DEEP,
-                layerFilter);
+                                                                           LayerUtils.SEARCH_DEEP,
+                                                                           layerFilter);
         if (layer != null) {
             setSelectedLayer(layer);
         }
@@ -776,7 +811,9 @@ public class ProductSceneView extends BasicView
 
     /**
      * @param pin The pins to test.
+     *
      * @return {@code true}, if the pin is selected.
+     *
      * @since BEAM 4.7
      */
     public boolean isPinSelected(Placemark pin) {
@@ -785,7 +822,9 @@ public class ProductSceneView extends BasicView
 
     /**
      * @param gcp The ground control point to test.
+     *
      * @return {@code true}, if the ground control point is selected.
+     *
      * @since BEAM 4.7
      */
     public boolean isGcpSelected(Placemark gcp) {
@@ -794,6 +833,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @return The (first) selected pin.
+     *
      * @since BEAM 4.7
      */
     public Placemark getSelectedPin() {
@@ -802,6 +842,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @return The selected pins.
+     *
      * @since BEAM 4.7
      */
     public Placemark[] getSelectedPins() {
@@ -810,6 +851,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @return The selected ground control points.
+     *
      * @since BEAM 4.7
      */
     public Placemark[] getSelectedGcps() {
@@ -818,6 +860,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @param pins The selected pins.
+     *
      * @since BEAM 4.7
      */
     public void selectPins(Placemark[] pins) {
@@ -826,6 +869,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @param gpcs The selected ground control points.
+     *
      * @since BEAM 4.7
      */
     public void selectGcps(Placemark[] gpcs) {
@@ -834,6 +878,7 @@ public class ProductSceneView extends BasicView
 
     /**
      * @return The (first) selected feature figure.
+     *
      * @since BEAM 4.7
      */
     public SimpleFeatureFigure getSelectedFeatureFigure() {
@@ -848,18 +893,44 @@ public class ProductSceneView extends BasicView
 
     /**
      * @return The selected feature figures.
+     *
      * @since BEAM 4.7
+     * @deprecated since BEAM 4.10, use {@link #getFeatureFigures(boolean)} instead
      */
     public SimpleFeatureFigure[] getSelectedFeatureFigures() {
-        Figure[] figures = figureEditor.getFigureSelection().getFigures();
-        ArrayList<SimpleFeatureFigure> selectedFigures = new ArrayList<SimpleFeatureFigure>(figures.length);
-        for (Figure figure : figures) {
-            if (figure instanceof SimpleFeatureFigure) {
-                SimpleFeatureFigure featureFigure = (SimpleFeatureFigure) figure;
-                selectedFigures.add(featureFigure);
-            }
+        ArrayList<SimpleFeatureFigure> selectedFigures = new ArrayList<SimpleFeatureFigure>();
+        collectFeatureFigures(figureEditor.getFigureSelection(), selectedFigures);
+        return selectedFigures.toArray(new SimpleFeatureFigure[selectedFigures.size()]);
+    }
+
+    /**
+     * Gets either the selected figures, or all the figures of the currently selected layer.
+     *
+     * @param selectedOnly If {@code true}, only selected figures are returned.
+     *
+     * @return The feature figures or an empty array.
+     *
+     * @since BEAM 4.10
+     */
+    public SimpleFeatureFigure[] getFeatureFigures(boolean selectedOnly) {
+        ArrayList<SimpleFeatureFigure> selectedFigures = new ArrayList<SimpleFeatureFigure>();
+        collectFeatureFigures(figureEditor.getFigureSelection(), selectedFigures);
+        if (selectedFigures.isEmpty()
+            && !selectedOnly
+            && getSelectedLayer() instanceof VectorDataLayer) {
+            VectorDataLayer vectorDataLayer = (VectorDataLayer) getSelectedLayer();
+            collectFeatureFigures(vectorDataLayer.getFigureCollection(), selectedFigures);
         }
         return selectedFigures.toArray(new SimpleFeatureFigure[selectedFigures.size()]);
+    }
+
+    private void collectFeatureFigures(FigureCollection figureCollection, List<SimpleFeatureFigure> selectedFigures) {
+        Figure[] figures = figureCollection.getFigures();
+        for (Figure figure : figures) {
+            if (figure instanceof SimpleFeatureFigure) {
+                selectedFigures.add((SimpleFeatureFigure) figure);
+            }
+        }
     }
 
     public boolean selectPlacemarks(PlacemarkGroup placemarkGroup, Placemark[] placemarks) {
@@ -880,6 +951,8 @@ public class ProductSceneView extends BasicView
             }
             figureEditor.getFigureSelection().removeAllFigures();
             figureEditor.getFigureSelection().addFigures(selectedFigures.toArray(new Figure[selectedFigures.size()]));
+            final int selectionStage = Math.min(selectedFigures.size(), 2);
+            figureEditor.getFigureSelection().setSelectionStage(selectionStage);
             return true;
         }
         return false;
@@ -1002,16 +1075,48 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    public void synchronizeViewport(ProductSceneView view) {
-        final Product currentProduct = getRaster().getProduct();
-        final Product otherProduct = view.getRaster().getProduct();
-        if (otherProduct == currentProduct ||
-                otherProduct.isCompatibleProduct(currentProduct, 1)) {
+    /**
+     * @deprecated since BEAM 4.10
+     */
+    @Deprecated
+    public void synchronizeViewport(ProductSceneView otherView) {
+        synchronizeViewportIfPossible(otherView);
+    }
 
-            Viewport viewPortToChange = view.layerCanvas.getViewport();
-            Viewport myViewPort = layerCanvas.getViewport();
-            viewPortToChange.setTransform(myViewPort);
+    public boolean synchronizeViewportIfPossible(ProductSceneView thatView) {
+        final RasterDataNode thisRaster = getRaster();
+        final RasterDataNode thatRaster = thatView.getRaster();
+        final Product thisProduct = thisRaster.getProduct();
+        final Product thatProduct = thatRaster.getProduct();
+
+        if (thatProduct == thisProduct || thatProduct.isCompatibleProduct(thisProduct, 1.0e-3f)) {
+            final Viewport thisViewport = layerCanvas.getViewport();
+            final Viewport thatViewport = thatView.layerCanvas.getViewport();
+            thatViewport.setTransform(thisViewport);
+            return true;
+        } else {
+            final GeoCoding thisGeoCoding = thisRaster.getGeoCoding();
+            final GeoCoding thatGeoCoding = thatRaster.getGeoCoding();
+            if (thisGeoCoding != null && thatGeoCoding != null && thisGeoCoding.canGetGeoPos() && thatGeoCoding.canGetPixelPos()) {
+                final Viewport thisViewport = layerCanvas.getViewport();
+                final Viewport thatViewport = thatView.layerCanvas.getViewport();
+                final double viewCenterX = thisViewport.getViewBounds().getCenterX();
+                final double viewCenterY = thisViewport.getViewBounds().getCenterY();
+                final Point2D viewCenter = new Point2D.Double(viewCenterX, viewCenterY);
+                final Point2D modelCenter = thisViewport.getViewToModelTransform().transform(viewCenter, null);
+                final PixelPos imageCenter = new PixelPos();
+                getBaseImageLayer().getModelToImageTransform().transform(modelCenter, imageCenter);
+                final GeoPos geoCenter = new GeoPos();
+                thisGeoCoding.getGeoPos(imageCenter, geoCenter);
+                thatGeoCoding.getPixelPos(geoCenter, imageCenter);
+                if (imageCenter.isValid()) {
+                    thatView.getBaseImageLayer().getImageToModelTransform().transform(imageCenter, modelCenter);
+                    thatViewport.setZoomFactor(thatViewport.getZoomFactor(), modelCenter.getX(), modelCenter.getY());
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
 
@@ -1050,8 +1155,8 @@ public class ProductSceneView extends BasicView
                 final Color color = (Color) noDataLayer.getConfiguration().getValue(
                         NoDataLayerType.PROPERTY_NAME_COLOR);
                 final MultiLevelSource multiLevelSource = MaskImageMultiLevelSource.create(getRaster().getProduct(),
-                        color, expression, true,
-                        getBaseImageLayer().getImageToModelTransform());
+                                                                                           color, expression, true,
+                                                                                           getBaseImageLayer().getImageToModelTransform());
                 noDataLayer.setMultiLevelSource(multiLevelSource);
             } else {
                 noDataLayer.setMultiLevelSource(MultiLevelSource.NULL);
@@ -1094,10 +1199,10 @@ public class ProductSceneView extends BasicView
          */
         public RGBChannel(final Product product, final String name, final String expression) {
             super(name,
-                    ProductData.TYPE_FLOAT32,
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(),
-                    expression);
+                  ProductData.TYPE_FLOAT32,
+                  product.getSceneRasterWidth(),
+                  product.getSceneRasterHeight(),
+                  expression);
             setOwner(product);
             setModified(false);
         }
@@ -1182,7 +1287,7 @@ public class ProductSceneView extends BasicView
     private boolean isPixelPosValid(int currentPixelX, int currentPixelY, int currentLevel) {
         return currentPixelX >= 0 && currentPixelX < baseImageLayer.getImage(
                 currentLevel).getWidth() && currentPixelY >= 0
-                && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
+               && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
     }
 
     private void firePixelPosChanged(MouseEvent e, int currentPixelX, int currentPixelY, int currentLevel) {
@@ -1206,7 +1311,6 @@ public class ProductSceneView extends BasicView
             Point2D p = new Point2D.Double(e.getX() + 0.5, e.getY() + 0.5);
 
             Viewport viewport = getLayerCanvas().getViewport();
-            int currentLevel = baseImageLayer.getLevel(viewport);
             AffineTransform v2mTransform = viewport.getViewToModelTransform();
             final Point2D modelP = v2mTransform.transform(p, null);
 
@@ -1215,6 +1319,7 @@ public class ProductSceneView extends BasicView
             currentPixelX = (int) Math.floor(imageP.getX());
             currentPixelY = (int) Math.floor(imageP.getY());
 
+            int currentLevel = baseImageLayer.getLevel(viewport);
             AffineTransform m2iLevelTransform = baseImageLayer.getModelToImageTransform(currentLevel);
             Point2D imageLevelP = m2iLevelTransform.transform(modelP, null);
             int currentPixelX = (int) Math.floor(imageLevelP.getX());
@@ -1233,7 +1338,7 @@ public class ProductSceneView extends BasicView
 
     private boolean isPixelBorderDisplayEnabled() {
         return pixelBorderShown &&
-                getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
+               getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
     }
 
     private void drawPixelBorder(int currentPixelX, int currentPixelY, int currentLevel, boolean showBorder) {

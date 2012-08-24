@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-dat</symbolicName>
-    <version>4C-1.1</version>
+    <version>5.0</version>
     <name>NEST Display and Analysis Tool</name>
 
     <description>NEST Display and Analysis Tool</description>
@@ -40,7 +40,7 @@
                 <applicationId>DatMain</applicationId>
                 <displayName>NEST DAT</displayName>
                 <frameIcon>/org/esa/nest/icons/dat.png</frameIcon>
-                <image>/org/esa/nest/dat/icons/nest_splash.png</image>
+                <image>/org/esa/nest/icons/dat.png</image>
                 <excludedActions>
                     <id>orthorectificationAction</id>
                     <id>showDataSources</id>
@@ -50,12 +50,13 @@
                     <id>showHomePage</id>
                     <id>about</id>
                     <id>createXYDisplacementBandsAction</id>
-                    <id>createElevationBand</id>
                     <id>productGrabber</id>
                     <id>createFilteredBand</id>
                     <id>mosaicAction</id>
                     <id>selectTool</id>
                     <id>PCAOp</id>
+                    <id>importMermaid</id>
+                    <id>importSeaDASTrack</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -86,7 +87,7 @@
             <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
             <class>org.esa.beam.visat.toolviews.stat.StatisticsToolView</class>
             <title>Analysis View</title>
-            <tabTitle>Analysis</tabTitle>
+            <tabTitle>Statistics</tabTitle>
             <mnemonic>t</mnemonic>
             <accelerator>ctrl alt T</accelerator>
             <description>Display statistics for a selected band.</description>
@@ -131,6 +132,30 @@
     </extension>
 
     <extension point="beam-ui:actions">
+
+        <action>
+            <id>showProcessorsToolBar</id>
+            <class>org.esa.beam.visat.actions.ShowToolBarAction</class>
+            <context>processorsToolBar</context>
+            <parent>toolBars</parent>
+            <text>Processor Tool Bar</text>
+            <selected>true</selected>
+            <toggle>true</toggle>
+            <shortDescr>Toggle visibility of the tool bar.</shortDescr>
+            <helpId>showViewsToolBar</helpId>
+        </action>
+
+        <action>
+            <id>showLabelsToolBar</id>
+            <class>org.esa.beam.visat.actions.ShowToolBarAction</class>
+            <context>labelsToolBar</context>
+            <parent>toolBars</parent>
+            <text>Labels Tool Bar</text>
+            <selected>true</selected>
+            <toggle>true</toggle>
+            <shortDescr>Toggle visibility of the tool bar.</shortDescr>
+            <helpId>showViewsToolBar</helpId>
+        </action>
 
       <action>
             <id>newProject</id>
@@ -341,36 +366,6 @@
         </action>
 
         <action>
-            <id>import</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <parent>file</parent>
-            <text>Product Readers</text>
-            <placeAfter>closeAllOthers</placeAfter>
-            <mnemonic>I</mnemonic>
-            <separatorBefore>true</separatorBefore>
-            <shortDescr>Product Readers</shortDescr>
-            <description>Open Products with a Specific Reader</description>
-            <smallIcon>icons/Import16.gif</smallIcon>
-            <largeIcon>icons/Import24.gif</largeIcon>
-            <helpId>import</helpId>
-        </action>
-
-        <action>
-            <id>export</id>
-            <class>org.esa.beam.visat.actions.ExportActionGroup</class>
-            <parent>file</parent>
-            <text>Product Writers</text>
-            <mnemonic>I</mnemonic>
-            <placeAfter>import</placeAfter>
-            <separatorAfter>true</separatorAfter>
-            <shortDescr>Product Writers</shortDescr>
-            <description>Export to a Specific Format</description>
-            <smallIcon>icons/Export16.gif</smallIcon>
-            <largeIcon>icons/Export24.gif</largeIcon>
-            <helpId>export</helpId>
-        </action>
-
-        <action>
             <id>loadTabbedLayout</id>
             <class>org.esa.nest.dat.actions.LoadTabbedLayoutAction</class>
             <parent>layout</parent>
@@ -384,22 +379,6 @@
             <parent>layout</parent>
             <text>Load Side by Side Layout</text>
             <shortDescr>Load the layout with Project and Product views side by side.</shortDescr>
-        </action>
-
-        <action>
-            <id>openInformationDialog</id>
-            <class>org.esa.nest.dat.actions.OpenInformationDialogAction</class>
-            <placeBefore>openGeoCodingInfoDialog</placeBefore>
-            <parent>data</parent>
-            <text>Information...</text>
-            <mnemonic>I</mnemonic>
-            <separatorBefore>true</separatorBefore>
-            <shortDescr>Open product information dialog.</shortDescr>
-            <description>Open product information dialog.</description>
-            <context>product,band,tiePointGrid</context>
-            <smallIcon>icons/Information16.gif</smallIcon>
-            <largeIcon>icons/Information24.gif</largeIcon>
-            <helpId>informationDialog</helpId>
         </action>
 
         <action>
@@ -643,7 +622,7 @@
         </action>
 
         <action>
-            <parent>export</parent>
+            <parent>exportRasterData</parent>
             <id>exportKmzProduct</id>
             <class>org.esa.nest.dat.actions.ExportKmzProductAction</class>
             <text>Export Product as Google Earth KMZ...</text>

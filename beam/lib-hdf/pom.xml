@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam</artifactId>
-        <version>4C-4.10</version>
+        <version>5.0-4.10.4</version>
     </parent>
 
     <name>HDF Library</name>
     <groupId>ncsa.hdf</groupId>
     <artifactId>lib-hdf</artifactId>
-    <version>2.7</version>
+    <version>${hdf.version}</version>
 
     <dependencies>
 

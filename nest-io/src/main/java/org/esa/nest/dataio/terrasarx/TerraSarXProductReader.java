@@ -39,7 +39,7 @@ import java.util.Arrays;
  */
 public class TerraSarXProductReader extends AbstractProductReader {
 
-    private TerraSarXProductDirectory _dataDir = null;
+    private TerraSarXProductDirectory dataDir = null;
 
     /**
      * Constructs a new abstract product reader.
@@ -64,9 +64,9 @@ public class TerraSarXProductReader extends AbstractProductReader {
      */
     @Override
     public void close() throws IOException {
-        if (_dataDir != null) {
-            _dataDir.close();
-            _dataDir = null;
+        if (dataDir != null) {
+            dataDir.close();
+            dataDir = null;
         }
         super.close();
     }
@@ -82,13 +82,12 @@ public class TerraSarXProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
 
-        final Object input = getInput();
-        final File fileFromInput = ReaderUtils.getFileFromInput(input);
         Product product;
         try {
-            _dataDir = new TerraSarXProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
-            _dataDir.readProductDirectory();
-            product = _dataDir.createProduct();
+            final File fileFromInput = ReaderUtils.getFileFromInput(getInput());
+            dataDir = new TerraSarXProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
+            dataDir.readProductDirectory();
+            product = dataDir.createProduct();
             product.setFileLocation(fileFromInput);
             product.setProductReader(this);
             /*if(dataDir.isComplex()) {
@@ -117,7 +116,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
         try {
-            final ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
+            final ImageIOFile.BandInfo bandInfo = dataDir.getBandInfo(destBand);
             if(bandInfo != null && bandInfo.img != null) {
                 bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
                         destBuffer, destOffsetX, destOffsetY, destWidth, destHeight, bandInfo.imageID);
@@ -126,7 +125,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
                 if(destBand.getUnit().equals(Unit.IMAGINARY))
                     oneOfTwo = false;
 
-                final ImageInputStream iiStream = _dataDir.getCosarImageInputStream(destBand);
+                final ImageInputStream iiStream = dataDir.getCosarImageInputStream(destBand);
                 readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
                                                  sourceWidth, sourceHeight,
                                                  sourceStepX, sourceStepY,

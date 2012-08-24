@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,8 +22,8 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import java.awt.Rectangle;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
 
 
 /**
@@ -38,9 +38,9 @@ public class BandOpImage extends RasterDataNodeOpImage {
 
     public BandOpImage(Band band, ResolutionLevel level) {
         super(band, level);
-        if (!Boolean.getBoolean("beam.imageManager.enableSourceTileCaching")) {
-            System.out.println("Warning! Tile Caching not enabled");
-		    setTileCache(null);
+        if (Boolean.getBoolean("beam.imageManager.disableSourceTileCaching")) {
+           	System.out.println("Warning! Tile Caching not enabled");
+			setTileCache(null);
         }
     }
 
