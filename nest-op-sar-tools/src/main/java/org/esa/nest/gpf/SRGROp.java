@@ -40,6 +40,7 @@ import java.awt.*;
 
 @OperatorMetadata(alias="SRGR",
         category = "Geometry",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         description="Converts Slant Range to Ground Range")
 public class SRGROp extends Operator {
 

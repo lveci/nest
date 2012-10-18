@@ -32,6 +32,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
  * Replaces the Metadata with that of another product
  */
 @OperatorMetadata(alias="ReplaceMetadata", category = "Utilities",
+                  authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
                   description = "Replace the metadata of the first product with that of the second")
 public class ReplaceMetadataOp extends Operator {
 

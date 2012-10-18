@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
                   authors = "BEAM team",
                   version = "1.0",
                   copyright = "(c) 2012 by Brockmann Consult",
-                  internal = false)
+                  internal = true)
 public class MergeOp extends Operator {
 
     @SourceProduct(description = "The master product, which receives nodes from subsequently provided products.")

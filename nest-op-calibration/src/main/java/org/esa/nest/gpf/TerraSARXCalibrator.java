@@ -83,6 +83,7 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
             targetProduct = tgtProduct;
 
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
 
             getMission();
 
@@ -90,9 +91,15 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
 
             getSampleType();
 
+            getMetadata();
+
             getCalibrationFactor();
 
+            getNoiseRecords();
+
             getTiePointGridData();
+
+            computeNoiseForRangeLines();
 
             if (mustUpdateMetadata) {
                 updateTargetProductMetadata();
@@ -117,8 +124,8 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
      * Get calibration factors for all polarizations.
      */
     private void getCalibrationFactor() {
-        final MetadataElement root = sourceProduct.getMetadataRoot();
-        final MetadataElement level1Product = root.getElement("level1Product");
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(sourceProduct.getMetadataRoot());
+        final MetadataElement level1Product = origProdRoot.getElement("level1Product");
         final MetadataElement calibrationElem = level1Product.getElement("calibration");
         final MetadataElement[] subElems = calibrationElem.getElements();
         for (MetadataElement ele : subElems) {
@@ -130,13 +137,21 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
         }
     }
 
+    private void getMetadata() {
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        if (lineTimeInterval == 0.0) {
+            throw new OperatorException("Invalid input for Line Time Interval: " + lineTimeInterval);
+        }
+    }
+
     /**
      * Get image noise records.
      */
     private void getNoiseRecords() {
 
-        final MetadataElement root = sourceProduct.getMetadataRoot();
-        final MetadataElement level1Product = root.getElement("level1Product");
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(sourceProduct.getMetadataRoot());
+        final MetadataElement level1Product = origProdRoot.getElement("level1Product");
         final MetadataElement[] subElems = level1Product.getElements();
         for (MetadataElement ele : subElems) {
             if (!ele.getName().contains("noise")) {
@@ -180,7 +195,7 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
     }
 
     /**
-     * Compute noise for the whold range lines corresponding to the noise records for all polarizations.
+     * Compute noise for the whole range lines corresponding to the noise records for all polarizations.
      */
     private void computeNoiseForRangeLines() {
 
@@ -279,10 +294,10 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
         if (pol != null) {
             Ks = calibrationFactor.get(pol);
         }
-        /*
+
         double[][] tileNoise = new double[h][w];
         computeTileNoise(pol, x0, y0, w, h, tileNoise);
-        */
+
         final ProductData trgData = targetTile.getDataBuffer();
         final TileIndex srcIndex = new TileIndex(sourceRaster1);
 
@@ -311,8 +326,8 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
                     throw new OperatorException("TerraSARXCalibrator: unhandled unit");
                 }
 
-//                sigma = Ks*(sigma - tileNoise[y-y0][x-x0])*Math.sin(incidenceAngle.getPixelDouble(x, y)*MathUtils.DTOR);
-                sigma *= Ks*Math.sin(incidenceAngle.getPixelDouble(x, y)*MathUtils.DTOR);
+                sigma = Ks*(sigma - tileNoise[y-y0][x-x0])*Math.sin(incidenceAngle.getPixelDouble(x, y)*MathUtils.DTOR);
+//                sigma *= Ks*Math.sin(incidenceAngle.getPixelDouble(x, y)*MathUtils.DTOR);
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
                     if (sigma < underFlowFloat) {
@@ -342,30 +357,29 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
         final int[] indexArray = rangeLineIndex.get(pol);
         final double[][] noise = rangeLineNoise.get(pol);
 
+        int i1 = 0, i2 = 0;
+        int y1 = 0, y2 = 0;
         for (int y = y0; y < y0 + h; ++y) {
+
+            for (int i = 0; i < indexArray.length; ++i) {
+                if (indexArray[i] <= y) {
+                    i1 = i;
+                    y1 = indexArray[i];
+                } else {
+                    i2 = i;
+                    y2 = indexArray[i];
+                    break;
+                }
+            }
+
+            if (y1 == indexArray[indexArray.length-1]) {
+                y2 = y1;
+                i2 = i1;
+            } else if (y1 > y2) {
+                throw new OperatorException("TerraSARXCalibrator: No noise is defined for pixel with y = " + y);
+            }
+
             for (int x = x0; x < x0 + w; ++x) {
-                int i1 = 0;
-                int i2 = 0;
-                int y1 = 0;
-                int y2 = 0;
-                for (int i = 0; i < indexArray.length; ++i) {
-                    if (indexArray[i] <= y) {
-                        i1 = i;
-                        y1 = indexArray[i];
-                    } else {
-                        y2 = indexArray[i];
-                        break;
-                    }
-                }
-
-                if (y1 == indexArray[indexArray.length-1]) {
-                    y2 = y1;
-                } else if (y1 > y2) {
-                    throw new OperatorException(
-                            "TerraSARXCalibrator: No noise is defined for pixel: (" + x + ", " + y + ")");
-                }
-
-                i2 = Math.min(i1 + 1, noise.length - 1);
                 final double n1 = noise[i1][x];
                 final double n2 = noise[i2][x];
                 double mu = 0.0;

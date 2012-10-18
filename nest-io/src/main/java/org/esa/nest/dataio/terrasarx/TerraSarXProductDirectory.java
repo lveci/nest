@@ -15,6 +15,7 @@
  */
 package org.esa.nest.dataio.terrasarx;
 
+import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.FileImageInputStreamExtImpl;
@@ -59,11 +60,12 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(root);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
 
-        final MetadataElement level1Elem = root.getElementAt(1);
+        final MetadataElement level1Elem = origProdRoot.getElementAt(0);
         final MetadataElement generalHeader = level1Elem.getElement("generalHeader");
         final MetadataElement productInfo = level1Elem.getElement("productInfo");
         final MetadataElement productSpecific = level1Elem.getElement("productSpecific");
@@ -231,7 +233,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if(platform != null) {
             final MetadataElement orbit = platform.getElement("orbit");
             addOrbitStateVectors(absRoot, orbit);
-            addSRGRCoefficients(absRoot, productSpecific);
+            addSRGRCoefficients(absRoot, productSpecific, productInfo);
         }
 
         final MetadataElement doppler = processing.getElement("doppler");
@@ -243,8 +245,6 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         // handle ATI products by copying abs metadata to slv metadata
         final String antennaReceiveConfiguration = acquisitionInfo.getAttributeString("antennaReceiveConfiguration");
         if(antennaReceiveConfiguration.equals("DRA")) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 1);
-
             final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product);
 
             // copy Abstracted Metadata
@@ -252,6 +252,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 final String fileName = cosFile.getName().toUpperCase();
                 if(fileName.contains("_SRA_"))
                     continue;
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.coregistered_stack, 1);
                 final MetadataElement targetSlaveMetadata = new MetadataElement(fileName);
                 targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
                 ProductUtils.copyMetadata(absRoot, targetSlaveMetadata);
@@ -557,33 +558,90 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         orbitVectorListElem.addElement(orbitVectorElem);
     }
 
-    private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement productSpecific) {
+    private static void addSRGRCoefficients(
+            final MetadataElement absRoot, final MetadataElement productSpecific, final MetadataElement productInfo) {
+
+        // get swath begin time and swath end time
+        final MetadataElement sceneInfo = productInfo.getElement("sceneInfo");
+        if(sceneInfo == null) {
+            return;
+        }
+
+        final MetadataElement rangeTime = sceneInfo.getElement("rangeTime");
+        if(rangeTime == null) {
+            return;
+        }
+
+        final double firstPixelTime = rangeTime.getAttributeDouble("firstPixel");
+        final double lastPixelTime = rangeTime.getAttributeDouble("lastPixel");
+
+        // get slant range time to ground rang conversion coefficients
         final MetadataElement projectedImageInfo = productSpecific.getElement("projectedImageInfo");
-        if(projectedImageInfo == null) return;
+        if(projectedImageInfo == null) {
+            return;
+        }
 
         final MetadataElement slantToGroundRangeProjection = projectedImageInfo.getElement("slantToGroundRangeProjection");
-        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+        if(slantToGroundRangeProjection == null) {
+            return;
+        }
 
+        // final double validityRangeMin = slantToGroundRangeProjection.getAttributeDouble("validityRangeMin");
+        // final double validityRangeMax = slantToGroundRangeProjection.getAttributeDouble("validityRangeMax");
+        final double referencePoint = slantToGroundRangeProjection.getAttributeDouble("referencePoint");
+        final int polynomialDegree = slantToGroundRangeProjection.getAttributeInt("polynomialDegree");
+
+        final double[] s2gCoef = new double[polynomialDegree+1];
+        int cnt = 0;
+        for (MetadataElement elem : slantToGroundRangeProjection.getElements()) {
+            s2gCoef[cnt++] = elem.getAttributeDouble("coefficient", 0);
+        }
+
+        // compute ground range to slant range conversion coefficients
+        final int m = 11; // order of ground to slant polynomial
+        double[] sltRgTime = new double[m+1];
+        double[] groundRange = new double[m+1];
+        for (int i = 0; i <= m; i++) {
+            sltRgTime[i] = firstPixelTime + (lastPixelTime - firstPixelTime)*i/m;
+            groundRange[i] = org.esa.nest.util.MathUtils.computePolynomialValue(sltRgTime[i] - referencePoint, s2gCoef);
+        }
+
+        // final double groundRangeRef = (groundRange[0] + groundRange[m]) / 2;
+        final double groundRangeRef = 0.0; // set ground range ref to 0 because when g2sCoef are used in computing
+                                           // slant range from ground range, the ground range origin is assumed to be 0
+        double[] deltaGroundRange = new double[m+1];
+        final double deltaMax = groundRange[m] - groundRangeRef;
+        for (int i = 0; i <= m; i++) {
+            deltaGroundRange[i] = (groundRange[i] - groundRangeRef) / deltaMax;
+        }
+
+        final Matrix G = org.esa.nest.util.MathUtils.createVandermondeMatrix(deltaGroundRange, m);
+        final Matrix tau = new Matrix(sltRgTime, m+1);
+        final Matrix s = G.solve(tau);
+        double[] g2sCoef = s.getColumnPackedCopy();
+
+        double tmp = 1;
+        for (int i = 0; i <= m; i++) {
+            g2sCoef[i] *= Constants.halfLightSpeed/tmp;
+            tmp *= deltaMax;
+        }
+
+        // save ground range to slant range conversion coefficients in abstract metadata
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
-
         final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
         srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
         AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
                 ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
         AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
 
-        int cnt = 1;
-        for (MetadataElement elem : slantToGroundRangeProjection.getElements()) {
-
-            final double coefValue = elem.getAttributeDouble("coefficient", 0);
-
-            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
+        for (int i = 0; i <= m; i++) {
+            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient + '.' + (i+1));
             srgrListElem.addElement(coefElem);
-            ++cnt;
             AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
                     ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
-            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, g2sCoef[i]);
         }
     }
 

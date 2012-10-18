@@ -40,6 +40,7 @@ import java.util.List;
  */
 @OperatorMetadata(alias = "DeburstWSS",
         category = "SAR Tools",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         description="Debursts an ASAR WSS product")
 public final class DeburstWSSOp extends Operator {
 

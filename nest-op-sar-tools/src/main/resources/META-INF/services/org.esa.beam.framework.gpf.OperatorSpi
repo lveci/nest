@@ -13,3 +13,4 @@ org.esa.nest.gpf.FillHoleOp$Spi
 org.esa.nest.gpf.ReplaceMetadataOp$Spi
 org.esa.nest.gpf.LinearTodBOp$Spi
 org.esa.nest.gpf.BandSelectOp$Spi
+org.esa.nest.gpf.ImportVectorOp$Spi

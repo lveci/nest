@@ -95,8 +95,6 @@ public class ImageIOFile {
         reader = iioReader;
         reader.setInput(stream);
 
-        //IIOMetadata iioMetadata = reader.getImageMetadata(0);
-
         name = inputFile.getName();
         numImages = reader.getNumImages(true);
         numBands = 3;

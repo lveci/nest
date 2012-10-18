@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 @OperatorMetadata(alias="BandSelect",
         category = "Utilities",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         description="Creates a new product with only selected bands")
 public final class BandSelectOp extends Operator {
 

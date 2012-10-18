@@ -37,6 +37,7 @@ import org.esa.beam.util.math.Range;
 
 @OperatorMetadata(alias="Convert-Datatype",
         category = "Utilities\\Data Conversion",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         description="Convert product data type")
 public class ConvertDataTypeOp extends Operator {
 

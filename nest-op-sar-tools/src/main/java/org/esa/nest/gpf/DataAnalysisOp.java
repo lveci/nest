@@ -55,6 +55,7 @@ import java.util.HashMap;
 @OperatorMetadata(alias="Data-Analysis",
         category = "Analysis",
         description="Computes statistics",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         internal=true)
 public class DataAnalysisOp extends Operator {
 

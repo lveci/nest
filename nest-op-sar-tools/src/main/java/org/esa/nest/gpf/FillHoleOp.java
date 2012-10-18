@@ -36,7 +36,8 @@ import java.awt.*;
  * Fill hole pixels in source product with linear interpolations in both x and y directions.
  */
 
-@OperatorMetadata(alias="Fill-Hole", category = "Geometry\\DEM Tools", description="Fill holes in given product")
+@OperatorMetadata(alias="Fill-Hole", category = "Geometry\\DEM Tools", description="Fill holes in given product",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.")
 public final class FillHoleOp extends Operator {
 
     @SourceProduct(alias="source")

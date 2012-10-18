@@ -44,6 +44,7 @@ public final class AbstractMetadata {
     public static final String ABSTRACT_METADATA_ROOT = "Abstracted_Metadata";
     @Deprecated
     private static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
+    private static final String ORIGINAL_PRODUCT_METADATA = "Original_Product_Metadata";
 
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
     public static final String MASTER_BANDS = "Master_bands";
@@ -83,6 +84,7 @@ public final class AbstractMetadata {
 
     public static final String PASS = "PASS";
     public static final String SAMPLE_TYPE = "SAMPLE_TYPE";
+    public static final String sample_type = "sample_type";
     public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
     public static final String mds3_tx_rx_polar = "mds3_tx_rx_polar";
@@ -331,32 +333,32 @@ public final class AbstractMetadata {
 
         addAbstractedAttribute(bandRoot, first_line_time, ProductData.TYPE_UTC, "utc", "First zero doppler azimuth time");
         addAbstractedAttribute(bandRoot, last_line_time, ProductData.TYPE_UTC, "utc", "Last zero doppler azimuth time");
-        addAbstractedAttribute(bandRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
+        addAbstractedAttribute(bandRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "Time per line");
 
-        addAbstractedAttribute(bandRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, first_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, first_far_long, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, last_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, last_near_long, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, last_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(bandRoot, last_far_long, ProductData.TYPE_FLOAT64, "deg", "");
-
-        addAbstractedAttribute(bandRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
-        addAbstractedAttribute(bandRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
         addAbstractedAttribute(bandRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
         addAbstractedAttribute(bandRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");
+        addAbstractedAttribute(absRoot, sample_type, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
 
         addAbstractedAttribute(bandRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
 
         return bandRoot;
     }
 
-    public static MetadataElement getBandMetadata(MetadataElement absRoot, final String bandMetadataName) {
-        return absRoot.getElement(bandMetadataName);
+    /**
+     * Returns the orignal product metadata
+     * @param root product Metadata root
+     * @return original metadata
+     */
+    public static MetadataElement getOriginalProductMetadata(final MetadataElement root) {
+        MetadataElement origMetadata = root.getElement(ORIGINAL_PRODUCT_METADATA);
+        if(origMetadata == null) {
+            origMetadata = new MetadataElement(ORIGINAL_PRODUCT_METADATA);
+            root.addElement(origMetadata);
+        }
+        return origMetadata;
     }
 
-    public static MetadataElement getBandMetadata(MetadataElement absRoot, final Band band) {
+    public static MetadataElement getBandMetadata(final MetadataElement absRoot, final Band band) {
         final MetadataElement[] elems = absRoot.getElements();
         for(MetadataElement elem : elems) {
             if(elem.containsAttribute(band_names)) {

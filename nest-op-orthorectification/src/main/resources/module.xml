@@ -142,7 +142,20 @@
 	        <dialogTitle>Mosaic</dialogTitle>
             <graphFile>MosaicGraph.xml</graphFile>
         </action>
-		
+
+        <action>
+            <id>ALOSDeskewingOp</id>
+            <helpId>ALOSDeskewingOp</helpId>
+            <class>org.esa.nest.dat.actions.OperatorAction</class>
+            <icon>esaIcon</icon>
+            <parent>geometry</parent>
+            <text>ALOS Deskewing</text>
+            <operatorName>ALOS-Deskewing</operatorName>
+            <dialogTitle>Deskew ALOS product</dialogTitle>
+            <shortDescr>Deskew ALOS product</shortDescr>
+            <targetProductNameSuffix>_DS</targetProductNameSuffix>
+            <placeAfter>SlantRangeGroundRangeOp</placeAfter>
+        </action>
     </extension>
 
 	<extension point="beam-ui:helpSets">

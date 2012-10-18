@@ -80,6 +80,7 @@ import java.util.StringTokenizer;
 
 @OperatorMetadata(alias="Undersample",
         category = "Utilities\\Resampling",
+        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
         description="Undersample the datset")
 public class UndersamplingOp extends Operator {
 

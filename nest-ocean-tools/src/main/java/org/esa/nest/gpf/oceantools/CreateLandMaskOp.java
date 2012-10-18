@@ -64,10 +64,10 @@ public class CreateLandMaskOp extends Operator {
     @Parameter(label="Use SRTM 3sec", defaultValue = "true")
     private boolean useSRTM = true;
 
-    @Parameter(label="Geometry", defaultValue = "")
+    @Parameter(label="Vector", defaultValue = "")
     private String geometry = "";
 
-    @Parameter(label="Invert Geometry", defaultValue = "false")
+    @Parameter(label="Invert Vector", defaultValue = "false")
     private boolean invertGeometry = false;
 
     @Parameter(label="Bypass", defaultValue = "false")
