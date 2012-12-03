@@ -1,3 +1,14 @@
+New in NEST 5
+
+Autoupdate installation
+Support for left facing missions
+Rigourous TerraSAR-X calibration
+TC of TerraSAR-X detected products
+copy, move, delete from product library
+graphical subset selection
+mapping tools layers
+
+
 New in NEST 4C
 
 Find optimal InSAR master

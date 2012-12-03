@@ -110,14 +110,16 @@ public class ProductFunctions {
      */
     public static class DirectoryFileFilter implements java.io.FileFilter {
 
-        final static String[] skip = { "annotation", "auxraster", "auxfiles", "imagedata", "preview", "support",
-                                       "quality", "source_images", "schemas" };
+        final static String[] skip = { "annotation", "measurement", "auxraster", "auxfiles", "imagedata", "preview",
+                                        "support", "quality", "source_images", "schemas" };
 
         public boolean accept(final File file) {
             if(!file.isDirectory()) return false;
             final String name = file.getName().toLowerCase();
             if(name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
                 return false;
+            if(name.endsWith("safe"))
+                return true;
             for(String ext : skip) {
                 if(name.equalsIgnoreCase(ext))
                     return false;
@@ -152,6 +154,8 @@ public class ProductFunctions {
             return ProductIO.readProduct(file, "GeoTIFF");
         } else if(file.isDirectory()) {
             return ProductIO.readProduct(file, "PolSARPro");
+        } else if(filename.endsWith("dbl")) {
+            return ProductIO.readProduct(file, "SMOS-DBL");
         }
         return null;
     }

@@ -109,7 +109,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(root);
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
@@ -124,6 +124,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 radarParameters.getAttributeString("acquisitionType", defStr));
         final String aquisitionMode = radarParameters.getAttributeString("acquisitionType", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, aquisitionMode);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.antenna_pointing,
+                radarParameters.getAttributeString("antennaPointing", defStr).toLowerCase());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.BEAMS,
                 radarParameters.getAttributeString("beams", defStr));
 
@@ -419,7 +421,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     @Override
     protected void addGeoCoding(final Product product) {
 
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product.getMetadataRoot());
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
         final MetadataElement productElem = origProdRoot.getElement("product");
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
         final MetadataElement geographicInformation = imageAttributes.getElement("geographicInformation");
@@ -506,6 +508,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final double rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 0); // in m
         final boolean srgrFlag = absRoot.getAttributeInt(AbstractMetadata.srgr_flag) != 0;
         final boolean isDescending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("DESCENDING");
+        final boolean isAntennaPointingRight = absRoot.getAttributeString(AbstractMetadata.antenna_pointing).equals("right");
 
         // get scene center latitude
         final GeoPos sceneCenterPos =
@@ -513,7 +516,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         double sceneCenterLatitude = sceneCenterPos.lat; // in deg
 
         // get near range incidence angle
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product.getMetadataRoot());
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
         final MetadataElement productElem = origProdRoot.getElement("product");
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
         final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
@@ -550,8 +553,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
             final double alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
             if (i % subSamplingX == 0) {
                 int index = k++;
-                if(isDescending)   // flip for descending RS2
+                if(isDescending && isAntennaPointingRight || (!isDescending && !isAntennaPointingRight)) {// flip
                     index = gridWidth-1 - index;
+                }
                 incidenceAngles[index] = (float)(alpha * org.esa.beam.util.math.MathUtils.RTOD);
             }
 

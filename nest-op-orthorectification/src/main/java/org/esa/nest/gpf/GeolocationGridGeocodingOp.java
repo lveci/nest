@@ -93,6 +93,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private int sourceImageHeight = 0;
 
     private TiePointGrid slantRangeTime = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
     private GeoCoding targetGeoCoding = null;
 
     private double rangeSpacing = 0.0;
@@ -139,10 +141,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
             getMetadata();
 
             imgResampling = ResamplingFactory.createResampling(imgResamplingMethod);
-            
-            createTargetProduct();
 
             getTiePointGrids();
+
+            createTargetProduct();
 
         } catch(Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -266,6 +268,16 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, targetCRS.getName().getCode());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+
+        // save look directions for 5 range lines
+        final MetadataElement lookDirectionListElem = new MetadataElement("Look_Direction_List");
+        final int numOfDirections = 5;
+        for(int i=1; i <= numOfDirections; ++i) {
+            RangeDopplerGeocodingOp.addLookDirection("look_direction", lookDirectionListElem, i, numOfDirections,
+                    sourceImageWidth, sourceImageHeight, firstLineUTC, lineTimeInterval, nearRangeOnLeft, latitude,
+                    longitude);
+        }
+        absTgt.addElement(lookDirectionListElem);
     }
 
     /**
@@ -275,6 +287,16 @@ public final class GeolocationGridGeocodingOp extends Operator {
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         if (slantRangeTime == null) {
             throw new OperatorException("Product without slant range time tie point grid");
+        }
+
+        latitude = OperatorUtils.getLatitude(sourceProduct);
+        if (latitude == null) {
+            throw new OperatorException("Product without latitude tie point grid");
+        }
+
+        longitude = OperatorUtils.getLongitude(sourceProduct);
+        if (longitude == null) {
+            throw new OperatorException("Product without longitude tie point grid");
         }
     }
 
@@ -319,6 +341,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
         final double srcBandNoDataValue = sourceBand1.getNoDataValue();
 
+        final double oneBillionthHalfSpeedLight = Constants.halfLightSpeed / Constants.oneBillion;
+
         try {
             final ProductData trgData = targetTile.getDataBuffer();
             final int srcMaxRange = sourceImageWidth - 1;
@@ -341,7 +365,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
                         continue;
                     }
 
-                    final double slantRange = computeSlantRange(pixPos);
+                    final double slantRange = slantRangeTime.getPixelFloat(pixPos.x, pixPos.y) * oneBillionthHalfSpeedLight;
+
                     final double zeroDopplerTime = computeZeroDopplerTime(pixPos);
                     double azimuthIndex = 0.0;
                     double rangeIndex = 0.0;
@@ -376,21 +401,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param sourceBand The source band.
      * @return The pixel position.
      */
-    private PixelPos computePixelPosition(final double lat, final double lon, final Band sourceBand) {
+    private static PixelPos computePixelPosition(final double lat, final double lon, final Band sourceBand) {
         // todo the following method is not accurate, should use point-in-polygon test
-        final GeoPos geoPos = new GeoPos((float)lat, (float)lon);
-        return sourceBand.getGeoCoding().getPixelPos(geoPos, null);
-    }
-
-    /**
-     * Compute slant range for a given pixel using biquadratic interpolation.
-     * @param pixPos The pixel position.
-     * @return The slant range in meters.
-     */
-    private double computeSlantRange(PixelPos pixPos) {
-//        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.InterpMode.BIQUADRATIC) /
-        return slantRangeTime.getPixelFloat(pixPos.x, pixPos.y) /
-                1000000000.0 * Constants.halfLightSpeed;
+        return sourceBand.getGeoCoding().getPixelPos(new GeoPos((float)lat, (float)lon), null);
     }
 
     /**

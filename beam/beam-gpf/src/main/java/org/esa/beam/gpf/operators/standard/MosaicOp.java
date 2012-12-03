@@ -103,7 +103,7 @@ public class MosaicOp extends Operator {
                description = "The CRS of the target product, represented as WKT or authority code.")
     String crs;
 
-    @Parameter(description = "Wether the source product should be orthorectified.", defaultValue = "false")
+    @Parameter(description = "Whether the source product should be orthorectified.", defaultValue = "false")
     boolean orthorectify;
     @Parameter(description = "The name of the elevation model for the orthorectification.")
     String elevationModelName;
@@ -339,7 +339,8 @@ public class MosaicOp extends Operator {
         final MultiLevelImage sourceImage = product.getBandAt(0).getSourceImage();
         final ResolutionLevel resolutionLevel = ResolutionLevel.create(sourceImage.getModel(), 0);
         final float fillValue = 0.0f;
-        return VirtualBandOpImage.create(expression, ProductData.TYPE_FLOAT32, fillValue, product, resolutionLevel);
+        return VirtualBandOpImage.create(expression, ProductData.TYPE_FLOAT32, fillValue, product,
+                                         product.getSceneRasterWidth(), product.getSceneRasterHeight(), resolutionLevel);
     }
 
     private Product[] createReprojectedProducts() {
@@ -532,7 +533,7 @@ public class MosaicOp extends Operator {
 
     private static void initParameter(MetadataElement parentElement, Field field,
                                       Map<String, Object> parameters) throws
-                                                                      OperatorException {
+            OperatorException {
         Parameter annotation = field.getAnnotation(Parameter.class);
         String name = annotation.alias();
         if (name.isEmpty()) {

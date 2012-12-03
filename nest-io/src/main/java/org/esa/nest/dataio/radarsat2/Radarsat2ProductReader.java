@@ -119,7 +119,7 @@ public class Radarsat2ProductReader extends AbstractProductReader {
         final File gammaLUT = new File(folder, lutgamma+".xml");
         final File betaLUT = new File(folder, lutbeta+".xml");
 
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product.getMetadataRoot());
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
 
         readCalibrationLUT(sigmaLUT, lutsigma, origProdRoot);
         readCalibrationLUT(gammaLUT, lutgamma, origProdRoot);
@@ -161,9 +161,9 @@ public class Radarsat2ProductReader extends AbstractProductReader {
 
         final ImageIOFile.BandInfo bandInfo = dataDir.getBandInfo(destBand);
         if(bandInfo != null && bandInfo.img != null) {
-            bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+            bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
                                                 destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
-                                                bandInfo.bandSampleOffset);
+                                                bandInfo.imageID, bandInfo.bandSampleOffset);
         }
     }
 }

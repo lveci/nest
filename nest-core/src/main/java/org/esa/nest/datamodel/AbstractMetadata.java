@@ -17,11 +17,14 @@ package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -45,6 +48,7 @@ public final class AbstractMetadata {
     @Deprecated
     private static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
     private static final String ORIGINAL_PRODUCT_METADATA = "Original_Product_Metadata";
+    public static final String BAND_PREFIX = "Band_";
 
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
     public static final String MASTER_BANDS = "Master_bands";
@@ -56,6 +60,7 @@ public final class AbstractMetadata {
     public static final String PATH = "PATH";
     public static final String MISSION = "MISSION";
     public static final String ACQUISITION_MODE = "ACQUISITION_MODE";
+    public static final String antenna_pointing = "antenna_pointing";
     public static final String BEAMS = "BEAMS";
     public static final String annotation = "annotation";
     public static final String band_names = "band_names";
@@ -207,6 +212,7 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "Satellite mission");
         addAbstractedAttribute(absRoot, ACQUISITION_MODE, ProductData.TYPE_ASCII, "", "Acquisition mode");
+        addAbstractedAttribute(absRoot, antenna_pointing, ProductData.TYPE_ASCII, "", "Right or left facing");
         addAbstractedAttribute(absRoot, BEAMS, ProductData.TYPE_ASCII, "", "Beams used");
         addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "Processed time");
@@ -337,36 +343,48 @@ public final class AbstractMetadata {
 
         addAbstractedAttribute(bandRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
         addAbstractedAttribute(bandRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");
-        addAbstractedAttribute(absRoot, sample_type, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
+        addAbstractedAttribute(bandRoot, sample_type, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
 
         addAbstractedAttribute(bandRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
 
         return bandRoot;
     }
 
+    public static void addBandToBandMap(final MetadataElement bandAbsRoot, final String name) {
+        String bandNames = bandAbsRoot.getAttributeString(band_names);
+        if(!bandNames.isEmpty())
+            bandNames += ' ';
+        bandNames += name;
+        bandAbsRoot.setAttributeString(band_names, bandNames);
+    }
+
+    public static MetadataElement getBandAbsMetadata(final MetadataElement absRoot, final Band band) {
+        final MetadataElement[] children = absRoot.getElements();
+        for(MetadataElement child : children) {
+            if(child.getName().startsWith(BAND_PREFIX)) {
+                final String[] bandNameArray = StringUtils.stringToArray(child.getAttributeString(band_names), " ");
+                for(String bandName : bandNameArray) {
+                    if(bandName.equals(band.getName()))
+                        return child;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Returns the orignal product metadata
-     * @param root product Metadata root
+     * @param product input product
      * @return original metadata
      */
-    public static MetadataElement getOriginalProductMetadata(final MetadataElement root) {
+    public static MetadataElement getOriginalProductMetadata(final Product product) {
+        final MetadataElement root = product.getMetadataRoot();
         MetadataElement origMetadata = root.getElement(ORIGINAL_PRODUCT_METADATA);
         if(origMetadata == null) {
             origMetadata = new MetadataElement(ORIGINAL_PRODUCT_METADATA);
             root.addElement(origMetadata);
         }
         return origMetadata;
-    }
-
-    public static MetadataElement getBandMetadata(final MetadataElement absRoot, final Band band) {
-        final MetadataElement[] elems = absRoot.getElements();
-        for(MetadataElement elem : elems) {
-            if(elem.containsAttribute(band_names)) {
-                final String bandNames = elem.getAttributeString(band_names);
-               // if()
-            }
-        }
-        return null;
     }
 
     /**
@@ -628,6 +646,7 @@ public final class AbstractMetadata {
      * @param create if null
      * @return MetadataElement of band
      */
+    @Deprecated
     public static MetadataElement getBandAbsMetadata(final MetadataElement root, final String bandName,
                                                      final boolean create) {
         final String bandElemName = "Band_"+bandName;

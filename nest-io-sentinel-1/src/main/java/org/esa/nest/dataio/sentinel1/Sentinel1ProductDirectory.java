@@ -20,7 +20,6 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.dataio.imageio.ImageIOFile;
-import org.esa.nest.dataio.netcdf.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.datamodel.Unit;
@@ -29,8 +28,6 @@ import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.gpf.Sentinel1Utils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +40,8 @@ import java.util.*;
 public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
     private final transient Map<String, String> imgBandMetadataMap = new HashMap<String, String>(4);
-    private final Map<String, NetcdfFile> bandNCFileMap = new HashMap<String, NetcdfFile>(1);
+    private Sentinel1OCNReader OCNReader = null;
+    private String acqMode = "";
 
     public Sentinel1ProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
@@ -51,24 +49,13 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
     protected void addImageFile(final File file) throws IOException {
         final String name = file.getName().toLowerCase();
-        if ((name.endsWith("tif") || name.endsWith("tiff")) && !name.contains("browse")) {
-            final ImageIOFile img = new ImageIOFile(file, ImageIOFile.getTiffIIOReader(file));
+        if (name.endsWith("tiff")) {
+            final ImageIOFile img = new ImageIOFile(file);
             bandImageFileMap.put(img.getName(), img);
-
-            setSceneWidthHeight(img.getSceneWidth(), img.getSceneHeight());
         } else if(name.endsWith(".nc")) {
-            final NetcdfFile netcdfFile = NetcdfFile.open(file.getPath());
-            readNetCDF(netcdfFile);
-            bandNCFileMap.put(name, netcdfFile);
-        }
-    }
-
-    private void readNetCDF(final NetcdfFile netcdfFile) {
-        final Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
-        if (!variableListMap.isEmpty()) {
-            final NcRasterDim rasterDim = NetCDFUtils.getBestRasterDim(variableListMap);
-
-            setSceneWidthHeight(rasterDim.getDimX().getLength(), rasterDim.getDimY().getLength());
+            if(OCNReader == null )
+                OCNReader = new Sentinel1OCNReader(this);
+            OCNReader.addImageFile(file, name);
         }
     }
 
@@ -90,7 +77,12 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
             final int width = bandMetadata.getAttributeInt(AbstractMetadata.num_samples_per_line);
             final int height = bandMetadata.getAttributeInt(AbstractMetadata.num_output_lines);
 
-            final String suffix = swath +'_'+ pol;
+            String tpgPrefix = "";
+            String suffix = pol;
+            if(isSLC() && isTOPSAR()) {
+                suffix = swath +'_'+ pol;
+                tpgPrefix = swath;
+            }
 
             int numImages = img.getNumImages();
             if(isSLC()) {
@@ -113,6 +105,7 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
                         product.addBand(band);
                         bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+                        AbstractMetadata.addBandToBandMap(bandMetadata, bandName);
 
                         if(real)
                             lastRealBand = band;
@@ -122,22 +115,23 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
                         }
                         real = !real;
 
-                        // add geocoding for band
-                        addGeoCoding(band, imgName, suffix);
+                        // add tiepointgrids and geocoding for band
+                        addTiePointGrids(band, imgName, tpgPrefix);
                     }
                 } else {
                     for(int b=0; b < img.getNumBands(); ++b) {
                         bandName = "Amplitude" +'_'+suffix;
-                        final Band band = new Band(bandName, img.getDataType(), width, height);
+                        final Band band = new Band(bandName, ProductData.TYPE_UINT16, width, height);
                         band.setUnit(Unit.AMPLITUDE);
 
                         product.addBand(band);
                         bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+                        AbstractMetadata.addBandToBandMap(bandMetadata, bandName);
 
                         ReaderUtils.createVirtualIntensityBand(product, band, '_'+suffix);
 
-                        // add geocoding for band
-                        addGeoCoding(band, imgName, suffix);
+                        // add tiepointgrids and geocoding for band
+                        addTiePointGrids(band, imgName, tpgPrefix);
                     }
                 }
             }
@@ -148,7 +142,7 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
     protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(root);
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
@@ -167,7 +161,7 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
         for(MetadataElement metadataObject : metadataObjectList) {
             final String id = metadataObject.getAttributeString("ID", defStr);
-            if(id.endsWith("Annotation")) {
+            if(id.endsWith("Annotation") || id.endsWith("Schema")) {
                 // continue;
             } else if(id.equals("processing")) {
                 final MetadataElement processing = findElement(metadataObject, "processing");
@@ -194,7 +188,8 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
                 final MetadataElement instrument = platform.getElement("instrument");
                 AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SWATH, instrument.getAttributeString("swath", defStr));
-                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, instrument.getAttributeString("mode", defStr));
+                acqMode = instrument.getAttributeString("mode", defStr);
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ACQUISITION_MODE, acqMode);
             } else if(id.equals("measurementOrbitReference")) {
                 final MetadataElement orbitReference = findElement(metadataObject, "orbitReference");
                 final MetadataElement orbitNumber = findElementContaining(orbitReference, "OrbitNumber", "type", "start");
@@ -210,18 +205,45 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
                 final String productType = generalProductInformation.getAttributeString("productType", defStr);
                 product.setProductType(productType);
                 AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
-                if(productType.contains("SLC"))
+                if(productType.contains("SLC")) {
                     setSLC(true);
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, "COMPLEX");
+                } else {
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, 1);
+                }
             }
         }
 
         // get metadata for each band
-        addBandAbstractedMetadata(absRoot, origProdRoot);
+        addBandAbstractedMetadata(product, absRoot, origProdRoot);
         addCalibrationAbstractedMetadata(origProdRoot);
         addNoiseAbstractedMetadata(origProdRoot);
+
+        determineProductDimensions(product, absRoot);
     }
 
-    private void addBandAbstractedMetadata(final MetadataElement absRoot,
+    private void determineProductDimensions(final Product product, final MetadataElement absRoot) {
+        int width = 0, height = 0;
+        int totalWidth = 0, totalHeight = 0;
+        for (Map.Entry<String, ImageIOFile> stringImageIOFileEntry : bandImageFileMap.entrySet()) {
+            final ImageIOFile img = stringImageIOFileEntry.getValue();
+            final String imgName = img.getName().toLowerCase();
+            final MetadataElement bandMetadata = absRoot.getElement(imgBandMetadataMap.get(imgName));
+
+            width = bandMetadata.getAttributeInt(AbstractMetadata.num_samples_per_line);
+            height = bandMetadata.getAttributeInt(AbstractMetadata.num_output_lines);
+            totalWidth += width;
+            totalHeight += height;
+        }
+        if(isSLC() && isTOPSAR()) {  // approximate does not account for overlap
+            product.setSceneDimensions(totalWidth, totalHeight);
+        } else {
+            product.setSceneDimensions(width, height);
+        }
+    }
+
+    private void addBandAbstractedMetadata(final Product product, final MetadataElement absRoot,
                                            final MetadataElement origProdRoot) throws IOException {
 
         MetadataElement annotationElement = origProdRoot.getElement("annotation");
@@ -231,11 +253,9 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
         }
         final File annotationFolder = new File(getBaseDir(), "annotation");
         final File[] files = annotationFolder.listFiles();
-        if(files == null) {
+        if(files == null && OCNReader != null) {
             // add netcdf metadata for OCN products
-            if(!bandNCFileMap.isEmpty()) {
-                addNetCDFMetadata(annotationElement);
-            }
+            OCNReader.addNetCDFMetadata(product, annotationElement);
             return;
         }
 
@@ -264,7 +284,7 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
             final ProductData.UTC startTime = Sentinel1Utils.getTime(adsHeader, "startTime");
             final ProductData.UTC stopTime = Sentinel1Utils.getTime(adsHeader, "stopTime");
 
-            final String bandRootName = swath +'_'+ pol;
+            final String bandRootName = AbstractMetadata.BAND_PREFIX+swath +'_'+ pol;
             final MetadataElement bandAbsRoot = AbstractMetadata.addBandAbstractedMetadata(absRoot, bandRootName);
             final String imgName = FileUtils.exchangeExtension(metadataFile.getName(), ".tiff");
             imgBandMetadataMap.put(imgName, bandRootName);
@@ -326,29 +346,6 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
                 azimuthSpacingTotal / (double)numBands);
     }
 
-    private void addNetCDFMetadata(final MetadataElement annotationElement) {
-        Set<String> files = bandNCFileMap.keySet();
-        for(String file : files) {
-            final NetcdfFile netcdfFile = bandNCFileMap.get(file);
-            MetadataElement bandElem = NetCDFUtils.addAttributes(annotationElement, file,
-                    netcdfFile.getGlobalAttributes());
-
-            final Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
-            if (!variableListMap.isEmpty()) {
-                // removeQuickLooks(variableListMap);
-
-                final NcRasterDim rasterDim = NetCDFUtils.getBestRasterDim(variableListMap);
-                final Variable[] rasterVariables = NetCDFUtils.getRasterVariables(variableListMap, rasterDim);
-                final Variable[] tiePointGridVariables = NetCDFUtils.getTiePointGridVariables(variableListMap, rasterVariables);
-                NcVariableMap variableMap = new NcVariableMap(rasterVariables);
-
-                for (final Variable variable : variableMap.getAll()) {
-                    NetCDFUtils.addAttributes(bandElem, variable.getName(), variable.getAttributes());
-                }
-            }
-        }
-    }
-
     private void addCalibrationAbstractedMetadata(final MetadataElement origProdRoot) throws IOException {
 
         MetadataElement calibrationElement = origProdRoot.getElement("calibration");
@@ -375,10 +372,10 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
     private void addNoiseAbstractedMetadata(final MetadataElement origProdRoot) throws IOException {
 
-        MetadataElement calibrationElement = origProdRoot.getElement("noise");
-        if(calibrationElement == null) {
-            calibrationElement = new MetadataElement("noise");
-            origProdRoot.addElement(calibrationElement);
+        MetadataElement noiseElement = origProdRoot.getElement("noise");
+        if(noiseElement == null) {
+            noiseElement = new MetadataElement("noise");
+            origProdRoot.addElement(noiseElement);
         }
         final File calFolder = new File(getBaseDir(), "annotation"+File.separator+"calibration");
         final File[] files = calFolder.listFiles();
@@ -391,7 +388,7 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
                 final Element rootElement = xmlDoc.getRootElement();
                 final String name = metadataFile.getName().replace("noise-","");
                 final MetadataElement nameElem = new MetadataElement(name);
-                calibrationElement.addElement(nameElem);
+                noiseElement.addElement(nameElem);
                 AbstractMetadataIO.AddXMLMetadata(rootElement, nameElem);
             }
         }
@@ -549,14 +546,27 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
     @Override
     protected void addGeoCoding(final Product product) {
-        // replaced by call to addGeoCoding(band)
+        // replaced by call to addTiePointGrids(band)
     }
 
-    protected static void addGeoCoding(final Band band, final String imgXMLName, final String suffix) {
+    @Override
+    protected void addTiePointGrids(final Product product) {
+        // replaced by call to addTiePointGrids(band)
+    }
+
+    private static void addTiePointGrids(final Band band, final String imgXMLName, final String tpgPrefix) {
 
         final Product product = band.getProduct();
+        String pre = "";
+        if(!tpgPrefix.isEmpty())
+            pre = tpgPrefix+'_';
+
+        final TiePointGrid testTPG = product.getTiePointGrid(pre+OperatorUtils.TPG_LATITUDE);
+        if(testTPG != null)
+            return;
+
         final String annotation = FileUtils.exchangeExtension(imgXMLName, ".xml");
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product.getMetadataRoot());
+        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
         final MetadataElement annotationElem = origProdRoot.getElement("annotation");
         final MetadataElement imgElem = annotationElem.getElement(annotation);
         final MetadataElement productElem = imgElem.getElement("product");
@@ -591,7 +601,6 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
 
         final float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
-        final String pre = suffix+'_';
 
         TiePointGrid latGrid = product.getTiePointGrid(pre+OperatorUtils.TPG_LATITUDE);
         if(latGrid == null) {
@@ -653,9 +662,8 @@ public class Sentinel1ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long, lonGrid.getPixelFloat(w, h));
     }
 
-    @Override
-    protected void addTiePointGrids(final Product product) {
-
+    private boolean isTOPSAR() {
+        return acqMode.equals("IW") || acqMode.equals("EW");
     }
 
     @Override

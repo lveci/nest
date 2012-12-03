@@ -2,13 +2,12 @@
     <shortName>NEST</shortName>
     <fullName>NEST</fullName>
     <version>5.0.0</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
     <componentList>
         <component>
-            <name>default</name>
-            <description>Default Component</description>
+            <name>NEST</name>
+            <description>Next ESA SAR Toolbox</description>
             <canBeEdited>1</canBeEdited>
             <selected>1</selected>
             <show>1</show>
@@ -17,7 +16,7 @@
                     <comment>NEST Display and Analysis Tool</comment>
                     <exec>${installdir}/dat.sh</exec>
                     <icon>${installdir}/res/dat.png</icon>
-                    <name>NEST 4C</name>
+                    <name>Next ESA SAR Toolbox</name>
                     <path>${installdir}</path>
                     <platforms>all</platforms>
                     <runAsAdmin>0</runAsAdmin>
@@ -113,6 +112,9 @@
                         <distributionDirectory>
                             <origin>target/nest-5.0-bin-linux.dir/jre</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-5.0-bin-linux.dir/autoupdate-linux.run</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
                 <folder>
@@ -172,6 +174,9 @@
                         <distributionFile>
                             <origin>target/nest-5.0-bin-win.dir/nest-clean.bat</origin>
                         </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-5.0-bin-win.dir/autoupdate-windows.exe</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
                 <folder>
@@ -203,6 +208,9 @@
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-5.0-bin-linux64.dir/libjogl_cg.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-5.0-bin-linux64.dir/autoupdate-linux-x64.run</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -242,6 +250,9 @@
                         <distributionDirectory>
                             <origin>target/nest-5.0-bin-mac.dir/__MACOSX</origin>
                         </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-5.0-bin-mac.dir/autoupdate-osx.app</origin>
+                        </distributionDirectory>
                     </distributionFileList>
                 </folder>
             </folderList>
@@ -257,8 +268,8 @@
                     <windowsPath>${installdir}/</windowsPath>
                 </startMenuShortcut>
                 <startMenuShortcut>
-                    <comment>Next ESA SAR Toolbox</comment>
-                    <name>NEST 4C</name>
+                    <comment>NEST Display and Anlaysis Tool</comment>
+                    <name>Next ESA SAR Toolbox</name>
                     <runAsAdmin>0</runAsAdmin>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>
@@ -438,7 +449,7 @@ This installer will optionally remove the older version before installing a new 
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;*/*.command;${installdir}/*.command;${installdir}/dat.sh;${installdir}/gpt.sh;${installdir}/jre/bin/*;${installdir}/*.so;${installdir}/*.jnilib</files>
+            <files>*/*.sh;*/*.run;*/*.bin;*/*.command;${installdir}/*.command;${installdir}/dat.sh;${installdir}/gpt.sh;${installdir}/jre/bin/*;${installdir}/*.so;${installdir}/*.jnilib</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
@@ -495,7 +506,7 @@ This installer will optionally remove the older version before installing a new 
             <name>NEST_HOME</name>
             <value>${installdir}</value>
         </setEnvironmentVariable>
-		<writeFile>
+        <writeFile>
             <path>${installdir}/update.ini</path>
             <text>[Update]
 url = http://www.array.ca/nest-web/autoupdate/update.xml
@@ -503,7 +514,7 @@ version_id = ${version}
 update_download_location = ${system_temp_directory}
 check_for_updates = 1
 </text>
-       </writeFile>
+        </writeFile>
     </postInstallationActionList>
     <postUninstallationActionList>
         <runConsoleProgram>
@@ -533,7 +544,7 @@ check_for_updates = 1
     <enableTimestamp>1</enableTimestamp>
     <outputDirectory>../../dist</outputDirectory>
     <saveRelativePaths>1</saveRelativePaths>
-    <startMenuGroupName>${product_fullname}-${product_version}</startMenuGroupName>
+    <startMenuGroupName>Next ESA SAR Toolbox</startMenuGroupName>
     <vendor>ESA</vendor>
     <parameterList>
         <directoryParameter>
@@ -541,7 +552,7 @@ check_for_updates = 1
             <description>Installer.Parameter.installdir.description</description>
             <explanation>Installer.Parameter.installdir.explanation</explanation>
             <value></value>
-            <default>${platform_install_prefix}/${product_shortname}${product_version}</default>
+            <default>${platform_install_prefix}/${product_shortname}</default>
             <allowEmptyValue>0</allowEmptyValue>
             <cliOptionName>prefix</cliOptionName>
             <mustBeWritable>yes</mustBeWritable>

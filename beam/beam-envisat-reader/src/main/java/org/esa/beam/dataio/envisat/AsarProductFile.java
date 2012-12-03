@@ -522,8 +522,7 @@ public class AsarProductFile extends ProductFile {
     }
 
     private static boolean productDDExists(String productType) {
-        String productInfoFilePath = "products/" + productType + ".dd";
-        return DDDB.databaseResourceExists(productInfoFilePath);
+        return DDDB.databaseResourceExists("products/" + productType + ".dd");
     }
 
     /**
@@ -857,6 +856,7 @@ public class AsarProductFile extends ProductFile {
 
     private void processWaveMetadata(Product product) throws IOException {
 
+        final MetadataElement origRoot = EnvisatProductReader.getOriginalProductMetadata(product);
         final String[] datasetNames = getValidDatasetNames();
         for (String datasetName : datasetNames) {
             if (datasetName.equalsIgnoreCase("CROSS_SPECTRA_MDS") || datasetName.equalsIgnoreCase("OCEAN_WAVE_SPECTRA_MDS")) {
@@ -895,7 +895,7 @@ public class AsarProductFile extends ProductFile {
                     }
                     metadataTableGroup.addElement(elem);
                 }
-                product.getMetadataRoot().addElement(metadataTableGroup);
+                origRoot.addElement(metadataTableGroup);
             }
         }
     }
@@ -939,7 +939,7 @@ public class AsarProductFile extends ProductFile {
             final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
                                                         getContextProperty("discard.unused.metadata");
             if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
-                removeUnusedMetadata(product.getMetadataRoot());
+                removeUnusedMetadata(EnvisatProductReader.getOriginalProductMetadata(product));
             }
         }
     }
