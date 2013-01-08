@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,14 +16,12 @@
 package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.DialogUtils;
 import org.jdoris.core.stacks.MasterSelection;
@@ -103,24 +101,11 @@ public class CreateStackOpUI extends BaseOperatorUI {
     public UIValidation validateParameters() {
 
         if(resamplingType.getSelectedItem().equals("NONE") && sourceProducts != null) {
-            double savedRangeSpacing = 0.0;
-            double savedAzimuthSpacing = 0.0;
-            for(final Product prod : sourceProducts) {
-
-                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(prod);
-                if (absRoot != null) {
-                    final double rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
-                    final double azimuthSpacing = absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
-                    if(savedRangeSpacing > 0.0 && savedAzimuthSpacing > 0.0 &&
-                      (Math.abs(rangeSpacing - savedRangeSpacing) > 0.001 ||
-                       Math.abs(azimuthSpacing - savedAzimuthSpacing) > 0.001)) {
-                        return new UIValidation(UIValidation.State.WARNING, "Resampling type cannot be NONE" +
+            try {
+                CreateStackOp.checkPixelSpacing(sourceProducts);
+            } catch(Exception e) {
+                return new UIValidation(UIValidation.State.WARNING, "Resampling type cannot be NONE" +
                                 " because pixel spacings are different for master and slave products");
-                    } else {
-                        savedRangeSpacing = rangeSpacing;
-                        savedAzimuthSpacing = azimuthSpacing;
-                    }
-                }
             }
         }
         return new UIValidation(UIValidation.State.OK, "");

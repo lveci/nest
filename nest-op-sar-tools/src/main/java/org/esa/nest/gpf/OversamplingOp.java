@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,7 +29,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Constants;
+import org.esa.nest.eo.Constants;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ import java.util.Map;
 
 @OperatorMetadata(alias="Oversample",
         category = "Utilities\\Resampling",
-        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
+        authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
         description="Oversample the datset")
 public class OversamplingOp extends Operator {
 
@@ -210,7 +210,7 @@ public class OversamplingOp extends Operator {
 
         // Get coefficients of Doppler frequency polynomial from
         // fields 105, 106 and 107 in PRI Data Set Summary Record
-        final MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Scene Parameters");
+        final MetadataElement facility = AbstractMetadata.getOriginalProductMetadata(sourceProduct).getElement("Leader").getElement("Scene Parameters");
         if (facility == null) {
             throw new OperatorException("Scene Parameters not found");
         }
@@ -248,7 +248,7 @@ public class OversamplingOp extends Operator {
     private void computeDopplerCentroidFreqForENVISATProd() {
 
         // get slant range time origin in second
-        final MetadataElement dsd = sourceProduct.getMetadataRoot().getElement("DOP_CENTROID_COEFFS_ADS");
+        final MetadataElement dsd = AbstractMetadata.getOriginalProductMetadata(sourceProduct).getElement("DOP_CENTROID_COEFFS_ADS");
         if (dsd == null) {
             throw new OperatorException("DOP_CENTROID_COEFFS_ADS not found");
         }

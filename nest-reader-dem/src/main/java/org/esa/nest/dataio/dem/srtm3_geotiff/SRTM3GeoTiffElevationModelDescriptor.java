@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -45,6 +45,8 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     private static final Datum DATUM = Datum.WGS_84;
 
     private File demInstallDir = null;
+
+    private static SRTM3GeoTiffElevationModel demModel = null;
 
     public SRTM3GeoTiffElevationModelDescriptor() {
     }
@@ -113,20 +115,12 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     }
 
     @Deprecated
-    public ElevationModel createDem() {
-        try {
-            return new SRTM3GeoTiffElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
-        } catch (Exception e) {
-            return null;
-        }
+    public synchronized ElevationModel createDem() {
+        return new SRTM3GeoTiffElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
     }
 
-    public ElevationModel createDem(Resampling resamplingMethod) {
-        try {
-            return new SRTM3GeoTiffElevationModel(this, resamplingMethod);
-        } catch (Exception e) {
-            return null;
-        }
+    public synchronized ElevationModel createDem(Resampling resamplingMethod) {
+        return new SRTM3GeoTiffElevationModel(this, resamplingMethod);
     }
 
     public String createTileFilename(final int tileX, final int tileY) {

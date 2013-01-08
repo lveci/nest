@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,8 +27,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.GeoUtils;
 import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
@@ -193,7 +193,7 @@ public class ALOSDeskewingOp extends Operator {
 
         final double vel = Math.sqrt(v.xVel*v.xVel + v.yVel*v.yVel + v.zVel*v.zVel);
 
-        final double newSlantRangeToFirstPixel = Math.cos(Math.asin(fd*radarWaveLength/(2.0*vel)))*slantRangeToFirstPixel;
+        final double newSlantRangeToFirstPixel = FastMath.cos(FastMath.asin(fd*radarWaveLength/(2.0*vel)))*slantRangeToFirstPixel;
 
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.slant_range_to_first_pixel, newSlantRangeToFirstPixel);
     }
@@ -284,7 +284,7 @@ public class ALOSDeskewingOp extends Operator {
             final int txMax = tx0 + tw;
             //System.out.println("x0 = " + tx0 + ", y0 = " + ty0 + ", w = " + tw + ", h = " + th);
 
-            final int maxShift = (int)computeMaxShift(txMax);
+            final int maxShift = (int)computeMaxShift(txMax, ty0);
 
             final Rectangle sourceRectangle = getSourceRectangle(tx0, ty0, tw, th, maxShift);
             final int sx0 = sourceRectangle.x;
@@ -309,14 +309,14 @@ public class ALOSDeskewingOp extends Operator {
                     for (int x = sx0; x < sxMax; x++) {
 
                         if (useMapreadyShiftOnly) {
-                            totalShift = Math.round(fracShift*x);
+                            totalShift = FastMath.round(fracShift*x);
                         } else if (useFAQShiftOnly) {
                             totalShift = computeShift(x, y);
                         } else if (useBoth) {
                             double faqShift = computeShift(x, y);
-                            double fraction = Math.round(fracShift*x);
+                            double fraction = FastMath.round(fracShift*x);
                             totalShift = faqShift + fraction;
-                            //totalShift = absShift + Math.round(fracShift*x);
+                            //totalShift = absShift + FastMath.round(fracShift*x);
                             //System.out.println(faqShift);
                         } else {
                             throw new OperatorException("No method was selected for shift calculation");
@@ -336,9 +336,13 @@ public class ALOSDeskewingOp extends Operator {
         }
     }
 
-    private double computeMaxShift(final int txMax) {
+    private double computeMaxShift(final int txMax, final int ty0) throws Exception {
 
-        return absShift + Math.round(txMax*fracShift);
+        if (useMapreadyShiftOnly) {
+            return FastMath.round(txMax*fracShift);
+        } else {
+            return computeShift(txMax, ty0) + FastMath.round(txMax*fracShift);
+        }
     }
 
     private Rectangle getSourceRectangle(final int tx0, final int ty0, final int tw, final int th, final int maxShift) {
@@ -383,12 +387,12 @@ public class ALOSDeskewingOp extends Operator {
 
         // absolute shift
         final double vel = Math.sqrt(v.xVel*v.xVel + v.yVel*v.yVel + v.zVel*v.zVel);
-        absShift = Math.round(slr*fd*radarWaveLength/(2.0*vel*azimuthSpacing));
+        absShift = FastMath.round(slr*fd*radarWaveLength/(2.0*vel*azimuthSpacing));
 
         // fractional shift
         final double[] lookYaw = new double[2];
         computeLookYawAngles(v, slr, fd, lookYaw);
-        fracShift = Math.sin(lookYaw[0])*Math.sin(lookYaw[1]);
+        fracShift = FastMath.sin(lookYaw[0])*FastMath.sin(lookYaw[1]);
     }
 
     /**
@@ -523,7 +527,7 @@ public class ALOSDeskewingOp extends Operator {
 
 	    final double ht = Math.sqrt(v.xPos*v.xPos + v.yPos*v.yPos + v.zPos*v.zPos);
 
-	    double look = Math.acos((ht*ht + slant*slant - earthRadius*earthRadius)/(2.0*slant*ht));
+	    double look = FastMath.acos((ht*ht + slant*slant - earthRadius*earthRadius)/(2.0*slant*ht));
 
 	    for (int iter = 0; iter < 100; iter++) {
 
@@ -608,9 +612,9 @@ public class ALOSDeskewingOp extends Operator {
         final double spx = v.xPos, spy = v.yPos, spz = v.zPos;
         final double svx = v.xVel, svy = v.yVel, svz = v.zVel;
 
-        final double x =  Math.sin(yaw);
-        final double y = -Math.sin(look)*Math.cos(yaw);
-        final double z = -Math.cos(look)*Math.cos(yaw);
+        final double x =  FastMath.sin(yaw);
+        final double y = -FastMath.sin(look)*FastMath.cos(yaw);
+        final double z = -FastMath.cos(look)*FastMath.cos(yaw);
 
         final double[][] rM = new double[3][3];
         getRotationMatrix(v, rM);
@@ -659,7 +663,7 @@ public class ALOSDeskewingOp extends Operator {
         final double lat = geoPos.lat;
         final double re = Constants.semiMajorAxis;
         final double rp = Constants.semiMinorAxis;
-        return (re*rp) / Math.sqrt(rp*rp*Math.cos(lat)*Math.cos(lat) + re*re*Math.sin(lat)*Math.sin(lat));
+        return (re*rp) / Math.sqrt(rp*rp*FastMath.cos(lat)*FastMath.cos(lat) + re*re*FastMath.sin(lat)*FastMath.sin(lat));
     }
 
     public static class stateVector {

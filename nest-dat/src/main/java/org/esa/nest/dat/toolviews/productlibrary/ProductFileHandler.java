@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
 package org.esa.nest.dat.toolviews.productlibrary;
 
 import org.esa.beam.dataio.dimap.DimapProductConstants;
@@ -16,8 +31,10 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 public class ProductFileHandler {
 
-    private static final String[] singleFileExt = {"n1","e1","e2","tif","tiff","h5"};
-    private static final String[] folderMissions = {"RS2"};
+    private static final String[] singleFileExt = {"n1","e1","e2","tif","tiff"};
+    private static final String[] folderExt = {"safe"};
+    private static final String[] folderMissions = {"RS2","TSX","TDX","CSKS1","CSKS2","CSKS3","CSKS4",
+                                                    "ALOS","JERS1","RS1"};
 
     public static boolean canMove(final ProductEntry entry) {
         return isDimap(entry) || isFolderProduct(entry) || isSingleFile(entry) || isSMOS(entry);
@@ -116,6 +133,15 @@ public class ProductFileHandler {
         final String mission = entry.getMission();
         for(String folderMission : folderMissions) {
             if(mission.equals(folderMission))
+                return true;
+        }
+        final String fileName = entry.getFile().getName().toLowerCase();
+        for(String ext : folderExt) {
+            if(fileName.endsWith(ext))
+                return true;
+        }
+        if(mission.equals("ERS1") || mission.equals("ERS2")) {
+            if(!isSingleFile(entry))  // if not .e1 or .e2
                 return true;
         }
         return false;

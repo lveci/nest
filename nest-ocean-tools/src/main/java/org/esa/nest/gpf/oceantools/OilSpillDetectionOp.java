@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -191,7 +191,7 @@ public class OilSpillDetectionOp extends Operator {
             final String targetBandName = srcBandNames + OILSPILLMASK_NAME;
             targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
 
-            final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+            final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
             targetBand.setSourceImage(srcBand.getSourceImage());
 
             final Band targetBandMask = new Band(targetBandName,

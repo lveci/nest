@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,7 +25,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.util.Constants;
+import org.esa.nest.eo.Constants;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -192,16 +192,19 @@ public abstract class CEOSProductDirectory {
             return ProductData.UTC.parse(procDate + procTime, "yyyyMMddHHmmss");
         } catch(ParseException e) {
             System.out.println(e.toString());
-            return new ProductData.UTC(0);
+            return AbstractMetadata.NO_METADATA_UTC;
         }
     }
 
     protected static String getPass(final BinaryRecord mapProjRec, final BinaryRecord sceneRec) {
         if(mapProjRec != null) {
-            final double heading = mapProjRec.getAttributeDouble("Platform heading at nadir corresponding to scene centre");
-            if(heading > 90 && heading < 270) return "DESCENDING";
-            else return "ASCENDING";
-        } else if(sceneRec != null) {
+            final Double heading = mapProjRec.getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+            if(heading != null) {
+                if(heading > 90 && heading < 270) return "DESCENDING";
+                else return "ASCENDING";
+            }
+        }
+        if(sceneRec != null) {
             String pass = sceneRec.getAttributeString("Ascending or Descending flag");
             if(pass == null) {
                 pass = sceneRec.getAttributeString("Time direction indicator along line direction");
@@ -227,7 +230,7 @@ public abstract class CEOSProductDirectory {
             if(startTime != null)
                 return AbstractMetadata.parseUTC(startTime, dateFormat);
         }
-        return new ProductData.UTC(0);
+        return AbstractMetadata.NO_METADATA_UTC;
     }
 
     protected static ProductData.UTC getUTCScanStopTime(final BinaryRecord sceneRec, final BinaryRecord detailProcRec) {
@@ -241,7 +244,7 @@ public abstract class CEOSProductDirectory {
             if(endTime != null)
                 return AbstractMetadata.parseUTC(endTime, dateFormat);
         }
-        return new ProductData.UTC(0);
+        return AbstractMetadata.NO_METADATA_UTC;
     }
 
     protected static void addSummaryMetadata(final File summaryFile, final String name, final MetadataElement parent) 
@@ -310,8 +313,8 @@ public abstract class CEOSProductDirectory {
             addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, i);
         }
 
-        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
-                equalElems(new ProductData.UTC(0))) {
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, AbstractMetadata.NO_METADATA_UTC).
+                equalElems(AbstractMetadata.NO_METADATA_UTC)) {
             
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 getOrbitTime(platformPosRec, 1));
@@ -343,16 +346,19 @@ public abstract class CEOSProductDirectory {
         final int year = platformPosRec.getAttributeInt("Year of data point");
         final int month = platformPosRec.getAttributeInt("Month of data point");
         final int day = platformPosRec.getAttributeInt("Day of data point");
-        final double secondsOfDay = platformPosRec.getAttributeDouble("Seconds of day");
+        Double secondsOfDay = platformPosRec.getAttributeDouble("Seconds of day");
+        if(secondsOfDay == null)
+            secondsOfDay = 0.0;
         final double hoursf = secondsOfDay / 3600f;
         final int hour = (int)hoursf;
         final double minutesf = (hoursf - hour) * 60f;
         final int minute = (int)minutesf;
         float second = ((float)minutesf - minute) * 60f;
 
-        final double interval = platformPosRec.getAttributeDouble("Time interval between DATA points");
-        if (interval <= 0.0) {
+        Double interval = platformPosRec.getAttributeDouble("Time interval between DATA points");
+        if (interval == null || interval <= 0.0) {
             System.out.println("CEOSProductDirectory: Time interval between DATA points in Platform Position Data is " + interval);
+            interval = 0.0;
         }
         second += interval * (num-1);
 
@@ -368,7 +374,7 @@ public abstract class CEOSProductDirectory {
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
 
-        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
         srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
         AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
                 ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
@@ -401,7 +407,7 @@ public abstract class CEOSProductDirectory {
         final MetadataElement dopListElem = new MetadataElement(AbstractMetadata.dop_coef_list);
         dopCoefficientsElem.addElement(dopListElem);
 
-        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
         dopListElem.setAttributeUTC(AbstractMetadata.dop_coef_time, utcTime);
         AbstractMetadata.addAbstractedAttribute(dopListElem, AbstractMetadata.slant_range_time,
                 ProductData.TYPE_FLOAT64, "ns", "Slant Range Time");

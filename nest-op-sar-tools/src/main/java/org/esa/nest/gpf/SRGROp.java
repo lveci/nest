@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,7 +29,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.GeoUtils;
 import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
@@ -40,7 +40,7 @@ import java.awt.*;
 
 @OperatorMetadata(alias="SRGR",
         category = "Geometry",
-        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
+        authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
         description="Converts Slant Range to Ground Range")
 public class SRGROp extends Operator {
 
@@ -409,7 +409,7 @@ public class SRGROp extends Operator {
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
 
-        final ProductData.UTC utcTime = absTgt.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        final ProductData.UTC utcTime = absTgt.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
         srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
 
         AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
@@ -467,31 +467,29 @@ public class SRGROp extends Operator {
      */
     private void addGeoCoding() {
 
-        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
-        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
-        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        final TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        final TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        final TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         if (lat == null || lon == null || incidenceAngle == null || slantRgTime == null) { // for unit test
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
             return;
         }
 
-        int gridWidth = 11;
-        int gridHeight = 11;
-        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
-        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-        PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        final float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+        final PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
 
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
-            float y = Math.min(j*subSamplingY, targetImageHeight - 1);
+            final float y = Math.min(j*subSamplingY, targetImageHeight - 1);
             for (int i = 0; i < gridWidth; i++) {
-                float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
-                float x = (float)getSlantRangePixelPosition((double)tx);
-                newTiePointPos[k] = new PixelPos();
-                newTiePointPos[k].x = x;
-                newTiePointPos[k].y = y;
+                final float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
+                final float x = (float)getSlantRangePixelPosition((double)tx);
+                newTiePointPos[k] = new PixelPos(x, y);
                 k++;
             }
         }

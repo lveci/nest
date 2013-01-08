@@ -18,7 +18,7 @@ package com.bc.jexp.impl;
 /**
  * An extension the the {@link java.lang.Math class}.
  */
-public class ExtMath {
+public final class ExtMath {
 
     private static final double INV_LN_10 = 1.0 / Math.log(10.0);
 
@@ -60,7 +60,7 @@ public class ExtMath {
      * @return true, if x1 and x2 are not equal
      */
     public static boolean fneq(final double x1, final double x2, final double eps) {
-        return !feq(x1, x2, eps);
+        return !(x1 == x2 || Math.abs(x1 - x2) <= eps);
     }
 
     /**

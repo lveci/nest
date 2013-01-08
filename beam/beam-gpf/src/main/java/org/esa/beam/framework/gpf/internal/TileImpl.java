@@ -34,7 +34,7 @@ import java.util.Iterator;
 /**
  * A {@link Tile} implementation backed by a {@link java.awt.image.Raster}.
  */
-public class TileImpl implements Tile {
+public final class TileImpl implements Tile {
 
     private final RasterDataNode rasterDataNode;
     private final Raster raster;
@@ -49,16 +49,16 @@ public class TileImpl implements Tile {
     private final boolean scaled;
     private final int scanlineOffset;
     private final int scanlineStride;
-    private final byte[] dataBufferByte;
-    private final short[] dataBufferShort;
-    private final int[] dataBufferInt;
-    private final float[] dataBufferFloat;
-    private final double[] dataBufferDouble;
+    private byte[] dataBufferByte = null;
+    private short[] dataBufferShort = null;
+    private int[] dataBufferInt = null;
+    private float[] dataBufferFloat = null;
+    private double[] dataBufferDouble = null;
 
     private ProductData dataBuffer;
     private ProductData rawSamples;
     private boolean mustWriteSampleData;
-    private SampleConverterFactory.SampleConverter sampleConverter;
+    private SampleConverterFactory.SampleConverter sampleConverter = null;
 
     public TileImpl(RasterDataNode rasterDataNode, Raster raster) {
         this(rasterDataNode, raster,
@@ -70,18 +70,18 @@ public class TileImpl implements Tile {
     }
 
     public TileImpl(RasterDataNode rasterDataNode, Raster raster, Rectangle rectangle, boolean target) {
-        Assert.notNull(rasterDataNode, "rasterDataNode");
-        Assert.argument(raster.getNumBands() == 1, "raster");
+        //Assert.notNull(rasterDataNode, "rasterDataNode");
+        //Assert.argument(raster.getNumBands() == 1, "raster");
         WritableRaster writableRaster = raster instanceof WritableRaster ? (WritableRaster) raster : null;
-        if (target) {
-            Assert.argument(writableRaster != null, "raster");
-        }
-        Assert.argument(raster.getSampleModel() instanceof ComponentSampleModel, "raster");
+        //if (target) {
+        //    Assert.argument(writableRaster != null, "raster");
+        //}
+        //Assert.argument(raster.getSampleModel() instanceof ComponentSampleModel, "raster");
         ComponentSampleModel sm = (ComponentSampleModel) raster.getSampleModel();
-        Assert.argument(sm.getNumBands() == 1, "raster");
+        //Assert.argument(sm.getNumBands() == 1, "raster");
         DataBuffer db = raster.getDataBuffer();
-        Assert.argument(db.getNumBanks() == 1, "raster");
-        Assert.notNull(rectangle, "rectangle");
+        //Assert.argument(db.getNumBanks() == 1, "raster");
+        //Assert.notNull(rectangle, "rectangle");
 
         this.rasterDataNode = rasterDataNode;
         this.raster = raster;
@@ -102,14 +102,14 @@ public class TileImpl implements Tile {
         this.scanlineStride = sm.getScanlineStride();
         this.scanlineOffset = smY0 * scanlineStride + smX0 + dbI0;
 
-        Object primitiveArray = ImageUtils.getPrimitiveArray(db);
-        this.dataBufferByte = (primitiveArray instanceof byte[]) ? (byte[]) primitiveArray : null;
-        this.dataBufferShort = (primitiveArray instanceof short[]) ? (short[]) primitiveArray : null;
-        this.dataBufferInt = (primitiveArray instanceof int[]) ? (int[]) primitiveArray : null;
-        this.dataBufferFloat = (primitiveArray instanceof float[]) ? (float[]) primitiveArray : null;
-        this.dataBufferDouble = (primitiveArray instanceof double[]) ? (double[]) primitiveArray : null;
+        //sampleConverter = SampleConverterFactory.createConverter(rasterDataNode);  //NESTMOD
+    }
 
-        sampleConverter = SampleConverterFactory.createConverter(rasterDataNode);
+    private SampleConverterFactory.SampleConverter getSampleConverter() {
+        if(sampleConverter == null) {
+            sampleConverter = SampleConverterFactory.createConverter(rasterDataNode);
+        }
+        return sampleConverter;
     }
 
     @Override
@@ -202,26 +202,46 @@ public class TileImpl implements Tile {
 
     @Override
     public final byte[] getDataBufferByte() {
+        if(dataBufferByte == null) {
+            Object primitiveArray = ImageUtils.getPrimitiveArray(raster.getDataBuffer());
+            this.dataBufferByte = (primitiveArray instanceof byte[]) ? (byte[]) primitiveArray : null;
+        }
         return dataBufferByte;
     }
 
     @Override
     public final short[] getDataBufferShort() {
+        if(dataBufferShort == null) {
+            Object primitiveArray = ImageUtils.getPrimitiveArray(raster.getDataBuffer());
+            this.dataBufferShort = (primitiveArray instanceof short[]) ? (short[]) primitiveArray : null;
+        }
         return dataBufferShort;
     }
 
     @Override
     public final int[] getDataBufferInt() {
+        if(dataBufferInt == null) {
+            Object primitiveArray = ImageUtils.getPrimitiveArray(raster.getDataBuffer());
+            this.dataBufferInt = (primitiveArray instanceof int[]) ? (int[]) primitiveArray : null;
+        }
         return dataBufferInt;
     }
 
     @Override
     public final float[] getDataBufferFloat() {
+        if(dataBufferFloat == null) {
+            Object primitiveArray = ImageUtils.getPrimitiveArray(raster.getDataBuffer());
+            this.dataBufferFloat = (primitiveArray instanceof float[]) ? (float[]) primitiveArray : null;
+        }
         return dataBufferFloat;
     }
 
     @Override
     public final double[] getDataBufferDouble() {
+        if(dataBufferDouble == null) {
+            Object primitiveArray = ImageUtils.getPrimitiveArray(raster.getDataBuffer());
+            this.dataBufferDouble = (primitiveArray instanceof double[]) ? (double[]) primitiveArray : null;
+        }
         return dataBufferDouble;
     }
 
@@ -411,24 +431,24 @@ public class TileImpl implements Tile {
     @Override
     public int getSampleInt(int x, int y) {
         int sample = raster.getSample(x, y, 0);
-        return (int) Math.floor(sampleConverter.toGeoPhysical(sample) + 0.5);
+        return (int) Math.floor(getSampleConverter().toGeoPhysical(sample) + 0.5);
     }
 
     @Override
     public void setSample(int x, int y, int sample) {
-        sample = (int) Math.floor(sampleConverter.toRaw(sample) + 0.5);
+        sample = (int) Math.floor(getSampleConverter().toRaw(sample) + 0.5);
         writableRaster.setSample(x, y, 0, sample);
     }
 
     @Override
     public float getSampleFloat(int x, int y) {
         float sample = raster.getSampleFloat(x, y, 0);
-        return (float) sampleConverter.toGeoPhysical(sample);
+        return (float) getSampleConverter().toGeoPhysical(sample);
     }
 
     @Override
     public void setSample(int x, int y, float sample) {
-        sample = (float) sampleConverter.toRaw(sample);
+        sample = (float) getSampleConverter().toRaw(sample);
         writableRaster.setSample(x, y, 0, sample);
     }
 
@@ -436,12 +456,12 @@ public class TileImpl implements Tile {
     @Override
     public double getSampleDouble(int x, int y) {
         double sample = raster.getSampleDouble(x, y, 0);
-        return sampleConverter.toGeoPhysical(sample);
+        return getSampleConverter().toGeoPhysical(sample);
     }
 
     @Override
     public void setSample(int x, int y, double sample) {
-        sample = sampleConverter.toRaw(sample);
+        sample = getSampleConverter().toRaw(sample);
         writableRaster.setSample(x, y, 0, sample);
     }
 

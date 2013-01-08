@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.util.Constants;
+import org.esa.nest.eo.Constants;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 
@@ -61,7 +61,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     protected void addAbstractedMetadataHeader(final Product product, final MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
-        final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
+        final MetadataElement origProdRoot = AbstractMetadata.addOriginalProductMetadata(product);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
@@ -244,7 +244,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         // handle ATI products by copying abs metadata to slv metadata
-        final String antennaReceiveConfiguration = acquisitionInfo.getAttributeString("antennaReceiveConfiguration");
+        final String antennaReceiveConfiguration = acquisitionInfo.getAttributeString("antennaReceiveConfiguration", "");
         if(antennaReceiveConfiguration.equals("DRA")) {
             final MetadataElement targetSlaveMetadataRoot = AbstractMetadata.getSlaveMetadata(product);
 
@@ -518,6 +518,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final int gridHeight = 4;
         final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+        if(subSamplingX == 0 || subSamplingY == 0)
+            return;
 
         if(product.getTiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE) == null) {
             final float[] fineAngles = new float[gridWidth*gridHeight];
@@ -621,8 +623,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         // set state vector time
-        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
-                equalElems(new ProductData.UTC(0))) {
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, AbstractMetadata.NO_METADATA_UTC).
+                equalElems(AbstractMetadata.NO_METADATA_UTC)) {
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 ReaderUtils.getTime(stateVectorElems[1], "timeUTC", AbstractMetadata.dateFormat));
@@ -724,7 +726,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
-        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, AbstractMetadata.NO_METADATA_UTC);
         srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
         AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
                 ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");

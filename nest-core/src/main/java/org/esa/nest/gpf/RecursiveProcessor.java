@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -45,7 +45,7 @@ public abstract class RecursiveProcessor {
                 try {
                     final Product sourceProduct = ProductIO.readProduct(file);
                     if(sourceProduct != null) {
-                        if(TestUtils.contains(sourceProduct.getProductType(), productTypeExemptions))
+                        if(productTypeExemptions != null && TestUtils.containsProductType(productTypeExemptions, sourceProduct.getProductType()))
                             continue;
 
                         process(sourceProduct);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,7 +31,7 @@ public final class ACE2_5MinFile extends ElevationFile {
 
     private final ACE2_5MinElevationModel demModel;
 
-    private static final String remoteHTTP = "http://nest.s3.amazonaws.com/data/ACE30/";
+    private static final String remoteHTTP = "http://nest.s3.amazonaws.com/data/ACE2/5M/";
 
     public ACE2_5MinFile(final ACE2_5MinElevationModel model, final File localFile, final ProductReader reader) {
         super(localFile,  reader);

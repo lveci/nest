@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -257,7 +257,7 @@ public class WarpOp extends Operator {
             Band targetBand;
             if (srcBand == masterBand || srcBand == masterBand2 ||
                     StringUtils.contains(masterBandNames, srcBand.getName())) {
-                targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+                targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
                 targetBand.setSourceImage(srcBand.getSourceImage());
             } else {
                 targetBand = targetProduct.addBand(srcBand.getName(), ProductData.TYPE_FLOAT32);
@@ -270,7 +270,7 @@ public class WarpOp extends Operator {
                 Band targetBandQ;
                 if (srcBand == masterBand || srcBand == masterBand2 ||
                         StringUtils.contains(masterBandNames, srcBand.getName())) {
-                    targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
+                    targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct, false);
                     targetBandQ.setSourceImage(srcBandQ.getSourceImage());
                 } else {
                     targetBandQ = targetProduct.addBand(srcBandQ.getName(), ProductData.TYPE_FLOAT32);

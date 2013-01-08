@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,6 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.binary.BinaryRecord;
 import org.esa.nest.dataio.binary.IllegalBinaryFormatException;
@@ -32,8 +31,8 @@ import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.GeoUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -161,8 +160,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     slantRangeTime*Constants.halfLightSpeed);
         }
 
-        float[] latCorners = leaderFile.getLatCorners();
-        float[] lonCorners = leaderFile.getLonCorners();
+        float[] latCorners = leaderFile.getLatCorners(leaderFile.getMapProjRecord());
+        float[] lonCorners = leaderFile.getLonCorners(leaderFile.getMapProjRecord());
         if(latCorners == null || lonCorners == null) {
             latCorners = imageFiles[0].getLatCorners();
             lonCorners = imageFiles[0].getLonCorners();
@@ -234,7 +233,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private void addMetaData(final Product product) throws IOException {
 
-        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement root = AbstractMetadata.addOriginalProductMetadata(product);
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         leaderFile.addMetadata(leadMetadata);
@@ -263,7 +262,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         //final File txtFile = FileUtils.exchangeExtension(volFile, ".txt");
         //addSummaryMetadata(txtFile, "Scene Description", root);
 
-        addAbstractedMetadataHeader(product, root);
+        addAbstractedMetadataHeader(product, product.getMetadataRoot());
     }
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
@@ -439,7 +438,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private static void addGeoCodingFromSceneLabel(Product product) {
 
-        final MetadataElement sceneLabelElem = product.getMetadataRoot().getElement("Scene Label");
+        final MetadataElement sceneLabelElem = AbstractMetadata.getOriginalProductMetadata(product).getElement("Scene Label");
         if (sceneLabelElem != null) {
 
             try {
@@ -496,8 +495,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i);
             }
 
-            if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
-                    equalElems(new ProductData.UTC(0))) {
+            if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, AbstractMetadata.NO_METADATA_UTC).
+                    equalElems(AbstractMetadata.NO_METADATA_UTC)) {
 
                 AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                     getOrbitTime(platformPosRec, 1));

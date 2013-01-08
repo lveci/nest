@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,6 +16,7 @@
 package org.esa.nest.gpf.oceantools;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.apache.commons.math.util.FastMath;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -181,7 +182,7 @@ public class AdaptiveThresholdingOp extends Operator {
                 final String targetBandName = srcBandNames + SHIPMASK_NAME;
                 targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
 
-                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
                 targetBand.setSourceImage(srcBand.getSourceImage());
 
                 final Band targetBandMask = new Band(targetBandName,
@@ -384,9 +385,9 @@ public class AdaptiveThresholdingOp extends Operator {
 
         final double z = Math.abs(x);
         final double t = 1.0 / (1.0 + 0.5*z);
-        double erfc = t*Math.exp(-z*z - 1.26551223 + t*(1.00002368 + t*(0.37409196 + t*(0.09678418 +
-                      t*(-0.18628806 + t*(0.27886807 + t*(-1.13520398 + t*(1.48851587 + t*(-0.82215223 +
-                      t*0.17087277)))))))));
+        double erfc = t* FastMath.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+                t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 +
+                        t * 0.17087277)))))))));
         if (x < 0) {
             erfc = 2.0 - erfc;
         }

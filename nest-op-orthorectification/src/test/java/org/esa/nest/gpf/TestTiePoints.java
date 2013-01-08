@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -34,8 +49,11 @@ public class TestTiePoints  extends TestCase {
 
     }
 
-    public void testGetPixelFloat() {
-        if(product1 == null) return;
+    public void testGetPixelFloat() throws Exception {
+        if(product1 == null) {
+            TestUtils.skipTest(this);
+            return;
+        }
         TiePointGrid tpg = product1.getTiePointGridAt(0);
         int w = product1.getSceneRasterWidth();
         int h = product1.getSceneRasterHeight();
@@ -50,8 +68,11 @@ public class TestTiePoints  extends TestCase {
 
     }
 
-    public void testGetPixelFloats() {
-        if(product2 == null) return;
+    public void testGetPixelFloats() throws Exception {
+        if(product2 == null) {
+            TestUtils.skipTest(this);
+            return;
+        }
         TiePointGrid tpg = product2.getTiePointGridAt(0);
         int w = product2.getSceneRasterWidth();
         int h = product2.getSceneRasterHeight();
@@ -60,8 +81,11 @@ public class TestTiePoints  extends TestCase {
         tpg.getPixels(0,0, w,h, floats, ProgressMonitor.NULL);
     }
 
-    public void testCompareFloats() {
-        if(product1 == null) return;
+    public void testCompareFloats() throws Exception {
+        if(product1 == null) {
+            TestUtils.skipTest(this);
+            return;
+        }
         TiePointGrid tpg = product1.getTiePointGridAt(0);
         int w = product1.getSceneRasterWidth();
         int h = product1.getSceneRasterHeight();

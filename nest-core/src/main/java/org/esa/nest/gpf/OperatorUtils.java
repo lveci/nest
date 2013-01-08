@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,7 +24,8 @@ import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Constants;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.util.ExceptionLog;
 
 import java.awt.*;
 import java.text.DateFormat;
@@ -421,6 +422,7 @@ public final class OperatorUtils {
         else
             message += e.toString();
 
+        ExceptionLog.log(message);
         System.out.println(message);
         throw new OperatorException(message);
     }
@@ -704,38 +706,6 @@ public final class OperatorUtils {
      * Get an array of rectangles for all source tiles of the image
      * @param sourceProduct the input
      * @param tileSize the rect
-     * @return Array of rectangles
-     */
-    public static Rectangle[] getAllTileRectangles(final Product sourceProduct, final Dimension tileSize) {
-
-        final int rasterHeight = sourceProduct.getSceneRasterHeight();
-        final int rasterWidth = sourceProduct.getSceneRasterWidth();
-
-        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
-
-        final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
-        final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
-
-        final Rectangle[] rectangles = new Rectangle[tileCountX * tileCountY];
-        int index = 0;
-        for (int tileY = 0; tileY < tileCountY; tileY++) {
-            for (int tileX = 0; tileX < tileCountX; tileX++) {
-                final Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                                              tileY * tileSize.height,
-                                                              tileSize.width,
-                                                              tileSize.height);
-                final Rectangle intersection = boundary.intersection(tileRectangle);
-                rectangles[index] = intersection;
-                index++;
-            }
-        }
-        return rectangles;
-    }
-
-    /**
-     * Get an array of rectangles for all source tiles of the image
-     * @param sourceProduct the input
-     * @param tileSize the rect
      * @param margin feathered area
      * @return Array of rectangles
      */
@@ -745,7 +715,7 @@ public final class OperatorUtils {
         final int rasterHeight = sourceProduct.getSceneRasterHeight()-margin-margin;
         final int rasterWidth = sourceProduct.getSceneRasterWidth()-margin-margin;
 
-        final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
+        final Rectangle boundary = new Rectangle(margin, margin, rasterWidth, rasterHeight);
 
         final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
         final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);

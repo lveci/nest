@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -282,10 +282,11 @@ public class BatchGraphDialog extends ModelessDialog {
      * Loads a new graph from a file
      * @param executer the GraphExcecuter
      * @param file the graph file to load
+     * @param addUI add a user interface
      */
-    void LoadGraph(final GraphExecuter executer, final File file) {
+    void LoadGraph(final GraphExecuter executer, final File file, final boolean addUI) {
         try {
-            executer.loadGraph(file, true);
+            executer.loadGraph(file, addUI);
 
         } catch(GraphException e) {
             showErrorDialog(e.getMessage());
@@ -344,7 +345,7 @@ public class BatchGraphDialog extends ModelessDialog {
     void createGraphs() throws GraphException {
         try {
             final GraphExecuter graphEx = new GraphExecuter();
-            LoadGraph(graphEx, graphFile);
+            LoadGraph(graphEx, graphFile, true);
             graphExecutorList.add(graphEx);
         } catch(Exception e) {
             throw new GraphException(e.getMessage());
@@ -467,7 +468,7 @@ public class BatchGraphDialog extends ModelessDialog {
         for(int graphIndex = 1; graphIndex < fileList.length; ++graphIndex) {
 
             final GraphExecuter cloneGraphEx = new GraphExecuter();
-            LoadGraph(cloneGraphEx, graphFile);
+            LoadGraph(cloneGraphEx, graphFile, false);
             graphExecutorList.add(cloneGraphEx);
 
             final List<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -128,11 +128,11 @@ public class OilSpillClusteringOp extends Operator {
             final String srcBandName = srcBand.getName();
             if (!srcBandName.contains(OilSpillDetectionOp.OILSPILLMASK_NAME)) {
 
-                final Band targetBand = ProductUtils.copyBand(srcBandName, sourceProduct, targetProduct);
+                final Band targetBand = ProductUtils.copyBand(srcBandName, sourceProduct, targetProduct, false);
                 targetBand.setSourceImage(srcBand.getSourceImage());
 
             } else {
-                ProductUtils.copyBand(srcBandName, sourceProduct, targetProduct);
+                ProductUtils.copyBand(srcBandName, sourceProduct, targetProduct, false);
             }
         }
     }

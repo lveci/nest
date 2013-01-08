@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -500,7 +500,7 @@ public class ProductLibraryToolView extends AbstractToolView {
             try {
                 dbPane.getDB().removeAllProducts();
             } catch(Exception e) {
-                //
+                System.out.println("Failed to remove all products");
             }
         } else if(selectedItem instanceof File) {
             final File baseDir = (File)selectedItem;
@@ -835,13 +835,13 @@ public class ProductLibraryToolView extends AbstractToolView {
                 "The follow files have errors:\n"+ str.toString() + question,
                 null)== 0) {
 
-            File file = ResourceUtils.GetSaveFilePath("Save as...", "Text", ".txt",
+            File file = ResourceUtils.GetSaveFilePath("Save as...", "Text", "txt",
                                    "ProductErrorList", "Products with errors");
             try {
                 writeErrors(errorList, file);
             } catch(Exception e) {
                 VisatApp.getApp().showErrorDialog("Unable to save to "+file.getAbsolutePath());
-                file = ResourceUtils.GetSaveFilePath("Save as...", "Text", ".txt",
+                file = ResourceUtils.GetSaveFilePath("Save as...", "Text", "txt",
                                    "ProductErrorList", "Products with errors");
                 try {
                     writeErrors(errorList, file);

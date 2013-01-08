@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -53,7 +53,11 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     public BaseElevationModel(final ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         this.descriptor = descriptor;
         this.resampling = resamplingMethod;
-        this.resamplingIndex = resampling.createIndex();
+        if(this.resampling != null) {
+            this.resamplingIndex = resampling.createIndex();
+        } else {
+            this.resamplingIndex = null;
+        }
         this.resamplingRaster = this;
 
         NUM_X_TILES = descriptor.getNumXTiles();
@@ -85,6 +89,9 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public final synchronized float getElevation(final GeoPos geoPos) throws Exception {
+        if (geoPos.lon > 180) {
+            geoPos.lon -= 360;
+        }
         final double pixelY = getIndexY(geoPos);
         if (pixelY < 0) {
             return NO_DATA_VALUE;
@@ -170,7 +177,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
         return (ProductReaderPlugIn) readerPlugIns.next();
     }
 
-    public void getSamples(int[] x, int[] y, float[][] samples) throws Exception {
+    public final void getSamples(final int[] x, final int[] y, final float[][] samples) throws Exception {
 
         for (int i = 0; i < y.length; i++) {
             final int tileYIndex = (int)(y[i] * NUM_PIXELS_PER_TILEinv);

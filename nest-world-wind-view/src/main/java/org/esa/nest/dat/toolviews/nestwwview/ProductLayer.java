@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@ import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -207,7 +207,7 @@ public class ProductLayer extends RenderableLayer {
     }
 
     private void addWaveProduct(final Product product) {
-        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement root = AbstractMetadata.getOriginalProductMetadata(product);
         final MetadataElement ggADS = root.getElement("GEOLOCATION_GRID_ADS");
         if (ggADS == null) return;
 

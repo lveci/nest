@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,7 @@ public class TestMapProjectionOp extends TestCase {
 
     private OperatorSpi spi;
 
-    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX", "GeoTIFF" };
     private String[] exceptionExemptions = { "not supported", "already map projected" };
 
     @Override
@@ -53,22 +53,22 @@ public class TestMapProjectionOp extends TestCase {
 
     public void testProcessAllALOS() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllRadarsat2() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllTerraSARX() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllCosmo() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllNestBox() throws Exception

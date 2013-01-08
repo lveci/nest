@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -179,7 +179,7 @@ public class FilterOperator extends Operator {
         return filterBand;
     }
 
-    private KernelFilter getUserDefinedFilter(File userDefinedKernelFile) {
+    private static KernelFilter getUserDefinedFilter(File userDefinedKernelFile) {
         final float[][] kernelData = UndersamplingOp.readFile(userDefinedKernelFile.getAbsolutePath());
         final int filterWidth = kernelData.length;
         final int filterHeight = kernelData[0].length;

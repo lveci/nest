@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,7 +16,10 @@
 package org.esa.nest.gpf.oceantools;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
@@ -30,10 +33,10 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.dataio.dem.DEMFactory;
 import org.esa.nest.gpf.OperatorUtils;
-import org.esa.nest.gpf.TileIndex;
 import org.esa.nest.gpf.TileGeoreferencing;
-import org.esa.nest.gpf.DEMFactory;
+import org.esa.nest.gpf.TileIndex;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -117,11 +120,11 @@ public class CreateLandMaskOp extends Operator {
                 virtBand.setDescription(srcBand.getDescription());
                 sourceProduct.addBand(virtBand);
 
-                final Band targetBand = ProductUtils.copyBand(virtBand.getName(), sourceProduct, targetProduct);
+                final Band targetBand = ProductUtils.copyBand(virtBand.getName(), sourceProduct, targetProduct, false);
                 targetBand.setName(srcBand.getName());
                 targetBand.setSourceImage(virtBand.getSourceImage());
             } else {
-                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
                 if(byPass) {
                     targetBand.setSourceImage(srcBand.getSourceImage());
                 }
@@ -165,10 +168,10 @@ public class CreateLandMaskOp extends Operator {
             final int maxY = targetRectangle.y + targetRectangle.height;
             boolean valid;
 
-            final TileIndex tileIndex = new TileIndex(trgTiles[0].srcTile);        
-            final float demNoDataValue = dem.getDescriptor().getNoDataValue();
-
+            final TileIndex tileIndex = new TileIndex(trgTiles[0].srcTile);
             final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, minX, minY, maxX-minX, maxY-minY);
+
+            final float demNoDataValue = dem.getDescriptor().getNoDataValue();
             final float[][] localDEM = new float[maxY-minY+2][maxX-minX+2];
             DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, minX, minY, maxX-minX, maxY-minY, localDEM);
 

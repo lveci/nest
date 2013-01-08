@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,8 +26,8 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.BaseCalibrator;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.GeoUtils;
 import org.esa.nest.util.Settings;
 
 import java.awt.*;
@@ -585,6 +585,8 @@ public class ASARCalibrator extends BaseCalibrator implements Calibrator {
         } else {
             ads = origRoot.getElement("MAIN_PROCESSING_PARAMS_ADS").
                     getElement("MAIN_PROCESSING_PARAMS_ADS.1");
+            if(ads == null)
+                ads = origRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         }
 
         if (ads == null) {
@@ -933,7 +935,7 @@ public class ASARCalibrator extends BaseCalibrator implements Calibrator {
                 // apply calibration constant and incidence angle corrections
                 sigma *= Math.sin(incidenceAnglesArray[xx] * MathUtils.DTOR) / theCalibrationFactor;
 
-                if (applyRangeSpreadingCorr) { // apply range spreading loss compensation
+                if (applyRangeSpreadingCorr && targetTileSlantRange != null) { // apply range spreading loss compensation
                     /*
                     time = slantRangeTimeArray[xx] / 1000000000.0; //convert ns to s
                     sigma *= Math.pow(time * halfLightSpeedByRefSlantRange, rangeSpreadingCompPower);

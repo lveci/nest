@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,6 +19,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeConfigException;
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
+import junit.framework.TestCase;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.*;
 import org.esa.beam.framework.datamodel.*;
@@ -63,6 +64,16 @@ public class TestUtils {
     private final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.subsetHeight"));
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
+    private static final String testReadersOnAllProducts = testPreferences.getPropertyString(contextID+".test.ReadersOnAllProducts");
+    private static final String testProcessingOnAllProducts = testPreferences.getPropertyString(contextID+".test.ProcessingOnAllProducts");
+    private static final String testBenchmarks = testPreferences.getPropertyString(contextID+".test.RunBenchmarks");
+
+    public static final boolean canTestReadersOnAllProducts = testReadersOnAllProducts != null && testReadersOnAllProducts.equalsIgnoreCase("true");
+    public static final boolean canTestProcessingOnAllProducts = testProcessingOnAllProducts != null && testProcessingOnAllProducts.equalsIgnoreCase("true");
+    public static final boolean runBenchmarks = testBenchmarks != null && testBenchmarks.equalsIgnoreCase("true");
+
+    private static final boolean DEBUG = true;
+    private static final boolean FailOnSkip = true;
 
     public static void initTestEnvironment() throws RuntimeConfigException {
         final RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
@@ -79,22 +90,10 @@ public class TestUtils {
         final File inputFile = new File(path);
         if(!inputFile.exists()) {
             throw new IOException(path + " not found");
-            //System.out.println("path + \" not found\"");
-            //return null;
         }
 
         final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
         return reader.readProductNodes(inputFile, null);
-    }
-
-    public static boolean canTestReadersOnAllProducts() {
-        final String testAllProducts = testPreferences.getPropertyString(contextID+".test.ReadersOnAllProducts");
-        return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
-    }
-
-    public static boolean canTestProcessingOnAllProducts() {
-        final String testAllProducts = testPreferences.getPropertyString(contextID+".test.ProcessingOnAllProducts");
-        return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 
     public static Product createProduct(final String type, final int w, final int h) {
@@ -224,8 +223,8 @@ public class TestUtils {
 
     public static void executeOperator(final Operator op) throws Exception {
         // get targetProduct: execute initialize()
- /*       final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false, !isAlos(targetProduct));
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
 
         final Band targetBand = targetProduct.getBandAt(0);
         if(targetBand == null)
@@ -240,7 +239,20 @@ public class TestUtils {
                               within(subsetY, bandHeight),
                               within(subsetWidth, bandWidth),
                               within(subsetHeight, bandHeight), 
-                              floatValues, ProgressMonitor.NULL);   */
+                              floatValues, ProgressMonitor.NULL);
+    }
+
+    public static void executeOperator(final Operator op, final int dimensions) throws Exception {
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+
+        // readPixels: execute computeTiles()
+        final int w = Math.min(targetProduct.getSceneRasterWidth(), dimensions);
+        final int h = Math.min(targetProduct.getSceneRasterHeight(), dimensions);
+        final float[] floatValues = new float[w*h];
+        final Band targetBand = targetProduct.getBandAt(0);
+        targetBand.readPixels(0, 0, w, h, floatValues, ProgressMonitor.NULL);
     }
 
     public static Product createSubsetProduct(final Product sourceProduct) throws IOException {
@@ -295,7 +307,7 @@ public class TestUtils {
                 final ProductReader reader = ProductIO.getProductReaderForFile(file);
                 if(reader != null) {
                     final Product sourceProduct = reader.readProductNodes(file, null);
-                    if(contains(sourceProduct.getProductType(), productTypeExemptions))
+                    if(productTypeExemptions != null && containsProductType(productTypeExemptions, sourceProduct.getProductType()))
                         continue;
 
                     TestUtils.verifyProduct(sourceProduct, false, false);
@@ -330,11 +342,12 @@ public class TestUtils {
         return iterations;
     }
 
-    public static boolean contains(final String value, final String[] exemptions) {
-        if(exemptions != null) {
-            for(String type : exemptions) {
-                if(value.contains(type))
+    public static boolean containsProductType(final String[] productTypeExemptions, final String productType) {
+        if(productTypeExemptions != null) {
+            for (String str : productTypeExemptions) {
+                if (productType.contains(str)) {
                     return true;
+                }
             }
         }
         return false;
@@ -355,7 +368,7 @@ public class TestUtils {
         final File folder = new File(folderPath);
         if(!folder.exists()) return;
 
-        if(canTestProcessingOnAllProducts()) {
+        if(canTestProcessingOnAllProducts) {
             int iterations = 0;
             recurseProcessFolder(spi, folder, iterations, productTypeExemptions, exceptionExemptions);
         }
@@ -376,7 +389,7 @@ public class TestUtils {
         final File folder = new File(folderPath);
         if(!folder.exists()) return;
 
-        if(canTestProcessingOnAllProducts()) {
+        if(canTestProcessingOnAllProducts) {
             int iterations = 0;
             processor.recurseProcessFolder(folder, iterations, productTypeExemptions, exceptionExemptions);
         }
@@ -401,14 +414,14 @@ public class TestUtils {
                     //System.out.println("Reading "+ file.toString());
 
                     final Product product = reader.readProductNodes(file, null);
-                    if(contains(product.getProductType(), productTypeExemptions))
-                            continue;
+                    if(productTypeExemptions != null && containsProductType(productTypeExemptions, product.getProductType()))
+                        continue;
                     ReaderUtils.verifyProduct(product, true);
                 } catch(Exception e) {
                     boolean ok = false;
                     if(exceptionExemptions != null) {
                         for(String excemption : exceptionExemptions) {
-                            if(e.getMessage().contains(excemption)) {
+                            if(e.getMessage() != null && e.getMessage().contains(excemption)) {
                                 ok = true;
                                 System.out.println("Excemption for "+e.getMessage());
                                 break;
@@ -421,6 +434,15 @@ public class TestUtils {
                     }
                 }
             }
+        }
+    }
+
+    public static void skipTest(final TestCase obj) throws Exception {
+        if(DEBUG) {
+            System.out.println(obj.getClass().getName()+':'+obj.getName()+" skipped");
+        }
+        if(FailOnSkip) {
+            throw new Exception(obj.getClass().getName()+':'+obj.getName()+" skipped");
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,7 +16,6 @@
 package org.esa.nest.gpf;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.TestUtils;
 
@@ -46,10 +45,13 @@ public class TestOrthorectifyGraph extends TestCase {
 
     }
 
-    public void testOrthorectifyGraph() throws GraphException {
+    public void testOrthorectifyGraph() throws Exception {
         final File inputFile = new File(TestUtils.rootPathExpectedProducts, ASAR_IMM);
         final File outputFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmpOut.dim");
-        if(!inputFile.exists()) return;
+        if(!inputFile.exists()) {
+            TestUtils.skipTest(this);
+            return;
+        }
 
     /*     final GraphExecuter graphEx = new GraphExecuter();
         graphEx.loadGraph(new File(ResourceUtils.getGraphFolder("User Graphs"), graphFile1), false);

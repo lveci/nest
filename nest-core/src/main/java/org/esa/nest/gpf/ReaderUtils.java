@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -46,6 +46,7 @@ public final class ReaderUtils {
                 expression);
         virtBand.setUnit(Unit.PHASE);
         virtBand.setDescription("Phase from complex data");
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
     }
 
@@ -60,6 +61,7 @@ public final class ReaderUtils {
                 expression);
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
 
         // set as band to use for quicklook
@@ -76,6 +78,7 @@ public final class ReaderUtils {
                 expression);
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
     }
 
@@ -108,6 +111,8 @@ public final class ReaderUtils {
 
         float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
+        if(subSamplingX == 0 || subSamplingY == 0)
+            return;
 
         final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
@@ -171,6 +176,8 @@ public final class ReaderUtils {
     }
 
     public static double getLineTimeInterval(final ProductData.UTC startUTC, final ProductData.UTC endUTC, final int sceneHeight) {
+        if(startUTC == null || endUTC == null)
+            return 0;
         final double startTime = startUTC.getMJD() * 24.0 * 3600.0;
         final double stopTime = endUTC.getMJD() * 24.0 * 3600.0;
         return (stopTime-startTime) / (double)(sceneHeight-1);
@@ -187,8 +194,10 @@ public final class ReaderUtils {
     public static void verifyProduct(final Product product, final boolean verifyTimes, final boolean verifyGeoCoding) throws Exception {
         if(product == null)
             throw new Exception("product is null");
-        if(verifyGeoCoding && product.getGeoCoding() == null)
-            throw new Exception("geocoding is null");
+        if(verifyGeoCoding && product.getGeoCoding() == null) {
+            System.out.println("Geocoding is null for "+product.getFileLocation().getAbsolutePath());
+            //throw new Exception("geocoding is null");
+        }
         if(product.getMetadataRoot() == null)
             throw new Exception("metadataroot is null");
         if(product.getNumBands() == 0)
@@ -208,6 +217,8 @@ public final class ReaderUtils {
     }
 
     public static ProductData.UTC getTime(final MetadataElement elem, final String tag, final DateFormat timeFormat) {
+        if(elem == null)
+            return AbstractMetadata.NO_METADATA_UTC;
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
                 new char[]{':','.','-'}, ' ').trim();
         return AbstractMetadata.parseUTC(timeStr, timeFormat);
@@ -255,7 +266,7 @@ public final class ReaderUtils {
         final String dicardUnusedMetadata = RuntimeContext.getModuleContext().getRuntimeConfig().
                                                     getContextProperty("discard.unused.metadata");
         if(dicardUnusedMetadata.equalsIgnoreCase("true")) {
-            removeUnusedMetadata(product.getMetadataRoot());
+            removeUnusedMetadata(AbstractMetadata.getOriginalProductMetadata(product));
         }
     }
 

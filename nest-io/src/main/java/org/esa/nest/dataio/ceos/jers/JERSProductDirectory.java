@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.util.Constants;
+import org.esa.nest.eo.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -122,7 +122,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.setEndTime(getUTCScanStopTime(leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
-        ReaderUtils.addGeoCoding(product, leaderFile.getLatCorners(), leaderFile.getLonCorners());
+        ReaderUtils.addGeoCoding(product, leaderFile.getLatCorners(leaderFile.getMapProjRecord()),
+                                          leaderFile.getLonCorners(leaderFile.getMapProjRecord()));
         addTiePointGrids(product, leaderFile.getFacilityRecord(), leaderFile.getSceneRecord());
         addMetaData(product);
 
@@ -159,7 +160,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     private void addMetaData(final Product product) throws IOException {
-        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement root = AbstractMetadata.addOriginalProductMetadata(product);
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         leaderFile.addMetadata(leadMetadata);
@@ -181,7 +182,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         }
 
         addSummaryMetadata(new File(baseDir, JERSConstants.SUMMARY_FILE_NAME), "Summary Information", root);
-        addAbstractedMetadataHeader(product, root);
+        addAbstractedMetadataHeader(product, product.getMetadataRoot());
     }
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {

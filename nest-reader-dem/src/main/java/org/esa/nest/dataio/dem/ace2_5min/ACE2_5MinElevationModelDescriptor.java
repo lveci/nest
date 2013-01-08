@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -101,6 +101,8 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
         if(aceDemInstallDir == null) {
             final String path = Settings.instance().get("DEM/ace2_5MinDEMDataPath");
             aceDemInstallDir = new File(path);
+            if(!aceDemInstallDir.exists())
+                aceDemInstallDir.mkdirs();
         }
         return aceDemInstallDir;
     }

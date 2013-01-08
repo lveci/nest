@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -15,13 +15,12 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dataio.dem.DEMFactory;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -39,14 +38,10 @@ import java.util.Map;
 public class SARSimulationOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox demName = new JComboBox();
+    private final JComboBox<String> demName = new JComboBox<String>(DEMFactory.getDEMNameList());
     private static final String externalDEMStr = "External DEM";
 
-    private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                      ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME,
-                                                                      ResamplingFactory.BICUBIC_INTERPOLATION_NAME,
-                                                                      ResamplingFactory.BISINC_INTERPOLATION_NAME});
+    private final JComboBox demResamplingMethod = new JComboBox<String>(ResamplingFactory.resamplingNames);
 
     private final JTextField externalDEMFile = new JTextField("");
     private final JTextField externalDEMNoDataValue = new JTextField("");
@@ -63,12 +58,6 @@ public class SARSimulationOpUI extends BaseOperatorUI {
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-
-        final ElevationModelDescriptor[] demDesciptors = elevationModelRegistry.getAllDescriptors();
-        for(ElevationModelDescriptor dem : demDesciptors) {
-            demName.addItem(DEMFactory.appendAutoDEM(dem.getName()));
-        }
         demName.addItem(externalDEMStr);
 
         initializeOperatorUI(operatorName, parameterMap);
@@ -101,7 +90,6 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         });
 
         externalDEMNoDataValue.addKeyListener(textAreaKeyListener);
-
 
         saveLayoverShadowMaskCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {

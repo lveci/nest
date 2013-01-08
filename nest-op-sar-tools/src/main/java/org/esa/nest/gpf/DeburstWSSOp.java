@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -40,7 +40,7 @@ import java.util.List;
  */
 @OperatorMetadata(alias = "DeburstWSS",
         category = "SAR Tools",
-        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
+        authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
         description="Debursts an ASAR WSS product")
 public final class DeburstWSSOp extends Operator {
 
@@ -159,8 +159,8 @@ public final class DeburstWSSOp extends Operator {
      * Compute mean pixel spacing (in m).
      */
     private void getSourceMetadata() {
-        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
-        final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement origRoot = AbstractMetadata.getOriginalProductMetadata(sourceProduct);
+        final MetadataElement mppRootElem = origRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         final MetadataElement mpp = mppRootElem.getElementAt(subSwathNum);
 
         targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
@@ -194,33 +194,33 @@ public final class DeburstWSSOp extends Operator {
         if(produceIntensitiesOnly)
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
 
-        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
-        final MetadataElement srcMPPRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement srcOrigRoot = AbstractMetadata.getOriginalProductMetadata(sourceProduct);
+        final MetadataElement srcMPPRootElem = srcOrigRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         final MetadataElement srcMPP = srcMPPRootElem.getElementAt(subSwathNum);
 
-        final ProductData.UTC startTime = srcMPP.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0));
-        final ProductData.UTC endTime = srcMPP.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0));
+        final ProductData.UTC startTime = srcMPP.getAttributeUTC("first_zero_doppler_time", AbstractMetadata.NO_METADATA_UTC);
+        final ProductData.UTC endTime = srcMPP.getAttributeUTC("last_zero_doppler_time", AbstractMetadata.NO_METADATA_UTC);
         absTgt.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
         absTgt.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
         lineTimeInterval = srcMPP.getAttributeDouble(AbstractMetadata.line_time_interval);
         absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, lineTimeInterval);
 
-        final MetadataElement tgtMetadataRoot = targetProduct.getMetadataRoot();
-        final MetadataElement tgtMppRootElem = tgtMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
-        tgtMetadataRoot.removeElement(tgtMppRootElem);
-        final MetadataElement tgtmds1RootElem = tgtMetadataRoot.getElement("MDS1_SQ_ADS");
-        tgtMetadataRoot.removeElement(tgtmds1RootElem);
+        final MetadataElement tgtOrigRoot = AbstractMetadata.getOriginalProductMetadata(targetProduct);
+        final MetadataElement tgtMppRootElem = tgtOrigRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        tgtOrigRoot.removeElement(tgtMppRootElem);
+        final MetadataElement tgtmds1RootElem = tgtOrigRoot.getElement("MDS1_SQ_ADS");
+        tgtOrigRoot.removeElement(tgtmds1RootElem);
 
-        final MetadataElement srcMDS1RootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement srcMDS1RootElem = srcOrigRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         final MetadataElement srcMDS1 = srcMDS1RootElem.getElementAt(subSwathNum);
 
         final MetadataElement tgtMPP = srcMDS1.createDeepClone();
         tgtMPP.setName("MAIN_PROCESSING_PARAMS_ADS");
-        tgtMetadataRoot.addElement(tgtMPP);
+        tgtOrigRoot.addElement(tgtMPP);
 
         final MetadataElement tgtMDS1 = srcMPP.createDeepClone();
         tgtMDS1.setName("MDS1_SQ_ADS");
-        tgtMetadataRoot.addElement(tgtMDS1);
+        tgtOrigRoot.addElement(tgtMDS1);
 
         targetProduct.setStartTime(startTime);
         targetProduct.setEndTime(endTime);
@@ -272,10 +272,10 @@ public final class DeburstWSSOp extends Operator {
 
     private void createTiePointGrids() {
 
-        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
-        final MetadataElement geolocRootElem = srcMetadataRoot.getElement("GEOLOCATION_GRID_ADS");
+        final MetadataElement origRoot = AbstractMetadata.getOriginalProductMetadata(sourceProduct);
+        final MetadataElement geolocRootElem = origRoot.getElement("GEOLOCATION_GRID_ADS");
         final MetadataElement[] geolocElems = geolocRootElem.getElements();
-        final MetadataElement mainProcRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement mainProcRootElem = origRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         final MetadataElement[] mainProcElems = mainProcRootElem.getElements();
 
         Double lineTimeInterval = 0.0;

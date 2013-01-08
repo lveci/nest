@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -58,16 +58,13 @@ public class WindFieldEstimationLayer extends Layer {
     }
 
     public static File getWindFieldReportFile(final Product product) {
-        final MetadataElement root = product.getMetadataRoot();
-        if (root != null) {
-            final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
-            if (absMetadata != null) {
-                final String windFieldReportFilePath = absMetadata.getAttributeString(AbstractMetadata.wind_field_report_file, null);
-                if(windFieldReportFilePath != null) {
-                    final File file = new File(windFieldReportFilePath);
-                    if(file.exists())
-                        return file;
-                }
+        final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
+        if (absMetadata != null) {
+            final String windFieldReportFilePath = absMetadata.getAttributeString(AbstractMetadata.wind_field_report_file, null);
+            if(windFieldReportFilePath != null) {
+                final File file = new File(windFieldReportFilePath);
+                if(file.exists())
+                    return file;
             }
         }
         return null;

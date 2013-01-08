@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 public class BaseElevationTile implements ElevationTile {
 
-    private Product product;
+    protected Product product;
     private final Band band;
     private final int bandWidth;
     protected final float noDataValue;

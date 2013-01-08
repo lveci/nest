@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -16,15 +16,16 @@
 package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dataio.dem.DEMFactory;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.MapProjectionHandler;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.MapProjectionHandler;
+import org.esa.nest.eo.SARGeocoding;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -39,23 +40,23 @@ import java.util.Map;
 public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox demName = new JComboBox();
+    private final JComboBox<String> demName = new JComboBox<String>(DEMFactory.getDEMNameList());
 
     private static final String externalDEMStr = "External DEM";
 
-    private final JComboBox demResamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
+    private JComboBox<String> demResamplingMethod = new JComboBox<String>(ResamplingFactory.resamplingNames);
 
-    final JComboBox imgResamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
+    final JComboBox<String> imgResamplingMethod = new JComboBox<String>(ResamplingFactory.resamplingNames);
 
-    final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
-                                                                          RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
-                                                                          RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+    final JComboBox incidenceAngleForGamma0 = new JComboBox<String>(new String[] {Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+            Constants.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+            Constants.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
-    final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
-                                                                          RangeDopplerGeocodingOp.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
-                                                                          RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
+    final JComboBox incidenceAngleForSigma0 = new JComboBox<String>(new String[] {Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM,
+            Constants.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
+            Constants.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
-    final JComboBox auxFile = new JComboBox(new String[] {CalibrationOp.LATEST_AUX,
+    final JComboBox auxFile = new JComboBox<String>(new String[] {CalibrationOp.LATEST_AUX,
                                                           CalibrationOp.PRODUCT_AUX,
                                                           CalibrationOp.EXTERNAL_AUX});
 
@@ -108,13 +109,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-
-        final ElevationModelDescriptor[] demDesciptors = elevationModelRegistry.getAllDescriptors();
-        for(ElevationModelDescriptor dem : demDesciptors) {
-            demName.addItem(DEMFactory.appendAutoDEM(dem.getName()));
-        }
         demName.addItem(externalDEMStr);
+        demResamplingMethod.addItem(DEMFactory.DELAUNAY_INTERPOLATION);
 
         initializeOperatorUI(operatorName, parameterMap);
 
@@ -248,7 +244,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 public void itemStateChanged(ItemEvent e) {
                     saveSigmaNought = (e.getStateChange() == ItemEvent.SELECTED);
                     if (saveSigmaNought) {
-                        if (incidenceAngleForSigma0.getSelectedItem().equals(RangeDopplerGeocodingOp.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
+                        if (incidenceAngleForSigma0.getSelectedItem().equals(Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM)) {
                             saveProjectedLocalIncidenceAngleCheckBox.setSelected(false);
                         } else {
                             saveProjectedLocalIncidenceAngleCheckBox.setSelected(true);
@@ -313,8 +309,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
             if (azimuthPixelSpacing == 0.0 || rangePixelSpacing == 0.0 || productChanged) {
                 try {
-                    azimuthPixelSpacing = RangeDopplerGeocodingOp.getAzimuthPixelSpacing(sourceProducts[0]);
-                    rangePixelSpacing = RangeDopplerGeocodingOp.getRangePixelSpacing(sourceProducts[0]);
+                    azimuthPixelSpacing = SARGeocoding.getAzimuthPixelSpacing(sourceProducts[0]);
+                    rangePixelSpacing = SARGeocoding.getRangePixelSpacing(sourceProducts[0]);
                     azimuthPixelSpacing = (double)((int)(azimuthPixelSpacing*100 + 0.5))/100.0;
                     rangePixelSpacing = (double)((int)(rangePixelSpacing*100 + 0.5))/100.0;
                 } catch (Exception e) {
@@ -325,11 +321,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 sourcePixelSpacingsLabelPart2.setText(text);
             }
 
-            if(pixelSpacingInMeter.getText().isEmpty() || productChanged) {
+            if(pixelSpacingInMeter.getText().isEmpty()) {
                 Double pixM, pixD;
                 try {
                     pixM = Math.max(azimuthPixelSpacing, rangePixelSpacing);
-                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                    pixD = SARGeocoding.getPixelSpacingInDegree(pixM);
                 } catch (Exception e) {
                     pixM = 0.0;
                     pixD = 0.0;
@@ -638,7 +634,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             try {
                 pixM = Double.parseDouble(pixelSpacingInMeter.getText());
                 if (pixM != pixMSaved) {
-                    pixD = RangeDopplerGeocodingOp.getPixelSpacingInDegree(pixM);
+                    pixD = SARGeocoding.getPixelSpacingInDegree(pixM);
                     pixelSpacingInDegree.setText(String.valueOf(pixD));
                     pixMSaved = pixM;
                     pixDSaved = pixD;
@@ -658,7 +654,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             try {
                 pixD = Double.parseDouble(pixelSpacingInDegree.getText());
                 if (pixD != pixDSaved) {
-                    pixM = RangeDopplerGeocodingOp.getPixelSpacingInMeter(pixD);
+                    pixM = SARGeocoding.getPixelSpacingInMeter(pixD);
                     pixelSpacingInMeter.setText(String.valueOf(pixM));
                     pixMSaved = pixM;
                     pixDSaved = pixD;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,7 +19,7 @@ import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.nest.datamodel.MapProjectionHandler;
+import org.esa.nest.eo.MapProjectionHandler;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -34,9 +34,7 @@ import java.util.Map;
 public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-                                                                      ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
-                                                                      ResamplingFactory.CUBIC_CONVOLUTION_NAME });
+    private final JComboBox imgResamplingMethod = new JComboBox(ResamplingFactory.resamplingNames);
     private final JButton crsButton = new JButton();
     private final MapProjectionHandler mapProjHandler = new MapProjectionHandler();
 

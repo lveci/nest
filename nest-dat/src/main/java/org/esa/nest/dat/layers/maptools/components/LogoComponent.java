@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
 package org.esa.nest.dat.layers.maptools.components;
 
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -24,18 +39,18 @@ public class LogoComponent implements MapToolsComponent {
         final Graphics2D g = image.createGraphics();
         g.drawImage(procNestIcon.getImage(), null, null);
 
-        point = new Point(100,100);
+        point = new Point(raster.getRasterWidth()-image.getWidth(), raster.getRasterHeight()-image.getHeight());
     }
 
     public void render(final Graphics2D graphics, final ScreenPixelConverter screenPixel) {
+        final AffineTransform transformSave = graphics.getTransform();
+        try {
+            final AffineTransform transform = screenPixel.getImageTransform(transformSave);
+            transform.translate(point.x, point.y);
 
-        final double[] pts = new double[2];
-        screenPixel.pixelToScreen(point, pts);
-        final double zoom = screenPixel.getZoomFactor();
-
-        final AffineTransform at = new AffineTransform();
-        at.setToTranslation((int)pts[0], (int)pts[1]);
-        at.scale(zoom, zoom);
-        graphics.drawRenderedImage(image, at);
+            graphics.drawRenderedImage(image, transform);
+        } finally {
+            graphics.setTransform(transformSave);
+        }
     }
 }

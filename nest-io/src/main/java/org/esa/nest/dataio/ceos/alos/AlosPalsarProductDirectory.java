@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,8 +31,8 @@ import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.ReaderUtils;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.GeoUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,7 +152,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         addGeoCodingFromPixelToLatLonCoefficients(product, leaderFile.getFacilityRecord());
 
         if(product.getGeoCoding() == null) {
-            ReaderUtils.addGeoCoding(product, leaderFile.getLatCorners(), leaderFile.getLonCorners());
+            ReaderUtils.addGeoCoding(product, leaderFile.getLatCorners(leaderFile.getMapProjRecord()),
+                                              leaderFile.getLonCorners(leaderFile.getMapProjRecord()));
         }
         addTiePointGrids(product);
         addMetaData(product);
@@ -385,7 +386,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private static void addGeoCodingFromWorkReport(Product product) {
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        final MetadataElement workReportElem = product.getMetadataRoot().getElement("Work Report");
+        final MetadataElement workReportElem = AbstractMetadata.getOriginalProductMetadata(product).getElement("Work Report");
         if(workReportElem != null) {
 
             try {
@@ -463,7 +464,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private void addMetaData(final Product product) throws IOException {
-        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement root = AbstractMetadata.addOriginalProductMetadata(product);
 
         if(leaderFile != null) {
             final MetadataElement leadMetadata = new MetadataElement("Leader");
@@ -489,12 +490,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         addSummaryMetadata(new File(baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addSummaryMetadata(new File(baseDir, AlosPalsarConstants.WORKREPORT_FILE_NAME), "Work Report", root);
         
-        addAbstractedMetadataHeader(product, root);
+        addAbstractedMetadataHeader(product);
     }
 
-    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
+    private void addAbstractedMetadataHeader(final Product product) {
 
-        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(product.getMetadataRoot());
+        final MetadataElement origProductMetadata = AbstractMetadata.getOriginalProductMetadata(product);
 
         final BinaryRecord sceneRec = leaderFile.getSceneRecord();
         final BinaryRecord mapProjRec = leaderFile.getMapProjRecord();
@@ -520,9 +522,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
 
-        final ProductData.UTC startTime = getStartTime(sceneRec, root, "StartDateTime");
+        final ProductData.UTC startTime = getStartTime(sceneRec, origProductMetadata, "StartDateTime");
         product.setStartTime(startTime);
-        final ProductData.UTC endTime = getEndTime(sceneRec, root, "EndDateTime", startTime);
+        final ProductData.UTC endTime = getEndTime(sceneRec, origProductMetadata, "EndDateTime", startTime);
         product.setEndTime(endTime);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
@@ -637,13 +639,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return " ";
     }
 
-    private static ProductData.UTC getStartTime(final BinaryRecord sceneRec, final MetadataElement root,
+    private static ProductData.UTC getStartTime(final BinaryRecord sceneRec, final MetadataElement origProductMetadata,
                                                 final String tagInSummary) {
         ProductData.UTC time = getUTCScanStartTime(sceneRec, null);
-        if(time.equalElems(new ProductData.UTC(0))) {
+        if(time.equalElems(AbstractMetadata.NO_METADATA_UTC)) {
             try {
                 ProductData.UTC summaryTime = null;
-                final MetadataElement summaryElem = root.getElement("Summary Information");
+                final MetadataElement summaryElem = origProductMetadata.getElement("Summary Information");
                 if(summaryElem != null) {
                     for(MetadataAttribute sum : summaryElem.getAttributes()) {
                         if(sum.getName().contains(tagInSummary)) {
@@ -654,7 +656,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 ProductData.UTC workReportTime = null;
-                final MetadataElement workReportElem = root.getElement("Work Report");
+                final MetadataElement workReportElem = origProductMetadata.getElement("Work Report");
                 if(workReportElem != null) {
                     String valueStr = workReportElem.getAttributeString("Img_SceneStartDateTime");
                     if(valueStr != null && valueStr.length() > 0) {
@@ -669,7 +671,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 ProductData.UTC imgRecTime = null;
-                final MetadataElement imageDescriptorElem = root.getElement("Image Descriptor 1");
+                final MetadataElement imageDescriptorElem = origProductMetadata.getElement("Image Descriptor 1");
                 if (imageDescriptorElem != null) {
                     final MetadataElement imageRecordElem = imageDescriptorElem.getElement("Image Record");
                     if (imageRecordElem != null) {
@@ -690,19 +692,19 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 return imgRecTime;
 
             } catch(Exception e) {
-                time = new ProductData.UTC(0);
+                time = AbstractMetadata.NO_METADATA_UTC;
             }
         }
         return time;
     }
 
-    private static ProductData.UTC getEndTime(final BinaryRecord sceneRec, final MetadataElement root,
+    private static ProductData.UTC getEndTime(final BinaryRecord sceneRec, final MetadataElement origProductMetadata,
                                               final String tagInSummary, final ProductData.UTC startTime) {
         ProductData.UTC time = getUTCScanStartTime(sceneRec, null);
-        if(time.equalElems(new ProductData.UTC(0))) {
+        if(time.equalElems(AbstractMetadata.NO_METADATA_UTC)) {
             try {
                 ProductData.UTC summaryTime = null;
-                final MetadataElement summaryElem = root.getElement("Summary Information");
+                final MetadataElement summaryElem = origProductMetadata.getElement("Summary Information");
                 if(summaryElem != null) {
                     for(MetadataAttribute sum : summaryElem.getAttributes()) {
                         if(sum.getName().contains(tagInSummary)) {
@@ -713,7 +715,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 ProductData.UTC workReportTime = null;
-                final MetadataElement workReportElem = root.getElement("Work Report");
+                final MetadataElement workReportElem = origProductMetadata.getElement("Work Report");
                 if(workReportElem != null) {
                     String valueStr = workReportElem.getAttributeString("Img_SceneEndDateTime");
                     if(valueStr != null && valueStr.length() > 0) {
@@ -738,7 +740,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
 
                 ProductData.UTC imgRecTime = null;
-                final MetadataElement imageDescriptorElem = root.getElement("Image Descriptor 1");
+                final MetadataElement imageDescriptorElem = origProductMetadata.getElement("Image Descriptor 1");
                 if (imageDescriptorElem != null) {
                     final int numRecords = imageDescriptorElem.getAttributeInt("Number of SAR DATA records", 0);
                     final MetadataElement imageRecordElem = imageDescriptorElem.getElement("Image Record");
@@ -767,7 +769,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 final double diff = centreTime.getMJD() - startTime.getMJD();
                 return new ProductData.UTC(startTime.getMJD() + (diff *2.0));
             } catch(Exception e) {
-                time = new ProductData.UTC(0);
+                time = AbstractMetadata.NO_METADATA_UTC;
             }
         }
         return time;

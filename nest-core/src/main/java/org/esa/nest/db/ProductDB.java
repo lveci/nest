@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -192,7 +192,11 @@ public class ProductDB extends DAO {
         final List<ProductEntry> listEntries = new ArrayList<ProductEntry>();
 
         final Statement queryStatement = dbConnection.createStatement();
-        final ResultSet results = queryStatement.executeQuery(strGetProductsWhere + queryStr);
+        String whereStr = strGetProductsWhere;
+        if(queryStr.isEmpty()) {
+            whereStr = strGetProductsWhere.substring(0, strGetProductsWhere.lastIndexOf(" AND "));
+        }
+        final ResultSet results = queryStatement.executeQuery(whereStr + queryStr);
         while(results.next()) {
             listEntries.add(new ProductEntry(results));
         }

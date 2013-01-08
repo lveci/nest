@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,11 +29,14 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.dataio.dem.DEMFactory;
 import org.esa.nest.dataio.dem.FileElevationModel;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
+import org.esa.nest.eo.Constants;
+import org.esa.nest.eo.GeoUtils;
+import org.esa.nest.eo.LocalGeometry;
+import org.esa.nest.eo.SARGeocoding;
 
 import java.awt.*;
 import java.io.File;
@@ -222,8 +225,8 @@ public final class SARSimulationOp extends Operator {
             nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
         }
 
-        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        nearRangeOnLeft = RangeDopplerGeocodingOp.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        nearRangeOnLeft = SARGeocoding.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
 
         isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
     }
@@ -273,7 +276,7 @@ public final class SARSimulationOp extends Operator {
         sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
         sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
 
-        RangeDopplerGeocodingOp.computeSensorPositionsAndVelocities(
+        SARGeocoding.computeSensorPositionsAndVelocities(
                 orbitStateVectors, timeArray, xPosArray, yPosArray, zPosArray,
                 sensorPosition, sensorVelocity, firstLineUTC, lineTimeInterval, sourceImageHeight);
     }
@@ -366,7 +369,7 @@ public final class SARSimulationOp extends Operator {
                 }
             }
 
-            targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+            targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, false);
             targetBand.setSourceImage(srcBand.getSourceImage());
         }
 
@@ -411,10 +414,10 @@ public final class SARSimulationOp extends Operator {
         targetGeoCoding.getGeoPos(pixPos, geoPos);
         GeoUtils.geo2xyzWGS84(geoPos.getLat(), geoPos.getLon(), alt, earthPoint);
 
-        final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
+        final double zeroDopplerTime = SARGeocoding.getEarthPointZeroDopplerTime(
                 firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
-        final double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+        final double slantRange = SARGeocoding.computeSlantRange(
                 zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
         final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.lightSpeedInMetersPerDay;
@@ -524,7 +527,7 @@ public final class SARSimulationOp extends Operator {
 
                     Double zeroDopplerTime = zeroDopplerTimeMap.get(y);
                     if(zeroDopplerTime == null) {
-                        zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
+                        zeroDopplerTime = SARGeocoding.getEarthPointZeroDopplerTime(
                             firstLineUTC, lineTimeInterval, wavelength, earthPoint,
                             sensorPosition, sensorVelocity);
                         zeroDopplerTimeMap.put(y, zeroDopplerTime);
@@ -534,7 +537,7 @@ public final class SARSimulationOp extends Operator {
                             firstLineUTC, lineTimeInterval, wavelength, earthPoint,
                             sensorPosition, sensorVelocity);     */
 
-                    double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                    double slantRange = SARGeocoding.computeSlantRange(
                             zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
                     final double zeroDopplerTimeWithoutBias =
@@ -542,10 +545,10 @@ public final class SARSimulationOp extends Operator {
 
                     double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
 
-                    slantRange = RangeDopplerGeocodingOp.computeSlantRange(zeroDopplerTimeWithoutBias,
+                    slantRange = SARGeocoding.computeSlantRange(zeroDopplerTimeWithoutBias,
                             timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
+                    double rangeIndex = SARGeocoding.computeRangeIndex(
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
                             zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
@@ -571,17 +574,16 @@ public final class SARSimulationOp extends Operator {
                         elev[xx] = computeElevationAngle(slantRange, earthPoint, sensorPos);
                     }
 
-                    final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
-                    RangeDopplerGeocodingOp.setLocalGeometry(x, y, tileGeoRef, earthPoint, sensorPos, localGeometry);
+                    final LocalGeometry localGeometry = new LocalGeometry(x, y, tileGeoRef, earthPoint, sensorPos);
 
-                    final double[] localIncidenceAngles = {RangeDopplerGeocodingOp.NonValidIncidenceAngle,
-                                                           RangeDopplerGeocodingOp.NonValidIncidenceAngle};
+                    final double[] localIncidenceAngles = {SARGeocoding.NonValidIncidenceAngle,
+                            SARGeocoding.NonValidIncidenceAngle};
 
-                    RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
+                    SARGeocoding.computeLocalIncidenceAngle(
                             localGeometry, demNoDataValue, true, true, false, x0, ymin, x, y, localDEM,
                             localIncidenceAngles); // in degrees
 
-                    if (localIncidenceAngles[0] == RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
+                    if (localIncidenceAngles[0] == SARGeocoding.NonValidIncidenceAngle) {
                         savePixel[xx] = false;
                         continue;
                     }
@@ -757,7 +759,7 @@ public final class SARSimulationOp extends Operator {
         final double H2 = sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2];
         final double R2 = earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2];
 
-        return Math.acos((slantRange*slantRange + H2 - R2)/(2*slantRange*Math.sqrt(H2)))*
+        return FastMath.acos((slantRange*slantRange + H2 - R2)/(2*slantRange*Math.sqrt(H2)))*
                 org.esa.beam.util.math.MathUtils.RTOD;
     }
     

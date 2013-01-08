@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,15 +28,15 @@ public class TestCalibrationOp extends TestCase {
 
     private OperatorSpi spi;
 
-    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_0_of_subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
-    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_0_of_subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_Calib.dim";
+    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
+    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_Calib.dim";
 
     private final static String inputPathIMP =     TestUtils.rootPathExpectedProducts+"\\input\\subset_0_of_ERS-1_SAR_PRI-ORBIT_32506_DATE__02-OCT-1997_14_53_43.dim";
     private final static String expectedPathIMP =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_0_of_ERS-1_SAR_PRI-ORBIT_32506_DATE__02-OCT-1997_14_53_43_Calib.dim";
     private final static String inputPathIMS =     TestUtils.rootPathExpectedProducts+"\\input\\subset_0_of_ERS-2_SAR_SLC-ORBIT_10249_DATE__06-APR-1997_03_09_34.dim";
     private final static String expectedPathIMS =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_0_of_ERS-2_SAR_SLC-ORBIT_10249_DATE__06-APR-1997_03_09_34_Calib.dim";
 
-    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR", "GeoTIFF" };
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR", "GeoTIFF", "SCS_U" };
     private String[] exceptionExemptions = { "Calibration: SCS_U calibration is not currently supported",
                                              "Calibration: Absolute radiometric calibration has already been applied to the product" };
 
@@ -96,17 +96,17 @@ public class TestCalibrationOp extends TestCase {
 
     public void testProcessAllALOS() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, null);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, productTypeExemptions, null);
     }
 
     public void testProcessAllRadarsat2() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, null);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, productTypeExemptions, null);
     }
 
     public void testProcessAllCosmo() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllNestBox() throws Exception

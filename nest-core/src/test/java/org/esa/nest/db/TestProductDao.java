@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,7 +24,6 @@ import org.esa.nest.util.TestUtils;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -52,9 +51,12 @@ public class TestProductDao extends TestCase {
         ProductDB.deleteInstance();
     }
 
-    public void testAddAll() throws IOException, SQLException {
+    public void testAddAll() throws Exception {
         final File folder1 = new File(TestUtils.rootPathASAR);
-        if(!folder1.exists()) return;
+        if(!folder1.exists()) {
+            TestUtils.skipTest(this);
+            return;
+        }
 
         recurseProcessFolder(folder1, db);
     }

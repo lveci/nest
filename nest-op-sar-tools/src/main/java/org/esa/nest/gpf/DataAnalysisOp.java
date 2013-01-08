@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -55,7 +55,7 @@ import java.util.HashMap;
 @OperatorMetadata(alias="Data-Analysis",
         category = "Analysis",
         description="Computes statistics",
-        authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
+        authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
         internal=true)
 public class DataAnalysisOp extends Operator {
 
@@ -170,7 +170,7 @@ public class DataAnalysisOp extends Operator {
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         for(Band band : sourceProduct.getBands()) {
-            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
         }
     }
 

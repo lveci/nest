@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2013 by Array Systems Computing Inc. http://www.array.ca
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,7 +32,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
  * Replaces the Metadata with that of another product
  */
 @OperatorMetadata(alias="ReplaceMetadata", category = "Utilities",
-                  authors = "NEST team", copyright = "(c) 2012 by Array Systems Computing Inc.",
+                  authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
                   description = "Replace the metadata of the first product with that of the second")
 public class ReplaceMetadataOp extends Operator {
 
@@ -84,7 +84,7 @@ public class ReplaceMetadataOp extends Operator {
             final Band[] bands = masterProduct.getBands();
             for (Band srcBand : bands) {
     
-                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), masterProduct, targetProduct);
+                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), masterProduct, targetProduct, false);
                 targetBand.setSourceImage(srcBand.getSourceImage());
             }
 
