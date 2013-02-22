@@ -175,7 +175,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
 
         final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        nearRangeOnLeft = SARGeocoding.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
+        if(incidenceAngle != null) {
+            nearRangeOnLeft = SARGeocoding.isNearRangeOnLeft(incidenceAngle, sourceImageWidth);
+        }
     }
 
     /**
@@ -210,7 +212,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
             targetProduct.setGeoCoding(crsHandler.getCrsGeoCoding());
 
             OperatorUtils.addSelectedBands(
-                    sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true);
+                    sourceProduct, sourceBandNames, targetProduct, targetBandNameToSourceBandName, true, true);
 
             targetGeoCoding = targetProduct.getGeoCoding();
 
@@ -341,6 +343,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         final double oneBillionthHalfSpeedLight = Constants.halfLightSpeed / Constants.oneBillion;
         final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
+        final GeoCoding srcGeocoding = sourceBand1.getGeoCoding();
 
         try {
             final ProductData trgData = targetTile.getDataBuffer();
@@ -360,7 +363,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                         lon -= 360.0;
                     }
                     geoPos.setLocation(lat, lon);
-                    sourceBand1.getGeoCoding().getPixelPos(geoPos, pixPos);
+                    srcGeocoding.getPixelPos(geoPos, pixPos);
                     if (Float.isNaN(pixPos.x) || Float.isNaN(pixPos.y) ||
                         pixPos.x < 0.0 || pixPos.x >= srcMaxRange || pixPos.y < 0.0 || pixPos.y >= srcMaxAzimuth) {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);

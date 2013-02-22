@@ -31,7 +31,10 @@ public class LogoComponent implements MapToolsComponent {
 
     private static final ImageIcon procNestIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/proc_nest.png");
     private final BufferedImage image;
-    private final Point point;
+    private final int rasterWidth;
+    private final int rasterHeight;
+    private final static double marginPct = 0.05;
+    private final int margin;
 
     public LogoComponent(final RasterDataNode raster) {
 
@@ -39,14 +42,21 @@ public class LogoComponent implements MapToolsComponent {
         final Graphics2D g = image.createGraphics();
         g.drawImage(procNestIcon.getImage(), null, null);
 
-        point = new Point(raster.getRasterWidth()-image.getWidth(), raster.getRasterHeight()-image.getHeight());
+        rasterWidth = raster.getRasterWidth();
+        rasterHeight = raster.getRasterHeight();
+        margin = (int)(Math.min(rasterWidth, rasterHeight) * marginPct);
     }
 
     public void render(final Graphics2D graphics, final ScreenPixelConverter screenPixel) {
         final AffineTransform transformSave = graphics.getTransform();
         try {
             final AffineTransform transform = screenPixel.getImageTransform(transformSave);
+
+            final double scale = (marginPct*2 * rasterWidth) / (double)image.getWidth();
+            final Point point = new Point((int)(rasterWidth-(image.getWidth()*scale)-margin),
+                                          (int)(rasterHeight-(image.getHeight()*scale)-margin));
             transform.translate(point.x, point.y);
+            transform.scale(scale, scale);
 
             graphics.drawRenderedImage(image, transform);
         } finally {

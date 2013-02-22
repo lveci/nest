@@ -47,8 +47,6 @@ public final class BandSelectOp extends Operator {
             rasterDataNodeType = Band.class, label="Source Bands")
     private String[] sourceBandNames;
 
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
-
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the

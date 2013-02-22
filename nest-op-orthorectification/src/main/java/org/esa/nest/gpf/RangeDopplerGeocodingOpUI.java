@@ -44,7 +44,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private static final String externalDEMStr = "External DEM";
 
-    private JComboBox<String> demResamplingMethod = new JComboBox<String>(ResamplingFactory.resamplingNames);
+    private JComboBox<String> demResamplingMethod = new JComboBox<String>(DEMFactory.getDEMResamplingMethods());
 
     final JComboBox<String> imgResamplingMethod = new JComboBox<String>(ResamplingFactory.resamplingNames);
 
@@ -110,7 +110,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         demName.addItem(externalDEMStr);
-        demResamplingMethod.addItem(DEMFactory.DELAUNAY_INTERPOLATION);
 
         initializeOperatorUI(operatorName, parameterMap);
 
@@ -119,8 +118,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         demName.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
-                final String item = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
-                if(item.equals(externalDEMStr)) {
+                if(((String)demName.getSelectedItem()).startsWith(externalDEMStr)) {
                     enableExternalDEM(true);
                 } else {
                     externalDEMFile.setText("");
@@ -129,8 +127,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
         externalDEMFile.setColumns(24);
-        final String demItem = ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, "");
-        enableExternalDEM(demItem.equals(externalDEMStr));
+        enableExternalDEM(((String)demName.getSelectedItem()).startsWith(externalDEMStr));
 
         auxFile.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
@@ -272,7 +269,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     @Override
     public void initParameters() {
-        OperatorUIUtils.initBandList(bandList, getBandNames());
+        OperatorUIUtils.initParamList(bandList, getBandNames());
 
         final String demNameParam = (String)paramMap.get("demName");
         if(demNameParam != null)
@@ -321,7 +318,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 sourcePixelSpacingsLabelPart2.setText(text);
             }
 
-            if(pixelSpacingInMeter.getText().isEmpty()) {
+            if(pixelSpacingInMeter.getText().isEmpty() || productChanged) {
                 Double pixM, pixD;
                 try {
                     pixM = Math.max(azimuthPixelSpacing, rangePixelSpacing);
@@ -471,9 +468,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
+        OperatorUIUtils.updateParamList(bandList, paramMap, OperatorUIUtils.SOURCE_BAND_NAMES);
 
-        paramMap.put("demName", ((String)demName.getSelectedItem()).replace(DEMFactory.AUTODEM, ""));
+        paramMap.put("demName", (DEMFactory.getProperDEMName((String)demName.getSelectedItem())));
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("incidenceAngleForGamma0", incidenceAngleForGamma0.getSelectedItem());

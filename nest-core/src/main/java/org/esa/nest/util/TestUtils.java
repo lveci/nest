@@ -33,6 +33,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.ReaderUtils;
 import org.esa.nest.gpf.RecursiveProcessor;
 
+import javax.media.jai.JAI;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -66,17 +67,17 @@ public class TestUtils {
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString(contextID+".test.maxProductsPerRootFolder"));
     private static final String testReadersOnAllProducts = testPreferences.getPropertyString(contextID+".test.ReadersOnAllProducts");
     private static final String testProcessingOnAllProducts = testPreferences.getPropertyString(contextID+".test.ProcessingOnAllProducts");
-    private static final String testBenchmarks = testPreferences.getPropertyString(contextID+".test.RunBenchmarks");
 
     public static final boolean canTestReadersOnAllProducts = testReadersOnAllProducts != null && testReadersOnAllProducts.equalsIgnoreCase("true");
     public static final boolean canTestProcessingOnAllProducts = testProcessingOnAllProducts != null && testProcessingOnAllProducts.equalsIgnoreCase("true");
-    public static final boolean runBenchmarks = testBenchmarks != null && testBenchmarks.equalsIgnoreCase("true");
 
     private static final boolean DEBUG = true;
     private static final boolean FailOnSkip = true;
 
     public static void initTestEnvironment() throws RuntimeConfigException {
         final RuntimeConfig runtimeConfig = new DefaultRuntimeConfig();
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
 
         //disable JAI media library
         System.setProperty("com.sun.media.jai.disableMediaLib", "true");
@@ -93,6 +94,8 @@ public class TestUtils {
         }
 
         final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        if(reader == null)
+            throw new IOException("No reader found for "+inputFile);
         return reader.readProductNodes(inputFile, null);
     }
 
@@ -242,19 +245,6 @@ public class TestUtils {
                               floatValues, ProgressMonitor.NULL);
     }
 
-    public static void executeOperator(final Operator op, final int dimensions) throws Exception {
-        // get targetProduct: execute initialize()
-        final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false, false);
-
-        // readPixels: execute computeTiles()
-        final int w = Math.min(targetProduct.getSceneRasterWidth(), dimensions);
-        final int h = Math.min(targetProduct.getSceneRasterHeight(), dimensions);
-        final float[] floatValues = new float[w*h];
-        final Band targetBand = targetProduct.getBandAt(0);
-        targetBand.readPixels(0, 0, w, h, floatValues, ProgressMonitor.NULL);
-    }
-
     public static Product createSubsetProduct(final Product sourceProduct) throws IOException {
         final int bandWidth = sourceProduct.getSceneRasterWidth();
         final int bandHeight = sourceProduct.getSceneRasterHeight();
@@ -395,20 +385,34 @@ public class TestUtils {
         }
     }
 
+    private final static ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(false);
+
     public static void recurseReadFolder(final File origFolder,
                                          final ProductReaderPlugIn readerPlugin,
                                          final ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions) throws Exception {
+        recurseReadFolder(origFolder, readerPlugin, reader, productTypeExemptions, exceptionExemptions, 0);
+    }
+
+    public static int recurseReadFolder(final File origFolder,
+                                         final ProductReaderPlugIn readerPlugin,
+                                         final ProductReader reader,
+                                         final String[] productTypeExemptions,
+                                         final String[] exceptionExemptions,
+                                         int iterations) throws Exception {
         final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
         for(File folder : folderList) {
             if(!folder.getName().contains("skipTest")) {
-                recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
+                iterations = recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, exceptionExemptions, iterations);
+                if(maxIteration > 0 && iterations >= maxIteration)
+                    return iterations;
             }
         }
 
-        for(File file : origFolder.listFiles()) {
-            if(!file.isDirectory() && readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
+        final File[] files = origFolder.listFiles(fileFilter);
+        for(File file : files) {
+            if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
                     //System.out.println("Reading "+ file.toString());
@@ -417,6 +421,10 @@ public class TestUtils {
                     if(productTypeExemptions != null && containsProductType(productTypeExemptions, product.getProductType()))
                         continue;
                     ReaderUtils.verifyProduct(product, true);
+                    ++iterations;
+
+                    if(maxIteration > 0 && iterations >= maxIteration)
+                        break;
                 } catch(Exception e) {
                     boolean ok = false;
                     if(exceptionExemptions != null) {
@@ -435,6 +443,7 @@ public class TestUtils {
                 }
             }
         }
+        return iterations;
     }
 
     public static void skipTest(final TestCase obj) throws Exception {

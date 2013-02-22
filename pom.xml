@@ -156,7 +156,6 @@
 		<module>nest-world-wind-view</module>
 		<module>nest-reader-dem</module>
 		<module>nest-io</module>
-		<!--module>nest-io-sentinel1</module-->
 	    <module>nest-op-calibration</module>
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
@@ -703,7 +702,7 @@
 			</dependency>
 	        <dependency>
 	            <groupId>org</groupId>
-	            <version>1.2.2</version>
+	            <version>1.2.0</version>
 	            <artifactId>jblas</artifactId>
 	        </dependency>
 			
@@ -738,6 +737,19 @@
 				<version>1.5.r0196</version>
 	        </dependency>
 		
+			<!-- look and feel -->
+			
+			<!--dependency>
+				<groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
+				<artifactId>napkinlaf</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.seaglasslookandfeel</groupId>
+				<artifactId>seaglasslookandfeel</artifactId>
+				<version>0.2</version>
+			</dependency-->
+
         </dependencies>
     </dependencyManagement>
 

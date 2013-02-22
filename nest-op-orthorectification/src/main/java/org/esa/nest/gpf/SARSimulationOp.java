@@ -146,7 +146,6 @@ public final class SARSimulationOp extends Operator {
     private double[] zPosArray = null;
 
     private int tileSize = 100;
-    private float tileOverlapPercentage = 0.0f;
 
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
@@ -246,11 +245,10 @@ public final class SARSimulationOp extends Operator {
     private synchronized void getElevationModel() throws Exception {
 
         if(isElevationModelAvailable) return;
+        try {
         if(externalDEMFile != null) { // if external DEM file is specified by user
 
-            dem = new FileElevationModel(externalDEMFile,
-                                         ResamplingFactory.createResampling(demResamplingMethod),
-                                         (float)externalDEMNoDataValue);
+            dem = new FileElevationModel(externalDEMFile, demResamplingMethod, (float)externalDEMNoDataValue);
 
             demNoDataValue = (float) externalDEMNoDataValue;
             demName = externalDEMFile.getPath();
@@ -258,6 +256,9 @@ public final class SARSimulationOp extends Operator {
         } else {
             dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
             demNoDataValue = dem.getDescriptor().getNoDataValue();
+        }
+        } catch(Throwable t) {
+            t.printStackTrace();
         }
         isElevationModelAvailable = true;
     }
@@ -385,37 +386,44 @@ public final class SARSimulationOp extends Operator {
         }
     }
 
-    private synchronized void computeTileOverlapPercentage(final int h) throws Exception {
+    private double computeTileOverlapPercentage(final int x0, final int y0, final int w, final int h) throws Exception {
 
-        if(overlapComputed) {
-            return;
-        }
-
-        final int x = sourceImageWidth/2;
-        final double[] earthPoint = new double[3];
-        final double[] sensorPos = new double[3];
-        final GeoPos geoPos = new GeoPos();
         final PixelPos pixPos = new PixelPos();
-        tileSize = h;
-
-        int y;
-        double alt = 0.0;
-        for (y = tileSize - 1; y < sourceImageHeight; y++) {
-            pixPos.setLocation(x+0.5f,y+0.5f);
-            targetGeoCoding.getGeoPos(pixPos, geoPos);
-
-            alt = dem.getElevation(geoPos);
-            if (alt != demNoDataValue) {
-                break;
+        final GeoPos geoPos = new GeoPos();
+        double altMax = 0;
+        int xMax = 0, yMax = 0;
+        boolean foundMax = false;
+        for (int y = y0; y < y0 + h; y+=20) {
+            for (int x = x0; x < x0 + w; x+=20) {
+                pixPos.setLocation(x,y);
+                targetGeoCoding.getGeoPos(pixPos, geoPos);
+                final double alt = dem.getElevation(geoPos);
+                if(alt != demNoDataValue && altMax < alt) {
+                    altMax = alt;
+                    xMax = x;
+                    yMax = y;
+                    foundMax = true;
+                }
             }
         }
 
-        pixPos.setLocation(x,y);
+        if (!foundMax) {
+            return 0.0;
+        }
+
+        final double[] earthPoint = new double[3];
+        final double[] sensorPos = new double[3];
+
+        pixPos.setLocation(xMax, yMax);
         targetGeoCoding.getGeoPos(pixPos, geoPos);
-        GeoUtils.geo2xyzWGS84(geoPos.getLat(), geoPos.getLon(), alt, earthPoint);
+        GeoUtils.geo2xyzWGS84(geoPos.getLat(), geoPos.getLon(), altMax, earthPoint);
 
         final double zeroDopplerTime = SARGeocoding.getEarthPointZeroDopplerTime(
                 firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
+
+        if (zeroDopplerTime == SARGeocoding.NonValidZeroDopplerTime) {
+            return 0.0;
+        }
 
         final double slantRange = SARGeocoding.computeSlantRange(
                 zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
@@ -424,13 +432,13 @@ public final class SARSimulationOp extends Operator {
 
         final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
 
-        tileOverlapPercentage = (float)(azimuthIndex - y)/ (float)tileSize;
+        double tileOverlapPercentage = (float)(azimuthIndex - yMax)/ (float)tileSize;
         if (tileOverlapPercentage >= 0.0) {
             tileOverlapPercentage += 0.05;
         } else {
             tileOverlapPercentage -= 0.05;
         }
-        overlapComputed = true;
+        return tileOverlapPercentage;
     }
 
     /**
@@ -443,7 +451,7 @@ public final class SARSimulationOp extends Operator {
      * @throws OperatorException if an error occurs during computation of the target rasters.
      */
     @Override
-    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+    public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
@@ -451,13 +459,13 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        double tileOverlapPercentage;
         try {
             if (!isElevationModelAvailable) {
                 getElevationModel();
             }
-            if(!overlapComputed) {
-                computeTileOverlapPercentage(h);
-            }
+            tileOverlapPercentage = computeTileOverlapPercentage(x0, y0, w, h);
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h + ", tileOverlapPercentage = " + tileOverlapPercentage);
         } catch(Exception e) {
             throw new OperatorException(e);
         }
@@ -533,6 +541,9 @@ public final class SARSimulationOp extends Operator {
                         zeroDopplerTimeMap.put(y, zeroDopplerTime);
                     }
 
+                    if (zeroDopplerTime == SARGeocoding.NonValidZeroDopplerTime) {
+                        continue;
+                    }
                  /*   Double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(
                             firstLineUTC, lineTimeInterval, wavelength, earthPoint,
                             sensorPosition, sensorVelocity);     */
@@ -566,7 +577,7 @@ public final class SARSimulationOp extends Operator {
 
                     if (!(rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex > y0-1 && azimuthIndex < y0+h)) {
                         savePixel[xx] = false;
-                        continue;   
+                        continue;
                     }
 
                     if (saveLayoverShadowMask) {

@@ -178,7 +178,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
             final File program = new File(homeFolder, "bin"+File.separator+"exec1.bat");
 
             final String arg = '\"' +autoUpdateExe.getParent()+"\" "+autoUpdateExe.getName();
-            command = program.getAbsolutePath() + ' ' + arg;
+            command = '\"' +program.getAbsolutePath() +"\" "+ arg;
         } else if(platform.getId() == Platform.ID.macosx) {
             autoUpdateExe = new File(homeFolder, "autoupdate-osx.app");
             command = autoUpdateExe.getAbsolutePath();
@@ -194,9 +194,11 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
             try {
                 externalExecute(command);
                 System.exit(0);
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 e.printStackTrace();
             }
+        } else {
+            VisatApp.getApp().showErrorDialog("Unable to locate AutoUpdate "+autoUpdateExe.getAbsolutePath());
         }
     }
 
@@ -211,7 +213,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
                     boolean hasErrors = outputTextBuffers(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
                     System.out.println(hasErrors);
 
-                } catch(Exception e) {
+                } catch(Throwable e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());
                 }
             }

@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>NEST</fullName>
-    <version>5.0.1</version>
+    <version>5.0.3</version>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>nest-src/main/bin/common/res/nest_splash.png</splashImage>
     <componentList>
@@ -568,7 +568,7 @@ This installer will optionally remove the older version before installing a new 
             <path>${installdir}/update.ini</path>
             <text>[Update]
 url = http://corp.array.ca/nest-web/autoupdate/update.xml
-version_id = ${version}
+version_id = ${product_version}
 update_download_location = ${system_temp_directory}
 check_for_updates = 1
 </text>
