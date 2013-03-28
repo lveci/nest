@@ -39,6 +39,8 @@ import org.esa.beam.util.math.MathUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
+import uk.me.jstott.jcoord.LatLng;
+import uk.me.jstott.jcoord.UTMRef;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -83,7 +85,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         final Dimension imageTileSize = new Dimension(tileExtend, tileExtend);
         product.setPreferredTileSize(imageTileSize);
 
-        final AffineTransform i2m = createAffineTransform(georefBounds, header, height);
+        final AffineTransform i2m = createAffineTransform(georefBounds, header, width, height);
         product.setGeoCoding(createGeoCoding(width, height, i2m));
 
         int productDataType = getDataType(header, rasterStatistics);
@@ -135,11 +137,16 @@ public class ArcBinGridReader extends AbstractProductReader {
         if (rasterStatistics != null) {
             metadataRoot.addElement(MetaDataHandler.createRasterStatisticsElement(rasterStatistics));
         }
+        initMetadata(product, headerFile);
 
         return product;
     }
 
-    private GeoCoding createGeoCoding(int width, int height, AffineTransform i2m) {
+    protected void initMetadata(final Product product, final File inputFile) throws IOException {
+
+    }
+
+    private static GeoCoding createGeoCoding(int width, int height, AffineTransform i2m) {
         // TODO parse projection from prj.adf file. For now we assume WGS84 (applicable for GlobToolBox products) (mz, 2010-02-24)
         Rectangle imageBounds = new Rectangle(width, height);
         try {
@@ -151,10 +158,25 @@ public class ArcBinGridReader extends AbstractProductReader {
         return null;
     }
 
-    private AffineTransform createAffineTransform(GeorefBounds georefBounds, Header header, int height) {
+    private static AffineTransform createAffineTransform(GeorefBounds georefBounds, Header header, int width, int height) {
         AffineTransform i2m = new AffineTransform();
-        i2m.translate(georefBounds.lowerLeftX, georefBounds.lowerLeftY);
-        i2m.scale(header.pixelSizeX, -header.pixelSizeY);
+
+        if(georefBounds.lowerLeftX > 180 || georefBounds.lowerLeftX < -180 ||
+                georefBounds.lowerLeftY > 180 || georefBounds.lowerLeftY < -180) {
+            UTMRef utmLL = new UTMRef(georefBounds.lowerLeftX, georefBounds.lowerLeftY, 'N', 18);
+            LatLng ll = utmLL.toLatLng();
+            UTMRef utmUR = new UTMRef(georefBounds.upperRightX, georefBounds.upperRightY, 'N', 18);
+            LatLng ur = utmUR.toLatLng();
+
+            double pixSizeX = Math.abs(ll.getLng() - ur.getLng())/(double)width;
+            double pixSizeY = Math.abs(ll.getLat() - ur.getLat())/(double)height;
+
+            i2m.translate(ll.getLng(), ll.getLat());
+            i2m.scale(pixSizeX, -pixSizeY);
+        } else {
+            i2m.translate(georefBounds.lowerLeftX, georefBounds.lowerLeftY);
+            i2m.scale(header.pixelSizeX, -header.pixelSizeY);
+        }
         i2m.translate(0, -height);
         return i2m;
     }
@@ -176,7 +198,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         }
     }
 
-    private int getDataType(Header header, RasterStatistics rasterStatistics) throws ProductIOException {
+    private static int getDataType(Header header, RasterStatistics rasterStatistics) throws ProductIOException {
         int cellType = header.cellType;
         if (cellType == ArcBinGridConstants.CELL_TYPE_INT) {
             if (rasterStatistics != null && rasterStatistics.min >= 0 && rasterStatistics.max <= 254) {
@@ -193,7 +215,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         }
     }
 
-    private double getNodataValue(int dataType) throws ProductIOException {
+    private static double getNodataValue(int dataType) throws ProductIOException {
         if (dataType == ProductData.TYPE_FLOAT32) {
             return ArcBinGridConstants.NODATA_VALUE_FLOAT;
         } else if (dataType == ProductData.TYPE_UINT8) {

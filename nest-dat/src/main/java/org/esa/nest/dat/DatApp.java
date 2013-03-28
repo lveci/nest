@@ -128,6 +128,8 @@ public class DatApp extends VisatApp {
 
             validateAuxDataFolder();
 
+            UIManager.put("List.lockToPositionOnScroll", Boolean.FALSE);
+
             backgroundInitTasks();
         } catch(Throwable t) {
             VisatApp.getApp().showErrorDialog("PostInit failed. "+t.toString());
@@ -325,9 +327,7 @@ public class DatApp extends VisatApp {
     @Override
     protected CommandBar createMainToolBar() {
         // context of action in module.xml used as key
-        final CommandBar toolBar = new CommandBar("mainToolBar");
-        toolBar.setTitle("Standard");
-        toolBar.addDockableBarListener(new ToolBarListener());
+        final CommandBar toolBar = createToolBar(MAIN_TOOL_BAR_ID, "Standard");
 
         addCommandsToToolBar(toolBar, new String[]{
                 "newProject",
