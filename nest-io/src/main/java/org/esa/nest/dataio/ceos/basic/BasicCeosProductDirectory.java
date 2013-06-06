@@ -154,7 +154,7 @@ class BasicCeosProductDirectory extends CEOSProductDirectory {
         final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME);
         if(slantRangeTimeTPG != null) {
             final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
-            final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
+            final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / Constants.oneBillion; //s
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
                     slantRangeTime*Constants.halfLightSpeed);
         }
@@ -536,7 +536,7 @@ class BasicCeosProductDirectory extends CEOSProductDirectory {
         double a1 = 876600.0*3600.0 + 8640184.812866;
         double a2 = 0.093104;
         double a3 = -6.2e-6;
-        double thp = ((a1 + 2.0*a2*t + 3.0*a3*t*t)/240.0*Math.PI/180.0)/(36525.0*86400.0);
+        double thp = ((a1 + 2.0*a2*t + 3.0*a3*t*t)/240.0*Constants.PI/180.0)/(36525.0*Constants.secondsInDay);
 
         final double xVelECEF = -sinTheta*thp*xPosECI + cosTheta*thp*yPosECI + cosTheta*xVelECI + sinTheta*yVelECI;
         final double yVelECEF = -cosTheta*thp*xPosECI - sinTheta*thp*yPosECI - sinTheta*xVelECI + cosTheta*yVelECI;
@@ -613,7 +613,7 @@ class BasicCeosProductDirectory extends CEOSProductDirectory {
 
         // get slant range time in nanoseconds from range distance in meters
         for(k = 0; k < rangeDist.length; k++) {
-            rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed)*1000000000;// in ns
+            rangeTime[k] = (float)((rangeDist[k] / Constants.halfLightSpeed)*Constants.oneBillion);// in ns
         }
 
         final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
@@ -698,7 +698,7 @@ class BasicCeosProductDirectory extends CEOSProductDirectory {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
-        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / Constants.secondsInDay; // s to day
 
         final double latMid = sceneRec.getAttributeDouble("scene centre geodetic latitude");
         final double lonMid = sceneRec.getAttributeDouble("scene centre geodetic longitude");
@@ -778,7 +778,7 @@ class BasicCeosProductDirectory extends CEOSProductDirectory {
                     x = (int)(c * subSamplingX);
                 }
 
-                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
+                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / Constants.oneBillion; // ns to s;
                 final GeoPos geoPos = computeLatLon(latMid, lonMid, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon; 

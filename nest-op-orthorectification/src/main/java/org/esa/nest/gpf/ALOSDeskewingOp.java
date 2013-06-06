@@ -42,7 +42,11 @@ import java.util.Set;
  * Reference: ALOS-PALSAR-FAQ-001, ESRIN Contract No.20700/07/I-OL, IDEAS QC PALSAR Team
  */
 
-@OperatorMetadata(alias="ALOS-Deskewing", category = "Geometry", description="Deskewing ALOS product")
+@OperatorMetadata(alias="ALOS-Deskewing",
+                  category = "Geometry",
+                  authors = "Jun Lu, Luis Veci",
+                  copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
+                  description="Deskewing ALOS product")
 public class ALOSDeskewingOp extends Operator {
 
     public static final String PRODUCT_SUFFIX = "_DS";
@@ -155,7 +159,7 @@ public class ALOSDeskewingOp extends Operator {
 
         lastLineTime = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
 
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / Constants.secondsInDay; // s to day
 
         dopplerCentroidCoefficientLists = AbstractMetadata.getDopplerCentroidCoefficients(absRoot);
 
@@ -300,7 +304,8 @@ public class ALOSDeskewingOp extends Operator {
             for(Band targetBand : keySet) {
 
                 final Tile targetTile = targetTiles.get(targetBand);
-                final Tile sourceTile = getSourceTile(sourceProduct.getBand(targetBand.getName()), sourceRectangle);
+                final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName())[0];
+                final Tile sourceTile = getSourceTile(sourceProduct.getBand(srcBandName), sourceRectangle);
                 final ProductData trgDataBuffer = targetTile.getDataBuffer();
                 final ProductData srcDataBuffer = sourceTile.getDataBuffer();
                 final TileIndex srcIndex = new TileIndex(sourceTile);

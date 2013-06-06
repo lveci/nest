@@ -301,7 +301,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         // slant range time (2-way)
         if(leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
 
-            final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
+            final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * Constants.oneMillion;  // MHz to Hz
 
             final double tmp = subSamplingX * Constants.halfLightSpeed / samplingRate;
             int k = 0;
@@ -334,7 +334,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         // get slant range time in nanoseconds from range distance in meters
         for(int k = 0; k < rangeDist.length; k++) {
-             rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed * 1000000000.0); // in ns
+             rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed * Constants.oneBillion); // in ns
         }
 
         final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
@@ -808,7 +808,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
-        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / Constants.secondsInDay; // s to day
 
         AbstractMetadata.OrbitStateVector[] orbitStateVectors;
         try {
@@ -885,7 +885,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     x = (int)(c * subSamplingX);
                 }
 
-                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
+                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / Constants.oneBillion; // ns to s;
                 final GeoPos geoPos = computeLatLon(refLat, refLon, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon;

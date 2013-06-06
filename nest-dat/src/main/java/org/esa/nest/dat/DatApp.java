@@ -37,6 +37,7 @@ import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.db.ProductDB;
+import org.esa.nest.eo.MapProjectionHandler;
 import org.esa.nest.util.MemUtils;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
@@ -63,6 +64,8 @@ public class DatApp extends VisatApp {
         DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = true;
 
         // enable anti-aliased text:
+
+        System.setProperty("sun.java2d.opengl","true");
         System.setProperty("awt.useSystemAAFontSettings","on");
         System.setProperty("swing.aatext", "true");
     }
@@ -170,7 +173,11 @@ public class DatApp extends VisatApp {
         @Override
         public void run() {
             try {
+                //speed up init of Product Library
                 ProductDB.instance();
+
+                //speed up init of projections in terrain correction
+                MapProjectionHandler dummyMapProj = new MapProjectionHandler();
             } catch(Exception e) {
                 e.printStackTrace();
             }

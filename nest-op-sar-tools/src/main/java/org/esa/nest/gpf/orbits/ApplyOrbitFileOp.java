@@ -28,6 +28,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Orbits;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.eo.Constants;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.eo.GeoUtils;
 
@@ -63,6 +64,8 @@ import java.io.File;
 
 @OperatorMetadata(alias="Apply-Orbit-File",
         category = "Utilities",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
         description="Apply orbit file")
 public final class ApplyOrbitFileOp extends Operator {
 
@@ -195,7 +198,7 @@ public final class ApplyOrbitFileOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / Constants.secondsInDay; // s to day
     }
 
     /**
@@ -258,7 +261,7 @@ public final class ApplyOrbitFileOp extends Operator {
                 targetIncidenceAngleTiePoints[k] = incidenceAngle.getPixelFloat((float)x, (float)y);
                 targetSlantRangeTimeTiePoints[k] = slantRangeTime.getPixelFloat((float)x, (float)y);
 
-                final double slrgTime = (double)targetSlantRangeTimeTiePoints[k] / 1000000000.0; // ns to s;
+                final double slrgTime = targetSlantRangeTimeTiePoints[k] / Constants.oneBillion; // ns to s;
                 final GeoPos geoPos = computeLatLon(x, y, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon;

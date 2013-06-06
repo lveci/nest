@@ -19,6 +19,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.io.WKTReader;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
@@ -56,16 +57,22 @@ public class SubsetUI extends BaseOperatorUI {
     private final WorldMapUI worldMapUI = new WorldMapUI();
     private final JTextField geoText = new JTextField("");
     private Geometry geoRegion = null;
-    private boolean pixelCoords = true;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
+        worldMapUI.addListener(new MapListener());
+
         initParameters();
 
-        worldMapUI.addListener(new MapListener());
+        geoText.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateGeoRegion();
+            }
+        });
 
         return new JScrollPane(panel);
     }
@@ -95,6 +102,18 @@ public class SubsetUI extends BaseOperatorUI {
         height.setText(String.valueOf(heightVal));
         subSamplingX.setText(String.valueOf(paramMap.get("subSamplingX")));
         subSamplingY.setText(String.valueOf(paramMap.get("subSamplingY")));
+
+        geoRegion = (Geometry)paramMap.get("geoRegion");
+        if(geoRegion != null) {
+            geoCoordRadio.setSelected(true);
+
+            final Coordinate coord[] = geoRegion.getCoordinates();
+            worldMapUI.setSelectionStart((float)coord[0].y, (float)coord[0].x);
+            worldMapUI.setSelectionEnd((float)coord[2].y, (float)coord[2].x);
+
+            pixelPanel.setVisible(false);
+            geoPanel.setVisible(true);
+        }
     }
 
     @Override
@@ -126,7 +145,7 @@ public class SubsetUI extends BaseOperatorUI {
         if(subSamplingYStr != null && !subSamplingYStr.isEmpty())
             paramMap.put("subSamplingY", Integer.parseInt(subSamplingYStr));
 
-        if(!pixelCoords && geoRegion != null) {
+        if(geoCoordRadio.isSelected() && geoRegion != null) {
             paramMap.put("geoRegion", geoRegion);
         }
     }
@@ -198,11 +217,9 @@ public class SubsetUI extends BaseOperatorUI {
             if (e.getActionCommand().contains("pixelCoordRadio")) {
                 pixelPanel.setVisible(true);
                 geoPanel.setVisible(false);
-                pixelCoords = true;
             } else {
                 pixelPanel.setVisible(false);
                 geoPanel.setVisible(true);
-                pixelCoords = false;
             }
         }
     }
@@ -210,7 +227,7 @@ public class SubsetUI extends BaseOperatorUI {
     private void getGeoRegion() {
         geoRegion = null;
         geoText.setText("");
-        if(!pixelCoords) {
+        if(geoCoordRadio.isSelected()) {
             final GeoPos[] selectionBox = worldMapUI.getSelectionBox();
             if(selectionBox != null) {
                 final Coordinate[] coords = new Coordinate[selectionBox.length+1];
@@ -225,6 +242,21 @@ public class SubsetUI extends BaseOperatorUI {
                 geoRegion = geometryFactory.createPolygon(linearRing, null);
                 geoText.setText(geoRegion.toText());
             }
+        }
+    }
+
+    private void updateGeoRegion() {
+        try {
+            geoRegion = new WKTReader().read(geoText.getText());
+
+            final Coordinate coord[] = geoRegion.getCoordinates();
+            worldMapUI.setSelectionStart((float)coord[0].y, (float)coord[0].x);
+            worldMapUI.setSelectionEnd((float)coord[2].y, (float)coord[2].x);
+            worldMapUI.getWorlMapPane().revalidate();
+            worldMapUI.getWorlMapPane().getLayerCanvas().updateUI();
+        } catch(Exception e) {
+            e.printStackTrace();
+            // do nothing
         }
     }
 

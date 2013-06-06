@@ -16,10 +16,9 @@
 
 package org.esa.beam.framework.dataop.resamp;
 
+import org.esa.beam.util.math.Array;
 
-import com.sun.corba.se.spi.presentation.rmi.IDLNameTranslator;
-
-final class BilinearInterpolationResampling implements Resampling {
+public final class BilinearInterpolationResampling implements Resampling {
 
     public String getName() {
         return "BILINEAR_INTERPOLATION";
@@ -75,26 +74,23 @@ final class BilinearInterpolationResampling implements Resampling {
         }
     }
 
-    public final float resample(final Raster raster,
-                                final Index index) throws Exception {
+    public final double resample(final Raster raster, final Index index) throws Exception {
 
-        final int[] x = new int[2];
-        final int[] y = new int[2];
-        final float[][] samples = new float[2][2];
+        final int[] x = new int[] {(int)index.i[0], (int)index.i[1] };
+        final int[] y = new int[] {(int)index.j[0], (int)index.j[1]};
+        final double[][] samples = new double[2][2];
 
-        x[0] = (int)index.i[0];
-        y[0] = (int)index.j[0];
-        x[1] = (int)index.i[1];
-        y[1] = (int)index.j[1];
-        raster.getSamples(x, y, samples);
+        if (!raster.getSamples(x, y, samples)) {
+            return samples[0][0];
+        }
 
         final double ki = index.ki[0];
         final double kj = index.kj[0];
 
-        return (float)(samples[0][0] * (1f - ki) * (1f - kj) +
-                       samples[0][1] * ki * (1f - kj) +
-                       samples[1][0] * (1f - ki) * kj +
-                       samples[1][1] * ki * kj);
+        return samples[0][0] * (1f - ki) * (1f - kj) +
+               samples[0][1] * ki * (1f - kj) +
+               samples[1][0] * (1f - ki) * kj +
+               samples[1][1] * ki * kj;
     }
 
     @Override

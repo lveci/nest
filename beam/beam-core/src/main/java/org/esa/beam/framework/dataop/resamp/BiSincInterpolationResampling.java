@@ -55,42 +55,68 @@ final class BiSincInterpolationResampling implements Resampling {
         final int iMax = width - 1;
         final int jMax = height - 1;
 
-        index.i[0] = Index.crop(i0 - 2, iMax);
-        index.i[1] = Index.crop(i0 - 1, iMax);
-        index.i[2] = Index.crop(i0, iMax);
-        index.i[3] = Index.crop(i0 + 1, iMax);
-        index.i[4] = Index.crop(i0 + 2, iMax);
+        int i_0, i_1, i_2, i_3, i_4;
+        if (di >= 0) {
+            i_0 = i0 - 2;
+            i_1 = i0 - 1;
+            i_2 = i0;
+            i_3 = i0 + 1;
+            i_4 = i0 + 2;
+            index.ki[0] = di;
+        } else {
+            i_0 = i0 - 3;
+            i_1 = i0 - 2;
+            i_2 = i0 - 1;
+            i_3 = i0;
+            i_4 = i0 + 1;
+            index.ki[0] = di + 1;
+        }
+        index.i[0] = (i_0 < 0) ? 0 : (i_0 > iMax) ? iMax : i_0; //Index.crop(i0 - 2, iMax);
+        index.i[1] = (i_1 < 0) ? 0 : (i_1 > iMax) ? iMax : i_1; //Index.crop(i0 - 1, iMax);
+        index.i[2] = (i_2 < 0) ? 0 : (i_2 > iMax) ? iMax : i_2; //Index.crop(i0, iMax);
+        index.i[3] = (i_3 < 0) ? 0 : (i_3 > iMax) ? iMax : i_3; //Index.crop(i0 + 1, iMax);
+        index.i[4] = (i_4 < 0) ? 0 : (i_4 > iMax) ? iMax : i_4; //Index.crop(i0 + 2, iMax);
 
-        index.ki[0] = di;
-
-        index.j[0] = Index.crop(j0 - 2, jMax);
-        index.j[1] = Index.crop(j0 - 1, jMax);
-        index.j[2] = Index.crop(j0, jMax);
-        index.j[3] = Index.crop(j0 + 1, jMax);
-        index.j[4] = Index.crop(j0 + 2, jMax);
-
-        index.kj[0] = dj;
+        int j_0, j_1, j_2, j_3, j_4;
+        if (dj >= 0) {
+            j_0 = j0 - 2;
+            j_1 = j0 - 1;
+            j_2 = j0;
+            j_3 = j0 + 1;
+            j_4 = j0 + 2;
+            index.kj[0] = dj;
+        } else {
+            j_0 = j0 - 3;
+            j_1 = j0 - 2;
+            j_2 = j0 - 1;
+            j_3 = j0;
+            j_4 = j0 + 1;
+            index.kj[0] = dj + 1;
+        }
+        index.j[0] = (j_0 < 0) ? 0 : (j_0 > jMax) ? jMax : j_0; //Index.crop(j0 - 2, jMax);
+        index.j[1] = (j_1 < 0) ? 0 : (j_1 > jMax) ? jMax : j_1; //Index.crop(j0 - 1, jMax);
+        index.j[2] = (j_2 < 0) ? 0 : (j_2 > jMax) ? jMax : j_2; //Index.crop(j0, jMax);
+        index.j[3] = (j_3 < 0) ? 0 : (j_3 > jMax) ? jMax : j_3; //Index.crop(j0 + 1, jMax);
+        index.j[4] = (j_4 < 0) ? 0 : (j_4 > jMax) ? jMax : j_4; //Index.crop(j0 + 2, jMax);
     }
 
-    public final float resample(final Raster raster,
+    public final double resample(final Raster raster,
                                 final Index index) throws Exception {
 
         final int[] x = new int[5];
         final int[] y = new int[5];
-        final float[][] samples = new float[5][5];
+        final double[][] samples = new double[5][5];
 
         for (int i = 0; i < 5; i++) {
             x[i] = (int)index.i[i];
             y[i] = (int)index.j[i];
         }
-        raster.getSamples(x, y, samples);
 
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                if(Double.isNaN(samples[j][i])) {
-                    return samples[2][2];
-                }
+        if(!raster.getSamples(x, y, samples)) {
+            if (Double.isNaN(samples[2][2])) {
+                return samples[2][2];
             }
+            BiCubicInterpolationResampling.replaceNaNWithMean(samples);
         }
 
         final double muX = index.ki[0];
@@ -109,7 +135,7 @@ final class BiSincInterpolationResampling implements Resampling {
         final double tmpV3 = (f0*samples[3][0] + f1*samples[3][1] + f2*samples[3][2] + f3*samples[3][3] + f4*samples[3][4]) / sum;
         final double tmpV4 = (f0*samples[4][0] + f1*samples[4][1] + f2*samples[4][2] + f3*samples[4][3] + f4*samples[4][4]) / sum;
 
-        return (float)interpolationSinc(tmpV0, tmpV1, tmpV2, tmpV3, tmpV4, muY);
+        return interpolationSinc(tmpV0, tmpV1, tmpV2, tmpV3, tmpV4, muY);
     }
 
     private static double interpolationSinc(

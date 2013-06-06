@@ -29,6 +29,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.eo.Constants;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -51,7 +52,8 @@ import java.util.HashMap;
 
 @OperatorMetadata(alias="Multilook",
         category = "SAR Tools",
-        authors = "NEST team", copyright = "(C) 2013 by Array Systems Computing Inc.",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
         description="Averages the power across a number of lines in both the azimuth and range directions")
 public final class MultilookOp extends Operator {
 
@@ -353,7 +355,7 @@ public final class MultilookOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.slant_range_to_first_pixel, newNearEdgeSlantRange);
 
         double oldFirstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
-        double newFirstLineUTC = oldFirstLineUTC + oldLineTimeInterval*((nAzLooks - 1)/2.0) / 86400.0;
+        double newFirstLineUTC = oldFirstLineUTC + oldLineTimeInterval*((nAzLooks - 1)/2.0) / Constants.secondsInDay;
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time, new ProductData.UTC(newFirstLineUTC));
     }
 

@@ -67,8 +67,10 @@ import java.util.Map;
  */
 
 @OperatorMetadata(alias="GCP-Selection",
-                  category = "SAR Tools\\Coregistration",
-                  description = "Automatic Selection of Ground Control Points")
+        category = "SAR Tools\\Coregistration",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
+        description = "Automatic Selection of Ground Control Points")
 public class GCPSelectionOp extends Operator {
 
     @SourceProduct
@@ -76,7 +78,7 @@ public class GCPSelectionOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-     @Parameter(description = "The number of GCPs to use in a grid", interval = "(10, 100000]", defaultValue = "200",
+     @Parameter(description = "The number of GCPs to use in a grid", interval = "(10, *)", defaultValue = "200",
                 label="Number of GCPs")
     private int numGCPtoGenerate = 200;
 
@@ -743,7 +745,7 @@ public class GCPSelectionOp extends Operator {
     private boolean checkMasterGCPValidity(final Placemark mPin) throws Exception {
         final PixelPos pixelPos = mPin.getPixelPos();
         if(onlyGCPsOnLand) {
-            float alt = dem.getElevation(mPin.getGeoPos());
+            double alt = dem.getElevation(mPin.getGeoPos());
             if(alt == dem.getDescriptor().getNoDataValue())
                 return false;
         }

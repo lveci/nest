@@ -72,7 +72,11 @@ import java.util.List;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Terrain-Correction", category = "Geometry\\Terrain Correction", description="RD method for orthorectification")
+@OperatorMetadata(alias="Terrain-Correction",
+        category = "Geometry\\Terrain Correction",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
+        description="RD method for orthorectification")
 public class RangeDopplerGeocodingOp extends Operator {
 
     public static final String PRODUCT_SUFFIX = "_TC";
@@ -162,6 +166,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
+    private Band elevationBand = null;
+    private float demNoDataValue = 0.0f; // no data value for DEM
     private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
@@ -182,7 +188,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
-    private float demNoDataValue = 0.0f; // no data value for DEM
 
     private CoordinateReferenceSystem targetCRS;
     private double delLat = 0.0;
@@ -371,7 +376,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / Constants.secondsInDay; // s to day
         if (lastLineUTC == 0.0) {
             throw new OperatorException("Invalid input for Line Time Interval: " + lineTimeInterval);
         }
@@ -452,6 +457,12 @@ public class RangeDopplerGeocodingOp extends Operator {
             dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
+
+        if(elevationBand != null) {
+            elevationBand.setNoDataValue(demNoDataValue);
+            elevationBand.setNoDataValueUsed(true);
+        }
+
         isElevationModelAvailable = true;
     }
 
@@ -624,11 +635,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if(saveDEM) {
-            final Band elevBand = addTargetBand("elevation", Unit.METERS, null);
-            if(externalDEMFile != null)
-                demNoDataValue = (float)externalDEMNoDataValue;
-            elevBand.setNoDataValue(demNoDataValue);
-            elevBand.setNoDataValueUsed(true);
+            elevationBand = addTargetBand("elevation", Unit.METERS, null);
         }
 
         if(saveLocalIncidenceAngle) {
@@ -786,11 +793,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w, h);
 
         try {
-            float[][] localDEM = new float[h+2][w+2];
+            double[][] localDEM = new double[h+2][w+2];
             if(useAvgSceneHeight) {
                 DEMFactory.fillDEM(localDEM, (float)avgSceneHeight);
             } else {
-                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, x0, y0, w, h, localDEM);
+                final boolean valid = DEMFactory.getLocalDEM(dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, w, h, localDEM);
                 if(!valid && nodataValueAtSea)
                     return;
             }
@@ -831,8 +838,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 final Band[] srcBands = targetBandNameToSourceBand.get(targetBand.getName());
 
-                final TileData td = new TileData(targetTiles.get(targetBand), srcBands[0],
-                        targetBand.getName(), getBandUnit(targetBand.getName()), absRoot);
+                final TileData td = new TileData(targetTiles.get(targetBand), srcBands, isPolsar,
+                        targetBand.getName(), getBandUnit(targetBand.getName()), absRoot, calibrator, imgResampling);
 
                 td.applyRadiometricNormalization = targetBandApplyRadiometricNormalizationFlag.get(targetBand.getName());
                 td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
@@ -850,7 +857,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
-                    double alt = (double)localDEM[yy][x-x0+1];
+                    double alt = localDEM[yy][x-x0+1];
 
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
@@ -938,7 +945,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                         if (saveIncidenceAngleFromEllipsoid) {
                             incidenceAngleFromEllipsoidBuffer.setElemDoubleAt(
-                                    index, (double)incidenceAngle.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+                                    index, incidenceAngle.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
                         }
 
                         double satelliteHeight = 0;
@@ -1003,27 +1010,25 @@ public class RangeDopplerGeocodingOp extends Operator {
         try {
             final int x0 = (int)(rangeIndex + 0.5);
             final int y0 = (int)(azimuthIndex + 0.5);
-            final Band[] srcBands = targetBandNameToSourceBand.get(tileData.bandName);
-            Rectangle srcRect = null;
-            Tile sourceTileI, sourceTileQ = null;
+            Rectangle srcRect;
 
-            if (imgResampling.equals(Resampling.NEAREST_NEIGHBOUR)) {
-
-                srcRect = new Rectangle(x0, y0, 1, 1);
-
-            } else if (imgResampling.equals(Resampling.BILINEAR_INTERPOLATION)) {
+            if (imgResampling == Resampling.BILINEAR_INTERPOLATION) {
 
                 srcRect = new Rectangle(Math.max(0, x0 - 1), Math.max(0, y0 - 1), 3, 3);
 
-            } else if (imgResampling.equals(Resampling.CUBIC_CONVOLUTION)) {
+            } else if (imgResampling == Resampling.NEAREST_NEIGHBOUR) {
+
+                srcRect = new Rectangle(x0, y0, 1, 1);
+
+            } else if (imgResampling == Resampling.CUBIC_CONVOLUTION) {
 
                 srcRect = new Rectangle(Math.max(0, x0 - 2), Math.max(0, y0 - 2), 5, 5);
 
-            } else if (imgResampling.equals(Resampling.BISINC_INTERPOLATION)) {
+            } else if (imgResampling == Resampling.BISINC_INTERPOLATION) {
 
                 srcRect = new Rectangle(Math.max(0, x0 - 3), Math.max(0, y0 - 3), 6, 6);
 
-            } else if (imgResampling.equals(Resampling.BICUBIC_INTERPOLATION)) {
+            } else if (imgResampling == Resampling.BICUBIC_INTERPOLATION) {
 
                 srcRect = new Rectangle(Math.max(0, x0 - 2), Math.max(0, y0 - 2), 5, 5);
 
@@ -1031,23 +1036,16 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Unhandled interpolation method");
             }
 
-            sourceTileI = getSourceTile(srcBands[0], srcRect);
-            if (srcBands.length > 1) {
-                sourceTileQ = getSourceTile(srcBands[1], srcRect);
-            }
+            final Band[] srcBands = targetBandNameToSourceBand.get(tileData.bandName);
+            tileData.imgResamplingRaster.set(rangeIndex, azimuthIndex, getSourceTile(srcBands[0], srcRect),
+                    srcBands.length > 1 ? getSourceTile(srcBands[1], srcRect) : null);
 
-            final ResamplingRaster imgResamplingRaster = new ResamplingRaster(
-                    rangeIndex, azimuthIndex, isPolsar, tileData, sourceTileI, sourceTileQ, calibrator);
+            imgResampling.computeIndex(rangeIndex + 0.5, azimuthIndex + 0.5,
+                                    sourceImageWidth, sourceImageHeight, tileData.imgResamplingIndex);
 
-            final Resampling resampling = imgResampling;
-            final Resampling.Index imgResamplingIndex = resampling.createIndex();
+            double v = imgResampling.resample(tileData.imgResamplingRaster, tileData.imgResamplingIndex);
 
-            resampling.computeIndex(rangeIndex + 0.5, azimuthIndex + 0.5,
-                                       sourceImageWidth, sourceImageHeight, imgResamplingIndex);
-
-            float v = resampling.resample(imgResamplingRaster, imgResamplingIndex);
-
-            subSwathIndex[0] = imgResamplingRaster.getSubSwathIndex();
+            subSwathIndex[0] = tileData.imgResamplingRaster.getSubSwathIndex();
 
             return v;
 
@@ -1079,43 +1077,55 @@ public class RangeDopplerGeocodingOp extends Operator {
         final String bandPolar;
         final Unit.UnitType bandUnit;
         final double noDataValue;
+        final Band[] srcBands;
+        final boolean isPolsar;
+        private final Calibrator calibrator;
         boolean applyRadiometricNormalization = false;
         boolean applyRetroCalibration = false;
+        final boolean computeIntensity;
 
-        public TileData(final Tile tile, final Band srcBand, final String name,
-                        final Unit.UnitType unit, final MetadataElement absRoot) {
-            targetTile = tile;
-            tileDataBuffer = tile.getDataBuffer();
-            bandName = name;
-            noDataValue = srcBand.getNoDataValue();
-            bandPolar = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
-            bandUnit = unit;
+        final ResamplingRaster imgResamplingRaster;
+        final Resampling.Index imgResamplingIndex;
+
+        public TileData(final Tile tile, final Band[] srcBands, final boolean isPolsar, final String name,
+                        final Unit.UnitType unit, final MetadataElement absRoot, final Calibrator calibrator,
+                        final Resampling imgResampling) {
+            this.targetTile = tile;
+            this.tileDataBuffer = tile.getDataBuffer();
+            this.bandName = name;
+            this.srcBands = srcBands;
+            this.isPolsar = isPolsar;
+            this.noDataValue = srcBands[0].getNoDataValue();
+            this.bandPolar = OperatorUtils.getBandPolarization(srcBands[0].getName(), absRoot);
+            this.bandUnit = unit;
+            this.calibrator = calibrator;
+            this.computeIntensity = !isPolsar &&
+                    (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY);
+
+            this.imgResamplingRaster = new ResamplingRaster(this);
+            imgResamplingIndex = imgResampling.createIndex();
         }
     }
 
     public static class ResamplingRaster implements Resampling.Raster {
 
-        private final double rangeIndex, azimuthIndex;
-        private final boolean isPolsar;
+        private double rangeIndex, azimuthIndex;
         private final TileData tileData;
-        private final Unit.UnitType bandUnit;
-        private final Tile sourceTileI, sourceTileQ;
-        private final double noDataValue;
-        private final ProductData dataBufferI, dataBufferQ;
-        private final Calibrator calibrator;
+        private Tile sourceTileI;
+        private ProductData dataBufferI, dataBufferQ;
         private int subSwathIndex;
 
-        public ResamplingRaster(final double rangeIndex, final double azimuthIndex, final boolean isPolsar,
-                                final TileData tileData, final Tile sourceTileI,
-                                final Tile sourceTileQ, final Calibrator calibrator) {
+        public ResamplingRaster(final TileData tileData) {
 
+            this.tileData = tileData;
+        }
+
+        public void set(final double rangeIndex, final double azimuthIndex,
+                        final Tile sourceTileI, final Tile sourceTileQ) {
             this.rangeIndex = rangeIndex;
             this.azimuthIndex = azimuthIndex;
-            this.isPolsar = isPolsar;
-            this.tileData = tileData;
-            this.bandUnit = tileData.bandUnit;
+
             this.sourceTileI = sourceTileI;
-            this.sourceTileQ = sourceTileQ;
 
             this.dataBufferI = sourceTileI.getDataBuffer();
             if (sourceTileQ != null) {
@@ -1123,9 +1133,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             } else {
                 this.dataBufferQ = null;
             }
-
-            this.noDataValue = sourceTileI.getRasterDataNode().getNoDataValue();
-            this.calibrator = calibrator;
         }
 
         public final int getWidth() {
@@ -1136,37 +1143,41 @@ public class RangeDopplerGeocodingOp extends Operator {
             return sourceTileI.getHeight();
         }
 
-        public void getSamples(int[] x, int[] y, float[][] samples) {
+        public boolean getSamples(final int[] x, final int[] y, final double[][] samples) {
 
-            int[][] subSwathIndices = new int[y.length][x.length];
+            final int[][] subSwathIndices = new int[y.length][x.length];
             boolean allPixelsFromSameSubSwath = true;
+            boolean allValid = true;
 
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
 
-                    double v = (float)dataBufferI.getElemDoubleAt(sourceTileI.getDataBufferIndex(x[j], y[i]));
-                    if (noDataValue != 0 && (v == noDataValue)) {
-                        samples[i][j] = (float)noDataValue;
+                    final  int index = sourceTileI.getDataBufferIndex(x[j], y[i]);
+                    double v = dataBufferI.getElemDoubleAt(index);
+                    if (tileData.noDataValue != 0 && (v == tileData.noDataValue)) {
+                        samples[i][j] = tileData.noDataValue;
+                        allValid = false;
                         continue;
-                    } else {
-                        samples[i][j] = (float)v;
                     }
 
-                    if (!isPolsar && (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY)) {
+                    samples[i][j] = v;
 
-                        final double vq = dataBufferQ.getElemDoubleAt(sourceTileQ.getDataBufferIndex(x[j], y[i]));
-                        if (noDataValue != 0 && vq == noDataValue) {
-                            samples[i][j] = (float)noDataValue;
+                    if (tileData.computeIntensity) {
+
+                        final double vq = dataBufferQ.getElemDoubleAt(index);
+                        if (tileData.noDataValue != 0 && vq == tileData.noDataValue) {
+                            samples[i][j] = tileData.noDataValue;
+                            allValid = false;
                             continue;
                         }
 
-                        samples[i][j] = (float)(v*v + vq*vq);
+                        samples[i][j] = v*v + vq*vq;
                     }
 
-                    int[] subSwathIndex = {-1};
+                    final int[] subSwathIndex = {-1};
                     if (tileData.applyRetroCalibration) {
-                        samples[i][j] = (float)calibrator.applyRetroCalibration(
-                                x[j], y[i], samples[i][j], tileData.bandPolar, bandUnit, subSwathIndex);
+                        samples[i][j] = tileData.calibrator.applyRetroCalibration(
+                                x[j], y[i], samples[i][j], tileData.bandPolar, tileData.bandUnit, subSwathIndex);
 
                         subSwathIndices[i][j] = subSwathIndex[0];
                         if (subSwathIndex[0] != subSwathIndices[0][0]) {
@@ -1198,7 +1209,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 if (xIdx != -1 && yIdx != -1) {
                     this.subSwathIndex = subSwathIndices[yIdx][xIdx];
-                    float sample = samples[yIdx][xIdx];
+                    double sample = samples[yIdx][xIdx];
                     for (int i = 0; i < y.length; i++) {
                         for (int j = 0; j < x.length; j++) {
                             samples[i][j] = sample;
@@ -1208,6 +1219,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     throw new OperatorException("Invalid x and y input for getSamples");
                 }
             }
+            return allValid;
         }
 
         public int getSubSwathIndex() {

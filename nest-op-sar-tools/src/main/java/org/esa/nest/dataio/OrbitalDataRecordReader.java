@@ -17,6 +17,7 @@ package org.esa.nest.dataio;
 
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.nest.eo.Constants;
 import org.esa.nest.eo.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
@@ -250,7 +251,7 @@ public final class OrbitalDataRecordReader {
     private OrbitPositionRecord computeOrbitPosition(OrbitDataRecord dataRecord) {
 
         // record time in UTC seconds past 1.0 January 1985.
-        final double time = (double)dataRecord.time / 86400.0; // to days
+        final double time = (double)dataRecord.time / Constants.secondsInDay; // to days
 
         // record time in days past since Jan.1, 2000
         final double utcTime = time + days1985To2000; // days1985To2000 is negative
@@ -260,11 +261,11 @@ public final class OrbitalDataRecordReader {
 
         double lat, lon;
         if (productSpecifier.contains("xODR")) {
-            lat = (double)dataRecord.latitude / 10000000.0; // xODR: 0.1 microdegrees to degrees
-            lon = (double)dataRecord.longitude / 10000000.0; // xODR: 0.1 microdegrees, [-180, 180]
+            lat = (double)dataRecord.latitude / Constants.oneMillion; // xODR: 0.1 microdegrees to degrees
+            lon = (double)dataRecord.longitude / Constants.oneMillion; // xODR: 0.1 microdegrees, [-180, 180]
         } else if (productSpecifier.contains("@ODR")) {
-            lat = (double)dataRecord.latitude / 1000000.0; //  @ODR: microdegrees to degrees
-            lon = (double)dataRecord.longitude / 1000000.0; // @ODR: in microdegrees, [0, 360]
+            lat = (double)dataRecord.latitude / Constants.oneMillion; //  @ODR: microdegrees to degrees
+            lon = (double)dataRecord.longitude / Constants.oneMillion; // @ODR: in microdegrees, [0, 360]
             if (lon > 180) { // convert to interval [-180, 180]
                 lon -= 360;
             }

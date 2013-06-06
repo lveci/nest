@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.eo.Constants;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.gpf.TileIndex;
 
@@ -40,6 +41,8 @@ import java.util.List;
  */
 @OperatorMetadata(alias = "Oil-Spill-Clustering",
         category = "Ocean-Tools",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
         description = "Remove small clusters from detected area.")
 public class OilSpillClusteringOp extends Operator {
 
@@ -82,7 +85,7 @@ public class OilSpillClusteringOp extends Operator {
     private void getPixelSpacings() throws Exception {
         final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-        minClusterSizeInPixels = (int)(minClusterSizeInKm2 * 1000000.0 / (rangeSpacing*azimuthSpacing)) + 1;
+        minClusterSizeInPixels = (int)(minClusterSizeInKm2 * Constants.oneMillion / (rangeSpacing*azimuthSpacing)) + 1;
     }
 
     /**

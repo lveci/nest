@@ -49,6 +49,8 @@ import java.util.Set;
  */
 @OperatorMetadata(alias = "Create-LandMask",
         category = "Ocean-Tools",
+        authors = "Jun Lu, Luis Veci",
+        copyright = "Copyright (C) 2013 by Array Systems Computing Inc.",
         description = "Creates a bitmask defining land vs ocean.")
 public class CreateLandMaskOp extends Operator {
 
@@ -172,8 +174,8 @@ public class CreateLandMaskOp extends Operator {
             final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, minX, minY, maxX-minX, maxY-minY);
 
             final float demNoDataValue = dem.getDescriptor().getNoDataValue();
-            final float[][] localDEM = new float[maxY-minY+2][maxX-minX+2];
-            DEMFactory.getLocalDEM(dem, demNoDataValue, tileGeoRef, minX, minY, maxX-minX, maxY-minY, localDEM);
+            final double[][] localDEM = new double[maxY-minY+2][maxX-minX+2];
+            DEMFactory.getLocalDEM(dem, demNoDataValue, null, tileGeoRef, minX, minY, maxX-minX, maxY-minY, localDEM);
 
             for (int y = minY; y < maxY; ++y) {
                 tileIndex.calculateStride(y);
@@ -181,7 +183,7 @@ public class CreateLandMaskOp extends Operator {
                 for (int x = minX; x < maxX; ++x) {
 
                     final int index = tileIndex.getIndex(x);
-                    final float elev = localDEM[yy][x-minX];
+                    final double elev = localDEM[yy][x-minX];
 
                     if(landMask) {
                         if(useSRTM)

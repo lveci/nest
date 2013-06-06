@@ -17,8 +17,6 @@
 package org.esa.beam.framework.dataop.resamp;
 
 
-import javax.vecmath.Color4b;
-
 final class CubicConvolutionResampling implements Resampling {
 
     public String getName() {
@@ -99,30 +97,36 @@ final class CubicConvolutionResampling implements Resampling {
         }
     }
 
-    public final float resample(final Raster raster,
+    public final double resample(final Raster raster,
                                 final Index index) throws Exception {
 
-        int[] x = new int[4];
-        int[] y = new int[4];
-        float[][] samples = new float[4][4];
+        final int[] x = new int[4];
+        final int[] y = new int[4];
+        final double[][] samples = new double[4][4];
 
         for (int i = 0; i < 4; i++) {
             x[i] = (int)index.i[i];
             y[i] = (int)index.j[i];
         }
-        raster.getSamples(x, y, samples);
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if(Double.isNaN(samples[j][i])) {
-                    if (index.i[1] == index.i0 && index.j[1] == index.j0) {
-                        return samples[1][1];
-                    } else if (index.i[1] == index.i0 && index.j[2] == index.j0) {
-                        return samples[2][1];
-                    } else if (index.i[2] == index.i0 && index.j[1] == index.j0) {
-                        return samples[1][2];
-                    } else if (index.i[2] == index.i0 && index.j[2] == index.j0) {
-                        return samples[2][2];
+        if(!raster.getSamples(x, y, samples)) {
+            if (Double.isNaN(samples[1][1])) {
+                return samples[1][1];
+            }
+            double mean = 0.0;
+            int k = 0;
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (!Double.isNaN(samples[i][j])) {
+                        mean += samples[i][j];
+                        k++;
+                    }
+                }
+            }
+            mean /= k;
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (Double.isNaN(samples[i][j])) {
+                        samples[i][j] = mean;
                     }
                 }
             }
@@ -143,7 +147,7 @@ final class CubicConvolutionResampling implements Resampling {
         final double tmpV1 = (c0*samples[1][0] + c1*samples[1][1] + c2*samples[1][2] + c3*samples[1][3]) / sum;
         final double tmpV2 = (c0*samples[2][0] + c1*samples[2][1] + c2*samples[2][2] + c3*samples[2][3]) / sum;
         final double tmpV3 = (c0*samples[3][0] + c1*samples[3][1] + c2*samples[3][2] + c3*samples[3][3]) / sum;
-        return (float)interpolationCubic(tmpV0, tmpV1, tmpV2, tmpV3, muY, muY*muY, muY*muY*muY);
+        return interpolationCubic(tmpV0, tmpV1, tmpV2, tmpV3, muY, muY*muY, muY*muY*muY);
     }
 
     private static double interpolationCubic(
