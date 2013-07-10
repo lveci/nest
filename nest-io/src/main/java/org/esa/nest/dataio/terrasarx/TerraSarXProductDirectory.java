@@ -419,14 +419,42 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final File georefFile = new File(getBaseDir(), "ANNOTATION"+File.separator+"GEOREF.xml");
         if(georefFile.exists()) {
             try {
-                readGeoRef(product, georefFile);
-                return;
+                //readGeoRef(product, georefFile);
+                //return;
             } catch(Exception e) {
                 //
             }
         }
 
-        ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
+        MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
+        final float[] flippedLatCorners = new float[4];
+        final float[] flippedLonCorners = new float[4];
+        if (isAscending) { // flip up and down
+            flippedLatCorners[0] = latCorners[2];
+            flippedLatCorners[1] = latCorners[3];
+            flippedLatCorners[2] = latCorners[0];
+            flippedLatCorners[3] = latCorners[1];
+
+            flippedLonCorners[0] = lonCorners[2];
+            flippedLonCorners[1] = lonCorners[3];
+            flippedLonCorners[2] = lonCorners[0];
+            flippedLonCorners[3] = lonCorners[1];
+
+        } else { // flip left and right
+
+            flippedLatCorners[0] = latCorners[1];
+            flippedLatCorners[1] = latCorners[0];
+            flippedLatCorners[2] = latCorners[3];
+            flippedLatCorners[3] = latCorners[2];
+
+            flippedLonCorners[0] = lonCorners[1];
+            flippedLonCorners[1] = lonCorners[0];
+            flippedLonCorners[2] = lonCorners[3];
+            flippedLonCorners[3] = lonCorners[2];
+        }
+
+        ReaderUtils.addGeoCoding(product, flippedLatCorners, flippedLonCorners);
     }
 
     private static void readGeoRef(final Product product, final File georefFile) throws IOException {
@@ -456,6 +484,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         int i = 0;
         int r = numRg-1;
         int c = 0;
+        boolean regridNeeded = false;
         final List<Element> grdPntList = geoGrid.getChildren("gridPoint");
         for(Element pnt : grdPntList) {
             int index = i;
@@ -480,6 +509,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             final Element rowElem = pnt.getChild("row");
             if(rowElem != null) {
                 row[index] = Integer.parseInt(rowElem.getValue()) - 1;
+                regridNeeded = true;
             }
             final Element colElem = pnt.getChild("col");
             if(colElem != null) {
@@ -496,22 +526,30 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final int gridHeight = numAz;
         final int newGridWidth = gridWidth;
         final int newGridHeight = gridHeight;
-        final float[] newLatList = new float[newGridWidth*newGridHeight];
-        final float[] newLonList = new float[newGridWidth*newGridHeight];
-        final float[] newIncList = new float[newGridWidth*newGridHeight];
+        float[] newLatList = new float[newGridWidth*newGridHeight];
+        float[] newLonList = new float[newGridWidth*newGridHeight];
+        float[] newIncList = new float[newGridWidth*newGridHeight];
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
         final double subSamplingX = sceneRasterWidth / (double)(newGridWidth - 1);
         final double subSamplingY = sceneRasterHeight / (double)(newGridHeight - 1);
 
-        getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, latList,
+        if(regridNeeded) {
+            getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, latList,
                 newGridWidth, newGridHeight, subSamplingX, subSamplingY, newLatList);
 
-        getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, lonList,
+            getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, lonList,
                 newGridWidth, newGridHeight, subSamplingX, subSamplingY, newLonList);
 
-        getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, incList,
+            getListInEvenlySpacedGrid(sceneRasterWidth, sceneRasterHeight, gridWidth, gridHeight, col, row, incList,
                 newGridWidth, newGridHeight, subSamplingX, subSamplingY, newIncList);
+        } else {
+            for(int m=0;m< newLatList.length; ++m) {
+                newLatList[m] = (float)latList[m];
+                newLonList[m] = (float)lonList[m];
+                newIncList[m] = (float)incList[m];
+            }
+        }
 
         final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE,
                 newGridWidth, newGridHeight, 0.5f, 0.5f, (float)subSamplingX, (float)subSamplingY, newLatList);
@@ -612,9 +650,37 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if(subSamplingX == 0 || subSamplingY == 0)
             return;
 
+        MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
+        final float[] flippedSlantRangeCorners = new float[4];
+        final float[] flippedIncidenceCorners = new float[4];
+        if (isAscending) { // flip up and down
+            flippedSlantRangeCorners[0] = slantRangeCorners[2];
+            flippedSlantRangeCorners[1] = slantRangeCorners[3];
+            flippedSlantRangeCorners[2] = slantRangeCorners[0];
+            flippedSlantRangeCorners[3] = slantRangeCorners[1];
+
+            flippedIncidenceCorners[0] = incidenceCorners[2];
+            flippedIncidenceCorners[1] = incidenceCorners[3];
+            flippedIncidenceCorners[2] = incidenceCorners[0];
+            flippedIncidenceCorners[3] = incidenceCorners[1];
+
+        } else { // flip left and right
+
+            flippedSlantRangeCorners[0] = slantRangeCorners[1];
+            flippedSlantRangeCorners[1] = slantRangeCorners[0];
+            flippedSlantRangeCorners[2] = slantRangeCorners[3];
+            flippedSlantRangeCorners[3] = slantRangeCorners[2];
+
+            flippedIncidenceCorners[0] = incidenceCorners[1];
+            flippedIncidenceCorners[1] = incidenceCorners[0];
+            flippedIncidenceCorners[2] = incidenceCorners[3];
+            flippedIncidenceCorners[3] = incidenceCorners[2];
+        }
+
         if(product.getTiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE) == null) {
             final float[] fineAngles = new float[gridWidth*gridHeight];
-            ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+            ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, flippedIncidenceCorners, fineAngles);
 
             final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
                     subSamplingX, subSamplingY, fineAngles);
@@ -623,7 +689,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         final float[] fineSlantRange = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRangeCorners, fineSlantRange);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, flippedSlantRangeCorners, fineSlantRange);
 
         final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineSlantRange);
