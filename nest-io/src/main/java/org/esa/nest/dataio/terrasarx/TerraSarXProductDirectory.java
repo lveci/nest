@@ -338,15 +338,20 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             final float lonLR = (float)sceneCoordsGeographic.getAttributeDouble("lowerRightLongitude", 0);
 
             int k = 0;
-            final double e = 1e-3;
+            double d0, d1, d2, d3;
             for(CornerCoord coord : coordList) {
-                if (Math.abs(coord.lat - latUL) < e && Math.abs(coord.lon - lonUL) < e) {
+                d0 = Math.abs(coord.lat - latUL) + Math.abs(coord.lon - lonUL);
+                d1 = Math.abs(coord.lat - latUR) + Math.abs(coord.lon - lonUR);
+                d2 = Math.abs(coord.lat - latLL) + Math.abs(coord.lon - lonLL);
+                d3 = Math.abs(coord.lat - latLR) + Math.abs(coord.lon - lonLR);
+
+                if (d0 <= d1 && d0 <= d2 && d0 <= d3) {
                     indexArray[k] = 0;
-                } else if (Math.abs(coord.lat - latUR) < e && Math.abs(coord.lon - lonUR) < e) {
+                } else if (d1 <= d0 && d1 <= d2 && d1 <= d3) {
                     indexArray[k] = 1;
-                } else if (Math.abs(coord.lat - latLL) < e && Math.abs(coord.lon - lonLL) < e) {
+                } else if (d2 <= d0 && d2 <= d1 && d2 <= d3) {
                     indexArray[k] = 2;
-                } else if (Math.abs(coord.lat - latLR) < e && Math.abs(coord.lon - lonLR) < e) {
+                } else if (d3 <= d0 && d3 <= d1 && d3 <= d2) {
                     indexArray[k] = 3;
                 }
                 k++;
@@ -427,34 +432,43 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
-        final float[] flippedLatCorners = new float[4];
-        final float[] flippedLonCorners = new float[4];
-        if (isAscending) { // flip up and down
-            flippedLatCorners[0] = latCorners[2];
-            flippedLatCorners[1] = latCorners[3];
-            flippedLatCorners[2] = latCorners[0];
-            flippedLatCorners[3] = latCorners[1];
+        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
 
-            flippedLonCorners[0] = lonCorners[2];
-            flippedLonCorners[1] = lonCorners[3];
-            flippedLonCorners[2] = lonCorners[0];
-            flippedLonCorners[3] = lonCorners[1];
+        if(OperatorUtils.isMapProjected(product) || sampleType.contains("COMPLEX")) {
 
-        } else { // flip left and right
+            ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
 
-            flippedLatCorners[0] = latCorners[1];
-            flippedLatCorners[1] = latCorners[0];
-            flippedLatCorners[2] = latCorners[3];
-            flippedLatCorners[3] = latCorners[2];
+        } else {
 
-            flippedLonCorners[0] = lonCorners[1];
-            flippedLonCorners[1] = lonCorners[0];
-            flippedLonCorners[2] = lonCorners[3];
-            flippedLonCorners[3] = lonCorners[2];
+            final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
+            final float[] flippedLatCorners = new float[4];
+            final float[] flippedLonCorners = new float[4];
+            if (isAscending) { // flip up and down
+                flippedLatCorners[0] = latCorners[2];
+                flippedLatCorners[1] = latCorners[3];
+                flippedLatCorners[2] = latCorners[0];
+                flippedLatCorners[3] = latCorners[1];
+
+                flippedLonCorners[0] = lonCorners[2];
+                flippedLonCorners[1] = lonCorners[3];
+                flippedLonCorners[2] = lonCorners[0];
+                flippedLonCorners[3] = lonCorners[1];
+
+            } else { // flip left and right
+
+                flippedLatCorners[0] = latCorners[1];
+                flippedLatCorners[1] = latCorners[0];
+                flippedLatCorners[2] = latCorners[3];
+                flippedLatCorners[3] = latCorners[2];
+
+                flippedLonCorners[0] = lonCorners[1];
+                flippedLonCorners[1] = lonCorners[0];
+                flippedLonCorners[2] = lonCorners[3];
+                flippedLonCorners[3] = lonCorners[2];
+            }
+
+            ReaderUtils.addGeoCoding(product, flippedLatCorners, flippedLonCorners);
         }
-
-        ReaderUtils.addGeoCoding(product, flippedLatCorners, flippedLonCorners);
     }
 
     private static void readGeoRef(final Product product, final File georefFile) throws IOException {
@@ -650,33 +664,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if(subSamplingX == 0 || subSamplingY == 0)
             return;
 
-        MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
         final float[] flippedSlantRangeCorners = new float[4];
         final float[] flippedIncidenceCorners = new float[4];
-        if (isAscending) { // flip up and down
-            flippedSlantRangeCorners[0] = slantRangeCorners[2];
-            flippedSlantRangeCorners[1] = slantRangeCorners[3];
-            flippedSlantRangeCorners[2] = slantRangeCorners[0];
-            flippedSlantRangeCorners[3] = slantRangeCorners[1];
-
-            flippedIncidenceCorners[0] = incidenceCorners[2];
-            flippedIncidenceCorners[1] = incidenceCorners[3];
-            flippedIncidenceCorners[2] = incidenceCorners[0];
-            flippedIncidenceCorners[3] = incidenceCorners[1];
-
-        } else { // flip left and right
-
-            flippedSlantRangeCorners[0] = slantRangeCorners[1];
-            flippedSlantRangeCorners[1] = slantRangeCorners[0];
-            flippedSlantRangeCorners[2] = slantRangeCorners[3];
-            flippedSlantRangeCorners[3] = slantRangeCorners[2];
-
-            flippedIncidenceCorners[0] = incidenceCorners[1];
-            flippedIncidenceCorners[1] = incidenceCorners[0];
-            flippedIncidenceCorners[2] = incidenceCorners[3];
-            flippedIncidenceCorners[3] = incidenceCorners[2];
-        }
+        getFlippedCorners(product, flippedSlantRangeCorners, flippedIncidenceCorners);
 
         if(product.getTiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE) == null) {
             final float[] fineAngles = new float[gridWidth*gridHeight];
@@ -696,6 +686,54 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
         product.addTiePointGrid(slantRangeGrid);
     }
+
+    private void getFlippedCorners(Product product,
+                                   final float[] flippedSlantRangeCorners, final float[] flippedIncidenceCorners) {
+
+        MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+
+        if(OperatorUtils.isMapProjected(product) || sampleType.contains("COMPLEX")) {
+
+            flippedSlantRangeCorners[0] = slantRangeCorners[0];
+            flippedSlantRangeCorners[1] = slantRangeCorners[1];
+            flippedSlantRangeCorners[2] = slantRangeCorners[2];
+            flippedSlantRangeCorners[3] = slantRangeCorners[3];
+
+            flippedIncidenceCorners[0] = incidenceCorners[0];
+            flippedIncidenceCorners[1] = incidenceCorners[1];
+            flippedIncidenceCorners[2] = incidenceCorners[2];
+            flippedIncidenceCorners[3] = incidenceCorners[3];
+
+        } else {
+
+            final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
+            if (isAscending) { // flip up and down
+                flippedSlantRangeCorners[0] = slantRangeCorners[2];
+                flippedSlantRangeCorners[1] = slantRangeCorners[3];
+                flippedSlantRangeCorners[2] = slantRangeCorners[0];
+                flippedSlantRangeCorners[3] = slantRangeCorners[1];
+
+                flippedIncidenceCorners[0] = incidenceCorners[2];
+                flippedIncidenceCorners[1] = incidenceCorners[3];
+                flippedIncidenceCorners[2] = incidenceCorners[0];
+                flippedIncidenceCorners[3] = incidenceCorners[1];
+
+            } else { // flip left and right
+
+                flippedSlantRangeCorners[0] = slantRangeCorners[1];
+                flippedSlantRangeCorners[1] = slantRangeCorners[0];
+                flippedSlantRangeCorners[2] = slantRangeCorners[3];
+                flippedSlantRangeCorners[3] = slantRangeCorners[2];
+
+                flippedIncidenceCorners[0] = incidenceCorners[1];
+                flippedIncidenceCorners[1] = incidenceCorners[0];
+                flippedIncidenceCorners[2] = incidenceCorners[3];
+                flippedIncidenceCorners[3] = incidenceCorners[2];
+            }
+        }
+    }
+
 
     @Override
     protected void addBands(final Product product, final int width, final int height) {

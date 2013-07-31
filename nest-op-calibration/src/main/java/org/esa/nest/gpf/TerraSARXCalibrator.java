@@ -41,6 +41,7 @@ import java.util.Set;
 public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
 
     private String productType = null;
+    private String acquisitionMode = null;
     private Boolean useIncidenceAngleFromGIM = false;
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
@@ -91,6 +92,8 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
 
             getMission();
 
+            getAcquisitionMode();
+
             getProductType();
 
             getCalibrationFlag();
@@ -128,6 +131,15 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
         if(!(mission.contains("TSX") || mission.contains("TDX")))
             throw new OperatorException("TerraSARXCalibrator: " + mission +
                     " is not a valid mission for TerraSAT-X Calibration");
+    }
+
+    /**
+     * Get acquisition mode.
+     */
+    private void getAcquisitionMode() {
+        acquisitionMode = absRoot.getAttributeString(AbstractMetadata.ACQUISITION_MODE);
+        if(acquisitionMode.contains("ScanSAR"))
+            throw new OperatorException("ScanSAR calibration is currently not supported.");
     }
 
     /**
@@ -231,11 +243,12 @@ public class TerraSARXCalibrator extends BaseCalibrator implements Calibrator {
                 index[i] = (int)((record[i].timeUTC - firstLineUTC) / lineTimeInterval + 0.5);
                 for (int j = 0; j < sourceImageWidth; ++j) {
                     final double slantRgTime = slantRangeTime.getPixelDouble(j, index[i])/1.0e9; // ns to s
-                    if (slantRgTime < record[i].validityRangeMin || slantRgTime > record[i].validityRangeMax) {
-                        throw new OperatorException("TerraSARXCalibrator: Invalid slant range time: " + slantRgTime);
+                    if (slantRgTime >= record[i].validityRangeMin && slantRgTime <= record[i].validityRangeMax) {
+                        noise[i][j] = org.esa.nest.util.MathUtils.computePolynomialValue(
+                                slantRgTime - record[i].referencePoint, record[i].coefficient);
+                    } else {
+                        noise[i][j] = 0.0;
                     }
-                    noise[i][j] = org.esa.nest.util.MathUtils.computePolynomialValue(
-                            slantRgTime - record[i].referencePoint, record[i].coefficient);
                 }
             }
             rangeLineIndex.put(pol, index);

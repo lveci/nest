@@ -153,9 +153,10 @@ public class DEMFactory {
                                       final int x0, final int y0,
                                       final int tileWidth, final int tileHeight,
                                       final Product sourceProduct,
+                                      final boolean nodataValueAtSea,
                                       final double[][] localDEM) throws Exception {
 
-        if(demResamplingMethod.equals(DELAUNAY_INTERPOLATION)) {
+        if(demResamplingMethod != null && demResamplingMethod.equals(DELAUNAY_INTERPOLATION)) {
             return getLocalDEMUsingDelaunayInterpolation(
                     dem, demNoDataValue, tileGeoRef, x0, y0, tileWidth, tileHeight, sourceProduct, localDEM);
         }
@@ -185,8 +186,15 @@ public class DEMFactory {
                 }    */
 
                 alt = dem.getElevation(geoPos);
-                if(!valid && alt != demNoDataValue)
+
+                if (alt == demNoDataValue && !nodataValueAtSea) {
+                    alt = EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon);
+                }
+
+                if(!valid && alt != demNoDataValue) {
                     valid = true;
+                }
+
                 localDEM[yy][x - x0 + 1] = alt;
             }
         }
