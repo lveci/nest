@@ -7,3 +7,6 @@ target/
 CVS/
 .cvsignore
 .svn
+jlinda
+jlinda/
+.gitmodules
