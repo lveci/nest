@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>NEST</fullName>
-    <version>5.0.11</version>
+    <version>5.0.12</version>
     <readmeFile>../../../what's new.txt</readmeFile>
     <licenseFile>../../../LICENSE.txt</licenseFile>
     <splashImage>../../main/bin/common/res/nest_splash.png</splashImage>
@@ -253,6 +253,9 @@
                         </distributionDirectory>
                         <distributionDirectory>
                             <origin>../../../target/nest-5.0-bin-mac.dir/autoupdate-osx.app</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>../../../target/nest-5.0-bin-mac.dir/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
