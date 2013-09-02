@@ -49,11 +49,11 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
 
             OrbitVector orb = null;
             final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SSSSSS");
-		    final ArrayList<OrbitVector> orbitVectorList = new ArrayList<OrbitVector>();
+            final ArrayList<OrbitVector> orbitVectorList = new ArrayList<OrbitVector>();
 
             final int numFields = orbitRecord.getNumFields();
             for (int i = 0; i < numFields; ++i) {
-                
+
                 final Field f = orbitRecord.getFieldAt(i);
 
                 final String fieldName = f.getName();
@@ -93,7 +93,7 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
                 } else if (fieldName.contains("qual_flags")) {
                     if (orb != null)
                         orb.qualFlags = f.getData().getElemString();
-                        orbitVectorList.add(orb);
+                    orbitVectorList.add(orb);
                 }
             }
 
@@ -150,34 +150,34 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
         }
 
         final double[] delta_ut1Array = {dataRecords[n0].delta_ut1, dataRecords[n1].delta_ut1, dataRecords[n2].delta_ut1, dataRecords[n3].delta_ut1,
-                                         dataRecords[n4].delta_ut1,
-                                         dataRecords[n5].delta_ut1, dataRecords[n6].delta_ut1, dataRecords[n7].delta_ut1, dataRecords[n8].delta_ut1};
+                dataRecords[n4].delta_ut1,
+                dataRecords[n5].delta_ut1, dataRecords[n6].delta_ut1, dataRecords[n7].delta_ut1, dataRecords[n8].delta_ut1};
 
         final double[] xPosArray = {dataRecords[n0].xPos, dataRecords[n1].xPos, dataRecords[n2].xPos, dataRecords[n3].xPos,
-                                    dataRecords[n4].xPos,
-                                    dataRecords[n5].xPos, dataRecords[n6].xPos, dataRecords[n7].xPos, dataRecords[n8].xPos};
+                dataRecords[n4].xPos,
+                dataRecords[n5].xPos, dataRecords[n6].xPos, dataRecords[n7].xPos, dataRecords[n8].xPos};
 
         final double[] yPosArray = {dataRecords[n0].yPos, dataRecords[n1].yPos, dataRecords[n2].yPos, dataRecords[n3].yPos,
-                                    dataRecords[n4].yPos,
-                                    dataRecords[n5].yPos, dataRecords[n6].yPos, dataRecords[n7].yPos, dataRecords[n8].yPos};
+                dataRecords[n4].yPos,
+                dataRecords[n5].yPos, dataRecords[n6].yPos, dataRecords[n7].yPos, dataRecords[n8].yPos};
 
         final double[] zPosArray = {dataRecords[n0].zPos, dataRecords[n1].zPos, dataRecords[n2].zPos, dataRecords[n3].zPos,
-                                    dataRecords[n4].zPos,
-                                    dataRecords[n5].zPos, dataRecords[n6].zPos, dataRecords[n7].zPos, dataRecords[n8].zPos};
+                dataRecords[n4].zPos,
+                dataRecords[n5].zPos, dataRecords[n6].zPos, dataRecords[n7].zPos, dataRecords[n8].zPos};
 
         final double[] xVelArray = {dataRecords[n0].xVel, dataRecords[n1].xVel, dataRecords[n2].xVel, dataRecords[n3].xVel,
-                                    dataRecords[n4].xVel,
-                                    dataRecords[n5].xVel, dataRecords[n6].xVel, dataRecords[n7].xVel, dataRecords[n8].xVel};
+                dataRecords[n4].xVel,
+                dataRecords[n5].xVel, dataRecords[n6].xVel, dataRecords[n7].xVel, dataRecords[n8].xVel};
 
         final double[] yVelArray = {dataRecords[n0].yVel, dataRecords[n1].yVel, dataRecords[n2].yVel, dataRecords[n3].yVel,
-                                    dataRecords[n4].yVel,
-                                    dataRecords[n5].yVel, dataRecords[n6].yVel, dataRecords[n7].yVel, dataRecords[n8].yVel};
+                dataRecords[n4].yVel,
+                dataRecords[n5].yVel, dataRecords[n6].yVel, dataRecords[n7].yVel, dataRecords[n8].yVel};
 
         final double[] zVelArray = {dataRecords[n0].zVel, dataRecords[n1].zVel, dataRecords[n2].zVel, dataRecords[n3].zVel,
-                                    dataRecords[n4].zVel,
-                                    dataRecords[n5].zVel, dataRecords[n6].zVel, dataRecords[n7].zVel, dataRecords[n8].zVel};
-        
-        
+                dataRecords[n4].zVel,
+                dataRecords[n5].zVel, dataRecords[n6].zVel, dataRecords[n7].zVel, dataRecords[n8].zVel};
+
+
         final OrbitVector orb = new OrbitVector();
 
         double ref = tRel - itRel;
@@ -290,35 +290,35 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
 
     /**
      * Interpolate vector using 8th order Legendre interpolation.
-     * <p>
-     * The method interpolates a n-dimensional vector, at desired point given as input an equidistant
-     * n-dimensional vectors.
      *
-     * <p><b>Note:</b> Coefficients for 8th order interpolation are pre-computed. Method is designed for interpolating
-     *     orbits, and it should be used with care in other applications.</p>
+     * <p>The method interpolates a n-dimensional vector, at desired point given as input an equidistant
+     * n-dimensional vectors.</p>
      *
-     * @param val Sample value array.
-     * @param desiredPos Desired position.
+     * <p><b>Notes:</b> Coefficients for 8th order interpolation are pre-computed. Method is primarily designed for
+     * interpolating orbits, and it should be used with care in other applications, although it should work anywhere.</p>
+     *
+     * <p><b>Implementation details:</b> Adapted from 'getorb' package.</p>
+     *
+     * @param samples Sample value array.
+     * @param x Desired position.
      * @return The interpolated sample value.
      *
      * @author Petar Marinkovic, PPO.labs
      */
-    public static double lagrangeEightOrderInterpolation(double[] val, double desiredPos) {
+    public static double lagrangeEightOrderInterpolation(double[] samples, double x) {
 
         double out = 0.0d;
         final double[] denominators = {40320, -5040, 1440, -720, 576, -720, 1440, -5040, 40320};
+        final double numerator = x * (x - 1) * (x - 2) * (x - 3) * (x - 4) * (x - 5) * (x - 6) * (x - 7) * (x - 8);
 
-        double x = desiredPos + 1;
-        final double counter = (x - 1) * (x - 2) * (x - 3) * (x - 4) * (x - 5) * (x - 6) * (x - 7) * (x - 8) * (x - 9);
-
-        if (counter == 0) {
-            return val[((int) Math.round(x))];
+        if (numerator == 0) {
+            return samples[(int) Math.round(x)];
         }
 
         double coeff;
-        for (int KX = 0; KX < val.length; KX++) {
-            coeff = counter / denominators[KX] / (x - (KX + 1));
-            out += coeff * val[KX];
+        for (int i = 0; i < samples.length; i++) {
+            coeff = numerator / denominators[i] / (x - i);
+            out += coeff * samples[i];
         }
         return out;
     }
@@ -336,7 +336,7 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
         public String qualFlags = null;
     }
 
-        /**
+    /**
      * Gets the singleton instance of this class.
      * @return the singlton instance
      */

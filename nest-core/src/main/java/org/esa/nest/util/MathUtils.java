@@ -248,35 +248,35 @@ public final class MathUtils
 
     /**
      * Interpolate vector using 8th order Legendre interpolation.
-     * <p>
-     * The method interpolates a n-dimensional vector, at desired point given as input an equidistant
-     * n-dimensional vectors.
      *
-     * <p><b>Note:</b> Coefficients for 8th order interpolation are pre-computed. Method is designed for interpolating
-     *     orbits, and it should be used with care in other applications.</p>
+     * <p>The method interpolates a n-dimensional vector, at desired point given as input an equidistant
+     * n-dimensional vectors.</p>
      *
-     * @param val Sample value array.
-     * @param desiredPos Desired position.
+     * <p><b>Notes:</b> Coefficients for 8th order interpolation are pre-computed. Method is primarily designed for
+     * interpolating orbits, and it should be used with care in other applications, although it should work anywhere.</p>
+     *
+     * <p><b>Implementation details:</b> Adapted from 'getorb' package.</p>
+     *
+     * @param samples Sample value array.
+     * @param x Desired position.
      * @return The interpolated sample value.
      *
      * @author Petar Marinkovic, PPO.labs
      */
-    public static double lagrangeEightOrderInterpolation(double[] val, double desiredPos) {
+    public static double lagrangeEightOrderInterpolation(double[] samples, double x) {
 
         double out = 0.0d;
         final double[] denominators = {40320, -5040, 1440, -720, 576, -720, 1440, -5040, 40320};
+        final double numerator = x * (x - 1) * (x - 2) * (x - 3) * (x - 4) * (x - 5) * (x - 6) * (x - 7) * (x - 8);
 
-        double x = desiredPos + 1;
-        final double counter = (x - 1) * (x - 2) * (x - 3) * (x - 4) * (x - 5) * (x - 6) * (x - 7) * (x - 8) * (x - 9);
-
-        if (counter == 0) {
-            return val[((int) Math.round(x))];
+        if (numerator == 0) {
+            return samples[(int) Math.round(x)];
         }
 
         double coeff;
-        for (int KX = 0; KX < val.length; KX++) {
-            coeff = counter / denominators[KX] / (x - (KX + 1));
-            out += coeff * val[KX];
+        for (int i = 0; i < samples.length; i++) {
+            coeff = numerator / denominators[i] / (x - i);
+            out += coeff * samples[i];
         }
         return out;
     }
