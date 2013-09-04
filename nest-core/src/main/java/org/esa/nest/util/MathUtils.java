@@ -193,7 +193,24 @@ public final class MathUtils
     public static double[] lagrangeWeight(final double pos[], final double desiredPos)  {
 
         final int length = pos.length;
+        if (desiredPos < pos[0] || desiredPos > pos[length-1]) {
+            double time = desiredPos - (int)desiredPos;
+            final double[] timeArray = new double[length];
+            for (int i = 0; i < length; i++) {
+                timeArray[i] = pos[i] - (int)pos[i];
+            }
+
+            return computeWeight(timeArray, time);
+
+        } else {
+            return computeWeight(pos, desiredPos);
+        }
+    }
+
+    private static double[] computeWeight(final double pos[], final double desiredPos) {
+        final int length = pos.length;
         final double[] weight = new double[length];
+
         for (int i = 0; i < length; ++i) {
             double weightVal = 1;
             for (int j = 0; j < length; ++j) {
@@ -203,6 +220,7 @@ public final class MathUtils
             }
             weight[i] = weightVal;
         }
+
         return weight;
     }
 
