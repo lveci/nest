@@ -52,6 +52,7 @@ public class TestProductDao extends TestCase {
     }
 
     public void testAddAll() throws Exception {
+
         final File folder1 = new File(TestUtils.rootPathASAR);
         if(!folder1.exists()) {
             TestUtils.skipTest(this);

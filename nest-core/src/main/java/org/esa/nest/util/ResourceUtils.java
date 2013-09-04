@@ -219,14 +219,6 @@ public final class ResourceUtils {
         return dir;
     }
 
-    public static File getDATUserDir() {
-        final File dir = new File(getApplicationUserDir(true), getContextID()+"-dat");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        return dir;
-    }
-
     public static String getContextID() {
         if (RuntimeActivator.getInstance() != null
                 && RuntimeActivator.getInstance().getModuleContext() != null) {
@@ -302,7 +294,7 @@ public final class ResourceUtils {
         final String nestHome = System.getProperty(getContextID()+".home");
         File homePath;
         if(nestHome == null)
-            homePath = SystemUtils.getBeamHomeDir();
+            homePath = SystemUtils.getApplicationHomeDir();
         else
             homePath = new File(nestHome);
         String homePathStr = homePath.getAbsolutePath();
