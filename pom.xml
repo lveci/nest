@@ -720,8 +720,8 @@
 				<version>2.3</version>
 			</dependency>
 	        <dependency>
-	            <groupId>org</groupId>
-	            <version>1.2.0</version>
+	            <groupId>org.jblas</groupId>
+	            <version>1.2.3</version>
 	            <artifactId>jblas</artifactId>
 	        </dependency>
 			
