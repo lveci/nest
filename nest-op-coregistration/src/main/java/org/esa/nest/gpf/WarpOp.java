@@ -210,7 +210,7 @@ public class WarpOp extends Operator {
         int kernelLength = lut.getKernelLength();
 
         // get LUT and cast it to float for JAI
-        double[] lutArrayDoubles = lut.getKernel().toArray();
+        double[] lutArrayDoubles = lut.getKernelAsArray();
         float lutArrayFloats[] = new float[lutArrayDoubles.length];
         int i = 0;
         for (double lutElement : lutArrayDoubles) {
@@ -466,19 +466,6 @@ public class WarpOp extends Operator {
         }
     }     
 
-    /**
-     * Called by the framework in order to compute a tile for the given target band.
-     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-     *
-     * @param targetTileMap   The target tiles associated with all target bands to be computed.
-     * @param targetRectangle The rectangle of target tile.
-     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
-     */
-    //@Override
-   // public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
-   //         throws OperatorException {
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
