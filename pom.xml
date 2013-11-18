@@ -9,9 +9,14 @@
 	           build tag. For now the convention is to that it as property.
 	           TODO: Move the sourceEncoding property to the build tag if version 3.0 is released
 	           -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<skipTests>true</skipTests>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>				
 		<ceresContext>nest</ceresContext>
+		
+		<skipTests>true</skipTests>
+		<test.jvm.maxpermsize>512m</test.jvm.maxpermsize>
+        <test.jvm.maxheapsize>5024m</test.jvm.maxheapsize>
+        <test.jvm.arguments>-Xmx${test.jvm.maxheapsize} -XX:MaxPermSize=${test.jvm.maxpermsize}</test.jvm.arguments>
+        <surefire.jvm.args>${test.jvm.arguments} -enableassertions -Dceres.context=${ceresContext}</surefire.jvm.args>
 		
 		<beam.version>5.0-4.10.4</beam.version>
 		<ceres.version>5.0-0.14</ceres.version>
@@ -19,8 +24,8 @@
 		<jide.version>3.5.3</jide.version>
 		<hdf.version>2.7</hdf.version>
 		<netcdf.version>4.2.20</netcdf.version>
-		<nest.version>5.0</nest.version>
-		<jlinda.version>0.7-SNAPSHOT</jlinda.version>
+		<nest.version>5.1</nest.version>
+		<jlinda.version>0.8-SNAPSHOT</jlinda.version>
 		<outputdir>../output</outputdir>
 	</properties>
 	
@@ -28,7 +33,7 @@
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest</artifactId>
-    <version>5.0</version>
+    <version>5.1</version>
 
     <packaging>pom</packaging>
   
@@ -317,7 +322,7 @@
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-core</artifactId>
-                <version>5.0.1</version>
+                <version>${nest.version}</version>
             </dependency>
 			
 			<dependency>
@@ -341,7 +346,7 @@
 			<dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-io</artifactId>
-                <version>5.0.2</version>
+                <version>${nest.version}</version>
             </dependency>
 			
 			<dependency>
@@ -866,7 +871,7 @@
                                 <value>target/test-data</value>
                             </property>
                         </systemProperties>
-                        <argLine>-Xmx512M -enableassertions -Dceres.context=${ceresContext}</argLine>
+						<argLine>${surefire.jvm.args}</argLine>
                     </configuration>
                     
                 </plugin>
@@ -1159,7 +1164,13 @@
                 <module>nest-developer-tools</module>
                 <module>nest-src</module>
             </modules>
-	</profile>
+		</profile>
+		<profile>
+            <id>benchmark</id>
+            <modules>
+				<module>nest-benchmark</module>
+            </modules>
+		</profile>
     </profiles>
 
 </project>

@@ -1,0 +1,41 @@
+####################################################################################
+# Configuration for the Automated Testing Framework
+# All properties described here can also be passed to the VM as system
+# properties using the standard Java
+#   -D<property>=<value>
+# syntax. In addition, it is possible to use macros of the form
+#   ${<property>}
+# within a value. Macros will expand to the value of the referred (system) property.
+####################################################################################
+
+####################################################################################
+#Automated Reader and Operator Tests
+#-----------------------------------
+#No output is produced. Readers and Operators are run on all products to
+#ensure no expections are thrown and processing completes.
+####################################################################################
+
+
+# Test Paths
+# Some unit tests open all products within a folder and apply thier processing to verify they don't get any error
+nest.test.ReadersOnAllProducts = true
+nest.test.ProcessingOnAllProducts = true
+nest.test.RunBenchmarks = false
+# max number of products to test from each root folder. Use -1 to test all.
+nest.test.maxProductsPerRootFolder = -1
+nest.test.subsetX = 100
+nest.test.subsetY = 100
+nest.test.subsetWidth = 100
+nest.test.subsetHeight = 100
+
+nest.test.rootPathExpectedProducts = 	P:\\nest\\nest\\ESA Data\\test\\
+nest.test.rootPathTerraSarX = 			P:\\nest\\nest\\ESA Data\\RADAR\\TerraSarX
+nest.test.rootPathASAR= 				P:\\nest\\nest\\ESA Data\\RADAR\\ASAR
+nest.test.rootPathRadarsat2 = 			P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2
+nest.test.rootPathRadarsat1 = 			P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1
+nest.test.rootPathERS = 				P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products
+nest.test.rootPathJERS = 				P:\\nest\\nest\\ESA Data\\RADAR\\JERS
+nest.test.rootPathALOS = 				P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR
+nest.test.rootPathCosmoSkymed = 		P:\\nest\\nest\\ESA Data\\RADAR\\Cosmo
+nest.test.rootPathMixProducts = 		P:\\nest\\nest\\ESA Data\\NestBox
+

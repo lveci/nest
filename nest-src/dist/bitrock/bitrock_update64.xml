@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>NEST</fullName>
-    <version>5.0.16</version>
+    <version>5.1</version>
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-update.${platform_exec_suffix}</installerFilename>
     <readmeFile>../../../what's new.txt</readmeFile>
     <licenseFile>../../../LICENSE.txt</licenseFile>
@@ -37,22 +37,22 @@
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/bin</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/config</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/graphs</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/lib</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/modules</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>../../../target/nest-5.0-bin-win64.dir/res</origin>
+                            <origin>../../../target/nest-5.1-bin-win64.dir/res</origin>
                         </distributionDirectory>
                     </distributionFileList>
                     <shortcutList>
