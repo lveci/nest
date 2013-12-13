@@ -686,7 +686,7 @@
                 <artifactId>jcommon</artifactId>
                 <version>1.0.17</version>
             </dependency>
-			
+
 			<!-- Python scripting support ######################################## -->
 
             <dependency>
@@ -694,15 +694,15 @@
                 <artifactId>jython</artifactId>
                 <version>2.5.2</version>
             </dependency>
-			
+
 			<!-- Apache Derby -->
-			
+
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
 				<version>10.10.1.1</version>
 			</dependency>
-			
+
 			<dependency>
 	            <groupId>commons-net</groupId>
 	            <artifactId>commons-net</artifactId>
@@ -1000,7 +1000,6 @@
 				  </executions>
 			</plugin>
         </plugins>
-		
     </build>
 
     <reporting>
