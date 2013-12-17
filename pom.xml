@@ -29,6 +29,10 @@
 		<outputdir>../output</outputdir>
 	</properties>
 	
+	<prerequisites>
+       <maven>3.0.1</maven>
+    </prerequisites>
+	
     <name>NEST Project</name>
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
@@ -166,7 +170,6 @@
 		<module>nest-bootstrap</module>
 		<module>nest-core</module>
 		<module>nest-dat</module>
-		<module>nest-developer-tools</module>
 		<module>nest-graph-builder</module>
 		<module>nest-help</module>
 		<module>nest-io</module>
@@ -686,7 +689,7 @@
                 <artifactId>jcommon</artifactId>
                 <version>1.0.17</version>
             </dependency>
-
+			
 			<!-- Python scripting support ######################################## -->
 
             <dependency>
@@ -694,15 +697,15 @@
                 <artifactId>jython</artifactId>
                 <version>2.5.2</version>
             </dependency>
-
+			
 			<!-- Apache Derby -->
-
+			
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
 				<version>10.10.1.1</version>
 			</dependency>
-
+			
 			<dependency>
 	            <groupId>commons-net</groupId>
 	            <artifactId>commons-net</artifactId>
@@ -761,13 +764,6 @@
 				<version>1.5.r0196</version>
 	        </dependency>
 		
-			<!-- Look and Feel ###############################################-->
-			
-			<dependency>
-				<groupId>com.seaglasslookandfeel</groupId>
-				<artifactId>seaglasslookandfeel</artifactId>
-				<version>0.2</version>
-			</dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -778,10 +774,6 @@
             <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
-
-	<prerequisites>
-       <maven>3.0.0</maven>
-    </prerequisites>
 	
     <build>
         <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
@@ -876,18 +868,6 @@
                     
                 </plugin>
 
-                <plugin>
-                    <artifactId>maven-idea-plugin</artifactId>
-					<version>2.2.1</version>
-                    <configuration>
-                        <downloadSources>true</downloadSources>
-                        <downloadJavadocs>true</downloadJavadocs>
-                        <jdkName>1.7</jdkName>
-                        <jdkLevel>1.7</jdkLevel>
-                        <exclude>target</exclude>
-						<!--<useShortDependencyNames>true</useShortDependencyNames>-->
-                    </configuration>
-                </plugin>
 				<plugin>
                     <artifactId>maven-clean-plugin</artifactId>
 					<version>2.5</version>
@@ -916,11 +896,6 @@
 						</execution>
 				   </executions>
 			   </plugin>
-			   <plugin>
-				  <groupId>org.apache.maven.plugins</groupId>
-				  <artifactId>maven-project-info-reports-plugin</artifactId>
-				  <version>2.7</version>
-				</plugin>
             </plugins>
         </pluginManagement>
 
@@ -978,11 +953,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.6</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				  <artifactId>maven-pdf-plugin</artifactId>
 				  <version>1.2</version>
 				  <executions>
@@ -1000,6 +970,7 @@
 				  </executions>
 			</plugin>
         </plugins>
+		
     </build>
 
     <reporting>
