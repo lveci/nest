@@ -876,18 +876,6 @@
                     
                 </plugin>
 
-                <plugin>
-                    <artifactId>maven-idea-plugin</artifactId>
-					<version>2.2.1</version>
-                    <configuration>
-                        <downloadSources>true</downloadSources>
-                        <downloadJavadocs>true</downloadJavadocs>
-                        <jdkName>1.7</jdkName>
-                        <jdkLevel>1.7</jdkLevel>
-                        <exclude>target</exclude>
-						<!--<useShortDependencyNames>true</useShortDependencyNames>-->
-                    </configuration>
-                </plugin>
 				<plugin>
                     <artifactId>maven-clean-plugin</artifactId>
 					<version>2.5</version>
