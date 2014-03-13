@@ -33,6 +33,7 @@
         </tocitem>
 		
 		<tocitem text="Product Readers">
+			<tocitem text="Open SENTINEL-1 Data Product" target="importSentinel1Product"/>
             <tocitem text="Open ENVISAT Data Product" target="importEnvisatProduct"/>
             <tocitem text="Open ERS (.E1, .E2) Data Product" target="importErsProduct"/>
 			<tocitem text="Open ERS CEOS Data Product" target="ImportERSCeos"/>

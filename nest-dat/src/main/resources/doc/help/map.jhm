@@ -28,6 +28,7 @@
     <mapID target="polarView" url="visat/PolarView.html"/>   
 	
 	<!-- Product Readers -->   
+	<mapID target="importSentinel1Product" url="readers/ImportSentinel1.html"/>
     <mapID target="importEnvisatProduct" url="readers/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="readers/ImportErs.html"/>
 	<mapID target="ImportERSCeos" url="readers/ImportERSCeos.html"/>
