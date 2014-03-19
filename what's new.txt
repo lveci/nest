@@ -1,4 +1,13 @@
 #################################################
+### New in NEST 5.1
+#################################################
+
+* Constantini MCF phase unwrapping
+* InSAR specific coregistration
+* Cross Interferometry between ERS and ENVISAT
+* fixes for Cosmo-Skymed product reader start time error
+
+#################################################
 ### New in NEST 5
 #################################################
 
