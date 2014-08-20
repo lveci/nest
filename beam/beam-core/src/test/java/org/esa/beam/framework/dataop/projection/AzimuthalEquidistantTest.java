@@ -49,21 +49,21 @@ public final class AzimuthalEquidistantTest extends AbstractProjectionTest<Azimu
     protected List<ProjTestData> createTestData() {
         List<ProjTestData> dataList = new ArrayList<ProjTestData>(13);
 
-        dataList.add(new ProjTestData(0, 0,				0.00,	0.00));
-        dataList.add(new ProjTestData(-180, 90,			-0.00,	10007538.685621306));
-        dataList.add(new ProjTestData(180, 90,			0.00,	10007538.685621306));
-        dataList.add(new ProjTestData(180, -90,			0.00,	-10007538.685621306));
-        dataList.add(new ProjTestData(180.0,	-87.5,	0.00,	-10285525.87133301));
-        dataList.add(new ProjTestData(180.0,	-59.5,	0.00,	-13398982.351304082));
-        dataList.add(new ProjTestData(-173.0,	-45.5,	-1772868.478338835,	-14803428.162628794));
-        dataList.add(new ProjTestData(-75.0,	-35.0,	-7000586.400144643,	-5074782.3858295875));
-        dataList.add(new ProjTestData(-8.5,	45.5,		-737084.3004029907,	5074524.19708281));
-        dataList.add(new ProjTestData(5.5,	-38.5,		516528.67517077894,	-4286736.234169507));
-        dataList.add(new ProjTestData(33.5,	-28.0 ,		3410200.3550437223,	-3285222.300525648));
-        dataList.add(new ProjTestData(96.5,	-21.0 ,		9964308.842777751,	-3849686.1368150287));
-        dataList.add(new ProjTestData(103.5,	-7.0 ,	11406690.775134822,	-1440362.8586200431));
-        dataList.add(new ProjTestData(163.0,	-63.0,	1896142.5998183272,	-12728281.58890539));
-        dataList.add(new ProjTestData(177.0,	87.5,	23501.876770090854,	10285117.806801353));
+		dataList.add(new ProjTestData(0, 0, 0.00, 0.00));
+		dataList.add(new ProjTestData(-180, 90, -0.00, 10007538.685621306));
+		dataList.add(new ProjTestData(180, 90, 0.00, 10007538.685621306));
+		dataList.add(new ProjTestData(180, -90, 0.00, -10007538.685621306));
+		dataList.add(new ProjTestData(180.0, -87.5, 0.00, -10285525.87133301));
+		dataList.add(new ProjTestData(180.0, -59.5, 0.00, -13398982.351304082));
+		dataList.add(new ProjTestData(-173.0, -45.5, -1772868.478338835, -14803428.162628794));
+		dataList.add(new ProjTestData(-75.0, -35.0, -7000586.400144643, -5074782.3858295875));
+		dataList.add(new ProjTestData(-8.5, 45.5, -737084.3004029907, 5074524.19708281));
+		dataList.add(new ProjTestData(5.5, -38.5, 516528.67517077894, -4286736.234169507));
+		dataList.add(new ProjTestData(33.5, -28.0 , 3410200.3550437223, -3285222.300525648));
+		dataList.add(new ProjTestData(96.5, -21.0 , 9964308.842777751, -3849686.1368150287));
+		dataList.add(new ProjTestData(103.5, -7.0 , 11406690.775134822, -1440362.8586200431));
+		dataList.add(new ProjTestData(163.0, -63.0, 1896142.5998183272, -12728281.58890539));
+		dataList.add(new ProjTestData(177.0, 87.5, 23501.876770090854, 10285117.806801353));
         
         return dataList;
     }
