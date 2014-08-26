@@ -48,6 +48,7 @@ public class EnviHeader {
     private static final String _enviByteOrderTag = "byte order";
     private static final String _enviMapInfo = "map info";
     private static final String _enviProjectionInfo = "projection info";
+    private static final String _enviCoordinateSystemString = "coordinate system string";
 
     private static final String _enviStandardType = "ENVI Standard";
     private static final String _enviBSQType = "bsq";
@@ -455,6 +456,23 @@ public class EnviHeader {
             out.print("units=" + mapUnits);
             out.print("}");
             out.println();
+        }
+        
+        // write coordinate system string
+        GeoCoding geoCoding = product.getGeoCoding();
+        CoordinateReferenceSystem crs = geoCoding.getMapCRS();
+        if (crs != null) {
+        	String wkt = crs.toWKT();
+        	
+        	// remove all line breaks and replace several white spaces by one
+        	wkt = wkt.replace("\r","").replace("\n","");
+        	wkt = wkt.trim().replaceAll(" +", " ");
+        	
+        	out.print(_enviCoordinateSystemString);
+        	out.print(" = {");
+        	out.print(wkt);
+        	out.print("}");
+        	out.println();
         }
     }
 
